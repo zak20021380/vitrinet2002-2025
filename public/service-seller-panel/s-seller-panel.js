@@ -6118,8 +6118,15 @@ renderCustomers(query = '') {
       UIComponents.showToast('تاریخ انقضا را وارد کنید.', 'error');
       return;
     }
+    const parsedCustomExpiry = duration === 'custom' ? this.parseDiscountDateInput(manualExpiry) : null;
+    if (duration === 'custom' && !parsedCustomExpiry) {
+      UIComponents.showToast('تاریخ واردشده معتبر نیست. لطفاً یک تاریخ شمسی مانند ۱۴۰۴/۰۸/۲۵ وارد کنید.', 'error');
+      return;
+    }
     const note = (this.discountModalNote?.value || '').trim();
-    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry, duration) : this.calculateDiscountExpiry(duration);
+    const expiresAt = duration === 'custom'
+      ? (() => { const d = parsedCustomExpiry; d.setHours(23, 59, 0, 0); return d.toISOString(); })()
+      : this.calculateDiscountExpiry(duration);
 
     const discount = {
       id: crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}`,
@@ -6276,41 +6283,70 @@ renderCustomers(query = '') {
     return { gy, gm, gd: days };
   }
 
+  gregorianToJalali(gy, gm, gd) {
+    const gDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    let gy2 = gy - 1600;
+    let gm2 = gm - 1;
+    let gd2 = gd - 1;
+
+    let gDayNo = 365 * gy2 + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400);
+    gDayNo += gDays[gm2] + gd2;
+    if (gm2 > 1 && ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0))) {
+      gDayNo += 1;
+    }
+
+    let jDayNo = gDayNo - 79;
+    const jNp = Math.floor(jDayNo / 12053);
+    jDayNo %= 12053;
+
+    let jy = 979 + 33 * jNp + 4 * Math.floor(jDayNo / 1461);
+    jDayNo %= 1461;
+
+    if (jDayNo >= 366) {
+      jy += Math.floor((jDayNo - 1) / 365);
+      jDayNo = (jDayNo - 1) % 365;
+    }
+
+    const jMonthDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+    let jm = 0;
+    while (jm < 11 && jDayNo >= jMonthDays[jm]) {
+      jDayNo -= jMonthDays[jm];
+      jm += 1;
+    }
+
+    const jd = jDayNo + 1;
+    return { jy, jm: jm + 1, jd };
+  }
+
+  isValidJalaliDate(jy, jm, jd) {
+    if (!Number.isInteger(jy) || !Number.isInteger(jm) || !Number.isInteger(jd)) return false;
+    if (jy < 1300 || jy > 1499) return false;
+    if (jm < 1 || jm > 12) return false;
+    if (jd < 1 || jd > 31) return false;
+
+    const gregorian = this.jalaliToGregorian(jy, jm, jd);
+    const backToJalali = this.gregorianToJalali(gregorian.gy, gregorian.gm, gregorian.gd);
+    return backToJalali.jy === jy && backToJalali.jm === jm && backToJalali.jd === jd;
+  }
+
   parseDiscountDateInput(dateValue) {
     const normalized = this.normalizePersianDigits(dateValue).replace(/\s+/g, '');
     if (!normalized) return null;
 
-    if (/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(normalized)) {
-      const d = new Date(normalized);
-      return Number.isNaN(d.getTime()) ? null : d;
-    }
+    const jalaliMatch = normalized.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    if (!jalaliMatch) return null;
 
-    const dayFirstMatch = normalized.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
-    const yearFirstMatch = normalized.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
-    const match = dayFirstMatch || yearFirstMatch;
-    if (!match) return null;
-
-    const [_, first, second, third] = match;
-    const [dStr, mStr, yStr] = match === dayFirstMatch ? [first, second, third] : [third, second, first];
-    const y = Number(yStr);
-    const m = Number(mStr);
-    const d = Number(dStr);
+    const [, yearStr, monthStr, dayStr] = jalaliMatch;
+    const y = Number(yearStr);
+    const m = Number(monthStr);
+    const d = Number(dayStr);
     const pad = (n) => String(n).padStart(2, '0');
 
-    if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+    if (!this.isValidJalaliDate(y, m, d)) return null;
 
-    if (y >= 1700) {
-      const greg = new Date(`${y}-${pad(m)}-${pad(d)}`);
-      return Number.isNaN(greg.getTime()) ? null : greg;
-    }
-
-    if (y >= 1200) {
-      const { gy, gm, gd } = this.jalaliToGregorian(y, m, d);
-      const greg = new Date(`${gy}-${pad(gm)}-${pad(gd)}`);
-      return Number.isNaN(greg.getTime()) ? null : greg;
-    }
-
-    return null;
+    const { gy, gm, gd } = this.jalaliToGregorian(y, m, d);
+    const greg = new Date(`${gy}-${pad(gm)}-${pad(gd)}`);
+    return Number.isNaN(greg.getTime()) ? null : greg;
   }
 
   formatCustomExpiryLabel(dateValue) {
@@ -6472,8 +6508,19 @@ renderCustomers(query = '') {
     }
 
     const duration = Array.from(this.globalDiscountDurationInputs || []).find(input => input.checked)?.value || 'week';
+    if (duration === 'custom' && !customDate) {
+      UIComponents.showToast('تاریخ انقضای تخفیف همگانی را وارد کنید.', 'error');
+      return;
+    }
+
+    const parsedCustomDate = duration === 'custom' ? this.parseDiscountDateInput(customDate) : null;
+    if (duration === 'custom' && !parsedCustomDate) {
+      UIComponents.showToast('تاریخ شمسی واردشده برای تخفیف همگانی معتبر نیست.', 'error');
+      return;
+    }
+
     const expiresAt = duration === 'custom'
-      ? this.normalizeExpiry(customDate, duration)
+      ? (() => { const d = parsedCustomDate; d.setHours(23, 59, 0, 0); return d.toISOString(); })()
       : this.calculateDiscountExpiry(duration);
     const noteLabel = duration === 'custom'
       ? this.formatCustomExpiryLabel(customDate)
@@ -6540,8 +6587,22 @@ renderCustomers(query = '') {
     const duration = this.getSelectedDiscountDuration();
     const customer = this.getDiscountCustomers().find(c => String(c.id) === String(customerId)) || {};
     const note = (this.discountNoteInput?.value || '').trim();
-    const manualExpiry = this.discountExpiryInput?.value;
-    const expiresAt = manualExpiry ? this.normalizeExpiry(manualExpiry, duration) : this.calculateDiscountExpiry(duration);
+    const manualExpiry = (this.discountExpiryInput?.value || '').trim();
+    const parsedManualExpiry = manualExpiry ? this.parseDiscountDateInput(manualExpiry) : null;
+
+    if (duration === 'custom' && !manualExpiry) {
+      UIComponents.showToast('تاریخ انقضا را وارد کنید.', 'error');
+      return;
+    }
+
+    if (manualExpiry && !parsedManualExpiry) {
+      UIComponents.showToast('تاریخ واردشده معتبر نیست. لطفاً یک تاریخ شمسی مانند ۱۴۰۴/۰۸/۲۵ وارد کنید.', 'error');
+      return;
+    }
+
+    const expiresAt = manualExpiry
+      ? (() => { const d = parsedManualExpiry; d.setHours(23, 59, 0, 0); return d.toISOString(); })()
+      : this.calculateDiscountExpiry(duration);
     const noteLabel = manualExpiry ? this.formatCustomExpiryLabel(manualExpiry) : this.getDiscountDurationLabel(duration);
 
     const discount = {
