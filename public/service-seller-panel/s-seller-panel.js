@@ -4227,6 +4227,7 @@ destroy() {
       document.querySelectorAll('.nav-item').forEach(n => n.removeAttribute('aria-current'));
       const activeSection = document.getElementById(`${page}-view`);
       const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+      const appHeader = document.querySelector('.app-header');
       if (activeSection) {
         activeSection.classList.add('active');
         document.title = `پنل فروشنده - ${activeNav?.textContent.trim() || 'داشبورد'}`;
@@ -4240,6 +4241,11 @@ destroy() {
       if (activeNav) {
         activeNav.classList.add('active');
         activeNav.setAttribute('aria-current', 'page');
+      }
+      if (appHeader) {
+        const shouldShowHeader = page === 'dashboard';
+        appHeader.classList.toggle('is-hidden', !shouldShowHeader);
+        appHeader.toggleAttribute('aria-hidden', !shouldShowHeader);
       }
     }
     renderPageContent(page) {
