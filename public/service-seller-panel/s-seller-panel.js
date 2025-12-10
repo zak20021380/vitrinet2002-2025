@@ -198,6 +198,41 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     ? 'چک‌پوینت فعال شد؛ چرخه جدید شروع شده است'
     : `${daysToNextCheckpoint} روز تا چک‌پوینت بعدی`;
 
+  // --- Header: hamburger navigation ---
+  const hamburgerToggle = document.getElementById('hamburger-toggle');
+  const hamburgerMenu = document.getElementById('hamburger-menu');
+  const hamburgerBackdrop = document.getElementById('hamburger-backdrop');
+
+  const setHamburgerState = (isOpen) => {
+    if (!hamburgerToggle || !hamburgerMenu || !hamburgerBackdrop) return;
+    hamburgerMenu.hidden = !isOpen;
+    hamburgerBackdrop.hidden = !isOpen;
+    hamburgerToggle.classList.toggle('is-open', isOpen);
+    hamburgerToggle.setAttribute('aria-expanded', String(isOpen));
+    document.body.classList.toggle('no-scroll', isOpen && window.innerWidth < 768);
+  };
+
+  const closeHamburger = () => setHamburgerState(false);
+
+  if (hamburgerToggle && hamburgerMenu && hamburgerBackdrop) {
+    hamburgerToggle.addEventListener('click', () => {
+      const isOpen = hamburgerToggle.getAttribute('aria-expanded') === 'true';
+      setHamburgerState(!isOpen);
+    });
+
+    hamburgerBackdrop.addEventListener('click', closeHamburger);
+
+    hamburgerMenu.querySelectorAll('.hamburger-menu__item').forEach((item) => {
+      item.addEventListener('click', closeHamburger);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeHamburger();
+      }
+    });
+  }
+
   const sheetData = {
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰',

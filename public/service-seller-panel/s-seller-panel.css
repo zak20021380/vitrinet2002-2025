@@ -93,8 +93,10 @@ body.no-scroll { overflow: hidden; }
   position: sticky;
   top: 0;
   z-index: var(--z-header);
-  background: transparent;
-  padding: 12px var(--content-padding, 16px) 8px;
+  background: linear-gradient(180deg, rgba(21, 21, 24, 0.94), rgba(12, 12, 16, 0.9));
+  padding: 18px var(--content-padding, 16px) 14px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
 }
 
 .app-header.is-hidden {
@@ -106,15 +108,15 @@ body.no-scroll { overflow: hidden; }
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-  padding: 10px 16px;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-    border-radius: 18px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    gap: 12px;
+    padding: 14px 18px;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 22px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
@@ -133,7 +135,7 @@ body.no-scroll { overflow: hidden; }
   align-items: center;
   gap: 8px;
   flex: 1;
-  justify-content: flex-start;
+  justify-content: center;
   padding-inline: 2px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -172,6 +174,110 @@ body.no-scroll { overflow: hidden; }
   padding-inline: 10px;
 }
 
+.hamburger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: #f8fafc;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  min-width: 56px;
+  flex: 0 0 auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.hamburger-btn:active { transform: scale(0.97); }
+
+.hamburger-btn:hover { border-color: rgba(255, 255, 255, 0.22); }
+
+.hamburger-btn__icon {
+  display: grid;
+  gap: 4px;
+  width: 20px;
+}
+
+.hamburger-btn__icon span {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.hamburger-btn.is-open .hamburger-btn__icon span:nth-child(1) {
+  transform: translateY(6px) rotate(38deg);
+}
+
+.hamburger-btn.is-open .hamburger-btn__icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.is-open .hamburger-btn__icon span:nth-child(3) {
+  transform: translateY(-6px) rotate(-38deg);
+}
+
+.hamburger-btn__label {
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.hamburger-menu {
+  position: absolute;
+  inset-inline-start: 18px;
+  top: calc(100% + 14px);
+  width: min(320px, 90vw);
+  background: rgba(20, 20, 24, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  animation: drawerFade var(--transition-base);
+  z-index: calc(var(--z-header) + 1);
+}
+
+.hamburger-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  color: #f8fafc;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.hamburger-menu__item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: linear-gradient(130deg, rgba(59, 130, 246, 0.14), rgba(255, 255, 255, 0.03));
+}
+
+.hamburger-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-backdrop);
+}
+
+@keyframes drawerFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
   .micro-chip--blue {
     color: #f8fafc;
     border-color: rgba(59, 130, 246, 0.4);
@@ -199,7 +305,7 @@ body.no-scroll { overflow: hidden; }
 
 @media (max-width: 640px) {
   .micro-toolbar {
-    padding: 8px 12px;
+    padding: 10px 12px;
   }
 
   .micro-toolbar__actions {
@@ -209,6 +315,18 @@ body.no-scroll { overflow: hidden; }
   .micro-chip {
     padding: 0 10px;
     font-size: 10.5px;
+  }
+
+  .hamburger-btn {
+    padding: 8px 10px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .hamburger-menu {
+    inset-inline-start: 12px;
+    width: min(320px, 92vw);
+    top: calc(100% + 10px);
   }
 
   #open-reservations-btn,
