@@ -133,7 +133,7 @@ body.no-scroll { overflow: hidden; }
 .micro-toolbar__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   justify-content: center;
   padding-inline: 2px;
@@ -150,28 +150,28 @@ body.no-scroll { overflow: hidden; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
-    padding: 0 12px;
-    border-radius: 12px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 11px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
     color: #f8fafc;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
-  letter-spacing: -0.01em;
-  text-align: center;
-  line-height: 1;
-  white-space: nowrap;
-  flex: 0 0 auto;
-  cursor: pointer;
-  gap: 6px;
+    letter-spacing: -0.01em;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    cursor: pointer;
+    gap: 6px;
     transition: border-color 160ms ease, color 160ms ease, transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   }
 
 #open-reservations-btn,
 #accounting-btn {
-  padding-inline: 10px;
+  padding-inline: 8px;
 }
 
 .hamburger-btn {
@@ -240,8 +240,21 @@ body.no-scroll { overflow: hidden; }
   padding: 14px;
   display: grid;
   gap: 8px;
-  animation: drawerFade var(--transition-base);
   z-index: calc(var(--z-header) + 1);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility 0s linear 160ms;
+}
+
+.hamburger-menu.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  animation: drawerFade var(--transition-base);
 }
 
 .hamburger-menu__item {
@@ -271,6 +284,15 @@ body.no-scroll { overflow: hidden; }
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(4px);
   z-index: var(--z-backdrop);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility 0s linear 180ms;
+}
+
+.hamburger-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--transition-base);
 }
 
 @keyframes drawerFade {

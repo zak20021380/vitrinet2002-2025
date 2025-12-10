@@ -205,8 +205,38 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
 
   const setHamburgerState = (isOpen) => {
     if (!hamburgerToggle || !hamburgerMenu || !hamburgerBackdrop) return;
-    hamburgerMenu.hidden = !isOpen;
-    hamburgerBackdrop.hidden = !isOpen;
+
+    const completeClose = () => {
+      hamburgerMenu.hidden = true;
+      hamburgerBackdrop.hidden = true;
+      hamburgerMenu.removeEventListener('transitionend', completeClose);
+    };
+
+    if (isOpen) {
+      hamburgerMenu.hidden = false;
+      hamburgerBackdrop.hidden = false;
+
+      requestAnimationFrame(() => {
+        hamburgerMenu.classList.add('is-open');
+        hamburgerBackdrop.classList.add('is-visible');
+      });
+
+      const firstMenuItem = hamburgerMenu.querySelector('.hamburger-menu__item');
+      if (firstMenuItem) {
+        firstMenuItem.focus({ preventScroll: true });
+      }
+    } else {
+      hamburgerMenu.classList.remove('is-open');
+      hamburgerBackdrop.classList.remove('is-visible');
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        completeClose();
+      } else {
+        hamburgerMenu.addEventListener('transitionend', completeClose, { once: true });
+        setTimeout(completeClose, 240);
+      }
+    }
+
     hamburgerToggle.classList.toggle('is-open', isOpen);
     hamburgerToggle.setAttribute('aria-expanded', String(isOpen));
     document.body.classList.toggle('no-scroll', isOpen && window.innerWidth < 768);
