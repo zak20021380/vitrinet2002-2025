@@ -69,6 +69,46 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     activeType: null
   };
 
+  // --- Sidebar drawer ---
+  const sidebarDrawer = document.getElementById('sidebar-drawer');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+
+  const closeSidebarDrawer = () => {
+    if (!sidebarDrawer) return;
+    sidebarDrawer.classList.remove('is-open');
+    sidebarDrawer.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+  };
+
+  const openSidebarDrawer = () => {
+    if (!sidebarDrawer) return;
+    sidebarDrawer.classList.add('is-open');
+    sidebarDrawer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+  };
+
+  sidebarToggle?.addEventListener('click', () => {
+    if (sidebarDrawer?.classList.contains('is-open')) {
+      closeSidebarDrawer();
+    } else {
+      openSidebarDrawer();
+    }
+  });
+
+  sidebarDrawer?.addEventListener('click', (event) => {
+    const dismissTarget = event.target.closest('[data-sidebar-dismiss]');
+    const itemTarget = event.target.closest('.sidebar-drawer__item');
+    if (dismissTarget || itemTarget) {
+      closeSidebarDrawer();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sidebarDrawer?.classList.contains('is-open')) {
+      closeSidebarDrawer();
+    }
+  });
+
   const toMidnight = (dateLike) => {
     const date = new Date(dateLike);
     if (Number.isNaN(date)) return null;

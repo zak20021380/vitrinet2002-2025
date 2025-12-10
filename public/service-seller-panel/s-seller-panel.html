@@ -109,6 +109,9 @@
   <header class="app-header" role="banner">
     <h1 class="sr-only" id="dashboard-title">پنل فروشنده</h1>
     <div class="micro-toolbar" aria-label="نوار ابزار سریع">
+      <button type="button" class="micro-toolbar__menu" id="sidebar-toggle" aria-label="باز کردن منوی کناری">
+        <span aria-hidden="true">☰</span>
+      </button>
       <div class="micro-toolbar__actions" aria-label="میانبرهای سریع">
         <span id="view-store-btn" class="micro-chip micro-chip--blue" role="link" tabindex="0">صفحه من</span>
         <span id="open-reservations-btn" class="micro-chip">نوبت‌دهی</span>
@@ -117,6 +120,53 @@
       </div>
     </div>
   </header>
+  <div id="sidebar-drawer" class="sidebar-drawer" aria-hidden="true">
+    <div class="sidebar-drawer__backdrop" data-sidebar-dismiss></div>
+    <aside class="sidebar-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="sidebar-drawer-title">
+      <header class="sidebar-drawer__header">
+        <div class="sidebar-drawer__profile">
+          <div class="sidebar-drawer__avatar" aria-hidden="true">SA</div>
+          <div>
+            <div class="sidebar-drawer__name" id="sidebar-drawer-title">سرویس‌دهنده آراسته</div>
+            <a href="#" class="sidebar-drawer__edit">ویرایش پروفایل</a>
+          </div>
+        </div>
+        <button type="button" class="sidebar-drawer__close" data-sidebar-dismiss aria-label="بستن منو">×</button>
+      </header>
+
+      <section class="sidebar-drawer__section">
+        <p class="sidebar-drawer__section-title">مدیریت کسب‌وکار</p>
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">🕒 تنظیمات ساعت کاری</span>
+        </button>
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">✂️ مدیریت خدمات و قیمت‌ها</span>
+        </button>
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">📷 گالری نمونه کار</span>
+        </button>
+      </section>
+
+      <section class="sidebar-drawer__section">
+        <p class="sidebar-drawer__section-title">تنظیمات</p>
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">🔔 اعلان‌ها</span>
+        </button>
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">🔒 امنیت و رمز عبور</span>
+        </button>
+      </section>
+
+      <footer class="sidebar-drawer__footer">
+        <button type="button" class="sidebar-drawer__item">
+          <span class="sidebar-drawer__item-label">🎧 پشتیبانی</span>
+        </button>
+        <button type="button" class="sidebar-drawer__item sidebar-drawer__item--danger">
+          <span class="sidebar-drawer__item-label">🚪 خروج</span>
+        </button>
+      </footer>
+    </aside>
+  </div>
   <main id="app" class="app-main" role="main" tabindex="-1">
     <div class="app-container">
       <section id="dashboard-view" class="view-section" role="region" aria-labelledby="dashboard-title" data-page="dashboard">
