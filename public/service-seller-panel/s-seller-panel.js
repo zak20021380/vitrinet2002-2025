@@ -202,15 +202,22 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰',
       currency: 'تومان',
-      note: 'این اعتبار مخصوص خرید خدمات در اپلیکیشن است.',
+      tagline: 'از این اعتبار برای رشد کسب‌وکارت استفاده کن.',
+      highlight: 'اعتبار قابل مصرف',
       useCases: [
-        { icon: '👑', title: 'خرید اشتراک', description: 'پلن‌های حرفه‌ای مدیریت فروشگاه' },
-        { icon: '🚀', title: 'نردبان آگهی', description: 'نمایش اول در نتایج جستجو' },
-        { icon: '⭐', title: 'خدمات ویژه', description: 'ابزارهای VIP برای فروش بیشتر' }
+        { icon: '👑', title: 'پلن طلایی' },
+        { icon: '🚀', title: 'نردبان آگهی' },
+        { icon: '⭐', title: 'نشان اعتماد' }
       ],
-      earners: [
-        { icon: '🔥', title: 'فعالیت روزانه و حفظ استریک', description: 'با حضور مداوم اعتبار هدیه بگیر.' },
-        { icon: '👥', title: 'دعوت از دوستان همکار', description: 'با هر دعوت موفق، اعتبار رایگان اضافه می‌شود.' }
+      serviceCards: [
+        { icon: '👑', title: 'ارتقا به پلن طلایی', price: 'از ۱۰۰,۰۰۰ ت' },
+        { icon: '🚀', title: 'نردبان کردن آگهی', price: '۲۰,۰۰۰ ت' },
+        { icon: '⭐', title: 'نشان اعتماد ویژه', price: '۵۰,۰۰۰ ت' }
+      ],
+      activities: [
+        { title: 'پاداش استریک', amount: '+۵۰,۰۰۰ ت', type: 'earn', time: '۵ دقیقه پیش' },
+        { title: 'خرید پلن', amount: '-۱۰۰,۰۰۰ ت', type: 'spend', time: '۲ ساعت پیش' },
+        { title: 'نردبان آگهی', amount: '-۲۰,۰۰۰ ت', type: 'spend', time: 'دیروز' }
       ]
     },
     streak: {
@@ -255,37 +262,67 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
-    bottomSheet.title.textContent = 'کیف پول و اعتبار';
+    bottomSheet.title.textContent = 'مرکز اعتبار و خرید خدمات';
     bottomSheet.content.innerHTML = `
       <section class="wallet-sheet" aria-label="اعتبار فروشگاه">
         <div class="wallet-sheet__hero">
-          <div class="wallet-sheet__amount">
-            <span class="wallet-sheet__amount-number">${data.balance}</span>
-            <span class="wallet-sheet__currency">${data.currency}</span>
+          <div class="wallet-sheet__hero-head">
+            <span class="wallet-sheet__eyebrow">${data.highlight}</span>
+            <p class="wallet-sheet__headline">${data.balance} <span>${data.currency}</span></p>
+            <p class="wallet-sheet__tagline">${data.tagline}</p>
           </div>
-          <p class="wallet-sheet__label">اعتبار جهت خرید خدمات اپلیکیشن</p>
-          <div class="wallet-sheet__usecases" aria-hidden="true">
-            ${data.useCases.map((item) => `<span class="wallet-sheet__usecase">${item.icon}<span>${item.title}</span></span>`).join('')}
+          <div class="wallet-sheet__tags" aria-hidden="true">
+            ${data.useCases.map((item) => `<span class="wallet-sheet__tag">${item.icon} ${item.title}</span>`).join('')}
           </div>
         </div>
 
-        <div class="wallet-sheet__section" aria-label="روش‌های کسب اعتبار رایگان">
-          <h4 class="wallet-sheet__section-title">روش‌های کسب اعتبار رایگان</h4>
-          <ul class="wallet-sheet__earn-list">
-            ${data.earners.map((item) => `
-              <li class="wallet-sheet__earn-item">
-                <span class="wallet-sheet__earn-icon" aria-hidden="true">${item.icon}</span>
-                <div class="wallet-sheet__earn-copy">
-                  <div class="wallet-sheet__earn-title">${item.title}</div>
-                  <p class="wallet-sheet__earn-desc">${item.description}</p>
+        <div class="wallet-sheet__section wallet-sheet__shop" aria-label="خدمات پیشنهادی برای هزینه اعتبار">
+          <div class="wallet-sheet__section-header">
+            <div>
+              <p class="wallet-sheet__section-eyebrow">کجا خرج کنم؟</p>
+              <h4 class="wallet-sheet__section-title">خرید سریع خدمات</h4>
+            </div>
+            <span class="wallet-sheet__section-chip">محبوب</span>
+          </div>
+          <div class="wallet-sheet__carousel" role="list">
+            ${data.serviceCards.map((card) => `
+              <article class="wallet-sheet__card" role="listitem" tabindex="0">
+                <div class="wallet-sheet__card-icon" aria-hidden="true">${card.icon}</div>
+                <div class="wallet-sheet__card-body">
+                  <h5 class="wallet-sheet__card-title">${card.title}</h5>
+                  <p class="wallet-sheet__card-price">${card.price}</p>
                 </div>
-              </li>
+              </article>
             `).join('')}
+          </div>
+        </div>
+
+        <div class="wallet-sheet__section wallet-sheet__activity" aria-label="فعالیت‌های اخیر اعتبار">
+          <div class="wallet-sheet__section-header">
+            <div>
+              <p class="wallet-sheet__section-eyebrow">جریان حساب</p>
+              <h4 class="wallet-sheet__section-title">تراکنش‌های اخیر</h4>
+            </div>
+            <span class="wallet-sheet__section-chip wallet-sheet__section-chip--muted">+ / -</span>
+          </div>
+          <ul class="wallet-sheet__activity-list">
+            ${data.activities.map((item) => {
+              const amountClass = item.type === 'earn' ? 'is-positive' : 'is-negative';
+              return `
+                <li class="wallet-sheet__activity-item">
+                  <div>
+                    <div class="wallet-sheet__activity-title">${item.title}</div>
+                    <p class="wallet-sheet__activity-meta">${item.time}</p>
+                  </div>
+                  <span class="wallet-sheet__activity-amount ${amountClass}">${item.amount}</span>
+                </li>
+              `;
+            }).join('')}
           </ul>
         </div>
 
         <div class="wallet-sheet__footer">
-          <button type="button" class="wallet-sheet__cta">استفاده از اعتبار / خرید پلن</button>
+          <button type="button" class="wallet-sheet__cta">مشاهده فروشگاه خدمات 🛍️</button>
         </div>
       </section>
     `;
