@@ -139,7 +139,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     const labels = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
     return labels.map((label, idx) => {
       const status = idx < progress ? 'hit' : 'pending';
-      return { label, status };
+      return { label, status, isGift: idx === labels.length - 1 };
     });
   };
 
@@ -219,13 +219,12 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       visualCycle: streakSnapshot.visualCycle,
       checkpointReached: streakSnapshot.checkpointReached,
       progress: Math.round((streakSnapshot.weekProgress / 7) * 100),
-      freezeCost: '۱۲۰ امتیاز',
       nextReward: nextRewardCopy,
       level: levelSnapshot,
       dailyReward: '+۱۰ امتیاز وفاداری',
       weeklyReward: `${formatTomans(5_000)} اعتبار فروشگاه`,
       monthlyReward: formatTomans(50_000),
-      rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد مگر اینکه استریک فریز فعال باشد.',
+      rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد.',
       days: createWeeklyDayState(streakSnapshot.weekProgress),
       message: streakSnapshot.message,
       softPenalty: streakSnapshot.softPenalty,
@@ -295,37 +294,39 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const renderStreakSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.streak;
-    bottomSheet.title.textContent = 'مسیر استریک و پاداش ماهانه';
+    bottomSheet.title.textContent = 'ماموریت استریک و ارتقای سطح';
 
     const dayMarkup = data.days.map((day) => {
       const statusClass = day.status === 'hit' ? 'is-hit' : day.status === 'missed' ? 'is-missed' : 'is-pending';
-      const symbol = day.status === 'hit' ? '✔' : day.status === 'missed' ? '✕' : '•';
+      const baseSymbol = day.status === 'hit' ? '✔' : day.status === 'missed' ? '✕' : '•';
+      const symbol = day.isGift ? '🎁' : baseSymbol;
       const stateLabel = day.status === 'hit' ? 'فعال' : day.status === 'missed' ? 'از دست رفته' : 'در انتظار';
       return `
         <div class="streak-day ${statusClass}" aria-label="${day.label} ${stateLabel}">
-          <div class="streak-day__circle">${symbol}</div>
+          <div class="streak-day__circle${day.isGift ? ' streak-day__circle--gift' : ''}">${symbol}</div>
           <span>${day.label}</span>
         </div>
       `;
     }).join('');
 
-    const nextGoalText = `${faNumber(data.level.daysToNextLevel)} روز مانده تا سطح ${data.level.nextLevelName} ${data.level.nextLevelIcon || ''} + جایزه ${data.level.nextRewardAmount}`;
+    const missionLabel = 'مأموریت سطح الماسی 💎';
+    const nextGoalText = `${faNumber(data.level.daysToNextLevel)} روز تا دریافت تیک آبی + ${formatTomans(300_000)} پاداش`;
     const tierStyle = data.level.color ? ` style="color: ${data.level.color}"` : '';
-    const nextGlowClass = data.level.nextLevelName === 'الماسی' ? ' streak-sheet__next-goal--diamond' : '';
+    const nextGlowClass = ' streak-sheet__next-goal--diamond';
 
     bottomSheet.content.innerHTML = `
       <section class="streak-sheet" aria-label="جزئیات استریک">
         <div class="streak-sheet__hero">
           <span class="streak-sheet__icon" aria-hidden="true">${data.level.icon}</span>
           <div class="streak-sheet__tier"${tierStyle}>فروشنده ${data.level.name}</div>
-          <div class="streak-sheet__count">${faNumber(data.totalDays)} روز</div>
+          <div class="streak-sheet__count">${faNumber(data.totalDays)} روز در اوج!</div>
           ${data.checkpointReached ? '<span class="streak-sheet__badge" role="status">چک‌پوینت فعال</span>' : ''}
         </div>
 
         <div class="streak-sheet__progress" aria-label="پیشرفت سطح بعدی">
           <div class="streak-sheet__progress-meta">
-            <span class="streak-sheet__progress-label">هدف: روز ${faNumber(data.level.nextMilestoneDay)}</span>
-            <span class="streak-sheet__progress-value">${faNumber(data.level.progressDays)}/${faNumber(data.level.span)}</span>
+            <span class="streak-sheet__progress-label">${missionLabel}</span>
+            <span class="streak-sheet__progress-value">${faNumber(data.level.daysToNextLevel)} روز تا الماس</span>
           </div>
           <div class="streak-sheet__progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
             <span style="inline-size: ${data.level.progressPercent}%"></span>
@@ -336,8 +337,8 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         <div class="streak-sheet__weekly" aria-label="پیشرفت هفتگی">
           <div class="streak-sheet__weekly-header">
             <div>
-              <p class="streak-sheet__week-label">اهداف هفتگی</p>
-              <p class="streak-sheet__week-hint">هر ۷ روز = ${data.weeklyReward}</p>
+              <p class="streak-sheet__week-label">مسیر جایزه این هفته</p>
+              <p class="streak-sheet__week-hint">پاداش هفتگی: ${formatTomans(5_000)} شارژ قطعی</p>
             </div>
             <div class="streak-sheet__week-value">${data.weekProgress}/7</div>
           </div>
@@ -351,18 +352,12 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         </div>
 
         <div class="streak-sheet__actions">
-          <button type="button" class="btn-secondary" data-action="freeze">خرید استریک فریز (${data.freezeCost})</button>
           <p class="streak-sheet__meta">${data.dailyReward} | پاداش هفتگی: ${data.weeklyReward} | پاداش ماهانه: ${data.monthlyReward} + ارتقای سطح</p>
           <p class="streak-sheet__meta">${data.rules}</p>
+          <p class="streak-sheet__quote">تداوم شما، اعتبار شماست.</p>
         </div>
       </section>
     `;
-
-    const freezeBtn = bottomSheet.content.querySelector('[data-action="freeze"]');
-    freezeBtn?.addEventListener('click', () => {
-      window.UIComponents?.showToast?.('استریک فریز با موفقیت به سبد شما افزوده شد.', 'info');
-      closeBottomSheet();
-    });
   };
 
   const openBottomSheet = (type = 'wallet') => {
