@@ -4416,6 +4416,8 @@ destroy() {
       this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
       this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
       this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      const storeCredit = mine.walletBalance ?? metrics.storeCredit ?? 0;
+      this.setText('store-credit', this.formatNumber(storeCredit));
 
       const modalCurrent = document.getElementById('rank-modal-current');
       if (modalCurrent) {
