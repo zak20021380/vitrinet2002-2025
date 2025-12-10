@@ -106,11 +106,11 @@ body.no-scroll { overflow: hidden; }
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-  padding: 10px 16px;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
+    gap: 0;
+    padding: 10px 16px;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
     border-radius: 18px;
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -128,13 +128,49 @@ body.no-scroll { overflow: hidden; }
   pointer-events: none;
 }
 
+.micro-toolbar__anchor {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  margin-inline-end: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+  box-shadow: -5px 0 10px rgba(15, 23, 42, 0.5);
+  z-index: 10;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.micro-toolbar__anchor::after {
+  content: '';
+  position: absolute;
+  inset-block: 6px;
+  inset-inline-end: -8px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+}
+
+.micro-toolbar__anchor:active {
+  transform: scale(0.96);
+}
+
+.micro-toolbar__anchor:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .micro-toolbar__actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
   justify-content: flex-start;
-  padding-inline: 2px;
+  padding: 0 10px;
   overflow-x: auto;
   scrollbar-width: none;
 }
