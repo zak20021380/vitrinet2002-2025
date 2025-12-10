@@ -7399,6 +7399,38 @@ async function showSellerModal (shop) {
   const subscriptionStart = sellerData.subscriptionStart;
   const subscriptionEnd = sellerData.subscriptionEnd;
 
+  const parseNumber = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+
+  const dailyStreakValue = parseNumber(
+    sellerData.dailyStreak ??
+    sellerData.streak ??
+    sellerData.daily_streak ??
+    sellerData.checkinStreak ??
+    sellerData.dailyCheckinStreak ??
+    sellerData.dailyStreakCount
+  );
+
+  const walletBalanceValue = parseNumber(
+    sellerData.walletBalance ??
+    sellerData.wallet_credit ??
+    sellerData.walletCredit ??
+    sellerData.wallet_amount ??
+    sellerData.walletAmount ??
+    (sellerData.wallet && (sellerData.wallet.balance ?? sellerData.wallet.amount))
+  );
+
+  const walletCurrencyLabel = sellerData.walletCurrency || (sellerData.wallet && sellerData.wallet.currency) || 'تومان';
+
+  const formatWalletAmount = (amount) => {
+    if (amount == null) return '—';
+    const rounded = Math.round(Number(amount));
+    const formatted = currencyFormatter ? currencyFormatter.format(rounded) : formatNumber(rounded);
+    return walletCurrencyLabel ? `${formatted} ${walletCurrencyLabel}` : formatted;
+  };
+
   if (sellerScoreKey && !sellerPerformanceLoaded) {
     await refreshSellerPerformanceMap();
   }
@@ -7483,6 +7515,25 @@ async function showSellerModal (shop) {
       <div class="seller-modal-row">
         <span class="seller-modal-label">تاریخ پایان:</span>
         <span class="seller-modal-value">${escapeHtml(fDate(subscriptionEnd))}</span>
+      </div>
+
+      <div class="seller-insights-grid">
+        <div class="seller-insight-card">
+          <div class="seller-insight-icon warm"><i class="ri-fire-line"></i></div>
+          <div class="seller-insight-body">
+            <p class="seller-insight-label">استریک روزانه</p>
+            <p class="seller-insight-value">${dailyStreakValue != null ? formatNumber(dailyStreakValue) : '—'} <span>روز متوالی</span></p>
+            <p class="seller-insight-hint">میزان فعالیت پیوسته فروشنده در روزهای اخیر</p>
+          </div>
+        </div>
+        <div class="seller-insight-card">
+          <div class="seller-insight-icon calm"><i class="ri-wallet-3-line"></i></div>
+          <div class="seller-insight-body">
+            <p class="seller-insight-label">اعتبار کیف پول</p>
+            <p class="seller-insight-value">${walletBalanceValue != null ? formatWalletAmount(walletBalanceValue) : '—'}</p>
+            <p class="seller-insight-hint">اعتبار قابل استفاده برای سفارش‌ها و تبلیغات</p>
+          </div>
+        </div>
       </div>
 
       <section class="seller-moderation-card" id="sellerModerationCard" data-status="${moderationStateInitial.blocked ? 'blocked' : 'active'}">
