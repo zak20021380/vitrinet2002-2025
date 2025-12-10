@@ -256,6 +256,21 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       item.addEventListener('click', closeHamburger);
     });
 
+    document.addEventListener('click', (event) => {
+      const clickTarget = event.target;
+      const isMenuOpen = hamburgerToggle.getAttribute('aria-expanded') === 'true';
+
+      if (!isMenuOpen) return;
+
+      const clickedInsideMenu = hamburgerMenu.contains(clickTarget);
+      const clickedToggle = hamburgerToggle.contains(clickTarget);
+      const clickedBackdrop = hamburgerBackdrop.contains(clickTarget);
+
+      if (!clickedInsideMenu && !clickedToggle && !clickedBackdrop) {
+        closeHamburger();
+      }
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         closeHamburger();
