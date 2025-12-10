@@ -202,17 +202,35 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰',
       currency: 'تومان',
-      tagline: 'از این اعتبار برای رشد کسب‌وکارت استفاده کن.',
-      highlight: 'اعتبار قابل مصرف',
+      tagline: 'اعتبارت را به ابزارهای بازدید و اعتماد تبدیل کن.',
+      highlight: 'اعتبار بازاریابی',
       useCases: [
-        { icon: '👑', title: 'پلن طلایی' },
         { icon: '🚀', title: 'نردبان آگهی' },
-        { icon: '⭐', title: 'نشان اعتماد' }
+        { icon: '🎫', title: 'کوپن تخفیف پلن' },
+        { icon: '⭐', title: 'نشان VIP' }
       ],
       serviceCards: [
-        { icon: '👑', title: 'ارتقا به پلن طلایی', price: 'از ۱۰۰,۰۰۰ ت' },
-        { icon: '🚀', title: 'نردبان کردن آگهی', price: '۲۰,۰۰۰ ت' },
-        { icon: '⭐', title: 'نشان اعتماد ویژه', price: '۵۰,۰۰۰ ت' }
+        {
+          icon: '🚀',
+          title: 'نردبان آگهی',
+          price: '۲۰,۰۰۰ اعتبار',
+          description: 'پروفایل و آگهی‌ات به بالای لیست می‌رود.',
+          theme: 'boost'
+        },
+        {
+          icon: '🎫',
+          title: 'تخفیف روی پلن',
+          price: '۵۰,۰۰۰ اعتبار',
+          description: 'اعتبار را به کوپن ۳۰٪ برای خرید نقدی پلن تبدیل کن.',
+          theme: 'discount'
+        },
+        {
+          icon: '⭐',
+          title: 'نشان VIP',
+          price: '۸۰,۰۰۰ اعتبار',
+          description: 'نشان اعتماد ۲۴ ساعته برای جلب مشتری بیشتر.',
+          theme: 'vip'
+        }
       ],
       activities: [
         { title: 'پاداش استریک', amount: '+۵۰,۰۰۰ ت', type: 'earn', time: '۵ دقیقه پیش' },
@@ -279,19 +297,21 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         <div class="wallet-sheet__section wallet-sheet__shop" aria-label="خدمات پیشنهادی برای هزینه اعتبار">
           <div class="wallet-sheet__section-header">
             <div>
-              <p class="wallet-sheet__section-eyebrow">کجا خرج کنم؟</p>
-              <h4 class="wallet-sheet__section-title">خرید سریع خدمات</h4>
+              <p class="wallet-sheet__section-eyebrow">اقتصاد افزونه</p>
+              <h4 class="wallet-sheet__section-title">افزایش بازدید و اعتماد</h4>
             </div>
-            <span class="wallet-sheet__section-chip">محبوب</span>
+            <span class="wallet-sheet__section-chip">پرداخت با اعتبار</span>
           </div>
           <div class="wallet-sheet__carousel" role="list">
             ${data.serviceCards.map((card) => `
-              <article class="wallet-sheet__card" role="listitem" tabindex="0">
+              <article class="wallet-sheet__card wallet-sheet__card--${card.theme}" role="listitem" tabindex="0">
                 <div class="wallet-sheet__card-icon" aria-hidden="true">${card.icon}</div>
                 <div class="wallet-sheet__card-body">
                   <h5 class="wallet-sheet__card-title">${card.title}</h5>
                   <p class="wallet-sheet__card-price">${card.price}</p>
+                  <p class="wallet-sheet__card-meta">${card.description}</p>
                 </div>
+                <span class="wallet-sheet__card-chip">اعتبار → ابزار رشد</span>
               </article>
             `).join('')}
           </div>
@@ -322,7 +342,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         </div>
 
         <div class="wallet-sheet__footer">
-          <button type="button" class="wallet-sheet__cta">مشاهده فروشگاه خدمات 🛍️</button>
+          <button type="button" class="wallet-sheet__cta">افزایش بازدید و فروش 🚀</button>
         </div>
       </section>
     `;
