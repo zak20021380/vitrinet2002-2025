@@ -147,10 +147,11 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
 
   const calculateUserLevel = (streakDays = 0) => {
     const tiers = [
-      { min: 0, max: 30, name: 'نوآموز', icon: '🌱' },
-      { min: 30, max: 60, name: 'برنزی', icon: '🥉' },
-      { min: 60, max: 90, name: 'نقره‌ای', icon: '🛡️' },
-      { min: 90, max: Infinity, name: 'طلایی', icon: '🏆' }
+      { min: 0, max: 30, name: 'نوآموز', icon: '🌱', color: '#22d3ee', reward: 50_000 },
+      { min: 30, max: 60, name: 'برنزی', icon: '🥉', color: '#f97316', reward: 100_000 },
+      { min: 60, max: 90, name: 'نقره‌ای', icon: '🛡️', color: '#cbd5e1', reward: 150_000 },
+      { min: 90, max: 120, name: 'طلایی', icon: '🏆', color: '#fbbf24', reward: 200_000 },
+      { min: 120, max: Infinity, name: 'الماسی', icon: '💎', color: '#67e8f9', reward: 300_000 }
     ];
 
     const activeTier = tiers.find((tier) => streakDays >= tier.min && streakDays < tier.max) || tiers[tiers.length - 1];
@@ -163,10 +164,12 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     const progressPercent = Math.min(100, Math.round((progressDays / span) * 100));
     const milestoneIndex = Math.ceil(nextMilestoneDay / 30);
     const nextLevel = tiers[tierIndex + 1] || activeTier;
+    const rewardForNextLevel = nextLevel.reward ?? milestoneIndex * 50_000;
 
     return {
       name: activeTier.name,
       icon: activeTier.icon,
+      color: activeTier.color,
       label: `${activeTier.icon} فروشنده ${activeTier.name}`,
       progressDays,
       span,
@@ -174,7 +177,9 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       daysToNextLevel,
       nextMilestoneDay,
       nextLevelName: nextLevel.name,
-      nextRewardAmount: formatTomans(milestoneIndex * 50_000)
+      nextLevelIcon: nextLevel.icon,
+      nextLevelColor: nextLevel.color,
+      nextRewardAmount: formatTomans(rewardForNextLevel)
     };
   };
 
@@ -304,24 +309,28 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
       `;
     }).join('');
 
+    const nextGoalText = `${faNumber(data.level.daysToNextLevel)} روز مانده تا سطح ${data.level.nextLevelName} ${data.level.nextLevelIcon || ''} + جایزه ${data.level.nextRewardAmount}`;
+    const tierStyle = data.level.color ? ` style="color: ${data.level.color}"` : '';
+    const nextGlowClass = data.level.nextLevelName === 'الماسی' ? ' streak-sheet__next-goal--diamond' : '';
+
     bottomSheet.content.innerHTML = `
       <section class="streak-sheet" aria-label="جزئیات استریک">
         <div class="streak-sheet__hero">
-          <span class="streak-sheet__icon" aria-hidden="true">🏆</span>
-          <div class="streak-sheet__tier">${data.level.label}</div>
-          <div class="streak-sheet__count">${data.totalDays} روز</div>
+          <span class="streak-sheet__icon" aria-hidden="true">${data.level.icon}</span>
+          <div class="streak-sheet__tier"${tierStyle}>فروشنده ${data.level.name}</div>
+          <div class="streak-sheet__count">${faNumber(data.totalDays)} روز</div>
           ${data.checkpointReached ? '<span class="streak-sheet__badge" role="status">چک‌پوینت فعال</span>' : ''}
         </div>
 
         <div class="streak-sheet__progress" aria-label="پیشرفت سطح بعدی">
           <div class="streak-sheet__progress-meta">
-            <span>${data.level.name === 'طلایی' ? 'پیشرفت مستمر ماهانه' : 'تا سطح بعدی'}</span>
-            <span class="streak-sheet__progress-value">${data.level.progressDays}/${data.level.span}</span>
+            <span class="streak-sheet__progress-label">هدف: روز ${faNumber(data.level.nextMilestoneDay)}</span>
+            <span class="streak-sheet__progress-value">${faNumber(data.level.progressDays)}/${faNumber(data.level.span)}</span>
           </div>
           <div class="streak-sheet__progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
             <span style="inline-size: ${data.level.progressPercent}%"></span>
           </div>
-          <p class="streak-sheet__hint">رسیدن به روز ${data.level.nextMilestoneDay} = سطح ${data.level.nextLevelName} + ${data.level.nextRewardAmount}</p>
+          <p class="streak-sheet__next-goal${nextGlowClass}">${nextGoalText}</p>
         </div>
 
         <div class="streak-sheet__weekly" aria-label="پیشرفت هفتگی">
