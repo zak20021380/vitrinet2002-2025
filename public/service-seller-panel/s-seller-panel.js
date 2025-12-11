@@ -198,6 +198,230 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     ? 'چک‌پوینت فعال شد؛ چرخه جدید شروع شده است'
     : `${daysToNextCheckpoint} روز تا چک‌پوینت بعدی`;
 
+  const parseTomansToNumber = (text = '') => {
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    const normalized = String(text)
+      .replace(/[۰-۹]/g, (d) => persianDigits.indexOf(d))
+      .replace(/[^0-9]/g, '');
+    return Number(normalized || 0);
+  };
+
+  const UpgradeModal = (() => {
+    const modal = document.getElementById('upgrade-modal');
+    const plansContainer = modal?.querySelector('#upgrade-plans');
+    const walletBalanceEl = modal?.querySelector('#upgrade-wallet-balance');
+    const walletStatusEl = modal?.querySelector('#upgrade-wallet-status');
+    const durationChips = modal ? Array.from(modal.querySelectorAll('[data-duration]')) : [];
+    const summaryTitle = modal?.querySelector('#upgrade-summary-title');
+    const summaryDesc = modal?.querySelector('#upgrade-summary-desc');
+    const summaryPrice = modal?.querySelector('#upgrade-summary-price');
+    const summaryWallet = modal?.querySelector('#upgrade-summary-wallet');
+    const payBtn = modal?.querySelector('#upgrade-pay-btn');
+    const highlight = modal?.querySelector('#upgrade-highlight');
+
+    const plans = [
+      {
+        key: 'starter',
+        title: 'شروع سریع',
+        subtitle: 'برای کسب‌وکارهایی که می‌خواهند سریع دیده شوند.',
+        ribbon: 'جدید',
+        pricing: { 1: 390_000, 3: 990_000, 6: 1_740_000 },
+        highlight: 'افزایش ۲.۳ برابری نمایش در صفحه اول.',
+        features: ['اولویت در جستجوی محلی', 'نمایش بنر ثابت در صفحه فروشگاه', 'پشتیبانی تیکت استاندارد']
+      },
+      {
+        key: 'growth',
+        title: 'رشد متمرکز',
+        subtitle: 'بهترین انتخاب برای فروشندگان فعال و رو‌به‌رشد.',
+        ribbon: 'محبوب',
+        pricing: { 1: 620_000, 3: 1_560_000, 6: 2_820_000 },
+        highlight: 'تا ۴۲٪ رشد ورودی و رزرو در ۹۰ روز.',
+        features: ['اسلات تبلیغاتی چرخشی', 'ویترین قابل شخصی‌سازی کمپین', 'گزارش لحظه‌ای کلیک و بازدید', 'پشتیبانی اولویت‌دار']
+      },
+      {
+        key: 'pro',
+        title: 'تبلیغات حرفه‌ای',
+        subtitle: 'برای فروشگاه‌هایی که همیشه در صدر می‌مانند.',
+        ribbon: 'بیشترین بازده',
+        pricing: { 1: 980_000, 3: 2_550_000, 6: 4_650_000 },
+        highlight: 'حضور در جایگاه‌های طلایی و گزارش پیشرفته.',
+        features: ['تاپ پوزیشن در نتایج جستجو', 'کمپین پیامکی هفتگی', 'لندینگ اختصاصی تبلیغاتی', 'مدیر حساب و مشاوره رشد']
+      }
+    ];
+
+    const state = {
+      duration: 3,
+      planKey: 'growth'
+    };
+
+    const formatDuration = (duration) => `${duration} ماهه`;
+
+    const getWalletValue = () => {
+      const walletText = document.getElementById('wallet-balance')?.textContent || '۰';
+      return parseTomansToNumber(walletText);
+    };
+
+    const updateWalletUI = () => {
+      const value = getWalletValue();
+      if (walletBalanceEl) walletBalanceEl.textContent = formatTomans(value);
+      if (walletStatusEl) walletStatusEl.textContent = 'به‌روز';
+      return value;
+    };
+
+    const renderPlans = () => {
+      if (!plansContainer) return;
+      plansContainer.innerHTML = '';
+
+      plans.forEach((plan) => {
+        const price = plan.pricing[state.duration];
+        const card = document.createElement('article');
+        card.className = 'upgrade-card';
+        card.tabIndex = 0;
+        card.dataset.planKey = plan.key;
+        if (plan.key === state.planKey) card.classList.add('is-selected');
+
+        card.innerHTML = `
+          <div class="upgrade-card__head">
+            <div>
+              <p class="upgrade-card__eyebrow">${plan.subtitle}</p>
+              <h4 class="upgrade-card__title">${plan.title}</h4>
+            </div>
+            <span class="upgrade-card__badge">${plan.ribbon}</span>
+          </div>
+          <div class="upgrade-card__price">
+            <strong>${formatTomans(price)}</strong>
+            <small>${formatDuration(state.duration)}</small>
+          </div>
+          <ul class="upgrade-card__features">
+            ${plan.features
+              .map((feature) => `<li><span class="upgrade-card__dot"></span>${feature}</li>`)
+              .join('')}
+          </ul>
+          <div class="upgrade-card__meta">
+            <span>پرداخت با اعتبار</span>
+            <span>فعال‌سازی فوری</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          state.planKey = plan.key;
+          renderPlans();
+          updateSummary();
+        });
+
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            card.click();
+          }
+        });
+
+        plansContainer.appendChild(card);
+      });
+    };
+
+    const updateHighlight = (text) => {
+      if (!highlight) return;
+      const titleEl = highlight.querySelector('.upgrade-highlights__title');
+      if (titleEl) titleEl.textContent = text || 'تا ۴۲٪ رشد در ورودی فروشگاه';
+    };
+
+    const updateSummary = () => {
+      const plan = plans.find((p) => p.key === state.planKey);
+      const wallet = updateWalletUI();
+
+      if (!plan) {
+        summaryTitle && (summaryTitle.textContent = '—');
+        summaryDesc && (summaryDesc.textContent = 'لطفاً یک پلن را انتخاب کنید.');
+        summaryPrice && (summaryPrice.textContent = '—');
+        payBtn && payBtn.setAttribute('disabled', 'true');
+        return;
+      }
+
+      const price = plan.pricing[state.duration];
+      const canPay = wallet >= price;
+      const remaining = wallet - price;
+
+      if (summaryTitle) summaryTitle.textContent = `${plan.title} (${formatDuration(state.duration)})`;
+      if (summaryDesc) summaryDesc.textContent = plan.subtitle;
+      if (summaryPrice) summaryPrice.textContent = formatTomans(price);
+      if (summaryWallet) {
+        summaryWallet.textContent = canPay
+          ? `با اعتبار پرداخت می‌شود. باقی‌مانده پس از خرید: ${formatTomans(remaining)}`
+          : `اعتبار کافی نیست. ${formatTomans(Math.abs(remaining))} تومان کم دارید.`;
+      }
+
+      if (payBtn) {
+        payBtn.disabled = !canPay;
+        payBtn.textContent = canPay ? 'پرداخت با اعتبار فروشگاه' : 'افزایش اعتبار موردنیاز';
+      }
+
+      updateHighlight(plan.highlight);
+    };
+
+    const setDuration = (duration) => {
+      state.duration = duration;
+      durationChips.forEach((chip) => {
+        const isActive = Number(chip.dataset.duration) === duration;
+        chip.classList.toggle('active', isActive);
+        chip.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      renderPlans();
+      updateSummary();
+    };
+
+    durationChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const duration = Number(chip.dataset.duration);
+        if (Number.isNaN(duration)) return;
+        setDuration(duration);
+      });
+    });
+
+    if (payBtn) {
+      payBtn.addEventListener('click', () => {
+        const plan = plans.find((p) => p.key === state.planKey);
+        if (!plan || payBtn.disabled) return;
+        updateSummary();
+        const amount = plan.pricing[state.duration];
+        if (window.UIComponents?.showToast) {
+          window.UIComponents.showToast(`پلن ${plan.title} (${formatDuration(state.duration)}) با اعتبار شما رزرو شد.`, 'success');
+        }
+        payBtn.textContent = `پرداخت ${formatTomans(amount)} انجام شد`;
+      });
+    }
+
+    const open = () => {
+      if (!modal) return;
+      setDuration(state.duration);
+      UIComponents.openModal('upgrade-modal');
+    };
+
+    const bindTriggers = () => {
+      const triggerSelectors = [
+        '#plan-renew-btn',
+        'a[data-page="plans"]',
+        '.hamburger-menu__item[href="#plans-view"]',
+        '[data-go-plans]'
+      ];
+
+      triggerSelectors.forEach((selector) => {
+        document.querySelectorAll(selector).forEach((el) => {
+          el.addEventListener('click', (event) => {
+            event.preventDefault();
+            open();
+          });
+        });
+      });
+    };
+
+    bindTriggers();
+
+    return { open };
+  })();
+
+  window.openUpgradeModal = UpgradeModal?.open;
+
   // --- Header: hamburger navigation ---
   const hamburgerToggle = document.getElementById('hamburger-toggle');
   const hamburgerMenu = document.getElementById('hamburger-menu');
@@ -1758,7 +1982,13 @@ const bindPlanHeroActions = (() => {
   return () => {
     if (bound) return;
     bound = true;
-    const goPlans = () => { window.location.hash = '#/plans'; };
+    const goPlans = () => {
+      if (typeof window.openUpgradeModal === 'function') {
+        window.openUpgradeModal();
+      } else {
+        window.location.hash = '#/plans';
+      }
+    };
     document.getElementById('plan-renew-btn')?.addEventListener('click', goPlans);
   };
 })();
