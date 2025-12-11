@@ -341,6 +341,121 @@ body.no-scroll { overflow: hidden; }
   }
 }
 
+.install-app-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(109, 152, 255, 0.35);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(96, 165, 250, 0.08)),
+    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.08), transparent 35%);
+  color: #e5edff;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  box-shadow: 0 12px 28px rgba(30, 64, 175, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  flex: 0 0 auto;
+  isolation: isolate;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.install-app-btn__spark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.25), transparent 32%),
+    radial-gradient(circle at 75% 80%, rgba(59, 130, 246, 0.25), transparent 30%);
+  filter: blur(2px);
+  opacity: 0.8;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.install-app-btn__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(29, 78, 216, 0.45));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 20px rgba(37, 99, 235, 0.35);
+  color: #f8fafc;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.install-app-btn__texts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  z-index: 1;
+}
+
+.install-app-btn__label {
+  font-size: 12.5px;
+}
+
+.install-app-btn__status {
+  font-size: 10.5px;
+  color: #cbd5f5;
+  opacity: 0.92;
+}
+
+.install-app-btn:hover {
+  transform: translateY(-1px) scale(1.01);
+  border-color: rgba(96, 165, 250, 0.7);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(56, 189, 248, 0.18));
+  box-shadow: 0 14px 34px rgba(59, 130, 246, 0.45);
+}
+
+.install-app-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.install-app-btn:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.65);
+  outline-offset: 3px;
+}
+
+.install-app-btn[data-state='installed'] {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(74, 222, 128, 0.14));
+  box-shadow: 0 14px 34px rgba(34, 197, 94, 0.35);
+  cursor: default;
+}
+
+.install-app-btn[data-state='installed'] .install-app-btn__icon {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.55), rgba(22, 163, 74, 0.5));
+}
+
+.install-app-btn[data-state='hint'] .install-app-btn__status {
+  color: #fde68a;
+}
+
+.install-app-btn.is-soft {
+  animation: softPulse 1.6s ease;
+}
+
+@keyframes softPulse {
+  0% {
+    box-shadow: 0 12px 28px rgba(30, 64, 175, 0.35);
+  }
+  50% {
+    box-shadow: 0 16px 38px rgba(96, 165, 250, 0.5);
+  }
+  100% {
+    box-shadow: 0 12px 28px rgba(30, 64, 175, 0.35);
+  }
+}
+
 @media (max-width: 640px) {
   .micro-toolbar {
     padding: 10px 12px;
@@ -348,6 +463,16 @@ body.no-scroll { overflow: hidden; }
 
   .micro-toolbar__actions {
     gap: 6px;
+  }
+
+  .install-app-btn {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .install-app-btn__icon {
+    width: 30px;
+    height: 30px;
   }
 
   .micro-chip {
@@ -387,6 +512,19 @@ body.no-scroll { overflow: hidden; }
       font-size: 10px;
       border-radius: 10px;
     }
+
+  .install-app-btn {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .install-app-btn__label {
+    font-size: 11.5px;
+  }
+
+  .install-app-btn__status {
+    display: none;
+  }
 
   #open-reservations-btn {
     padding-inline: 7px;

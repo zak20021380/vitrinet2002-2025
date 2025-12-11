@@ -202,6 +202,9 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const hamburgerToggle = document.getElementById('hamburger-toggle');
   const hamburgerMenu = document.getElementById('hamburger-menu');
   const hamburgerBackdrop = document.getElementById('hamburger-backdrop');
+  const installAppButton = document.getElementById('install-app-btn');
+  const installAppStatus = installAppButton?.querySelector('.install-app-btn__status');
+  let deferredInstallPrompt = null;
 
   const setHamburgerState = (isOpen) => {
     if (!hamburgerToggle || !hamburgerMenu || !hamburgerBackdrop) return;
@@ -276,6 +279,70 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         closeHamburger();
       }
     });
+  }
+
+  const setInstallState = (state, statusCopy) => {
+    if (!installAppButton || !installAppStatus) return;
+    installAppButton.dataset.state = state;
+    if (statusCopy) {
+      installAppStatus.textContent = statusCopy;
+    }
+    installAppButton.disabled = state === 'installed';
+  };
+
+  const markAppInstalled = () => {
+    setInstallState('installed', 'نصب شده روی دستگاه');
+  };
+
+  if (installAppButton) {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) {
+      markAppInstalled();
+    }
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      installAppButton.hidden = false;
+      installAppButton.disabled = false;
+      setInstallState('ready', 'افزودن به صفحه اصلی');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      markAppInstalled();
+      deferredInstallPrompt = null;
+    });
+
+    installAppButton.addEventListener('click', async () => {
+      if (installAppButton.dataset.state === 'installed') return;
+
+      if (deferredInstallPrompt) {
+        try {
+          setInstallState('prompting', 'در حال آماده‌سازی نصب');
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          if (choice.outcome === 'accepted') {
+            markAppInstalled();
+            return;
+          }
+          setInstallState('ready', 'هر زمان خواستی می‌توانی نصب کنی');
+        } catch (error) {
+          console.warn('Install prompt failed', error);
+          setInstallState('ready', 'دوباره تلاش کنید');
+        }
+        return;
+      }
+
+      setInstallState('hint', 'از منوی مرورگر گزینه «Add to Home Screen» را بزنید');
+      installAppButton.classList.add('is-soft');
+      setTimeout(() => installAppButton.classList.remove('is-soft'), 2200);
+    });
+
+    if (!installAppButton.dataset.state || installAppButton.dataset.state === 'idle') {
+      installAppButton.hidden = false;
+      setInstallState('idle', 'وب‌اپلیکیشن آماده استفاده است');
+    }
   }
 
   const sheetData = {
