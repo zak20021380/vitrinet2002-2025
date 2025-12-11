@@ -1870,35 +1870,30 @@
       </header>
 
       <div class="support-actions">
-        <a
-          class="support-chat"
-          href="https://wa.me/982191009900"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <button type="button" class="support-chat" data-telegram-trigger>
           <span class="support-chat__icon" aria-hidden="true">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
-                d="M12.04 2C6.57 2 2.17 6.13 2.17 11.14c0 1.78.5 3.47 1.37 4.93L2 22l6.13-1.95a10.3 10.3 0 0 0 3.9.76c5.47 0 9.87-4.13 9.87-9.14C21.9 6.13 17.5 2 12.04 2Z"
-                fill="url(#waGradient)"
+                d="M4.5 11.4c5.28-2.3 8.8-3.8 10.57-4.5 5.04-2 6.08-2.34 6.76-2.35.15 0 .48.04.7.24.18.17.23.39.26.55.02.16.06.48.03.73-.3 3.17-1.62 10.88-2.29 14.46-.28 1.5-.82 2-.98 2.16-.84.78-2.14.52-2.66.1-.6-.5-1.34-1.63-2.1-2.56-.58-.72-1.7-2.14-1.7-2.14-.55-.7-.1-1.02.48-1.6.33-.32.8-.82 1.3-1.34.44-.44.9-.9 1.02-1.14.02-.06.05-.2-.07-.32-.12-.12-.31-.1-.46-.06-.2.06-1.26.8-3.54 2.3-1.04.7-1.99 1.28-2.88 1.76-1.02.54-1.94.98-2.96.96-.9-.02-2.64-.52-3.94-.94-1.6-.52-2.86-.8-2.74-1.7.06-.46.7-.92 1.94-1.4Z"
+                fill="url(#tgGradient)"
               />
               <path
-                d="M16.4 13.54c-.24-.12-1.4-.7-1.63-.78-.22-.08-.38-.12-.55.12-.16.24-.63.78-.77.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.18-.7-.62-1.17-1.38-1.31-1.62-.14-.24-.02-.38.1-.5.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.75-1.77-.2-.48-.4-.4-.55-.4-.14 0-.3-.02-.46-.02-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.7 2.6 4.12 3.6.58.24 1.04.38 1.4.48.58.18 1.1.16 1.52.1.46-.06 1.4-.58 1.6-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"
+                d="M17 7.7s-4.18 2.62-6.27 3.9c-.25.16-.48.24-.68.22-.23-.02-.66-.18-.99-.29-.32-.1-.71-.23-.71-.23s-.26-.1-.18-.33c.02-.08.1-.18.2-.25.4-.35 1.77-1.38 2.66-2.06.66-.5 1.32-1 1.44-1.12.03-.04.05-.16-.1-.06-.17.1-2.06 1.27-2.9 1.79-.19.12-.44.17-.7.1-.23-.06-.45-.14-.7-.24-.46-.16-.69-.26-.69-.26s-.25-.16.17-.32c.98-.4 4.86-1.8 6.83-2.53.32-.12.7.1.86.38.16.32.06.72-.02.92-.3.88-1.4 4.46-1.58 5.04-.1.32-.12.36-.38.3-.16-.04-1.36-.44-1.88-.6-.12-.04-.26-.12-.18-.3.12-.32 2.04-2.3 3.12-3.46.2-.2.4-.7-.4-.12Z"
                 fill="#fff"
               />
               <defs>
-                <linearGradient id="waGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#25D366" />
-                  <stop offset="1" stop-color="#128C7E" />
+                <linearGradient id="tgGradient" x1="4" y1="4" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#4da3ff" />
+                  <stop offset="1" stop-color="#1c7ed6" />
                 </linearGradient>
               </defs>
             </svg>
           </span>
           <div>
-            <strong>گفتگو در واتساپ</strong>
-            <span class="support-chat__hint">پاسخگویی سریع</span>
+            <strong>گفتگو در تلگرام</strong>
+            <span class="support-chat__hint">نمایش آیدی پشتیبانی</span>
           </div>
-        </a>
+        </button>
 
         <details class="support-ticket">
           <summary>
@@ -1932,9 +1927,38 @@
         </details>
       </div>
 
-      <footer class="support-footer">
-        <a href="/faq" class="support-footer__link">سوالات متداول (FAQ)</a>
-      </footer>
+    </div>
+  </section>
+
+  <section
+    id="telegram-modal"
+    class="telegram-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="telegram-modal-title"
+    hidden
+  >
+    <div class="telegram-modal__backdrop" data-telegram-close></div>
+    <div class="telegram-modal__surface" role="document">
+      <button type="button" class="telegram-modal__close" aria-label="بستن" data-telegram-close>×</button>
+      <div class="telegram-modal__header">
+        <div class="telegram-modal__icon" aria-hidden="true">📨</div>
+        <div>
+          <p class="telegram-modal__eyebrow">ارتباط مستقیم</p>
+          <h3 id="telegram-modal-title">گفتگو در تلگرام</h3>
+          <p class="telegram-modal__subtitle">برای شروع گفتگو، آیدی پشتیبانی را در تلگرام جستجو کنید.</p>
+        </div>
+      </div>
+      <div class="telegram-modal__content">
+        <div class="telegram-id-chip">
+          <span aria-hidden="true">@</span>
+          <strong id="telegram-support-id">vitrinet_support</strong>
+        </div>
+        <a class="telegram-open-link" href="https://t.me/vitrinet_support" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">↗</span>
+          باز کردن گفت‌وگو در تلگرام
+        </a>
+      </div>
     </div>
   </section>
 

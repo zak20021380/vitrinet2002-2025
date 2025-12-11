@@ -284,6 +284,9 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const supportTriggers = document.querySelectorAll('[data-support-trigger]');
   const supportCloseEls = supportModal ? supportModal.querySelectorAll('[data-support-close]') : [];
   const supportForm = supportModal?.querySelector('.support-ticket__form');
+  const telegramModal = document.getElementById('telegram-modal');
+  const telegramTriggers = document.querySelectorAll('[data-telegram-trigger]');
+  const telegramCloseEls = telegramModal ? telegramModal.querySelectorAll('[data-telegram-close]') : [];
 
   const isSupportOpen = () => supportModal && !supportModal.hidden;
 
@@ -341,6 +344,48 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     closeSupportModal();
     if (window.UIComponents?.showToast) {
       window.UIComponents.showToast('درخواست شما ثبت شد؛ به‌زودی پاسخ می‌دهیم.', 'success');
+    }
+  });
+
+  // Telegram modal
+  const openTelegramModal = () => {
+    if (!telegramModal) return;
+    telegramModal.hidden = false;
+    requestAnimationFrame(() => {
+      telegramModal.classList.add('is-visible');
+    });
+  };
+
+  const closeTelegramModal = () => {
+    if (!telegramModal || telegramModal.hidden) return;
+    const finish = () => { telegramModal.hidden = true; };
+    telegramModal.classList.remove('is-visible');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finish();
+    } else {
+      telegramModal.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 260);
+    }
+  };
+
+  telegramTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', openTelegramModal);
+  });
+
+  telegramCloseEls.forEach((el) => {
+    el.addEventListener('click', closeTelegramModal);
+  });
+
+  telegramModal?.addEventListener('click', (event) => {
+    if ((event.target)?.classList?.contains('telegram-modal__backdrop')) {
+      closeTelegramModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && telegramModal && !telegramModal.hidden) {
+      closeTelegramModal();
     }
   });
 
