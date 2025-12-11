@@ -135,7 +135,7 @@
         <a class="hamburger-menu__item" href="#bookings-view">مدیریت نوبت‌ها</a>
         <a class="hamburger-menu__item" href="#accounting-view">حسابداری</a>
         <a class="hamburger-menu__item" href="#install-app">نصب اپلیکیشن</a>
-        <a class="hamburger-menu__item" href="tel:02191009900">پشتیبانی</a>
+        <button type="button" class="hamburger-menu__item hamburger-menu__button" data-support-trigger>پشتیبانی</button>
       </nav>
     </div>
     <div id="hamburger-backdrop" class="hamburger-backdrop" hidden></div>
@@ -1845,6 +1845,98 @@
   </div>
 
   <div id="toast-root" aria-live="assertive" aria-atomic="true"></div>
+
+  <section
+    id="support-modal"
+    class="support-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="support-modal-title"
+    aria-describedby="support-modal-desc"
+    hidden
+  >
+    <div class="support-modal__backdrop" data-support-close></div>
+    <div class="support-sheet" tabindex="-1">
+      <div class="support-sheet__handle" aria-hidden="true"></div>
+      <button type="button" class="support-sheet__close" aria-label="بستن" data-support-close>×</button>
+
+      <header class="support-hero">
+        <div class="support-hero__icon" aria-hidden="true">🎧</div>
+        <div>
+          <p class="support-hero__eyebrow">هم‌اکنون در پنل فروشنده</p>
+          <h2 id="support-modal-title" class="support-hero__title">مرکز پشتیبانی</h2>
+          <p id="support-modal-desc" class="support-hero__subtitle">ما اینجاییم تا مشکلت رو حل کنیم.</p>
+        </div>
+      </header>
+
+      <div class="support-actions">
+        <a
+          class="support-chat"
+          href="https://wa.me/982191009900"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="support-chat__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12.04 2C6.57 2 2.17 6.13 2.17 11.14c0 1.78.5 3.47 1.37 4.93L2 22l6.13-1.95a10.3 10.3 0 0 0 3.9.76c5.47 0 9.87-4.13 9.87-9.14C21.9 6.13 17.5 2 12.04 2Z"
+                fill="url(#waGradient)"
+              />
+              <path
+                d="M16.4 13.54c-.24-.12-1.4-.7-1.63-.78-.22-.08-.38-.12-.55.12-.16.24-.63.78-.77.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.18-.7-.62-1.17-1.38-1.31-1.62-.14-.24-.02-.38.1-.5.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.75-1.77-.2-.48-.4-.4-.55-.4-.14 0-.3-.02-.46-.02-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2 0 1.18.86 2.32.98 2.48.12.16 1.7 2.6 4.12 3.6.58.24 1.04.38 1.4.48.58.18 1.1.16 1.52.1.46-.06 1.4-.58 1.6-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"
+                fill="#fff"
+              />
+              <defs>
+                <linearGradient id="waGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#25D366" />
+                  <stop offset="1" stop-color="#128C7E" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <div>
+            <strong>گفتگو در واتساپ</strong>
+            <span class="support-chat__hint">پاسخگویی سریع</span>
+          </div>
+        </a>
+
+        <details class="support-ticket">
+          <summary>
+            <div>
+              <strong>ارسال تیکت</strong>
+              <span class="support-ticket__hint">در صورت عدم دسترسی به چت</span>
+            </div>
+            <span class="support-ticket__chevron" aria-hidden="true">⌄</span>
+          </summary>
+          <form class="support-ticket__form">
+            <label class="support-ticket__field">
+              <span>موضوع</span>
+              <select required>
+                <option value="">یک مورد را انتخاب کنید</option>
+                <option>مالی</option>
+                <option>فنی</option>
+                <option>نوبت‌دهی</option>
+              </select>
+            </label>
+            <label class="support-ticket__field">
+              <span>پیام</span>
+              <textarea rows="3" placeholder="چه مشکلی پیش آمده؟" required></textarea>
+            </label>
+            <label class="support-ticket__attachment">
+              <input type="file" hidden />
+              <span class="attachment-icon" aria-hidden="true">📎</span>
+              پیوست فایل (اختیاری)
+            </label>
+            <button type="submit" class="support-ticket__submit">ارسال درخواست</button>
+          </form>
+        </details>
+      </div>
+
+      <footer class="support-footer">
+        <a href="/faq" class="support-footer__link">سوالات متداول (FAQ)</a>
+      </footer>
+    </div>
+  </section>
 
   <!-- Notification FAB -->
   <div class="notification-fab" aria-live="polite">

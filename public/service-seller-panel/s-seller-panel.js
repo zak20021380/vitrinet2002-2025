@@ -278,6 +278,72 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     });
   }
 
+  // --- Support modal ---
+  const supportModal = document.getElementById('support-modal');
+  const supportSheet = supportModal?.querySelector('.support-sheet');
+  const supportTriggers = document.querySelectorAll('[data-support-trigger]');
+  const supportCloseEls = supportModal ? supportModal.querySelectorAll('[data-support-close]') : [];
+  const supportForm = supportModal?.querySelector('.support-ticket__form');
+
+  const isSupportOpen = () => supportModal && !supportModal.hidden;
+
+  const openSupportModal = () => {
+    if (!supportModal) return;
+    supportModal.hidden = false;
+    requestAnimationFrame(() => {
+      supportModal.classList.add('is-visible');
+      supportSheet?.focus({ preventScroll: true });
+    });
+    document.body.classList.add('is-support-open');
+    closeHamburger();
+  };
+
+  const closeSupportModal = () => {
+    if (!isSupportOpen()) return;
+
+    const finish = () => {
+      if (supportModal) supportModal.hidden = true;
+    };
+
+    supportModal.classList.remove('is-visible');
+    document.body.classList.remove('is-support-open');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finish();
+    } else {
+      supportModal.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 260);
+    }
+  };
+
+  supportTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', openSupportModal);
+  });
+
+  supportCloseEls.forEach((el) => {
+    el.addEventListener('click', closeSupportModal);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isSupportOpen()) {
+      closeSupportModal();
+    }
+  });
+
+  supportModal?.addEventListener('click', (event) => {
+    if ((event.target)?.classList?.contains('support-modal__backdrop')) {
+      closeSupportModal();
+    }
+  });
+
+  supportForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    closeSupportModal();
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('درخواست شما ثبت شد؛ به‌زودی پاسخ می‌دهیم.', 'success');
+    }
+  });
+
   const sheetData = {
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰',
