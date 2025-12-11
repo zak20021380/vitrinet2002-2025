@@ -278,6 +278,66 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     });
   }
 
+  // --- Growth & Ads Store bottom sheet ---
+  const growthStoreSheet = {
+    root: document.getElementById('growth-store-sheet'),
+    overlay: document.querySelector('#growth-store-sheet .growth-store-sheet__overlay'),
+    panel: document.querySelector('#growth-store-sheet .growth-store-sheet__panel'),
+    closeButtons: document.querySelectorAll('[data-growth-close]'),
+    triggers: [document.getElementById('growth-store-trigger')].filter(Boolean)
+  };
+
+  const setGrowthStoreState = (isOpen) => {
+    if (!growthStoreSheet.root) return;
+
+    if (isOpen) {
+      growthStoreSheet.root.hidden = false;
+      growthStoreSheet.root.setAttribute('aria-hidden', 'false');
+
+      requestAnimationFrame(() => {
+        growthStoreSheet.root.classList.add('is-open');
+        growthStoreSheet.panel?.focus({ preventScroll: true });
+      });
+    } else {
+      growthStoreSheet.root.classList.remove('is-open');
+      growthStoreSheet.root.setAttribute('aria-hidden', 'true');
+
+      const completeClose = () => {
+        growthStoreSheet.root.hidden = true;
+      };
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        completeClose();
+      } else {
+        setTimeout(completeClose, 260);
+      }
+    }
+
+    document.body.classList.toggle('no-scroll', isOpen);
+  };
+
+  const closeGrowthStore = () => setGrowthStoreState(false);
+
+  growthStoreSheet.triggers.forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeHamburger();
+      setGrowthStoreState(true);
+    });
+  });
+
+  growthStoreSheet.overlay?.addEventListener('click', closeGrowthStore);
+
+  growthStoreSheet.closeButtons.forEach((btn) => {
+    btn.addEventListener('click', closeGrowthStore);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && growthStoreSheet.root?.classList.contains('is-open')) {
+      closeGrowthStore();
+    }
+  });
+
   // --- Support modal ---
   const supportModal = document.getElementById('support-modal');
   const supportSheet = supportModal?.querySelector('.support-sheet');
