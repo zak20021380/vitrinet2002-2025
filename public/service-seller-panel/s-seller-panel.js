@@ -284,6 +284,8 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
   const supportTriggers = document.querySelectorAll('[data-support-trigger]');
   const supportCloseEls = supportModal ? supportModal.querySelectorAll('[data-support-close]') : [];
   const supportForm = supportModal?.querySelector('.support-ticket__form');
+  const supportTicketDetails = supportModal?.querySelector('.support-ticket');
+  const supportTicketSummary = supportTicketDetails?.querySelector('summary');
   const telegramModal = document.getElementById('telegram-modal');
   const telegramTriggers = document.querySelectorAll('[data-telegram-trigger]');
   const telegramCloseEls = telegramModal ? telegramModal.querySelectorAll('[data-telegram-close]') : [];
@@ -337,6 +339,15 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     if ((event.target)?.classList?.contains('support-modal__backdrop')) {
       closeSupportModal();
     }
+  });
+
+  supportTicketSummary?.addEventListener('click', () => {
+    if (!supportTicketDetails) return;
+    setTimeout(() => {
+      supportTicketDetails.setAttribute('open', '');
+      supportForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      supportForm?.querySelector('select')?.focus({ preventScroll: true });
+    }, 0);
   });
 
   supportForm?.addEventListener('submit', (event) => {
