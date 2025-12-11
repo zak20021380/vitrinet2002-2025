@@ -8710,6 +8710,36 @@ function cleanScheduleData() {
   })();
 })();
 
+  function initServiceStoreTabs() {
+    const modal = document.getElementById('service-store-modal');
+    if (!modal) return;
+
+    const buttons = modal.querySelectorAll('.service-store-switch__btn');
+    const tabs = modal.querySelectorAll('.service-store-tab');
+
+    const setActiveTab = (key = 'plans') => {
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.target === key;
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      tabs.forEach((tab) => {
+        const isActive = tab.dataset.tab === key;
+        tab.classList.toggle('is-active', isActive);
+        tab.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => setActiveTab(btn.dataset.target));
+    });
+
+    setActiveTab('plans');
+  }
+
+  initServiceStoreTabs();
+
 
 });
 
