@@ -221,7 +221,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
         hamburgerBackdrop.classList.add('is-visible');
       });
 
-      const firstMenuItem = hamburgerMenu.querySelector('.hamburger-menu__item');
+      const firstMenuItem = hamburgerMenu.querySelector('.hamburger-menu__profile-card, .hamburger-menu__item');
       if (firstMenuItem) {
         firstMenuItem.focus({ preventScroll: true });
       }
@@ -252,7 +252,7 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
 
     hamburgerBackdrop.addEventListener('click', closeHamburger);
 
-    hamburgerMenu.querySelectorAll('.hamburger-menu__item').forEach((item) => {
+    hamburgerMenu.querySelectorAll('.hamburger-menu__item, .hamburger-menu__profile-card').forEach((item) => {
       item.addEventListener('click', closeHamburger);
     });
 
