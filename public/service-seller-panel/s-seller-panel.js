@@ -2764,11 +2764,18 @@ async deletePortfolioItem(id) {
       if (diff < 86400) return `${Math.floor(diff/3600)} ساعت پیش`;
       return `${Math.floor(diff/86400)} روز پیش`;
     };
+    const detectType = (n) => {
+      if (n.type) return n.type;
+      if (typeof n.message === 'string' && n.message.includes('تیکت')) return 'ticket';
+      return 'info';
+    };
     return arr.map(n => ({
       id: n._id || n.id,
       text: n.message || '',
       time: n.createdAt ? fmt(n.createdAt) : '',
-      read: !!n.read
+      read: !!n.read,
+      type: detectType(n),
+      title: n.title || ''
     }));
   },
 
@@ -3557,9 +3564,24 @@ const Notifications = {
         const fullText = btn?.dataset?.fulltext || '';
         this.showFullComment(fullText);
         this.markRead(li.dataset.id);
+      } else if (e.target.closest('.notif-reply-btn')) {
+        e.preventDefault();
+        this.toggleReplyForm(li);
+      } else if (e.target.closest('.notif-reply-cancel')) {
+        e.preventDefault();
+        this.toggleReplyForm(li);
       } else {
         this.markRead(li.dataset.id);
       }
+    });
+
+    this._els.list?.addEventListener('submit', (e) => {
+      const form = e.target.closest('.notif-reply-form');
+      if (!form) return;
+      e.preventDefault();
+      const li = form.closest('li[data-id]');
+      const message = form.querySelector('textarea')?.value || '';
+      this.submitReply(li?.dataset?.id, message, form);
     });
   },
 
@@ -3648,6 +3670,8 @@ const Notifications = {
       const previewText = isLong ? `${fullBody.slice(0, LONG_BODY_LIMIT)}…` : fullBody;
       const safePreview = this._escapeHtml(previewText);
       const safeFull = this._escapeHtml(fullBody);
+      const isTicket = (n.type || '').toLowerCase() === 'ticket';
+      const titleText = n.title || (isTicket ? 'پیام پشتیبانی' : '');
 
       return `
       <li class="notification-item ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem" tabindex="0">
@@ -3656,10 +3680,24 @@ const Notifications = {
           <div class="notif-content">
             <div class="notif-text">
               ${label ? `<span class="notif-label">${label}</span>` : ''}
-              ${n.title ? `<strong class="notif-title">${n.title}</strong>` : ''}
+              ${titleText ? `<strong class="notif-title">${titleText}</strong>` : ''}
               <span class="notif-body">${safePreview}</span>
               ${isLong ? `<button class="notif-view-more" data-fulltext="${safeFull}" aria-label="نمایش کامل نظر">مشاهده</button>` : ''}
             </div>
+            ${isTicket ? `
+              <div class="notif-meta-row">
+                <span class="notif-pill notif-pill--admin" aria-label="اعلان مدیریت">از مدیریت سایت</span>
+                <button class="notif-reply-btn" type="button" aria-expanded="false">پاسخ</button>
+              </div>
+              <form class="notif-reply-form" hidden>
+                <label class="sr-only" for="reply-${n.id}">پاسخ به مدیریت</label>
+                <textarea id="reply-${n.id}" rows="2" placeholder="پاسخ خود را بنویسید..."></textarea>
+                <div class="notif-reply-actions">
+                  <button type="submit" class="notif-reply-submit">ارسال</button>
+                  <button type="button" class="notif-reply-cancel">انصراف</button>
+                </div>
+              </form>
+            ` : ''}
             <time class="notif-time">${n.time || ''}</time>
           </div>
           <button class="notif-delete" aria-label="حذف اعلان">×</button>
@@ -3694,6 +3732,47 @@ Notifications._escapeHtml = function(str = '') {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+};
+
+Notifications.toggleReplyForm = function(li) {
+  if (!li) return;
+  const form = li.querySelector('.notif-reply-form');
+  const toggleBtn = li.querySelector('.notif-reply-btn');
+  if (!form || !toggleBtn) return;
+
+  // close other open forms
+  this._els.list?.querySelectorAll('.notif-reply-form').forEach(f => {
+    if (f !== form) {
+      f.setAttribute('hidden', '');
+      const parentLi = f.closest('li');
+      parentLi?.querySelector('.notif-reply-btn')?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  const isHidden = form.hasAttribute('hidden');
+  if (isHidden) {
+    form.removeAttribute('hidden');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    form.querySelector('textarea')?.focus();
+  } else {
+    form.setAttribute('hidden', '');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  }
+};
+
+Notifications.submitReply = function(id, message, form) {
+  if (!id || !form) return;
+  const trimmed = (message || '').trim();
+  if (!trimmed) {
+    UIComponents.showToast('متن پاسخ را وارد کنید.', 'error');
+    return;
+  }
+
+  UIComponents.showToast('پاسخ شما ارسال شد.', 'success');
+  form.reset();
+  form.setAttribute('hidden', '');
+  form.closest('li')?.querySelector('.notif-reply-btn')?.setAttribute('aria-expanded', 'false');
+  this.markRead(id);
 };
 
 Notifications.showFullComment = function(text = '') {
