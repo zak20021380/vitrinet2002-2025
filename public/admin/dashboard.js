@@ -3299,16 +3299,16 @@ function renderSupportTickets(list = supportTickets) {
     const createdAt = formatDateTime(ticket.createdAt) || '';
     const shortMessage = (ticket.message || '').slice(0, 70);
     row.innerHTML = `
-      <td>
-        <div style="font-weight:700;">${escapeHtml(ticket.subject || 'بدون عنوان')}</div>
-        <div style="color:#6b7280;font-size:0.9rem;">${escapeHtml(shortMessage)}${ticket.message && ticket.message.length > 70 ? '…' : ''}</div>
+      <td data-label="موضوع">
+        <div class="ticket-cell-title">${escapeHtml(ticket.subject || 'بدون عنوان')}</div>
+        <div class="ticket-cell-preview">${escapeHtml(shortMessage)}${ticket.message && ticket.message.length > 70 ? '…' : ''}</div>
       </td>
-      <td>${escapeHtml(sellerLabel)}</td>
-      <td>${escapeHtml(ticket.category || 'عمومی')}</td>
-      <td><span class="ticket-status ${ticket.status || 'open'}">${getTicketStatusLabel(ticket.status)}</span></td>
-      <td>${createdAt}</td>
-      <td>
-        <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+      <td data-label="فروشنده">${escapeHtml(sellerLabel)}</td>
+      <td data-label="دسته">${escapeHtml(ticket.category || 'عمومی')}</td>
+      <td data-label="وضعیت"><span class="ticket-status ${ticket.status || 'open'}">${getTicketStatusLabel(ticket.status)}</span></td>
+      <td data-label="تاریخ">${createdAt}</td>
+      <td data-label="عملیات">
+        <div class="ticket-actions">
           <select data-ticket-status="${ticket._id}" class="ticket-status-select">
             <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>باز</option>
             <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>در حال بررسی</option>
