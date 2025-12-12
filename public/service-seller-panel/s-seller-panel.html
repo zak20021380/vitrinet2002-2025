@@ -131,7 +131,7 @@
       </div>
 
       <nav id="hamburger-menu" class="hamburger-menu" hidden aria-label="منوی اصلی">
-        <a class="hamburger-menu__item" href="#plans-view">ارتقا و تبلیغات</a>
+        <button type="button" class="hamburger-menu__item hamburger-menu__button" id="open-ads-modal-btn">ارتقا و تبلیغات</button>
         <a class="hamburger-menu__item" href="#bookings-view">مدیریت نوبت‌ها</a>
         <a class="hamburger-menu__item" href="#accounting-view">حسابداری</a>
         <a class="hamburger-menu__item" href="#install-app">نصب اپلیکیشن</a>
@@ -2007,6 +2007,61 @@
         <button type="button" class="bottom-sheet__close" aria-label="بستن پنجره" id="bottom-sheet-close">×</button>
       </header>
       <div class="bottom-sheet__content" id="bottom-sheet-content"></div>
+    </div>
+  </div>
+
+  <!-- Advertising Plans Modal -->
+  <div id="ads-modal" class="ads-modal" role="dialog" aria-modal="true" aria-labelledby="ads-modal-title" hidden>
+    <div class="ads-modal__backdrop" data-ads-close></div>
+    <div class="ads-modal__surface" role="document">
+      <button type="button" class="ads-modal__close" aria-label="بستن" data-ads-close>×</button>
+      
+      <header class="ads-modal__header">
+        <div class="ads-modal__icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <p class="ads-modal__eyebrow">ارتقا فروشگاه</p>
+          <h2 id="ads-modal-title" class="ads-modal__title">پلن‌های تبلیغاتی</h2>
+          <p class="ads-modal__subtitle">با تبلیغات هدفمند، مشتریان بیشتری جذب کنید</p>
+        </div>
+      </header>
+
+      <div class="ads-modal__state" id="ads-state">
+        <div class="ads-loading" id="ads-loading">
+          <span class="ads-spinner" aria-hidden="true"></span>
+          <strong>در حال بارگذاری پلن‌ها...</strong>
+        </div>
+        <div class="ads-error" id="ads-error" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+          <p>بارگذاری پلن‌ها با مشکل مواجه شد. لطفاً دوباره تلاش کنید.</p>
+          <button type="button" class="btn-secondary" id="ads-retry">تلاش مجدد</button>
+        </div>
+        <div class="ads-empty" id="ads-empty" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          <p>در حال حاضر پلن تبلیغاتی فعالی وجود ندارد.</p>
+        </div>
+      </div>
+
+      <div class="ads-modal__content" id="ads-content" hidden>
+        <div class="ads-grid" id="ads-grid" role="list"></div>
+      </div>
+
+      <footer class="ads-modal__footer">
+        <p class="ads-modal__trust">پشتیبانی ۲۴/۷ • بازگشت وجه در صورت عدم رضایت • گزارش عملکرد لحظه‌ای</p>
+      </footer>
     </div>
   </div>
 
