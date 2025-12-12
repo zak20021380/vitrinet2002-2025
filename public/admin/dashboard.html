@@ -77,6 +77,10 @@
           <i class="ri-chat-1-line"></i> پیام‌ها
           <span class="count" id="count-messages">0</span>
         </a>
+        <a href="#" data-section="tickets">
+          <i class="ri-customer-service-2-line"></i> تیکت‌ها
+          <span class="count" id="count-tickets">0</span>
+        </a>
 <a href="#" data-section="reports"><i class="ri-file-list-line"></i> گزارشات <span class="count" id="count-reports">0</span></a>
 
 
@@ -1313,6 +1317,34 @@
   </div>
 </div>
 
+<!-- ۱۱) تیکت‌ها -->
+<div class="section-panel" id="tickets-panel" style="display:none;">
+  <div class="content-header">تیکت‌های پشتیبانی <span class="header-count" id="header-tickets-count"></span></div>
+
+  <div class="messages-filters ticket-filters" style="display:flex;gap:0.7rem;margin-bottom:1.1rem;flex-wrap:wrap;">
+    <button class="ticket-filter-btn active" data-filter="all">همه</button>
+    <button class="ticket-filter-btn" data-filter="open">باز</button>
+    <button class="ticket-filter-btn" data-filter="in_progress">در حال بررسی</button>
+    <button class="ticket-filter-btn" data-filter="resolved">حل شده</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="ticketsTable">
+      <thead>
+        <tr>
+          <th>موضوع</th>
+          <th>فروشنده</th>
+          <th>دسته</th>
+          <th>وضعیت</th>
+          <th>تاریخ</th>
+          <th>عملیات</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
 
 
 <!-- پنل جدید برای گزارش‌ها -->
@@ -1350,6 +1382,31 @@
 <div id="ad-order-modal" class="ad-modal-overlay" style="display:none"></div>
 
 <div id="seller-modal-overlay" class="seller-modal-overlay" style="display:none"></div>
+
+<div id="ticket-modal-overlay" class="ticket-modal-overlay" hidden>
+  <div class="ticket-modal">
+    <button type="button" class="ticket-modal__close" aria-label="بستن" data-ticket-close>×</button>
+    <header class="ticket-modal__header">
+      <div>
+        <p class="ticket-modal__eyebrow">درخواست پشتیبانی فروشنده</p>
+        <h3 id="ticket-modal-title">جزئیات تیکت</h3>
+      </div>
+      <span class="ticket-modal__status" id="ticket-modal-status"></span>
+    </header>
+    <div class="ticket-modal__meta">
+      <div><strong>فروشنده:</strong> <span id="ticket-modal-seller">—</span></div>
+      <div><strong>دسته:</strong> <span id="ticket-modal-category">—</span></div>
+      <div><strong>شماره تماس:</strong> <span id="ticket-modal-phone">—</span></div>
+      <div><strong>لینک فروشگاه:</strong> <span id="ticket-modal-shopurl">—</span></div>
+      <div><strong>ایجاد:</strong> <span id="ticket-modal-created">—</span></div>
+      <div id="ticket-modal-note" class="ticket-modal__note"></div>
+    </div>
+    <div class="ticket-modal__body">
+      <h4>شرح مشکل</h4>
+      <p id="ticket-modal-message"></p>
+    </div>
+  </div>
+</div>
 
 
 
