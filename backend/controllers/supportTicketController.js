@@ -1,5 +1,6 @@
 const SupportTicket = require('../models/SupportTicket');
 const Seller = require('../models/Seller');
+const { createNotification } = require('./notificationController');
 
 function normalizeSellerName(seller) {
   if (!seller) return '';
@@ -87,5 +88,51 @@ exports.updateStatus = async (req, res) => {
   } catch (err) {
     console.error('updateStatus error:', err);
     res.status(500).json({ message: 'بروزرسانی وضعیت ممکن نیست.' });
+  }
+};
+
+exports.replyToTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message, status } = req.body || {};
+
+    if (!message || !String(message).trim()) {
+      return res.status(400).json({ message: 'متن پاسخ اجباری است.' });
+    }
+
+    const ticket = await SupportTicket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: 'تیکت پیدا نشد.' });
+    }
+
+    const replyEntry = {
+      message: String(message).trim(),
+      adminId: req.user?.id || null
+    };
+
+    if (!Array.isArray(ticket.adminReplies)) {
+      ticket.adminReplies = [];
+    }
+    ticket.adminReplies.push(replyEntry);
+
+    const normalizedStatus = status && ['open', 'in_progress', 'resolved'].includes(status)
+      ? status
+      : 'in_progress';
+
+    ticket.status = normalizedStatus;
+    ticket.lastUpdatedBy = req.user?.role || ticket.lastUpdatedBy;
+    await ticket.save();
+
+    if (ticket.sellerId) {
+      const summary = replyEntry.message.length > 120
+        ? `${replyEntry.message.slice(0, 120)}…`
+        : replyEntry.message;
+      await createNotification(ticket.sellerId, `پاسخ جدید برای تیکت «${ticket.subject}»: ${summary}`);
+    }
+
+    res.json({ ticket });
+  } catch (err) {
+    console.error('replyToTicket error:', err);
+    res.status(500).json({ message: 'ارسال پاسخ با خطا مواجه شد.' });
   }
 };

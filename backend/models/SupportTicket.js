@@ -24,6 +24,11 @@ const SupportTicketSchema = new mongoose.Schema({
     enum: ['normal', 'high'],
     default: 'normal'
   },
+  adminReplies: [{
+    message: { type: String, trim: true, required: true },
+    adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+    createdAt: { type: Date, default: Date.now }
+  }],
   adminNote: { type: String, trim: true },
   lastUpdatedBy: { type: String, trim: true }
 }, {

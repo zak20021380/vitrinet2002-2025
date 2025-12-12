@@ -1384,6 +1384,7 @@ let adModalOverlayHandler = null;
 let supportTickets = [];
 let supportTicketsLoaded = false;
 let ticketFilterMode = 'all';
+let ticketModalCurrentId = null;
 
 let sellerPerformanceMap = {};
 let sellerPerformanceLoaded = false;
@@ -3384,11 +3385,108 @@ async function updateTicketStatus(ticketId, status, selectEl) {
   }
 }
 
+function renderTicketReplies(ticket) {
+  const listEl = document.getElementById('ticket-replies-list');
+  if (!listEl) return;
+
+  listEl.innerHTML = '';
+
+  const items = [];
+  items.push({
+    author: ticket.sellerName || 'فروشنده خدماتی',
+    role: 'seller',
+    message: ticket.message || '',
+    createdAt: ticket.createdAt
+  });
+
+  (ticket.adminReplies || []).forEach(reply => {
+    items.push({
+      author: 'ادمین',
+      role: 'admin',
+      message: reply.message,
+      createdAt: reply.createdAt
+    });
+  });
+
+  if (!items.length) {
+    const empty = document.createElement('p');
+    empty.className = 'ticket-thread__empty';
+    empty.textContent = 'پاسخی ثبت نشده است.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  items
+    .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+    .forEach(entry => {
+      const item = document.createElement('div');
+      item.className = 'ticket-thread__item';
+      if (entry.role === 'seller') item.classList.add('ticket-thread__item--seller');
+
+      const meta = document.createElement('div');
+      meta.className = 'ticket-thread__meta';
+      const author = document.createElement('span');
+      author.className = 'ticket-thread__author';
+      author.textContent = entry.author;
+      const time = document.createElement('span');
+      time.textContent = formatDateTime(entry.createdAt) || '';
+      meta.append(author, time);
+
+      const body = document.createElement('p');
+      body.textContent = entry.message || '';
+
+      item.append(meta, body);
+      listEl.appendChild(item);
+    });
+}
+
+async function sendTicketReply(ticketId, message, status) {
+  if (!ticketId || !message) return;
+  const submitBtn = document.getElementById('ticket-reply-submit');
+  const textarea = document.getElementById('ticket-reply-text');
+  if (submitBtn) submitBtn.disabled = true;
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}/reply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, status })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'ارسال پاسخ انجام نشد');
+    }
+    const idx = supportTickets.findIndex(t => t._id === ticketId);
+    if (idx !== -1) {
+      supportTickets[idx] = data.ticket;
+    } else if (data.ticket) {
+      supportTickets.push(data.ticket);
+    }
+    renderSupportTickets();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    openTicketModal(ticketId);
+    if (textarea) textarea.value = '';
+    UIComponents.showToast('پاسخ ثبت شد و برای فروشنده ارسال گردید.', 'success');
+  } catch (err) {
+    console.error('sendTicketReply error:', err);
+    alert(err.message || 'ارسال پاسخ انجام نشد');
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
 function openTicketModal(ticketId) {
   const modal = document.getElementById('ticket-modal-overlay');
   if (!modal) return;
   const ticket = supportTickets.find(t => t._id === ticketId);
   if (!ticket) return;
+
+  ticketModalCurrentId = ticketId;
+  const replyForm = document.getElementById('ticket-reply-form');
+  if (replyForm) replyForm.dataset.ticketId = ticketId;
+  const replyStatus = document.getElementById('ticket-reply-status');
+  if (replyStatus) replyStatus.value = ticket.status || 'open';
 
   document.getElementById('ticket-modal-title').textContent = ticket.subject || 'تیکت پشتیبانی';
   document.getElementById('ticket-modal-status').textContent = getTicketStatusLabel(ticket.status);
@@ -3401,6 +3499,7 @@ function openTicketModal(ticketId) {
   document.getElementById('ticket-modal-message').textContent = ticket.message || '';
   const noteEl = document.getElementById('ticket-modal-note');
   noteEl.textContent = ticket.adminNote ? `یادداشت ادمین: ${ticket.adminNote}` : '';
+  renderTicketReplies(ticket);
 
   modal.hidden = false;
 }
@@ -3408,6 +3507,7 @@ function openTicketModal(ticketId) {
 function closeTicketModal() {
   const modal = document.getElementById('ticket-modal-overlay');
   if (modal) modal.hidden = true;
+  ticketModalCurrentId = null;
 }
 
 document.querySelectorAll('[data-ticket-close]').forEach(btn => {
@@ -3421,6 +3521,19 @@ document.querySelectorAll('.ticket-filter-btn').forEach(btn => {
     ticketFilterMode = btn.getAttribute('data-filter') || 'all';
     renderSupportTickets();
   });
+});
+
+const ticketReplyForm = document.getElementById('ticket-reply-form');
+ticketReplyForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const message = (document.getElementById('ticket-reply-text')?.value || '').trim();
+  const status = document.getElementById('ticket-reply-status')?.value;
+  const ticketId = ticketReplyForm.dataset.ticketId || ticketModalCurrentId;
+  if (!message) {
+    alert('متن پاسخ را بنویسید');
+    return;
+  }
+  sendTicketReply(ticketId, message, status);
 });
 
 
