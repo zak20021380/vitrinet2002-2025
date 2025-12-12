@@ -3467,7 +3467,11 @@ async function sendTicketReply(ticketId, message, status) {
     updateHeaderCounts();
     openTicketModal(ticketId);
     if (textarea) textarea.value = '';
-    UIComponents.showToast('پاسخ ثبت شد و برای فروشنده ارسال گردید.', 'success');
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('پاسخ ثبت شد و برای فروشنده ارسال گردید.', 'success');
+    } else {
+      alert('پاسخ ثبت شد و برای فروشنده ارسال گردید.');
+    }
   } catch (err) {
     console.error('sendTicketReply error:', err);
     alert(err.message || 'ارسال پاسخ انجام نشد');
