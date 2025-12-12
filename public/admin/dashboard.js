@@ -3399,6 +3399,15 @@ function renderTicketReplies(ticket) {
     createdAt: ticket.createdAt
   });
 
+  (ticket.sellerReplies || []).forEach((reply) => {
+    items.push({
+      author: ticket.sellerName || 'فروشنده خدماتی',
+      role: 'seller',
+      message: reply.message,
+      createdAt: reply.createdAt
+    });
+  });
+
   (ticket.adminReplies || []).forEach(reply => {
     items.push({
       author: 'ادمین',

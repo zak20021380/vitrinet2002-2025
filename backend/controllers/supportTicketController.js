@@ -127,7 +127,10 @@ exports.replyToTicket = async (req, res) => {
       const summary = replyEntry.message.length > 120
         ? `${replyEntry.message.slice(0, 120)}…`
         : replyEntry.message;
-      await createNotification(ticket.sellerId, `پاسخ جدید برای تیکت «${ticket.subject}»: ${summary}`);
+      await createNotification(ticket.sellerId, `پاسخ جدید برای تیکت «${ticket.subject}»: ${summary}`, {
+        relatedTicketId: ticket._id,
+        type: 'support_ticket'
+      });
     }
 
     res.json({ ticket });

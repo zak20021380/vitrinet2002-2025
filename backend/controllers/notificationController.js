@@ -1,4 +1,5 @@
 const Notification = require('../models/notification');
+const SupportTicket = require('../models/SupportTicket');
 
 // لیست اعلان‌های کاربر
 exports.list = async (req, res) => {
@@ -70,6 +71,23 @@ exports.reply = async (req, res) => {
     notif.userReplies.push(replyEntry);
     await notif.save();
 
+    if (notif.relatedTicketId) {
+      const ticket = await SupportTicket.findById(notif.relatedTicketId);
+      if (ticket) {
+        if (!Array.isArray(ticket.sellerReplies)) {
+          ticket.sellerReplies = [];
+        }
+        ticket.sellerReplies.push({
+          message: replyEntry.message,
+          sellerId: req.user?.id || null,
+          createdAt: replyEntry.createdAt
+        });
+        ticket.lastUpdatedBy = req.user?.role || ticket.lastUpdatedBy;
+        ticket.status = 'in_progress';
+        await ticket.save();
+      }
+    }
+
     res.status(201).json({
       notification: notif,
       reply: replyEntry
@@ -81,9 +99,13 @@ exports.reply = async (req, res) => {
 };
 
 // متد کمکی برای ایجاد اعلان
-exports.createNotification = async (userId, message) => {
+exports.createNotification = async (userId, message, options = {}) => {
   try {
-    await Notification.create({ userId, message });
+    const payload = { userId, message };
+    ['title', 'type', 'relatedTicketId'].forEach((key) => {
+      if (options[key]) payload[key] = options[key];
+    });
+    await Notification.create(payload);
   } catch (err) {
     console.error('Failed to create notification', err);
   }
