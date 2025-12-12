@@ -9,5 +9,7 @@ router.get('/', auth(), ctrl.list);
 router.put('/:id/read', auth(), ctrl.markAsRead);
 // حذف اعلان
 router.delete('/:id', auth(), ctrl.remove);
+// پاسخ به اعلان (مثلاً تیکت)
+router.post('/:id/reply', auth('seller'), ctrl.reply);
 
 module.exports = router;
