@@ -2022,6 +2022,17 @@
       </button>
       
       <header class="ads-modal__header">
+        <!-- Wallet Balance Display -->
+        <div class="ads-wallet-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="3"/>
+            <path d="M16 12h4"/>
+            <circle cx="14" cy="12" r="2"/>
+          </svg>
+          <span class="ads-wallet-badge__label">موجودی کی٤ پول:</span>
+          <span class="ads-wallet-badge__amount" id="ads-wallet-balance">۳٬۵۰۰٬۰۰۰ تومان</span>
+        </div>
+        
         <h2 id="ads-modal-title" class="ads-modal__title">پلن‌های تبلیغاتی</h2>
         <p class="ads-modal__subtitle">فروشگاه خود را به هزاران مشتری جدید معرفی کنید</p>
         <div class="ads-modal__stats">
@@ -2078,7 +2089,7 @@
                 <span>نمایش در صفحه اصلی</span>
               </li>
             </ul>
-            <button type="button" class="ads-plan-card__btn" data-ad-slug="ad_products">انتخاب پلن</button>
+            <button type="button" class="ads-plan-card__btn" data-ad-slug="ad_products" data-ad-title="تبلیغ پایه" data-ad-price="49000" data-ad-duration="روزانه">انتخاب پلن</button>
           </article>
 
           <!-- Plan 2: Pro (Popular) -->
@@ -2122,7 +2133,7 @@
                 <span>پشتیبانی اختصاصی</span>
               </li>
             </ul>
-            <button type="button" class="ads-plan-card__btn ads-plan-card__btn--primary" data-ad-slug="ad_home">انتخاب پلن</button>
+            <button type="button" class="ads-plan-card__btn ads-plan-card__btn--primary" data-ad-slug="ad_home" data-ad-title="تبلیغ حرفه‌ای" data-ad-price="99000" data-ad-duration="روزانه">انتخاب پلن</button>
           </article>
 
           <!-- Plan 3: Premium -->
@@ -2165,7 +2176,7 @@
                 <span>مدیر حساب اختصاصی</span>
               </li>
             </ul>
-            <button type="button" class="ads-plan-card__btn ads-plan-card__btn--premium" data-ad-slug="ad_search">انتخاب پلن</button>
+            <button type="button" class="ads-plan-card__btn ads-plan-card__btn--premium" data-ad-slug="ad_search" data-ad-title="تبلیغ ویژه" data-ad-price="189000" data-ad-duration="روزانه">انتخاب پلن</button>
           </article>
 
         </div>
@@ -2187,6 +2198,90 @@
           </div>
         </div>
       </footer>
+    </div>
+  </div>
+
+  <!-- Checkout/Confirmation Modal -->
+  <div id="ads-checkout-modal" class="ads-checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title" hidden>
+    <div class="ads-checkout-modal__backdrop" data-checkout-close></div>
+    <div class="ads-checkout-modal__surface" role="document">
+      <button type="button" class="ads-checkout-modal__close" aria-label="بستن" data-checkout-close>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="ads-checkout-header">
+        <div class="ads-checkout-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <h3 id="checkout-modal-title" class="ads-checkout-title">تأیید خرید</h3>
+        <p class="ads-checkout-subtitle">لطفاً جزئیات سفارش را بررسی کنید</p>
+      </div>
+
+      <div class="ads-checkout-body">
+        <div class="ads-checkout-plan">
+          <div class="ads-checkout-plan__label">پلن انتخابی</div>
+          <div class="ads-checkout-plan__title" id="checkout-plan-title">تبلیغ حرفه‌ای</div>
+        </div>
+
+        <div class="ads-checkout-breakdown">
+          <div class="ads-checkout-row">
+            <span class="ads-checkout-row__label">قیمت روزانه</span>
+            <span class="ads-checkout-row__value" id="checkout-daily-price">۹۹,۰۰۰ تومان</span>
+          </div>
+          <div class="ads-checkout-row">
+            <span class="ads-checkout-row__label">مدت زمان</span>
+            <span class="ads-checkout-row__value" id="checkout-duration">۱ روز</span>
+          </div>
+          <div class="ads-checkout-row ads-checkout-row--total">
+            <span class="ads-checkout-row__label">جمع کل</span>
+            <span class="ads-checkout-row__value" id="checkout-total">۹۹,۰۰۰ تومان</span>
+          </div>
+        </div>
+
+        <div class="ads-checkout-wallet">
+          <div class="ads-checkout-wallet__header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="3"/>
+              <circle cx="14" cy="12" r="2"/>
+            </svg>
+            <span>پرداخت از کیف پول</span>
+          </div>
+          <div class="ads-checkout-wallet__balance">
+            <span class="ads-checkout-wallet__label">موجودی فعلی:</span>
+            <span class="ads-checkout-wallet__amount" id="checkout-wallet-balance">۳٬۵۰۰٬۰۰۰ تومان</span>
+          </div>
+          <div class="ads-checkout-wallet__remaining" id="checkout-remaining">
+            <span class="ads-checkout-wallet__label">موجودی پس از خرید:</span>
+            <span class="ads-checkout-wallet__amount">۳٬۴۰۱٬۰۰۰ تومان</span>
+          </div>
+        </div>
+
+        <div class="ads-checkout-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          <span>تبلیغ پس از تأیید توسط تیم ما، در کمتر از ۲۴ ساعت فعال خواهد شد</span>
+        </div>
+      </div>
+
+      <div class="ads-checkout-footer">
+        <button type="button" class="ads-checkout-btn ads-checkout-btn--cancel" data-checkout-close>انصراف</button>
+        <button type="button" class="ads-checkout-btn ads-checkout-btn--confirm" id="ads-checkout-confirm">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>تأیید و پرداخت</span>
+        </button>
+      </div>
     </div>
   </div>
 

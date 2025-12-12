@@ -8843,75 +8843,185 @@ function cleanScheduleData() {
 window.customersData = window.customersData || [];
 
 /* =========================================
-   Advertising Plans Modal - Simplified
+   Advertising Plans Modal & Checkout
    ========================================= */
 (function initAdsModal() {
   const modal = document.getElementById('ads-modal');
+  const checkoutModal = document.getElementById('ads-checkout-modal');
   const openBtn = document.getElementById('open-ads-modal-btn');
   const notificationFab = document.querySelector('.notification-fab');
 
-  if (!modal || !openBtn) return;
+  if (!modal || !checkoutModal || !openBtn) return;
 
-  // Handle ad plan selection
-  const handleSelectAdPlan = (slug) => {
-    closeModal();
+  // Get wallet balance from dashboard (synced with main wallet card)
+  const getWalletBalance = () => {
+    const walletEl = document.getElementById('wallet-balance');
+    if (!walletEl) return 3500000; // Default value
+    
+    // Extract numeric value from Persian text like "۳٬۵۰۰٬۰۰۰ تومان"
+    const text = walletEl.textContent.trim();
+    const numericText = text.replace(/[^۰-۹0-9]/g, '');
+    
+    // Convert Persian digits to English
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    const englishDigits = '0123456789';
+    let englishNumeric = '';
+    for (let char of numericText) {
+      const index = persianDigits.indexOf(char);
+      englishNumeric += index !== -1 ? englishDigits[index] : char;
+    }
+    
+    return parseInt(englishNumeric, 10) || 3500000;
+  };
+
+  // Format number to Persian with comma separator
+  const formatPersianNumber = (num) => {
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formatted.split('').map(char => {
+      if (char >= '0' && char <= '9') {
+        return persianDigits[parseInt(char)];
+      }
+      return char;
+    }).join('');
+  };
+
+  // Update wallet balance displays
+  const updateWalletDisplays = () => {
+    const balance = getWalletBalance();
+    const formattedBalance = formatPersianNumber(balance) + ' تومان';
+    
+    // Update in ads modal
+    const adsWalletEl = document.getElementById('ads-wallet-balance');
+    if (adsWalletEl) {
+      adsWalletEl.textContent = formattedBalance;
+    }
+    
+    // Update in checkout modal
+    const checkoutWalletEl = document.getElementById('checkout-wallet-balance');
+    if (checkoutWalletEl) {
+      checkoutWalletEl.textContent = formattedBalance;
+    }
+  };
+
+  // Handle ad plan selection - open checkout modal
+  const handleSelectAdPlan = (planData) => {
+    const { title, price, duration } = planData;
+    const balance = getWalletBalance();
+    const priceNum = parseInt(price, 10);
+    
+    // Update checkout modal content
+    document.getElementById('checkout-plan-title').textContent = title;
+    document.getElementById('checkout-daily-price').textContent = formatPersianNumber(priceNum) + ' تومان';
+    document.getElementById('checkout-duration').textContent = '۱ روز'; // Default 1 day
+    document.getElementById('checkout-total').textContent = formatPersianNumber(priceNum) + ' تومان';
+    
+    // Calculate remaining balance
+    const remainingBalance = balance - priceNum;
+    const remainingEl = document.getElementById('checkout-remaining');
+    const remainingAmountEl = remainingEl?.querySelector('.ads-checkout-wallet__amount');
+    
+    if (remainingAmountEl) {
+      if (remainingBalance < 0) {
+        remainingAmountEl.textContent = 'موجودی ناکافی';
+        remainingAmountEl.style.color = '#ef4444';
+      } else {
+        remainingAmountEl.textContent = formatPersianNumber(remainingBalance) + ' تومان';
+        remainingAmountEl.style.color = '';
+      }
+    }
+    
+    // Close ads modal and open checkout modal
+    modal.hidden = true;
+    checkoutModal.hidden = false;
+    
+    // Store plan data for confirmation
+    checkoutModal.dataset.planSlug = planData.slug;
+    checkoutModal.dataset.planPrice = price;
+  };
+
+  // Handle checkout confirmation
+  const handleCheckoutConfirm = () => {
+    const balance = getWalletBalance();
+    const price = parseInt(checkoutModal.dataset.planPrice, 10);
+    const slug = checkoutModal.dataset.planSlug;
+    
+    if (balance < price) {
+      showToast('موجودی کیف پول شما کافی نیست', 'error');
+      return;
+    }
+    
+    // Close checkout modal
+    closeCheckoutModal();
     
     // Check if openAdModal exists (from dashboard-upgrade.js)
     if (typeof window.openAdModal === 'function') {
       window.openAdModal(slug);
     } else {
-      // Show a nice toast or fallback message
-      const toast = document.createElement('div');
-      toast.className = 'ads-toast';
-      toast.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-        <span>درخواست شما ثبت شد. پشتیبانی به زودی با شما تماس خواهد گرفت.</span>
-      `;
-      document.body.appendChild(toast);
-      
-      // Add styles dynamically if not exists
-      if (!document.getElementById('ads-toast-styles')) {
-        const style = document.createElement('style');
-        style.id = 'ads-toast-styles';
-        style.textContent = `
-          .ads-toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
-            z-index: 9999;
-            opacity: 0;
-            animation: toastIn 0.4s ease forwards, toastOut 0.4s ease 3s forwards;
-          }
-          @keyframes toastIn {
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-          }
-          @keyframes toastOut {
-            to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-      
-      setTimeout(() => toast.remove(), 3500);
+      // Show success toast
+      showToast('درخواست شما با موفقیت ثبت شد. پشتیبانی به زودی با شما تماس خواهد گرفت.', 'success');
     }
   };
 
-  // Open modal
+  // Show toast notification
+  const showToast = (message, type = 'success') => {
+    const toast = document.createElement('div');
+    toast.className = 'ads-toast ads-toast--' + type;
+    
+    const icon = type === 'success' 
+      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+      : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    
+    toast.innerHTML = `${icon}<span>${message}</span>`;
+    document.body.appendChild(toast);
+    
+    // Add styles dynamically if not exists
+    if (!document.getElementById('ads-toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'ads-toast-styles';
+      style.textContent = `
+        .ads-toast {
+          position: fixed;
+          bottom: 100px;
+          left: 50%;
+          transform: translateX(-50%) translateY(20px);
+          color: white;
+          padding: 14px 24px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          z-index: 99999;
+          opacity: 0;
+          animation: toastIn 0.4s ease forwards, toastOut 0.4s ease 3s forwards;
+          max-width: 90vw;
+        }
+        .ads-toast--success {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+        }
+        .ads-toast--error {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
+        }
+        @keyframes toastIn {
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastOut {
+          to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    setTimeout(() => toast.remove(), 3500);
+  };
+
+  // Open ads modal
   const openModal = () => {
+    updateWalletDisplays();
     modal.hidden = false;
     document.body.classList.add('no-scroll');
     
@@ -8923,7 +9033,7 @@ window.customersData = window.customersData || [];
     }
   };
 
-  // Close modal
+  // Close ads modal
   const closeModal = () => {
     modal.hidden = true;
     document.body.classList.remove('no-scroll');
@@ -8936,29 +9046,62 @@ window.customersData = window.customersData || [];
     }
   };
 
-  // Event listeners
+  // Close checkout modal
+  const closeCheckoutModal = () => {
+    checkoutModal.hidden = true;
+    document.body.classList.remove('no-scroll');
+    
+    // Show notification FAB
+    if (notificationFab) {
+      notificationFab.style.opacity = '';
+      notificationFab.style.pointerEvents = '';
+      notificationFab.style.transform = '';
+    }
+  };
+
+  // Event listeners - Open ads modal
   openBtn.addEventListener('click', (e) => {
     e.preventDefault();
     openModal();
   });
   
-  // Close on backdrop click or close button
+  // Close ads modal
   modal.querySelectorAll('[data-ads-close]').forEach(el => {
     el.addEventListener('click', closeModal);
   });
 
+  // Close checkout modal
+  checkoutModal.querySelectorAll('[data-checkout-close]').forEach(el => {
+    el.addEventListener('click', closeCheckoutModal);
+  });
+
+  // Checkout confirm button
+  const confirmBtn = document.getElementById('ads-checkout-confirm');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', handleCheckoutConfirm);
+  }
+
   // Close on Escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.hidden) {
-      closeModal();
+    if (e.key === 'Escape') {
+      if (!checkoutModal.hidden) {
+        closeCheckoutModal();
+      } else if (!modal.hidden) {
+        closeModal();
+      }
     }
   });
 
   // Add click handlers to plan buttons
   modal.querySelectorAll('.ads-plan-card__btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const slug = btn.dataset.adSlug;
-      handleSelectAdPlan(slug);
+      const planData = {
+        slug: btn.dataset.adSlug,
+        title: btn.dataset.adTitle,
+        price: btn.dataset.adPrice,
+        duration: btn.dataset.adDuration
+      };
+      handleSelectAdPlan(planData);
     });
   });
 
