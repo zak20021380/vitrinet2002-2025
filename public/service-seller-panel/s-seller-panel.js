@@ -2795,6 +2795,18 @@ async deletePortfolioItem(id) {
     });
     if (!r.ok) throw new Error('DELETE_NOTIFICATION_FAILED');
     return true;
+  },
+
+  async sendNotificationReply(id, message) {
+    const r = await fetch(`${API_BASE}/api/notifications/${id}/reply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    if (!r.ok) throw new Error('SEND_NOTIFICATION_REPLY_FAILED');
+    const data = await this._json(r);
+    return data?.reply || { message, createdAt: new Date().toISOString() };
   }
 
 
@@ -3504,7 +3516,15 @@ const Notifications = {
   async fetchFromServer() {
     try {
       const items = await API.getNotifications();
-      this.save(items);
+      const existing = this.load();
+      const merged = items.map((item) => {
+        const prev = existing.find((p) => (p.id === item.id || p._id === item.id));
+        if (prev?.userReplies?.length) {
+          return { ...item, userReplies: prev.userReplies };
+        }
+        return item;
+      });
+      this.save(merged);
     } catch (err) {
       console.error('Failed to load notifications', err);
     }
@@ -3575,13 +3595,13 @@ const Notifications = {
       }
     });
 
-    this._els.list?.addEventListener('submit', (e) => {
+    this._els.list?.addEventListener('submit', async (e) => {
       const form = e.target.closest('.notif-reply-form');
       if (!form) return;
       e.preventDefault();
       const li = form.closest('li[data-id]');
       const message = form.querySelector('textarea')?.value || '';
-      this.submitReply(li?.dataset?.id, message, form);
+      await this.submitReply(li?.dataset?.id, message, form);
     });
   },
 
@@ -3672,6 +3692,22 @@ const Notifications = {
       const safeFull = this._escapeHtml(fullBody);
       const isTicket = (n.type || '').toLowerCase() === 'ticket';
       const titleText = n.title || (isTicket ? 'پیام پشتیبانی' : '');
+      const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
+      const replyThread = replies.length ? `
+        <div class="notif-reply-thread" aria-label="پاسخ‌های شما">
+          ${replies.map((reply, idx) => `
+            <div class="notif-reply-thread__item">
+              <div class="notif-reply-thread__meta">
+                <span class="notif-reply-thread__badge">پاسخ شما</span>
+                <span>در ${reply.time || 'تیکت'}</span>
+                <span aria-hidden="true">•</span>
+                <span>#${idx + 1}</span>
+              </div>
+              <div>${this._escapeHtml(reply.message || reply.text || '')}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
 
       return `
       <li class="notification-item ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem" tabindex="0">
@@ -3689,9 +3725,10 @@ const Notifications = {
                 <span class="notif-pill notif-pill--admin" aria-label="اعلان مدیریت">از مدیریت سایت</span>
                 <button class="notif-reply-btn" type="button" aria-expanded="false">پاسخ</button>
               </div>
+              ${replyThread}
               <form class="notif-reply-form" hidden>
                 <label class="sr-only" for="reply-${n.id}">پاسخ به مدیریت</label>
-                <textarea id="reply-${n.id}" rows="2" placeholder="پاسخ خود را بنویسید..."></textarea>
+                <textarea id="reply-${n.id}" rows="4" placeholder="پاسخ خود را با جزئیات بنویسید"></textarea>
                 <div class="notif-reply-actions">
                   <button type="submit" class="notif-reply-submit">ارسال</button>
                   <button type="button" class="notif-reply-cancel">انصراف</button>
@@ -3760,7 +3797,7 @@ Notifications.toggleReplyForm = function(li) {
   }
 };
 
-Notifications.submitReply = function(id, message, form) {
+Notifications.submitReply = async function(id, message, form) {
   if (!id || !form) return;
   const trimmed = (message || '').trim();
   if (!trimmed) {
@@ -3768,11 +3805,33 @@ Notifications.submitReply = function(id, message, form) {
     return;
   }
 
+  try {
+    await API.sendNotificationReply(id, trimmed);
+    await API.markNotificationRead(id);
+  } catch (error) {
+    console.error('notif reply failed', error);
+    UIComponents.showToast('ارسال پاسخ با خطا مواجه شد. لطفاً دوباره امتحان کنید.', 'error');
+    return;
+  }
+
+  const nowLabel = new Date().toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+  const items = this.load().map((n) => {
+    if (n.id !== id) return n;
+    const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
+    return {
+      ...n,
+      read: true,
+      userReplies: [...replies, { message: trimmed, time: nowLabel }]
+    };
+  });
+
+  this.save(items);
+  this.render();
+
   UIComponents.showToast('پاسخ شما ارسال شد.', 'success');
   form.reset();
   form.setAttribute('hidden', '');
   form.closest('li')?.querySelector('.notif-reply-btn')?.setAttribute('aria-expanded', 'false');
-  this.markRead(id);
 };
 
 Notifications.showFullComment = function(text = '') {
