@@ -9109,3 +9109,115 @@ window.customersData = window.customersData || [];
   window.openAdsModal = openModal;
   window.closeAdsModal = closeModal;
 })();
+
+/* =========================================
+   Notification FAB Hide on Rank Card Visibility
+   Hide FAB when user scrolls to rank card section on mobile
+   ========================================= */
+(function initRankCardFabVisibility() {
+  const rankCard = document.getElementById('rank-card');
+  const notificationFab = document.querySelector('.notification-fab');
+  const dashboardView = document.getElementById('dashboard-view');
+
+  if (!rankCard || !notificationFab) return;
+
+  // Only apply on mobile/tablet screens
+  const isMobileViewport = () => window.innerWidth <= 768;
+
+  // Check if dashboard is the active view
+  const isDashboardActive = () => {
+    if (!dashboardView) return true;
+    return !dashboardView.hidden && dashboardView.offsetParent !== null;
+  };
+
+  let fabHiddenByRankCard = false;
+
+  // Create intersection observer
+  const observerOptions = {
+    root: null, // viewport
+    rootMargin: '-10% 0px -20% 0px', // Trigger when card is in center of viewport
+    threshold: [0.3, 0.6] // Trigger at different visibility levels
+  };
+
+  const handleIntersection = (entries) => {
+    if (!isMobileViewport()) {
+      // On larger screens, always show FAB
+      if (fabHiddenByRankCard) {
+        notificationFab.classList.remove('is-hidden-by-rank');
+        fabHiddenByRankCard = false;
+      }
+      return;
+    }
+
+    if (!isDashboardActive()) {
+      // If not on dashboard, show FAB
+      if (fabHiddenByRankCard) {
+        notificationFab.classList.remove('is-hidden-by-rank');
+        fabHiddenByRankCard = false;
+      }
+      return;
+    }
+
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+        // Rank card is visible - hide FAB
+        if (!fabHiddenByRankCard) {
+          notificationFab.classList.add('is-hidden-by-rank');
+          fabHiddenByRankCard = true;
+        }
+      } else {
+        // Rank card is not visible - show FAB
+        if (fabHiddenByRankCard) {
+          notificationFab.classList.remove('is-hidden-by-rank');
+          fabHiddenByRankCard = false;
+        }
+      }
+    });
+  };
+
+  const observer = new IntersectionObserver(handleIntersection, observerOptions);
+  observer.observe(rankCard);
+
+  // Also listen for navigation/page changes
+  const handlePageChange = () => {
+    if (!isDashboardActive() && fabHiddenByRankCard) {
+      notificationFab.classList.remove('is-hidden-by-rank');
+      fabHiddenByRankCard = false;
+    }
+  };
+
+  // Listen for hash changes (page navigation)
+  window.addEventListener('hashchange', handlePageChange);
+
+  // Listen for popstate (back/forward navigation)
+  window.addEventListener('popstate', handlePageChange);
+
+  // Re-check on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!isMobileViewport() && fabHiddenByRankCard) {
+        notificationFab.classList.remove('is-hidden-by-rank');
+        fabHiddenByRankCard = false;
+      }
+    }, 150);
+  });
+
+  // MutationObserver to watch for view changes (class or hidden attribute changes)
+  const viewObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes') {
+        handlePageChange();
+        break;
+      }
+    }
+  });
+
+  if (dashboardView) {
+    viewObserver.observe(dashboardView, {
+      attributes: true,
+      attributeFilter: ['hidden', 'class', 'aria-hidden']
+    });
+  }
+})();
