@@ -24,6 +24,11 @@ const SupportTicketSchema = new mongoose.Schema({
     enum: ['normal', 'high'],
     default: 'normal'
   },
+  sellerReplies: [{
+    message: { type: String, trim: true, required: true },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller' },
+    createdAt: { type: Date, default: Date.now }
+  }],
   adminReplies: [{
     message: { type: String, trim: true, required: true },
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
