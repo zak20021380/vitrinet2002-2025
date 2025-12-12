@@ -8843,172 +8843,70 @@ function cleanScheduleData() {
 window.customersData = window.customersData || [];
 
 /* =========================================
-   Advertising Plans Modal
+   Advertising Plans Modal - Simplified
    ========================================= */
 (function initAdsModal() {
   const modal = document.getElementById('ads-modal');
   const openBtn = document.getElementById('open-ads-modal-btn');
-  const adsState = document.getElementById('ads-state');
-  const adsLoading = document.getElementById('ads-loading');
-  const adsError = document.getElementById('ads-error');
-  const adsEmpty = document.getElementById('ads-empty');
-  const adsContent = document.getElementById('ads-content');
-  const adsGrid = document.getElementById('ads-grid');
-  const retryBtn = document.getElementById('ads-retry');
+  const notificationFab = document.querySelector('.notification-fab');
 
   if (!modal || !openBtn) return;
 
-  // Format price in Persian
-  const formatPrice = (price) => {
-    if (!price) return '—';
-    return Number(price).toLocaleString('fa-IR');
-  };
-
-  // Show different states
-  const showState = (state) => {
-    adsLoading.hidden = state !== 'loading';
-    adsError.hidden = state !== 'error';
-    adsEmpty.hidden = state !== 'empty';
-    adsContent.hidden = state !== 'content';
-  };
-
-  // Get seller phone from session or cookie
-  const getSellerPhone = async () => {
-    try {
-      const res = await fetch('/api/serviceShops/me', { credentials: 'include' });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data?.shop?.phone || data?.shop?.sellerPhone || null;
-    } catch (err) {
-      console.error('Failed to get seller phone:', err);
-      return null;
-    }
-  };
-
-  // Fetch advertising plans
-  const loadAdPlans = async () => {
-    showState('loading');
-
-    try {
-      const sellerPhone = await getSellerPhone();
-      let url = '/api/adPlans';
-      if (sellerPhone) {
-        url += `?sellerPhone=${encodeURIComponent(sellerPhone)}`;
-      }
-
-      const res = await fetch(url, { credentials: 'include' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data = await res.json();
-      const plans = data?.adplans || {};
-
-      // Define plan metadata
-      const plansMeta = [
-        {
-          slug: 'ad_search',
-          title: 'تبلیغ در جستجو',
-          description: 'محصولات شما در نتایج جستجو برجسته نمایش داده می‌شوند',
-          features: [
-            'نمایش در بالای نتایج جستجو',
-            'افزایش 3 برابری بازدید',
-            'هدف‌گذاری کاربران فعال',
-            'گزارش عملکرد لحظه‌ای'
-          ],
-          badge: 'محبوب'
-        },
-        {
-          slug: 'ad_home',
-          title: 'تبلیغ صفحه اصلی',
-          description: 'فروشگاه شما در صفحه اول نمایش داده می‌شود',
-          features: [
-            'نمایش در صفحه اول سایت',
-            'بیشترین نرخ کلیک',
-            'دسترسی به کاربران جدید',
-            'افزایش اعتبار برند'
-          ],
-          badge: 'ویژه'
-        },
-        {
-          slug: 'ad_products',
-          title: 'تبلیغ لیست محصولات',
-          description: 'محصولات شما در لیست محصولات برجسته می‌شوند',
-          features: [
-            'نمایش در لیست محصولات',
-            'افزایش فروش مستقیم',
-            'هدف‌گذاری دقیق',
-            'آمار تبدیل بالا'
-          ],
-          badge: 'پیشنهاد'
-        }
-      ];
-
-      // Filter plans that have a price
-      const availablePlans = plansMeta.filter(meta => plans[meta.slug] != null && plans[meta.slug] > 0);
-
-      if (availablePlans.length === 0) {
-        showState('empty');
-        return;
-      }
-
-      // Render plans
-      adsGrid.innerHTML = availablePlans.map(meta => {
-        const price = plans[meta.slug];
-        return `
-          <article class="ads-plan-card" role="listitem">
-            <div class="ads-plan-card__header">
-              <h3 class="ads-plan-card__title">${meta.title}</h3>
-              <span class="ads-plan-card__badge">${meta.badge}</span>
-            </div>
-            <div class="ads-plan-card__price">
-              <span class="ads-plan-card__amount">${formatPrice(price)}</span>
-              <span class="ads-plan-card__unit">تومان</span>
-            </div>
-            <p style="font-size: 0.875rem; color: var(--c-text-secondary); margin: 0;">${meta.description}</p>
-            <ul class="ads-plan-card__features">
-              ${meta.features.map(f => `
-                <li class="ads-plan-card__feature">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>${f}</span>
-                </li>
-              `).join('')}
-            </ul>
-            <div class="ads-plan-card__cta">
-              <button type="button" class="ads-plan-card__btn" data-ad-slug="${meta.slug}">
-                انتخاب و ثبت تبلیغ
-              </button>
-            </div>
-          </article>
-        `;
-      }).join('');
-
-      // Add event listeners to buttons
-      adsGrid.querySelectorAll('.ads-plan-card__btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const slug = btn.dataset.adSlug;
-          handleSelectAdPlan(slug);
-        });
-      });
-
-      showState('content');
-    } catch (err) {
-      console.error('Failed to load ad plans:', err);
-      showState('error');
-    }
-  };
-
   // Handle ad plan selection
   const handleSelectAdPlan = (slug) => {
-    // Close the modal
     closeModal();
     
     // Check if openAdModal exists (from dashboard-upgrade.js)
     if (typeof window.openAdModal === 'function') {
       window.openAdModal(slug);
     } else {
-      // Fallback: show alert if the function doesn't exist
-      alert('برای ثبت تبلیغ، لطفاً با پشتیبانی تماس بگیرید.');
+      // Show a nice toast or fallback message
+      const toast = document.createElement('div');
+      toast.className = 'ads-toast';
+      toast.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>درخواست شما ثبت شد. پشتیبانی به زودی با شما تماس خواهد گرفت.</span>
+      `;
+      document.body.appendChild(toast);
+      
+      // Add styles dynamically if not exists
+      if (!document.getElementById('ads-toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'ads-toast-styles';
+        style.textContent = `
+          .ads-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+            z-index: 9999;
+            opacity: 0;
+            animation: toastIn 0.4s ease forwards, toastOut 0.4s ease 3s forwards;
+          }
+          @keyframes toastIn {
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+          }
+          @keyframes toastOut {
+            to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      setTimeout(() => toast.remove(), 3500);
     }
   };
 
@@ -9016,17 +8914,33 @@ window.customersData = window.customersData || [];
   const openModal = () => {
     modal.hidden = false;
     document.body.classList.add('no-scroll');
-    loadAdPlans();
+    
+    // Hide notification FAB
+    if (notificationFab) {
+      notificationFab.style.opacity = '0';
+      notificationFab.style.pointerEvents = 'none';
+      notificationFab.style.transform = 'translateY(20px)';
+    }
   };
 
   // Close modal
   const closeModal = () => {
     modal.hidden = true;
     document.body.classList.remove('no-scroll');
+    
+    // Show notification FAB
+    if (notificationFab) {
+      notificationFab.style.opacity = '';
+      notificationFab.style.pointerEvents = '';
+      notificationFab.style.transform = '';
+    }
   };
 
   // Event listeners
-  openBtn.addEventListener('click', openModal);
+  openBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openModal();
+  });
   
   // Close on backdrop click or close button
   modal.querySelectorAll('[data-ads-close]').forEach(el => {
@@ -9040,8 +8954,15 @@ window.customersData = window.customersData || [];
     }
   });
 
-  // Retry button
-  if (retryBtn) {
-    retryBtn.addEventListener('click', loadAdPlans);
-  }
+  // Add click handlers to plan buttons
+  modal.querySelectorAll('.ads-plan-card__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.adSlug;
+      handleSelectAdPlan(slug);
+    });
+  });
+
+  // Expose functions globally if needed
+  window.openAdsModal = openModal;
+  window.closeAdsModal = closeModal;
 })();
