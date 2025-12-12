@@ -1318,18 +1318,35 @@
 </div>
 
 <!-- ۱۱) تیکت‌ها -->
-<div class="section-panel" id="tickets-panel" style="display:none;">
-  <div class="content-header">تیکت‌های پشتیبانی <span class="header-count" id="header-tickets-count"></span></div>
-
-  <div class="messages-filters ticket-filters" style="display:flex;gap:0.7rem;margin-bottom:1.1rem;flex-wrap:wrap;">
-    <button class="ticket-filter-btn active" data-filter="all">همه</button>
-    <button class="ticket-filter-btn" data-filter="open">باز</button>
-    <button class="ticket-filter-btn" data-filter="in_progress">در حال بررسی</button>
-    <button class="ticket-filter-btn" data-filter="resolved">حل شده</button>
+<div class="section-panel ticket-section" id="tickets-panel" style="display:none;">
+  <div class="ticket-header">
+    <div>
+      <p class="ticket-eyebrow">مرکز پشتیبانی</p>
+      <div class="content-header">تیکت‌های پشتیبانی <span class="header-count" id="header-tickets-count"></span></div>
+      <p class="ticket-subtitle">پیگیری درخواست‌های فروشندگان با یک نگاه منظم و شفاف.</p>
+    </div>
+    <div class="ticket-chips">
+      <span class="ticket-chip">مرتب‌سازی بر اساس وضعیت</span>
+      <span class="ticket-chip ticket-chip--muted">نمایش همه تیکت‌ها</span>
+    </div>
   </div>
 
-  <div class="table-wrap">
-    <table id="ticketsTable">
+  <div class="ticket-toolbar">
+    <div class="ticket-filters">
+      <button class="ticket-filter-btn active" data-filter="all">همه</button>
+      <button class="ticket-filter-btn" data-filter="open">باز</button>
+      <button class="ticket-filter-btn" data-filter="in_progress">در حال بررسی</button>
+      <button class="ticket-filter-btn" data-filter="resolved">حل شده</button>
+    </div>
+    <div class="ticket-legend" aria-hidden="true">
+      <span class="ticket-legend__item"><span class="dot dot--open"></span>باز</span>
+      <span class="ticket-legend__item"><span class="dot dot--progress"></span>در حال بررسی</span>
+      <span class="ticket-legend__item"><span class="dot dot--resolved"></span>حل شده</span>
+    </div>
+  </div>
+
+  <div class="table-wrap ticket-table-card">
+    <table id="ticketsTable" class="ticket-table">
       <thead>
         <tr>
           <th>موضوع</th>
