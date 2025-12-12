@@ -3603,6 +3603,26 @@ const Notifications = {
       const message = form.querySelector('textarea')?.value || '';
       await this.submitReply(li?.dataset?.id, message, form);
     });
+
+    // Character counter for reply textarea
+    this._els.list?.addEventListener('input', (e) => {
+      if (!e.target.matches('.notif-reply-form textarea, .ticket-reply-form textarea, .ticket-reply-form__textarea')) return;
+      const textarea = e.target;
+      const form = textarea.closest('.notif-reply-form, .ticket-reply-form');
+      const counter = form?.querySelector('.notif-reply-char-count, .ticket-reply-form__counter');
+      const currentSpan = counter?.querySelector('.notif-reply-char-current');
+      if (!currentSpan) return;
+      
+      const len = textarea.value.length;
+      currentSpan.textContent = len.toLocaleString('fa-IR');
+      
+      counter.classList.remove('is-warning', 'is-error');
+      if (len > 1800) {
+        counter.classList.add('is-error');
+      } else if (len > 1500) {
+        counter.classList.add('is-warning');
+      }
+    });
   },
 
   open() {
@@ -3690,25 +3710,106 @@ const Notifications = {
       const previewText = isLong ? `${fullBody.slice(0, LONG_BODY_LIMIT)}…` : fullBody;
       const safePreview = this._escapeHtml(previewText);
       const safeFull = this._escapeHtml(fullBody);
-      const isTicket = (n.type || '').toLowerCase() === 'ticket';
+      
+      // Check if this is a ticket-related notification
+      const notifType = (n.type || '').toLowerCase();
+      const notifText = (n.text || '').toLowerCase();
+      const notifTitle = (n.title || '').toLowerCase();
+      
+      const isTicket = notifType === 'ticket' || 
+                       notifType === 'ticket_reply' ||
+                       notifType === 'support' ||
+                       notifType === 'admin_reply' ||
+                       notifText.includes('تیکت') ||
+                       notifText.includes('پاسخ جدید برای تیکت') ||
+                       notifTitle.includes('تیکت') ||
+                       notifTitle.includes('پشتیبانی') ||
+                       n.ticketId != null;
+      
       const titleText = n.title || (isTicket ? 'پیام پشتیبانی' : '');
       const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
+      
+      // Build reply thread HTML
       const replyThread = replies.length ? `
-        <div class="notif-reply-thread" aria-label="پاسخ‌های شما">
+        <div class="ticket-replies" aria-label="پاسخ‌های شما">
+          <div class="ticket-replies__header">
+            <span class="ticket-replies__title">پاسخ‌های شما</span>
+            <span class="ticket-replies__count">${replies.length}</span>
+          </div>
           ${replies.map((reply, idx) => `
-            <div class="notif-reply-thread__item">
-              <div class="notif-reply-thread__meta">
-                <span class="notif-reply-thread__badge">پاسخ شما</span>
-                <span>در ${reply.time || 'تیکت'}</span>
-                <span aria-hidden="true">•</span>
-                <span>#${idx + 1}</span>
+            <div class="ticket-reply-item">
+              <div class="ticket-reply-item__badge">شما</div>
+              <div class="ticket-reply-item__content">
+                <p class="ticket-reply-item__text">${this._escapeHtml(reply.message || reply.text || '')}</p>
+                <span class="ticket-reply-item__time">${reply.time || ''}</span>
               </div>
-              <div>${this._escapeHtml(reply.message || reply.text || '')}</div>
             </div>
           `).join('')}
         </div>
       ` : '';
 
+      // Ticket notification layout
+      if (isTicket) {
+        return `
+        <li class="notification-item is-ticket ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}"${n.ticketId ? ` data-ticket-id="${n.ticketId}"` : ''} role="listitem">
+          <article class="ticket-card">
+            <header class="ticket-card__header">
+              <div class="ticket-card__badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                پاسخ پشتیبانی
+              </div>
+              <button class="ticket-card__delete notif-delete" type="button" aria-label="حذف اعلان">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </header>
+            
+            <div class="ticket-card__body">
+              <h4 class="ticket-card__title">${this._escapeHtml(titleText)}</h4>
+              <p class="ticket-card__message">${safePreview}</p>
+              ${isLong ? `<button class="ticket-card__more notif-view-more" data-fulltext="${safeFull}">مشاهده کامل</button>` : ''}
+            </div>
+            
+            <footer class="ticket-card__footer">
+              <div class="ticket-card__meta">
+                <span class="ticket-card__source">از مدیریت سایت</span>
+                <time class="ticket-card__time">${n.time || ''}</time>
+              </div>
+              <button class="ticket-card__reply-btn notif-reply-btn" type="button" aria-expanded="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h10a8 8 0 0 1 8 8v4M3 10l6 6M3 10l6-6"/></svg>
+                پاسخ دادن
+              </button>
+            </footer>
+            
+            ${replyThread}
+            
+            <form class="ticket-reply-form notif-reply-form" hidden>
+              <div class="ticket-reply-form__header">
+                <span class="ticket-reply-form__title">پاسخ به پشتیبانی</span>
+                <button type="button" class="ticket-reply-form__close notif-reply-cancel" aria-label="بستن">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="ticket-reply-form__body">
+                <label class="sr-only" for="reply-${n.id}">پاسخ شما</label>
+                <textarea id="reply-${n.id}" class="ticket-reply-form__textarea" rows="4" placeholder="پاسخ خود را اینجا بنویسید..." maxlength="2000" required></textarea>
+                <div class="ticket-reply-form__counter">
+                  <span class="notif-reply-char-current">۰</span>
+                  <span>/ ۲۰۰۰ کاراکتر</span>
+                </div>
+              </div>
+              <div class="ticket-reply-form__actions">
+                <button type="submit" class="ticket-reply-form__submit notif-reply-submit">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  ارسال پاسخ
+                </button>
+              </div>
+            </form>
+          </article>
+        </li>
+        `;
+      }
+
+      // Regular notification layout
       return `
       <li class="notification-item ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem" tabindex="0">
         <div class="notif-row">
@@ -3716,25 +3817,10 @@ const Notifications = {
           <div class="notif-content">
             <div class="notif-text">
               ${label ? `<span class="notif-label">${label}</span>` : ''}
-              ${titleText ? `<strong class="notif-title">${titleText}</strong>` : ''}
+              ${titleText ? `<strong class="notif-title">${this._escapeHtml(titleText)}</strong>` : ''}
               <span class="notif-body">${safePreview}</span>
-              ${isLong ? `<button class="notif-view-more" data-fulltext="${safeFull}" aria-label="نمایش کامل نظر">مشاهده</button>` : ''}
+              ${isLong ? `<button class="notif-view-more" data-fulltext="${safeFull}" aria-label="نمایش کامل">مشاهده</button>` : ''}
             </div>
-            ${isTicket ? `
-              <div class="notif-meta-row">
-                <span class="notif-pill notif-pill--admin" aria-label="اعلان مدیریت">از مدیریت سایت</span>
-                <button class="notif-reply-btn" type="button" aria-expanded="false">پاسخ</button>
-              </div>
-              ${replyThread}
-              <form class="notif-reply-form" hidden>
-                <label class="sr-only" for="reply-${n.id}">پاسخ به مدیریت</label>
-                <textarea id="reply-${n.id}" rows="4" placeholder="پاسخ خود را با جزئیات بنویسید"></textarea>
-                <div class="notif-reply-actions">
-                  <button type="submit" class="notif-reply-submit">ارسال</button>
-                  <button type="button" class="notif-reply-cancel">انصراف</button>
-                </div>
-              </form>
-            ` : ''}
             <time class="notif-time">${n.time || ''}</time>
           </div>
           <button class="notif-delete" aria-label="حذف اعلان">×</button>
@@ -3800,38 +3886,77 @@ Notifications.toggleReplyForm = function(li) {
 Notifications.submitReply = async function(id, message, form) {
   if (!id || !form) return;
   const trimmed = (message || '').trim();
+  const submitBtn = form.querySelector('.notif-reply-submit');
+  const cancelBtn = form.querySelector('.notif-reply-cancel');
+  const textarea = form.querySelector('textarea');
+
+  // Validation
   if (!trimmed) {
     UIComponents.showToast('متن پاسخ را وارد کنید.', 'error');
+    textarea?.focus();
     return;
   }
+
+  if (trimmed.length < 10) {
+    UIComponents.showToast('پاسخ باید حداقل ۱۰ کاراکتر باشد.', 'error');
+    textarea?.focus();
+    return;
+  }
+
+  if (trimmed.length > 2000) {
+    UIComponents.showToast('پاسخ نباید بیشتر از ۲۰۰۰ کاراکتر باشد.', 'error');
+    return;
+  }
+
+  // Set loading state
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.setAttribute('aria-busy', 'true');
+  }
+  if (cancelBtn) cancelBtn.disabled = true;
+  if (textarea) textarea.disabled = true;
 
   try {
     await API.sendNotificationReply(id, trimmed);
     await API.markNotificationRead(id);
+
+    const nowLabel = new Date().toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+    const items = this.load().map((n) => {
+      if (n.id !== id) return n;
+      const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
+      return {
+        ...n,
+        read: true,
+        userReplies: [...replies, { message: trimmed, time: nowLabel }]
+      };
+    });
+
+    this.save(items);
+    this.render();
+
+    UIComponents.showToast('پاسخ شما با موفقیت ارسال شد.', 'success');
+    form.reset();
+    form.setAttribute('hidden', '');
+    form.closest('li')?.querySelector('.notif-reply-btn')?.setAttribute('aria-expanded', 'false');
+
   } catch (error) {
     console.error('notif reply failed', error);
-    UIComponents.showToast('ارسال پاسخ با خطا مواجه شد. لطفاً دوباره امتحان کنید.', 'error');
-    return;
+    const errorMsg = error?.message || 'ارسال پاسخ با خطا مواجه شد. لطفاً دوباره امتحان کنید.';
+    UIComponents.showToast(errorMsg, 'error');
+
+    // Reset loading state on error
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+      submitBtn.removeAttribute('aria-busy');
+    }
+    if (cancelBtn) cancelBtn.disabled = false;
+    if (textarea) {
+      textarea.disabled = false;
+      textarea.focus();
+    }
   }
-
-  const nowLabel = new Date().toLocaleString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-  const items = this.load().map((n) => {
-    if (n.id !== id) return n;
-    const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
-    return {
-      ...n,
-      read: true,
-      userReplies: [...replies, { message: trimmed, time: nowLabel }]
-    };
-  });
-
-  this.save(items);
-  this.render();
-
-  UIComponents.showToast('پاسخ شما ارسال شد.', 'success');
-  form.reset();
-  form.setAttribute('hidden', '');
-  form.closest('li')?.querySelector('.notif-reply-btn')?.setAttribute('aria-expanded', 'false');
 };
 
 Notifications.showFullComment = function(text = '') {

@@ -3392,13 +3392,17 @@ function renderTicketReplies(ticket) {
   listEl.innerHTML = '';
 
   const items = [];
+  
+  // Original message from seller
   items.push({
     author: ticket.sellerName || 'فروشنده خدماتی',
-    role: 'seller',
+    role: 'original',
     message: ticket.message || '',
-    createdAt: ticket.createdAt
+    createdAt: ticket.createdAt,
+    isOriginal: true
   });
 
+  // Seller replies
   (ticket.sellerReplies || []).forEach((reply) => {
     items.push({
       author: ticket.sellerName || 'فروشنده خدماتی',
@@ -3408,9 +3412,10 @@ function renderTicketReplies(ticket) {
     });
   });
 
+  // Admin replies
   (ticket.adminReplies || []).forEach(reply => {
     items.push({
-      author: 'ادمین',
+      author: reply.adminName || 'ادمین',
       role: 'admin',
       message: reply.message,
       createdAt: reply.createdAt
@@ -3425,67 +3430,134 @@ function renderTicketReplies(ticket) {
     return;
   }
 
+  // Sort by date and render
   items
     .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
-    .forEach(entry => {
+    .forEach((entry, index) => {
       const item = document.createElement('div');
       item.className = 'ticket-thread__item';
-      if (entry.role === 'seller') item.classList.add('ticket-thread__item--seller');
+      
+      // Apply role-specific styling
+      if (entry.isOriginal) {
+        item.classList.add('ticket-thread__item--original');
+      } else if (entry.role === 'seller') {
+        item.classList.add('ticket-thread__item--seller');
+      } else if (entry.role === 'admin') {
+        item.classList.add('ticket-thread__item--admin');
+      }
 
-      const meta = document.createElement('div');
-      meta.className = 'ticket-thread__meta';
-      const author = document.createElement('span');
-      author.className = 'ticket-thread__author';
-      author.textContent = entry.author;
-      const time = document.createElement('span');
-      time.textContent = formatDateTime(entry.createdAt) || '';
-      meta.append(author, time);
-
+      // Message body first
       const body = document.createElement('p');
       body.textContent = entry.message || '';
 
-      item.append(meta, body);
+      // Meta info
+      const meta = document.createElement('div');
+      meta.className = 'ticket-thread__meta';
+      
+      const author = document.createElement('span');
+      author.className = 'ticket-thread__author';
+      author.textContent = entry.author;
+      
+      const time = document.createElement('span');
+      time.className = 'ticket-thread__time';
+      time.textContent = formatDateTime(entry.createdAt) || '';
+      
+      // Add message number
+      const msgNum = document.createElement('span');
+      msgNum.className = 'ticket-thread__num';
+      msgNum.textContent = `#${index + 1}`;
+      
+      meta.append(author, time, msgNum);
+
+      item.append(body, meta);
       listEl.appendChild(item);
     });
+  
+  // Scroll to bottom to show latest message
+  listEl.scrollTop = listEl.scrollHeight;
 }
 
 async function sendTicketReply(ticketId, message, status) {
   if (!ticketId || !message) return;
+  
   const submitBtn = document.getElementById('ticket-reply-submit');
   const textarea = document.getElementById('ticket-reply-text');
-  if (submitBtn) submitBtn.disabled = true;
+  const statusSelect = document.getElementById('ticket-reply-status');
+  
+  // Validation
+  const trimmedMessage = message.trim();
+  if (trimmedMessage.length < 5) {
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('پاسخ باید حداقل ۵ کاراکتر باشد.', 'error');
+    } else {
+      alert('پاسخ باید حداقل ۵ کاراکتر باشد.');
+    }
+    textarea?.focus();
+    return;
+  }
+  
+  // Set loading state
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.setAttribute('aria-busy', 'true');
+  }
+  if (textarea) textarea.disabled = true;
+  if (statusSelect) statusSelect.disabled = true;
+  
   try {
     const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}/reply`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, status })
+      body: JSON.stringify({ message: trimmedMessage, status })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.message || 'ارسال پاسخ انجام نشد');
     }
+    
+    // Update local data
     const idx = supportTickets.findIndex(t => t._id === ticketId);
     if (idx !== -1) {
       supportTickets[idx] = data.ticket;
     } else if (data.ticket) {
       supportTickets.push(data.ticket);
     }
+    
+    // Re-render UI
     renderSupportTickets();
     updateSidebarCounts();
     updateHeaderCounts();
     openTicketModal(ticketId);
+    
+    // Clear form
     if (textarea) textarea.value = '';
+    
+    // Success notification
     if (window.UIComponents?.showToast) {
-      window.UIComponents.showToast('پاسخ ثبت شد و برای فروشنده ارسال گردید.', 'success');
+      window.UIComponents.showToast('پاسخ با موفقیت ثبت شد و برای فروشنده ارسال گردید.', 'success');
     } else {
       alert('پاسخ ثبت شد و برای فروشنده ارسال گردید.');
     }
+    
   } catch (err) {
     console.error('sendTicketReply error:', err);
-    alert(err.message || 'ارسال پاسخ انجام نشد');
+    const errorMsg = err.message || 'ارسال پاسخ انجام نشد. لطفاً دوباره تلاش کنید.';
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast(errorMsg, 'error');
+    } else {
+      alert(errorMsg);
+    }
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    // Reset loading state
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+      submitBtn.removeAttribute('aria-busy');
+    }
+    if (textarea) textarea.disabled = false;
+    if (statusSelect) statusSelect.disabled = false;
   }
 }
 
