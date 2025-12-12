@@ -1381,6 +1381,10 @@ let adOrdersPlanFilter = 'all';
 let currentAdOrderId = null;
 let adModalOverlayHandler = null;
 
+let supportTickets = [];
+let supportTicketsLoaded = false;
+let ticketFilterMode = 'all';
+
 let sellerPerformanceMap = {};
 let sellerPerformanceLoaded = false;
 
@@ -3265,6 +3269,160 @@ document.querySelectorAll('.messages-filters button').forEach(btn => {
 
 // ————————————————————————————————
 
+// پشتیبانی: تیکت‌ها
+function getTicketStatusLabel(status) {
+  if (status === 'resolved') return 'حل شده';
+  if (status === 'in_progress') return 'در حال بررسی';
+  return 'باز';
+}
+
+function renderSupportTickets(list = supportTickets) {
+  const tbody = document.querySelector('#ticketsTable tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const filtered = list.filter(ticket => {
+    if (ticketFilterMode === 'all') return true;
+    return ticket.status === ticketFilterMode;
+  });
+
+  if (!filtered.length) {
+    const emptyRow = document.createElement('tr');
+    emptyRow.innerHTML = `<td colspan="6" style="text-align:center;color:#6b7280;">تیکتی موجود نیست.</td>`;
+    tbody.appendChild(emptyRow);
+    return;
+  }
+
+  filtered.forEach(ticket => {
+    const row = document.createElement('tr');
+    const sellerLabel = ticket.sellerName || 'فروشنده خدماتی';
+    const createdAt = formatDateTime(ticket.createdAt) || '';
+    const shortMessage = (ticket.message || '').slice(0, 70);
+    row.innerHTML = `
+      <td>
+        <div style="font-weight:700;">${escapeHtml(ticket.subject || 'بدون عنوان')}</div>
+        <div style="color:#6b7280;font-size:0.9rem;">${escapeHtml(shortMessage)}${ticket.message && ticket.message.length > 70 ? '…' : ''}</div>
+      </td>
+      <td>${escapeHtml(sellerLabel)}</td>
+      <td>${escapeHtml(ticket.category || 'عمومی')}</td>
+      <td><span class="ticket-status ${ticket.status || 'open'}">${getTicketStatusLabel(ticket.status)}</span></td>
+      <td>${createdAt}</td>
+      <td>
+        <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+          <select data-ticket-status="${ticket._id}" class="ticket-status-select">
+            <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>باز</option>
+            <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>در حال بررسی</option>
+            <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>حل شده</option>
+          </select>
+          <button class="action-btn view" data-ticket-open="${ticket._id}">مشاهده</button>
+        </div>
+      </td>`;
+
+    tbody.appendChild(row);
+
+    const selectEl = row.querySelector('select[data-ticket-status]');
+    selectEl?.addEventListener('change', (e) => {
+      updateTicketStatus(ticket._id, e.target.value, selectEl);
+    });
+
+    const viewBtn = row.querySelector('button[data-ticket-open]');
+    viewBtn?.addEventListener('click', () => openTicketModal(ticket._id));
+  });
+}
+
+async function fetchSupportTickets() {
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets`, { credentials: 'include' });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || 'خطا در واکشی تیکت‌ها');
+    }
+    const data = await res.json();
+    return Array.isArray(data.tickets) ? data.tickets : [];
+  } catch (err) {
+    console.error('fetchSupportTickets error:', err);
+    return [];
+  }
+}
+
+async function ensureSupportTicketsLoaded(force = false) {
+  if (supportTicketsLoaded && !force) return supportTickets;
+  supportTickets = await fetchSupportTickets();
+  supportTicketsLoaded = true;
+  renderSupportTickets();
+  updateSidebarCounts();
+  updateHeaderCounts();
+  return supportTickets;
+}
+
+async function updateTicketStatus(ticketId, status, selectEl) {
+  if (!ticketId || !status) return;
+  const previous = selectEl?.value;
+  if (selectEl) selectEl.disabled = true;
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}/status`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'بروزرسانی انجام نشد');
+    }
+    const idx = supportTickets.findIndex(t => t._id === ticketId);
+    if (idx !== -1) supportTickets[idx] = data.ticket;
+    renderSupportTickets();
+    updateSidebarCounts();
+    updateHeaderCounts();
+  } catch (err) {
+    console.error('updateTicketStatus error:', err);
+    if (selectEl && previous) selectEl.value = previous;
+    alert(err.message || 'خطا در بروزرسانی وضعیت');
+  } finally {
+    if (selectEl) selectEl.disabled = false;
+  }
+}
+
+function openTicketModal(ticketId) {
+  const modal = document.getElementById('ticket-modal-overlay');
+  if (!modal) return;
+  const ticket = supportTickets.find(t => t._id === ticketId);
+  if (!ticket) return;
+
+  document.getElementById('ticket-modal-title').textContent = ticket.subject || 'تیکت پشتیبانی';
+  document.getElementById('ticket-modal-status').textContent = getTicketStatusLabel(ticket.status);
+  document.getElementById('ticket-modal-status').className = `ticket-modal__status ticket-status ${ticket.status || 'open'}`;
+  document.getElementById('ticket-modal-seller').textContent = ticket.sellerName || 'فروشنده خدماتی';
+  document.getElementById('ticket-modal-category').textContent = ticket.category || 'عمومی';
+  document.getElementById('ticket-modal-phone').textContent = ticket.phone || '—';
+  document.getElementById('ticket-modal-shopurl').textContent = ticket.shopurl ? `vitreenet.ir/${ticket.shopurl}` : '—';
+  document.getElementById('ticket-modal-created').textContent = formatDateTime(ticket.createdAt) || '—';
+  document.getElementById('ticket-modal-message').textContent = ticket.message || '';
+  const noteEl = document.getElementById('ticket-modal-note');
+  noteEl.textContent = ticket.adminNote ? `یادداشت ادمین: ${ticket.adminNote}` : '';
+
+  modal.hidden = false;
+}
+
+function closeTicketModal() {
+  const modal = document.getElementById('ticket-modal-overlay');
+  if (modal) modal.hidden = true;
+}
+
+document.querySelectorAll('[data-ticket-close]').forEach(btn => {
+  btn.addEventListener('click', closeTicketModal);
+});
+
+document.querySelectorAll('.ticket-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ticket-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ticketFilterMode = btn.getAttribute('data-filter') || 'all';
+    renderSupportTickets();
+  });
+});
+
 
 
 
@@ -4331,6 +4489,12 @@ function updateSidebarCounts() {
   const centersCountEl = document.getElementById('count-shopping-centers');
   if (centersCountEl) centersCountEl.textContent = formatNumber(shoppingCentersList.length);
 
+  const ticketCountEl = document.getElementById('count-tickets');
+  if (ticketCountEl) {
+    const openTickets = supportTickets.filter(t => t.status !== 'resolved').length;
+    ticketCountEl.textContent = openTickets > 0 ? formatNumber(openTickets) : '';
+  }
+
   const unread = getTotalUnreadMessages();
   // فقط اگر عدد بزرگ‌تر از صفر باشد نمایش بده
   document.getElementById('count-messages').textContent = unread > 0 ? formatNumber(unread) : '';
@@ -4357,6 +4521,12 @@ function updateHeaderCounts() {
   // اگر صفر بود خالی بنویس
   document.getElementById('header-messages-count').textContent =
     unread > 0 ? `(${formatNumber(unread)} پیام جدید)` : '';
+
+  const ticketsHeaderEl = document.getElementById('header-tickets-count');
+  if (ticketsHeaderEl) {
+    const openTickets = supportTickets.filter(t => t.status !== 'resolved').length;
+    ticketsHeaderEl.textContent = openTickets > 0 ? `(${formatNumber(openTickets)} تیکت باز)` : '';
+  }
 }
 
 
@@ -6590,6 +6760,7 @@ const panels = {
   'ad-orders': document.getElementById('ad-orders-panel'),
   'home-section': document.getElementById('home-section-panel'),
   messages:  document.getElementById('messages-panel'),
+  tickets: document.getElementById('tickets-panel'),
   'daily-visits': document.getElementById('daily-visits-panel')
 };
 
@@ -6637,6 +6808,10 @@ menuLinks.forEach(link => {
 
     if (section === 'ad-orders') {
       await loadAdOrders();
+    }
+
+    if (section === 'tickets') {
+      await ensureSupportTicketsLoaded();
     }
 
     if (section === 'categories') {
@@ -6933,12 +7108,13 @@ if (shoppingCentersRefreshBtn) {
 async function updateAll() {
   try {
     // ۱) واکشی هم‌زمان داده‌ها و آمار داشبورد
-    const [users, shops, products, centers, stats] = await Promise.all([
+    const [users, shops, products, centers, stats, tickets] = await Promise.all([
       fetchUsers(),
       fetchShops(),
       fetchProducts(),
       fetchShoppingCenters(),
-      fetchDashboardStats()
+      fetchDashboardStats(),
+      fetchSupportTickets()
     ]);
 
     // ۲) ست‌کردن آرایه‌های سراسری
@@ -6960,6 +7136,9 @@ shopsList.slice(0, 10).forEach((s, i) => {
 console.groupEnd();
 
     productsList = products;
+    supportTickets = tickets;
+    supportTicketsLoaded = true;
+    renderSupportTickets();
     updateSidebarCounts();
     updateHeaderCounts();
     await loadAdOrders();

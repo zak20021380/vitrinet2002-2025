@@ -350,11 +350,59 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     }, 0);
   });
 
-  supportForm?.addEventListener('submit', (event) => {
+  supportForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    closeSupportModal();
-    if (window.UIComponents?.showToast) {
-      window.UIComponents.showToast('درخواست شما ثبت شد؛ به‌زودی پاسخ می‌دهیم.', 'success');
+
+    const submitBtn = supportForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn?.textContent;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'در حال ارسال…';
+    }
+
+    const categoryField = supportForm.querySelector('select');
+    const messageField = supportForm.querySelector('textarea');
+    const category = categoryField?.value || '';
+    const message = (messageField?.value || '').trim();
+
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const payload = {
+      subject: category || 'پشتیبانی',
+      category: category || 'عمومی',
+      message,
+      priority: 'normal',
+      phone: sellerData.phone || '',
+      shopurl: sellerData.shopurl || ''
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/support-tickets`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'ارسال تیکت انجام نشد.');
+      }
+
+      if (window.UIComponents?.showToast) {
+        window.UIComponents.showToast('درخواست شما ثبت شد؛ به‌زودی پاسخ می‌دهیم.', 'success');
+      }
+      supportForm.reset();
+      closeSupportModal();
+    } catch (error) {
+      console.error('support ticket error:', error);
+      if (window.UIComponents?.showToast) {
+        window.UIComponents.showToast(error.message || 'خطا در ارسال تیکت', 'error');
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText || 'ارسال درخواست';
+      }
     }
   });
 

@@ -14,6 +14,7 @@ const settingsRoutes = require('./routes/settings');
 const accountantRoutes = require('./routes/accountant');
 const categoryRoutes = require('./routes/categoryRoutes');
 const securityRoutes = require('./routes/security');
+const supportTicketRoutes = require('./routes/supportTickets');
 require('dotenv').config();
 
 const app = express();
@@ -73,6 +74,7 @@ app.use('/api/blocked-sellers', require('./routes/blockedSellers'));
 app.use('/api/categories', categoryRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', adminUserMessageRoutes);
+app.use('/api/support-tickets', supportTicketRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/adPlans', adPlanRoutes);
 app.use('/api/admin', adminRoutes);
