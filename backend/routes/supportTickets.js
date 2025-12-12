@@ -12,4 +12,7 @@ router.get('/', authMiddleware('admin'), controller.listTickets);
 // ادمین: بروزرسانی وضعیت
 router.patch('/:id/status', authMiddleware('admin'), controller.updateStatus);
 
+// ادمین: پاسخ به تیکت + ارسال اعلان
+router.post('/:id/reply', authMiddleware('admin'), controller.replyToTicket);
+
 module.exports = router;
