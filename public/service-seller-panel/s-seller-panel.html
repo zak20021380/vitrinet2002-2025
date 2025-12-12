@@ -1963,16 +1963,19 @@
       <span class="notification-badge" id="notification-badge"></span>
     </button>
 
+    <!-- Backdrop for closing modal on outside click -->
+    <div id="notification-backdrop" class="notification-backdrop" hidden></div>
+
     <div id="notification-panel" class="notification-panel" role="dialog" aria-labelledby="notification-title" aria-modal="true" hidden>
       <div class="notification-panel__surface">
         <header class="notif-header">
           <h2 id="notification-title" class="notif-title">اعلان‌ها</h2>
           <div class="notif-actions">
             <button type="button" id="notif-clear-all" class="notif-clear-all" aria-label="حذف همه اعلان‌ها">
-              حذف همه
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M3 6h18v2H3V6zm2 3h14l-1.2 11.2A2 2 0 0 1 15.82 22H8.18a2 2 0 0 1-1.98-1.8L5 9zm6-6h2a2 2 0 0 1 2 2v1H9V5a2 2 0 0 1 2-2z"/>
               </svg>
+              حذف همه
             </button>
           </div>
         </header>
@@ -1980,11 +1983,22 @@
         <ul class="notification-list" id="notification-list" role="list" aria-live="polite"></ul>
 
         <div id="notif-empty" class="notif-empty" hidden>
-          هیچ اعلانی ندارید.
+          <div class="notif-empty__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <p class="notif-empty__text">هیچ اعلانی ندارید.</p>
         </div>
 
         <footer class="notif-footer">
-          <button type="button" id="notif-mark-read" class="btn-text-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
+          <button type="button" id="notif-mark-read" class="notif-mark-read-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            علامت‌گذاری همه به‌عنوان خوانده‌شده
+          </button>
         </footer>
       </div>
     </div>

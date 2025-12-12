@@ -2775,7 +2775,10 @@ async deletePortfolioItem(id) {
       time: n.createdAt ? fmt(n.createdAt) : '',
       read: !!n.read,
       type: detectType(n),
-      title: n.title || ''
+      title: n.title || '',
+      relatedTicketId: n.relatedTicketId || null,
+      ticketId: n.relatedTicketId || n.ticketId || null,
+      userReplies: Array.isArray(n.userReplies) ? n.userReplies : []
     }));
   },
 
@@ -3517,16 +3520,36 @@ const Notifications = {
     try {
       const items = await API.getNotifications();
       const existing = this.load();
-      const merged = items.map((item) => {
-        const prev = existing.find((p) => (p.id === item.id || p._id === item.id));
-        if (prev?.userReplies?.length) {
-          return { ...item, userReplies: prev.userReplies };
-        }
-        return item;
-      });
-      this.save(merged);
+      
+      // اگر سرور نوتیفیکیشن جدید برگرداند، آن‌ها را با موجودی‌ها ادغام کن
+      if (items && items.length > 0) {
+        // ایجاد Map از نوتیفیکیشن‌های موجود برای دسترسی سریع
+        const existingMap = new Map(existing.map(n => [n.id, n]));
+        
+        // ادغام نوتیفیکیشن‌های جدید با حفظ userReplies
+        const merged = items.map((item) => {
+          const prev = existingMap.get(item.id);
+          // ادغام userReplies از سرور و محلی
+          const serverReplies = Array.isArray(item.userReplies) ? item.userReplies : [];
+          const localReplies = Array.isArray(prev?.userReplies) ? prev.userReplies : [];
+          // ترکیب پاسخ‌ها (اولویت با سرور)
+          const combinedReplies = serverReplies.length > 0 ? serverReplies : localReplies;
+          return { ...item, userReplies: combinedReplies };
+        });
+        
+        // اضافه کردن نوتیفیکیشن‌های محلی که در سرور نیستند (مثل live activity)
+        const serverIds = new Set(items.map(n => n.id));
+        const localOnly = existing.filter(n => !serverIds.has(n.id) && n.id?.startsWith('n'));
+        
+        this.save([...merged, ...localOnly].slice(0, 50));
+      } else if (existing.length > 0) {
+        // اگر سرور خالی برگرداند ولی نوتیفیکیشن‌های محلی داریم، آن‌ها را حفظ کن
+        // همه نوتیفیکیشن‌های موجود را نگه دار
+        // فقط اگر سرور واقعاً پاسخ داد (نه خطا)
+      }
     } catch (err) {
       console.error('Failed to load notifications', err);
+      // در صورت خطا، نوتیفیکیشن‌های محلی را حفظ کن و هیچ تغییری نده
     }
   },
 
@@ -3534,6 +3557,7 @@ const Notifications = {
     this._els = {
       btn: document.getElementById('notification-btn'),
       panel: document.getElementById('notification-panel'),
+      backdrop: document.getElementById('notification-backdrop'),
       list: document.getElementById('notification-list'),
       badge: document.getElementById('notification-badge'),
       clearAll: document.getElementById('notif-clear-all'),
@@ -3548,10 +3572,16 @@ const Notifications = {
 
     // باز/بستن پنل
     this._els.btn.addEventListener('click', () => this.toggle());
+    
+    // بستن با کلیک روی backdrop
+    this._els.backdrop?.addEventListener('click', () => this.close());
+    
+    // بستن با کلیک خارج از پنل
     document.addEventListener('click', (e) => {
       const insidePanel = e.target.closest('#notification-panel');
       const onButton = e.target.closest('#notification-btn');
-      if (!insidePanel && !onButton) this.close();
+      const onBackdrop = e.target.closest('#notification-backdrop');
+      if (!insidePanel && !onButton && !onBackdrop) this.close();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.close(); });
 
@@ -3626,14 +3656,44 @@ const Notifications = {
   },
 
   open() {
+    // نمایش backdrop
+    if (this._els.backdrop) {
+      this._els.backdrop.hidden = false;
+      requestAnimationFrame(() => {
+        this._els.backdrop.classList.add('active');
+      });
+    }
+    // نمایش پنل
     this._els.panel.hidden = false;
-    this._els.panel.classList.add('active');
+    requestAnimationFrame(() => {
+      this._els.panel.classList.add('active');
+    });
     this._els.btn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('notification-open');
   },
   close() {
+    // مخفی کردن پنل
     this._els.panel.classList.remove('active');
-    this._els.panel.hidden = true;
+    // مخفی کردن backdrop
+    if (this._els.backdrop) {
+      this._els.backdrop.classList.remove('active');
+    }
     this._els.btn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('notification-open');
+    
+    // بعد از انیمیشن، hidden کن
+    const hideAfterTransition = () => {
+      this._els.panel.hidden = true;
+      if (this._els.backdrop) {
+        this._els.backdrop.hidden = true;
+      }
+    };
+    
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      hideAfterTransition();
+    } else {
+      setTimeout(hideAfterTransition, 280);
+    }
   },
   toggle(){
     this._els.panel.classList.contains('active') ? this.close() : this.open();
@@ -3719,12 +3779,15 @@ const Notifications = {
       const isTicket = notifType === 'ticket' || 
                        notifType === 'ticket_reply' ||
                        notifType === 'support' ||
+                       notifType === 'support_ticket' ||
                        notifType === 'admin_reply' ||
                        notifText.includes('تیکت') ||
                        notifText.includes('پاسخ جدید برای تیکت') ||
+                       notifText.includes('پاسخ جدید') ||
                        notifTitle.includes('تیکت') ||
                        notifTitle.includes('پشتیبانی') ||
-                       n.ticketId != null;
+                       n.ticketId != null ||
+                       n.relatedTicketId != null;
       
       const titleText = n.title || (isTicket ? 'پیام پشتیبانی' : '');
       const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
