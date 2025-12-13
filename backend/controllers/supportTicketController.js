@@ -139,3 +139,124 @@ exports.replyToTicket = async (req, res) => {
     res.status(500).json({ message: 'ارسال پاسخ با خطا مواجه شد.' });
   }
 };
+
+// فروشنده: دریافت تیکت‌های خود
+exports.getMyTickets = async (req, res) => {
+  try {
+    const sellerId = req.user?.id;
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت الزامی است.' });
+    }
+
+    const tickets = await SupportTicket.find({ sellerId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Transform tickets for frontend
+    const transformedTickets = tickets.map(ticket => {
+      // Combine admin replies into a unified replies array
+      const replies = [];
+      
+      if (Array.isArray(ticket.adminReplies)) {
+        ticket.adminReplies.forEach(reply => {
+          replies.push({
+            message: reply.message,
+            from: 'admin',
+            isAdmin: true,
+            createdAt: reply.createdAt || reply.repliedAt
+          });
+        });
+      }
+
+      if (Array.isArray(ticket.sellerReplies)) {
+        ticket.sellerReplies.forEach(reply => {
+          replies.push({
+            message: reply.message,
+            from: 'seller',
+            isAdmin: false,
+            createdAt: reply.createdAt
+          });
+        });
+      }
+
+      // Sort replies by date
+      replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      // Map status to frontend format
+      let status = 'pending';
+      if (ticket.status === 'resolved') status = 'closed';
+      else if (ticket.status === 'in_progress') status = 'in-progress';
+      else if (ticket.adminReplies?.length > 0) status = 'answered';
+
+      return {
+        _id: ticket._id,
+        id: ticket._id,
+        subject: ticket.subject,
+        message: ticket.message,
+        category: ticket.category,
+        status,
+        priority: ticket.priority,
+        replies,
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt
+      };
+    });
+
+    res.json({ tickets: transformedTickets });
+  } catch (err) {
+    console.error('getMyTickets error:', err);
+    res.status(500).json({ message: 'خطا در دریافت تیکت‌ها.' });
+  }
+};
+
+// فروشنده: پاسخ به تیکت خود
+exports.sellerReplyToTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body || {};
+    const sellerId = req.user?.id;
+
+    if (!sellerId) {
+      return res.status(401).json({ message: 'احراز هویت الزامی است.' });
+    }
+
+    if (!message || !String(message).trim()) {
+      return res.status(400).json({ message: 'متن پاسخ الزامی است.' });
+    }
+
+    const ticket = await SupportTicket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: 'تیکت پیدا نشد.' });
+    }
+
+    // Check if this ticket belongs to the seller
+    if (String(ticket.sellerId) !== String(sellerId)) {
+      return res.status(403).json({ message: 'شما اجازه پاسخ به این تیکت را ندارید.' });
+    }
+
+    // Check if ticket is closed
+    if (ticket.status === 'resolved') {
+      return res.status(400).json({ message: 'این تیکت بسته شده و امکان پاسخ وجود ندارد.' });
+    }
+
+    const replyEntry = {
+      message: String(message).trim(),
+      createdAt: new Date()
+    };
+
+    if (!Array.isArray(ticket.sellerReplies)) {
+      ticket.sellerReplies = [];
+    }
+    ticket.sellerReplies.push(replyEntry);
+
+    // Update status to open (waiting for admin response)
+    ticket.status = 'open';
+    ticket.lastUpdatedBy = 'seller';
+    await ticket.save();
+
+    res.json({ success: true, message: 'پاسخ شما ثبت شد.' });
+  } catch (err) {
+    console.error('sellerReplyToTicket error:', err);
+    res.status(500).json({ message: 'خطا در ارسال پاسخ.' });
+  }
+};

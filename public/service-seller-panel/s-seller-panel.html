@@ -2139,8 +2139,123 @@
             <button type="submit" class="support-ticket__submit">ارسال درخواست</button>
           </form>
         </details>
+
+        <!-- My Tickets Section -->
+        <section class="my-tickets-section" id="my-tickets-section" aria-label="تیکت‌های من">
+          <div class="my-tickets-header" id="my-tickets-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="my-tickets-body">
+            <div class="my-tickets-header__right">
+              <div class="my-tickets-header__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <path d="M8 9h8M8 13h6"/>
+                </svg>
+              </div>
+              <div class="my-tickets-header__text">
+                <h3 class="my-tickets-header__title">تیکت‌های من</h3>
+                <p class="my-tickets-header__subtitle">مشاهده وضعیت درخواست‌ها</p>
+              </div>
+            </div>
+            <div class="my-tickets-header__left">
+              <span class="my-tickets-count" id="my-tickets-count" data-count="0">۰</span>
+              <span class="my-tickets-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="my-tickets-body" id="my-tickets-body">
+            <!-- Filter Tabs -->
+            <div class="my-tickets-filters" role="tablist" aria-label="فیلتر تیکت‌ها">
+              <button type="button" class="my-tickets-filter-btn active" role="tab" aria-selected="true" data-filter="all">
+                همه
+                <span class="my-tickets-filter-btn__count" id="filter-count-all">۰</span>
+              </button>
+              <button type="button" class="my-tickets-filter-btn" role="tab" aria-selected="false" data-filter="pending">
+                در انتظار
+                <span class="my-tickets-filter-btn__count" id="filter-count-pending">۰</span>
+              </button>
+              <button type="button" class="my-tickets-filter-btn" role="tab" aria-selected="false" data-filter="answered">
+                پاسخ داده شده
+                <span class="my-tickets-filter-btn__count" id="filter-count-answered">۰</span>
+              </button>
+              <button type="button" class="my-tickets-filter-btn" role="tab" aria-selected="false" data-filter="closed">
+                بسته شده
+                <span class="my-tickets-filter-btn__count" id="filter-count-closed">۰</span>
+              </button>
+            </div>
+
+            <!-- Tickets List -->
+            <div class="my-tickets-list" id="my-tickets-list" role="tabpanel">
+              <!-- Loading State -->
+              <div class="my-tickets-loading" id="my-tickets-loading">
+                <div class="my-tickets-loading__spinner"></div>
+                <span class="my-tickets-loading__text">در حال بارگذاری تیکت‌ها...</span>
+              </div>
+
+              <!-- Empty State (hidden by default) -->
+              <div class="my-tickets-empty" id="my-tickets-empty" hidden>
+                <div class="my-tickets-empty__icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <h4 class="my-tickets-empty__title">هنوز تیکتی ثبت نکرده‌اید</h4>
+                <p class="my-tickets-empty__text">برای ارسال درخواست از فرم بالا استفاده کنید</p>
+              </div>
+
+              <!-- Error State (hidden by default) -->
+              <div class="my-tickets-error" id="my-tickets-error" hidden>
+                <div class="my-tickets-error__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                </div>
+                <p class="my-tickets-error__text">خطا در بارگذاری تیکت‌ها</p>
+                <button type="button" class="my-tickets-error__retry" id="my-tickets-retry">تلاش مجدد</button>
+              </div>
+
+              <!-- Tickets will be rendered here -->
+            </div>
+          </div>
+        </section>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Ticket Detail Modal -->
+  <section
+    id="ticket-detail-modal"
+    class="ticket-detail-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ticket-detail-title"
+    hidden
+  >
+    <div class="ticket-detail-modal__backdrop" data-ticket-detail-close></div>
+    <div class="ticket-detail-modal__sheet" tabindex="-1">
+      <div class="ticket-detail-modal__handle" aria-hidden="true"></div>
+      
+      <header class="ticket-detail-modal__header">
+        <div class="ticket-detail-modal__header-right">
+          <h2 id="ticket-detail-title" class="ticket-detail-modal__title">جزئیات تیکت</h2>
+          <span class="ticket-detail-modal__id" id="ticket-detail-id">#—</span>
+        </div>
+        <button type="button" class="ticket-detail-modal__close" aria-label="بستن" data-ticket-detail-close>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="ticket-detail-modal__content" id="ticket-detail-content">
+        <!-- Content will be rendered dynamically -->
+      </div>
     </div>
   </section>
 

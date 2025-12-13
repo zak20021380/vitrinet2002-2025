@@ -3506,7 +3506,7 @@ async function sendTicketReply(ticketId, message, status) {
   if (statusSelect) statusSelect.disabled = true;
   
   try {
-    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}/reply`, {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}/admin-reply`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

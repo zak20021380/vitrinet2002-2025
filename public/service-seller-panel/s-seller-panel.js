@@ -439,6 +439,470 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // --- My Tickets Section ---
+  const myTicketsSection = document.getElementById('my-tickets-section');
+  const myTicketsToggle = document.getElementById('my-tickets-toggle');
+  const myTicketsBody = document.getElementById('my-tickets-body');
+  const myTicketsList = document.getElementById('my-tickets-list');
+  const myTicketsCount = document.getElementById('my-tickets-count');
+  const myTicketsLoading = document.getElementById('my-tickets-loading');
+  const myTicketsEmpty = document.getElementById('my-tickets-empty');
+  const myTicketsError = document.getElementById('my-tickets-error');
+  const myTicketsRetry = document.getElementById('my-tickets-retry');
+  const ticketDetailModal = document.getElementById('ticket-detail-modal');
+  const ticketDetailContent = document.getElementById('ticket-detail-content');
+  const ticketDetailCloseEls = ticketDetailModal ? ticketDetailModal.querySelectorAll('[data-ticket-detail-close]') : [];
+
+  let myTicketsData = [];
+  let currentFilter = 'all';
+  let ticketsLoaded = false;
+
+  const statusLabels = {
+    pending: 'در انتظار پاسخ',
+    answered: 'پاسخ داده شده',
+    closed: 'بسته شده',
+    'in-progress': 'در حال بررسی'
+  };
+
+  const categoryLabels = {
+    'مالی': '💰 مالی',
+    'فنی': '🔧 فنی',
+    'نوبت‌دهی': '📅 نوبت‌دهی',
+    'عمومی': '📋 عمومی'
+  };
+
+  const formatTicketDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const date = new Date(dateStr);
+      return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatRelativeTime = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'همین الان';
+      if (diffMins < 60) return `${toFaDigits(diffMins)} دقیقه پیش`;
+      if (diffHours < 24) return `${toFaDigits(diffHours)} ساعت پیش`;
+      if (diffDays < 7) return `${toFaDigits(diffDays)} روز پیش`;
+      return formatTicketDate(dateStr);
+    } catch {
+      return '';
+    }
+  };
+
+  const toggleMyTicketsSection = () => {
+    if (!myTicketsSection) return;
+    const isOpen = myTicketsSection.hasAttribute('open');
+    
+    if (isOpen) {
+      myTicketsSection.removeAttribute('open');
+      myTicketsToggle?.setAttribute('aria-expanded', 'false');
+    } else {
+      myTicketsSection.setAttribute('open', '');
+      myTicketsToggle?.setAttribute('aria-expanded', 'true');
+      if (!ticketsLoaded) {
+        loadMyTickets();
+      }
+    }
+  };
+
+  const loadMyTickets = async () => {
+    if (!myTicketsList) return;
+
+    // Show loading
+    if (myTicketsLoading) myTicketsLoading.hidden = false;
+    if (myTicketsEmpty) myTicketsEmpty.hidden = true;
+    if (myTicketsError) myTicketsError.hidden = true;
+
+    // Clear existing tickets
+    const existingItems = myTicketsList.querySelectorAll('.my-ticket-item');
+    existingItems.forEach(item => item.remove());
+
+    try {
+      const res = await fetch(`${API_BASE}/api/support-tickets/my-tickets`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        throw new Error('خطا در دریافت تیکت‌ها');
+      }
+
+      const data = await res.json();
+      myTicketsData = data.tickets || [];
+      ticketsLoaded = true;
+
+      updateTicketCounts();
+      renderTickets();
+
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+      if (myTicketsLoading) myTicketsLoading.hidden = true;
+      if (myTicketsError) myTicketsError.hidden = false;
+    }
+  };
+
+  const updateTicketCounts = () => {
+    const counts = {
+      all: myTicketsData.length,
+      pending: myTicketsData.filter(t => t.status === 'pending' || t.status === 'in-progress').length,
+      answered: myTicketsData.filter(t => t.status === 'answered').length,
+      closed: myTicketsData.filter(t => t.status === 'closed').length
+    };
+
+    if (myTicketsCount) {
+      myTicketsCount.textContent = toFaDigits(counts.all);
+      myTicketsCount.dataset.count = counts.all;
+    }
+
+    document.getElementById('filter-count-all')?.textContent && (document.getElementById('filter-count-all').textContent = toFaDigits(counts.all));
+    document.getElementById('filter-count-pending')?.textContent && (document.getElementById('filter-count-pending').textContent = toFaDigits(counts.pending));
+    document.getElementById('filter-count-answered')?.textContent && (document.getElementById('filter-count-answered').textContent = toFaDigits(counts.answered));
+    document.getElementById('filter-count-closed')?.textContent && (document.getElementById('filter-count-closed').textContent = toFaDigits(counts.closed));
+  };
+
+  const getFilteredTickets = () => {
+    if (currentFilter === 'all') return myTicketsData;
+    if (currentFilter === 'pending') return myTicketsData.filter(t => t.status === 'pending' || t.status === 'in-progress');
+    return myTicketsData.filter(t => t.status === currentFilter);
+  };
+
+  const renderTickets = () => {
+    if (!myTicketsList) return;
+
+    if (myTicketsLoading) myTicketsLoading.hidden = true;
+
+    // Clear existing tickets
+    const existingItems = myTicketsList.querySelectorAll('.my-ticket-item');
+    existingItems.forEach(item => item.remove());
+
+    const filteredTickets = getFilteredTickets();
+
+    if (filteredTickets.length === 0) {
+      if (myTicketsEmpty) myTicketsEmpty.hidden = false;
+      return;
+    }
+
+    if (myTicketsEmpty) myTicketsEmpty.hidden = true;
+
+    filteredTickets.forEach(ticket => {
+      const ticketEl = createTicketElement(ticket);
+      myTicketsList.appendChild(ticketEl);
+    });
+  };
+
+  const createTicketElement = (ticket) => {
+    const statusClass = ticket.status || 'pending';
+    const statusLabel = statusLabels[statusClass] || 'نامشخص';
+    const categoryLabel = categoryLabels[ticket.category] || `📋 ${ticket.category || 'عمومی'}`;
+    const repliesCount = ticket.replies?.length || 0;
+    const ticketId = ticket._id || ticket.id || '—';
+    const shortId = String(ticketId).slice(-6).toUpperCase();
+
+    const article = document.createElement('article');
+    article.className = 'my-ticket-item';
+    article.dataset.ticketId = ticketId;
+
+    article.innerHTML = `
+      <div class="my-ticket-item__header">
+        <span class="my-ticket-item__status my-ticket-item__status--${statusClass}">
+          <span class="my-ticket-item__status-dot"></span>
+          ${escapeHtml(statusLabel)}
+        </span>
+        <span class="my-ticket-item__id">#${escapeHtml(shortId)}</span>
+      </div>
+      <div class="my-ticket-item__body">
+        <span class="my-ticket-item__category">${categoryLabel}</span>
+        <h4 class="my-ticket-item__subject">${escapeHtml(ticket.subject || 'بدون موضوع')}</h4>
+        <p class="my-ticket-item__message">${escapeHtml(ticket.message || '')}</p>
+      </div>
+      <div class="my-ticket-item__footer">
+        <div class="my-ticket-item__meta">
+          <span class="my-ticket-item__date">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            ${formatRelativeTime(ticket.createdAt)}
+          </span>
+          ${repliesCount > 0 ? `
+            <span class="my-ticket-item__replies">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              ${toFaDigits(repliesCount)} پاسخ
+            </span>
+          ` : ''}
+        </div>
+        <button type="button" class="my-ticket-item__view-btn" data-view-ticket="${ticketId}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+          مشاهده
+        </button>
+      </div>
+    `;
+
+    return article;
+  };
+
+  const openTicketDetail = async (ticketId) => {
+    if (!ticketDetailModal || !ticketDetailContent) return;
+
+    const ticket = myTicketsData.find(t => (t._id || t.id) === ticketId);
+    if (!ticket) return;
+
+    const shortId = String(ticketId).slice(-6).toUpperCase();
+    const ticketIdEl = document.getElementById('ticket-detail-id');
+    if (ticketIdEl) ticketIdEl.textContent = `#${shortId}`;
+
+    const statusClass = ticket.status || 'pending';
+    const statusLabel = statusLabels[statusClass] || 'نامشخص';
+    const categoryLabel = categoryLabels[ticket.category] || ticket.category || 'عمومی';
+    const repliesCount = ticket.replies?.length || 0;
+    const isClosed = ticket.status === 'closed';
+
+    let threadHtml = '';
+    if (ticket.replies && ticket.replies.length > 0) {
+      threadHtml = `
+        <div class="ticket-detail-thread">
+          <h3 class="ticket-detail-thread__title">
+            گفتگو
+            <span class="ticket-detail-thread__count">${toFaDigits(repliesCount)}</span>
+          </h3>
+          <div class="ticket-detail-thread__list">
+            ${ticket.replies.map(reply => {
+              const isAdmin = reply.from === 'admin' || reply.isAdmin;
+              return `
+                <div class="ticket-thread-msg ticket-thread-msg--${isAdmin ? 'admin' : 'user'}">
+                  <div class="ticket-thread-msg__header">
+                    <span class="ticket-thread-msg__sender">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        ${isAdmin ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>' : '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
+                      </svg>
+                      ${isAdmin ? 'پشتیبانی' : 'شما'}
+                    </span>
+                    <span class="ticket-thread-msg__time">${formatRelativeTime(reply.createdAt)}</span>
+                  </div>
+                  <p class="ticket-thread-msg__text">${escapeHtml(reply.message || '')}</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    let replyFormHtml = '';
+    if (isClosed) {
+      replyFormHtml = `
+        <div class="ticket-detail-closed">
+          <div class="ticket-detail-closed__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="ticket-detail-closed__text">
+            <h4 class="ticket-detail-closed__title">این تیکت بسته شده است</h4>
+            <p class="ticket-detail-closed__subtitle">برای ارسال درخواست جدید، تیکت جدیدی ایجاد کنید</p>
+          </div>
+        </div>
+      `;
+    } else {
+      replyFormHtml = `
+        <div class="ticket-detail-reply">
+          <label class="ticket-detail-reply__label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            ارسال پاسخ
+          </label>
+          <textarea class="ticket-detail-reply__textarea" id="ticket-reply-textarea" placeholder="پیام خود را بنویسید..." rows="3"></textarea>
+          <div class="ticket-detail-reply__actions">
+            <button type="button" class="ticket-detail-reply__submit" id="ticket-reply-submit" data-ticket-id="${ticketId}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              ارسال پاسخ
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    ticketDetailContent.innerHTML = `
+      <div class="ticket-detail-info">
+        <div class="ticket-detail-info__item">
+          <span class="ticket-detail-info__label">وضعیت:</span>
+          <span class="ticket-detail-info__value">${escapeHtml(statusLabel)}</span>
+        </div>
+        <div class="ticket-detail-info__item">
+          <span class="ticket-detail-info__label">دسته‌بندی:</span>
+          <span class="ticket-detail-info__value">${categoryLabel}</span>
+        </div>
+        <div class="ticket-detail-info__item">
+          <span class="ticket-detail-info__label">تاریخ:</span>
+          <span class="ticket-detail-info__value">${formatTicketDate(ticket.createdAt)}</span>
+        </div>
+      </div>
+
+      <div class="ticket-detail-original">
+        <span class="ticket-detail-original__label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          پیام اصلی
+        </span>
+        <h3 class="ticket-detail-original__subject">${escapeHtml(ticket.subject || 'بدون موضوع')}</h3>
+        <p class="ticket-detail-original__message">${escapeHtml(ticket.message || '')}</p>
+      </div>
+
+      ${threadHtml}
+      ${replyFormHtml}
+    `;
+
+    // Show modal
+    ticketDetailModal.hidden = false;
+    requestAnimationFrame(() => {
+      ticketDetailModal.classList.add('is-visible');
+    });
+
+    // Bind reply submit
+    const replySubmitBtn = document.getElementById('ticket-reply-submit');
+    const replyTextarea = document.getElementById('ticket-reply-textarea');
+    
+    replySubmitBtn?.addEventListener('click', async () => {
+      const message = replyTextarea?.value?.trim();
+      if (!message) {
+        UIComponents?.showToast?.('لطفاً پیام خود را وارد کنید', 'error');
+        return;
+      }
+
+      replySubmitBtn.disabled = true;
+      replySubmitBtn.classList.add('is-loading');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/support-tickets/${ticketId}/seller-reply`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        if (!res.ok) {
+          throw new Error('خطا در ارسال پاسخ');
+        }
+
+        UIComponents?.showToast?.('پاسخ شما ارسال شد', 'success');
+        closeTicketDetail();
+        loadMyTickets(); // Refresh tickets
+      } catch (error) {
+        console.error('Error sending reply:', error);
+        UIComponents?.showToast?.(error.message || 'خطا در ارسال پاسخ', 'error');
+      } finally {
+        replySubmitBtn.disabled = false;
+        replySubmitBtn.classList.remove('is-loading');
+      }
+    });
+  };
+
+  const closeTicketDetail = () => {
+    if (!ticketDetailModal || ticketDetailModal.hidden) return;
+
+    const finish = () => {
+      ticketDetailModal.hidden = true;
+    };
+
+    ticketDetailModal.classList.remove('is-visible');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finish();
+    } else {
+      ticketDetailModal.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 350);
+    }
+  };
+
+  // Event Listeners for My Tickets
+  myTicketsToggle?.addEventListener('click', toggleMyTicketsSection);
+  myTicketsToggle?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleMyTicketsSection();
+    }
+  });
+
+  myTicketsRetry?.addEventListener('click', loadMyTickets);
+
+  // Filter buttons
+  document.querySelectorAll('.my-tickets-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.my-tickets-filter-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      currentFilter = btn.dataset.filter || 'all';
+      renderTickets();
+    });
+  });
+
+  // View ticket detail
+  myTicketsList?.addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('[data-view-ticket]');
+    if (viewBtn) {
+      const ticketId = viewBtn.dataset.viewTicket;
+      openTicketDetail(ticketId);
+    }
+  });
+
+  // Close ticket detail modal
+  ticketDetailCloseEls.forEach(el => {
+    el.addEventListener('click', closeTicketDetail);
+  });
+
+  ticketDetailModal?.addEventListener('click', (e) => {
+    if (e.target?.classList?.contains('ticket-detail-modal__backdrop')) {
+      closeTicketDetail();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ticketDetailModal && !ticketDetailModal.hidden) {
+      closeTicketDetail();
+    }
+  });
+
+  // Refresh tickets after submitting new ticket
+  const originalSupportFormSubmit = supportForm?.onsubmit;
+  supportForm?.addEventListener('submit', () => {
+    setTimeout(() => {
+      if (ticketsLoaded) {
+        loadMyTickets();
+      }
+    }, 1500);
+  });
+
   const sheetData = {
     wallet: {
       balance: '۳٬۵۰۰٬۰۰۰',
