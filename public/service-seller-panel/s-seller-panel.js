@@ -2385,6 +2385,12 @@ function renderComplimentaryPlan(planRaw) {
     });
   }
 
+  // تاریخ فعالسازی پلن
+  const planStartDateEl = document.getElementById('plan-start-date');
+  if (planStartDateEl) {
+    planStartDateEl.textContent = startLabel || '—';
+  }
+
   if (messageEl) {
     if (plan.note) {
       messageEl.textContent = plan.note;
@@ -2428,7 +2434,7 @@ function renderComplimentaryPlan(planRaw) {
   // نمایش یادداشت هدیه برای پلن‌های فعال
   if (giftNoteEl) {
     if (plan.activeNow) {
-      giftNoteEl.textContent = '🎁 این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
+      giftNoteEl.textContent = 'این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible');
     } else {
