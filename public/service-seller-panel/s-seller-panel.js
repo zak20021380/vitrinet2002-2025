@@ -4697,6 +4697,77 @@ if (elements.viewStoreBtn) {
     elements.serviceImageBtn.addEventListener('click', () => elements.serviceImageInput.click());
   }
 
+  // Service image preview handler
+  if (elements.serviceImageInput) {
+    elements.serviceImageInput.addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      const previewEl = document.getElementById('service-image-preview');
+      
+      if (file && previewEl) {
+        try {
+          const dataUrl = await this.fileToDataURL(file);
+          this.currentServiceImage = dataUrl;
+          
+          // Update preview
+          previewEl.classList.remove('is-empty');
+          previewEl.innerHTML = `
+            <img src="${dataUrl}" alt="پیش‌نمایش تصویر خدمت" />
+            <div class="image-preview__actions">
+              <button type="button" class="image-preview__action-btn image-preview__action-btn--delete" id="service-image-remove" aria-label="حذف تصویر">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
+            <div class="image-preview__info">
+              <span class="image-preview__info-text">${file.name}</span>
+              <span class="image-preview__info-size">${this.formatFileSize(file.size)}</span>
+            </div>
+          `;
+          
+          // Add remove button handler
+          const removeBtn = document.getElementById('service-image-remove');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+              this.currentServiceImage = '';
+              elements.serviceImageInput.value = '';
+              previewEl.classList.add('is-empty');
+              previewEl.innerHTML = `
+                <div class="image-preview__placeholder">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>پس از انتخاب، پیش‌نمایش تصویر اینجا نمایش داده می‌شود</span>
+                </div>
+              `;
+            });
+          }
+        } catch (err) {
+          console.error('service image preview failed', err);
+          this.currentServiceImage = '';
+        }
+      } else if (previewEl) {
+        this.currentServiceImage = '';
+        previewEl.classList.add('is-empty');
+        previewEl.innerHTML = `
+          <div class="image-preview__placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>پس از انتخاب، پیش‌نمایش تصویر اینجا نمایش داده می‌شود</span>
+          </div>
+        `;
+      }
+    });
+  }
+
   if (elements.portfolioImageBtn && elements.portfolioImageInput) {
     elements.portfolioImageBtn.addEventListener('click', () => elements.portfolioImageInput.click());
   }
@@ -6513,6 +6584,14 @@ async handlePortfolioFormSubmit() {
             reader.onerror = () => reject();
             reader.readAsDataURL(file);
         });
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 بایت';
+        const k = 1024;
+        const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
 
     // === NEW: VIP Settings Methods ===
