@@ -4140,7 +4140,8 @@ function normaliseServiceShopRecord(raw) {
     || raw.owner?.fullName 
     || raw.sellerName 
     || raw.fullName 
-    || raw.firstName && raw.lastName ? `${raw.firstName} ${raw.lastName}` : ''
+    || (raw.firstname && raw.lastname ? `${raw.firstname} ${raw.lastname}`.trim() : '')
+    || (raw.firstName && raw.lastName ? `${raw.firstName} ${raw.lastName}`.trim() : '')
     || '';
 
   // تاریخ ثبت‌نام
