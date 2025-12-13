@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hamburgerToggle = document.getElementById('hamburger-toggle');
   const hamburgerMenu = document.getElementById('hamburger-menu');
   const hamburgerBackdrop = document.getElementById('hamburger-backdrop');
+  const notificationFab = document.querySelector('.notification-fab');
 
   const setHamburgerState = (isOpen) => {
     if (!hamburgerToggle || !hamburgerMenu || !hamburgerBackdrop) return;
@@ -116,6 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hamburgerToggle.classList.toggle('is-open', isOpen);
     hamburgerToggle.setAttribute('aria-expanded', String(isOpen));
     document.body.classList.toggle('no-scroll', isOpen && window.innerWidth < 768);
+    if (notificationFab) {
+      notificationFab.classList.toggle('is-hidden-by-menu', isOpen);
+    }
   };
 
   const closeHamburger = () => setHamburgerState(false);
@@ -2536,12 +2540,16 @@ async function fetchInitialData() {
    * State Manager
    * ==============================
    */
-  const StateManager = {
-    currentTheme: 'dark',
-    currentRoute: '',
-    isModalOpen: false,
-    focusedElementBeforeModal: null,
-  };
+  const StateManager = Object.assign(
+    window.StateManager || {},
+    {
+      currentTheme: (window.StateManager && window.StateManager.currentTheme) || 'dark',
+      currentRoute: (window.StateManager && window.StateManager.currentRoute) || '',
+      isModalOpen: (window.StateManager && window.StateManager.isModalOpen) || false,
+      focusedElementBeforeModal: (window.StateManager && window.StateManager.focusedElementBeforeModal) || null,
+    }
+  );
+  window.StateManager = StateManager;
   /**
    * ==============================
    * UI Components & Helpers

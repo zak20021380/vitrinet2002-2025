@@ -1,3 +1,19 @@
+// Shared overlay state between modules (falls back to window)
+const overlayState = (() => {
+  if (typeof window !== 'undefined') {
+    window.StateManager = window.StateManager || {
+      isModalOpen: false,
+      focusedElementBeforeModal: null
+    };
+    return window.StateManager;
+  }
+
+  return {
+    isModalOpen: false,
+    focusedElementBeforeModal: null
+  };
+})();
+
 class UIComponents {
   static formatPersianNumber(num) {
     if (typeof num !== 'number') return num;
@@ -174,30 +190,30 @@ static showToast(message, type = 'info', duration = 4000) {
 }
 
 // Modal & Drawer Logic
-static _handleOverlay(overlay, trigger, isOpen) {
-  const body = document.body;
-  const mainContent = document.getElementById('app');
-  if (isOpen) {
-    StateManager.isModalOpen = true;
-    StateManager.focusedElementBeforeModal = document.activeElement;
-    overlay.classList.add('is-open');
-    body.classList.add('has-overlay');
-    mainContent.setAttribute('aria-hidden', 'true');
+  static _handleOverlay(overlay, trigger, isOpen) {
+    const body = document.body;
+    const mainContent = document.getElementById('app');
+    if (isOpen) {
+      overlayState.isModalOpen = true;
+      overlayState.focusedElementBeforeModal = document.activeElement;
+      overlay.classList.add('is-open');
+      body.classList.add('has-overlay');
+      mainContent.setAttribute('aria-hidden', 'true');
     const focusableElements = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
     overlay.addEventListener('keydown', (e) => this._trapFocus(e, firstFocusable, lastFocusable));
     if (firstFocusable) firstFocusable.focus();
-  } else {
-    StateManager.isModalOpen = false;
-    overlay.classList.remove('is-open');
-    body.classList.remove('has-overlay');
-    mainContent.removeAttribute('aria-hidden');
-    if (StateManager.focusedElementBeforeModal) {
-      StateManager.focusedElementBeforeModal.focus();
+    } else {
+      overlayState.isModalOpen = false;
+      overlay.classList.remove('is-open');
+      body.classList.remove('has-overlay');
+      mainContent.removeAttribute('aria-hidden');
+      if (overlayState.focusedElementBeforeModal) {
+        overlayState.focusedElementBeforeModal.focus();
+      }
     }
   }
-}
 
 static _trapFocus(e, firstFocusable, lastFocusable) {
   if (e.key !== 'Tab') return;
