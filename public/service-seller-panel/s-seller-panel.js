@@ -3569,7 +3569,10 @@ const Notifications = {
       badge: document.getElementById('notification-badge'),
       clearAll: document.getElementById('notif-clear-all'),
       empty: document.getElementById('notif-empty'),
-      markRead: document.getElementById('notif-mark-read')
+      markRead: document.getElementById('notif-mark-read'),
+      unreadCount: document.getElementById('notif-unread-count'),
+      unreadCountNumber: document.querySelector('#notif-unread-count .notif-unread-count__number'),
+      closeBtn: document.getElementById('notif-close-btn')
     };
     if (!this._els.btn || !this._els.panel) return;
 
@@ -3582,6 +3585,9 @@ const Notifications = {
     
     // بستن با کلیک روی backdrop
     this._els.backdrop?.addEventListener('click', () => this.close());
+    
+    // بستن با دکمه بستن
+    this._els.closeBtn?.addEventListener('click', () => this.close());
     
     // بستن با کلیک خارج از پنل
     document.addEventListener('click', (e) => {
@@ -3744,7 +3750,7 @@ const Notifications = {
     const unread = items.filter(n => !n.read).length;
     const LONG_BODY_LIMIT = 90;
 
-    // badge
+    // FAB badge
     if (this._els.badge) {
       if (unread > 0) {
         this._els.badge.textContent = unread > 99 ? '99+' : unread.toString();
@@ -3759,6 +3765,17 @@ const Notifications = {
 
     if (this._els.btn) {
       this._els.btn.classList.toggle('has-unread', unread > 0);
+    }
+
+    // Header unread count badge
+    if (this._els.unreadCount && this._els.unreadCountNumber) {
+      if (unread > 0) {
+        const displayCount = unread > 99 ? '۹۹+' : unread.toLocaleString('fa-IR');
+        this._els.unreadCountNumber.textContent = displayCount;
+        this._els.unreadCount.hidden = false;
+      } else {
+        this._els.unreadCount.hidden = true;
+      }
     }
 
     // لیست / حالت خالی
@@ -3869,6 +3886,10 @@ const Notifications = {
                 </div>
               </div>
               <div class="ticket-reply-form__actions">
+                <button type="button" class="ticket-reply-form__cancel notif-reply-cancel" aria-label="انصراف از پاسخ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <span>انصراف</span>
+                </button>
                 <button type="submit" class="ticket-reply-form__submit notif-reply-submit">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                   ارسال پاسخ
