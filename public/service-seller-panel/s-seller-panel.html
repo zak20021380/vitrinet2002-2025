@@ -395,10 +395,12 @@
                   </svg>
                   <span id="rank-category">آرایشگاه مردانه</span>
                 </div>
-                <button type="button" class="rank-card-v2__info-btn" aria-label="اطلاعات بیشتر">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                <button type="button" class="rank-card-v2__help-btn" id="rank-help-btn" aria-label="نحوه محاسبه رتبه" aria-haspopup="dialog">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
                   </svg>
+                  <span>نحوه سنجش</span>
                 </button>
               </div>
 
@@ -409,6 +411,12 @@
                     <span class="rank-card-v2__rank" id="current-rank">۱</span>
                     <span class="rank-card-v2__total">از <span id="total-sellers">۳</span></span>
                   </div>
+                </div>
+
+                <!-- Metrics Explanation -->
+                <div class="rank-card-v2__explanation">
+                  <span class="rank-card-v2__explanation-icon">📊</span>
+                  <span class="rank-card-v2__explanation-text">رتبه شما از ترکیب این ۴ معیار محاسبه می‌شود:</span>
                 </div>
 
                 <div class="rank-card-v2__metrics">
@@ -456,7 +464,7 @@
               <div class="rank-card-v2__actions">
                 <button type="button" id="rank-cta-btn" class="rank-card-v2__cta" data-route="top">
                   <span class="rank-card-v2__cta-pill">جدید</span>
-                  <span class="rank-card-v2__cta-text">مشاهده رتبه‌بندی من</span>
+                  <span class="rank-card-v2__cta-text">مقایسه با سایر فروشندگان</span>
                   <span class="rank-card-v2__cta-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
@@ -1212,19 +1220,98 @@
 
     
   </nav>
-  <div id="rank-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rank-modal-title" hidden>
-    <div class="modal-backdrop" data-dismiss="modal"></div>
-    <div class="modal-content card" role="document">
-        <div class="modal-header">
-            <h3 id="rank-modal-title" class="modal-title">جزئیات رتبه‌بندی</h3>
-            <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+  <div id="rank-modal" class="rank-help-modal" role="dialog" aria-modal="true" aria-labelledby="rank-modal-title" hidden>
+    <div class="rank-help-modal__backdrop" data-dismiss="modal"></div>
+    <div class="rank-help-modal__container" role="document">
+      <button type="button" class="rank-help-modal__close" data-dismiss="modal" aria-label="بستن">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <header class="rank-help-modal__header">
+        <div class="rank-help-modal__icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
         </div>
-        <div class="modal-body">
-            <p>رتبه شما بر اساس ترکیبی از تعداد مشتریان جدید، تعداد کل نوبت‌ها، و میانگین امتیازات شما در ۳۰ روز گذشته محاسبه می‌شود. فعال بودن و دریافت نظرات مثبت به بهبود رتبه شما کمک می‌کند.</p>
-            <p id="rank-modal-current"></p>
+        <h3 id="rank-modal-title" class="rank-help-modal__title">نحوه محاسبه رتبه شما</h3>
+        <p class="rank-help-modal__subtitle">رتبه‌بندی بر اساس ترکیب ۴ معیار کلیدی انجام می‌شود</p>
+      </header>
+
+      <div class="rank-help-modal__body">
+        <div class="rank-help-modal__factors">
+          <div class="rank-help-factor">
+            <div class="rank-help-factor__icon rank-help-factor__icon--rating">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div class="rank-help-factor__content">
+              <h4 class="rank-help-factor__title">امتیاز مشتریان</h4>
+              <p class="rank-help-factor__desc">میانگین امتیازات و نظرات مشتریان در ۳۰ روز اخیر</p>
+            </div>
+            <span class="rank-help-factor__weight">۲۵٪</span>
+          </div>
+
+          <div class="rank-help-factor">
+            <div class="rank-help-factor__icon rank-help-factor__icon--bookings">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </div>
+            <div class="rank-help-factor__content">
+              <h4 class="rank-help-factor__title">تعداد نوبت‌ها</h4>
+              <p class="rank-help-factor__desc">مجموع نوبت‌های تکمیل شده در ۳۰ روز اخیر</p>
+            </div>
+            <span class="rank-help-factor__weight">۲۵٪</span>
+          </div>
+
+          <div class="rank-help-factor">
+            <div class="rank-help-factor__icon rank-help-factor__icon--customers">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="rank-help-factor__content">
+              <h4 class="rank-help-factor__title">مشتریان فعال</h4>
+              <p class="rank-help-factor__desc">تعداد مشتریان یکتا که از خدمات شما استفاده کرده‌اند</p>
+            </div>
+            <span class="rank-help-factor__weight">۲۵٪</span>
+          </div>
+
+          <div class="rank-help-factor">
+            <div class="rank-help-factor__icon rank-help-factor__icon--wallet">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="5" width="20" height="14" rx="3"/>
+                <path d="M16 12h4"/>
+                <circle cx="16" cy="12" r="1.5"/>
+              </svg>
+            </div>
+            <div class="rank-help-factor__content">
+              <h4 class="rank-help-factor__title">اعتبار کیف پول</h4>
+              <p class="rank-help-factor__desc">موجودی اعتبار فروشگاه و سرمایه‌گذاری در رشد</p>
+            </div>
+            <span class="rank-help-factor__weight">۲۵٪</span>
+          </div>
         </div>
+
+        <div class="rank-help-modal__tips">
+          <h4 class="rank-help-modal__tips-title">💡 راهکارهای بهبود رتبه</h4>
+          <ul class="rank-help-modal__tips-list">
+            <li>از مشتریان بخواهید پس از دریافت خدمات، امتیاز ثبت کنند</li>
+            <li>نوبت‌های بیشتری را تایید و تکمیل کنید</li>
+            <li>با خدمات باکیفیت، مشتریان را به بازگشت ترغیب کنید</li>
+            <li>اعتبار کیف پول خود را افزایش دهید</li>
+          </ul>
+        </div>
+
+        <p class="rank-help-modal__status" id="rank-modal-current"></p>
+      </div>
+
+      <footer class="rank-help-modal__footer">
+        <button type="button" class="rank-help-modal__btn" data-dismiss="modal">متوجه شدم</button>
+      </footer>
     </div>
   </div>
   <div

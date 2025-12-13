@@ -4142,10 +4142,18 @@ if (elements.viewStoreBtn) {
   }
 
   // 7. Button click handlers with null checks
+  const rankHelpBtn = document.getElementById('rank-help-btn');
   const buttonHandlers = [
     {
       element: elements.rankCard,
       handler: () => UIComponents.openModal('rank-modal')
+    },
+    {
+      element: rankHelpBtn,
+      handler: (e) => {
+        e.stopPropagation(); // Prevent rank-card click
+        UIComponents.openModal('rank-modal');
+      }
     },
     {
       element: elements.bookingHistoryBtn,
