@@ -1,0 +1,947 @@
+/* ============================================
+   Reservation Modal V2 - Mobile-First Design
+   Professional, Modern, and Accessible
+   ============================================ */
+
+/* Modal Container */
+.resv-modal-v2 {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.resv-backdrop-v2 {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: resvFadeIn 0.25s ease;
+}
+
+@keyframes resvFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Bottom Sheet Container */
+.resv-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  max-height: 92vh;
+  background: linear-gradient(180deg, #1e1e22 0%, #161618 100%);
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: resvSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 
+    0 -8px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+@keyframes resvSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.resv-sheet__header {
+  flex-shrink: 0;
+  padding: 12px 20px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.resv-sheet__drag-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 auto 14px;
+}
+
+.resv-sheet__header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.resv-sheet__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resv-sheet__icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border-radius: 12px;
+  color: #a5b4fc;
+}
+
+.resv-sheet__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resv-sheet__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.resv-sheet__subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.resv-sheet__close {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resv-sheet__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.resv-sheet__close:active {
+  transform: scale(0.95);
+}
+
+/* Body */
+.resv-sheet__body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Days Section */
+.resv-days-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resv-days-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.resv-days-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.resv-day-btn {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.resv-day-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.resv-day-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+}
+
+.resv-day-btn__name {
+  white-space: nowrap;
+}
+
+.resv-day-btn__indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.resv-day-btn.has-pending .resv-day-btn__indicator {
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.resv-day-btn.has-cancelled .resv-day-btn__indicator {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.resv-date-display {
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+}
+
+/* Status Bar */
+.resv-status-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.resv-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.resv-status-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.resv-status-chip--booked .resv-status-chip__dot {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.resv-status-chip--pending .resv-status-chip__dot {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
+.resv-status-chip--cancelled .resv-status-chip__dot {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Card Sections */
+.resv-card-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.resv-card-section__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.resv-card-section__header svg {
+  color: #a5b4fc;
+}
+
+/* Service Select */
+.resv-select-wrap {
+  position: relative;
+}
+
+.resv-select-v2 {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resv-select-v2:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.resv-select-v2:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.resv-select-v2 option {
+  background: #1c1c1e;
+  color: #fff;
+  padding: 12px;
+}
+
+.resv-select-arrow {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+/* Add Time Section */
+.resv-add-section {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border-color: rgba(99, 102, 241, 0.15);
+}
+
+.resv-add-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.resv-time-input-wrap {
+  flex: 1;
+}
+
+.resv-time-input-v2 {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+}
+
+.resv-time-input-v2:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.resv-time-input-v2:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.resv-time-input-v2::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.resv-add-btn-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+  height: 50px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.resv-add-btn-v2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+}
+
+.resv-add-btn-v2:active {
+  transform: translateY(0);
+}
+
+.resv-add-hint {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+/* Time Slots Section */
+.resv-slots-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resv-slots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resv-slots-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.resv-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+/* Time Slot Chips - V2 */
+.resv-slots-grid .resv-time-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.resv-slots-grid .resv-time-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.resv-slots-grid .resv-time-chip .t {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  direction: ltr;
+}
+
+.resv-slots-grid .resv-time-chip.booked {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  cursor: not-allowed;
+}
+
+.resv-slots-grid .resv-time-chip.booked .badge-booked {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.resv-slots-grid .resv-time-chip.pending {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.resv-slots-grid .resv-time-chip.pending .badge-pending {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.resv-slots-grid .resv-time-chip.cancelled-available {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.05) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+  border-style: dashed;
+}
+
+/* Empty State */
+.resv-slots-grid:empty::before {
+  content: 'هنوز ساعتی تعریف نشده';
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+/* Footer */
+.resv-sheet__footer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.resv-btn-cancel {
+  flex: 1;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resv-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.resv-btn-save {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.resv-btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+}
+
+.resv-btn-save:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+
+/* Tablet and larger */
+@media (min-width: 640px) {
+  .resv-modal-v2 {
+    align-items: center;
+  }
+  
+  .resv-sheet {
+    max-height: 85vh;
+    border-radius: 24px;
+    margin: 20px;
+    animation: resvScaleIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  
+  @keyframes resvScaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .resv-sheet__drag-handle {
+    display: none;
+  }
+  
+  .resv-day-btn {
+    min-width: 80px;
+    padding: 14px 16px;
+  }
+  
+  .resv-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+}
+
+/* Small mobile */
+@media (max-width: 380px) {
+  .resv-sheet__header {
+    padding: 10px 16px 14px;
+  }
+  
+  .resv-sheet__icon {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .resv-sheet__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .resv-sheet__title {
+    font-size: 1rem;
+  }
+  
+  .resv-sheet__body {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .resv-day-btn {
+    min-width: 64px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .resv-status-chip {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+  
+  .resv-card-section {
+    padding: 12px;
+  }
+  
+  .resv-card-section__header {
+    font-size: 0.8rem;
+  }
+  
+  .resv-select-v2 {
+    padding: 12px 40px 12px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .resv-time-input-v2 {
+    height: 46px;
+    font-size: 1rem;
+  }
+  
+  .resv-add-btn-v2 {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+  }
+  
+  .resv-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .resv-slots-grid .resv-time-chip {
+    padding: 10px 6px;
+    min-height: 54px;
+  }
+  
+  .resv-slots-grid .resv-time-chip .t {
+    font-size: 0.9rem;
+  }
+  
+  .resv-sheet__footer {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  
+  .resv-btn-cancel,
+  .resv-btn-save {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 320px) {
+  .resv-day-btn {
+    min-width: 58px;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .resv-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .resv-add-row {
+    flex-direction: column;
+  }
+  
+  .resv-add-btn-v2 {
+    width: 100%;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .resv-sheet {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .resv-sheet__body {
+    padding: 12px 20px;
+  }
+  
+  .resv-days-scroll {
+    padding: 2px 0 6px;
+  }
+  
+  .resv-day-btn {
+    padding: 8px 12px;
+  }
+  
+  .resv-status-bar {
+    padding: 6px 0;
+  }
+  
+  .resv-card-section {
+    padding: 10px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .resv-sheet,
+  .resv-backdrop-v2 {
+    animation: none !important;
+  }
+  
+  .resv-day-btn,
+  .resv-add-btn-v2,
+  .resv-btn-save,
+  .resv-slots-grid .resv-time-chip {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .resv-sheet {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .resv-day-btn.active {
+    border-width: 2px;
+  }
+  
+  .resv-card-section {
+    border-width: 2px;
+  }
+}
+
+
+/* ============================================
+   Additional Polish & Micro-interactions
+   ============================================ */
+
+/* Smooth scroll behavior */
+.resv-sheet__body {
+  scroll-behavior: smooth;
+}
+
+/* Active state for day buttons */
+.resv-day-btn:active {
+  transform: scale(0.96);
+}
+
+/* Focus states for accessibility */
+.resv-day-btn:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline-offset: 2px;
+}
+
+.resv-select-v2:focus-visible,
+.resv-time-input-v2:focus-visible {
+  outline: none;
+}
+
+.resv-add-btn-v2:focus-visible,
+.resv-btn-save:focus-visible,
+.resv-btn-cancel:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+/* Loading state for slots */
+.resv-slots-grid.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.resv-slots-grid.is-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: shimmerV2 1.5s infinite;
+}
+
+@keyframes shimmerV2 {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Delete animation for time chips */
+.resv-slots-grid .resv-time-chip.is-deleting {
+  animation: chipDelete 0.3s ease forwards;
+}
+
+@keyframes chipDelete {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Add animation for new time chips */
+.resv-slots-grid .resv-time-chip.is-new {
+  animation: chipAdd 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes chipAdd {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ripple effect on buttons */
+.resv-add-btn-v2,
+.resv-btn-save {
+  position: relative;
+  overflow: hidden;
+}
+
+.resv-add-btn-v2::before,
+.resv-btn-save::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.resv-add-btn-v2:active::before,
+.resv-btn-save:active::before {
+  transform: scale(2);
+  opacity: 1;
+  transition: transform 0s, opacity 0s;
+}
+
+/* Scrollbar styling for days scroll */
+.resv-days-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.resv-days-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.resv-days-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.resv-days-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+
+/* Touch feedback */
+@media (hover: none) {
+  .resv-day-btn:active,
+  .resv-slots-grid .resv-time-chip:active {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .resv-day-btn.active:active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(139, 92, 246, 0.3) 100%);
+  }
+}
+
+/* Safe area padding for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .resv-sheet__footer {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .resv-sheet {
+    background: linear-gradient(180deg, #1a1a1d 0%, #121214 100%);
+  }
+}
+
+/* Print styles - hide modal */
+@media print {
+  .resv-modal-v2 {
+    display: none !important;
+  }
+}

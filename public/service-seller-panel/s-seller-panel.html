@@ -1332,102 +1332,157 @@
   </div>
 
 
-<div id="resv-modal" class="modal resv-modal" role="dialog" aria-modal="true" aria-labelledby="resv-title" hidden>
-  <div class="modal-backdrop" data-dismiss="modal"></div>
-  <div class="modal-content card resv-card" role="document">
-<div class="modal-header resv-header">
-  <div class="resv-title-wrap">
-    <h3 id="resv-title" class="modal-title">نوبت‌دهی</h3>
-
-    <!-- راهنما -->
-    <div class="resv-help" role="note" aria-live="polite">
-      <span class="resv-help-icon" aria-hidden="true">ℹ️</span>
-      راهنما: برای حذف یک ساعت، دوبار روی آن کلیک/تاچ کنید. (ساعت‌های رزرو‌شده قابل حذف نیستند)
+<!-- Reservation Modal - Redesigned Mobile-First -->
+<div id="resv-modal" class="modal resv-modal-v2" role="dialog" aria-modal="true" aria-labelledby="resv-title" hidden>
+  <div class="modal-backdrop resv-backdrop-v2" data-dismiss="modal"></div>
+  <div class="resv-sheet" role="document">
+    
+    <!-- Header -->
+    <div class="resv-sheet__header">
+      <div class="resv-sheet__drag-handle" aria-hidden="true"></div>
+      <div class="resv-sheet__header-content">
+        <div class="resv-sheet__title-row">
+          <div class="resv-sheet__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="resv-sheet__title-wrap">
+            <h3 id="resv-title" class="resv-sheet__title">مدیریت نوبت‌ها</h3>
+            <span id="resv-today" class="resv-sheet__subtitle">—</span>
+          </div>
+        </div>
+        <button type="button" class="resv-sheet__close" data-dismiss="modal" aria-label="بستن">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <div id="resv-today" class="resv-today">—</div>
-  </div>
-
-  <button type="button" class="btn-icon modal-close-btn" data-dismiss="modal" aria-label="بستن">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  </button>
-</div>
-
-
-    <div class="resv-body">
-      <!-- هفتهٔ فارسی -->
-      <div id="resv-week" class="resv-week" role="tablist" aria-label="انتخاب روز هفته">
-        <button type="button" class="resv-day-chip" data-day="6">شنبه</button>
-        <button type="button" class="resv-day-chip" data-day="0">یکشنبه</button>
-        <button type="button" class="resv-day-chip" data-day="1">دوشنبه</button>
-        <button type="button" class="resv-day-chip" data-day="2">سه‌شنبه</button>
-        <button type="button" class="resv-day-chip" data-day="3">چهارشنبه</button>
-        <button type="button" class="resv-day-chip" data-day="4">پنجشنبه</button>
-        <button type="button" class="resv-day-chip" data-day="5">جمعه</button>
+    <!-- Body -->
+    <div class="resv-sheet__body">
+      
+      <!-- Days Selector -->
+      <div class="resv-days-section">
+        <div id="resv-week" class="resv-days-scroll" role="tablist" aria-label="انتخاب روز هفته">
+          <button type="button" class="resv-day-btn" data-day="6">
+            <span class="resv-day-btn__name">شنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="0">
+            <span class="resv-day-btn__name">یکشنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="1">
+            <span class="resv-day-btn__name">دوشنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="2">
+            <span class="resv-day-btn__name">سه‌شنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="3">
+            <span class="resv-day-btn__name">چهارشنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="4">
+            <span class="resv-day-btn__name">پنجشنبه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+          <button type="button" class="resv-day-btn" data-day="5">
+            <span class="resv-day-btn__name">جمعه</span>
+            <span class="resv-day-btn__indicator"></span>
+          </button>
+        </div>
+        <div id="resv-date-hint" class="resv-date-display">—</div>
       </div>
 
-      <!-- تاریخ هدف آن روز به شمسی -->
-      <div id="resv-date-hint" class="resv-date-hint">—</div>
+      <!-- Status Legend -->
+      <div class="resv-status-bar" id="resv-legend">
+        <div class="resv-status-chip resv-status-chip--booked">
+          <span class="resv-status-chip__dot"></span>
+          <span>رزرو شده</span>
+        </div>
+        <div class="resv-status-chip resv-status-chip--pending">
+          <span class="resv-status-chip__dot"></span>
+          <span>در انتظار</span>
+        </div>
+        <div class="resv-status-chip resv-status-chip--cancelled">
+          <span class="resv-status-chip__dot"></span>
+          <span>لغو شده</span>
+        </div>
+      </div>
 
-
-      <!-- Legend: وضعیت هر ساعت -->
-<div class="resv-legend" id="resv-legend">
-  <span class="legend-chip st-booked">رزرو شده</span>
-  <span class="legend-chip st-pending">در انتظار تایید</span>
-  <span class="legend-chip st-cancelled">لغو شده</span>
-</div>
-
-
-      <!-- انتخاب خدمت -->
-      <div class="resv-service-select">
-        <label class="resv-service-select__label" for="resv-service-dropdown">
+      <!-- Service Selection Card -->
+      <div class="resv-card-section">
+        <div class="resv-card-section__header">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
           </svg>
-          انتخاب خدمت
-        </label>
-        <div class="resv-service-select__wrapper">
-          <select id="resv-service-dropdown" class="resv-service-select__dropdown">
+          <span>انتخاب خدمت</span>
+        </div>
+        <div class="resv-select-wrap">
+          <select id="resv-service-dropdown" class="resv-select-v2">
             <option value="">همه خدمات</option>
           </select>
-          <div class="resv-service-select__arrow">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <div class="resv-select-arrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </div>
         </div>
-        <p class="resv-service-select__hint">خدمتی که می‌خواهید برای آن نوبت تعریف کنید را انتخاب کنید</p>
       </div>
 
-      <!-- افزودن ساعت -->
-      <div class="resv-add">
-        <label class="sr-only" for="resv-time-input">ساعت</label>
-        <input id="resv-time-input" type="time" inputmode="numeric" step="300"
-               pattern="^([01]\\d|2[0-3]):([0-5]\\d)$" dir="ltr" placeholder="HH:MM" />
-        <button id="resv-add-btn" type="button" class="btn-primary btn-sm">افزودن</button>
+      <!-- Add Time Card -->
+      <div class="resv-card-section resv-add-section">
+        <div class="resv-card-section__header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>افزودن ساعت جدید</span>
+        </div>
+        <div class="resv-add-row">
+          <div class="resv-time-input-wrap">
+            <input id="resv-time-input" type="time" inputmode="numeric" step="300" class="resv-time-input-v2" dir="ltr" placeholder="HH:MM" />
+          </div>
+          <button id="resv-add-btn" type="button" class="resv-add-btn-v2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>افزودن</span>
+          </button>
+        </div>
+        <p class="resv-add-hint">برای حذف، دوبار روی ساعت بزنید</p>
       </div>
 
-      <!-- لیست ساعات ثبت‌شده -->
-      <div id="resv-times" class="resv-times" role="list"></div>
-
-
-      
-
-      <!-- اکشن‌ها -->
-      <div class="resv-actions">
- 
-        <button id="resv-save" type="button" class="btn-primary">ذخیره</button>
+      <!-- Time Slots Grid -->
+      <div class="resv-slots-section">
+        <div class="resv-slots-header">
+          <span class="resv-slots-title">ساعت‌های تعریف شده</span>
+        </div>
+        <div id="resv-times" class="resv-slots-grid" role="list"></div>
       </div>
-
-      
-
-      <!-- شیت کپی -->
 
     </div>
+
+    <!-- Footer Actions -->
+    <div class="resv-sheet__footer">
+      <button type="button" class="resv-btn-cancel" data-dismiss="modal">انصراف</button>
+      <button id="resv-save" type="button" class="resv-btn-save">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>ذخیره تغییرات</span>
+      </button>
+    </div>
+
   </div>
 </div>
 

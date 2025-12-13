@@ -7920,7 +7920,8 @@ loadCustomers();
 
   function updateDayIndicators() {
     const bookings = window.MOCK_DATA?.bookings || [];
-    const chips = document.querySelectorAll('#resv-week .resv-day-chip');
+    // Support both old (.resv-day-chip) and new (.resv-day-btn) selectors
+    const chips = document.querySelectorAll('#resv-week .resv-day-btn, #resv-week .resv-day-chip');
     chips.forEach(chip => {
       const day = parseInt(chip.dataset.day, 10);
       chip.classList.remove('has-pending', 'has-cancelled');
@@ -7994,7 +7995,7 @@ loadCustomers();
   // tabs (weekdays)
   function selectDay(idx) {
     state.selectedIdx = idx;
-    $$('#resv-week .resv-day-chip').forEach((b, i) => b.classList.toggle('active', i === idx));
+    $$('#resv-week .resv-day-btn, #resv-week .resv-day-chip').forEach((b, i) => b.classList.toggle('active', i === idx));
     updateDateHint();
     renderTimes();
   }
@@ -8315,7 +8316,7 @@ function cleanScheduleData() {
     el('open-reservations-btn')?.addEventListener('click', openModal);
 
     // تب‌های روزهای هفته
-    $$('#resv-week .resv-day-chip').forEach((b, i) => b.addEventListener('click', () => selectDay(i)));
+    $$('#resv-week .resv-day-btn, #resv-week .resv-day-chip').forEach((b, i) => b.addEventListener('click', () => selectDay(i)));
 
     // انتخاب خدمت
     initServiceDropdown();
