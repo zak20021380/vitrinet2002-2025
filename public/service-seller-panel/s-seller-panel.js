@@ -905,16 +905,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lastName = sellerData.lastname || sellerData.lastName || '';
     const fullName = `${firstName} ${lastName}`.trim() || 'فروشنده عزیز';
     
+    // Helper: Get store name from multiple possible fields
+    const getStoreName = (data) => {
+      return (
+        data?.storename ||        // Primary field used in localStorage (most common)
+        data?.shopname || 
+        data?.shopName || 
+        data?.storeName ||
+        data?.title ||            // Sometimes used as store name
+        data?.displayName ||      // Alternative field
+        data?.branchName ||       // Alternative field
+        data?.name ||             // Fallback
+        ''
+      ).toString().trim();
+    };
+    
     // Helper: Convert to Persian numbers
     const toPersianNum = (num) => {
       const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
       return String(num).replace(/[0-9]/g, d => persianDigits[parseInt(d)]);
     };
     
+    // Helper: Get join date from multiple possible fields
+    const getJoinDate = (data) => {
+      return (
+        data?.createdAt ||
+        data?.created_at ||
+        data?.joinDate ||
+        data?.join_date ||
+        data?.membershipDate ||
+        data?.memberSince ||
+        data?.registeredAt ||
+        data?.registered_at ||
+        null
+      );
+    };
+    
     // Helper: Format date to Jalali
     const formatJalaliDate = (dateStr) => {
       if (!dateStr) return '—';
-      const date = new Date(dateStr);
+      
+      // Handle different date formats
+      let date;
+      if (typeof dateStr === 'string') {
+        // Try parsing as ISO string or other formats
+        date = new Date(dateStr);
+      } else if (dateStr instanceof Date) {
+        date = dateStr;
+      } else if (typeof dateStr === 'number') {
+        date = new Date(dateStr);
+      } else {
+        return '—';
+      }
+      
       if (isNaN(date.getTime())) return '—';
       
       const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
@@ -949,7 +992,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (avatarText) avatarText.textContent = firstName.charAt(0) || lastName.charAt(0) || 'ف';
     if (nameEl) nameEl.textContent = fullName;
-    if (shopEl) shopEl.textContent = sellerData.shopname || sellerData.shopName || 'فروشگاه شما';
+    // Shop label - use storename if available, otherwise show default
+    if (shopEl) {
+      const shopName = getStoreName(sellerData);
+      shopEl.textContent = shopName || 'فروشگاه شما';
+    }
     
     // Plan badge
     if (planBadge) {
@@ -974,7 +1021,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalCustomersEl = document.getElementById('profile-modal-total-customers');
     const ratingEl = document.getElementById('profile-modal-rating');
     
-    if (joinDateEl) joinDateEl.textContent = formatJalaliDate(sellerData.createdAt || sellerData.created_at);
+    if (joinDateEl) {
+      const joinDate = getJoinDate(sellerData);
+      joinDateEl.textContent = formatJalaliDate(joinDate);
+    }
     if (totalBookingsEl) totalBookingsEl.textContent = toPersianNum(sellerData.totalBookings || sellerData.bookingsTotal || 0);
     if (totalCustomersEl) totalCustomersEl.textContent = toPersianNum(sellerData.totalCustomers || sellerData.ucw30 || 0);
     if (ratingEl) ratingEl.textContent = toPersianNum((sellerData.rating || sellerData.avgRating || 0).toFixed(1));
@@ -986,9 +1036,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cityEl = document.getElementById('profile-modal-city');
     const shopurlEl = document.getElementById('profile-modal-shopurl');
     
-    // Store Name
+    // Store Name - Use helper function to get store name
     if (storeNameEl) {
-      const storeName = sellerData.shopname || sellerData.shopName || sellerData.storeName || '';
+      const storeName = getStoreName(sellerData);
       storeNameEl.textContent = storeName || '—';
     }
     
@@ -2796,7 +2846,11 @@ async function fetchInitialData() {
           phone: seller.phone,
           address: seller.address,
           startTime: seller.startTime || '',
-          endTime: seller.endTime || ''
+          endTime: seller.endTime || '',
+          createdAt: seller.createdAt || seller.created_at || seller.joinDate || seller.join_date || seller.membershipDate || null,
+          rating: seller.rating || seller.avgRating || 0,
+          totalBookings: seller.totalBookings || seller.bookingsTotal || 0,
+          totalCustomers: seller.totalCustomers || seller.ucw30 || 0
         };
       localStorage.setItem('seller', JSON.stringify(store));
       
@@ -2874,9 +2928,17 @@ async function fetchInitialData() {
         phone: '۰۹۱۲۳۴۵۶۷۸۹',
         address: 'آدرس نامشخص',
         startTime: '09:00',
-        endTime: '18:00'
+        endTime: '18:00',
+        createdAt: new Date().toISOString(), // Use current date as fallback
+        rating: 0,
+        totalBookings: 0,
+        totalCustomers: 0
       };
     const storedSeller = JSON.parse(localStorage.getItem('seller') || 'null') || defaultSeller;
+    // Preserve existing createdAt if available, otherwise use default
+    if (!storedSeller.createdAt && !storedSeller.created_at) {
+      storedSeller.createdAt = defaultSeller.createdAt;
+    }
     localStorage.setItem('seller', JSON.stringify(storedSeller));
 
     const setText = (id, text) => {
