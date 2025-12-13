@@ -216,84 +216,87 @@
               </article>
             </section>
 
-<!-- Preview: Hero (بالای داشبورد) -->
-<section class="plan-hero card" id="plan-hero" aria-label="وضعیت پلن فروشنده" aria-hidden="true" hidden>
-      <div class="plan-hero-bg" aria-hidden="true"></div>
-
-    <div class="plan-hero-content">
-      <div class="plan-hero-top">
-        <div>
-          <h3 class="plan-hero-title">پلن فعال شما</h3>
-          <p class="plan-hero-subtext" id="plan-hero-subtext">
-            وضعیت پلن رایگان فروشگاه در حال بارگذاری است.
-          </p>
-          <div class="plan-gift-note" id="plan-gift-note">این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.</div>
-        </div>
-        <span class="plan-tier-badge" id="plan-tier"></span>
+<!-- Plan Hero V2 - وضعیت پلن فروشنده -->
+<section class="plan-hero" id="plan-hero" aria-label="وضعیت پلن فروشنده" aria-hidden="true" hidden>
+  <div class="plan-hero-bg" aria-hidden="true"></div>
+  
+  <div class="plan-hero-content">
+    <!-- Header -->
+    <div class="plan-hero-top">
+      <div>
+        <h3 class="plan-hero-title">پلن فعال شما</h3>
+        <p class="plan-hero-subtext" id="plan-hero-subtext">
+          وضعیت پلن رایگان فروشگاه در حال بارگذاری است.
+        </p>
+        <div class="plan-gift-note" id="plan-gift-note">این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.</div>
       </div>
+      <span class="plan-tier-badge" id="plan-tier">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span id="plan-tier-text"></span>
+      </span>
+    </div>
 
-      <div class="plan-hero-highlight" role="status" aria-live="polite">
-        <div class="plan-hero-highlight__text">
-          <p class="plan-hero-message" id="plan-hero-message">
-            اگر پلن فعالی نداشته باشید یا دسترسی توسط مدیریت غیرفعال شده باشد، از همین بخش اطلاع‌رسانی می‌شود.
-          </p>
+    <!-- Alert/Message Section -->
+    <div class="plan-hero-highlight" role="status" aria-live="polite">
+      <div class="plan-hero-highlight__text">
+        <p class="plan-hero-message" id="plan-hero-message">
+          دوره پلن به پایان رسیده است. برای ادامه از بخش «پلن‌ها» پلن جدیدی انتخاب و فعال کنید.
+        </p>
+      </div>
+      
+      <!-- Meta Info Grid -->
       <div class="plan-hero-meta" role="list">
-            <div class="meta-item" role="listitem">
-              <div class="meta-text">
-                <span>پلن هدیه</span>
-                <strong id="plan-name"></strong>
-              </div>
-            </div>
-            <div class="meta-item" role="listitem">
-              <svg class="icon-clock" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
-              </svg>
-              <div class="meta-text">
-                <span>مانده</span>
-                <strong id="plan-days-left"></strong>
-              </div>
-            </div>
-            <div class="meta-item" role="listitem">
-              <div class="meta-text">
-                <span>انقضا</span>
-                <strong id="plan-expiry"></strong>
-              </div>
-            </div>
-            <div class="meta-item meta-chip" role="listitem">
-              <span class="meta-label">وضعیت</span>
-              <strong id="plan-status-chip" class="chip"></strong>
-            </div>
+        <div class="meta-item" role="listitem">
+          <div class="meta-text">
+            <span>پلن هدیه</span>
+            <strong id="plan-name">پلن آماتور</strong>
           </div>
         </div>
-      </div>
-
-      <div class="plan-hero-progress" aria-label="پیشرفت دوره">
-        <div
-          class="progress-bar"
-          id="plan-progress"
-          role="progressbar"
-          aria-label="پیشرفت پلن رایگان"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="0"
-          aria-valuetext="۰ درصد استفاده شده"
-        >
-          <span id="plan-progress-bar"></span>
+        <div class="meta-item" role="listitem">
+          <div class="meta-text">
+            <span>مانده</span>
+            <strong id="plan-days-left">۰ روز</strong>
+          </div>
         </div>
-        <div class="progress-legend">
-          <span>روز استفاده‌شده: <b id="plan-used"></b></span>
-          <span>روز باقی‌مانده از هدیه: <b id="plan-left"></b></span>
+        <div class="meta-item" role="listitem">
+          <div class="meta-text">
+            <span>انقضا</span>
+            <strong id="plan-expiry">۱۴۰۴/۰۹/۱۶</strong>
+          </div>
         </div>
-      </div>
-
-      <div class="plan-hero-footer">
-        <ul class="plan-hero-perks" aria-label="مزایای پلن" id="plan-hero-perks"></ul>
-        <div class="plan-hero-actions">
-          <button type="button" class="btn-renew" id="plan-renew-btn">تمدید / ارتقا</button>
+        <div class="meta-item meta-chip" role="listitem">
+          <span class="meta-label">وضعیت</span>
+          <strong id="plan-status-chip" class="chip">پلن رایگان منقضی شده</strong>
         </div>
       </div>
     </div>
+
+    <!-- Progress Bar -->
+    <div class="plan-hero-progress" aria-label="پیشرفت دوره">
+      <div class="progress-bar" id="plan-progress" role="progressbar" aria-label="پیشرفت پلن رایگان" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-valuetext="۱۰۰ درصد استفاده شده">
+        <span id="plan-progress-bar" style="width: 100%"></span>
+      </div>
+      <div class="progress-legend">
+        <span>روز استفاده‌شده: <b id="plan-used">۱۰ روز (۱۰۰٪)</b></span>
+        <span>روز باقی‌مانده از هدیه: <b id="plan-left">۰ روز</b></span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="plan-hero-footer">
+      <ul class="plan-hero-perks" aria-label="مزایای پلن" id="plan-hero-perks"></ul>
+      <div class="plan-hero-actions">
+        <button type="button" class="btn-renew" id="plan-renew-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+          </svg>
+          تمدید / ارتقا
+        </button>
+      </div>
+    </div>
+  </div>
 </section>
 
 
