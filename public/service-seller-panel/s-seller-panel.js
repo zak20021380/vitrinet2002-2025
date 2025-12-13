@@ -4030,7 +4030,7 @@ if (dismissTarget) {
 
 
 
-}, { passive: true });
+}, { passive: false });
 
 
 
