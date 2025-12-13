@@ -2253,6 +2253,7 @@ function renderComplimentaryPlan(planRaw) {
   const planCtaBtn = document.getElementById('plan-renew-btn');
   const planNameEl = document.getElementById('plan-name');
   const progressTrack = document.getElementById('plan-progress');
+  const giftNoteEl = document.getElementById('plan-gift-note');
 
   const hasAnyPlanLifecycle = plan.activeNow || plan.isActive || plan.hasExpired || plan.startDate || plan.endDate;
   const planlessNudge = !plansDisabled && !hasAnyPlanLifecycle;
@@ -2275,20 +2276,40 @@ function renderComplimentaryPlan(planRaw) {
   bindPlanHeroActions();
 
   if (tierEl) {
-    const tierLabel = planlessNudge
-      ? 'نیاز به انتخاب پلن'
-      : (plan.title ? `پلن «${plan.title}» غیرفعال است` : 'پلن رایگان غیرفعال شده است');
+    let tierLabel;
+    if (planlessNudge) {
+      tierLabel = 'نیاز به انتخاب پلن';
+    } else if (plan.activeNow) {
+      tierLabel = plan.title ? `پلن «${plan.title}» فعال است` : 'پلن رایگان فعال است';
+    } else if (plan.hasExpired) {
+      tierLabel = plan.title ? `پلن «${plan.title}» منقضی شده` : 'پلن رایگان منقضی شده است';
+    } else if (plan.isActive) {
+      tierLabel = plan.title ? `پلن «${plan.title}» در انتظار شروع` : 'پلن رایگان در انتظار شروع';
+    } else {
+      tierLabel = plan.title ? `پلن «${plan.title}» غیرفعال است` : 'پلن رایگان غیرفعال شده است';
+    }
     tierEl.textContent = tierLabel;
   }
 
   if (planNameEl) {
-    planNameEl.textContent = planlessNudge ? 'در انتظار انتخاب پلن' : (plan.title || 'پلن هدیه غیرفعال شده');
+    let planNameLabel;
+    if (planlessNudge) {
+      planNameLabel = 'در انتظار انتخاب پلن';
+    } else if (plan.activeNow) {
+      planNameLabel = plan.title || 'پلن هدیه فعال';
+    } else {
+      planNameLabel = plan.title || 'پلن هدیه غیرفعال شده';
+    }
+    planNameEl.textContent = planNameLabel;
   }
 
   if (planCtaBtn) {
     if (planlessNudge) {
       planCtaBtn.textContent = 'مشاهده و خرید پلن';
       planCtaBtn.setAttribute('aria-label', 'مشاهده و خرید پلن مناسب کسب‌وکار');
+    } else if (plan.activeNow) {
+      planCtaBtn.textContent = 'مشاهده پروفایل فروشنده';
+      planCtaBtn.setAttribute('aria-label', 'مشاهده پروفایل فروشنده');
     } else {
       planCtaBtn.textContent = 'فعالسازی مجدد / ارتقا';
       planCtaBtn.setAttribute('aria-label', 'فعالسازی مجدد یا ارتقای پلن متوقف‌شده');
@@ -2337,11 +2358,12 @@ function renderComplimentaryPlan(planRaw) {
     if (planlessNudge) {
       statusChip.textContent = 'پلن انتخاب نشده است';
     } else if (plan.activeNow) {
-      statusChip.textContent = 'دسترسی پلن متوقف شده است';
+      statusChip.classList.add('chip-live');
+      statusChip.textContent = 'تایید شده';
     } else if (plan.hasExpired) {
       statusChip.textContent = 'پلن رایگان منقضی شده';
     } else if (plan.isActive) {
-      statusChip.textContent = 'پلن رایگان در انتظار شروع (غیرفعال)';
+      statusChip.textContent = 'پلن رایگان در انتظار شروع';
     } else {
       statusChip.textContent = 'پلن رایگان غیرفعال';
     }
@@ -2369,12 +2391,13 @@ function renderComplimentaryPlan(planRaw) {
     } else if (planlessNudge) {
       messageEl.innerHTML = 'هیچ پلنی برای فروشگاه فعال نیست و دسترسی‌ها متوقف شده‌اند. برای فعال شدن همه قابلیت‌ها، از بخش «<a href="#/plans" class="plan-link">پلن‌ها</a>» یکی از گزینه‌ها را انتخاب کنید.';
     } else if (plan.activeNow) {
-      messageEl.textContent = 'پلن رایگان شما از سمت مدیریت غیرفعال شده است. برای فعال‌سازی مجدد از بخش «پلن‌ها» اقدام کنید یا با پشتیبانی در ارتباط باشید.';
+      const remainingText = remainingDays != null ? `${faNumber(remainingDays)} روز` : '';
+      messageEl.innerHTML = `🎉 این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.${remainingText ? ` <strong>${remainingText}</strong> از دوره پلن باقی مانده است.` : ''}`;
     } else if (plan.hasExpired) {
       messageEl.textContent = 'دوره پلن به پایان رسیده است. برای ادامه از بخش «پلن‌ها» پلن جدیدی انتخاب و فعال کنید.';
     } else if (plan.isActive) {
       const startText = startLabel ? `از ${startLabel}` : 'به‌زودی';
-      messageEl.textContent = `پلن رایگان شما ${startText} فعال می‌شود اما در حال حاضر غیرفعال است. هنگام شروع، همینجا اطلاع‌رسانی خواهد شد.`;
+      messageEl.textContent = `پلن رایگان شما ${startText} فعال می‌شود. هنگام شروع، همینجا اطلاع‌رسانی خواهد شد.`;
     } else if (plansDisabled) {
       messageEl.textContent = 'پلن رایگان موقتاً از سمت مدیریت غیرفعال است. با تغییر وضعیت، اطلاع‌رسانی می‌شود.';
     } else {
@@ -2384,13 +2407,13 @@ function renderComplimentaryPlan(planRaw) {
 
   let subtext = 'وضعیت پلن رایگان توسط تیم مدیریت ویترینت کنترل می‌شود و فعلاً غیرفعال است. برای پیگیری با پشتیبانی در ارتباط باشید.';
   if (plan.activeNow) {
-    subtext = 'دسترسی پلن متوقف شده است و تا فعال‌سازی مجدد امکان استفاده کامل وجود ندارد.';
+    subtext = 'شما به تمام امکانات پلن دسترسی دارید. از خدمات و نوبت‌دهی استفاده کنید.';
   } else if (plan.hasExpired) {
     subtext = 'پلن قبلی منقضی شده است. از بخش «پلن‌ها» یکی از گزینه‌ها را انتخاب کنید تا دسترسی کامل دوباره فعال شود.';
   } else if (plan.isActive) {
     subtext = startLabel
-      ? `پلن رایگان شما از ${startLabel} فعال می‌شود و تا آن زمان غیرفعال باقی می‌ماند.`
-      : 'پلن رایگان شما زمان‌بندی شده است و تا شروع دوره غیرفعال خواهد بود.';
+      ? `پلن رایگان شما از ${startLabel} فعال می‌شود.`
+      : 'پلن رایگان شما زمان‌بندی شده است و به‌زودی فعال خواهد شد.';
   } else if (plansDisabled) {
     subtext = 'دسترسی رایگان به صورت سراسری غیرفعال شده است؛ با تغییر وضعیت، اطلاع‌رسانی می‌شود.';
   }
@@ -2399,6 +2422,18 @@ function renderComplimentaryPlan(planRaw) {
       subtextEl.innerHTML = 'برای شروع فروش حرفه‌ای، وارد بخش <a href="#/plans" class="plan-link">پلن‌ها</a> شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
     } else {
       subtextEl.textContent = subtext;
+    }
+  }
+
+  // نمایش یادداشت هدیه برای پلن‌های فعال
+  if (giftNoteEl) {
+    if (plan.activeNow) {
+      giftNoteEl.textContent = '🎁 این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
+      giftNoteEl.hidden = false;
+      giftNoteEl.classList.add('is-visible');
+    } else {
+      giftNoteEl.hidden = true;
+      giftNoteEl.classList.remove('is-visible');
     }
   }
 
