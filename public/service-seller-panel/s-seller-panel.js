@@ -316,6 +316,20 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     }
   });
 
+  // Copy Toast Helper
+  const showCopyToast = () => {
+    const copyToast = document.getElementById('copy-toast');
+    if (!copyToast) return;
+    
+    copyToast.hidden = false;
+    
+    // Auto-hide after 2.5 seconds
+    clearTimeout(copyToast._hideTimer);
+    copyToast._hideTimer = setTimeout(() => {
+      copyToast.hidden = true;
+    }, 2500);
+  };
+
   // Copy referral code
   referralModal?.addEventListener('click', async (e) => {
     const copyBtn = e.target.closest('[data-copy-target]');
@@ -327,12 +341,12 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     
     try {
       await navigator.clipboard.writeText(input.value);
-      UIComponents.showToast('کد دعوت کپی شد!', 'success');
+      showCopyToast();
     } catch (err) {
       // Fallback
       input.select();
       document.execCommand('copy');
-      UIComponents.showToast('کد دعوت کپی شد!', 'success');
+      showCopyToast();
     }
   });
 
