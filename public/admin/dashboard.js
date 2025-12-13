@@ -4013,6 +4013,7 @@ async function fetchShops() {
 async function ensureShopsLoaded() {
   if (!shopsList.length) {
     shopsList = await fetchShops();
+    renderCategoryFilter(); // بروزرسانی فیلتر دسته‌بندی پس از بارگذاری
   }
 }
 
@@ -7321,6 +7322,7 @@ async function updateAll() {
     shoppingCentersList = centers;
     shoppingCentersLoaded = true;
     renderShoppingCenters();
+    renderCategoryFilter(); // بروزرسانی فیلتر دسته‌بندی پس از بارگذاری
     await refreshSellerPerformanceMap();
     console.group('🟢 shopsList snapshot');
 shopsList.slice(0, 10).forEach((s, i) => {
@@ -7412,6 +7414,7 @@ document.head.appendChild(style);
 // --- فیلتر و مرتب‌سازی فروشگاه‌ها ---
 let sellersSortMode = 'newest'; // حالت پیش‌فرض
 let sellersTypeFilter = 'all';
+let sellerCategoryFilter = new Set(['all']); // مجموعه دسته‌های انتخاب شده (پیش‌فرض: همه)
 
 document.querySelectorAll('.seller-filter-btn[data-sort]').forEach(btn => {
   btn.onclick = function() {
@@ -7514,6 +7517,7 @@ function renderSellers() {
   const tbody = document.querySelector('#sellersTable tbody');
   tbody.innerHTML = '';
 
+  renderCategoryFilter(); // بروزرسانی فیلتر دسته‌بندی
   renderSellerCategorySummary();
 
   if (!shopsList.length) {
@@ -7537,6 +7541,26 @@ function renderSellers() {
 
   if (sellersTypeFilter === 'service') {
     sellers = sellers.filter(shop => shop.isServiceSeller);
+  }
+
+  // فیلتر دسته‌بندی
+  if (sellerCategoryFilter.size > 0 && !sellerCategoryFilter.has('all')) {
+    sellers = sellers.filter(shop => {
+      const primaryCategory = (shop.serviceCategoryName || shop.category || '').trim();
+      const subcategories = Array.isArray(shop.serviceSubcategories) 
+        ? shop.serviceSubcategories.map(s => String(s).trim())
+        : [];
+      const allCategories = [primaryCategory, ...subcategories].filter(Boolean);
+      
+      // بررسی تطابق با دسته‌های انتخاب شده
+      return Array.from(sellerCategoryFilter).some(selectedCategory => {
+        const selectedNormalized = selectedCategory.trim().toLowerCase();
+        return allCategories.some(cat => {
+          const catNormalized = cat.toLowerCase();
+          return catNormalized === selectedNormalized || catNormalized.includes(selectedNormalized);
+        });
+      });
+    });
   }
 
   sellers.forEach(shop => {
@@ -7707,7 +7731,199 @@ function renderSellers() {
   if (!sellers.length) {
     tbody.innerHTML = `<tr><td colspan="9" style="color:#888;text-align:center">هیچ فروشگاهی یافت نشد.</td></tr>`;
   }
+
+  // بروزرسانی شمارنده فیلتر
+  updateCategoryFilterCount(sellers.length);
 }
+
+// تابع استخراج دسته‌های منحصر به فرد از لیست فروشندگان
+function extractUniqueCategories(shops = []) {
+  const categoriesMap = new Map();
+  
+  shops.forEach(shop => {
+    // دسته اصلی - اولویت با serviceCategoryName، سپس category
+    const primaryCategory = (shop.serviceCategoryName || shop.category || '').trim();
+    if (primaryCategory) {
+      const key = primaryCategory.toLowerCase();
+      if (!categoriesMap.has(key)) {
+        categoriesMap.set(key, {
+          label: primaryCategory,
+          count: 0
+        });
+      }
+      categoriesMap.get(key).count++;
+    }
+    
+    // زیردسته‌ها (فقط اگر دسته اصلی وجود نداشته باشد یا متفاوت باشد)
+    if (Array.isArray(shop.serviceSubcategories)) {
+      shop.serviceSubcategories.forEach(subcat => {
+        const subcatStr = String(subcat).trim();
+        if (subcatStr) {
+          const key = subcatStr.toLowerCase();
+          // اگر این زیردسته با دسته اصلی یکسان نیست، اضافه کن
+          const primaryKey = primaryCategory.toLowerCase();
+          if (key !== primaryKey) {
+            if (!categoriesMap.has(key)) {
+              categoriesMap.set(key, {
+                label: subcatStr,
+                count: 0
+              });
+            }
+            categoriesMap.get(key).count++;
+          }
+        }
+      });
+    }
+  });
+  
+  // تبدیل به آرایه و مرتب‌سازی بر اساس تعداد
+  const categories = Array.from(categoriesMap.values()).sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    return a.label.localeCompare(b.label, 'fa', { sensitivity: 'base' });
+  });
+  
+  return categories;
+}
+
+// تابع رندر کردن فیلتر دسته‌بندی
+function renderCategoryFilter() {
+  const container = document.getElementById('sellerCategoryFilterChips');
+  if (!container) return;
+  
+  const categories = extractUniqueCategories(shopsList);
+  
+  // اگر دسته‌ای وجود ندارد، فیلتر را مخفی کن
+  if (categories.length === 0) {
+    const filterCard = container.closest('.seller-category-filter-card');
+    if (filterCard) filterCard.style.display = 'none';
+    return;
+  }
+  
+  // نمایش کارت فیلتر
+  const filterCard = container.closest('.seller-category-filter-card');
+  if (filterCard) filterCard.style.display = 'block';
+  
+  // دکمه "همه" از قبل وجود دارد، فقط دسته‌ها را اضافه می‌کنیم
+  const existingAllBtn = container.querySelector('[data-category="all"]');
+  const chipsContainer = document.createDocumentFragment();
+  
+  // اگر دکمه "همه" وجود ندارد، آن را اضافه کن
+  if (!existingAllBtn) {
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'seller-category-chip-filter active';
+    allBtn.setAttribute('data-category', 'all');
+    allBtn.innerHTML = '<i class="ri-list-check"></i><span>همه دسته‌ها</span>';
+    chipsContainer.appendChild(allBtn);
+  }
+  
+  // اضافه کردن دسته‌ها
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'seller-category-chip-filter';
+    btn.setAttribute('data-category', cat.label);
+    btn.innerHTML = `
+      <span>${escapeHtml(cat.label)}</span>
+      <span class="seller-category-chip-count">${formatNumber(cat.count)}</span>
+    `;
+    chipsContainer.appendChild(btn);
+  });
+  
+  // پاک کردن و اضافه کردن مجدد
+  container.innerHTML = '';
+  container.appendChild(chipsContainer);
+  
+  // اضافه کردن event listener به دکمه‌ها
+  container.querySelectorAll('.seller-category-chip-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.getAttribute('data-category');
+      
+      if (category === 'all') {
+        // انتخاب "همه" - پاک کردن همه فیلترها
+        sellerCategoryFilter.clear();
+        sellerCategoryFilter.add('all');
+        container.querySelectorAll('.seller-category-chip-filter').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      } else {
+        // حذف "همه" از انتخاب‌ها
+        sellerCategoryFilter.delete('all');
+        
+        // toggle دسته انتخاب شده
+        if (sellerCategoryFilter.has(category)) {
+          sellerCategoryFilter.delete(category);
+          this.classList.remove('active');
+        } else {
+          sellerCategoryFilter.add(category);
+          this.classList.add('active');
+        }
+        
+        // اگر هیچ دسته‌ای انتخاب نشده، "همه" را فعال کن
+        if (sellerCategoryFilter.size === 0) {
+          sellerCategoryFilter.add('all');
+          const allBtn = container.querySelector('[data-category="all"]');
+          if (allBtn) allBtn.classList.add('active');
+        } else {
+          const allBtn = container.querySelector('[data-category="all"]');
+          if (allBtn) allBtn.classList.remove('active');
+        }
+      }
+      
+      updateCategoryFilterUI();
+      renderSellers();
+    });
+  });
+  
+  updateCategoryFilterUI();
+}
+
+// بروزرسانی UI فیلتر دسته‌بندی
+function updateCategoryFilterUI() {
+  const clearBtn = document.getElementById('sellerCategoryFilterClear');
+  const footer = document.getElementById('sellerCategoryFilterFooter');
+  
+  const hasActiveFilter = sellerCategoryFilter.size > 0 && !sellerCategoryFilter.has('all');
+  
+  if (clearBtn) {
+    clearBtn.style.display = hasActiveFilter ? 'flex' : 'none';
+  }
+  
+  if (footer) {
+    footer.style.display = hasActiveFilter ? 'flex' : 'none';
+  }
+}
+
+// بروزرسانی شمارنده نتایج فیلتر
+function updateCategoryFilterCount(count) {
+  const countEl = document.getElementById('sellerCategoryFilterCount');
+  if (countEl) {
+    countEl.textContent = formatNumber(count);
+  }
+}
+
+// دکمه پاک کردن فیلترها
+document.addEventListener('DOMContentLoaded', function() {
+  const clearBtn = document.getElementById('sellerCategoryFilterClear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      sellerCategoryFilter.clear();
+      sellerCategoryFilter.add('all');
+      
+      const container = document.getElementById('sellerCategoryFilterChips');
+      if (container) {
+        container.querySelectorAll('.seller-category-chip-filter').forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.getAttribute('data-category') === 'all') {
+            btn.classList.add('active');
+          }
+        });
+      }
+      
+      updateCategoryFilterUI();
+      renderSellers();
+    });
+  }
+});
 
 // پاپ‌آپ اطلاعات فروشنده
 // ← این تابع را جایگزین کنید

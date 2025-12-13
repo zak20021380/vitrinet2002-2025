@@ -4990,6 +4990,237 @@ tr:last-child td {
   border-color: #0ea5e9;
 }
 
+/* فیلتر دسته‌بندی حرفه‌ای */
+.seller-category-filter-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seller-category-filter-card:hover {
+  box-shadow: 0 6px 30px rgba(16, 185, 129, 0.12);
+  border-color: #10b98140;
+}
+
+.seller-category-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.seller-category-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.seller-category-filter-title i {
+  color: #10b981;
+  font-size: 1.2rem;
+}
+
+.seller-category-filter-clear {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.seller-category-filter-clear:hover {
+  background: #fecaca;
+  border-color: #f87171;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.seller-category-filter-clear i {
+  font-size: 1rem;
+}
+
+.seller-category-filter-content {
+  margin-bottom: 0.5rem;
+}
+
+.seller-category-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.seller-category-chip-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  background: #ffffff;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.seller-category-chip-filter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b98115 0%, #0ea5e915 100%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.seller-category-chip-filter:hover {
+  border-color: #10b98160;
+  color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.seller-category-chip-filter:hover::before {
+  opacity: 1;
+}
+
+.seller-category-chip-filter.active {
+  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+.seller-category-chip-filter.active::before {
+  opacity: 0;
+}
+
+.seller-category-chip-filter.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.seller-category-chip-filter i {
+  font-size: 1.1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.seller-category-chip-filter span {
+  position: relative;
+  z-index: 1;
+}
+
+.seller-category-chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-right: -0.2rem;
+}
+
+.seller-category-chip-filter.active .seller-category-chip-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.seller-category-chip-filter:not(.active) .seller-category-chip-count {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.seller-category-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 0.8rem;
+  margin-top: 0.8rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.seller-category-filter-count {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.seller-category-filter-count strong {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* انیمیشن برای ظاهر شدن فیلتر */
+@keyframes slideInFilter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.seller-category-filter-card {
+  animation: slideInFilter 0.3s ease-out;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 768px) {
+  .seller-category-filter-card {
+    padding: 1rem;
+  }
+
+  .seller-category-filter-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .seller-category-filter-title {
+    font-size: 0.95rem;
+  }
+
+  .seller-category-chip-filter {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .seller-category-filter-chips {
+    gap: 0.5rem;
+  }
+}
+
 .seller-category-summary {
   margin: 1rem 0 1.5rem;
   padding: 1rem 1.1rem;
