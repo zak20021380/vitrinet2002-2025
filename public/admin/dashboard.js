@@ -4134,6 +4134,18 @@ function normaliseServiceShopRecord(raw) {
     && (!complimentaryStart || complimentaryStart.getTime() <= now)
     && (!complimentaryEnd || complimentaryEnd.getTime() >= now);
 
+  // نام صاحب فروشگاه
+  const ownerName = raw.ownerName 
+    || raw.owner?.name 
+    || raw.owner?.fullName 
+    || raw.sellerName 
+    || raw.fullName 
+    || raw.firstName && raw.lastName ? `${raw.firstName} ${raw.lastName}` : ''
+    || '';
+
+  // تاریخ ثبت‌نام
+  const createdAt = raw.createdAt || raw.registeredAt || raw.signupDate || raw.joinedAt || null;
+
   return {
     id,
     name,
@@ -4143,6 +4155,8 @@ function normaliseServiceShopRecord(raw) {
     subcategories,
     status,
     ownerPhone,
+    ownerName,
+    createdAt,
     shopUrl,
     updatedAt: raw.updatedAt || raw.createdAt || null,
     isPremium: premiumActive,
@@ -4356,7 +4370,8 @@ function renderServiceShopsTable() {
       || shop.name.toLowerCase().includes(searchText)
       || (shop.city || '').toLowerCase().includes(searchText)
       || (shop.address || '').toLowerCase().includes(searchText)
-      || (shop.ownerPhone || '').toLowerCase().includes(searchText);
+      || (shop.ownerPhone || '').toLowerCase().includes(searchText)
+      || (shop.ownerName || '').toLowerCase().includes(searchText);
     return matchesStatus && matchesPlan && matchesSearch;
   });
 
@@ -4463,6 +4478,20 @@ function openServiceShopModal(shopId) {
 
   const phoneEl = document.getElementById('serviceShopModalPhone');
   if (phoneEl) phoneEl.textContent = shop.ownerPhone || 'شماره‌ای ثبت نشده';
+
+  // نام صاحب فروشگاه
+  const ownerNameEl = document.getElementById('serviceShopModalOwnerName');
+  if (ownerNameEl) ownerNameEl.textContent = shop.ownerName || 'ثبت نشده';
+
+  // تاریخ ثبت‌نام
+  const createdAtEl = document.getElementById('serviceShopModalCreatedAt');
+  if (createdAtEl) {
+    if (shop.createdAt) {
+      createdAtEl.textContent = persianDateFormatter.format(new Date(shop.createdAt));
+    } else {
+      createdAtEl.textContent = 'ثبت نشده';
+    }
+  }
 
   const appointmentsEl = document.getElementById('serviceShopModalAppointments');
   if (appointmentsEl) appointmentsEl.textContent = displayNumber(shop.appointmentsCount);
