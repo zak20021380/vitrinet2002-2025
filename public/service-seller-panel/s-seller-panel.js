@@ -5020,9 +5020,8 @@ destroy() {
         activeNav.setAttribute('aria-current', 'page');
       }
       if (appHeader) {
-        const shouldShowHeader = page === 'dashboard';
-        appHeader.classList.toggle('is-hidden', !shouldShowHeader);
-        appHeader.toggleAttribute('aria-hidden', !shouldShowHeader);
+        appHeader.classList.remove('is-hidden');
+        appHeader.removeAttribute('aria-hidden');
       }
     }
     renderPageContent(page) {
