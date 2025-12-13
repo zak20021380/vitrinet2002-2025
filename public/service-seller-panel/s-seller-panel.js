@@ -2308,8 +2308,8 @@ function renderComplimentaryPlan(planRaw) {
       planCtaBtn.textContent = 'مشاهده و خرید پلن';
       planCtaBtn.setAttribute('aria-label', 'مشاهده و خرید پلن مناسب کسب‌وکار');
     } else if (plan.activeNow) {
-      planCtaBtn.textContent = 'مشاهده پروفایل فروشنده';
-      planCtaBtn.setAttribute('aria-label', 'مشاهده پروفایل فروشنده');
+    planCtaBtn.textContent = 'فعالسازی پلن';
+    planCtaBtn.setAttribute('aria-label', 'فعالسازی پلن');
     } else {
       planCtaBtn.textContent = 'فعالسازی مجدد / ارتقا';
       planCtaBtn.setAttribute('aria-label', 'فعالسازی مجدد یا ارتقای پلن متوقف‌شده');
