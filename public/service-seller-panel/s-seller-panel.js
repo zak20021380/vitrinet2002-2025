@@ -278,6 +278,103 @@ const escapeHtml = (str = '') => String(str).replace(/[&<>"']/g, (char) => ({
     });
   }
 
+  // --- Referral Modal (دعوت دوستان) ---
+  const referralModal = document.getElementById('referral-modal');
+  const referralOpenBtn = document.getElementById('open-referral-modal-btn');
+  const referralCloseEls = referralModal ? referralModal.querySelectorAll('[data-referral-close]') : [];
+
+  const openReferralModal = () => {
+    if (!referralModal) return;
+    referralModal.hidden = false;
+    closeHamburger();
+    
+    // Generate referral codes based on seller info
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const sellerId = sellerData._id || sellerData.id || 'XXXXX';
+    const shortId = String(sellerId).slice(-5).toUpperCase();
+    
+    const userCodeEl = document.getElementById('user-referral-code');
+    const sellerCodeEl = document.getElementById('seller-referral-code');
+    if (userCodeEl) userCodeEl.value = `USR-${shortId}`;
+    if (sellerCodeEl) sellerCodeEl.value = `SLR-${shortId}`;
+  };
+
+  const closeReferralModal = () => {
+    if (!referralModal || referralModal.hidden) return;
+    referralModal.hidden = true;
+  };
+
+  referralOpenBtn?.addEventListener('click', openReferralModal);
+  
+  referralCloseEls.forEach((el) => {
+    el.addEventListener('click', closeReferralModal);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && referralModal && !referralModal.hidden) {
+      closeReferralModal();
+    }
+  });
+
+  // Copy referral code
+  referralModal?.addEventListener('click', async (e) => {
+    const copyBtn = e.target.closest('[data-copy-target]');
+    if (!copyBtn) return;
+    
+    const targetId = copyBtn.dataset.copyTarget;
+    const input = document.getElementById(targetId);
+    if (!input) return;
+    
+    try {
+      await navigator.clipboard.writeText(input.value);
+      UIComponents.showToast('کد دعوت کپی شد!', 'success');
+    } catch (err) {
+      // Fallback
+      input.select();
+      document.execCommand('copy');
+      UIComponents.showToast('کد دعوت کپی شد!', 'success');
+    }
+  });
+
+  // Share referral link
+  referralModal?.addEventListener('click', async (e) => {
+    const shareBtn = e.target.closest('[data-share-type]');
+    if (!shareBtn) return;
+    
+    const shareType = shareBtn.dataset.shareType;
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const sellerId = sellerData._id || sellerData.id || 'XXXXX';
+    const shortId = String(sellerId).slice(-5).toUpperCase();
+    
+    const code = shareType === 'seller' ? `SLR-${shortId}` : `USR-${shortId}`;
+    const baseUrl = window.location.origin;
+    const shareUrl = shareType === 'seller' 
+      ? `${baseUrl}/register.html?ref=${code}`
+      : `${baseUrl}/login.html?ref=${code}`;
+    
+    const shareText = shareType === 'seller'
+      ? `🎁 با کد دعوت من در ویترینت ثبت‌نام کن و فروشگاهت رو راه‌اندازی کن!\n\nکد دعوت: ${code}\n${shareUrl}`
+      : `🎁 با کد دعوت من در ویترینت ثبت‌نام کن!\n\nکد دعوت: ${code}\n${shareUrl}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'دعوت به ویترینت',
+          text: shareText,
+          url: shareUrl
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          await navigator.clipboard.writeText(shareText);
+          UIComponents.showToast('لینک دعوت کپی شد!', 'success');
+        }
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      UIComponents.showToast('لینک دعوت کپی شد!', 'success');
+    }
+  });
+
   // --- Support modal ---
   const supportModal = document.getElementById('support-modal');
   const supportSheet = supportModal?.querySelector('.support-sheet');
