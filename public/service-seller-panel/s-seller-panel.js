@@ -8891,8 +8891,67 @@ loadCustomers();
   // state + storage from server
   const state = {
     selectedIdx: 0,
+    selectedService: '',
     schedule: { '6': [], '0': [], '1': [], '2': [], '3': [], '4': [], '5': [] }
   };
+
+  // Load seller services into dropdown
+  async function loadServicesDropdown() {
+    const dropdown = el('resv-service-dropdown');
+    if (!dropdown) return;
+
+    try {
+      // Try to get services from cache or API
+      let services = [];
+      
+      // Check if services are already loaded in window
+      if (window.sellerServices && Array.isArray(window.sellerServices)) {
+        services = window.sellerServices;
+      } else {
+        // Fetch from API
+        const res = await fetch(`${API_BASE}/api/seller-services/me/services`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          services = Array.isArray(data) ? data : (data.services || []);
+          window.sellerServices = services;
+        }
+      }
+
+      // Clear existing options except first
+      dropdown.innerHTML = '<option value="">همه خدمات</option>';
+
+      // Add service options
+      services.forEach(service => {
+        const name = service.name || service.title || service.serviceName || '';
+        const id = service._id || service.id || '';
+        if (name) {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = name;
+          dropdown.appendChild(option);
+        }
+      });
+
+      // Restore selected service if any
+      if (state.selectedService) {
+        dropdown.value = state.selectedService;
+      }
+    } catch (err) {
+      console.error('Failed to load services for dropdown', err);
+    }
+  }
+
+  // Handle service selection change
+  function initServiceDropdown() {
+    const dropdown = el('resv-service-dropdown');
+    if (!dropdown) return;
+
+    dropdown.addEventListener('change', (e) => {
+      state.selectedService = e.target.value;
+      // Optionally filter times by service
+      renderTimes();
+    });
+  }
 
   async function load() {
     try {
@@ -8989,6 +9048,9 @@ loadCustomers();
     }
 
     Object.keys(bookedCache).forEach(k => delete bookedCache[k]);
+
+    // Load seller services into dropdown
+    await loadServicesDropdown();
 
     UIComponents.openModal('resv-modal');
     updateTodayBanner();
@@ -9325,6 +9387,9 @@ function cleanScheduleData() {
 
     // تب‌های روزهای هفته
     $$('#resv-week .resv-day-chip').forEach((b, i) => b.addEventListener('click', () => selectDay(i)));
+
+    // انتخاب خدمت
+    initServiceDropdown();
 
     // افزودن/حذف ساعت
     el('resv-add-btn')?.addEventListener('click', addTime);
