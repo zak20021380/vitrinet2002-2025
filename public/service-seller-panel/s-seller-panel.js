@@ -2758,28 +2758,81 @@ async deletePortfolioItem(id) {
     if (!r.ok && r.status !== 304) throw new Error('FETCH_NOTIFICATIONS_FAILED');
     const raw = this._unwrap(await this._json(r));
     const arr = Array.isArray(raw) ? raw : [];
+
     const fmt = (d) => {
       const diff = (Date.now() - new Date(d).getTime()) / 1000;
       if (diff < 3600) return `${Math.floor(diff/60)} دقیقه پیش`;
       if (diff < 86400) return `${Math.floor(diff/3600)} ساعت پیش`;
       return `${Math.floor(diff/86400)} روز پیش`;
     };
+
     const detectType = (n) => {
       if (n.type) return n.type;
-      if (typeof n.message === 'string' && n.message.includes('تیکت')) return 'ticket';
+      const msg = typeof n.message === 'string' ? n.message : (typeof n.text === 'string' ? n.text : '');
+      if (msg.includes('تیکت')) return 'ticket';
       return 'info';
     };
-    return arr.map(n => ({
-      id: n._id || n.id,
-      text: n.message || '',
-      time: n.createdAt ? fmt(n.createdAt) : '',
-      read: !!n.read,
-      type: detectType(n),
-      title: n.title || '',
-      relatedTicketId: n.relatedTicketId || null,
-      ticketId: n.relatedTicketId || n.ticketId || null,
-      userReplies: Array.isArray(n.userReplies) ? n.userReplies : []
-    }));
+
+    const pickText = (n) => {
+      const candidates = [
+        n.message,
+        n.text,
+        n.body,
+        n.description,
+        n.reply,
+        n.replyText,
+        n.adminMessage,
+        n.adminReply,
+        n.latestMessage,
+        n.lastMessage,
+        n.content,
+        n.adminReplyText
+      ];
+
+      const direct = candidates.find(v => typeof v === 'string' && v.trim());
+      if (direct) return direct.trim();
+
+      if (Array.isArray(n.replies) && n.replies.length) {
+        const latestReply = n.replies[n.replies.length - 1];
+        if (typeof latestReply?.message === 'string') return latestReply.message;
+        if (typeof latestReply?.text === 'string') return latestReply.text;
+      }
+      if (n.latestReply && typeof n.latestReply.message === 'string') return n.latestReply.message;
+      return '';
+    };
+
+    const pickTitle = (n, type) => {
+      if (n.title) return n.title;
+      if (n.subject) return n.subject;
+      if (n.ticketTitle) return n.ticketTitle;
+      if (type === 'ticket') return 'پاسخ پشتیبانی';
+      return '';
+    };
+
+    const pickReplies = (n) => {
+      if (Array.isArray(n.userReplies)) return n.userReplies;
+      if (Array.isArray(n.replies)) {
+        return n.replies.filter(r => (r.from || r.authorRole || '').toLowerCase() === 'user' || (r.role || '').toLowerCase() === 'seller');
+      }
+      return [];
+    };
+
+    return arr.map(n => {
+      const type = detectType(n);
+      const text = pickText(n);
+      return {
+        id: n._id || n.id,
+        text,
+        time: n.createdAt ? fmt(n.createdAt) : '',
+        read: !!n.read,
+        type,
+        title: pickTitle(n, type),
+        relatedTicketId: n.relatedTicketId || null,
+        ticketId: n.relatedTicketId || n.ticketId || null,
+        supportName: n.supportName || n.adminName || n.agentName || 'مدیریت ویترینت',
+        userReplies: pickReplies(n)
+      };
+    });
   },
 
   async markNotificationRead(id) {
@@ -3834,7 +3887,8 @@ const Notifications = {
             
             <footer class="ticket-card__footer">
               <div class="ticket-card__meta">
-                <span class="ticket-card__source">از مدیریت سایت</span>
+                <span class="ticket-card__source">از ${this._escapeHtml(n.supportName || 'مدیریت سایت')}</span>
+                ${n.ticketId ? `<span class="ticket-card__tag">تیکت #${n.ticketId}</span>` : ''}
                 <time class="ticket-card__time">${n.time || ''}</time>
               </div>
               <button class="ticket-card__reply-btn notif-reply-btn" type="button" aria-expanded="false">
