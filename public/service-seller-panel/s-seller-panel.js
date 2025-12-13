@@ -980,10 +980,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (ratingEl) ratingEl.textContent = toPersianNum((sellerData.rating || sellerData.avgRating || 0).toFixed(1));
     
     // Details
+    const storeNameEl = document.getElementById('profile-modal-store-name');
     const phoneEl = document.getElementById('profile-modal-phone');
     const categoryEl = document.getElementById('profile-modal-category');
     const cityEl = document.getElementById('profile-modal-city');
     const shopurlEl = document.getElementById('profile-modal-shopurl');
+    
+    // Store Name
+    if (storeNameEl) {
+      const storeName = sellerData.shopname || sellerData.shopName || sellerData.storeName || '';
+      storeNameEl.textContent = storeName || '—';
+    }
     
     if (phoneEl) {
       const phone = sellerData.phone || '—';
