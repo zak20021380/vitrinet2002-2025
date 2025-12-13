@@ -4425,6 +4425,27 @@ destroy() {
       this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
       this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
       this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      
+      // Update wallet rank from wallet balance
+      const walletBalanceEl = document.getElementById('wallet-balance');
+      if (walletBalanceEl) {
+        const walletText = walletBalanceEl.textContent || '۰';
+        // Extract numeric value and format for display
+        const numericValue = walletText.replace(/[^\d۰-۹]/g, '');
+        const walletRankEl = document.getElementById('walletRank');
+        if (walletRankEl) {
+          // Show abbreviated format (e.g., 3.5M)
+          const persianToEnglish = (str) => str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+          const englishNum = parseInt(persianToEnglish(numericValue)) || 0;
+          if (englishNum >= 1000000) {
+            walletRankEl.textContent = this.formatNumber(Math.round(englishNum / 100000) / 10) + 'M';
+          } else if (englishNum >= 1000) {
+            walletRankEl.textContent = this.formatNumber(Math.round(englishNum / 100) / 10) + 'K';
+          } else {
+            walletRankEl.textContent = this.formatNumber(englishNum);
+          }
+        }
+      }
 
       const modalCurrent = document.getElementById('rank-modal-current');
       if (modalCurrent) {
