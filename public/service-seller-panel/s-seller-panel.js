@@ -707,6 +707,112 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   bindSheetTriggers();
 
+  // --- Seller Identity Header ---
+  const initSellerIdentity = () => {
+    const nameEl = document.getElementById('seller-identity-name');
+    const dateEl = document.getElementById('seller-identity-date');
+    const avatarEl = document.getElementById('seller-identity-avatar');
+    const greetingEl = document.getElementById('seller-greeting-text');
+    const badgeEl = document.getElementById('seller-identity-badge');
+    
+    if (!nameEl || !dateEl) return;
+    
+    // Get seller data
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const firstName = sellerData.firstname || sellerData.firstName || '';
+    const lastName = sellerData.lastname || sellerData.lastName || '';
+    const fullName = `${firstName} ${lastName}`.trim() || 'فروشنده عزیز';
+    
+    // Set seller name
+    nameEl.textContent = fullName;
+    
+    // Set avatar initial
+    if (avatarEl) {
+      const initial = firstName.charAt(0) || lastName.charAt(0) || 'ف';
+      const avatarText = avatarEl.querySelector('.seller-identity__avatar-text');
+      if (avatarText) avatarText.textContent = initial;
+    }
+    
+    // Set greeting based on time of day
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      let greeting = 'سلام';
+      if (hour >= 5 && hour < 12) greeting = 'صبح بخیر';
+      else if (hour >= 12 && hour < 17) greeting = 'ظهر بخیر';
+      else if (hour >= 17 && hour < 21) greeting = 'عصر بخیر';
+      else greeting = 'شب بخیر';
+      greetingEl.textContent = greeting;
+    }
+    
+    // Show badge if seller has active plan
+    if (badgeEl && sellerData.plan && sellerData.plan !== 'none') {
+      badgeEl.hidden = false;
+    }
+    
+    // Update Jalali date
+    const updateJalaliDate = () => {
+      const now = new Date();
+      
+      // Persian weekday names
+      const persianWeekdays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+      // Persian month names
+      const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+      
+      // Convert to Jalali
+      const toJalali = (gy, gm, gd) => {
+        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let jy = (gy <= 1600) ? 0 : 979;
+        gy -= (gy <= 1600) ? 621 : 1600;
+        const gy2 = (gm > 2) ? (gy + 1) : gy;
+        let days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - (Math.floor((gy2 + 99) / 100)) + (Math.floor((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+        jy += 33 * (Math.floor(days / 12053));
+        days %= 12053;
+        jy += 4 * (Math.floor(days / 1461));
+        days %= 1461;
+        jy += Math.floor((days - 1) / 365);
+        if (days > 365) days = (days - 1) % 365;
+        const jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+        const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+        return { year: jy, month: jm, day: jd };
+      };
+      
+      const jalali = toJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const weekdayIndex = now.getDay() === 0 ? 0 : now.getDay();
+      const persianWeekday = persianWeekdays[weekdayIndex];
+      const persianMonth = persianMonths[jalali.month - 1];
+      
+      // Convert numbers to Persian
+      const toPersianNum = (num) => {
+        const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+        return String(num).replace(/[0-9]/g, d => persianDigits[parseInt(d)]);
+      };
+      
+      const formattedDate = `${persianWeekday}، ${toPersianNum(jalali.day)} ${persianMonth} ${toPersianNum(jalali.year)}`;
+      dateEl.textContent = formattedDate;
+      dateEl.setAttribute('datetime', now.toISOString().split('T')[0]);
+    };
+    
+    // Initial update
+    updateJalaliDate();
+    
+    // Update date at midnight
+    const scheduleNextUpdate = () => {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const msUntilMidnight = tomorrow - now;
+      setTimeout(() => {
+        updateJalaliDate();
+        scheduleNextUpdate();
+      }, msUntilMidnight);
+    };
+    scheduleNextUpdate();
+  };
+  
+  initSellerIdentity();
+  
+  // Expose globally for updates after profile changes
+  window.updateSellerIdentity = initSellerIdentity;
+
 const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
 const moderationElements = {
   overlay: document.getElementById('moderation-overlay'),
@@ -2433,6 +2539,12 @@ async function fetchInitialData() {
           endTime: seller.endTime || ''
         };
       localStorage.setItem('seller', JSON.stringify(store));
+      
+      // Update seller identity header
+      if (typeof window.updateSellerIdentity === 'function') {
+        window.updateSellerIdentity();
+      }
+      
       const fullName = `${seller.firstname || ''} ${seller.lastname || ''}`.trim();
 
       const setText = (id, text) => {
@@ -5173,6 +5285,11 @@ async initServices() {
         data.endTime = end;
 
         localStorage.setItem('seller', JSON.stringify(data));
+        
+        // Update seller identity header
+        if (typeof window.updateSellerIdentity === 'function') {
+          window.updateSellerIdentity();
+        }
 
         const payload = {
             startTime: start || '',
