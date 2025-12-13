@@ -5801,6 +5801,8 @@ async handleServiceFormSubmit() {
     }
 
     StorageManager.set('vit_services', services);
+    window.sellerServices = services;
+    await loadServicesDropdown();
     this.renderServicesList();
     UIComponents.closeDrawer('service-drawer');
     UIComponents.showToast('با موفقیت ذخیره شد.', 'success');
@@ -8351,36 +8353,57 @@ loadCustomers();
     if (!dropdown) return;
 
     try {
-      // Try to get services from cache or API
+      // Try to get services from cache, API, then local storage fallback
       let services = [];
-      
-      // Check if services are already loaded in window
-      if (window.sellerServices && Array.isArray(window.sellerServices)) {
+
+      if (Array.isArray(window.sellerServices) && window.sellerServices.length) {
         services = window.sellerServices;
       } else {
-        // Fetch from API
-        const res = await fetch(`${API_BASE}/api/seller-services/me/services`, { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          services = Array.isArray(data) ? data : (data.services || []);
-          window.sellerServices = services;
+        try {
+          const res = await fetch(`${API_BASE}/api/seller-services/me/services`, { credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            services = Array.isArray(data) ? data : (data.services || []);
+          }
+        } catch (networkErr) {
+          console.warn('Service dropdown API failed, using cached data if available', networkErr);
         }
+
+        if (!services.length) {
+          const cachedServices = StorageManager.get('vit_services');
+          if (Array.isArray(cachedServices) && cachedServices.length) {
+            services = cachedServices;
+          }
+        }
+
+        window.sellerServices = services;
       }
 
       // Clear existing options except first
       dropdown.innerHTML = '<option value="">همه خدمات</option>';
 
+      const uniqueServices = new Map();
+
       // Add service options
-      services.forEach(service => {
-        const name = service.name || service.title || service.serviceName || '';
-        const id = service._id || service.id || '';
-        if (name) {
+      services.forEach((service, idx) => {
+        const name = service.name || service.title || service.serviceName || service.service || '';
+        const id = service._id || service.id || service.serviceId || `svc-${idx}`;
+        if (name && !uniqueServices.has(id)) {
+          uniqueServices.set(id, name);
           const option = document.createElement('option');
           option.value = id;
           option.textContent = name;
           dropdown.appendChild(option);
         }
       });
+
+      if (uniqueServices.size === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'هیچ خدمتی ثبت نشده است';
+        option.disabled = true;
+        dropdown.appendChild(option);
+      }
 
       // Restore selected service if any
       if (state.selectedService) {
