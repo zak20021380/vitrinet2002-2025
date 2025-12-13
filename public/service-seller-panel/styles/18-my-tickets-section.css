@@ -123,8 +123,13 @@
   transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.my-tickets-section:not([open]) .my-tickets-body {
+  display: none;
+}
+
 .my-tickets-section[open] .my-tickets-body {
-  max-height: 600px;
+  display: block;
+  max-height: 520px;
 }
 
 /* Filter Tabs */
@@ -195,9 +200,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 400px;
+  max-height: 320px;
+  min-height: 200px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  position: relative;
 }
 
 .my-tickets-list::-webkit-scrollbar {
@@ -424,8 +431,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 28px 16px;
   text-align: center;
+  position: absolute;
+  inset: 0;
 }
 
 .my-tickets-empty__icon {
@@ -465,8 +474,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 28px 16px;
   gap: 12px;
+  position: absolute;
+  inset: 0;
 }
 
 .my-tickets-loading__spinner {
@@ -492,8 +503,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px 20px;
+  padding: 24px 16px;
   text-align: center;
+  position: absolute;
+  inset: 0;
 }
 
 .my-tickets-error__icon {
