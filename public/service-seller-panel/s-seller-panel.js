@@ -2365,7 +2365,14 @@ const API = {
     // Allow different backend response shapes (items, data, bookings, etc.)
     // so that newer booking endpoints returning `{ bookings: [...] }`
     // are parsed correctly.
-    return o.items || o.data || o.services || o.service || o.bookings || [];
+    return o.items ||
+           o.data ||
+           o.services ||
+           o.service ||
+           o.bookings ||
+           o.notifications ||
+           o.notification ||
+           [];
   },
 
   // فقط دریافت خدمات فروشنده‌ی لاگین‌شده
@@ -3765,18 +3772,13 @@ const Notifications = {
 
     this._els.list.innerHTML = items.map(n => {
       const { label, body } = this._splitMessage(n.text);
-      const fullBody = body || n.text;
-      const isLong = (fullBody || '').length > LONG_BODY_LIMIT;
-      const previewText = isLong ? `${fullBody.slice(0, LONG_BODY_LIMIT)}…` : fullBody;
-      const safePreview = this._escapeHtml(previewText);
-      const safeFull = this._escapeHtml(fullBody);
-      
-      // Check if this is a ticket-related notification
+
+      // Check if this is a ticket-related notification (must happen before preview logic)
       const notifType = (n.type || '').toLowerCase();
       const notifText = (n.text || '').toLowerCase();
       const notifTitle = (n.title || '').toLowerCase();
-      
-      const isTicket = notifType === 'ticket' || 
+
+      const isTicket = notifType === 'ticket' ||
                        notifType === 'ticket_reply' ||
                        notifType === 'support' ||
                        notifType === 'support_ticket' ||
@@ -3788,7 +3790,13 @@ const Notifications = {
                        notifTitle.includes('پشتیبانی') ||
                        n.ticketId != null ||
                        n.relatedTicketId != null;
-      
+
+      const fullBody = body || n.text;
+      const isLong = !isTicket && (fullBody || '').length > LONG_BODY_LIMIT;
+      const previewText = isTicket ? fullBody : (isLong ? `${fullBody.slice(0, LONG_BODY_LIMIT)}…` : fullBody);
+      const safePreview = this._escapeHtml(previewText);
+      const safeFull = this._escapeHtml(fullBody);
+
       const titleText = n.title || (isTicket ? 'پیام پشتیبانی' : '');
       const replies = Array.isArray(n.userReplies) ? n.userReplies : [];
       
