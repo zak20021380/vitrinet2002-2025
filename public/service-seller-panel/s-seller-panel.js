@@ -592,67 +592,118 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderStreakSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.streak;
-    bottomSheet.title.textContent = 'ماموریت استریک و ارتقای سطح';
+    bottomSheet.title.textContent = 'استریک و پاداش‌ها';
 
-    const dayMarkup = data.days.map((day) => {
+    const dayMarkup = data.days.map((day, index) => {
       const statusClass = day.status === 'hit' ? 'is-hit' : day.status === 'missed' ? 'is-missed' : 'is-pending';
-      const baseSymbol = day.status === 'hit' ? '✔' : day.status === 'missed' ? '✕' : '•';
-      const symbol = day.isGift ? '🎁' : baseSymbol;
-      const stateLabel = day.status === 'hit' ? 'فعال' : day.status === 'missed' ? 'از دست رفته' : 'در انتظار';
+      const isToday = index === data.weekProgress - 1 && day.status === 'hit';
+      const stateLabel = day.status === 'hit' ? 'انجام شده' : day.status === 'missed' ? 'از دست رفته' : 'در انتظار';
       return `
-        <div class="streak-day ${statusClass}" aria-label="${day.label} ${stateLabel}">
-          <div class="streak-day__circle${day.isGift ? ' streak-day__circle--gift' : ''}">${symbol}</div>
-          <span>${day.label}</span>
+        <div class="streak-day ${statusClass}${isToday ? ' is-today' : ''}" aria-label="${day.label} ${stateLabel}">
+          <div class="streak-day__circle">
+            ${day.status === 'hit' ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+            ${day.status === 'missed' ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` : ''}
+          </div>
+          <span class="streak-day__label">${day.label}</span>
+          ${day.isGift ? '<span class="streak-day__gift">🎁</span>' : ''}
         </div>
       `;
     }).join('');
 
-    const missionLabel = 'مأموریت سطح الماسی 💎';
-    const nextGoalText = `${faNumber(data.level.daysToNextLevel)} روز تا دریافت تیک آبی + ${formatTomans(300_000)} پاداش`;
-    const tierStyle = data.level.color ? ` style="color: ${data.level.color}"` : '';
-    const nextGlowClass = ' streak-sheet__next-goal--diamond';
+    const tierStyle = data.level.color ? ` style="--tier-color: ${data.level.color}"` : '';
 
     bottomSheet.content.innerHTML = `
-      <section class="streak-sheet" aria-label="جزئیات استریک">
-        <div class="streak-sheet__hero">
-          <span class="streak-sheet__icon" aria-hidden="true">${data.level.icon}</span>
-          <div class="streak-sheet__tier"${tierStyle}>فروشنده ${data.level.name}</div>
-          <div class="streak-sheet__count">${faNumber(data.totalDays)} روز در اوج!</div>
-          ${data.checkpointReached ? '<span class="streak-sheet__badge" role="status">چک‌پوینت فعال</span>' : ''}
-        </div>
-
-        <div class="streak-sheet__progress" aria-label="پیشرفت سطح بعدی">
-          <div class="streak-sheet__progress-meta">
-            <span class="streak-sheet__progress-label">${missionLabel}</span>
-            <span class="streak-sheet__progress-value">${faNumber(data.level.daysToNextLevel)} روز تا الماس</span>
+      <section class="streak-sheet-v2" aria-label="جزئیات استریک"${tierStyle}>
+        <!-- Hero Section -->
+        <div class="streak-hero">
+          <div class="streak-hero__glow"></div>
+          <div class="streak-hero__icon-wrapper">
+            <span class="streak-hero__icon">${data.level.icon}</span>
+            <div class="streak-hero__ring"></div>
           </div>
-          <div class="streak-sheet__progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}" aria-valuetext="${data.level.progressPercent} درصد">
-            <span style="inline-size: ${data.level.progressPercent}%"></span>
-          </div>
-          <p class="streak-sheet__next-goal${nextGlowClass}">${nextGoalText}</p>
-        </div>
-
-        <div class="streak-sheet__weekly" aria-label="پیشرفت هفتگی">
-          <div class="streak-sheet__weekly-header">
-            <div>
-              <p class="streak-sheet__week-label">مسیر جایزه این هفته</p>
-              <p class="streak-sheet__week-hint">پاداش هفتگی: ${formatTomans(5_000)} شارژ قطعی</p>
+          <div class="streak-hero__content">
+            <span class="streak-hero__tier">فروشنده ${data.level.name}</span>
+            <div class="streak-hero__count">
+              <span class="streak-hero__number">${faNumber(data.totalDays)}</span>
+              <span class="streak-hero__unit">روز متوالی</span>
             </div>
-            <div class="streak-sheet__week-value">${data.weekProgress}/7</div>
+            ${data.checkpointReached ? '<span class="streak-hero__checkpoint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>چک‌پوینت فعال</span>' : ''}
           </div>
-          <div class="streak-sheet__calendar" role="list">${dayMarkup}</div>
         </div>
 
-        <div class="streak-sheet__notes">
-          <p class="streak-sheet__note streak-sheet__note--accent">${data.message}</p>
-          ${data.softPenalty ? `<p class="streak-sheet__note streak-sheet__note--warning">${data.softPenalty} امتیاز وفاداری این هفته سوزانده شد.</p>` : ''}
-          ${data.isFrozen ? '<p class="streak-sheet__note">استریک فریز فعال است و زنجیره حفظ می‌شود.</p>' : ''}
+        <!-- Level Progress -->
+        <div class="streak-level">
+          <div class="streak-level__header">
+            <div class="streak-level__info">
+              <span class="streak-level__label">مسیر ارتقا به الماس</span>
+              <span class="streak-level__badge">💎 ${faNumber(data.level.daysToNextLevel)} روز مانده</span>
+            </div>
+            <span class="streak-level__percent">${faNumber(data.level.progressPercent)}٪</span>
+          </div>
+          <div class="streak-level__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}">
+            <div class="streak-level__fill" style="width: ${data.level.progressPercent}%"></div>
+            <div class="streak-level__glow" style="width: ${data.level.progressPercent}%"></div>
+          </div>
+          <p class="streak-level__reward">🏆 تیک آبی + ${formatTomans(300_000)} پاداش</p>
         </div>
 
-        <div class="streak-sheet__actions">
-          <p class="streak-sheet__meta">${data.dailyReward} | پاداش هفتگی: ${data.weeklyReward} | پاداش ماهانه: ${data.monthlyReward} + ارتقای سطح</p>
-          <p class="streak-sheet__meta">${data.rules}</p>
-          <p class="streak-sheet__quote">تداوم شما، اعتبار شماست.</p>
+        <!-- Weekly Calendar -->
+        <div class="streak-weekly">
+          <div class="streak-weekly__header">
+            <div>
+              <h4 class="streak-weekly__title">پیشرفت این هفته</h4>
+              <p class="streak-weekly__subtitle">پاداش: ${formatTomans(5_000)} شارژ</p>
+            </div>
+            <div class="streak-weekly__counter">
+              <span class="streak-weekly__current">${faNumber(data.weekProgress)}</span>
+              <span class="streak-weekly__divider">/</span>
+              <span class="streak-weekly__total">۷</span>
+            </div>
+          </div>
+          <div class="streak-weekly__calendar">${dayMarkup}</div>
+        </div>
+
+        <!-- Rewards Grid -->
+        <div class="streak-rewards">
+          <h4 class="streak-rewards__title">پاداش‌های شما</h4>
+          <div class="streak-rewards__grid">
+            <div class="streak-reward-card streak-reward-card--daily">
+              <div class="streak-reward-card__icon">📅</div>
+              <div class="streak-reward-card__content">
+                <span class="streak-reward-card__label">روزانه</span>
+                <span class="streak-reward-card__value">${data.dailyReward}</span>
+              </div>
+            </div>
+            <div class="streak-reward-card streak-reward-card--weekly">
+              <div class="streak-reward-card__icon">🎯</div>
+              <div class="streak-reward-card__content">
+                <span class="streak-reward-card__label">هفتگی</span>
+                <span class="streak-reward-card__value">${data.weeklyReward}</span>
+              </div>
+            </div>
+            <div class="streak-reward-card streak-reward-card--monthly">
+              <div class="streak-reward-card__icon">🏅</div>
+              <div class="streak-reward-card__content">
+                <span class="streak-reward-card__label">ماهانه</span>
+                <span class="streak-reward-card__value">${data.monthlyReward}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        ${data.message || data.softPenalty || data.isFrozen ? `
+        <div class="streak-status">
+          ${data.message ? `<div class="streak-status__item streak-status__item--info"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>${data.message}</span></div>` : ''}
+          ${data.softPenalty ? `<div class="streak-status__item streak-status__item--warning"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>${data.softPenalty} امتیاز سوخته</span></div>` : ''}
+          ${data.isFrozen ? `<div class="streak-status__item streak-status__item--frozen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg><span>استریک فریز فعال</span></div>` : ''}
+        </div>
+        ` : ''}
+
+        <!-- Footer -->
+        <div class="streak-footer">
+          <p class="streak-footer__quote">🔥 تداوم شما، اعتبار شماست</p>
+          <p class="streak-footer__rule">${data.rules}</p>
         </div>
       </section>
     `;
@@ -812,6 +863,208 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Expose globally for updates after profile changes
   window.updateSellerIdentity = initSellerIdentity;
+
+  // --- Seller Profile Modal ---
+  const sellerProfileModal = {
+    modal: document.getElementById('seller-profile-modal'),
+    backdrop: document.querySelector('.seller-profile-modal__backdrop'),
+    closeBtn: document.querySelector('.seller-profile-modal__close'),
+    dismissBtns: document.querySelectorAll('[data-dismiss="seller-profile-modal"]'),
+    viewShopBtn: document.getElementById('profile-modal-view-shop'),
+    identitySection: document.querySelector('.seller-identity')
+  };
+
+  const openSellerProfileModal = () => {
+    if (!sellerProfileModal.modal) return;
+    
+    // Populate modal with seller data
+    populateSellerProfileModal();
+    
+    sellerProfileModal.modal.hidden = false;
+    document.body.classList.add('is-profile-modal-open');
+    
+    // Focus trap
+    requestAnimationFrame(() => {
+      sellerProfileModal.modal.querySelector('.seller-profile-modal__close')?.focus({ preventScroll: true });
+    });
+  };
+
+  const closeSellerProfileModal = () => {
+    if (!sellerProfileModal.modal || sellerProfileModal.modal.hidden) return;
+    
+    sellerProfileModal.modal.hidden = true;
+    document.body.classList.remove('is-profile-modal-open');
+    
+    // Return focus to trigger
+    sellerProfileModal.identitySection?.focus({ preventScroll: true });
+  };
+
+  const populateSellerProfileModal = () => {
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const firstName = sellerData.firstname || sellerData.firstName || '';
+    const lastName = sellerData.lastname || sellerData.lastName || '';
+    const fullName = `${firstName} ${lastName}`.trim() || 'فروشنده عزیز';
+    
+    // Helper: Convert to Persian numbers
+    const toPersianNum = (num) => {
+      const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+      return String(num).replace(/[0-9]/g, d => persianDigits[parseInt(d)]);
+    };
+    
+    // Helper: Format date to Jalali
+    const formatJalaliDate = (dateStr) => {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return '—';
+      
+      const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+      
+      const toJalali = (gy, gm, gd) => {
+        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let jy = (gy <= 1600) ? 0 : 979;
+        gy -= (gy <= 1600) ? 621 : 1600;
+        const gy2 = (gm > 2) ? (gy + 1) : gy;
+        let days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - (Math.floor((gy2 + 99) / 100)) + (Math.floor((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+        jy += 33 * (Math.floor(days / 12053));
+        days %= 12053;
+        jy += 4 * (Math.floor(days / 1461));
+        days %= 1461;
+        jy += Math.floor((days - 1) / 365);
+        if (days > 365) days = (days - 1) % 365;
+        const jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+        const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+        return { year: jy, month: jm, day: jd };
+      };
+      
+      const jalali = toJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      return `${toPersianNum(jalali.day)} ${persianMonths[jalali.month - 1]} ${toPersianNum(jalali.year)}`;
+    };
+    
+    // Header
+    const avatarText = document.querySelector('#profile-modal-avatar .seller-profile-modal__avatar-text');
+    const nameEl = document.getElementById('seller-profile-title');
+    const shopEl = document.getElementById('profile-modal-shop');
+    const statusBadge = document.getElementById('profile-modal-status');
+    const planBadge = document.getElementById('profile-modal-plan');
+    
+    if (avatarText) avatarText.textContent = firstName.charAt(0) || lastName.charAt(0) || 'ف';
+    if (nameEl) nameEl.textContent = fullName;
+    if (shopEl) shopEl.textContent = sellerData.shopname || sellerData.shopName || 'فروشگاه شما';
+    
+    // Plan badge
+    if (planBadge) {
+      const planNames = {
+        'free': 'پلن رایگان',
+        'basic': 'پلن پایه',
+        'pro': 'پلن حرفه‌ای',
+        'premium': 'پلن ویژه'
+      };
+      const planName = planNames[sellerData.plan] || sellerData.plan;
+      if (sellerData.plan && sellerData.plan !== 'none') {
+        planBadge.textContent = planName;
+        planBadge.hidden = false;
+      } else {
+        planBadge.hidden = true;
+      }
+    }
+    
+    // Stats
+    const joinDateEl = document.getElementById('profile-modal-join-date');
+    const totalBookingsEl = document.getElementById('profile-modal-total-bookings');
+    const totalCustomersEl = document.getElementById('profile-modal-total-customers');
+    const ratingEl = document.getElementById('profile-modal-rating');
+    
+    if (joinDateEl) joinDateEl.textContent = formatJalaliDate(sellerData.createdAt || sellerData.created_at);
+    if (totalBookingsEl) totalBookingsEl.textContent = toPersianNum(sellerData.totalBookings || sellerData.bookingsTotal || 0);
+    if (totalCustomersEl) totalCustomersEl.textContent = toPersianNum(sellerData.totalCustomers || sellerData.ucw30 || 0);
+    if (ratingEl) ratingEl.textContent = toPersianNum((sellerData.rating || sellerData.avgRating || 0).toFixed(1));
+    
+    // Details
+    const phoneEl = document.getElementById('profile-modal-phone');
+    const categoryEl = document.getElementById('profile-modal-category');
+    const cityEl = document.getElementById('profile-modal-city');
+    const shopurlEl = document.getElementById('profile-modal-shopurl');
+    
+    if (phoneEl) {
+      const phone = sellerData.phone || '—';
+      phoneEl.textContent = phone !== '—' ? toPersianNum(phone) : phone;
+    }
+    if (categoryEl) categoryEl.textContent = sellerData.category || sellerData.serviceCategory || '—';
+    if (cityEl) cityEl.textContent = sellerData.city || '—';
+    if (shopurlEl) {
+      const shopurl = sellerData.shopurl || sellerData.shopUrl || '';
+      shopurlEl.textContent = shopurl || '—';
+      if (shopurl) {
+        shopurlEl.onclick = () => window.open(`/service-shops.html?shop=${shopurl}`, '_blank');
+      }
+    }
+    
+    // Activity
+    const todayBookingsEl = document.getElementById('profile-modal-today-bookings');
+    const pendingEl = document.getElementById('profile-modal-pending');
+    const streakEl = document.getElementById('profile-modal-streak');
+    const walletEl = document.getElementById('profile-modal-wallet');
+    
+    // Get today's bookings from stat card
+    const todayStatValue = document.querySelector('.stat-bookings .stat-value');
+    if (todayBookingsEl) todayBookingsEl.textContent = todayStatValue?.textContent || '۰';
+    
+    // Get pending from stat card
+    const pendingStatValue = document.querySelector('.stat-pending .stat-value');
+    if (pendingEl) pendingEl.textContent = pendingStatValue?.textContent || '۰';
+    
+    // Get streak from streak card
+    const streakValue = document.getElementById('daily-streak');
+    if (streakEl) streakEl.textContent = streakValue?.textContent || '۰ روز';
+    
+    // Get wallet from wallet card
+    const walletValue = document.getElementById('wallet-balance');
+    if (walletEl) walletEl.textContent = walletValue?.textContent || '۰ تومان';
+  };
+
+  // Event listeners for seller profile modal
+  if (sellerProfileModal.identitySection) {
+    sellerProfileModal.identitySection.setAttribute('role', 'button');
+    sellerProfileModal.identitySection.setAttribute('tabindex', '0');
+    sellerProfileModal.identitySection.setAttribute('aria-haspopup', 'dialog');
+    sellerProfileModal.identitySection.setAttribute('aria-controls', 'seller-profile-modal');
+    
+    sellerProfileModal.identitySection.addEventListener('click', openSellerProfileModal);
+    sellerProfileModal.identitySection.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openSellerProfileModal();
+      }
+    });
+  }
+
+  // Close modal handlers
+  sellerProfileModal.backdrop?.addEventListener('click', closeSellerProfileModal);
+  sellerProfileModal.closeBtn?.addEventListener('click', closeSellerProfileModal);
+  sellerProfileModal.dismissBtns?.forEach(btn => {
+    btn.addEventListener('click', closeSellerProfileModal);
+  });
+
+  // View shop button
+  sellerProfileModal.viewShopBtn?.addEventListener('click', () => {
+    const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+    const shopurl = sellerData.shopurl || sellerData.shopUrl || '';
+    if (shopurl) {
+      window.open(`/service-shops.html?shop=${shopurl}`, '_blank');
+    }
+    closeSellerProfileModal();
+  });
+
+  // Escape key handler
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sellerProfileModal.modal && !sellerProfileModal.modal.hidden) {
+      closeSellerProfileModal();
+    }
+  });
+
+  // Expose globally
+  window.openSellerProfileModal = openSellerProfileModal;
+  window.closeSellerProfileModal = closeSellerProfileModal;
 
 const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
 const moderationElements = {
