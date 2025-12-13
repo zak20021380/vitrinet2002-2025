@@ -6155,23 +6155,45 @@ async initServices() {
         if (!container) {
             return;
         }
-        container.innerHTML = services.length === 0 ? '<p>هیچ خدمتی تعریف نشده است.</p>' : services.map(service => `
-            <div class="item-card" data-id="${service.id}">
-                <div class="item-card-header">
-                    <h4 class="item-title">${service.title}</h4>
+        
+        // Helper to get image URL from service (handles both 'image' and 'images' array)
+        const getServiceImage = (service) => {
+            if (service.image) return service.image;
+            if (Array.isArray(service.images) && service.images.length > 0) {
+                const mainIdx = service.mainImageIndex || 0;
+                return service.images[mainIdx] || service.images[0] || '';
+            }
+            return '';
+        };
+        
+        container.innerHTML = services.length === 0 ? '<p class="no-services-msg">هیچ خدمتی تعریف نشده است.</p>' : services.map(service => {
+            const imageUrl = getServiceImage(service);
+            return `
+            <div class="service-item-card" data-id="${service.id}">
+                <div class="service-item-image">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${service.title}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="service-item-no-image" style="display:none;"><i class="fas fa-image"></i><span>تصویر نامعتبر</span></div>` : 
+                    `<div class="service-item-no-image"><i class="fas fa-image"></i><span>بدون تصویر</span></div>`}
                 </div>
-                <div class="item-image-preview">
-                    ${service.image ? `<img src="${service.image}" alt="${service.title}" onerror="this.parentElement.innerHTML='<span>تصویر نامعتبر</span>'">` : '<span>بدون تصویر</span>'}
+                <div class="service-item-content">
+                    <h4 class="service-item-title">${service.title}</h4>
+                    <div class="service-item-price">
+                        <i class="fas fa-tag"></i>
+                        <span>${UIComponents.formatPersianNumber(service.price)} تومان</span>
+                    </div>
                 </div>
-                <div class="item-details">
-                    <span>قیمت: ${UIComponents.formatPersianNumber(service.price)} تومان</span>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="btn-text-sm edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${service.title}">ویرایش</button>
-                    <button type="button" class="btn-text-sm delete-service-btn" data-id="${service.id}" aria-label="حذف ${service.title}">حذف</button>
+                <div class="service-item-actions">
+                    <button type="button" class="service-btn-edit edit-service-btn" data-id="${service.id}" aria-label="ویرایش ${service.title}">
+                        <i class="fas fa-edit"></i>
+                        <span>ویرایش</span>
+                    </button>
+                    <button type="button" class="service-btn-delete delete-service-btn" data-id="${service.id}" aria-label="حذف ${service.title}">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>حذف</span>
+                    </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
         
         // Add event listeners to the new buttons
         container.querySelectorAll('.edit-service-btn').forEach(btn => {
@@ -6264,20 +6286,62 @@ async initServices() {
   populateServiceForm(service) {
         const form = document.getElementById('service-form');
         const titleEl = document.getElementById('service-drawer-title');
+        const previewContainer = document.getElementById('service-image-preview');
+        
         if (service && service.id != null) {
             form.dataset.editingId = service.id;
             document.getElementById('service-id').value = service.id;
             document.getElementById('service-title').value = service.title;
             document.getElementById('service-price').value = service.price;
-            this.currentServiceImage = service.image || '';
+            
+            // Handle both 'image' string and 'images' array
+            let imageUrl = '';
+            if (service.image) {
+                imageUrl = service.image;
+            } else if (Array.isArray(service.images) && service.images.length > 0) {
+                const mainIdx = service.mainImageIndex || 0;
+                imageUrl = service.images[mainIdx] || service.images[0] || '';
+            }
+            this.currentServiceImage = imageUrl;
             document.getElementById('service-image').value = '';
             titleEl.textContent = 'ویرایش خدمت';
+            
+            // Show existing image preview if available
+            if (previewContainer && imageUrl) {
+                previewContainer.innerHTML = `
+                    <div class="image-preview__content">
+                        <img src="${imageUrl}" alt="پیش‌نمایش تصویر" class="image-preview__img">
+                        <div class="image-preview__overlay">
+                            <button type="button" class="image-preview__remove" onclick="window.sellerPanelApp?.clearServiceImagePreview()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="image-preview__info">
+                            <span class="image-preview__name">تصویر فعلی</span>
+                        </div>
+                    </div>
+                `;
+                previewContainer.classList.remove('is-empty');
+                previewContainer.classList.add('has-image');
+            }
         } else {
             delete form.dataset.editingId;
             form.reset();
             document.getElementById('service-id').value = '';
             this.currentServiceImage = '';
             titleEl.textContent = 'افزودن خدمت جدید';
+            
+            // Clear image preview
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div class="image-preview__placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>تصویری انتخاب نشده</span>
+                    </div>
+                `;
+                previewContainer.classList.add('is-empty');
+                previewContainer.classList.remove('has-image');
+            }
         }
     }
 // ==== REPLACE: handleServiceFormSubmit (write-through to API) ====
@@ -6338,7 +6402,9 @@ async handleServiceFormSubmit() {
 
     StorageManager.set('vit_services', services);
     window.sellerServices = services;
-    await loadServicesDropdown();
+    if (typeof window.loadServicesDropdown === 'function') {
+      await window.loadServicesDropdown();
+    }
     this.renderServicesList();
     UIComponents.closeDrawer('service-drawer');
     UIComponents.showToast('با موفقیت ذخیره شد.', 'success');
@@ -6592,6 +6658,24 @@ async handlePortfolioFormSubmit() {
         const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    clearServiceImagePreview() {
+        this.currentServiceImage = '';
+        const fileInput = document.getElementById('service-image');
+        if (fileInput) fileInput.value = '';
+        
+        const previewContainer = document.getElementById('service-image-preview');
+        if (previewContainer) {
+            previewContainer.innerHTML = `
+                <div class="image-preview__placeholder">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>تصویری انتخاب نشده</span>
+                </div>
+            `;
+            previewContainer.classList.add('is-empty');
+            previewContainer.classList.remove('has-image');
+        }
     }
 
     // === NEW: VIP Settings Methods ===
@@ -8819,6 +8903,7 @@ await loadSellerPlans();
 await loadComplimentaryPlan();
 
 const app = new SellerPanelApp(featureFlags);
+window.sellerPanelApp = app; // Expose to window for global access
 app.init();
 if (typeof app.initBrandImages === 'function') app.initBrandImages();
 
@@ -8892,7 +8977,7 @@ loadCustomers();
   };
 
   // Load seller services into dropdown
-  async function loadServicesDropdown() {
+  window.loadServicesDropdown = async function loadServicesDropdown() {
     const dropdown = el('resv-service-dropdown');
     if (!dropdown) return;
 

@@ -79,12 +79,23 @@ const API = {
     if (!r.ok && r.status !== 304) throw new Error('FETCH_SERVICES_FAILED');
     const raw = this._unwrap(await this._json(r));
     const arr = Array.isArray(raw) ? raw : [];
-    return arr.map(s => ({
-      id:    s._id || s.id,
-      title: s.title,
-      price: s.price,
-      image: s.image || ''
-    }));
+    return arr.map(s => {
+      // Handle both 'image' string and 'images' array from backend
+      let imageUrl = '';
+      if (s.image) {
+        imageUrl = s.image;
+      } else if (Array.isArray(s.images) && s.images.length > 0) {
+        const mainIdx = s.mainImageIndex || 0;
+        imageUrl = s.images[mainIdx] || s.images[0] || '';
+      }
+      return {
+        id:    s._id || s.id,
+        title: s.title,
+        price: s.price,
+        image: imageUrl,
+        images: s.images || []
+      };
+    });
   },
 
   async getComplimentaryPlan() {
@@ -236,11 +247,20 @@ async createService(payload) {
   }
   
   const data = this._unwrap(await this._json(r));
+  // Handle both 'image' string and 'images' array from backend
+  let imageUrl = '';
+  if (data.image) {
+    imageUrl = data.image;
+  } else if (Array.isArray(data.images) && data.images.length > 0) {
+    const mainIdx = data.mainImageIndex || 0;
+    imageUrl = data.images[mainIdx] || data.images[0] || '';
+  }
   return {
     id:    data._id || data.id,
     title: data.title,
     price: data.price,
-    image: data.image || ''
+    image: imageUrl,
+    images: data.images || []
   };
 },
 
@@ -254,11 +274,22 @@ async createService(payload) {
     });
     if (!r.ok) throw new Error('UPDATE_SERVICE_FAILED');
     const data = this._unwrap(await this._json(r));
+    // Handle both 'image' string and 'images' array from backend
+    let imageUrl = '';
+    if (data.image) {
+      imageUrl = data.image;
+    } else if (Array.isArray(data.images) && data.images.length > 0) {
+      const mainIdx = data.mainImageIndex || 0;
+      imageUrl = data.images[mainIdx] || data.images[0] || '';
+    } else if (Array.isArray(payload.images) && payload.images.length > 0) {
+      imageUrl = payload.images[0] || '';
+    }
     return {
       id:    data._id || data.id || id,
       title: data.title,
       price: data.price,
-      image: data.image || payload.image || ''
+      image: imageUrl,
+      images: data.images || payload.images || []
     };
   },
 
