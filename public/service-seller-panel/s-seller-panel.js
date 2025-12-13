@@ -1123,6 +1123,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.openSellerProfileModal = openSellerProfileModal;
   window.closeSellerProfileModal = closeSellerProfileModal;
 
+  // --- Profile Modal Button (پروفایل کاربری) ---
+  const profileOpenBtn = document.getElementById('open-profile-modal-btn');
+  if (profileOpenBtn) {
+    profileOpenBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Close hamburger menu first
+      closeHamburger();
+      // Open seller profile modal
+      openSellerProfileModal();
+    });
+  }
+
 const MODERATION_STORAGE_KEY = 'vt:service-seller:moderation';
 const moderationElements = {
   overlay: document.getElementById('moderation-overlay'),
