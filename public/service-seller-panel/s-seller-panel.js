@@ -588,7 +588,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderTickets = () => {
     if (!myTicketsList) return;
 
+    // Hide all states first
     if (myTicketsLoading) myTicketsLoading.hidden = true;
+    if (myTicketsEmpty) myTicketsEmpty.hidden = true;
+    if (myTicketsError) myTicketsError.hidden = true;
 
     // Clear existing tickets
     const existingItems = myTicketsList.querySelectorAll('.my-ticket-item');
@@ -600,8 +603,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (myTicketsEmpty) myTicketsEmpty.hidden = false;
       return;
     }
-
-    if (myTicketsEmpty) myTicketsEmpty.hidden = true;
 
     filteredTickets.forEach(ticket => {
       const ticketEl = createTicketElement(ticket);
