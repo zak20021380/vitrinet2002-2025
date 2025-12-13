@@ -7547,7 +7547,7 @@ function renderSellers() {
   if (sellerCategoryFilter.size > 0 && !sellerCategoryFilter.has('all')) {
     sellers = sellers.filter(shop => {
       const primaryCategory = (shop.serviceCategoryName || shop.category || '').trim();
-      const subcategories = Array.isArray(shop.serviceSubcategories) 
+      const subcategories = Array.isArray(shop.serviceSubcategories)
         ? shop.serviceSubcategories.map(s => String(s).trim())
         : [];
       const allCategories = [primaryCategory, ...subcategories].filter(Boolean);
@@ -7562,6 +7562,8 @@ function renderSellers() {
       });
     });
   }
+
+  updateCategoryFilterCount(sellers.length);
 
   sellers.forEach(shop => {
     shop._productsCount = shop.productsCount ?? shop.productCount ?? 0;
@@ -7776,7 +7778,7 @@ function extractUniqueCategories(shops = []) {
     }
   });
   
-  // تبدیل به آرایه و مرتب‌سازی بر اساس تعداد
+// تبدیل به آرایه و مرتب‌سازی بر اساس تعداد
   const categories = Array.from(categoriesMap.values()).sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count;
     return a.label.localeCompare(b.label, 'fa', { sensitivity: 'base' });
@@ -7785,11 +7787,24 @@ function extractUniqueCategories(shops = []) {
   return categories;
 }
 
+function getActiveSellerCategories() {
+  return Array.from(sellerCategoryFilter).filter(item => item !== 'all');
+}
+
+function syncCategoryChipState(container) {
+  const hasAll = sellerCategoryFilter.has('all') || sellerCategoryFilter.size === 0;
+  container.querySelectorAll('.seller-category-chip-filter').forEach(btn => {
+    const category = btn.getAttribute('data-category');
+    const shouldBeActive = hasAll ? category === 'all' : sellerCategoryFilter.has(category);
+    btn.classList.toggle('active', shouldBeActive);
+  });
+}
+
 // تابع رندر کردن فیلتر دسته‌بندی
 function renderCategoryFilter() {
   const container = document.getElementById('sellerCategoryFilterChips');
   if (!container) return;
-  
+
   const categories = extractUniqueCategories(shopsList);
   
   // اگر دسته‌ای وجود ندارد، فیلتر را مخفی کن
@@ -7802,16 +7817,14 @@ function renderCategoryFilter() {
   // نمایش کارت فیلتر
   const filterCard = container.closest('.seller-category-filter-card');
   if (filterCard) filterCard.style.display = 'block';
-  
-  // دکمه "همه" از قبل وجود دارد، فقط دسته‌ها را اضافه می‌کنیم
+
   const existingAllBtn = container.querySelector('[data-category="all"]');
   const chipsContainer = document.createDocumentFragment();
-  
-  // اگر دکمه "همه" وجود ندارد، آن را اضافه کن
+
   if (!existingAllBtn) {
     const allBtn = document.createElement('button');
     allBtn.type = 'button';
-    allBtn.className = 'seller-category-chip-filter active';
+    allBtn.className = 'seller-category-chip-filter';
     allBtn.setAttribute('data-category', 'all');
     allBtn.innerHTML = '<i class="ri-list-check"></i><span>همه دسته‌ها</span>';
     chipsContainer.appendChild(allBtn);
@@ -7833,47 +7846,36 @@ function renderCategoryFilter() {
   // پاک کردن و اضافه کردن مجدد
   container.innerHTML = '';
   container.appendChild(chipsContainer);
-  
+
   // اضافه کردن event listener به دکمه‌ها
   container.querySelectorAll('.seller-category-chip-filter').forEach(btn => {
     btn.addEventListener('click', function() {
       const category = this.getAttribute('data-category');
-      
+
       if (category === 'all') {
-        // انتخاب "همه" - پاک کردن همه فیلترها
         sellerCategoryFilter.clear();
         sellerCategoryFilter.add('all');
-        container.querySelectorAll('.seller-category-chip-filter').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
       } else {
-        // حذف "همه" از انتخاب‌ها
         sellerCategoryFilter.delete('all');
-        
-        // toggle دسته انتخاب شده
+
         if (sellerCategoryFilter.has(category)) {
           sellerCategoryFilter.delete(category);
-          this.classList.remove('active');
         } else {
           sellerCategoryFilter.add(category);
-          this.classList.add('active');
         }
-        
-        // اگر هیچ دسته‌ای انتخاب نشده، "همه" را فعال کن
+
         if (sellerCategoryFilter.size === 0) {
           sellerCategoryFilter.add('all');
-          const allBtn = container.querySelector('[data-category="all"]');
-          if (allBtn) allBtn.classList.add('active');
-        } else {
-          const allBtn = container.querySelector('[data-category="all"]');
-          if (allBtn) allBtn.classList.remove('active');
         }
       }
-      
+
+      syncCategoryChipState(container);
       updateCategoryFilterUI();
       renderSellers();
     });
   });
-  
+
+  syncCategoryChipState(container);
   updateCategoryFilterUI();
 }
 
@@ -7881,15 +7883,25 @@ function renderCategoryFilter() {
 function updateCategoryFilterUI() {
   const clearBtn = document.getElementById('sellerCategoryFilterClear');
   const footer = document.getElementById('sellerCategoryFilterFooter');
-  
+  const selectedEl = document.getElementById('sellerCategoryFilterSelected');
+
   const hasActiveFilter = sellerCategoryFilter.size > 0 && !sellerCategoryFilter.has('all');
-  
+
   if (clearBtn) {
     clearBtn.style.display = hasActiveFilter ? 'flex' : 'none';
   }
   
   if (footer) {
     footer.style.display = hasActiveFilter ? 'flex' : 'none';
+  }
+
+  if (selectedEl) {
+    if (hasActiveFilter) {
+      const labels = getActiveSellerCategories();
+      selectedEl.textContent = `فیلتر فعال: ${labels.join('، ')}`;
+    } else {
+      selectedEl.textContent = 'بدون فیلتر فعال';
+    }
   }
 }
 
@@ -7908,17 +7920,12 @@ document.addEventListener('DOMContentLoaded', function() {
     clearBtn.addEventListener('click', function() {
       sellerCategoryFilter.clear();
       sellerCategoryFilter.add('all');
-      
+
       const container = document.getElementById('sellerCategoryFilterChips');
       if (container) {
-        container.querySelectorAll('.seller-category-chip-filter').forEach(btn => {
-          btn.classList.remove('active');
-          if (btn.getAttribute('data-category') === 'all') {
-            btn.classList.add('active');
-          }
-        });
+        syncCategoryChipState(container);
       }
-      
+
       updateCategoryFilterUI();
       renderSellers();
     });
