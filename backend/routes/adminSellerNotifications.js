@@ -9,6 +9,9 @@ router.post('/', auth('admin'), ctrl.sendNotification);
 // دریافت پیام‌های فروشنده (برای داشبورد فروشنده)
 router.get('/seller/:sellerId', auth('seller'), ctrl.getSellerNotifications);
 
+// دریافت پیام‌های فروشنده (برای داشبورد ادمین)
+router.get('/admin/seller/:sellerId', auth('admin'), ctrl.getSellerNotifications);
+
 // علامت‌گذاری پیام به عنوان خوانده شده
 router.put('/:id/read', auth('seller'), ctrl.markAsRead);
 

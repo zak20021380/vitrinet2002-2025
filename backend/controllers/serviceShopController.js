@@ -656,6 +656,7 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
   return {
     _id: seller._id,
     legacySellerId: seller._id,
+    sellerId: seller._id, // شناسه فروشنده برای ارسال پیام از ادمین
     name,
     shopUrl,
     ownerName: ownerName || name,

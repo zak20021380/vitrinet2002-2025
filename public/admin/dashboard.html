@@ -751,7 +751,43 @@
           </button>
         </div>
         <div class="message-section__body" id="messageFormContainer" hidden>
+          <!-- نمایش نام فروشگاه -->
+          <div class="message-form__recipient" id="messageRecipientInfo">
+            <i class="ri-store-2-line" aria-hidden="true"></i>
+            <span>گیرنده: <strong id="messageRecipientName">—</strong></span>
+          </div>
+          
           <div class="message-form">
+            <!-- قالب‌های پیام از پیش تعریف شده -->
+            <div class="message-form__field">
+              <label for="adminMessageTemplate" class="message-form__label">
+                <i class="ri-file-list-3-line" aria-hidden="true"></i>
+                قالب پیام (اختیاری)
+              </label>
+              <select id="adminMessageTemplate" class="message-form__select">
+                <option value="">انتخاب قالب...</option>
+                <optgroup label="اطلاع‌رسانی">
+                  <option value="welcome">خوش‌آمدگویی</option>
+                  <option value="profile-complete">تکمیل پروفایل</option>
+                  <option value="new-feature">معرفی قابلیت جدید</option>
+                </optgroup>
+                <optgroup label="هشدار">
+                  <option value="incomplete-info">اطلاعات ناقص</option>
+                  <option value="low-activity">فعالیت کم</option>
+                  <option value="policy-reminder">یادآوری قوانین</option>
+                </optgroup>
+                <optgroup label="تبریک">
+                  <option value="first-booking">اولین رزرو</option>
+                  <option value="milestone">دستاورد ویژه</option>
+                  <option value="good-rating">امتیاز عالی</option>
+                </optgroup>
+                <optgroup label="فوری">
+                  <option value="urgent-action">اقدام فوری</option>
+                  <option value="account-issue">مشکل حساب</option>
+                </optgroup>
+              </select>
+            </div>
+            
             <div class="message-form__field">
               <label for="adminMessageType" class="message-form__label">نوع پیام</label>
               <select id="adminMessageType" class="message-form__select">
@@ -784,6 +820,20 @@
             </div>
           </div>
           <div class="message-form__status" id="messageFormStatus" hidden></div>
+          
+          <!-- تاریخچه پیام‌های ارسال شده -->
+          <div class="message-history" id="messageHistorySection" hidden>
+            <div class="message-history__header">
+              <i class="ri-history-line" aria-hidden="true"></i>
+              <span>پیام‌های قبلی</span>
+              <button type="button" class="message-history__refresh" id="refreshMessageHistory" title="بروزرسانی">
+                <i class="ri-refresh-line" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="message-history__list" id="messageHistoryList">
+              <!-- پیام‌ها به صورت داینامیک اضافه می‌شوند -->
+            </div>
+          </div>
         </div>
       </div>
       
@@ -796,6 +846,11 @@
           <i class="ri-external-link-line" aria-hidden="true"></i>
           فعالسازی پلن
         </a>
+      </div>
+      
+      <!-- Scroll indicator -->
+      <div class="service-shop-modal__scroll-hint" id="serviceShopScrollHint">
+        <i class="ri-arrow-down-double-line" aria-hidden="true"></i>
       </div>
     </div>
   </div>

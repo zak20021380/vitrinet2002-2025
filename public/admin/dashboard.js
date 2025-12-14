@@ -4174,6 +4174,18 @@ function normaliseServiceShopRecord(raw) {
 
   const walletCurrency = raw.walletCurrency || raw.wallet?.currency || 'تومان';
 
+  // شناسه فروشنده برای ارسال پیام
+  const sellerId = toIdString(
+    raw.sellerId
+    || raw.legacySellerId
+    || raw.ownerId
+    || raw.owner?._id
+    || raw.owner?.id
+    || raw.seller?._id
+    || raw.seller?.id
+    || ''
+  );
+
   return {
     id,
     name,
@@ -4200,6 +4212,7 @@ function normaliseServiceShopRecord(raw) {
     dailyStreak,
     walletBalance,
     walletCurrency,
+    sellerId,
     meta: raw
   };
 }
@@ -4599,7 +4612,49 @@ function openServiceShopModal(shopId) {
     resetMessageSection();
   }
 
+  // به‌روزرسانی نام گیرنده پیام
+  if (typeof updateMessageRecipient === 'function') {
+    updateMessageRecipient(shop.name || shop.ownerName || '—');
+  }
+
+  // بارگذاری تاریخچه پیام‌ها
+  if (typeof loadMessageHistory === 'function' && currentServiceShopSellerId) {
+    loadMessageHistory(currentServiceShopSellerId);
+  }
+
   modal.hidden = false;
+
+  // مدیریت scroll indicator
+  initServiceShopModalScroll();
+}
+
+/**
+ * مدیریت scroll indicator در مدال فروشگاه خدماتی
+ */
+function initServiceShopModalScroll() {
+  const dialog = document.querySelector('.service-shop-modal__dialog');
+  const scrollHint = document.getElementById('serviceShopScrollHint');
+
+  if (!dialog || !scrollHint) return;
+
+  // بررسی اولیه
+  const checkScroll = () => {
+    const isAtBottom = dialog.scrollHeight - dialog.scrollTop - dialog.clientHeight < 50;
+    const hasScroll = dialog.scrollHeight > dialog.clientHeight;
+
+    if (!hasScroll || isAtBottom) {
+      scrollHint.classList.add('is-hidden');
+    } else {
+      scrollHint.classList.remove('is-hidden');
+    }
+  };
+
+  // اسکرول به بالا و بررسی
+  dialog.scrollTop = 0;
+  setTimeout(checkScroll, 100);
+
+  // Event listener برای اسکرول
+  dialog.addEventListener('scroll', checkScroll, { passive: true });
 }
 
 function closeServiceShopModal() {
@@ -10161,15 +10216,32 @@ function initAdminMessageSection() {
   const charCount = document.getElementById('messageCharCount');
   const sendBtn = document.getElementById('sendAdminMessage');
   const clearBtn = document.getElementById('clearAdminMessage');
+  const messageHeader = document.querySelector('.message-section__header');
 
   if (!toggleBtn || !messageContainer) return;
 
-  // Toggle بخش پیام
-  toggleBtn.addEventListener('click', () => {
+  // تابع toggle برای باز و بسته کردن بخش پیام
+  const toggleMessageSection = () => {
     const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
     toggleBtn.setAttribute('aria-expanded', !isExpanded);
     messageContainer.hidden = isExpanded;
+  };
+
+  // Toggle بخش پیام با کلیک روی دکمه
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMessageSection();
   });
+
+  // Toggle بخش پیام با کلیک روی کل header
+  if (messageHeader) {
+    messageHeader.addEventListener('click', (e) => {
+      // اگر روی دکمه کلیک نشده، toggle کن
+      if (!e.target.closest('.message-section__toggle')) {
+        toggleMessageSection();
+      }
+    });
+  }
 
   // شمارش کاراکترها
   if (messageContent && charCount) {
@@ -10311,12 +10383,14 @@ function clearAdminMessageForm() {
   const typeSelect = document.getElementById('adminMessageType');
   const titleInput = document.getElementById('adminMessageTitle');
   const contentInput = document.getElementById('adminMessageContent');
+  const templateSelect = document.getElementById('adminMessageTemplate');
   const charCount = document.getElementById('messageCharCount');
   const statusEl = document.getElementById('messageFormStatus');
 
   if (typeSelect) typeSelect.value = 'info';
   if (titleInput) titleInput.value = '';
   if (contentInput) contentInput.value = '';
+  if (templateSelect) templateSelect.value = '';
   if (charCount) {
     charCount.textContent = '0';
     charCount.parentElement.classList.remove('is-warning', 'is-limit');
@@ -10339,9 +10413,222 @@ function resetMessageSection() {
   }
   
   clearAdminMessageForm();
+  hideMessageHistory();
+}
+
+/**
+ * قالب‌های پیام از پیش تعریف شده
+ */
+const MESSAGE_TEMPLATES = {
+  // اطلاع‌رسانی
+  welcome: {
+    type: 'info',
+    title: 'خوش آمدید به ویترینت!',
+    content: 'از ثبت‌نام شما در ویترینت خوشحالیم. برای شروع، پروفایل فروشگاه خود را تکمیل کنید و خدمات خود را اضافه نمایید. در صورت نیاز به راهنمایی، با پشتیبانی تماس بگیرید.'
+  },
+  'profile-complete': {
+    type: 'info',
+    title: 'تکمیل پروفایل فروشگاه',
+    content: 'برای جذب مشتریان بیشتر، لطفاً پروفایل فروشگاه خود را تکمیل کنید. اضافه کردن تصاویر، توضیحات و ساعات کاری به افزایش اعتماد مشتریان کمک می‌کند.'
+  },
+  'new-feature': {
+    type: 'info',
+    title: 'قابلیت جدید در ویترینت',
+    content: 'قابلیت جدیدی به پنل فروشندگان اضافه شده است. برای آشنایی با این قابلیت و استفاده از آن، به بخش راهنما مراجعه کنید.'
+  },
+  // هشدار
+  'incomplete-info': {
+    type: 'warning',
+    title: 'اطلاعات ناقص فروشگاه',
+    content: 'اطلاعات فروشگاه شما ناقص است. لطفاً در اسرع وقت اطلاعات خود را تکمیل کنید تا فروشگاه شما در نتایج جستجو نمایش داده شود.'
+  },
+  'low-activity': {
+    type: 'warning',
+    title: 'فعالیت کم در فروشگاه',
+    content: 'مدتی است که فعالیتی در فروشگاه شما مشاهده نشده است. برای حفظ رتبه و جایگاه خود، لطفاً به صورت منظم وارد پنل شوید و خدمات خود را به‌روزرسانی کنید.'
+  },
+  'policy-reminder': {
+    type: 'warning',
+    title: 'یادآوری قوانین ویترینت',
+    content: 'لطفاً قوانین و مقررات ویترینت را مطالعه و رعایت کنید. عدم رعایت قوانین ممکن است منجر به محدودیت یا تعلیق حساب شود.'
+  },
+  // تبریک
+  'first-booking': {
+    type: 'success',
+    title: 'تبریک! اولین رزرو شما',
+    content: 'تبریک می‌گوییم! اولین رزرو در فروشگاه شما ثبت شد. امیدواریم این شروع موفقیت‌های بیشتر باشد. به ارائه خدمات با کیفیت ادامه دهید.'
+  },
+  milestone: {
+    type: 'success',
+    title: 'دستاورد ویژه!',
+    content: 'تبریک! شما به یک دستاورد ویژه در ویترینت رسیدید. از تلاش و پشتکار شما قدردانی می‌کنیم.'
+  },
+  'good-rating': {
+    type: 'success',
+    title: 'امتیاز عالی از مشتریان',
+    content: 'تبریک! مشتریان از خدمات شما راضی هستند و امتیاز عالی به شما داده‌اند. به همین روند ادامه دهید.'
+  },
+  // فوری
+  'urgent-action': {
+    type: 'urgent',
+    title: 'اقدام فوری مورد نیاز',
+    content: 'لطفاً در اسرع وقت به پنل فروشندگان مراجعه کنید. یک موضوع مهم نیاز به توجه فوری شما دارد.'
+  },
+  'account-issue': {
+    type: 'urgent',
+    title: 'مشکل در حساب کاربری',
+    content: 'مشکلی در حساب کاربری شما شناسایی شده است. لطفاً در اسرع وقت با پشتیبانی تماس بگیرید یا به پنل خود مراجعه کنید.'
+  }
+};
+
+/**
+ * اعمال قالب پیام
+ */
+function applyMessageTemplate(templateKey) {
+  const template = MESSAGE_TEMPLATES[templateKey];
+  if (!template) return;
+
+  const typeSelect = document.getElementById('adminMessageType');
+  const titleInput = document.getElementById('adminMessageTitle');
+  const contentInput = document.getElementById('adminMessageContent');
+  const charCount = document.getElementById('messageCharCount');
+
+  if (typeSelect) typeSelect.value = template.type;
+  if (titleInput) titleInput.value = template.title;
+  if (contentInput) {
+    contentInput.value = template.content;
+    // به‌روزرسانی شمارنده کاراکتر
+    if (charCount) {
+      const count = template.content.length;
+      charCount.textContent = count;
+      const charCountContainer = charCount.parentElement;
+      charCountContainer.classList.remove('is-warning', 'is-limit');
+      if (count >= 500) {
+        charCountContainer.classList.add('is-limit');
+      } else if (count >= 400) {
+        charCountContainer.classList.add('is-warning');
+      }
+    }
+  }
+}
+
+/**
+ * به‌روزرسانی نام گیرنده پیام
+ */
+function updateMessageRecipient(shopName) {
+  const recipientName = document.getElementById('messageRecipientName');
+  if (recipientName) {
+    recipientName.textContent = shopName || '—';
+  }
+}
+
+/**
+ * دریافت و نمایش تاریخچه پیام‌ها
+ */
+async function loadMessageHistory(sellerId) {
+  const historySection = document.getElementById('messageHistorySection');
+  const historyList = document.getElementById('messageHistoryList');
+  const refreshBtn = document.getElementById('refreshMessageHistory');
+
+  if (!historySection || !historyList || !sellerId) {
+    hideMessageHistory();
+    return;
+  }
+
+  // نمایش بخش تاریخچه
+  historySection.hidden = false;
+
+  // نمایش loading
+  if (refreshBtn) {
+    refreshBtn.classList.add('is-loading');
+  }
+  historyList.innerHTML = '<div class="message-history__empty"><i class="ri-loader-4-line ri-spin"></i>در حال بارگذاری...</div>';
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/admin-seller-notifications/admin/seller/${sellerId}?limit=5`, {
+      credentials: 'include'
+    });
+
+    if (!res.ok) {
+      throw new Error('خطا در دریافت تاریخچه پیام‌ها');
+    }
+
+    const data = await res.json();
+    const notifications = data.notifications || [];
+
+    if (!notifications.length) {
+      historyList.innerHTML = '<div class="message-history__empty"><i class="ri-mail-line"></i>پیامی ارسال نشده است</div>';
+      return;
+    }
+
+    historyList.innerHTML = notifications.map(notification => {
+      const typeLabels = {
+        info: 'اطلاع‌رسانی',
+        warning: 'هشدار',
+        success: 'تبریک',
+        urgent: 'فوری'
+      };
+      const date = notification.createdAt 
+        ? persianDateFormatter.format(new Date(notification.createdAt))
+        : '—';
+      
+      return `
+        <div class="message-history__item">
+          <div class="message-history__item-header">
+            <span class="message-history__item-title">${escapeHtml(notification.title)}</span>
+            <span class="message-history__item-date">${date}</span>
+          </div>
+          <div class="message-history__item-content">${escapeHtml(notification.content)}</div>
+          <span class="message-history__item-type is-${notification.type || 'info'}">
+            ${typeLabels[notification.type] || 'اطلاع‌رسانی'}
+            ${notification.read ? '<i class="ri-check-double-line"></i>' : ''}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('loadMessageHistory error:', error);
+    historyList.innerHTML = '<div class="message-history__empty"><i class="ri-error-warning-line"></i>خطا در بارگذاری</div>';
+  } finally {
+    if (refreshBtn) {
+      refreshBtn.classList.remove('is-loading');
+    }
+  }
+}
+
+/**
+ * مخفی کردن بخش تاریخچه
+ */
+function hideMessageHistory() {
+  const historySection = document.getElementById('messageHistorySection');
+  if (historySection) {
+    historySection.hidden = true;
+  }
 }
 
 // راه‌اندازی در DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   initAdminMessageSection();
+  
+  // Event listener برای قالب پیام
+  const templateSelect = document.getElementById('adminMessageTemplate');
+  if (templateSelect) {
+    templateSelect.addEventListener('change', (e) => {
+      const templateKey = e.target.value;
+      if (templateKey) {
+        applyMessageTemplate(templateKey);
+      }
+    });
+  }
+  
+  // Event listener برای بروزرسانی تاریخچه
+  const refreshBtn = document.getElementById('refreshMessageHistory');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      if (currentServiceShopSellerId) {
+        loadMessageHistory(currentServiceShopSellerId);
+      }
+    });
+  }
 });
