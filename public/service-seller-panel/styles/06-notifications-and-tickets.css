@@ -1,4 +1,230 @@
 /* ============================================
+   ADMIN MESSAGE NOTIFICATION IN PANEL
+   پیام‌های مدیریت در پنل نوتیفیکیشن
+   ============================================ */
+
+/* Admin Message Notification Item */
+.notification-item.is-admin-message {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.notification-item.is-admin-message:hover {
+  transform: none !important;
+  background: transparent !important;
+}
+
+/* Admin Message Card */
+.admin-message-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fef9c3 50%, #fefce8 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.admin-message-card:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+  transform: translateY(-2px);
+}
+
+.notification-item.is-admin-message.is-unread .admin-message-card {
+  border-right: 4px solid #f59e0b;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+}
+
+/* Admin Message Header */
+.admin-message-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.admin-message-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-message-card__badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-message-card__badge--info {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0369a1;
+}
+
+.admin-message-card__badge--warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #b45309;
+}
+
+.admin-message-card__badge--success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.admin-message-card__badge--urgent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.admin-message-card__delete {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.admin-message-card__delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.05);
+}
+
+/* Admin Message Body */
+.admin-message-card__body {
+  padding: 16px;
+}
+
+.admin-message-card__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+.admin-message-card__content {
+  margin: 0;
+  font-size: 14px;
+  color: #78350f;
+  line-height: 1.7;
+}
+
+/* Admin Message Footer */
+.admin-message-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.admin-message-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-message-card__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.admin-message-card__source svg {
+  width: 14px;
+  height: 14px;
+  color: #f59e0b;
+}
+
+.admin-message-card__time {
+  font-size: 11px;
+  color: #92400e;
+  opacity: 0.7;
+}
+
+.admin-message-card__mark-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.admin-message-card__mark-read:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.admin-message-card__mark-read svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Responsive Admin Message */
+@media (max-width: 480px) {
+  .admin-message-card__header {
+    padding: 10px 12px;
+  }
+  
+  .admin-message-card__badge {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  
+  .admin-message-card__body {
+    padding: 12px;
+  }
+  
+  .admin-message-card__title {
+    font-size: 14px;
+  }
+  
+  .admin-message-card__content {
+    font-size: 13px;
+  }
+  
+  .admin-message-card__footer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  
+  .admin-message-card__meta {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .admin-message-card__mark-read {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================
    TICKET NOTIFICATION ENHANCEMENTS
    ============================================ */
 

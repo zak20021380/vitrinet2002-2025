@@ -9183,3 +9183,129 @@ tr:last-child td {
     max-height: 200px;
   }
 }
+
+/* ============================================
+   Popup پیام ادمین
+   ============================================ */
+
+.admin-message-popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  animation: popupSlideIn 0.3s ease;
+}
+
+.admin-message-popup.is-hiding {
+  animation: popupSlideOut 0.3s ease forwards;
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes popupSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+}
+
+.admin-message-popup__content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  min-width: 300px;
+  max-width: 450px;
+}
+
+.admin-message-popup__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-message-popup__icon i {
+  font-size: 1.5rem;
+}
+
+.admin-message-popup.is-success .admin-message-popup__icon {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.admin-message-popup.is-error .admin-message-popup__icon {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.admin-message-popup__text {
+  flex: 1;
+}
+
+.admin-message-popup__text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+
+.admin-message-popup__text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.admin-message-popup__close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.admin-message-popup__close:hover {
+  background: rgba(148, 163, 184, 0.2);
+  color: #0f172a;
+}
+
+@media (max-width: 480px) {
+  .admin-message-popup {
+    left: 10px;
+    right: 10px;
+    transform: none;
+  }
+
+  .admin-message-popup__content {
+    min-width: auto;
+    max-width: none;
+  }
+}

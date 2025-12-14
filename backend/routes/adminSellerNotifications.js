@@ -6,6 +6,12 @@ const auth = require('../middlewares/authMiddleware');
 // ارسال پیام از ادمین به فروشنده
 router.post('/', auth('admin'), ctrl.sendNotification);
 
+// دریافت پیام‌های فروشنده لاگین‌شده (بدون نیاز به sellerId)
+router.get('/my', auth('seller'), ctrl.getMyNotifications);
+
+// دریافت تعداد پیام‌های خوانده نشده فروشنده لاگین‌شده
+router.get('/my/unread-count', auth('seller'), ctrl.getMyUnreadCount);
+
 // دریافت پیام‌های فروشنده (برای داشبورد فروشنده)
 router.get('/seller/:sellerId', auth('seller'), ctrl.getSellerNotifications);
 

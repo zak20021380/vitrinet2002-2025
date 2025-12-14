@@ -50,12 +50,88 @@ exports.sendNotification = async (req, res) => {
 };
 
 /**
+ * دریافت پیام‌های فروشنده لاگین‌شده (بدون نیاز به sellerId در URL)
+ */
+exports.getMyNotifications = async (req, res) => {
+  try {
+    const sellerId = req.user?.id || req.user?._id;
+    const { page = 1, limit = 20, unreadOnly = false } = req.query;
+
+    if (!sellerId) {
+      return res.status(401).json({ error: 'لطفاً وارد حساب کاربری شوید' });
+    }
+
+    const query = { sellerId };
+    if (unreadOnly === 'true') {
+      query.read = false;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [notifications, total] = await Promise.all([
+      AdminSellerNotification.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      AdminSellerNotification.countDocuments(query)
+    ]);
+
+    res.json({
+      success: true,
+      notifications,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('getMyNotifications error:', error);
+    res.status(500).json({ error: 'خطا در دریافت پیام‌ها' });
+  }
+};
+
+/**
+ * دریافت تعداد پیام‌های خوانده نشده فروشنده لاگین‌شده
+ */
+exports.getMyUnreadCount = async (req, res) => {
+  try {
+    const sellerId = req.user?.id || req.user?._id;
+
+    if (!sellerId) {
+      return res.status(401).json({ error: 'لطفاً وارد حساب کاربری شوید' });
+    }
+
+    const count = await AdminSellerNotification.countDocuments({
+      sellerId,
+      read: false
+    });
+
+    res.json({ success: true, count });
+  } catch (error) {
+    console.error('getMyUnreadCount error:', error);
+    res.status(500).json({ error: 'خطا در دریافت تعداد پیام‌ها' });
+  }
+};
+
+/**
  * دریافت پیام‌های فروشنده
  */
 exports.getSellerNotifications = async (req, res) => {
   try {
     const { sellerId } = req.params;
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
+
+    // بررسی دسترسی: فروشنده فقط می‌تواند پیام‌های خودش را ببیند
+    // ادمین می‌تواند پیام‌های همه را ببیند
+    const userRole = req.user?.role;
+    const userId = req.user?.id || req.user?._id;
+    
+    if (userRole === 'seller' && sellerId !== String(userId)) {
+      return res.status(403).json({ error: 'شما فقط می‌توانید پیام‌های خودتان را مشاهده کنید' });
+    }
 
     const query = { sellerId };
     if (unreadOnly === 'true') {
@@ -161,6 +237,14 @@ exports.deleteNotification = async (req, res) => {
 exports.getUnreadCount = async (req, res) => {
   try {
     const { sellerId } = req.params;
+
+    // بررسی دسترسی: فروشنده فقط می‌تواند تعداد پیام‌های خودش را ببیند
+    const userRole = req.user?.role;
+    const userId = req.user?.id || req.user?._id;
+    
+    if (userRole === 'seller' && sellerId !== String(userId)) {
+      return res.status(403).json({ error: 'دسترسی غیرمجاز' });
+    }
 
     const count = await AdminSellerNotification.countDocuments({
       sellerId,

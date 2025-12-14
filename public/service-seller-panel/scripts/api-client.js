@@ -551,10 +551,16 @@ async deletePortfolioItem(id) {
   // ===== Admin Seller Notifications API Methods =====
   
   /**
-   * دریافت پیام‌های ادمین برای فروشنده
+   * دریافت پیام‌های ادمین برای فروشنده لاگین‌شده
+   * از endpoint /my استفاده می‌کند که نیازی به sellerId ندارد
    */
-  async getAdminNotifications(sellerId) {
-    const r = await fetch(bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}`), {
+  async getAdminNotifications(sellerId = null) {
+    // استفاده از endpoint جدید /my که از توکن استفاده می‌کند
+    const url = sellerId 
+      ? bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}`)
+      : bust(`${API_BASE}/api/admin-seller-notifications/my`);
+    
+    const r = await fetch(url, {
       credentials: 'include',
       ...NO_CACHE
     });
@@ -569,8 +575,11 @@ async deletePortfolioItem(id) {
     };
     return arr.map(n => ({
       id: n._id || n.id,
+      _id: n._id || n.id,
       text: n.content || '',
+      content: n.content || '',
       time: n.createdAt ? fmt(n.createdAt) : '',
+      createdAt: n.createdAt,
       read: !!n.read,
       type: n.type || 'info',
       title: n.title || '',
@@ -604,15 +613,20 @@ async deletePortfolioItem(id) {
 
   /**
    * دریافت تعداد پیام‌های خوانده نشده ادمین
+   * از endpoint /my/unread-count استفاده می‌کند که نیازی به sellerId ندارد
    */
-  async getAdminNotificationsUnreadCount(sellerId) {
-    const r = await fetch(bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}/unread-count`), {
+  async getAdminNotificationsUnreadCount(sellerId = null) {
+    const url = sellerId
+      ? bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}/unread-count`)
+      : bust(`${API_BASE}/api/admin-seller-notifications/my/unread-count`);
+    
+    const r = await fetch(url, {
       credentials: 'include',
       ...NO_CACHE
     });
-    if (!r.ok && r.status !== 304) return 0;
+    if (!r.ok && r.status !== 304) return { count: 0 };
     const data = await this._json(r);
-    return data?.count || 0;
+    return { count: data?.count || 0 };
   },
 
   // ===== Streak API Methods =====

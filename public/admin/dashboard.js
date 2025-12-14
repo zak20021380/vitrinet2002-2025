@@ -10332,22 +10332,28 @@ async function sendAdminMessageToSeller() {
       throw new Error(data.error || 'خطا در ارسال پیام');
     }
 
-    showMessageFormStatus('✅ پیام با موفقیت ارسال شد', 'success');
+    // پاک کردن فرم
     clearAdminMessageForm();
 
-    // بستن بخش پیام بعد از 2 ثانیه
-    setTimeout(() => {
-      const toggleBtn = document.getElementById('toggleMessageSection');
-      const messageContainer = document.getElementById('messageFormContainer');
-      if (toggleBtn && messageContainer) {
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        messageContainer.hidden = true;
-      }
-    }, 2000);
+    // بستن مدال
+    closeServiceShopModal();
+
+    // نمایش toast موفقیت
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('✅ پیام با موفقیت به فروشنده ارسال شد', 'success');
+    } else {
+      showAdminMessagePopup('success', 'پیام ارسال شد', 'پیام شما با موفقیت به فروشنده ارسال گردید.');
+    }
 
   } catch (error) {
     console.error('sendAdminMessageToSeller error:', error);
-    showMessageFormStatus(`❌ ${error.message}`, 'error');
+    
+    // نمایش toast خطا
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast(`❌ ${error.message}`, 'error');
+    } else {
+      showAdminMessagePopup('error', 'خطا در ارسال', error.message || 'ارسال پیام انجام نشد. لطفاً دوباره تلاش کنید.');
+    }
   } finally {
     if (sendBtn) {
       sendBtn.disabled = false;
@@ -10374,6 +10380,51 @@ function showMessageFormStatus(message, type = 'info') {
       statusEl.hidden = true;
     }, 5000);
   }
+}
+
+/**
+ * نمایش popup پیام برای زمانی که toast در دسترس نیست
+ */
+function showAdminMessagePopup(type, title, message) {
+  // حذف popup قبلی اگر وجود دارد
+  const existingPopup = document.getElementById('adminMessagePopup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+
+  const popup = document.createElement('div');
+  popup.id = 'adminMessagePopup';
+  popup.className = `admin-message-popup is-${type}`;
+  popup.innerHTML = `
+    <div class="admin-message-popup__content">
+      <div class="admin-message-popup__icon">
+        <i class="${type === 'success' ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill'}" aria-hidden="true"></i>
+      </div>
+      <div class="admin-message-popup__text">
+        <strong>${escapeHtml(title)}</strong>
+        <p>${escapeHtml(message)}</p>
+      </div>
+      <button class="admin-message-popup__close" type="button" aria-label="بستن">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+
+  // Event listener برای بستن
+  popup.querySelector('.admin-message-popup__close').addEventListener('click', () => {
+    popup.classList.add('is-hiding');
+    setTimeout(() => popup.remove(), 300);
+  });
+
+  // بستن خودکار بعد از 4 ثانیه
+  setTimeout(() => {
+    if (popup.parentNode) {
+      popup.classList.add('is-hiding');
+      setTimeout(() => popup.remove(), 300);
+    }
+  }, 4000);
 }
 
 /**

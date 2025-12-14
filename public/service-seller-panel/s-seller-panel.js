@@ -997,6 +997,225 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1500);
   });
 
+  // ===== Admin Notifications Section =====
+  const adminNotificationsSection = document.getElementById('admin-notifications-section');
+  const adminNotificationsToggle = document.getElementById('admin-notifications-toggle');
+  const adminNotificationsBody = document.getElementById('admin-notifications-body');
+  const adminNotificationsList = document.getElementById('admin-notifications-list');
+  const adminNotificationsCount = document.getElementById('admin-notifications-count');
+  const adminNotificationsLoading = document.getElementById('admin-notifications-loading');
+  const adminNotificationsEmpty = document.getElementById('admin-notifications-empty');
+
+  let adminNotificationsData = [];
+  let adminNotificationsLoaded = false;
+
+  const notificationTypeLabels = {
+    info: 'اطلاع‌رسانی',
+    warning: 'هشدار',
+    success: 'تبریک',
+    urgent: 'فوری'
+  };
+
+  const formatNotificationDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'همین الان';
+      if (diffMins < 60) return `${toFaDigits(diffMins)} دقیقه پیش`;
+      if (diffHours < 24) return `${toFaDigits(diffHours)} ساعت پیش`;
+      if (diffDays < 7) return `${toFaDigits(diffDays)} روز پیش`;
+      
+      return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }).format(date);
+    } catch {
+      return '—';
+    }
+  };
+
+  const toggleAdminNotificationsSection = () => {
+    if (!adminNotificationsSection) return;
+    const isExpanded = adminNotificationsToggle?.getAttribute('aria-expanded') === 'true';
+    
+    if (isExpanded) {
+      adminNotificationsToggle?.setAttribute('aria-expanded', 'false');
+      if (adminNotificationsBody) adminNotificationsBody.hidden = true;
+    } else {
+      adminNotificationsToggle?.setAttribute('aria-expanded', 'true');
+      if (adminNotificationsBody) adminNotificationsBody.hidden = false;
+      if (!adminNotificationsLoaded) {
+        loadAdminNotifications();
+      }
+    }
+  };
+
+  const loadAdminNotifications = async () => {
+    if (!adminNotificationsList) return;
+
+    // Show loading
+    if (adminNotificationsLoading) adminNotificationsLoading.hidden = false;
+    if (adminNotificationsEmpty) adminNotificationsEmpty.hidden = true;
+
+    // Clear existing notifications
+    const existingItems = adminNotificationsList.querySelectorAll('.admin-notification-item');
+    existingItems.forEach(item => item.remove());
+
+    try {
+      // استفاده از endpoint /my که نیازی به sellerId ندارد
+      // API از توکن فروشنده برای شناسایی استفاده می‌کند
+      const data = await API.getAdminNotifications();
+      // API returns array directly with mapped fields
+      adminNotificationsData = Array.isArray(data) ? data : (data.notifications || []);
+      adminNotificationsLoaded = true;
+
+      updateAdminNotificationsCount();
+      renderAdminNotifications();
+
+    } catch (error) {
+      console.error('Error loading admin notifications:', error);
+      if (adminNotificationsLoading) adminNotificationsLoading.hidden = true;
+      if (adminNotificationsEmpty) {
+        adminNotificationsEmpty.hidden = false;
+        const emptyTitle = adminNotificationsEmpty.querySelector('.admin-notifications-empty__title');
+        if (emptyTitle) emptyTitle.textContent = 'خطا در بارگذاری';
+      }
+    }
+  };
+
+  const updateAdminNotificationsCount = () => {
+    const unreadCount = adminNotificationsData.filter(n => !n.read).length;
+    if (adminNotificationsCount) {
+      adminNotificationsCount.textContent = toFaDigits(unreadCount);
+      adminNotificationsCount.dataset.count = String(unreadCount);
+    }
+  };
+
+  const renderAdminNotifications = () => {
+    if (!adminNotificationsList) return;
+
+    if (adminNotificationsLoading) adminNotificationsLoading.hidden = true;
+
+    if (!adminNotificationsData.length) {
+      if (adminNotificationsEmpty) adminNotificationsEmpty.hidden = false;
+      return;
+    }
+
+    if (adminNotificationsEmpty) adminNotificationsEmpty.hidden = true;
+
+    adminNotificationsData.forEach(notification => {
+      const item = document.createElement('div');
+      const notificationId = notification.id || notification._id;
+      item.className = `admin-notification-item${notification.read ? '' : ' is-unread'}`;
+      item.dataset.id = notificationId;
+
+      const typeLabel = notificationTypeLabels[notification.type] || 'اطلاع‌رسانی';
+      const dateStr = notification.time || formatNotificationDate(notification.createdAt);
+
+      item.innerHTML = `
+        <div class="admin-notification-item__header">
+          <span class="admin-notification-item__type is-${notification.type || 'info'}">${typeLabel}</span>
+          <span class="admin-notification-item__date">${dateStr}</span>
+        </div>
+        <h4 class="admin-notification-item__title">${escapeHtml(notification.title || '')}</h4>
+        <p class="admin-notification-item__content">${escapeHtml(notification.text || notification.content || '')}</p>
+        <div class="admin-notification-item__actions">
+          ${!notification.read ? `
+            <button type="button" class="admin-notification-item__btn admin-notification-item__btn--read" data-action="mark-read" data-id="${notificationId}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              خوانده شد
+            </button>
+          ` : ''}
+          <button type="button" class="admin-notification-item__btn admin-notification-item__btn--delete" data-action="delete" data-id="${notificationId}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            حذف
+          </button>
+        </div>
+      `;
+
+      adminNotificationsList.appendChild(item);
+    });
+  };
+
+  const handleAdminNotificationAction = async (action, id) => {
+    try {
+      if (action === 'mark-read') {
+        await API.markAdminNotificationRead(id);
+        const notification = adminNotificationsData.find(n => (n.id || n._id) === id);
+        if (notification) notification.read = true;
+        
+        // Update UI
+        const item = adminNotificationsList?.querySelector(`[data-id="${id}"]`);
+        if (item) {
+          item.classList.remove('is-unread');
+          const readBtn = item.querySelector('[data-action="mark-read"]');
+          if (readBtn) readBtn.remove();
+        }
+        updateAdminNotificationsCount();
+        
+      } else if (action === 'delete') {
+        if (!confirm('آیا از حذف این پیام مطمئن هستید؟')) return;
+        
+        await API.deleteAdminNotification(id);
+        adminNotificationsData = adminNotificationsData.filter(n => (n.id || n._id) !== id);
+        
+        // Remove from UI
+        const item = adminNotificationsList?.querySelector(`[data-id="${id}"]`);
+        if (item) item.remove();
+        
+        updateAdminNotificationsCount();
+        
+        if (!adminNotificationsData.length && adminNotificationsEmpty) {
+          adminNotificationsEmpty.hidden = false;
+        }
+      }
+    } catch (error) {
+      console.error('Admin notification action error:', error);
+      alert('خطا در انجام عملیات');
+    }
+  };
+
+  // Event listeners for admin notifications
+  adminNotificationsToggle?.addEventListener('click', toggleAdminNotificationsSection);
+  adminNotificationsToggle?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleAdminNotificationsSection();
+    }
+  });
+
+  adminNotificationsList?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if (action && id) {
+      handleAdminNotificationAction(action, id);
+    }
+  });
+
+  // Load admin notifications count on page load
+  (async () => {
+    try {
+      // استفاده از endpoint /my/unread-count که نیازی به sellerId ندارد
+      const data = await API.getAdminNotificationsUnreadCount();
+      if (adminNotificationsCount && data.count !== undefined) {
+        adminNotificationsCount.textContent = toFaDigits(data.count);
+        adminNotificationsCount.dataset.count = String(data.count);
+      }
+    } catch (err) {
+      console.error('Failed to load admin notifications count:', err);
+    }
+  })();
+
   // ===== کیف پول از سرور - بدون داده فیک =====
   let walletData = null;
   let walletLoading = true;
@@ -3829,13 +4048,17 @@ const Notifications = {
       const items = await API.getNotifications();
       const existing = this.load();
       
-      // دریافت پیام‌های ادمین (اگر sellerId موجود باشد)
+      // دریافت پیام‌های ادمین (بدون نیاز به sellerId - از توکن استفاده می‌شود)
       let adminNotifications = [];
       try {
-        const sellerId = StorageManager.get('sellerId') || window.currentSellerId;
-        if (sellerId) {
-          adminNotifications = await API.getAdminNotifications(sellerId);
-        }
+        // استفاده از endpoint /my که نیازی به sellerId ندارد
+        adminNotifications = await API.getAdminNotifications();
+        // تبدیل پیام‌های ادمین به فرمت نوتیفیکیشن
+        adminNotifications = adminNotifications.map(n => ({
+          ...n,
+          type: 'admin_message',
+          isAdminMessage: true
+        }));
       } catch (adminErr) {
         console.warn('Failed to load admin notifications', adminErr);
       }
@@ -3934,11 +4157,23 @@ const Notifications = {
     });
 
     // دلیگیشن برای آیتم‌ها (حذف/خواندن)
-    this._els.list?.addEventListener('click', (e) => {
+    this._els.list?.addEventListener('click', async (e) => {
       const li = e.target.closest('li[data-id]');
       if (!li) return;
+      
+      const isAdminMessage = li.classList.contains('is-admin-message');
+      
       if (e.target.closest('.notif-delete')) {
-        this.remove(li.dataset.id);
+        // حذف پیام (برای پیام‌های ادمین از API مخصوص استفاده می‌شود)
+        if (isAdminMessage) {
+          await this.removeAdminMessage(li.dataset.id);
+        } else {
+          this.remove(li.dataset.id);
+        }
+      } else if (e.target.closest('.notif-mark-read-single')) {
+        // علامت‌گذاری پیام ادمین به عنوان خوانده شده
+        e.preventDefault();
+        await this.markAdminMessageRead(li.dataset.id);
       } else if (e.target.closest('.notif-view-more')) {
         const btn = e.target.closest('.notif-view-more');
         const fullText = btn?.dataset?.fulltext || '';
@@ -3951,7 +4186,12 @@ const Notifications = {
         e.preventDefault();
         this.toggleReplyForm(li);
       } else {
-        this.markRead(li.dataset.id);
+        // کلیک روی آیتم - علامت‌گذاری به عنوان خوانده شده
+        if (isAdminMessage) {
+          await this.markAdminMessageRead(li.dataset.id);
+        } else {
+          this.markRead(li.dataset.id);
+        }
       }
     });
 
@@ -4043,6 +4283,33 @@ const Notifications = {
     this.render();
   },
 
+  // علامت‌گذاری پیام ادمین به عنوان خوانده شده
+  async markAdminMessageRead(id) {
+    try {
+      await API.markAdminNotificationRead(id);
+      const items = this.load().map(n => n.id === id ? ({ ...n, read: true }) : n);
+      this.save(items);
+      this.render();
+      UIComponents.showToast('پیام خوانده شد', 'success');
+    } catch (e) {
+      console.error('Failed to mark admin message as read:', e);
+    }
+  },
+
+  // حذف پیام ادمین
+  async removeAdminMessage(id) {
+    try {
+      await API.deleteAdminNotification(id);
+      const items = this.load().filter(n => n.id !== id);
+      this.save(items);
+      this.render();
+      UIComponents.showToast('پیام حذف شد', 'info');
+    } catch (e) {
+      console.error('Failed to delete admin message:', e);
+      UIComponents.showToast('خطا در حذف پیام', 'error');
+    }
+  },
+
   add(payload, fallbackType = 'info') {
     const items = this.load();
     const nowLabel = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
@@ -4112,7 +4379,13 @@ const Notifications = {
       const notifText = (n.text || '').toLowerCase();
       const notifTitle = (n.title || '').toLowerCase();
 
-      const isTicket = notifType === 'ticket' ||
+      // بررسی پیام ادمین
+      const isAdminMessage = n.isAdminMessage === true || 
+                             notifType === 'admin_message' ||
+                             notifType === 'admin';
+
+      const isTicket = !isAdminMessage && (
+                       notifType === 'ticket' ||
                        notifType === 'ticket_reply' ||
                        notifType === 'support' ||
                        notifType === 'support_ticket' ||
@@ -4123,7 +4396,7 @@ const Notifications = {
                        notifTitle.includes('تیکت') ||
                        notifTitle.includes('پشتیبانی') ||
                        n.ticketId != null ||
-                       n.relatedTicketId != null;
+                       n.relatedTicketId != null);
 
       const fullBody = body || n.text;
       const isLong = !isTicket && (fullBody || '').length > LONG_BODY_LIMIT;
@@ -4152,6 +4425,60 @@ const Notifications = {
           `).join('')}
         </div>
       ` : '';
+
+      // Admin message notification layout
+      if (isAdminMessage) {
+        const adminTypeLabel = {
+          info: 'اطلاع‌رسانی',
+          warning: 'هشدار',
+          success: 'تبریک',
+          urgent: 'فوری'
+        }[n.type] || 'پیام مدیریت';
+        
+        const adminTypeClass = n.type || 'info';
+        
+        return `
+        <li class="notification-item is-admin-message ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" role="listitem">
+          <article class="admin-message-card">
+            <header class="admin-message-card__header">
+              <div class="admin-message-card__badge admin-message-card__badge--${adminTypeClass}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                ${adminTypeLabel}
+              </div>
+              <button class="admin-message-card__delete notif-delete" type="button" aria-label="حذف پیام">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </header>
+            
+            <div class="admin-message-card__body">
+              <h4 class="admin-message-card__title">${this._escapeHtml(n.title || 'پیام از مدیریت')}</h4>
+              <p class="admin-message-card__content">${this._escapeHtml(n.text || n.content || '')}</p>
+            </div>
+            
+            <footer class="admin-message-card__footer">
+              <div class="admin-message-card__meta">
+                <span class="admin-message-card__source">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  مدیریت ویترینت
+                </span>
+                <time class="admin-message-card__time">${n.time || ''}</time>
+              </div>
+              ${!n.read ? `
+                <button class="admin-message-card__mark-read notif-mark-read-single" type="button" data-id="${n.id}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  خوانده شد
+                </button>
+              ` : ''}
+            </footer>
+          </article>
+        </li>
+        `;
+      }
 
       // Ticket notification layout
       if (isTicket) {
