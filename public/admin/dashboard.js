@@ -4103,6 +4103,11 @@ function normaliseServiceShopRecord(raw) {
     return null;
   };
 
+  const toNumber = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+
   const appointmentsCount = toCount(
     raw.appointmentsCount
     || raw.totalAppointments
@@ -4147,6 +4152,28 @@ function normaliseServiceShopRecord(raw) {
   // تاریخ ثبت‌نام
   const createdAt = raw.createdAt || raw.registeredAt || raw.signupDate || raw.joinedAt || null;
 
+  const dailyStreak = toNumber(
+    raw.dailyStreak
+    || raw.daily_streak
+    || raw.streak
+    || raw.checkinStreak
+    || raw.dailyCheckinStreak
+    || raw.meta?.dailyStreak
+    || raw.meta?.streak
+  );
+
+  const walletBalance = toNumber(
+    raw.walletBalance
+    || raw.wallet_credit
+    || raw.walletCredit
+    || raw.wallet_amount
+    || raw.walletAmount
+    || raw.wallet?.balance
+    || raw.wallet?.amount
+  );
+
+  const walletCurrency = raw.walletCurrency || raw.wallet?.currency || 'تومان';
+
   return {
     id,
     name,
@@ -4170,6 +4197,9 @@ function normaliseServiceShopRecord(raw) {
     appointmentsCount,
     servicesCount,
     portfolioCount,
+    dailyStreak,
+    walletBalance,
+    walletCurrency,
     meta: raw
   };
 }
@@ -4479,6 +4509,24 @@ function openServiceShopModal(shopId) {
 
   const phoneEl = document.getElementById('serviceShopModalPhone');
   if (phoneEl) phoneEl.textContent = shop.ownerPhone || 'شماره‌ای ثبت نشده';
+
+  const streakEl = document.getElementById('serviceShopModalStreak');
+  if (streakEl) {
+    streakEl.textContent = Number.isFinite(shop.dailyStreak)
+      ? formatNumber(shop.dailyStreak)
+      : '—';
+  }
+
+  const creditEl = document.getElementById('serviceShopModalCredit');
+  if (creditEl) {
+    if (Number.isFinite(shop.walletBalance)) {
+      const rounded = Math.round(Number(shop.walletBalance));
+      const label = shop.walletCurrency || 'تومان';
+      creditEl.textContent = `${currencyFormatter.format(rounded)} ${label}`;
+    } else {
+      creditEl.textContent = '—';
+    }
+  }
 
   // نام صاحب فروشگاه
   const ownerNameEl = document.getElementById('serviceShopModalOwnerName');
