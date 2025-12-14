@@ -686,6 +686,44 @@ async deletePortfolioItem(id) {
       };
     }
     return data;
+  },
+
+  // ==================== RANK API ====================
+
+  /**
+   * دریافت رتبه فروشنده با محاسبه معیارهای واقعی
+   */
+  async getMyRank() {
+    const r = await fetch(bust(`${API_BASE}/api/rank/my`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok) {
+      const errData = await this._json(r);
+      throw new Error(errData?.message || 'GET_RANK_FAILED');
+    }
+    return await this._json(r);
+  },
+
+  /**
+   * دریافت لیدربورد دسته‌بندی
+   */
+  async getRankLeaderboard(limit = 10) {
+    const r = await fetch(bust(`${API_BASE}/api/rank/leaderboard?limit=${limit}`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok) {
+      const errData = await this._json(r);
+      throw new Error(errData?.message || 'GET_LEADERBOARD_FAILED');
+    }
+    return await this._json(r);
   }
 
 };

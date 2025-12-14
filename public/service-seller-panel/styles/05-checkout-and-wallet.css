@@ -952,6 +952,209 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
   padding: 16px;
 }
 
+/* ============================================
+   بخش راه‌های کسب اعتبار
+   ============================================ */
+.wallet-sheet__section-chip--earn {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.15));
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.wallet-earn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.wallet-earn-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  transition: all 0.25s ease;
+}
+
+.wallet-earn-card:hover {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.wallet-earn-card__icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border-radius: 12px;
+}
+
+.wallet-earn-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.wallet-earn-card__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-earn-card__desc {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-earn-card__reward {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* تم‌های مختلف کارت‌ها */
+.wallet-earn-card--streak:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+}
+.wallet-earn-card--streak .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.08));
+}
+
+.wallet-earn-card--checkpoint:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.wallet-earn-card--checkpoint .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08));
+}
+
+.wallet-earn-card--booking:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.wallet-earn-card--booking .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.08));
+}
+
+.wallet-earn-card--review:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.wallet-earn-card--review .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+}
+
+.wallet-earn-card--referral:hover {
+  border-color: rgba(236, 72, 153, 0.3);
+}
+.wallet-earn-card--referral .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.08));
+}
+
+.wallet-earn-card--profile:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.wallet-earn-card--profile .wallet-earn-card__icon {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+}
+
+/* نکته راهنما */
+.wallet-earn-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.04));
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+.wallet-earn-tip__icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+/* ===== Responsive - موبایل ===== */
+@media (max-width: 480px) {
+  .wallet-earn-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .wallet-earn-card {
+    padding: 12px;
+  }
+  
+  .wallet-earn-card__icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+  
+  .wallet-earn-card__title {
+    font-size: 0.85rem;
+  }
+  
+  .wallet-earn-card__desc {
+    font-size: 0.7rem;
+  }
+  
+  .wallet-earn-card__reward {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .wallet-earn-tip {
+    padding: 12px 14px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ===== Responsive - موبایل خیلی کوچک ===== */
+@media (max-width: 359px) {
+  .wallet-earn-card {
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .wallet-earn-card__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+  
+  .wallet-earn-card__title {
+    font-size: 0.8rem;
+  }
+  
+  .wallet-earn-card__reward {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+}
+
 
 /* ============================================
    ENHANCED TICKET REPLY SYSTEM
@@ -1311,3 +1514,85 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
 }
 
 
+
+/* ============================================
+   WALLET SHEET CLOSE BUTTON
+   ============================================ */
+.wallet-sheet__close-btn {
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 
+    0 4px 15px rgba(139, 92, 246, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.wallet-sheet__close-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    transparent 50%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.wallet-sheet__close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(139, 92, 246, 0.45),
+    0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.wallet-sheet__close-btn:hover::before {
+  opacity: 1;
+}
+
+.wallet-sheet__close-btn:active {
+  transform: translateY(0);
+}
+
+.wallet-sheet__close-btn:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .wallet-sheet__close-btn {
+    margin-top: 20px;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 359px) {
+  .wallet-sheet__close-btn {
+    margin-top: 16px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .wallet-sheet__close-btn {
+    transition: none;
+  }
+
+  .wallet-sheet__close-btn:hover {
+    transform: none;
+  }
+}

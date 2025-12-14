@@ -1198,6 +1198,78 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         </div>
 
+        <!-- بخش راه‌های کسب اعتبار -->
+        <div class="wallet-sheet__section wallet-sheet__earn" aria-label="راه‌های کسب اعتبار">
+          <div class="wallet-sheet__section-header">
+            <div>
+              <p class="wallet-sheet__section-eyebrow">💰 کسب درآمد</p>
+              <h4 class="wallet-sheet__section-title">چطور اعتبار کسب کنم؟</h4>
+            </div>
+            <span class="wallet-sheet__section-chip wallet-sheet__section-chip--earn">رایگان</span>
+          </div>
+          
+          <div class="wallet-earn-grid">
+            <div class="wallet-earn-card wallet-earn-card--streak">
+              <div class="wallet-earn-card__icon">🔥</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">ورود روزانه</h5>
+                <p class="wallet-earn-card__desc">هر روز وارد پنل شو</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۱,۰۰۰ ت</span>
+            </div>
+            
+            <div class="wallet-earn-card wallet-earn-card--checkpoint">
+              <div class="wallet-earn-card__icon">🎯</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">چک‌پوینت هفتگی</h5>
+                <p class="wallet-earn-card__desc">۷ روز متوالی ورود</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۵,۰۰۰ ت</span>
+            </div>
+            
+            <div class="wallet-earn-card wallet-earn-card--booking">
+              <div class="wallet-earn-card__icon">📅</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">تکمیل نوبت</h5>
+                <p class="wallet-earn-card__desc">هر نوبت موفق</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۲,۰۰۰ ت</span>
+            </div>
+            
+            <div class="wallet-earn-card wallet-earn-card--review">
+              <div class="wallet-earn-card__icon">⭐</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">نظر مثبت</h5>
+                <p class="wallet-earn-card__desc">دریافت نظر از مشتری</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۳,۰۰۰ ت</span>
+            </div>
+            
+            <div class="wallet-earn-card wallet-earn-card--referral">
+              <div class="wallet-earn-card__icon">🎁</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">دعوت دوستان</h5>
+                <p class="wallet-earn-card__desc">معرفی فروشنده جدید</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۱۰,۰۰۰ ت</span>
+            </div>
+            
+            <div class="wallet-earn-card wallet-earn-card--profile">
+              <div class="wallet-earn-card__icon">✅</div>
+              <div class="wallet-earn-card__content">
+                <h5 class="wallet-earn-card__title">تکمیل پروفایل</h5>
+                <p class="wallet-earn-card__desc">اطلاعات کامل فروشگاه</p>
+              </div>
+              <span class="wallet-earn-card__reward">+۳,۰۰۰ ت</span>
+            </div>
+          </div>
+          
+          <p class="wallet-earn-tip">
+            <span class="wallet-earn-tip__icon">💡</span>
+            <span>با فعالیت مداوم در پنل، اعتبار رایگان کسب کنید و از خدمات ویژه استفاده کنید!</span>
+          </p>
+        </div>
+
         <div class="wallet-sheet__section wallet-sheet__activity" aria-label="فعالیت‌های اخیر اعتبار">
           <div class="wallet-sheet__section-header">
             <div>
@@ -1211,9 +1283,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           </ul>
         </div>
 
-        <div class="wallet-sheet__footer">
-          <p class="wallet-sheet__footer-hint">با فعالیت در پنل، اعتبار کسب کنید!</p>
-        </div>
+        <button type="button" class="wallet-sheet__close-btn" aria-label="بستن مدال اعتبار">
+          متوجه شدم
+        </button>
       </section>
     `;
 
@@ -1243,6 +1315,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     });
+
+    // اضافه کردن event listener برای دکمه بستن مدال
+    const closeWalletBtn = bottomSheet.content.querySelector('.wallet-sheet__close-btn');
+    if (closeWalletBtn) {
+      closeWalletBtn.addEventListener('click', closeBottomSheet);
+    }
   };
 
   const renderStreakSheet = () => {
@@ -5096,6 +5174,26 @@ if (elements.viewStoreBtn) {
     });
   }
 
+  // Event listeners برای فیلترهای لیدربورد
+  const leaderboardFilterBtns = document.querySelectorAll('[data-leaderboard-limit]');
+  leaderboardFilterBtns.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const limit = parseInt(btn.dataset.leaderboardLimit) || 10;
+      
+      // آپدیت کلاس active
+      leaderboardFilterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // بارگذاری مجدد با limit جدید
+      try {
+        await app.loadTopPeers(true, limit);
+        app.applyTopPeers(app.topPeersData);
+      } catch (err) {
+        console.error('Failed to reload leaderboard with new limit:', err);
+      }
+    });
+  });
+
   function updateVipToggleBtn() {
     if (!elements.vipToggleBtn) return;
     const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
@@ -5257,7 +5355,7 @@ destroy() {
       }
     }
 
-    async loadTopPeers(force = false) {
+    async loadTopPeers(force = false, limit = 10) {
       if (this._topPeersPromise && !force) {
         return this._topPeersPromise;
       }
@@ -5268,8 +5366,21 @@ destroy() {
 
       this._topPeersPromise = (async () => {
         try {
-          const data = await API.getTopPeers({ scope: 'subcategory' });
-          this.topPeersData = data || {};
+          // استفاده از API لیدربورد برای دریافت همه فروشندگان هم‌دسته و هم‌زیرگروه
+          const leaderboardData = await API.getRankLeaderboard(limit);
+          
+          // ذخیره داده‌های لیدربورد
+          this.topPeersData = {
+            top: leaderboardData.top || [],
+            mine: leaderboardData.mine || null,
+            total: leaderboardData.total || 0,
+            category: leaderboardData.category || 'خدمات',
+            subcategory: leaderboardData.subcategory || '',
+            scope: leaderboardData.scope || 'category',
+            scoreExplanation: leaderboardData.scoreExplanation || null,
+            updatedAt: leaderboardData.updatedAt || new Date().toISOString()
+          };
+          
           this.applyRankCard(this.topPeersData);
           this.applyTopSummary(this.topPeersData);
           return this.topPeersData;
@@ -5296,28 +5407,22 @@ destroy() {
       this.setText('rank-category', categoryLabel);
       this.setText('total-sellers', this.formatNumber(total));
       this.setText('current-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
-      this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
-      this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings ?? 0));
-      this.setText('rating30', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
       
-      // Update wallet rank from wallet balance
-      const walletBalanceEl = document.getElementById('wallet-balance');
-      if (walletBalanceEl) {
-        const walletText = walletBalanceEl.textContent || '۰';
-        // Extract numeric value and format for display
-        const numericValue = walletText.replace(/[^\d۰-۹]/g, '');
-        const walletRankEl = document.getElementById('walletRank');
-        if (walletRankEl) {
-          // Show abbreviated format (e.g., 3.5M)
-          const persianToEnglish = (str) => str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-          const englishNum = parseInt(persianToEnglish(numericValue)) || 0;
-          if (englishNum >= 1000000) {
-            walletRankEl.textContent = this.formatNumber(Math.round(englishNum / 100000) / 10) + 'M';
-          } else if (englishNum >= 1000) {
-            walletRankEl.textContent = this.formatNumber(Math.round(englishNum / 100) / 10) + 'K';
-          } else {
-            walletRankEl.textContent = this.formatNumber(englishNum);
-          }
+      // آپدیت معیارهای واقعی از بک‌اند
+      this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers || 0));
+      this.setText('bookingsTotal', this.formatNumber(metrics.totalBookings || 0));
+      this.setText('rating30', this.formatNumber(metrics.ratingAverage || 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      
+      // آپدیت اعتبار از معیارهای واقعی
+      const walletRankEl = document.getElementById('walletRank');
+      if (walletRankEl) {
+        const walletBalance = metrics.walletBalance || 0;
+        if (walletBalance >= 1000000) {
+          walletRankEl.textContent = this.formatNumber(Math.round(walletBalance / 100000) / 10) + 'M';
+        } else if (walletBalance >= 1000) {
+          walletRankEl.textContent = this.formatNumber(Math.round(walletBalance / 100) / 10) + 'K';
+        } else {
+          walletRankEl.textContent = this.formatNumber(walletBalance);
         }
       }
 
@@ -5346,23 +5451,35 @@ destroy() {
       this.setText('top-my-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
       this.setText('top-total-peers', this.formatNumber(total));
 
-      const aggregateScore = this.calculateAggregateScore(metrics);
-      const scoreText = this.formatNumber(aggregateScore, { fractionDigits: 1, fallback: '۰٫۰' });
+      // استفاده از امتیاز کل محاسبه‌شده از بک‌اند
+      const totalScore = mine.score || 0;
+      const scoreText = this.formatNumber(totalScore, { fractionDigits: 1, fallback: '۰٫۰' });
       this.setText('top-my-score', scoreText);
-      this.setText('top-my-rating', this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' }));
-      this.setText('top-my-bookings', this.formatNumber(metrics.totalBookings ?? 0));
-      this.setText('top-my-customers', this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0));
+      this.setText('top-my-rating', this.formatNumber(metrics.ratingAverage || 0, { fractionDigits: 1, fallback: '۰٫۰' }));
+      this.setText('top-my-bookings', this.formatNumber(metrics.totalBookings || 0));
+      this.setText('top-my-customers', this.formatNumber(metrics.uniqueCustomers || 0));
+      
+      // نمایش اعتبار فروشگاه
+      const walletBalance = metrics.walletBalance || 0;
+      const walletFormatted = formatTomans(walletBalance);
+      this.setText('top-my-wallet', walletFormatted);
 
       const badgesEl = document.getElementById('top-my-badges');
       if (badgesEl) {
         const badges = [];
         if (mine.badges?.isPremium) {
-          badges.push('<span class="badge-pill badge-premium">پریمیوم</span>');
+          badges.push('<span class="badge-pill badge-premium" title="اعتبار بالای ۱ میلیون تومان">💎 پریمیوم</span>');
         }
         if (mine.badges?.isFeatured) {
-          badges.push('<span class="badge-pill badge-featured">ویژه</span>');
+          badges.push('<span class="badge-pill badge-featured" title="امتیاز بالای ۴.۵ با بیش از ۱۰ نظر">⭐ ویژه</span>');
         }
-        badgesEl.innerHTML = badges.length ? badges.join('') : '<span class="badge-pill">بدون نشان ویژه</span>';
+        if (mine.badges?.isTopRated) {
+          badges.push('<span class="badge-pill badge-top-rated" title="امتیاز بالای ۴.۸">🏆 برتر</span>');
+        }
+        if (mine.badges?.isActive) {
+          badges.push('<span class="badge-pill badge-active" title="استریک بیش از ۷ روز">🔥 فعال</span>');
+        }
+        badgesEl.innerHTML = badges.length ? badges.join('') : '<span class="badge-pill badge-none">بدون نشان ویژه</span>';
       }
 
       const updatedAtEl = document.getElementById('top-updated-at');
@@ -5373,9 +5490,16 @@ destroy() {
 
       const subtitle = document.getElementById('top-subtitle');
       if (subtitle) {
-        const scopeLabel = data?.scope === 'subcategory' ? 'زیرگروه' : 'حوزه';
-        const groupLabel = data?.category ? `${scopeLabel} «${data.category}»` : 'همه حوزه‌ها';
+        const categoryLabel = data?.subcategory || data?.category || '';
+        const scopeLabel = data?.scope === 'subcategory' ? 'زیرگروه' : 'دسته';
+        const groupLabel = categoryLabel ? `${scopeLabel} «${categoryLabel}»` : 'همه حوزه‌ها';
         subtitle.textContent = `رتبه‌بندی برترین فروشگاه‌های ${groupLabel}`;
+      }
+
+      // نمایش توضیح نحوه محاسبه امتیاز
+      const captionEl = document.querySelector('.leaderboard-caption');
+      if (captionEl && data?.scoreExplanation?.formula) {
+        captionEl.innerHTML = `فرمول محاسبه: <code>${data.scoreExplanation.formula}</code>`;
       }
     }
 
@@ -5383,19 +5507,27 @@ destroy() {
       const metrics = entry.metrics || {};
       const isMine = entry.isMine || (mine?.shopUrl && entry.shopUrl && mine.shopUrl === entry.shopUrl);
       const rank = this.formatNumber(entry.rank);
-      const aggregateScore = this.calculateAggregateScore(metrics);
-      const score = this.formatNumber(aggregateScore, { fractionDigits: 1, fallback: '۰٫۰' });
+      // استفاده از امتیاز محاسبه‌شده از سرور
+      const score = this.formatNumber(entry.score ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
       const rating = this.formatNumber(metrics.ratingAverage ?? 0, { fractionDigits: 1, fallback: '۰٫۰' });
       const ratingCount = this.formatNumber(metrics.ratingCount ?? 0);
       const bookings = this.formatNumber(metrics.totalBookings ?? 0);
-      const customers = this.formatNumber(metrics.uniqueCustomers ?? metrics.completedBookings ?? 0);
+      const customers = this.formatNumber(metrics.uniqueCustomers ?? 0);
+      const walletBalance = metrics.walletBalance ?? 0;
+      const walletFormatted = this.formatWalletShort(walletBalance);
 
       const badges = [];
       if (entry.badges?.isPremium) {
-        badges.push('<span class="badge-pill badge-premium">پریمیوم</span>');
+        badges.push('<span class="badge-pill badge-premium" title="اعتبار بالای ۱ میلیون تومان">💎 پریمیوم</span>');
       }
       if (entry.badges?.isFeatured) {
-        badges.push('<span class="badge-pill badge-featured">ویژه</span>');
+        badges.push('<span class="badge-pill badge-featured" title="امتیاز بالای ۴.۵ با بیش از ۱۰ نظر">⭐ ویژه</span>');
+      }
+      if (entry.badges?.isTopRated) {
+        badges.push('<span class="badge-pill badge-top-rated" title="امتیاز بالای ۴.۸">🏆 برتر</span>');
+      }
+      if (entry.badges?.isActive) {
+        badges.push('<span class="badge-pill badge-active" title="استریک بیش از ۷ روز">🔥 فعال</span>');
       }
 
       const nameMarkup = entry.shopUrl
@@ -5404,30 +5536,54 @@ destroy() {
 
       const metaParts = [];
       if (entry.city) {
-        metaParts.push(`<span>📍 ${escapeHtml(entry.city)}</span>`);
+        metaParts.push(`<span class="meta-city">📍 ${escapeHtml(entry.city)}</span>`);
       }
-      metaParts.push(`<span>⭐ ${rating} (${ratingCount})</span>`);
-      metaParts.push(`<span>📆 ${bookings} نوبت</span>`);
-      metaParts.push(`<span>👥 ${customers} مشتری فعال</span>`);
+      metaParts.push(`<span class="meta-rating">⭐ ${rating} (${ratingCount})</span>`);
+      metaParts.push(`<span class="meta-bookings">📆 ${bookings} نوبت</span>`);
+      metaParts.push(`<span class="meta-customers">👥 ${customers} مشتری</span>`);
+      metaParts.push(`<span class="meta-wallet">💰 ${walletFormatted}</span>`);
 
       const dataAttr = entry.shopUrl ? ` data-shop-url="${escapeHtml(entry.shopUrl)}"` : '';
+      const rankClass = entry.rank <= 3 ? ` rank-${entry.rank}` : '';
 
       return `
-        <li class="leaderboard-item${isMine ? ' is-mine' : ''}" data-rank="${entry.rank || ''}"${dataAttr}>
-          <div class="leaderboard-rank">${rank}</div>
+        <li class="leaderboard-item${isMine ? ' is-mine' : ''}${rankClass}" data-rank="${entry.rank || ''}"${dataAttr}>
+          <div class="leaderboard-rank">
+            ${entry.rank <= 3 ? this.getRankMedal(entry.rank) : rank}
+          </div>
           <div class="leaderboard-main">
             <div class="leaderboard-title">
               ${nameMarkup}
-              ${badges.join('')}
+              ${badges.length ? `<div class="leaderboard-badges">${badges.join('')}</div>` : ''}
             </div>
             <div class="leaderboard-meta">${metaParts.join('')}</div>
           </div>
           <div class="leaderboard-score">
-            <span>${score}</span>
-            <span>مجموع امتیاز</span>
+            <span class="score-value">${score}</span>
+            <span class="score-label">امتیاز کل</span>
           </div>
         </li>
       `;
+    }
+
+    formatWalletShort(amount) {
+      if (amount >= 1000000000) {
+        return this.formatNumber(Math.round(amount / 100000000) / 10) + 'B';
+      } else if (amount >= 1000000) {
+        return this.formatNumber(Math.round(amount / 100000) / 10) + 'M';
+      } else if (amount >= 1000) {
+        return this.formatNumber(Math.round(amount / 100) / 10) + 'K';
+      }
+      return this.formatNumber(amount);
+    }
+
+    getRankMedal(rank) {
+      const medals = {
+        1: '<span class="rank-medal rank-gold" title="رتبه اول">🥇</span>',
+        2: '<span class="rank-medal rank-silver" title="رتبه دوم">🥈</span>',
+        3: '<span class="rank-medal rank-bronze" title="رتبه سوم">🥉</span>'
+      };
+      return medals[rank] || this.formatNumber(rank);
     }
 
     applyTopPeers(data = this.topPeersData || {}) {

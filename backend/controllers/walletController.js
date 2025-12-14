@@ -1,5 +1,6 @@
 const SellerWallet = require('../models/SellerWallet');
 const WalletTransaction = require('../models/WalletTransaction');
+const { triggerRankUpdate } = require('./rankController');
 
 /**
  * تبدیل عدد به فارسی
@@ -350,6 +351,9 @@ async function addCredit(sellerId, options) {
   wallet.lastTransactionAt = new Date();
   await wallet.save();
 
+  // آپدیت رتبه فروشنده
+  triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
+
   return {
     wallet,
     transaction,
@@ -392,6 +396,9 @@ async function deductCredit(sellerId, options) {
   wallet.totalSpent += amount;
   wallet.lastTransactionAt = new Date();
   await wallet.save();
+
+  // آپدیت رتبه فروشنده
+  triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
 
   return {
     wallet,

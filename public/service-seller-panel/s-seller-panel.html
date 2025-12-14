@@ -494,11 +494,21 @@
               <header class="leaderboard-header">
                 <div>
                   <h3 id="leaderboard-title">جدول رتبه‌بندی</h3>
-                  <p class="leaderboard-caption">مجموع امتیاز بر اساس جمع امتیاز مشتریان، تعداد نوبت‌ها و مشتریان فعال</p>
+                  <p class="leaderboard-caption">رتبه‌بندی بر اساس: امتیاز مشتریان، تعداد نوبت‌ها، مشتریان فعال و اعتبار فروشگاه</p>
                 </div>
                 <span class="top-updated" id="top-updated-at" aria-live="polite"></span>
               </header>
+              <div class="leaderboard-filters" role="group" aria-label="فیلتر نمایش">
+                <span class="leaderboard-filter-label">نمایش:</span>
+                <button type="button" class="leaderboard-filter-btn active" data-leaderboard-limit="10">۱۰ نفر</button>
+                <button type="button" class="leaderboard-filter-btn" data-leaderboard-limit="20">۲۰ نفر</button>
+                <button type="button" class="leaderboard-filter-btn" data-leaderboard-limit="50">همه</button>
+              </div>
               <div class="leaderboard-body">
+                <div class="leaderboard-loading" id="top-leaderboard-loading" hidden>
+                  <div class="leaderboard-loading__spinner"></div>
+                  <span>در حال بارگذاری...</span>
+                </div>
                 <div class="leaderboard-error" id="top-error" hidden role="alert"></div>
                 <div class="leaderboard-empty" id="top-leaderboard-empty" hidden>هنوز داده‌ای برای رتبه‌بندی ثبت نشده است.</div>
                 <ol class="leaderboard-list" id="top-leaderboard-list" role="list" aria-live="polite"></ol>
@@ -536,6 +546,17 @@
                   <div class="metric-row">
                     <dt>مشتریان فعال</dt>
                     <dd id="top-my-customers">۰</dd>
+                  </div>
+                  <div class="metric-row metric-row--highlight">
+                    <dt>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="14" rx="3"/>
+                        <path d="M16 12h4"/>
+                        <circle cx="16" cy="12" r="1.5"/>
+                      </svg>
+                      اعتبار فروشگاه
+                    </dt>
+                    <dd id="top-my-wallet">۰ تومان</dd>
                   </div>
                 </dl>
                 <div class="top-summary-actions">

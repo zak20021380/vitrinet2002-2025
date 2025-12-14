@@ -3,6 +3,7 @@ const ShopAppearance = require('../models/ShopAppearance');
 const ShoppingCenter = require('../models/ShoppingCenter');
 const Review = require('../models/Review');
 const ServiceShop = require('../models/serviceShop');
+const { triggerRankUpdate } = require('./rankController');
 
 // تابع کمکی برای تبدیل URL نسبی به مطلق
 function makeFullUrl(req, path) {
@@ -292,6 +293,9 @@ exports.addReview = async (req, res) => {
 
     // ۵) محاسبهٔ مجدد امتیازها فقط بر اساس نظرات تایید شده
     const { averageRating, ratingCount } = await recalcShopRating(sellerId);
+
+    // آپدیت رتبه فروشنده بعد از ثبت نظر
+    triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
 
     res.json({ averageRating, ratingCount });
   } catch (err) {

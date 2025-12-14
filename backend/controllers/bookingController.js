@@ -4,6 +4,7 @@ const SellerService = require('../models/seller-services');
 const Seller = require('../models/Seller');
 const User = require('../models/user');
 const { createNotification } = require('./notificationController');
+const { triggerRankUpdate } = require('./rankController');
 
 // Convert Persian/Arabic digits in a string to English digits
 function normalizeDigits(str = '') {
@@ -217,6 +218,11 @@ exports.updateBookingStatus = async (req, res) => {
 
     booking.status = status;
     await booking.save();
+
+    // آپدیت رتبه فروشنده بعد از تکمیل نوبت
+    if (status === 'completed') {
+      triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
+    }
 
     if (status === 'confirmed' || status === 'cancelled') {
       try {

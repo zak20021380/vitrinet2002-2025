@@ -1,5 +1,6 @@
 const SellerStreak = require('../models/SellerStreak');
 const { addCredit, REWARD_CONFIG } = require('./walletController');
+const { triggerRankUpdate } = require('./rankController');
 
 /**
  * تبدیل تاریخ به فرمت فقط روز (بدون ساعت) برای مقایسه
@@ -140,6 +141,9 @@ exports.checkIn = async (req, res) => {
     streak.weekHistory = updateWeekHistory(streak.weekHistory, today);
 
     await streak.save();
+
+    // آپدیت رتبه فروشنده
+    triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
 
     res.json({
       success: true,
