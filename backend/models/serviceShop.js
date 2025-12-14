@@ -80,6 +80,7 @@ const complimentaryPlanSchema = new mongoose.Schema({
   startDate: { type: Date, default: null },
   endDate: { type: Date, default: null },
   note: { type: String, default: '' },
+  assignmentId: { type: String, default: '' },
   planTitle: { type: String, default: '' },
   planSlug: { type: String, default: '' }
 }, { _id: false });

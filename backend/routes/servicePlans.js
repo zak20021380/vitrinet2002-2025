@@ -190,6 +190,8 @@ const computeStatus = (startDate, endDate) => {
 const syncComplimentaryPlanOnShop = async (assignment, adminId = null) => {
   if (!assignment?.serviceShop) return;
 
+  const assignmentId = assignment.id || assignment._id || assignment.assignmentId || null;
+
   const payload = {
     complimentaryPlan: {
       isActive: assignment.status === 'active',
@@ -197,6 +199,7 @@ const syncComplimentaryPlanOnShop = async (assignment, adminId = null) => {
       startDate: assignment.startDate || null,
       endDate: assignment.endDate || null,
       note: assignment.notes || '',
+      assignmentId: assignmentId ? String(assignmentId) : '',
       planTitle: assignment.planSnapshot?.title || assignment.servicePlan?.title || '',
       planSlug: assignment.planSnapshot?.slug || assignment.servicePlan?.slug || ''
     },
@@ -716,7 +719,8 @@ router.delete('/assignments/:id', auth('admin'), async (req, res) => {
       durationDays: null,
       startDate: null,
       endDate: null,
-      notes: ''
+      notes: '',
+      assignmentId: deleted._id
     }, req.user?.id || null);
     res.status(204).send();
   } catch (error) {

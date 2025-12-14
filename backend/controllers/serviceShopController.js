@@ -309,6 +309,7 @@ const normaliseComplimentaryPlan = (plan = {}) => {
   const normalized = {
     isActive: !!plan.isActive,
     note: String(plan.note || '').trim(),
+    assignmentId: String(plan.assignmentId || '').trim(),
     planTitle: String(plan.planTitle || '').trim(),
     planSlug: String(plan.planSlug || '').trim()
   };
@@ -391,6 +392,11 @@ const parseComplimentaryPlan = (value, { existing = null, partial = false } = {}
 
   if (source.note !== undefined) {
     base.note = String(source.note || '').trim();
+    changed = true;
+  }
+
+  if (source.assignmentId !== undefined) {
+    base.assignmentId = String(source.assignmentId || '').trim();
     changed = true;
   }
 
