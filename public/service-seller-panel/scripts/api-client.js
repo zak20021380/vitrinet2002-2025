@@ -254,6 +254,9 @@ async createService(payload) {
   } else if (Array.isArray(data.images) && data.images.length > 0) {
     const mainIdx = data.mainImageIndex || 0;
     imageUrl = data.images[mainIdx] || data.images[0] || '';
+  } else if (Array.isArray(payload.images) && payload.images.length > 0) {
+    // Backend might omit the uploaded data URL in the response; keep the local preview so cards show immediately
+    imageUrl = payload.images[0];
   }
   return {
     id:    data._id || data.id,
