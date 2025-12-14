@@ -100,6 +100,46 @@ const calculateSellerRank = async (sellerId) => {
 };
 
 /**
+ * محاسبه رتبه همه فروشندگان یک دسته‌بندی
+ * این تابع ابتدا همه فروشندگان را پیدا کرده و رتبه آنها را محاسبه می‌کند
+ */
+const calculateAllSellersInCategory = async (category, subcategory = null) => {
+  try {
+    // پیدا کردن همه فروشندگان فعال در این دسته‌بندی (غیر مسدود)
+    const sellerMatch = { blockedByAdmin: { $ne: true } };
+    if (category && subcategory) {
+      sellerMatch.category = category;
+      sellerMatch.subcategory = subcategory;
+    } else if (category) {
+      sellerMatch.category = category;
+    }
+
+    const sellers = await Seller.find(sellerMatch)
+      .select('_id category subcategory storename shopurl')
+      .lean();
+
+    console.log(`[Rank] Found ${sellers.length} sellers in category: ${category}, subcategory: ${subcategory}`);
+
+    // محاسبه رتبه هر فروشنده
+    let calculated = 0;
+    for (const seller of sellers) {
+      try {
+        await calculateSellerRank(seller._id);
+        calculated++;
+      } catch (err) {
+        console.error(`[Rank] Failed to calculate rank for seller ${seller._id}:`, err.message);
+      }
+    }
+
+    console.log(`[Rank] Successfully calculated ${calculated}/${sellers.length} seller ranks`);
+    return sellers.length;
+  } catch (error) {
+    console.error('calculateAllSellersInCategory error:', error);
+    return 0;
+  }
+};
+
+/**
  * آپدیت رتبه‌بندی همه فروشندگان در یک دسته‌بندی
  */
 const updateCategoryRankings = async (category, subcategory = null) => {
@@ -226,10 +266,13 @@ exports.getCategoryLeaderboard = async (req, res) => {
       return res.status(404).json({ message: 'فروشنده یافت نشد.' });
     }
 
-    // ابتدا رتبه فروشنده فعلی را محاسبه کن
-    await calculateSellerRank(sellerId);
+    // ابتدا رتبه همه فروشندگان هم‌دسته را محاسبه کن
+    await calculateAllSellersInCategory(seller.category, seller.subcategory);
 
-    // پیدا کردن همه فروشندگان هم‌دسته و هم‌زیرگروه
+    // آپدیت رتبه‌بندی همه فروشندگان در این دسته‌بندی
+    await updateCategoryRankings(seller.category, seller.subcategory);
+
+    // پیدا کردن همه فروشندگان هم‌دسته و هم‌زیرگروه از جدول SellerRank
     const categoryMatch = { isActive: true };
     
     // فیلتر بر اساس دسته و زیرگروه - باید هر دو یکی باشد
@@ -240,11 +283,11 @@ exports.getCategoryLeaderboard = async (req, res) => {
       categoryMatch.category = seller.category;
     }
 
-    // محاسبه رتبه همه فروشندگان در این دسته‌بندی
-    await updateCategoryRankings(seller.category, seller.subcategory);
+    console.log(`[Rank] Leaderboard query match:`, categoryMatch);
 
     // دریافت تعداد کل فروشندگان در این دسته‌بندی
     const total = await SellerRank.countDocuments(categoryMatch);
+    console.log(`[Rank] Total sellers in category: ${total}`);
 
     // دریافت لیدربورد با مرتب‌سازی بر اساس امتیاز کل
     const leaderboard = await SellerRank.find(categoryMatch)
@@ -252,6 +295,8 @@ exports.getCategoryLeaderboard = async (req, res) => {
       .limit(limit)
       .populate('sellerId', 'storename shopurl firstname lastname city')
       .lean();
+
+    console.log(`[Rank] Leaderboard entries found: ${leaderboard.length}`);
 
     // دریافت رتبه فروشنده فعلی
     const myRank = await SellerRank.findOne({ sellerId }).lean();

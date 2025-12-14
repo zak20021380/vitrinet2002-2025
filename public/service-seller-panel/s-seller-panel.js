@@ -5194,6 +5194,49 @@ if (elements.viewStoreBtn) {
     });
   });
 
+  // Event listener برای دکمه نمایش اطلاعات امتیازدهی
+  const leaderboardInfoBtn = document.getElementById('leaderboard-info-btn');
+  const scoreInfoCard = document.getElementById('score-info-card');
+  const scoreInfoClose = document.getElementById('score-info-close');
+
+  if (leaderboardInfoBtn && scoreInfoCard) {
+    leaderboardInfoBtn.addEventListener('click', () => {
+      const isHidden = scoreInfoCard.hidden;
+      scoreInfoCard.hidden = !isHidden;
+      leaderboardInfoBtn.setAttribute('aria-expanded', String(!isHidden));
+    });
+  }
+
+  if (scoreInfoClose && scoreInfoCard) {
+    scoreInfoClose.addEventListener('click', () => {
+      scoreInfoCard.hidden = true;
+      leaderboardInfoBtn?.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  // Event listener برای دکمه بروزرسانی لیدربورد
+  const leaderboardRefreshBtn = document.getElementById('leaderboard-refresh-btn');
+  if (leaderboardRefreshBtn) {
+    leaderboardRefreshBtn.addEventListener('click', async () => {
+      leaderboardRefreshBtn.classList.add('is-loading');
+      leaderboardRefreshBtn.disabled = true;
+      
+      try {
+        const activeFilter = document.querySelector('[data-leaderboard-limit].active');
+        const limit = parseInt(activeFilter?.dataset.leaderboardLimit) || 10;
+        await app.loadTopPeers(true, limit);
+        app.applyTopPeers(app.topPeersData);
+        UIComponents?.showToast?.('رتبه‌بندی بروزرسانی شد', 'success');
+      } catch (err) {
+        console.error('Failed to refresh leaderboard:', err);
+        UIComponents?.showToast?.('خطا در بروزرسانی', 'error');
+      } finally {
+        leaderboardRefreshBtn.classList.remove('is-loading');
+        leaderboardRefreshBtn.disabled = false;
+      }
+    });
+  }
+
   function updateVipToggleBtn() {
     if (!elements.vipToggleBtn) return;
     const disabled = localStorage.getItem('vit_vip_rewards_disabled') === '1';
@@ -5496,11 +5539,6 @@ destroy() {
         subtitle.textContent = `رتبه‌بندی برترین فروشگاه‌های ${groupLabel}`;
       }
 
-      // نمایش توضیح نحوه محاسبه امتیاز
-      const captionEl = document.querySelector('.leaderboard-caption');
-      if (captionEl && data?.scoreExplanation?.formula) {
-        captionEl.innerHTML = `فرمول محاسبه: <code>${data.scoreExplanation.formula}</code>`;
-      }
     }
 
     buildLeaderboardItem(entry, mine = {}) {
