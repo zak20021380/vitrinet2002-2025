@@ -546,8 +546,147 @@ async deletePortfolioItem(id) {
     if (!r.ok) throw new Error('SEND_NOTIFICATION_REPLY_FAILED');
     const data = await this._json(r);
     return data?.reply || { message, createdAt: new Date().toISOString() };
-  }
+  },
 
+  // ===== Streak API Methods =====
+  
+  /**
+   * دریافت وضعیت استریک فروشنده
+   */
+  async getStreak() {
+    const r = await fetch(bust(`${API_BASE}/api/streak`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_STREAK_FAILED');
+    }
+    const data = await this._json(r);
+    return data?.data || null;
+  },
+
+  /**
+   * ثبت ورود روزانه (چک‌این استریک)
+   */
+  async checkInStreak() {
+    const r = await fetch(`${API_BASE}/api/streak/checkin`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok) {
+      throw new Error('CHECKIN_STREAK_FAILED');
+    }
+    const data = await this._json(r);
+    return data;
+  },
+
+  /**
+   * دریافت لیدربورد استریک
+   */
+  async getStreakLeaderboard(limit = 10) {
+    const r = await fetch(bust(`${API_BASE}/api/streak/leaderboard?limit=${limit}`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_STREAK_LEADERBOARD_FAILED');
+    }
+    const data = await this._json(r);
+    return data?.data || [];
+  },
+
+  // ===== Wallet API Methods =====
+  
+  /**
+   * دریافت اطلاعات کیف پول فروشنده
+   */
+  async getWallet() {
+    const r = await fetch(bust(`${API_BASE}/api/wallet`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_WALLET_FAILED');
+    }
+    const data = await this._json(r);
+    return data?.data || null;
+  },
+
+  /**
+   * دریافت تاریخچه تراکنش‌های کیف پول
+   */
+  async getWalletTransactions(page = 1, limit = 20) {
+    const r = await fetch(bust(`${API_BASE}/api/wallet/transactions?page=${page}&limit=${limit}`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok && r.status !== 304) {
+      throw new Error('FETCH_WALLET_TRANSACTIONS_FAILED');
+    }
+    const data = await this._json(r);
+    return data?.data || { transactions: [], pagination: {} };
+  },
+
+  /**
+   * کسب اعتبار (پاداش فعالیت)
+   */
+  async earnWalletCredit(category, options = {}) {
+    const r = await fetch(`${API_BASE}/api/wallet/earn`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, ...options })
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok) {
+      const errData = await this._json(r);
+      throw new Error(errData?.message || 'EARN_CREDIT_FAILED');
+    }
+    const data = await this._json(r);
+    return data;
+  },
+
+  /**
+   * خرج اعتبار (خرید خدمات)
+   */
+  async spendWalletCredit(serviceType, options = {}) {
+    const r = await fetch(`${API_BASE}/api/wallet/spend`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceType, ...options })
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    const data = await this._json(r);
+    if (!r.ok) {
+      throw { 
+        status: r.status, 
+        message: data?.message || 'SPEND_CREDIT_FAILED',
+        data: data?.data
+      };
+    }
+    return data;
+  }
 
 };
 

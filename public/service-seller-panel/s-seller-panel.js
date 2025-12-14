@@ -59,20 +59,113 @@ document.addEventListener('DOMContentLoaded', async () => {
     activeType: null
   };
 
-  const streakSnapshot = evaluateCheckpointStreak({
-    lastLoginDate: new Date(Date.now() - 26 * 60 * 60 * 1000), // دیروز - نمایش رشد استریک
-    currentStreak: 105,
-    userPoints: 940,
-    pendingWeekPoints: 35,
-    freezeUsed: false
-  });
+  // ===== استریک از سرور - بدون داده فیک =====
+  let streakData = null;
+  let streakLoading = true;
+  let streakError = null;
 
-  const levelSnapshot = calculateUserLevel(streakSnapshot.totalDays);
+  // تابع برای بارگذاری و چک‌این استریک از سرور
+  const loadAndCheckInStreak = async () => {
+    try {
+      streakLoading = true;
+      streakError = null;
+      
+      // ابتدا چک‌این کن (ثبت ورود روزانه)
+      const checkInResult = await API.checkInStreak();
+      console.log('Streak check-in result:', checkInResult);
+      
+      if (checkInResult?.success) {
+        streakData = checkInResult.data;
+        
+        // نمایش پیام مناسب
+        if (!checkInResult.alreadyCheckedIn) {
+          UIComponents.showToast(checkInResult.message || 'ورود امروز ثبت شد!', 'success');
+        }
+      } else {
+        // اگر چک‌این موفق نبود، فقط داده‌ها رو بگیر
+        streakData = await API.getStreak();
+      }
+      
+      streakLoading = false;
+      updateStreakUI();
+      
+    } catch (err) {
+      console.error('Failed to load/checkin streak:', err);
+      streakError = err;
+      streakLoading = false;
+      
+      // نمایش وضعیت پیش‌فرض در صورت خطا
+      streakData = {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalLoginDays: 0,
+        weekProgress: 0,
+        checkpointReached: false,
+        level: { name: 'تازه‌کار', icon: '🌱', color: '#22d3ee', progress: 0 },
+        days: [
+          { label: 'ش', status: 'pending', isGift: false },
+          { label: 'ی', status: 'pending', isGift: false },
+          { label: 'د', status: 'pending', isGift: false },
+          { label: 'س', status: 'pending', isGift: false },
+          { label: 'چ', status: 'pending', isGift: false },
+          { label: 'پ', status: 'pending', isGift: false },
+          { label: 'ج', status: 'pending', isGift: true }
+        ],
+        dailyReward: '+۱۰ امتیاز وفاداری',
+        weeklyReward: '۵,۰۰۰ تومان اعتبار'
+      };
+      updateStreakUI();
+    }
+  };
 
-  const daysToNextCheckpoint = streakSnapshot.checkpointReached ? 7 : 7 - streakSnapshot.weekProgress;
-  const nextRewardCopy = streakSnapshot.checkpointReached
-    ? 'چک‌پوینت فعال شد؛ چرخه جدید شروع شده است'
-    : `${daysToNextCheckpoint} روز تا چک‌پوینت بعدی`;
+  // تابع آپدیت UI استریک
+  const updateStreakUI = () => {
+    if (!streakData) return;
+    
+    // آپدیت کارت استریک در داشبورد
+    const streakEl = document.getElementById('daily-streak');
+    if (streakEl) {
+      const days = streakData.currentStreak || 0;
+      streakEl.textContent = `${toFaDigits(days)} روز متوالی`;
+      
+      const streakCard = streakEl.closest('.streak-card');
+      if (streakCard) {
+        if (streakData.checkpointReached) {
+          streakCard.classList.add('has-checkpoint');
+        } else {
+          streakCard.classList.remove('has-checkpoint');
+        }
+      }
+    }
+    
+    // آپدیت sheetData برای bottom sheet
+    if (sheetData) {
+      sheetData.streak = {
+        totalDays: streakData.currentStreak || 0,
+        weekProgress: streakData.weekProgress || 0,
+        visualCycle: streakData.weekProgress || 0,
+        checkpointReached: streakData.checkpointReached || false,
+        progress: Math.round(((streakData.weekProgress || 0) / 7) * 100),
+        nextReward: streakData.checkpointReached 
+          ? 'چک‌پوینت فعال شد؛ چرخه جدید شروع شده است'
+          : `${7 - (streakData.weekProgress || 0)} روز تا چک‌پوینت بعدی`,
+        level: streakData.level || { name: 'تازه‌کار', icon: '🌱', color: '#22d3ee' },
+        dailyReward: streakData.dailyReward || '+۱۰ امتیاز وفاداری',
+        weeklyReward: streakData.weeklyReward || '۵,۰۰۰ تومان اعتبار',
+        monthlyReward: formatTomans(50_000),
+        rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد.',
+        days: streakData.days || [],
+        message: '',
+        softPenalty: 0,
+        isFrozen: false,
+        longestStreak: streakData.longestStreak || 0,
+        loyaltyPoints: streakData.loyaltyPoints || 0
+      };
+    }
+  };
+
+  // بارگذاری استریک در شروع
+  loadAndCheckInStreak();
 
   // --- Header: hamburger navigation ---
   const hamburgerToggle = document.getElementById('hamburger-toggle');
@@ -904,12 +997,65 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1500);
   });
 
+  // ===== کیف پول از سرور - بدون داده فیک =====
+  let walletData = null;
+  let walletLoading = true;
+
+  // تابع بارگذاری کیف پول از سرور
+  const loadWallet = async () => {
+    try {
+      walletLoading = true;
+      walletData = await API.getWallet();
+      console.log('Wallet loaded:', walletData);
+      updateWalletUI();
+    } catch (err) {
+      console.error('Failed to load wallet:', err);
+      // مقادیر پیش‌فرض در صورت خطا
+      walletData = {
+        balance: 0,
+        totalEarned: 0,
+        totalSpent: 0,
+        formattedBalance: '۰',
+        recentTransactions: []
+      };
+      updateWalletUI();
+    } finally {
+      walletLoading = false;
+    }
+  };
+
+  // تابع آپدیت UI کیف پول
+  const updateWalletUI = () => {
+    if (!walletData) return;
+    
+    // آپدیت کارت کیف پول در داشبورد
+    const walletBalanceEl = document.getElementById('wallet-balance');
+    if (walletBalanceEl) {
+      walletBalanceEl.textContent = `${walletData.formattedBalance || '۰'} تومان`;
+    }
+    
+    // آپدیت sheetData
+    if (sheetData) {
+      sheetData.wallet.balance = walletData.formattedBalance || '۰';
+      sheetData.wallet.activities = (walletData.recentTransactions || []).map(tx => ({
+        title: tx.title,
+        amount: tx.formattedAmount,
+        type: tx.isPositive ? 'earn' : 'spend',
+        time: tx.timeAgo
+      }));
+    }
+  };
+
+  // بارگذاری کیف پول در شروع
+  loadWallet();
+
   const sheetData = {
+    // کیف پول از سرور بارگذاری می‌شود - مقادیر پیش‌فرض
     wallet: {
-      balance: '۳٬۵۰۰٬۰۰۰',
+      balance: '۰',
       currency: 'تومان',
       tagline: 'اعتبارت را به ابزارهای بازدید و اعتماد تبدیل کن.',
-      highlight: 'اعتبار بازاریابی',
+      highlight: 'اعتبار فروشگاه',
       useCases: [
         { icon: '🚀', title: 'نردبان آگهی' },
         { icon: '🎫', title: 'کوپن تخفیف پلن' },
@@ -919,61 +1065,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         {
           icon: '🚀',
           title: 'نردبان آگهی',
-          price: '۲۰,۰۰۰ اعتبار',
+          price: '۲۰,۰۰۰ تومان',
+          cost: 20000,
+          serviceType: 'boost_purchase',
           description: 'پروفایل و آگهی‌ات به بالای لیست می‌رود.',
           theme: 'boost'
         },
         {
           icon: '🎫',
           title: 'تخفیف روی پلن',
-          price: '۵۰,۰۰۰ اعتبار',
+          price: '۵۰,۰۰۰ تومان',
+          cost: 50000,
+          serviceType: 'plan_discount',
           description: 'اعتبار را به کوپن ۳۰٪ برای خرید نقدی پلن تبدیل کن.',
           theme: 'discount'
         },
         {
           icon: '⭐',
           title: 'نشان VIP',
-          price: '۸۰,۰۰۰ اعتبار',
+          price: '۸۰,۰۰۰ تومان',
+          cost: 80000,
+          serviceType: 'vip_badge',
           description: 'نشان اعتماد ۲۴ ساعته برای جلب مشتری بیشتر.',
           theme: 'vip'
         }
       ],
-      activities: [
-        { title: 'پاداش استریک', amount: '+۵۰,۰۰۰ ت', type: 'earn', time: '۵ دقیقه پیش' },
-        { title: 'خرید پلن', amount: '-۱۰۰,۰۰۰ ت', type: 'spend', time: '۲ ساعت پیش' },
-        { title: 'نردبان آگهی', amount: '-۲۰,۰۰۰ ت', type: 'spend', time: 'دیروز' }
-      ]
+      activities: []
     },
+    // استریک از سرور بارگذاری می‌شود - مقادیر پیش‌فرض
     streak: {
-      totalDays: streakSnapshot.totalDays,
-      weekProgress: streakSnapshot.weekProgress,
-      visualCycle: streakSnapshot.visualCycle,
-      checkpointReached: streakSnapshot.checkpointReached,
-      progress: Math.round((streakSnapshot.weekProgress / 7) * 100),
-      nextReward: nextRewardCopy,
-      level: levelSnapshot,
+      totalDays: 0,
+      weekProgress: 0,
+      visualCycle: 0,
+      checkpointReached: false,
+      progress: 0,
+      nextReward: '۷ روز تا چک‌پوینت بعدی',
+      level: { name: 'تازه‌کار', icon: '🌱', color: '#22d3ee', progress: 0 },
       dailyReward: '+۱۰ امتیاز وفاداری',
-      weeklyReward: `${formatTomans(5_000)} اعتبار فروشگاه`,
+      weeklyReward: '۵,۰۰۰ تومان اعتبار',
       monthlyReward: formatTomans(50_000),
       rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد.',
-      days: createWeeklyDayState(streakSnapshot.weekProgress),
-      message: streakSnapshot.message,
-      softPenalty: streakSnapshot.softPenalty,
-      isFrozen: streakSnapshot.isFrozen
+      days: [
+        { label: 'ش', status: 'pending', isGift: false },
+        { label: 'ی', status: 'pending', isGift: false },
+        { label: 'د', status: 'pending', isGift: false },
+        { label: 'س', status: 'pending', isGift: false },
+        { label: 'چ', status: 'pending', isGift: false },
+        { label: 'پ', status: 'pending', isGift: false },
+        { label: 'ج', status: 'pending', isGift: true }
+      ],
+      message: '',
+      softPenalty: 0,
+      isFrozen: false,
+      longestStreak: 0,
+      loyaltyPoints: 0
     }
   };
 
-  const updateStreakCard = () => {
-    const streakEl = document.getElementById('daily-streak');
-    if (!streakEl) return;
-    streakEl.textContent = `${sheetData.streak.totalDays} روز متوالی`;
-    const streakCard = streakEl.closest('.streak-card');
-    if (streakCard && sheetData.streak.checkpointReached) {
-      streakCard.classList.add('has-checkpoint');
-    }
-  };
-
-  updateStreakCard();
+  // توجه: updateStreakCard حذف شد چون در loadAndCheckInStreak انجام می‌شود
 
   const closeBottomSheet = () => {
     if (!bottomSheet.root) return;
@@ -986,7 +1135,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
+    const currentBalance = walletData?.balance || 0;
     bottomSheet.title.textContent = 'مرکز اعتبار و خرید خدمات';
+    
+    // نمایش تراکنش‌ها یا پیام خالی
+    const activitiesMarkup = data.activities.length > 0 
+      ? data.activities.map((item) => {
+          const amountClass = item.type === 'earn' ? 'is-positive' : 'is-negative';
+          return `
+            <li class="wallet-sheet__activity-item">
+              <div>
+                <div class="wallet-sheet__activity-title">${item.title}</div>
+                <p class="wallet-sheet__activity-meta">${item.time}</p>
+              </div>
+              <span class="wallet-sheet__activity-amount ${amountClass}">${item.amount}</span>
+            </li>
+          `;
+        }).join('')
+      : '<li class="wallet-sheet__activity-empty">هنوز تراکنشی ثبت نشده است</li>';
+
     bottomSheet.content.innerHTML = `
       <section class="wallet-sheet" aria-label="اعتبار فروشگاه">
         <div class="wallet-sheet__hero">
@@ -1009,17 +1176,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span class="wallet-sheet__section-chip">پرداخت با اعتبار</span>
           </div>
           <div class="wallet-sheet__carousel" role="list">
-            ${data.serviceCards.map((card) => `
-              <article class="wallet-sheet__card wallet-sheet__card--${card.theme}" role="listitem" tabindex="0">
+            ${data.serviceCards.map((card) => {
+              const canAfford = currentBalance >= card.cost;
+              const disabledClass = canAfford ? '' : 'is-disabled';
+              return `
+              <article class="wallet-sheet__card wallet-sheet__card--${card.theme} ${disabledClass}" 
+                       role="listitem" tabindex="0" 
+                       data-service-type="${card.serviceType}"
+                       data-cost="${card.cost}">
                 <div class="wallet-sheet__card-icon" aria-hidden="true">${card.icon}</div>
                 <div class="wallet-sheet__card-body">
                   <h5 class="wallet-sheet__card-title">${card.title}</h5>
                   <p class="wallet-sheet__card-price">${card.price}</p>
                   <p class="wallet-sheet__card-meta">${card.description}</p>
                 </div>
-                <span class="wallet-sheet__card-chip">اعتبار → ابزار رشد</span>
+                <button type="button" class="wallet-sheet__card-btn" ${canAfford ? '' : 'disabled'}>
+                  ${canAfford ? 'خرید' : 'موجودی کافی نیست'}
+                </button>
               </article>
-            `).join('')}
+            `}).join('')}
           </div>
         </div>
 
@@ -1032,26 +1207,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span class="wallet-sheet__section-chip wallet-sheet__section-chip--muted">+ / -</span>
           </div>
           <ul class="wallet-sheet__activity-list">
-            ${data.activities.map((item) => {
-              const amountClass = item.type === 'earn' ? 'is-positive' : 'is-negative';
-              return `
-                <li class="wallet-sheet__activity-item">
-                  <div>
-                    <div class="wallet-sheet__activity-title">${item.title}</div>
-                    <p class="wallet-sheet__activity-meta">${item.time}</p>
-                  </div>
-                  <span class="wallet-sheet__activity-amount ${amountClass}">${item.amount}</span>
-                </li>
-              `;
-            }).join('')}
+            ${activitiesMarkup}
           </ul>
         </div>
 
         <div class="wallet-sheet__footer">
-          <button type="button" class="wallet-sheet__cta">افزایش بازدید و فروش 🚀</button>
+          <p class="wallet-sheet__footer-hint">با فعالیت در پنل، اعتبار کسب کنید!</p>
         </div>
       </section>
     `;
+
+    // اضافه کردن event listener برای دکمه‌های خرید
+    bottomSheet.content.querySelectorAll('.wallet-sheet__card-btn:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.wallet-sheet__card');
+        const serviceType = card?.dataset?.serviceType;
+        if (!serviceType) return;
+
+        btn.disabled = true;
+        btn.textContent = 'در حال پردازش...';
+
+        try {
+          const result = await API.spendWalletCredit(serviceType);
+          UIComponents.showToast(result.message || 'خدمت با موفقیت فعال شد', 'success');
+          
+          // بروزرسانی کیف پول
+          await loadWallet();
+          renderWalletSheet();
+        } catch (err) {
+          console.error('Spend credit failed:', err);
+          UIComponents.showToast(err.message || 'خطا در خرید خدمت', 'error');
+          btn.disabled = false;
+          btn.textContent = 'خرید';
+        }
+      });
+    });
   };
 
   const renderStreakSheet = () => {
@@ -1059,9 +1250,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = sheetData.streak;
     bottomSheet.title.textContent = 'استریک و پاداش‌ها';
 
-    const dayMarkup = data.days.map((day, index) => {
+    // ساخت روزهای هفته
+    const dayMarkup = (data.days || []).map((day, index) => {
       const statusClass = day.status === 'hit' ? 'is-hit' : day.status === 'missed' ? 'is-missed' : 'is-pending';
-      const isToday = index === data.weekProgress - 1 && day.status === 'hit';
+      const isToday = index === (data.weekProgress || 0) - 1 && day.status === 'hit';
       const stateLabel = day.status === 'hit' ? 'انجام شده' : day.status === 'missed' ? 'از دست رفته' : 'در انتظار';
       return `
         <div class="streak-day ${statusClass}${isToday ? ' is-today' : ''}" aria-label="${day.label} ${stateLabel}">
@@ -1075,7 +1267,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }).join('');
 
-    const tierStyle = data.level.color ? ` style="--tier-color: ${data.level.color}"` : '';
+    const level = data.level || { name: 'تازه‌کار', icon: '🌱', color: '#22d3ee', progress: 0, daysToNext: 7 };
+    const tierStyle = level.color ? ` style="--tier-color: ${level.color}"` : '';
+    const progressPercent = level.progress || 0;
+    const daysToNext = level.daysToNext || 0;
+    const nextTierName = level.nextTierName || 'فعال';
 
     bottomSheet.content.innerHTML = `
       <section class="streak-sheet-v2" aria-label="جزئیات استریک"${tierStyle}>
@@ -1083,16 +1279,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="streak-hero">
           <div class="streak-hero__glow"></div>
           <div class="streak-hero__icon-wrapper">
-            <span class="streak-hero__icon">${data.level.icon}</span>
+            <span class="streak-hero__icon">${level.icon || '🌱'}</span>
             <div class="streak-hero__ring"></div>
           </div>
           <div class="streak-hero__content">
-            <span class="streak-hero__tier">فروشنده ${data.level.name}</span>
+            <span class="streak-hero__tier">فروشنده ${level.name || 'تازه‌کار'}</span>
             <div class="streak-hero__count">
-              <span class="streak-hero__number">${faNumber(data.totalDays)}</span>
+              <span class="streak-hero__number">${toFaDigits(data.totalDays || 0)}</span>
               <span class="streak-hero__unit">روز متوالی</span>
             </div>
             ${data.checkpointReached ? '<span class="streak-hero__checkpoint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>چک‌پوینت فعال</span>' : ''}
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="streak-stats-row">
+          <div class="streak-stat">
+            <span class="streak-stat__value">${toFaDigits(data.longestStreak || 0)}</span>
+            <span class="streak-stat__label">بیشترین رکورد</span>
+          </div>
+          <div class="streak-stat">
+            <span class="streak-stat__value">${toFaDigits(data.loyaltyPoints || 0)}</span>
+            <span class="streak-stat__label">امتیاز وفاداری</span>
           </div>
         </div>
 
@@ -1100,16 +1308,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="streak-level">
           <div class="streak-level__header">
             <div class="streak-level__info">
-              <span class="streak-level__label">مسیر ارتقا به الماس</span>
-              <span class="streak-level__badge">💎 ${faNumber(data.level.daysToNextLevel)} روز مانده</span>
+              <span class="streak-level__label">مسیر ارتقا به ${nextTierName}</span>
+              <span class="streak-level__badge">${level.icon || '⭐'} ${toFaDigits(daysToNext)} روز مانده</span>
             </div>
-            <span class="streak-level__percent">${faNumber(data.level.progressPercent)}٪</span>
+            <span class="streak-level__percent">${toFaDigits(progressPercent)}٪</span>
           </div>
-          <div class="streak-level__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${data.level.progressPercent}">
-            <div class="streak-level__fill" style="width: ${data.level.progressPercent}%"></div>
-            <div class="streak-level__glow" style="width: ${data.level.progressPercent}%"></div>
+          <div class="streak-level__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
+            <div class="streak-level__fill" style="width: ${progressPercent}%"></div>
+            <div class="streak-level__glow" style="width: ${progressPercent}%"></div>
           </div>
-          <p class="streak-level__reward">🏆 تیک آبی + ${formatTomans(300_000)} پاداش</p>
+          <p class="streak-level__reward">🏆 با ارتقا به سطح بعدی پاداش ویژه دریافت کنید</p>
         </div>
 
         <!-- Weekly Calendar -->
@@ -1117,10 +1325,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="streak-weekly__header">
             <div>
               <h4 class="streak-weekly__title">پیشرفت این هفته</h4>
-              <p class="streak-weekly__subtitle">پاداش: ${formatTomans(5_000)} شارژ</p>
+              <p class="streak-weekly__subtitle">پاداش: ${data.weeklyReward || '۵,۰۰۰ تومان'}</p>
             </div>
             <div class="streak-weekly__counter">
-              <span class="streak-weekly__current">${faNumber(data.weekProgress)}</span>
+              <span class="streak-weekly__current">${toFaDigits(data.weekProgress || 0)}</span>
               <span class="streak-weekly__divider">/</span>
               <span class="streak-weekly__total">۷</span>
             </div>
@@ -1136,21 +1344,21 @@ document.addEventListener('DOMContentLoaded', async () => {
               <div class="streak-reward-card__icon">📅</div>
               <div class="streak-reward-card__content">
                 <span class="streak-reward-card__label">روزانه</span>
-                <span class="streak-reward-card__value">${data.dailyReward}</span>
+                <span class="streak-reward-card__value">${data.dailyReward || '+۱۰ امتیاز'}</span>
               </div>
             </div>
             <div class="streak-reward-card streak-reward-card--weekly">
               <div class="streak-reward-card__icon">🎯</div>
               <div class="streak-reward-card__content">
                 <span class="streak-reward-card__label">هفتگی</span>
-                <span class="streak-reward-card__value">${data.weeklyReward}</span>
+                <span class="streak-reward-card__value">${data.weeklyReward || '۵,۰۰۰ تومان'}</span>
               </div>
             </div>
             <div class="streak-reward-card streak-reward-card--monthly">
               <div class="streak-reward-card__icon">🏅</div>
               <div class="streak-reward-card__content">
                 <span class="streak-reward-card__label">ماهانه</span>
-                <span class="streak-reward-card__value">${data.monthlyReward}</span>
+                <span class="streak-reward-card__value">${data.monthlyReward || '۵۰,۰۰۰ تومان'}</span>
               </div>
             </div>
           </div>
@@ -6215,7 +6423,13 @@ async initServices() {
         // Add event listeners to the new buttons
         container.querySelectorAll('.edit-service-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
+                e.preventDefault();
+                e.stopPropagation();
+                // استفاده از closest برای پیدا کردن دکمه حتی اگر روی آیکون یا span کلیک شده باشد
+                const button = e.target.closest('.edit-service-btn');
+                const id = button?.dataset?.id;
+                if (!id) return;
+                
                 const services = StorageManager.get('vit_services') || [];
                 const service = services.find(s => String(s.id) === String(id));
                 if (service) {
@@ -6226,7 +6440,13 @@ async initServices() {
         });
         container.querySelectorAll('.delete-service-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
+                e.preventDefault();
+                e.stopPropagation();
+                // استفاده از closest برای پیدا کردن دکمه حتی اگر روی آیکون یا span کلیک شده باشد
+                const button = e.target.closest('.delete-service-btn');
+                const id = button?.dataset?.id;
+                if (!id) return;
+                
                 this.deleteService(id);
             });
         });
