@@ -6156,14 +6156,31 @@ async initServices() {
             return;
         }
         
-        // Helper to get image URL from service (handles both 'image' and 'images' array)
+        // Helper to resolve service image URL (supports multiple backend shapes)
         const getServiceImage = (service) => {
-            if (service.image) return service.image;
+            // 1) Direct field returned by backend
+            if (service.image) return normalizeImagePath(service.image);
+            if (service.imageUrl) return normalizeImagePath(service.imageUrl);
+
+            // 2) Array-based responses
             if (Array.isArray(service.images) && service.images.length > 0) {
                 const mainIdx = service.mainImageIndex || 0;
-                return service.images[mainIdx] || service.images[0] || '';
+                return normalizeImagePath(service.images[mainIdx] || service.images[0] || '');
             }
+
+            // 3) Nothing available
             return '';
+        };
+
+        const normalizeImagePath = (path) => {
+            if (!path) return '';
+
+            // If backend returns a relative path, prefix with API_BASE for proper loading
+            if (path.startsWith('/')) {
+                return `${API_BASE}${path}`;
+            }
+
+            return path;
         };
         
         container.innerHTML = services.length === 0 ? '<p class="no-services-msg">هیچ خدمتی تعریف نشده است.</p>' : services.map(service => {
