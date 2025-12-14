@@ -108,6 +108,7 @@ app.use('/api/rewards', require('./routes/rewardCampaign'));
 app.use('/api/streak', require('./routes/streak'));
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/rank', require('./routes/rank'));
+app.use('/api/admin-seller-notifications', require('./routes/adminSellerNotifications'));
 
 // ------------------- Health Check -------------------
 app.get('/', (req, res) => {

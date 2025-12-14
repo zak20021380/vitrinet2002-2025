@@ -16,6 +16,7 @@ const Report = require('../models/Report');
 const Review = require('../models/Review');
 const Block = require('../models/Block');
 const BannedPhone = require('../models/BannedPhone');
+const ServicePlanSubscription = require('../models/servicePlanSubscription');
 const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
 
 const SELLER_MODERATION_FIELDS = 'storename shopurl phone blockedByAdmin blockedAt blockedReason blockedBy';
@@ -598,7 +599,7 @@ const parseLegacyList = (value) => {
     .slice(0, 20);
 };
 
-const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {} } = {}) => {
+const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}, complimentaryPlan = null } = {}) => {
   if (!seller) return null;
 
   const serviceTitles = Array.isArray(services)
@@ -640,6 +641,18 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     previousBookingEnabled: baseBookable
   };
 
+  // استفاده از complimentaryPlan پاس داده شده یا مقدار پیش‌فرض
+  const finalComplimentaryPlan = complimentaryPlan || {
+    isActive: false,
+    durationDays: null,
+    startDate: null,
+    endDate: null,
+    note: '',
+    assignmentId: '',
+    planTitle: '',
+    planSlug: ''
+  };
+
   return {
     _id: seller._id,
     legacySellerId: seller._id,
@@ -660,13 +673,7 @@ const mapLegacySellerToItem = (seller, { appearance, services = [], booking = {}
     isFeatured: false,
     isPremium: !!seller.isPremium,
     premiumUntil,
-    complimentaryPlan: {
-      isActive: false,
-      durationDays: null,
-      startDate: null,
-      endDate: null,
-      note: ''
-    },
+    complimentaryPlan: finalComplimentaryPlan,
     bookingSettings: { enabled: isBlockedByAdmin ? false : baseBookable },
     analytics: {
       totalBookings: booking.total || 0,
@@ -1052,7 +1059,7 @@ async function buildLegacyServiceShopBySellerId(id) {
   const categoryText = `${seller.category || ''} ${seller.subcategory || ''}`;
   if (!SERVICE_CATEGORY_REGEX.test(categoryText)) return null;
 
-  const [appearance, services, bookingStats] = await Promise.all([
+  const [appearance, services, bookingStats, planSubscription] = await Promise.all([
     ShopAppearance.findOne({ sellerId: seller._id }).lean(),
     SellerService.find({ sellerId: seller._id }).select('title').lean(),
     Booking.aggregate([
@@ -1079,15 +1086,56 @@ async function buildLegacyServiceShopBySellerId(id) {
           lastBookingAt: { $max: '$createdAt' }
         }
       }
-    ])
+    ]),
+    // جستجوی پلن رایگان برای این فروشنده
+    ServicePlanSubscription.findOne({
+      $or: [
+        { serviceShop: seller._id },
+        { normalizedPhone: normalizePhone(seller.phone) }
+      ],
+      status: 'active'
+    }).populate('servicePlan').lean()
   ]);
 
   const booking = bookingStats && bookingStats.length ? bookingStats[0] : {};
 
+  // ساخت اطلاعات پلن رایگان
+  let complimentaryPlan = {
+    isActive: false,
+    durationDays: null,
+    startDate: null,
+    endDate: null,
+    note: '',
+    assignmentId: '',
+    planTitle: '',
+    planSlug: ''
+  };
+
+  if (planSubscription) {
+    const now = new Date();
+    const startDate = planSubscription.startDate ? new Date(planSubscription.startDate) : null;
+    const endDate = planSubscription.endDate ? new Date(planSubscription.endDate) : null;
+    const isActive = planSubscription.status === 'active'
+      && (!startDate || startDate <= now)
+      && (!endDate || endDate >= now);
+
+    complimentaryPlan = {
+      isActive,
+      durationDays: planSubscription.durationDays || null,
+      startDate: planSubscription.startDate || null,
+      endDate: planSubscription.endDate || null,
+      note: planSubscription.notes || '',
+      assignmentId: String(planSubscription._id),
+      planTitle: planSubscription.servicePlan?.title || planSubscription.planSnapshot?.title || '',
+      planSlug: planSubscription.servicePlan?.slug || planSubscription.planSnapshot?.slug || ''
+    };
+  }
+
   return mapLegacySellerToItem(seller, {
     appearance,
     services: services.map(service => service.title).filter(Boolean),
-    booking
+    booking,
+    complimentaryPlan
   });
 }
 

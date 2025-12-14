@@ -729,4 +729,50 @@ router.delete('/assignments/:id', auth('admin'), async (req, res) => {
   }
 });
 
+// غیرفعال کردن پلن رایگان بر اساس shopId
+router.delete('/assignments/by-shop/:shopId', auth('admin'), async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    
+    // ابتدا بررسی کن که آیا این یک ServiceShop است
+    const ServiceShop = require('../models/serviceShop');
+    let shop = await ServiceShop.findById(shopId);
+    
+    if (shop) {
+      // اگر ServiceShop است، assignment را پیدا کن و حذف کن
+      const deleted = await ServicePlanSubscription.findOneAndDelete({ serviceShop: shopId });
+      
+      // غیرفعال کردن پلن در ServiceShop
+      await ServiceShop.findByIdAndUpdate(shopId, {
+        $set: {
+          'complimentaryPlan.isActive': false,
+          'complimentaryPlan.assignmentId': '',
+          updatedBy: req.user?.id || null,
+          updatedAt: new Date()
+        }
+      });
+      
+      return res.status(204).send();
+    }
+    
+    // اگر ServiceShop نیست، شاید یک legacy seller است
+    // در این حالت فقط assignment را حذف کن
+    const deleted = await ServicePlanSubscription.findOneAndDelete({ 
+      $or: [
+        { serviceShop: shopId },
+        { assignedPhone: shopId }
+      ]
+    });
+    
+    if (!deleted) {
+      return res.status(404).json({ message: 'پلن رایگان فعالی برای این فروشنده یافت نشد.' });
+    }
+    
+    res.status(204).send();
+  } catch (error) {
+    console.error('Failed to revoke plan by shopId:', error);
+    res.status(500).json({ message: 'خطا در غیرفعال‌سازی پلن رایگان' });
+  }
+});
+
 module.exports = router;

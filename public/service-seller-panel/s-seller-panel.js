@@ -3182,15 +3182,37 @@ function renderComplimentaryPlan(planRaw) {
     }
   }
 
-  // نمایش یادداشت هدیه برای پلن‌های فعال
+  // نمایش یادداشت هدیه برای پلن‌ها با وضعیت‌های مختلف
   if (giftNoteEl) {
-    if (plan.activeNow) {
-      giftNoteEl.textContent = 'این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
+    // حذف کلاس‌های قبلی
+    giftNoteEl.classList.remove('is-visible', 'is-active', 'is-expired', 'is-inactive', 'is-scheduled');
+    
+    if (planlessNudge) {
+      // هیچ پلنی انتخاب نشده
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">📋</span> هنوز پلنی برای فروشگاه شما فعال نشده است.';
       giftNoteEl.hidden = false;
-      giftNoteEl.classList.add('is-visible');
+      giftNoteEl.classList.add('is-visible', 'is-inactive');
+    } else if (plan.activeNow) {
+      // پلن فعال است
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">🎁</span> این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
+      giftNoteEl.hidden = false;
+      giftNoteEl.classList.add('is-visible', 'is-active');
+    } else if (plan.hasExpired) {
+      // پلن منقضی شده
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">⏰</span> دوره پلن رایگان به پایان رسیده است. برای ادامه فعالیت، پلن جدیدی تهیه کنید.';
+      giftNoteEl.hidden = false;
+      giftNoteEl.classList.add('is-visible', 'is-expired');
+    } else if (plan.isActive) {
+      // پلن در انتظار شروع
+      const startText = startLabel ? `از تاریخ ${startLabel}` : 'به‌زودی';
+      giftNoteEl.innerHTML = `<span class="gift-note-icon">📅</span> پلن رایگان شما ${startText} فعال خواهد شد.`;
+      giftNoteEl.hidden = false;
+      giftNoteEl.classList.add('is-visible', 'is-scheduled');
     } else {
-      giftNoteEl.hidden = true;
-      giftNoteEl.classList.remove('is-visible');
+      // پلن غیرفعال شده توسط ادمین
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">🚫</span> پلن رایگان توسط مدیریت غیرفعال شده است. برای پیگیری با پشتیبانی تماس بگیرید.';
+      giftNoteEl.hidden = false;
+      giftNoteEl.classList.add('is-visible', 'is-inactive');
     }
   }
 
@@ -3803,16 +3825,31 @@ const Notifications = {
 
   async fetchFromServer() {
     try {
+      // دریافت نوتیفیکیشن‌های عادی
       const items = await API.getNotifications();
       const existing = this.load();
       
+      // دریافت پیام‌های ادمین (اگر sellerId موجود باشد)
+      let adminNotifications = [];
+      try {
+        const sellerId = StorageManager.get('sellerId') || window.currentSellerId;
+        if (sellerId) {
+          adminNotifications = await API.getAdminNotifications(sellerId);
+        }
+      } catch (adminErr) {
+        console.warn('Failed to load admin notifications', adminErr);
+      }
+      
+      // ترکیب همه نوتیفیکیشن‌ها
+      const allItems = [...items, ...adminNotifications];
+      
       // اگر سرور نوتیفیکیشن جدید برگرداند، آن‌ها را با موجودی‌ها ادغام کن
-      if (items && items.length > 0) {
+      if (allItems && allItems.length > 0) {
         // ایجاد Map از نوتیفیکیشن‌های موجود برای دسترسی سریع
         const existingMap = new Map(existing.map(n => [n.id, n]));
         
         // ادغام نوتیفیکیشن‌های جدید با حفظ userReplies
-        const merged = items.map((item) => {
+        const merged = allItems.map((item) => {
           const prev = existingMap.get(item.id);
           // ادغام userReplies از سرور و محلی
           const serverReplies = Array.isArray(item.userReplies) ? item.userReplies : [];
@@ -3823,10 +3860,12 @@ const Notifications = {
         });
         
         // اضافه کردن نوتیفیکیشن‌های محلی که در سرور نیستند (مثل live activity)
-        const serverIds = new Set(items.map(n => n.id));
+        const serverIds = new Set(allItems.map(n => n.id));
         const localOnly = existing.filter(n => !serverIds.has(n.id) && n.id?.startsWith('n'));
         
-        this.save([...merged, ...localOnly].slice(0, 50));
+        // مرتب‌سازی بر اساس زمان (جدیدترین اول)
+        const finalList = [...merged, ...localOnly].slice(0, 50);
+        this.save(finalList);
       } else if (existing.length > 0) {
         // اگر سرور خالی برگرداند ولی نوتیفیکیشن‌های محلی داریم، آن‌ها را حفظ کن
         // همه نوتیفیکیشن‌های موجود را نگه دار

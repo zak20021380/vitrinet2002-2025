@@ -4581,12 +4581,22 @@ function openServiceShopModal(shopId) {
 
   const disableBtn = document.getElementById('serviceShopModalDisablePlan');
   if (disableBtn) {
-    const canDisable = !!shop.complimentaryActive && !!shop.complimentaryAssignmentId;
+    // اگر پلن رایگان فعال است، دکمه را نمایش بده (حتی اگر assignmentId نداشته باشیم)
+    const canDisable = !!shop.complimentaryActive;
     disableBtn.hidden = !canDisable;
     disableBtn.disabled = false;
     disableBtn.dataset.assignmentId = shop.complimentaryAssignmentId || '';
     disableBtn.dataset.shopId = shop.id || '';
     disableBtn.textContent = 'غیرفعال کردن پلن رایگان';
+  }
+
+  // ذخیره شناسه فروشنده برای ارسال پیام
+  currentServiceShopSellerId = shop.sellerId || shop.ownerId || null;
+  currentServiceShopId = shop.id || null;
+
+  // ریست کردن بخش پیام
+  if (typeof resetMessageSection === 'function') {
+    resetMessageSection();
   }
 
   modal.hidden = false;
@@ -4620,7 +4630,10 @@ async function ensureServiceShopsData(force = false) {
 }
 
 async function revokeComplimentaryPlan(assignmentId, shopId, buttonEl) {
-  if (!assignmentId) return alert('شناسه پلن رایگان برای این فروشنده در دسترس نیست.');
+  // اگر assignmentId نداریم، از shopId استفاده کن
+  if (!assignmentId && !shopId) {
+    return alert('شناسه فروشنده یا پلن رایگان در دسترس نیست.');
+  }
 
   const confirmed = confirm('آیا از غیرفعال کردن پلن رایگان این فروشنده مطمئن هستید؟');
   if (!confirmed) return;
@@ -4632,10 +4645,21 @@ async function revokeComplimentaryPlan(assignmentId, shopId, buttonEl) {
   }
 
   try {
-    const res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments/${encodeURIComponent(assignmentId)}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
+    let res;
+    
+    if (assignmentId) {
+      // اگر assignmentId داریم، از route اصلی استفاده کن
+      res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments/${encodeURIComponent(assignmentId)}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+    } else {
+      // اگر assignmentId نداریم، از route جدید با shopId استفاده کن
+      res = await fetch(`${ADMIN_API_BASE}/service-plans/assignments/by-shop/${encodeURIComponent(shopId)}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+    }
 
     if (!res.ok && res.status !== 204) {
       let message = 'خطا در غیرفعال‌سازی پلن رایگان';
@@ -10118,3 +10142,206 @@ menuLinks.forEach(link => {
 
 
 
+
+/* ============================================
+   سیستم ارسال پیام از ادمین به فروشنده خدماتی
+   ============================================ */
+
+// متغیر برای ذخیره شناسه فروشنده فعلی در مدال
+let currentServiceShopSellerId = null;
+let currentServiceShopId = null;
+
+/**
+ * راه‌اندازی بخش ارسال پیام در مدال
+ */
+function initAdminMessageSection() {
+  const toggleBtn = document.getElementById('toggleMessageSection');
+  const messageContainer = document.getElementById('messageFormContainer');
+  const messageContent = document.getElementById('adminMessageContent');
+  const charCount = document.getElementById('messageCharCount');
+  const sendBtn = document.getElementById('sendAdminMessage');
+  const clearBtn = document.getElementById('clearAdminMessage');
+
+  if (!toggleBtn || !messageContainer) return;
+
+  // Toggle بخش پیام
+  toggleBtn.addEventListener('click', () => {
+    const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    toggleBtn.setAttribute('aria-expanded', !isExpanded);
+    messageContainer.hidden = isExpanded;
+  });
+
+  // شمارش کاراکترها
+  if (messageContent && charCount) {
+    messageContent.addEventListener('input', () => {
+      const count = messageContent.value.length;
+      charCount.textContent = count;
+      
+      const charCountContainer = charCount.parentElement;
+      charCountContainer.classList.remove('is-warning', 'is-limit');
+      
+      if (count >= 500) {
+        charCountContainer.classList.add('is-limit');
+      } else if (count >= 400) {
+        charCountContainer.classList.add('is-warning');
+      }
+    });
+  }
+
+  // ارسال پیام
+  if (sendBtn) {
+    sendBtn.addEventListener('click', sendAdminMessageToSeller);
+  }
+
+  // پاک کردن فرم
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearAdminMessageForm);
+  }
+}
+
+/**
+ * ارسال پیام به فروشنده
+ */
+async function sendAdminMessageToSeller() {
+  const typeSelect = document.getElementById('adminMessageType');
+  const titleInput = document.getElementById('adminMessageTitle');
+  const contentInput = document.getElementById('adminMessageContent');
+  const statusEl = document.getElementById('messageFormStatus');
+  const sendBtn = document.getElementById('sendAdminMessage');
+
+  if (!currentServiceShopSellerId) {
+    showMessageFormStatus('خطا: شناسه فروشنده یافت نشد', 'error');
+    return;
+  }
+
+  const title = titleInput?.value?.trim();
+  const content = contentInput?.value?.trim();
+  const type = typeSelect?.value || 'info';
+
+  if (!title) {
+    showMessageFormStatus('لطفاً عنوان پیام را وارد کنید', 'error');
+    titleInput?.focus();
+    return;
+  }
+
+  if (!content) {
+    showMessageFormStatus('لطفاً متن پیام را وارد کنید', 'error');
+    contentInput?.focus();
+    return;
+  }
+
+  // غیرفعال کردن دکمه
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> در حال ارسال...';
+  }
+
+  showMessageFormStatus('در حال ارسال پیام...', 'loading');
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/admin-seller-notifications`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sellerId: currentServiceShopSellerId,
+        serviceShopId: currentServiceShopId,
+        type,
+        title,
+        content
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'خطا در ارسال پیام');
+    }
+
+    showMessageFormStatus('✅ پیام با موفقیت ارسال شد', 'success');
+    clearAdminMessageForm();
+
+    // بستن بخش پیام بعد از 2 ثانیه
+    setTimeout(() => {
+      const toggleBtn = document.getElementById('toggleMessageSection');
+      const messageContainer = document.getElementById('messageFormContainer');
+      if (toggleBtn && messageContainer) {
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        messageContainer.hidden = true;
+      }
+    }, 2000);
+
+  } catch (error) {
+    console.error('sendAdminMessageToSeller error:', error);
+    showMessageFormStatus(`❌ ${error.message}`, 'error');
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<i class="ri-send-plane-fill"></i> ارسال پیام';
+    }
+  }
+}
+
+/**
+ * نمایش وضعیت فرم پیام
+ */
+function showMessageFormStatus(message, type = 'info') {
+  const statusEl = document.getElementById('messageFormStatus');
+  if (!statusEl) return;
+
+  statusEl.textContent = message;
+  statusEl.className = 'message-form__status';
+  statusEl.classList.add(`is-${type}`);
+  statusEl.hidden = false;
+
+  // مخفی کردن بعد از 5 ثانیه (به جز loading)
+  if (type !== 'loading') {
+    setTimeout(() => {
+      statusEl.hidden = true;
+    }, 5000);
+  }
+}
+
+/**
+ * پاک کردن فرم پیام
+ */
+function clearAdminMessageForm() {
+  const typeSelect = document.getElementById('adminMessageType');
+  const titleInput = document.getElementById('adminMessageTitle');
+  const contentInput = document.getElementById('adminMessageContent');
+  const charCount = document.getElementById('messageCharCount');
+  const statusEl = document.getElementById('messageFormStatus');
+
+  if (typeSelect) typeSelect.value = 'info';
+  if (titleInput) titleInput.value = '';
+  if (contentInput) contentInput.value = '';
+  if (charCount) {
+    charCount.textContent = '0';
+    charCount.parentElement.classList.remove('is-warning', 'is-limit');
+  }
+  if (statusEl) statusEl.hidden = true;
+}
+
+/**
+ * ریست کردن بخش پیام هنگام باز شدن مدال
+ */
+function resetMessageSection() {
+  const toggleBtn = document.getElementById('toggleMessageSection');
+  const messageContainer = document.getElementById('messageFormContainer');
+  
+  if (toggleBtn) {
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (messageContainer) {
+    messageContainer.hidden = true;
+  }
+  
+  clearAdminMessageForm();
+}
+
+// راه‌اندازی در DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  initAdminMessageSection();
+});

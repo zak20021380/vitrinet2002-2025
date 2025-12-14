@@ -548,6 +548,73 @@ async deletePortfolioItem(id) {
     return data?.reply || { message, createdAt: new Date().toISOString() };
   },
 
+  // ===== Admin Seller Notifications API Methods =====
+  
+  /**
+   * دریافت پیام‌های ادمین برای فروشنده
+   */
+  async getAdminNotifications(sellerId) {
+    const r = await fetch(bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_ADMIN_NOTIFICATIONS_FAILED');
+    const data = await this._json(r);
+    const arr = Array.isArray(data?.notifications) ? data.notifications : [];
+    const fmt = (d) => {
+      const diff = (Date.now() - new Date(d).getTime()) / 1000;
+      if (diff < 3600) return `${Math.floor(diff/60)} دقیقه پیش`;
+      if (diff < 86400) return `${Math.floor(diff/3600)} ساعت پیش`;
+      return `${Math.floor(diff/86400)} روز پیش`;
+    };
+    return arr.map(n => ({
+      id: n._id || n.id,
+      text: n.content || '',
+      time: n.createdAt ? fmt(n.createdAt) : '',
+      read: !!n.read,
+      type: n.type || 'info',
+      title: n.title || '',
+      isAdminMessage: true
+    }));
+  },
+
+  /**
+   * علامت‌گذاری پیام ادمین به عنوان خوانده شده
+   */
+  async markAdminNotificationRead(id) {
+    const r = await fetch(`${API_BASE}/api/admin-seller-notifications/${id}/read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('MARK_ADMIN_NOTIFICATION_READ_FAILED');
+    return true;
+  },
+
+  /**
+   * حذف پیام ادمین
+   */
+  async deleteAdminNotification(id) {
+    const r = await fetch(`${API_BASE}/api/admin-seller-notifications/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('DELETE_ADMIN_NOTIFICATION_FAILED');
+    return true;
+  },
+
+  /**
+   * دریافت تعداد پیام‌های خوانده نشده ادمین
+   */
+  async getAdminNotificationsUnreadCount(sellerId) {
+    const r = await fetch(bust(`${API_BASE}/api/admin-seller-notifications/seller/${sellerId}/unread-count`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) return 0;
+    const data = await this._json(r);
+    return data?.count || 0;
+  },
+
   // ===== Streak API Methods =====
   
   /**

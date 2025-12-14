@@ -8591,3 +8591,302 @@ tr:last-child td {
 .ticket-thread__item--original .ticket-thread__author {
   color: #b45309;
 }
+
+
+/* ============================================
+   بخش ارسال پیام به فروشنده در مدال
+   ============================================ */
+
+.service-shop-modal__message-section {
+  margin-top: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.service-shop-modal__message-section:hover {
+  border-color: rgba(14, 165, 233, 0.35);
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.08);
+}
+
+.message-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.message-section__header:hover {
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.message-section__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.message-section__title i {
+  font-size: 1.25rem;
+  color: var(--secondary);
+}
+
+.message-section__toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.message-section__toggle:hover {
+  background: rgba(14, 165, 233, 0.2);
+  transform: scale(1.05);
+}
+
+.message-section__toggle[aria-expanded="true"] {
+  background: var(--secondary);
+  color: white;
+}
+
+.message-section__toggle[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+.message-section__toggle i {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.message-section__body {
+  padding: 0 1.25rem 1.25rem;
+  animation: slideDown 0.3s ease;
+}
+
+.message-section__body[hidden] {
+  display: none;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.message-form__label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.message-form__select,
+.message-form__input,
+.message-form__textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1.5px solid rgba(148, 163, 184, 0.4);
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.2s ease;
+  color: #0f172a;
+}
+
+.message-form__select:focus,
+.message-form__input:focus,
+.message-form__textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.message-form__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.75rem center;
+  background-size: 18px;
+  padding-left: 2.5rem;
+}
+
+.message-form__textarea {
+  resize: vertical;
+  min-height: 100px;
+  max-height: 200px;
+  line-height: 1.6;
+}
+
+.message-form__char-count {
+  text-align: left;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.message-form__char-count span {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.message-form__char-count.is-warning span {
+  color: #f59e0b;
+}
+
+.message-form__char-count.is-limit span {
+  color: #ef4444;
+}
+
+.message-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.message-form__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.message-form__btn--send {
+  flex: 1;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+}
+
+.message-form__btn--send:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+}
+
+.message-form__btn--send:active {
+  transform: translateY(0);
+}
+
+.message-form__btn--send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message-form__btn--clear {
+  background: rgba(148, 163, 184, 0.15);
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.message-form__btn--clear:hover {
+  background: rgba(148, 163, 184, 0.25);
+  color: #475569;
+}
+
+.message-form__status {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.message-form__status[hidden] {
+  display: none;
+}
+
+.message-form__status.is-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.message-form__status.is-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.message-form__status.is-loading {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .service-shop-modal__message-section {
+    margin-top: 1rem;
+  }
+
+  .message-section__header {
+    padding: 0.85rem 1rem;
+  }
+
+  .message-section__title {
+    font-size: 0.9rem;
+  }
+
+  .message-section__body {
+    padding: 0 1rem 1rem;
+  }
+
+  .message-form__actions {
+    flex-direction: column;
+  }
+
+  .message-form__btn {
+    width: 100%;
+  }
+}
