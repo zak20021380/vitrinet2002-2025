@@ -41,6 +41,77 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
   }
 });
 
+// به‌روزرسانی اطلاعات فروشنده (شماره تلفن و آدرس)
+router.put('/me', authMiddleware('seller'), async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    const { phone, address, storename } = req.body;
+    
+    // اعتبارسنجی شماره تلفن
+    if (phone !== undefined) {
+      const phoneRegex = /^09[0-9]{9}$/;
+      const normalizedPhone = String(phone).replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]);
+      if (!phoneRegex.test(normalizedPhone)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره تلفن نامعتبر است. لطفاً شماره موبایل ۱۱ رقمی وارد کنید.' 
+        });
+      }
+    }
+    
+    // ساخت آبجکت به‌روزرسانی
+    const updateData = {};
+    if (phone !== undefined) {
+      updateData.phone = String(phone).replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]);
+    }
+    if (address !== undefined) {
+      updateData.address = String(address).trim();
+    }
+    if (storename !== undefined) {
+      updateData.storename = String(storename).trim();
+    }
+    
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'هیچ فیلدی برای به‌روزرسانی ارسال نشده است.' 
+      });
+    }
+    
+    updateData.updatedAt = new Date();
+    
+    const seller = await Seller.findByIdAndUpdate(
+      sellerId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password -otp -otpExpire');
+    
+    if (!seller) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'فروشنده پیدا نشد!' 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'اطلاعات با موفقیت به‌روزرسانی شد.',
+      seller: {
+        id: seller._id,
+        phone: seller.phone,
+        address: seller.address,
+        storename: seller.storename
+      }
+    });
+  } catch (err) {
+    console.error('update /me error', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'خطا در به‌روزرسانی اطلاعات.' 
+    });
+  }
+});
+
 // دریافت فروشنده بر اساس shopurl (عمومی)
 router.get('/by-shopurl/:shopurl', async (req, res) => {
   try {

@@ -1144,29 +1144,118 @@
             <h2 class="view-title" id="settings-title">تنظیمات</h2>
           </header>
 <form id="settings-form" class="settings-list">
-  <div class="settings-group">
+  <div class="settings-group business-info-group">
     <h3 class="settings-group-title">اطلاعات کسب‌وکار</h3>
-<div class="form-group">
-  <label for="business-name" class="form-label">نام کسب‌وکار</label>
-  <input type="text" id="business-name" class="form-control" value="">
-</div>
+    
     <div class="form-group">
-      <label for="business-category" class="form-label">دسته بندی</label>
-      <select id="business-category" class="form-select" disabled>
-        <option value="barbershop" selected>آرایشگاه مردانه</option>
-        <option value="salon">سالن زیبایی زنانه</option>
-        <option value="clinic">کلینیک زیبایی</option>
-      </select>
-      <div class="help">دسته‌بندی توسط پشتیبانی تعیین می‌شود</div>
+      <label for="business-name" class="form-label">نام کسب‌وکار</label>
+      <input type="text" id="business-name" class="form-control" value="">
     </div>
-<div class="form-group">
-  <label for="business-phone" class="form-label">شماره تلفن</label>
-  <input type="tel" id="business-phone" class="form-control" inputmode="tel" value="">
-</div>
-  <div class="form-group">
-    <label for="business-address" class="form-label">آدرس</label>
-    <input type="text" id="business-address" class="form-control" value="">
-  </div>
+    
+    <!-- دسته‌بندی - غیرقابل تغییر -->
+    <div class="form-group form-group--disabled">
+      <label for="business-category" class="form-label">
+        <span>دسته بندی</span>
+        <span class="form-label__badge form-label__badge--locked">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          قفل شده
+        </span>
+      </label>
+      <div class="form-control-locked">
+        <span class="form-control-locked__icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </span>
+        <span id="business-category-display" class="form-control-locked__text">آرایشگاه مردانه</span>
+      </div>
+      <input type="hidden" id="business-category" value="barbershop">
+      <p class="form-help form-help--info">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        دسته‌بندی توسط پشتیبانی تعیین می‌شود و قابل تغییر نیست
+      </p>
+    </div>
+    
+    <!-- شماره تلفن - قابل ویرایش -->
+    <div class="form-group form-group--editable">
+      <label for="business-phone" class="form-label">
+        <span>شماره تلفن</span>
+        <span class="form-label__badge form-label__badge--editable">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          قابل ویرایش
+        </span>
+      </label>
+      <div class="form-input-wrapper">
+        <span class="form-input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </span>
+        <input type="tel" id="business-phone" class="form-control form-control--with-icon" inputmode="tel" placeholder="09123456789" pattern="^09[0-9]{9}$" maxlength="11" autocomplete="tel">
+      </div>
+      <p class="form-help">شماره موبایل ۱۱ رقمی وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹)</p>
+    </div>
+    
+    <!-- آدرس - قابل ویرایش -->
+    <div class="form-group form-group--editable">
+      <label for="business-address" class="form-label">
+        <span>آدرس</span>
+        <span class="form-label__badge form-label__badge--editable">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          قابل ویرایش
+        </span>
+      </label>
+      <div class="form-input-wrapper">
+        <span class="form-input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </span>
+        <input type="text" id="business-address" class="form-control form-control--with-icon" placeholder="آدرس کامل فروشگاه را وارد کنید" autocomplete="street-address">
+      </div>
+      <p class="form-help">آدرس دقیق فروشگاه برای نمایش به مشتریان</p>
+    </div>
+    
+    <!-- دکمه ذخیره تغییرات -->
+    <div class="form-actions form-actions--sticky">
+      <button type="button" id="save-business-info-btn" class="btn-save-settings" disabled>
+        <span class="btn-save-settings__icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+        </span>
+        <span class="btn-save-settings__text">ذخیره تغییرات</span>
+        <span class="btn-save-settings__loading" hidden>
+          <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+          </svg>
+          در حال ذخیره...
+        </span>
+      </button>
+      <p class="form-actions__hint" id="save-hint" hidden>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        تغییرات ذخیره نشده دارید
+      </p>
+    </div>
   </div>
 
   <div class="settings-group working-hours-group">

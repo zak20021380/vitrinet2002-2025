@@ -9624,31 +9624,144 @@ function populateSettingsForm(sellerData) {
     endEl.value = sellerData.endTime;
   }
 
-  // Business category dropdown
-  const categoryEl = document.getElementById('business-category');
-  if (categoryEl && sellerData.category) {
-    // Map Persian categories to option values
-    const categoryMap = {
-      'آرایشگاه مردانه': 'barbershop',
-      'آرایشگاه زنانه': 'salon', 
-      'سالن زیبایی زنانه': 'salon',
-      'کلینیک زیبایی': 'clinic',
-      'زیبایی': 'clinic',
-      'خدمات': 'barbershop', // default for service
-      'تالار و مجالس': 'barbershop',
-      'خودرو': 'barbershop',
-      'ورزشی': 'barbershop'
-    };
-    
-    const mappedValue = categoryMap[sellerData.category] || 'barbershop';
-    categoryEl.value = mappedValue;
-    
-    // Update the display text
-    const selectedOption = categoryEl.querySelector(`option[value="${mappedValue}"]`);
-    if (selectedOption) {
-      selectedOption.selected = true;
-    }
+  // Business category display (locked field)
+  const categoryDisplayEl = document.getElementById('business-category-display');
+  const categoryHiddenEl = document.getElementById('business-category');
+  if (categoryDisplayEl && sellerData.category) {
+    categoryDisplayEl.textContent = sellerData.category;
   }
+  if (categoryHiddenEl && sellerData.category) {
+    categoryHiddenEl.value = sellerData.category;
+  }
+  
+  // Initialize business info save functionality
+  initBusinessInfoSave(sellerData);
+}
+
+// ===== Business Info Save Functionality =====
+function initBusinessInfoSave(initialData) {
+  const phoneEl = document.getElementById('business-phone');
+  const addressEl = document.getElementById('business-address');
+  const nameEl = document.getElementById('business-name');
+  const saveBtn = document.getElementById('save-business-info-btn');
+  const saveHint = document.getElementById('save-hint');
+  
+  if (!saveBtn) return;
+  
+  // Store initial values
+  const initialValues = {
+    phone: initialData.phone || '',
+    address: initialData.address || '',
+    storename: initialData.storename || ''
+  };
+  
+  // Check for changes
+  const checkForChanges = () => {
+    const currentPhone = phoneEl?.value?.trim() || '';
+    const currentAddress = addressEl?.value?.trim() || '';
+    const currentName = nameEl?.value?.trim() || '';
+    
+    const hasChanges = 
+      currentPhone !== initialValues.phone ||
+      currentAddress !== initialValues.address ||
+      currentName !== initialValues.storename;
+    
+    saveBtn.disabled = !hasChanges;
+    
+    if (hasChanges) {
+      saveBtn.classList.add('has-changes');
+      if (saveHint) saveHint.hidden = false;
+    } else {
+      saveBtn.classList.remove('has-changes');
+      if (saveHint) saveHint.hidden = true;
+    }
+  };
+  
+  // Add input listeners
+  [phoneEl, addressEl, nameEl].forEach(el => {
+    if (el) {
+      el.addEventListener('input', checkForChanges);
+      el.addEventListener('change', checkForChanges);
+    }
+  });
+  
+  // Save button click handler
+  saveBtn.addEventListener('click', async () => {
+    const phone = phoneEl?.value?.trim() || '';
+    const address = addressEl?.value?.trim() || '';
+    const storename = nameEl?.value?.trim() || '';
+    
+    // Validate phone
+    if (phone) {
+      const normalizedPhone = phone.replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]);
+      const phoneRegex = /^09[0-9]{9}$/;
+      if (!phoneRegex.test(normalizedPhone)) {
+        UIComponents.showToast('شماره تلفن نامعتبر است. لطفاً شماره موبایل ۱۱ رقمی وارد کنید.', 'error');
+        phoneEl?.focus();
+        return;
+      }
+    }
+    
+    // Show loading state
+    const textEl = saveBtn.querySelector('.btn-save-settings__text');
+    const iconEl = saveBtn.querySelector('.btn-save-settings__icon');
+    const loadingEl = saveBtn.querySelector('.btn-save-settings__loading');
+    
+    if (textEl) textEl.hidden = true;
+    if (iconEl) iconEl.hidden = true;
+    if (loadingEl) loadingEl.hidden = false;
+    saveBtn.disabled = true;
+    
+    try {
+      const updateData = {};
+      if (phone !== initialValues.phone) updateData.phone = phone;
+      if (address !== initialValues.address) updateData.address = address;
+      if (storename !== initialValues.storename) updateData.storename = storename;
+      
+      const result = await API.updateSellerProfile(updateData);
+      
+      if (result.success) {
+        // Update localStorage
+        const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+        if (updateData.phone) sellerData.phone = updateData.phone;
+        if (updateData.address) sellerData.address = updateData.address;
+        if (updateData.storename) sellerData.storename = updateData.storename;
+        localStorage.setItem('seller', JSON.stringify(sellerData));
+        
+        // Update initial values
+        initialValues.phone = phone;
+        initialValues.address = address;
+        initialValues.storename = storename;
+        
+        // Update seller identity header
+        if (typeof window.updateSellerIdentity === 'function') {
+          window.updateSellerIdentity();
+        }
+        
+        // Show success
+        saveBtn.classList.add('is-success');
+        saveBtn.classList.remove('has-changes');
+        if (saveHint) saveHint.hidden = true;
+        
+        UIComponents.showToast('✅ اطلاعات با موفقیت ذخیره شد', 'success');
+        
+        // Reset success state after 2 seconds
+        setTimeout(() => {
+          saveBtn.classList.remove('is-success');
+          checkForChanges();
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Save business info error:', err);
+      UIComponents.showToast(err.message || 'خطا در ذخیره اطلاعات', 'error');
+    } finally {
+      // Reset button state
+      if (textEl) textEl.hidden = false;
+      if (iconEl) iconEl.hidden = false;
+      if (loadingEl) loadingEl.hidden = true;
+      checkForChanges();
+    }
+  });
 }
 
 function showPersonalizedWelcome(sellerData) {

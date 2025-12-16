@@ -805,6 +805,45 @@ async deletePortfolioItem(id) {
       throw new Error(errData?.message || 'GET_LEADERBOARD_FAILED');
     }
     return await this._json(r);
+  },
+
+  // ==================== SELLER PROFILE API ====================
+
+  /**
+   * به‌روزرسانی اطلاعات فروشنده (شماره تلفن، آدرس، نام کسب‌وکار)
+   */
+  async updateSellerProfile(data) {
+    const r = await fetch(`${API_BASE}/api/sellers/me`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    const result = await this._json(r);
+    if (!r.ok) {
+      throw new Error(result?.message || 'UPDATE_PROFILE_FAILED');
+    }
+    return result;
+  },
+
+  /**
+   * دریافت اطلاعات فروشنده جاری
+   */
+  async getSellerProfile() {
+    const r = await fetch(bust(`${API_BASE}/api/sellers/me`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (r.status === 401) {
+      throw { status: 401, message: 'UNAUTHORIZED' };
+    }
+    if (!r.ok) {
+      throw new Error('GET_PROFILE_FAILED');
+    }
+    return await this._json(r);
   }
 
 };
