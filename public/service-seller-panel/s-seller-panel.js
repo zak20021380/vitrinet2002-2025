@@ -9644,7 +9644,6 @@ function initBusinessInfoSave(initialData) {
   const addressEl = document.getElementById('business-address');
   const nameEl = document.getElementById('business-name');
   const saveBtn = document.getElementById('save-business-info-btn');
-  const saveHint = document.getElementById('save-hint');
   
   if (!saveBtn) return;
   
@@ -9657,6 +9656,11 @@ function initBusinessInfoSave(initialData) {
   
   // Check for changes
   const checkForChanges = () => {
+    // Skip if button is in loading or success state
+    if (saveBtn.classList.contains('is-loading') || saveBtn.classList.contains('is-success')) {
+      return;
+    }
+    
     const currentPhone = phoneEl?.value?.trim() || '';
     const currentAddress = addressEl?.value?.trim() || '';
     const currentName = nameEl?.value?.trim() || '';
@@ -9667,14 +9671,6 @@ function initBusinessInfoSave(initialData) {
       currentName !== initialValues.storename;
     
     saveBtn.disabled = !hasChanges;
-    
-    if (hasChanges) {
-      saveBtn.classList.add('has-changes');
-      if (saveHint) saveHint.hidden = false;
-    } else {
-      saveBtn.classList.remove('has-changes');
-      if (saveHint) saveHint.hidden = true;
-    }
   };
   
   // Add input listeners
@@ -9703,13 +9699,7 @@ function initBusinessInfoSave(initialData) {
     }
     
     // Show loading state
-    const textEl = saveBtn.querySelector('.btn-save-settings__text');
-    const iconEl = saveBtn.querySelector('.btn-save-settings__icon');
-    const loadingEl = saveBtn.querySelector('.btn-save-settings__loading');
-    
-    if (textEl) textEl.hidden = true;
-    if (iconEl) iconEl.hidden = true;
-    if (loadingEl) loadingEl.hidden = false;
+    saveBtn.classList.add('is-loading');
     saveBtn.disabled = true;
     
     try {
@@ -9738,27 +9728,28 @@ function initBusinessInfoSave(initialData) {
           window.updateSellerIdentity();
         }
         
-        // Show success
+        // Remove loading, show success
+        saveBtn.classList.remove('is-loading');
         saveBtn.classList.add('is-success');
-        saveBtn.classList.remove('has-changes');
-        if (saveHint) saveHint.hidden = true;
         
-        UIComponents.showToast('✅ اطلاعات با موفقیت ذخیره شد', 'success');
+        // Update button text temporarily
+        const textEl = saveBtn.querySelector('.btn-save-settings__text');
+        const originalText = textEl?.textContent;
+        if (textEl) textEl.textContent = 'ذخیره شد ✓';
         
-        // Reset success state after 2 seconds
+        UIComponents.showToast('اطلاعات با موفقیت ذخیره شد', 'success');
+        
+        // Reset after 2 seconds
         setTimeout(() => {
           saveBtn.classList.remove('is-success');
+          if (textEl) textEl.textContent = originalText || 'ذخیره تغییرات';
           checkForChanges();
         }, 2000);
       }
     } catch (err) {
       console.error('Save business info error:', err);
       UIComponents.showToast(err.message || 'خطا در ذخیره اطلاعات', 'error');
-    } finally {
-      // Reset button state
-      if (textEl) textEl.hidden = false;
-      if (iconEl) iconEl.hidden = false;
-      if (loadingEl) loadingEl.hidden = true;
+      saveBtn.classList.remove('is-loading');
       checkForChanges();
     }
   });
