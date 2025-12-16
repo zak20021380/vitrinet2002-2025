@@ -8,22 +8,9 @@ const MOCK_DATA = {
   reviews: []
 };
 
+// داده‌های فیک حذف شدند - فقط داده‌های واقعی از سرور استفاده می‌شوند
 function buildSampleCustomers() {
-  const baseDate = new Date();
-  const daysAgo = (d) => {
-    const copy = new Date(baseDate);
-    copy.setDate(copy.getDate() - d);
-    return copy.toISOString();
-  };
-
-  return [
-    { id: 'c-101', name: 'امیر محمدی', phone: '۰۹۱۲۳۴۵۶۷۸۹', bookingsCount: 12, reviewCount: 4, joinedAt: daysAgo(320), lastReservation: daysAgo(3) },
-    { id: 'c-102', name: 'نسترن حیدری', phone: '۰۹۳۵۴۳۲۱۵۴۵', bookingsCount: 7, reviewCount: 2, joinedAt: daysAgo(45), lastReservation: daysAgo(9), vipCurrent: 2 },
-    { id: 'c-103', name: 'حسین مرادی', phone: '۰۹۱۳۳۳۳۳۳۳۳', bookingsCount: 3, reviewCount: 1, joinedAt: daysAgo(18), lastReservation: daysAgo(2) },
-    { id: 'c-104', name: 'شیما مقدم', phone: '۰۹۱۲۴۴۴۴۳۳۳', bookingsCount: 15, reviewCount: 6, joinedAt: daysAgo(600), lastReservation: daysAgo(40), rewardCount: 3 },
-    { id: 'c-105', name: 'سینا احدی', phone: '۰۹۰۱۱۲۲۲۳۳۴', bookingsCount: 1, reviewCount: 0, joinedAt: daysAgo(10), lastReservation: daysAgo(8) },
-    { id: 'c-106', name: 'الهام کاظمی', phone: '۰۹۱۹۸۷۶۵۴۳۲', bookingsCount: 9, reviewCount: 5, joinedAt: daysAgo(120), lastReservation: daysAgo(14) }
-  ];
+  return [];
 }
 
 async function loadCustomers() {
@@ -75,14 +62,11 @@ async function loadCustomers() {
       };
     });
 
-    if (!mapped.length) {
-      mapped = buildSampleCustomers();
-    }
-
     applyCustomers(mapped);
   } catch (err) {
     console.error('loadCustomers', err);
-    applyCustomers(buildSampleCustomers());
+    // در صورت خطا، آرایه خالی برگردان - بدون داده فیک
+    applyCustomers([]);
   }
 }
 

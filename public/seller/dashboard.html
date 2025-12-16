@@ -22,287 +22,358 @@
     padding-right: 140px;
   }
 
-  /* اعلان لایک محصولات */
+  /* اعلان لایک محصولات - بهبود یافته و رسپانسیو */
   .like-notification-stack {
     position: fixed;
-    top: 16px;
-    inset-inline: 12px;
-    max-width: 420px;
+    top: env(safe-area-inset-top, 12px);
+    inset-inline: 8px;
+    max-width: 380px;
     margin-inline: auto;
-    z-index: 500;
+    z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     pointer-events: none;
   }
 
   .like-notification {
     position: relative;
     overflow: hidden;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #ffffff 0%, #f6fffb 100%);
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 10px 20px -5px rgba(16, 185, 129, 0.15),
+      0 0 0 1px rgba(16, 185, 129, 0.08);
     color: #0f172a;
-    border: 1px solid rgba(16, 185, 129, 0.18);
-    transform: translateY(-14px);
+    transform: translateY(-20px) scale(0.95);
     opacity: 0;
-    transition: transform 0.28s ease, opacity 0.28s ease, box-shadow 0.2s ease;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: auto;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .like-notification--visible {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 
   .like-notification__pulse {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 18% 25%, rgba(16, 185, 129, 0.09), transparent 38%);
-    opacity: 0.9;
+    background: radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.12), transparent 50%);
+    opacity: 1;
     pointer-events: none;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
   }
 
   .like-notification__icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(14, 165, 233, 0.14));
-    color: #0f766e;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    animation: heart-beat 1.5s ease-in-out infinite;
+  }
+
+  @keyframes heart-beat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
   }
 
   .like-notification__content {
-    display: grid;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     gap: 4px;
   }
 
   .like-notification__title {
-    font-weight: 800;
+    font-weight: 700;
     font-size: 14px;
     color: #0f172a;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .like-notification__subtitle {
-    font-size: 13px;
-    color: #1f2937;
+    font-size: 12px;
+    color: #475569;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .like-notification__meta {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    font-size: 12px;
-    color: #0f172a;
+    margin-top: 4px;
   }
 
   .like-notification__meta span {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 9px;
-    border-radius: 999px;
-    background: rgba(14, 165, 233, 0.12);
-    font-weight: 700;
-    color: #0369a1;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    font-weight: 600;
+    font-size: 11px;
+    color: #059669;
   }
 
   .like-notification__close {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: none;
-    background: #ecfdf3;
-    color: #0f766e;
+    background: rgba(0, 0, 0, 0.05);
+    color: #64748b;
     cursor: pointer;
     display: grid;
     place-items: center;
-    transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .like-notification__close:hover,
   .like-notification__close:focus {
-    transform: scale(1.04);
-    background: #0ea5e9;
+    background: #ef4444;
     color: #fff;
+    transform: scale(1.1);
     outline: none;
+  }
+
+  .like-notification__close:active {
+    transform: scale(0.95);
   }
 
   .like-notification__progress {
     position: absolute;
-    inset-inline: 14px;
-    bottom: 8px;
+    inset-inline: 0;
+    bottom: 0;
     height: 3px;
-    border-radius: 999px;
-    background: rgba(14, 165, 233, 0.08);
+    background: rgba(16, 185, 129, 0.1);
     overflow: hidden;
   }
 
   .like-notification__progress-bar {
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, #10b981, #0ea5e9);
+    background: linear-gradient(90deg, #10b981, #06b6d4);
     transform-origin: right;
     transform: scaleX(1);
     transition: transform var(--toast-duration, 6s) linear;
   }
 
-  @media (max-width: 640px) {
+  /* رسپانسیو موبایل - لایک */
+  @media (max-width: 480px) {
+    .like-notification-stack {
+      top: env(safe-area-inset-top, 8px);
+      inset-inline: 6px;
+      max-width: none;
+    }
+
     .like-notification {
-      grid-template-columns: 1fr auto;
-      grid-template-rows: auto auto;
-      align-items: flex-start;
       padding: 12px;
+      border-radius: 16px;
+      gap: 10px;
     }
 
     .like-notification__icon {
-      width: 42px;
-      height: 42px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
     }
 
-  .like-notification__close {
-    align-self: center;
-  }
+    .like-notification__icon i {
+      font-size: 20px !important;
+    }
+
+    .like-notification__title {
+      font-size: 13px;
+    }
+
+    .like-notification__subtitle {
+      font-size: 11px;
+      -webkit-line-clamp: 1;
+    }
+
+    .like-notification__meta {
+      display: none;
+    }
+
+    .like-notification__close {
+      width: 26px;
+      height: 26px;
+    }
   }
 
-  /* اعلان مشتری جدید */
+  /* اعلان مشتری جدید - بهبود یافته و رسپانسیو */
   .customer-toast-stack {
     position: fixed;
-    top: 110px;
-    inset-inline: 16px;
-    max-width: 540px;
+    top: calc(env(safe-area-inset-top, 12px) + 70px);
+    inset-inline: 8px;
+    max-width: 400px;
     margin-inline: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    z-index: 520;
+    gap: 8px;
+    z-index: 9998;
     pointer-events: none;
   }
 
   .customer-toast {
     position: relative;
     overflow: hidden;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     padding: 14px 16px;
-    border-radius: 18px;
-    background: radial-gradient(circle at 12% 12%, rgba(16, 185, 129, 0.12), transparent 40%),
-      radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.12), transparent 42%),
-      linear-gradient(135deg, #ffffff 0%, #f4fbff 100%);
-    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
-    border: 1px solid rgba(14, 165, 233, 0.16);
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ffffff 0%, #eff6ff 100%);
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 10px 20px -5px rgba(14, 165, 233, 0.15),
+      0 0 0 1px rgba(14, 165, 233, 0.08);
     color: #0f172a;
-    transform: translateY(-14px);
+    transform: translateY(-20px) scale(0.95);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.2s ease;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     pointer-events: auto;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .customer-toast--visible {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 
   .customer-toast__halo {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.2), transparent 36%);
-    opacity: 0.8;
+    background: radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.12), transparent 50%);
+    opacity: 1;
     pointer-events: none;
   }
 
   .customer-toast__icon {
-    width: 52px;
-    height: 52px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
     border-radius: 14px;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(14, 165, 233, 0.18));
-    color: #0f766e;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
   }
 
   .customer-toast__content {
-    display: grid;
-    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .customer-toast__title {
-    font-weight: 900;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: 14px;
     color: #0f172a;
-    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
 
   .customer-toast__subtitle {
-    font-size: 13px;
-    color: #1f2937;
-    line-height: 1.5;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .customer-toast__meta {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    font-size: 12px;
-    color: #0f172a;
+    margin-top: 4px;
   }
 
   .customer-toast__pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(16, 185, 129, 0.12);
-    color: #0f766e;
-    font-weight: 700;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(14, 165, 233, 0.1);
+    color: #0284c7;
+    font-weight: 600;
+    font-size: 11px;
   }
 
   .customer-toast__pill--accent {
-    background: rgba(14, 165, 233, 0.12);
-    color: #0369a1;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
   }
 
   .customer-toast__close {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: none;
-    background: #ecfeff;
-    color: #0f766e;
+    background: rgba(0, 0, 0, 0.05);
+    color: #64748b;
     cursor: pointer;
     display: grid;
     place-items: center;
-    transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .customer-toast__close:hover,
   .customer-toast__close:focus {
-    transform: scale(1.04);
-    background: #0ea5e9;
+    background: #ef4444;
     color: #fff;
+    transform: scale(1.1);
     outline: none;
+  }
+
+  .customer-toast__close:active {
+    transform: scale(0.95);
   }
 
   .customer-toast__progress {
     position: absolute;
-    inset-inline: 16px;
-    bottom: 10px;
+    inset-inline: 0;
+    bottom: 0;
     height: 3px;
-    border-radius: 999px;
     background: rgba(14, 165, 233, 0.1);
     overflow: hidden;
   }
@@ -310,23 +381,52 @@
   .customer-toast__progress-bar {
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, #10b981, #0ea5e9);
+    background: linear-gradient(90deg, #0ea5e9, #06b6d4);
     transform-origin: right;
     transform: scaleX(1);
     transition: transform var(--customer-toast-duration, 6500ms) linear;
   }
 
-  @media (max-width: 640px) {
+  /* رسپانسیو موبایل - مشتری */
+  @media (max-width: 480px) {
+    .customer-toast-stack {
+      top: calc(env(safe-area-inset-top, 8px) + 60px);
+      inset-inline: 6px;
+      max-width: none;
+    }
+
     .customer-toast {
-      grid-template-columns: 1fr auto;
-      grid-template-rows: auto auto;
+      padding: 12px;
+      border-radius: 16px;
       gap: 10px;
-      padding: 13px;
     }
 
     .customer-toast__icon {
-      width: 46px;
-      height: 46px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+    }
+
+    .customer-toast__icon i {
+      font-size: 20px !important;
+    }
+
+    .customer-toast__title {
+      font-size: 13px;
+    }
+
+    .customer-toast__subtitle {
+      font-size: 11px;
+      -webkit-line-clamp: 1;
+    }
+
+    .customer-toast__meta {
+      display: none;
+    }
+
+    .customer-toast__close {
+      width: 26px;
+      height: 26px;
     }
   }
   .subscription-modal {
@@ -1425,32 +1525,121 @@
     padding-right: 14px;
   }
 
+  /* دکمه ورود به حسابداری - طراحی حرفه‌ای و متمایز */
   .sidebar-link.accountant-shortcut {
-    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
-    color: #fff;
-    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.25);
+    position: relative;
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    color: #fbbf24;
+    box-shadow: 
+      0 8px 24px rgba(15, 23, 42, 0.4),
+      0 0 0 1px rgba(251, 191, 36, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
     font-size: 24px;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    overflow: hidden;
+  }
+
+  .sidebar-link.accountant-shortcut::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+    opacity: 0.9;
+  }
+
+  .sidebar-link.accountant-shortcut::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.08), transparent 50%);
+    pointer-events: none;
   }
 
   .sidebar-link.accountant-shortcut i {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
+    color: #fbbf24;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-link.accountant-shortcut span {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .sidebar-link.accountant-shortcut:hover,
   .sidebar-link.accountant-shortcut:focus {
-    background: linear-gradient(135deg, #0284c7 0%, #0d9a72 100%);
-    color: #fff;
-    box-shadow: 0 16px 38px rgba(14, 165, 233, 0.35);
-    transform: translateY(-2px);
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    color: #fcd34d;
+    box-shadow: 
+      0 12px 32px rgba(15, 23, 42, 0.5),
+      0 0 0 1px rgba(251, 191, 36, 0.3),
+      0 0 20px rgba(251, 191, 36, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-3px);
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+
+  .sidebar-link.accountant-shortcut:hover i,
+  .sidebar-link.accountant-shortcut:focus i {
+    transform: scale(1.1) rotate(-5deg);
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6));
   }
 
   .sidebar-link.accountant-shortcut:focus {
-    outline: 3px solid rgba(14, 165, 233, 0.35);
-    outline-offset: 2px;
+    outline: 2px solid rgba(251, 191, 36, 0.5);
+    outline-offset: 3px;
+  }
+
+  .sidebar-link.accountant-shortcut:active {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 6px 20px rgba(15, 23, 42, 0.4),
+      0 0 0 1px rgba(251, 191, 36, 0.25);
   }
 
   .sidebar.expanded .sidebar-link.accountant-shortcut {
-    color: #fff;
+    color: #fbbf24;
+  }
+
+  .sidebar.expanded .sidebar-link.accountant-shortcut span {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* انیمیشن درخشش طلایی برای دکمه حسابداری */
+  @keyframes accountantGlow {
+    0%, 100% { 
+      box-shadow: 
+        0 8px 24px rgba(15, 23, 42, 0.4),
+        0 0 0 1px rgba(251, 191, 36, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    50% { 
+      box-shadow: 
+        0 8px 24px rgba(15, 23, 42, 0.4),
+        0 0 0 1px rgba(251, 191, 36, 0.3),
+        0 0 15px rgba(251, 191, 36, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .sidebar-link.accountant-shortcut {
+    animation: accountantGlow 3s ease-in-out infinite;
+  }
+
+  .sidebar-link.accountant-shortcut:hover,
+  .sidebar-link.accountant-shortcut:focus {
+    animation: none;
   }
 
   .sidebar-link:hover {
@@ -4122,49 +4311,48 @@
     const stack = document.getElementById('likeNotificationStack');
     if (!stack) return;
 
-    const DISPLAY_DURATION = 6200;
+    const DISPLAY_DURATION = 5000;
     const phrases = [
-      'یک لایک تازه ✨',
-      'به جمع محبوب‌ها اضافه شد.',
-      'مشتری‌ها توجه نشان می‌دهند.',
-      'همین حالا دیده شد!'
+      'عالیه! 🎉',
+      'محبوبیت در حال افزایش!',
+      'ادامه بده! 💪',
+      'فروشگاهت داره می‌درخشه ✨'
     ];
 
     const closeNotification = (card) => {
       if (!card) return;
       card.classList.remove('like-notification--visible');
-      setTimeout(() => card.remove(), 280);
+      setTimeout(() => card.remove(), 350);
     };
 
     const showProductLikeNotification = (detail = {}) => {
       if (!stack) return;
 
       const productName = detail.productTitle || 'محصول شما';
-      const likerName = detail.likerName || 'یک مشتری خوش‌ذوق';
       const totalLikes = detail.totalLikes;
       const phrase = phrases[Math.floor(Math.random() * phrases.length)];
 
       const card = document.createElement('div');
       card.className = 'like-notification';
       card.setAttribute('role', 'status');
-      card.setAttribute('aria-live', 'assertive');
+      card.setAttribute('aria-live', 'polite');
       card.style.setProperty('--toast-duration', `${DISPLAY_DURATION}ms`);
 
       const likesText = Number.isFinite(totalLikes)
-        ? `<span><i class="ri-heart-3-line"></i>${totalLikes} پسند</span>`
-        : '<span><i class="ri-heart-3-line"></i>محبوبیت رو به رشد</span>';
+        ? `<span><i class="ri-heart-3-fill"></i>${totalLikes.toLocaleString('fa-IR')}</span>`
+        : '';
 
       card.innerHTML = `
         <div class="like-notification__pulse" aria-hidden="true"></div>
         <div class="like-notification__icon" aria-hidden="true">
-          <i class="ri-heart-3-fill" style="font-size:26px;"></i>
+          <i class="ri-heart-3-fill" style="font-size:22px;"></i>
         </div>
-          <div class="like-notification__content">
-            <div class="like-notification__title">محصول «${productName}» پسند شد</div>
-            <div class="like-notification__subtitle">${likerName} این محصول را پسندید. ${phrase}</div>
-            <div class="like-notification__meta">${likesText}<span><i class="ri-sparkling-2-line"></i>پیشنهاد کنید</span></div>
-          </div>
-        <button class="like-notification__close" type="button" aria-label="بستن اعلان علاقه">
+        <div class="like-notification__content">
+          <div class="like-notification__title">❤️ لایک جدید!</div>
+          <div class="like-notification__subtitle">«${productName}» پسندیده شد. ${phrase}</div>
+          <div class="like-notification__meta">${likesText}</div>
+        </div>
+        <button class="like-notification__close" type="button" aria-label="بستن">
           <i class="ri-close-line"></i>
         </button>
         <div class="like-notification__progress" aria-hidden="true">
@@ -4191,25 +4379,7 @@
     window.showProductLikeNotification = showProductLikeNotification;
     document.addEventListener('product:liked', (event) => showProductLikeNotification(event.detail || {}));
 
-    let shouldShowDemo = false;
-    try {
-      shouldShowDemo = !sessionStorage.getItem('demoLikeToastShown');
-      if (shouldShowDemo) {
-        sessionStorage.setItem('demoLikeToastShown', 'true');
-      }
-    } catch (error) {
-      shouldShowDemo = false;
-    }
-
-    if (shouldShowDemo) {
-      setTimeout(() => {
-        showProductLikeNotification({
-          productTitle: 'پک ویژه تابستان',
-          likerName: 'مشتری وفادار تهران',
-          totalLikes: 128
-        });
-      }, 1400);
-    }
+    // نوتیفیکیشن‌های فیک حذف شدند - فقط نوتیفیکیشن‌های واقعی نمایش داده می‌شوند
   })();
 </script>
 
@@ -4219,17 +4389,17 @@
     const stack = document.getElementById('customerNotificationStack');
     if (!stack) return;
 
-    const DISPLAY_DURATION = 6800;
+    const DISPLAY_DURATION = 5000;
     const sellerId = window.seller?.id || window.seller?._id || window.seller?.sellerId;
 
     const closeToast = (card) => {
       if (!card) return;
       card.classList.remove('customer-toast--visible');
-      setTimeout(() => card.remove(), 280);
+      setTimeout(() => card.remove(), 350);
     };
 
     const showCustomerToast = (detail = {}) => {
-      const customerName = detail.customerName || 'یک خریدار جدید';
+      const customerName = detail.customerName || 'مشتری جدید';
       const totalCustomers = Number.isFinite(detail.totalCustomers) ? detail.totalCustomers : null;
       const timeLabel = new Date(detail.at || Date.now()).toLocaleTimeString('fa-IR', {
         hour: '2-digit',
@@ -4239,24 +4409,24 @@
       const card = document.createElement('div');
       card.className = 'customer-toast';
       card.setAttribute('role', 'status');
-      card.setAttribute('aria-live', 'assertive');
+      card.setAttribute('aria-live', 'polite');
       card.style.setProperty('--customer-toast-duration', `${DISPLAY_DURATION}ms`);
 
       const countText = totalCustomers != null
-        ? `<span class="customer-toast__pill"><i class="ri-team-line"></i>کل مشتریان: ${totalCustomers.toLocaleString('fa-IR')}</span>`
+        ? `<span class="customer-toast__pill"><i class="ri-group-line"></i>${totalCustomers.toLocaleString('fa-IR')} نفر</span>`
         : '';
 
       card.innerHTML = `
         <div class="customer-toast__halo" aria-hidden="true"></div>
         <div class="customer-toast__icon" aria-hidden="true">
-          <i class="ri-user-star-line" style="font-size:26px;"></i>
+          <i class="ri-user-add-line" style="font-size:22px;"></i>
         </div>
         <div class="customer-toast__content">
-          <div class="customer-toast__title">مشتری جدید به جمع شما اضافه شد</div>
-          <div class="customer-toast__subtitle">${customerName} همین الان فروشگاه شما را به لیست محبوب‌ها افزوده است.</div>
+          <div class="customer-toast__title">🎊 مشتری جدید!</div>
+          <div class="customer-toast__subtitle">${customerName} فروشگاه شما رو دنبال کرد</div>
           <div class="customer-toast__meta">${countText}<span class="customer-toast__pill customer-toast__pill--accent"><i class="ri-time-line"></i>${timeLabel}</span></div>
         </div>
-        <button class="customer-toast__close" type="button" aria-label="بستن اعلان مشتری">
+        <button class="customer-toast__close" type="button" aria-label="بستن">
           <i class="ri-close-line"></i>
         </button>
         <div class="customer-toast__progress" aria-hidden="true">

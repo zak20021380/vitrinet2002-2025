@@ -8354,11 +8354,8 @@ renderCustomers(query = '') {
       }));
     }
 
-    return [
-      { id: 'demo-1', name: 'مشتری وفادار', phone: '۰۹۱۲۱۲۳۴۵۶۷', lastReservation: '۱۴۰۳/۰۴/۲۲' },
-      { id: 'demo-2', name: 'مشتری جدید', phone: '۰۹۳۵۴۴۴۴۴۴۴', lastReservation: 'دیروز' },
-      { id: 'demo-3', name: 'مشتری نزدیک', phone: '۰۹۱۳۳۳۳۳۳۳۳', lastReservation: 'هفته جاری' }
-    ];
+    // بدون داده فیک - فقط داده‌های واقعی نمایش داده می‌شوند
+    return [];
   }
 
   refreshDiscountCustomers(selectedId = '') {
