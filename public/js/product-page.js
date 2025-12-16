@@ -1761,10 +1761,24 @@
     return String(num).replace(/\d/g, d => persianDigits[d]);
   }
 
-  // Check if user is logged in
+  // Check if user is logged in (check all possible tokens)
   function checkUserLogin() {
-    const token = document.cookie.split('; ').find(r => r.startsWith('user_token='));
-    return Boolean(token);
+    const cookies = document.cookie.split('; ');
+    const userToken = cookies.find(r => r.startsWith('user_token='));
+    const sellerToken = cookies.find(r => r.startsWith('seller_token='));
+    const adminToken = cookies.find(r => r.startsWith('admin_token='));
+    const accessToken = cookies.find(r => r.startsWith('access_token='));
+    return Boolean(userToken || sellerToken || adminToken || accessToken);
+  }
+
+  // Get the best available token for API calls
+  function getAuthToken() {
+    const cookies = document.cookie.split('; ');
+    const userToken = cookies.find(r => r.startsWith('user_token='))?.split('=')[1];
+    const sellerToken = cookies.find(r => r.startsWith('seller_token='))?.split('=')[1];
+    const adminToken = cookies.find(r => r.startsWith('admin_token='))?.split('=')[1];
+    const accessToken = cookies.find(r => r.startsWith('access_token='))?.split('=')[1];
+    return userToken || sellerToken || adminToken || accessToken || null;
   }
 
   // Update character count
@@ -1880,7 +1894,7 @@
     messageError.hidden = true;
 
     try {
-      const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+      const token = getAuthToken();
       
       const response = await fetch('/api/chats', {
         method: 'POST',
