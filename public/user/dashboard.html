@@ -4779,20 +4779,11 @@ async function openAdminMsgModal() {
   const uid = window.currentUserId;
   if (!uid) return alert('شناسه کاربر پیدا نشد!');
 
-  // اول چت با admin رو ensure کن (اگر وجود نداشت، بساز)
+  // مودال گفتگو با مدیر را با API اختصاصی مدیر/کاربر باز کن
   try {
-    const res = await fetch(`${API_BASE}/chats/ensure`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipientRole: 'admin' })  // بدون recipientId، چون admin پیش‌فرض
-    });
-    if (!res.ok) throw new Error('دریافت/ایجاد چت با مدیر ناموفق بود');
-    const chat = await res.json();
-    currentCid = chat._id;  // chatId رو ست کن
-    showChatModal();        // مودال رو باز کن (که جزئیات رو لود می‌کنه)
+    await showAdminMsgModal(uid);
   } catch (err) {
-    alert('خطا: ' + err.message);
+    alert('خطا در باز کردن گفتگو با مدیر: ' + (err?.message || err));
   }
 }
 
