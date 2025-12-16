@@ -523,21 +523,62 @@ function renderChatModal(chat) {
   msgs.forEach(m => {
     const bubble = document.createElement('div');
 
-    const role = m.from || m.sender?.role || m.senderId?.role;
-    const fromSeller = role === 'seller';
-    const fromAdmin  = role === 'admin';
+    // تشخیص نقش فرستنده پیام با بررسی همه فیلدهای ممکن
+    let role = '';
+    
+    // اولویت ۱: فیلد from (استاندارد در مدل Chat)
+    if (m.from && typeof m.from === 'string') {
+      role = m.from;
+    }
+    // اولویت ۲: sender.role
+    else if (m.sender?.role && typeof m.sender.role === 'string') {
+      role = m.sender.role;
+    }
+    // اولویت ۳: senderId.role
+    else if (m.senderId?.role && typeof m.senderId.role === 'string') {
+      role = m.senderId.role;
+    }
+    // اولویت ۴: senderRole
+    else if (m.senderRole && typeof m.senderRole === 'string') {
+      role = m.senderRole;
+    }
+    
+    const normalizedRole = role.toLowerCase().trim();
+    
+    // تشخیص دقیق نقش‌ها
+    const fromSeller = normalizedRole === 'seller';
+    const fromAdmin  = normalizedRole === 'admin';
+    const fromUser   = normalizedRole === 'user' || normalizedRole === 'customer';
 
-    const clsAlign   = fromSeller ? 'self-end' : 'self-start';
-    const clsRole    = fromAdmin ? 'msg-admin' : fromSeller ? 'msg-seller' : 'msg-customer';
+    // تعیین موقعیت حباب پیام - پیام‌های فروشنده سمت چپ (self-end)، بقیه سمت راست (self-start)
+    const clsAlign = fromSeller ? 'self-end' : 'self-start';
+    
+    // تعیین کلاس رنگ حباب
+    let clsRole;
+    if (fromAdmin) {
+      clsRole = 'msg-admin';
+    } else if (fromSeller) {
+      clsRole = 'msg-seller';
+    } else {
+      clsRole = 'msg-customer';
+    }
+    
+    // تعیین نام فرستنده
     let senderName;
-    if (fromSeller)       senderName = 'شما';
-    else if (fromAdmin)   senderName = 'مدیر سایت';
-    else if (role === 'user')    senderName = 'مشتری';
-    else if (role === 'seller')  senderName = 'فروشنده';
-    else if (role === 'admin')   senderName = 'مدیر سایت';
-    else                        senderName = 'ناشناس';
+    if (fromSeller) {
+      senderName = 'شما';
+    } else if (fromAdmin) {
+      senderName = 'مدیر سایت';
+    } else if (fromUser) {
+      senderName = customerName || 'مشتری';
+    } else {
+      // اگر نقش مشخص نیست، فرض کن پیام از مشتری است (چون فروشنده در پنل خودش است)
+      senderName = customerName || 'مشتری';
+      // همچنین کلاس را به مشتری تغییر بده
+      clsRole = 'msg-customer';
+    }
 
-    const timeISO    = m.createdAt || m.created_at || m.date || m.updatedAt || m.timestamp;
+    const timeISO = m.createdAt || m.created_at || m.date || m.updatedAt || m.timestamp;
 
     bubble.className = `msg-bubble ${clsRole} ${clsAlign} px-4 py-2 rounded-2xl text-sm leading-relaxed`;
     bubble.innerHTML = `
