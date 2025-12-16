@@ -10732,10 +10732,34 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       if (!response.ok) throw new Error('خطا در دریافت لیست فروشندگان');
-      
       const data = await response.json();
-      // ساختار داده می‌تواند متفاوت باشد
-      allSellers = data.sellers || data.data || data || [];
+      // ساختار داده می‌تواند متفاوت باشد → همه فیلدهای لازم را نرمال‌سازی می‌کنیم
+      const rawSellers = data.sellers || data.data || data || [];
+
+      allSellers = rawSellers.map((seller) => {
+        const firstName = seller.firstName || seller.firstname || '';
+        const lastName  = seller.lastName  || seller.lastname  || '';
+        const ownerName = seller.ownerName || seller.name || `${firstName} ${lastName}`.trim();
+        const shopName  = seller.shopName  || seller.storename || '';
+        const phone     = seller.phone     || seller.mobile    || '';
+
+        const normalizedId   = seller._id || seller.id || seller.sellerId;
+        const normalizedLogo = seller.logo || seller.boardImage || seller.avatar || '';
+        const normalizedSlug = seller.shopurl || seller.shopUrl || seller.slug || '';
+
+        return {
+          ...seller,
+          _id: normalizedId,
+          id: normalizedId,
+          ownerName,
+          firstName,
+          lastName,
+          shopName,
+          phone,
+          logo: normalizedLogo,
+          shopSlug: normalizedSlug
+        };
+      });
       console.log('Loaded sellers:', allSellers.length);
       return allSellers;
     } catch (error) {
@@ -10782,7 +10806,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     directSellerResults.innerHTML = results.map((seller, index) => {
-      const avatar = seller.logo || seller.avatar;
+      const avatar = seller.logo || seller.avatar || seller.boardImage;
       const initials = getInitials(seller.shopName || seller.ownerName || 'ف');
       const isService = seller.isServiceSeller || seller.sellerType === 'service';
       
@@ -10833,7 +10857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedSeller = seller;
     
     // آپدیت UI
-    const avatar = seller.logo || seller.avatar;
+    const avatar = seller.logo || seller.avatar || seller.boardImage;
     const initials = getInitials(seller.shopName || seller.ownerName || 'ف');
     
     if (selectedSellerAvatar) {
