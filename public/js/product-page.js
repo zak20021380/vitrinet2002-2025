@@ -1744,6 +1744,8 @@
   const messageProductSeller = document.getElementById('messageProductSeller');
   const messageSendText = document.getElementById('messageSendText');
   const messageSendIcon = document.getElementById('messageSendIcon');
+  const messageSuccessToast = document.getElementById('messageSuccessToast');
+  const messageToastClose = document.getElementById('messageToastClose');
 
   if (!messageBtn || !messageModal) return;
 
@@ -1754,7 +1756,8 @@
     sellerName: '',
     productImage: '',
     isLoggedIn: false,
-    isSending: false
+    isSending: false,
+    toastTimeout: null
   };
 
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -1952,7 +1955,8 @@
       messageSuccess.hidden = false;
       messageText.value = '';
       updateCharCount();
-      
+      showSuccessToast();
+
       // Close modal after delay
       setTimeout(() => {
         closeMessageModal();
@@ -1975,11 +1979,42 @@
     messageErrorText.textContent = message;
   }
 
+  function hideSuccessToast() {
+    if (!messageSuccessToast || messageSuccessToast.hidden) return;
+
+    messageSuccessToast.classList.remove('is-visible');
+    messageSuccessToast.classList.add('is-leaving');
+
+    setTimeout(() => {
+      messageSuccessToast.hidden = true;
+      messageSuccessToast.classList.remove('is-leaving');
+    }, 200);
+  }
+
+  function showSuccessToast() {
+    if (!messageSuccessToast) return;
+
+    clearTimeout(messageState.toastTimeout);
+    messageSuccessToast.hidden = false;
+
+    requestAnimationFrame(() => {
+      messageSuccessToast.classList.add('is-visible');
+    });
+
+    messageState.toastTimeout = setTimeout(hideSuccessToast, 3200);
+  }
+
   // Event listeners
   messageBtn.addEventListener('click', openMessageModal);
   messageModalClose.addEventListener('click', closeMessageModal);
   messageCancelBtn.addEventListener('click', closeMessageModal);
   messageSendBtn.addEventListener('click', sendMessage);
+  if (messageToastClose) {
+    messageToastClose.addEventListener('click', () => {
+      clearTimeout(messageState.toastTimeout);
+      hideSuccessToast();
+    });
+  }
   
   messageText.addEventListener('input', updateCharCount);
   messageText.addEventListener('keydown', (e) => {
