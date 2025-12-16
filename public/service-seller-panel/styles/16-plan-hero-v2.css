@@ -1,12 +1,12 @@
-/* ===== Plan Hero V2 - Professional Color Scheme ===== */
-/* طراحی حرفه‌ای با پالت رنگی مدرن و زیبا */
+/* ===== Plan Hero V2 - Professional Mobile-First Design ===== */
+/* طراحی حرفه‌ای با تمرکز بر تجربه کاربری موبایل */
 
 /* ===== Base Card ===== */
 .plan-hero {
   position: relative;
   overflow: hidden;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0;
   background: linear-gradient(165deg, #16181c 0%, #1a1d24 50%, #12141a 100%);
   box-shadow: 
@@ -15,7 +15,7 @@
   margin-bottom: var(--space-4);
 }
 
-/* ===== Background Glow - Expired State (Default) ===== */
+/* ===== Background Glow ===== */
 .plan-hero-bg {
   position: absolute;
   inset: 0;
@@ -24,9 +24,6 @@
     radial-gradient(ellipse 60% 50% at 100% 100%, rgba(139, 92, 246, 0.06), transparent 50%);
   opacity: 1;
   pointer-events: none;
-  animation: none;
-  filter: none;
-  height: auto;
 }
 
 /* Main content wrapper */
@@ -41,11 +38,10 @@
 /* ===== Header Section ===== */
 .plan-hero-top {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .plan-hero-top > div:first-child {
@@ -54,8 +50,8 @@
 }
 
 .plan-hero-title {
-  margin: 0 0 var(--space-1);
-  font-size: 1.15rem;
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
   font-weight: 700;
   color: #f1f5f9;
   letter-spacing: -0.01em;
@@ -63,34 +59,34 @@
 
 .plan-hero-subtext {
   margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.65;
+  font-size: 0.82rem;
+  line-height: 1.7;
   color: #94a3b8;
-  max-width: 50ch;
 }
 
 /* Gift note - Base style */
 .plan-gift-note {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  padding: 10px 16px;
+  gap: 10px;
+  margin-top: var(--space-3);
+  padding: 12px 16px;
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 12px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #a5b4fc;
   font-weight: 500;
+  line-height: 1.6;
   transition: all 0.3s ease;
 }
 
 .plan-gift-note::before {
-  display: none; /* آیکون از طریق JS اضافه می‌شود */
+  display: none;
 }
 
 .gift-note-icon {
-  font-size: 1rem;
+  font-size: 1.1rem;
   flex-shrink: 0;
 }
 
@@ -122,36 +118,37 @@
   color: #60a5fa;
 }
 
-/* ===== Tier Badge - Expired State ===== */
+/* ===== Tier Badge ===== */
 .plan-tier-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
   border-radius: 12px;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: #fff;
   font-weight: 700;
-  font-size: 0.82rem;
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  font-size: 0.88rem;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
   white-space: nowrap;
-  flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  align-self: flex-start;
 }
 
 .plan-tier-badge svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   opacity: 0.9;
 }
 
-/* ===== Highlight/Alert Section - Expired ===== */
+/* ===== Highlight/Alert Section ===== */
 .plan-hero-highlight {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: var(--space-4);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.04));
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.03));
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -163,8 +160,8 @@
 
 .plan-hero-message {
   margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.75;
+  font-size: 0.88rem;
+  line-height: 1.8;
   color: #c4b5fd;
   font-weight: 600;
 }
@@ -176,53 +173,28 @@
   text-underline-offset: 3px;
 }
 
-/* ===== Meta Info Grid ===== */
+/* ===== Meta Info Grid - Mobile First ===== */
 .plan-hero-meta {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: var(--space-2);
-}
-
-/* 5 items: first row 3 items, second row 2 items centered */
-.plan-hero-meta:has(:nth-child(5)) {
-  grid-template-columns: repeat(6, 1fr);
-}
-
-.plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(1) {
-  grid-column: 1 / 3;
-}
-
-.plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(2) {
-  grid-column: 3 / 5;
-}
-
-.plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(3) {
-  grid-column: 5 / 7;
-}
-
-.plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(4) {
-  grid-column: 1 / 4;
-}
-
-.plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(5) {
-  grid-column: 4 / 7;
+  margin-top: 0;
 }
 
 .meta-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   transition: all 0.2s ease;
 }
 
 .meta-item:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .meta-item .icon-clock {
@@ -231,79 +203,82 @@
 
 .meta-text {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-3);
 }
 
 .meta-text span {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.78rem;
+  color: #94a3b8;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
 
 .meta-text strong {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #f1f5f9;
+  text-align: left;
 }
 
-/* Status chip - Expired */
+/* Status chip item */
 .meta-item.meta-chip {
-  background: rgba(239, 68, 68, 0.06);
-  border-color: rgba(239, 68, 68, 0.15);
+  background: rgba(34, 197, 94, 0.06);
+  border-color: rgba(34, 197, 94, 0.15);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .meta-label {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.78rem;
+  color: #94a3b8;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 2px;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
   font-weight: 700;
-  width: fit-content;
+  white-space: nowrap;
 }
 
 /* Expired chip */
 .plan-hero[data-plan-state="expired"] .chip,
 .chip {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.12);
   color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
 .chip-live {
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(34, 197, 94, 0.12);
   color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 /* ===== Progress Section ===== */
 .plan-hero-progress {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   padding: 16px var(--space-4);
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .progress-bar {
   position: relative;
-  height: 6px;
+  height: 8px;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   border: none;
 }
 
@@ -318,16 +293,20 @@
 
 .progress-legend {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.progress-legend span {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  font-size: 0.78rem;
-  color: #64748b;
 }
 
 .progress-legend b {
-  color: #cbd5e1;
+  color: #e2e8f0;
   font-weight: 600;
 }
 
@@ -354,23 +333,24 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: #94a3b8;
   transition: all 0.2s ease;
 }
 
 .plan-hero-perks li:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
 }
 
-/* ===== CTA Button - Expired State ===== */
+/* ===== CTA Button ===== */
 .plan-hero-actions {
   display: flex;
   justify-content: stretch;
+  margin-top: var(--space-2);
 }
 
 .btn-renew {
@@ -378,14 +358,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 20px;
+  gap: 10px;
+  padding: 16px 24px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
   transition: all 0.25s ease;
@@ -402,8 +382,8 @@
 }
 
 .btn-renew svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   opacity: 0.9;
 }
 
@@ -412,20 +392,18 @@
    ============================================ */
 
 .plan-hero[data-plan-state="active"] {
-  border-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.25);
 }
 
 .plan-hero[data-plan-state="active"] .plan-hero-bg {
   background: 
-    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(34, 197, 94, 0.1), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(20, 184, 166, 0.08), transparent 50%);
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(34, 197, 94, 0.12), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(20, 184, 166, 0.1), transparent 50%);
 }
-
-/* استایل plan-gift-note از طریق کلاس‌های is-active, is-expired, is-inactive, is-scheduled کنترل می‌شود */
 
 .plan-hero[data-plan-state="active"] .plan-tier-badge {
   background: linear-gradient(135deg, #059669, #0d9488);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
 }
 
 .plan-hero[data-plan-state="active"] .plan-hero-highlight {
@@ -442,9 +420,9 @@
 }
 
 .plan-hero[data-plan-state="active"] .chip {
-  background: rgba(34, 197, 94, 0.12);
+  background: rgba(34, 197, 94, 0.15);
   color: #86efac;
-  border-color: rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .plan-hero[data-plan-state="active"] .progress-bar > span {
@@ -467,18 +445,18 @@
    ============================================ */
 
 .plan-hero[data-plan-state="expired"] {
-  border-color: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .plan-hero[data-plan-state="expired"] .plan-hero-bg {
   background: 
-    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(99, 102, 241, 0.1), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(139, 92, 246, 0.08), transparent 50%);
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(99, 102, 241, 0.12), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(139, 92, 246, 0.1), transparent 50%);
 }
 
 .plan-hero[data-plan-state="expired"] .plan-tier-badge {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
 }
 
 .plan-hero[data-plan-state="expired"] .plan-hero-highlight {
@@ -494,18 +472,18 @@
    ============================================ */
 
 .plan-hero[data-plan-state="scheduled"] {
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.25);
 }
 
 .plan-hero[data-plan-state="scheduled"] .plan-hero-bg {
   background: 
-    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(59, 130, 246, 0.1), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(99, 102, 241, 0.08), transparent 50%);
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(59, 130, 246, 0.12), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(99, 102, 241, 0.1), transparent 50%);
 }
 
 .plan-hero[data-plan-state="scheduled"] .plan-tier-badge {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
 }
 
 .plan-hero[data-plan-state="scheduled"] .plan-hero-highlight {
@@ -529,16 +507,163 @@
   opacity: 0.5;
 }
 
-/* ===== Responsive Design ===== */
+/* ============================================
+   RESPONSIVE DESIGN - Mobile First
+   ============================================ */
 
-/* Tablet */
-@media (min-width: 640px) {
+/* Small mobile (default - base styles above) */
+@media (max-width: 480px) {
+  .plan-hero {
+    border-radius: 16px;
+    margin-inline: -4px;
+  }
+  
   .plan-hero-top {
-    padding: var(--space-5);
+    padding: 16px;
+    gap: 12px;
   }
   
   .plan-hero-title {
-    font-size: 1.3rem;
+    font-size: 1rem;
+  }
+  
+  .plan-hero-subtext {
+    font-size: 0.78rem;
+  }
+  
+  .plan-gift-note {
+    font-size: 0.76rem;
+    padding: 10px 14px;
+    margin-top: 12px;
+  }
+  
+  .plan-tier-badge {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+  
+  .plan-hero-highlight {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .plan-hero-message {
+    font-size: 0.82rem;
+    line-height: 1.75;
+  }
+  
+  .plan-hero-meta {
+    gap: 8px;
+  }
+  
+  .meta-item {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+  
+  .meta-text span {
+    font-size: 0.72rem;
+  }
+  
+  .meta-text strong {
+    font-size: 0.85rem;
+  }
+  
+  .chip {
+    padding: 6px 12px;
+    font-size: 0.72rem;
+  }
+  
+  .plan-hero-progress {
+    padding: 14px 16px;
+  }
+  
+  .progress-bar {
+    height: 6px;
+  }
+  
+  .progress-legend {
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+  
+  .plan-hero-footer {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .plan-hero-perks li {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  
+  .btn-renew {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 360px) {
+  .plan-hero {
+    margin-inline: -8px;
+    border-radius: 12px;
+  }
+  
+  .plan-hero-top {
+    padding: 14px;
+  }
+  
+  .plan-hero-title {
+    font-size: 0.95rem;
+  }
+  
+  .plan-gift-note {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: right;
+  }
+  
+  .plan-tier-badge {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+  
+  .plan-hero-highlight {
+    padding: 14px;
+  }
+  
+  .meta-item {
+    padding: 10px 12px;
+  }
+  
+  .btn-renew {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .plan-hero {
+    border-radius: 20px;
+  }
+  
+  .plan-hero-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--space-5);
+  }
+  
+  .plan-tier-badge {
+    align-self: flex-start;
+  }
+  
+  .plan-hero-title {
+    font-size: 1.25rem;
   }
   
   .plan-hero-highlight {
@@ -546,20 +671,39 @@
   }
   
   .plan-hero-meta {
-    grid-template-columns: repeat(5, 1fr);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   
-  /* Reset 5-item special layout for tablet+ */
-  .plan-hero-meta:has(:nth-child(5)) {
-    grid-template-columns: repeat(5, 1fr);
+  .meta-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
   
-  .plan-hero-meta:has(:nth-child(5)) .meta-item {
-    grid-column: auto;
+  .meta-text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .meta-text strong {
+    text-align: right;
+  }
+  
+  .meta-item.meta-chip {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
   .plan-hero-progress {
-    padding: 16px var(--space-5);
+    padding: 18px var(--space-5);
+  }
+  
+  .progress-legend {
+    flex-direction: row;
+    justify-content: space-between;
   }
   
   .plan-hero-footer {
@@ -571,11 +715,12 @@
   
   .plan-hero-actions {
     flex-shrink: 0;
+    margin-top: 0;
   }
   
   .btn-renew {
     width: auto;
-    min-width: 200px;
+    min-width: 180px;
   }
 }
 
@@ -589,147 +734,38 @@
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+    gap: var(--space-5);
   }
   
   .plan-hero-highlight__text {
-    flex: 1;
-    max-width: 45%;
+    flex: 0 0 40%;
+    max-width: 40%;
   }
   
   .plan-hero-meta {
     flex: 1;
-    max-width: 50%;
+    grid-template-columns: repeat(3, 1fr);
     margin-top: 0;
+  }
+  
+  .meta-item.meta-chip {
+    grid-column: span 1;
   }
   
   .meta-item {
     padding: 16px 18px;
   }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-  .plan-hero {
-    border-radius: 16px;
-    margin-inline: calc(var(--space-2) * -1);
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
-  
-  .plan-hero-top {
-    flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-3);
-  }
-  
-  .plan-tier-badge {
-    align-self: flex-start;
-  }
-  
-  .plan-hero-title {
-    font-size: 1.05rem;
-  }
-  
-  .plan-hero-subtext {
-    font-size: 0.8rem;
-  }
-  
-  .plan-gift-note {
-    font-size: 0.72rem;
-    padding: 8px 12px;
-    border-radius: 10px;
-  }
-  
-  .gift-note-icon {
-    font-size: 0.9rem;
-  }
-  
-  .plan-hero-highlight {
-    padding: var(--space-3);
-  }
-  
-  .plan-hero-message {
-    font-size: 0.85rem;
-  }
-  
-  .plan-hero-meta {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  /* 5 items mobile: 2-2-1 layout */
-  .plan-hero-meta:has(:nth-child(5)) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .plan-hero-meta:has(:nth-child(5)) .meta-item {
-    grid-column: auto;
-  }
-  
-  .plan-hero-meta:has(:nth-child(5)) .meta-item:nth-child(5) {
-    grid-column: 1 / -1;
-  }
-  
-  .meta-item {
-    padding: 12px;
-  }
-  
-  .meta-text strong {
-    font-size: 0.88rem;
-  }
-  
-  .plan-hero-progress {
-    padding: 12px var(--space-3);
-  }
-  
-  .progress-legend {
-    font-size: 0.72rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  
-  .plan-hero-footer {
-    padding: var(--space-3);
-  }
-  
-  .plan-hero-perks li {
-    font-size: 0.72rem;
-    padding: 6px 10px;
-  }
   
   .btn-renew {
-    padding: 12px 16px;
-    font-size: 0.88rem;
-    border-radius: 10px;
+    min-width: 220px;
+    padding: 16px 28px;
   }
 }
 
-/* Extra small mobile */
-@media (max-width: 360px) {
+/* Large Desktop */
+@media (min-width: 1200px) {
   .plan-hero-meta {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  
-  .plan-hero-meta:has(:nth-child(5)) {
-    grid-template-columns: 1fr;
-  }
-  
-  .plan-hero-meta:has(:nth-child(5)) .meta-item {
-    grid-column: auto;
-  }
-  
-  .meta-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .meta-text {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-2);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -754,24 +790,25 @@
     animation: metaItemFadeIn 0.3s ease backwards;
   }
   
-  .meta-item:nth-child(1) { animation-delay: 0.1s; }
-  .meta-item:nth-child(2) { animation-delay: 0.15s; }
-  .meta-item:nth-child(3) { animation-delay: 0.2s; }
-  .meta-item:nth-child(4) { animation-delay: 0.25s; }
+  .meta-item:nth-child(1) { animation-delay: 0.05s; }
+  .meta-item:nth-child(2) { animation-delay: 0.1s; }
+  .meta-item:nth-child(3) { animation-delay: 0.15s; }
+  .meta-item:nth-child(4) { animation-delay: 0.2s; }
+  .meta-item:nth-child(5) { animation-delay: 0.25s; }
   
   @keyframes metaItemFadeIn {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
-      transform: scale(1);
+      transform: translateY(0);
     }
   }
 }
 
-/* ===== Focus states ===== */
+/* ===== Focus & Accessibility ===== */
 .btn-renew:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
@@ -780,4 +817,20 @@
 .meta-item:focus-within {
   border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ===== RTL Support ===== */
+[dir="rtl"] .meta-text strong {
+  text-align: right;
+}
+
+[dir="rtl"] .plan-gift-note {
+  text-align: right;
+}
+
+/* ===== Dark Mode Enhancements ===== */
+@media (prefers-color-scheme: dark) {
+  .plan-hero {
+    background: linear-gradient(165deg, #0f1115 0%, #14171d 50%, #0c0e12 100%);
+  }
 }
