@@ -1761,24 +1761,26 @@
     return String(num).replace(/\d/g, d => persianDigits[d]);
   }
 
-  // Check if user is logged in (check all possible tokens)
-  function checkUserLogin() {
-    const cookies = document.cookie.split('; ');
-    const userToken = cookies.find(r => r.startsWith('user_token='));
-    const sellerToken = cookies.find(r => r.startsWith('seller_token='));
-    const adminToken = cookies.find(r => r.startsWith('admin_token='));
-    const accessToken = cookies.find(r => r.startsWith('access_token='));
-    return Boolean(userToken || sellerToken || adminToken || accessToken);
-  }
+  // Check if user is logged in using backend endpoints (httpOnly cookies aren't readable on client)
+  async function checkUserLogin() {
+    try {
+      // اول کاربر عادی را بررسی می‌کنیم
+      const userRes = await fetch('/api/auth/getCurrentUser', {
+        credentials: 'include'
+      });
+      if (userRes.ok) {
+        return true;
+      }
 
-  // Get the best available token for API calls
-  function getAuthToken() {
-    const cookies = document.cookie.split('; ');
-    const userToken = cookies.find(r => r.startsWith('user_token='))?.split('=')[1];
-    const sellerToken = cookies.find(r => r.startsWith('seller_token='))?.split('=')[1];
-    const adminToken = cookies.find(r => r.startsWith('admin_token='))?.split('=')[1];
-    const accessToken = cookies.find(r => r.startsWith('access_token='))?.split('=')[1];
-    return userToken || sellerToken || adminToken || accessToken || null;
+      // سپس فروشنده (برای مواقعی که فروشنده در حال مشاهده صفحه است)
+      const sellerRes = await fetch('/api/auth/getCurrentSeller', {
+        credentials: 'include'
+      });
+      return sellerRes.ok;
+    } catch (error) {
+      console.error('checkUserLogin error:', error);
+      return false;
+    }
   }
 
   // Update character count
@@ -1795,11 +1797,11 @@
     }
 
     // Enable/disable send button
-    messageSendBtn.disabled = length === 0 || messageState.isSending;
+    messageSendBtn.disabled = length === 0 || messageState.isSending || !messageState.isLoggedIn;
   }
 
   // Open message modal
-  function openMessageModal() {
+  async function openMessageModal() {
     if (!messageModal) return;
 
     // Get product data from analytics state
@@ -1819,18 +1821,11 @@
     messageProductImage.src = messageState.productImage;
     messageProductImage.alt = messageState.productTitle;
 
-    // Check login status
-    messageState.isLoggedIn = checkUserLogin();
-
-    if (messageState.isLoggedIn) {
-      messageLoginPrompt.hidden = true;
-      messageFormContainer.hidden = false;
-      messageModalFooter.hidden = false;
-    } else {
-      messageLoginPrompt.hidden = false;
-      messageFormContainer.hidden = true;
-      messageModalFooter.hidden = true;
-    }
+    // Reset auth-related UI until نتیجه بررسی مشخص شود
+    messageState.isLoggedIn = false;
+    messageLoginPrompt.hidden = true;
+    messageFormContainer.hidden = true;
+    messageModalFooter.hidden = true;
 
     // Reset form
     messageText.value = '';
@@ -1849,10 +1844,22 @@
     });
     document.body.classList.add('modal-open');
 
-    // Focus on textarea if logged in
-    if (messageState.isLoggedIn) {
+    // Check login status using backend (کوکی‌های httpOnly در دسترس JS نیستند)
+    const isLoggedIn = await checkUserLogin();
+    messageState.isLoggedIn = isLoggedIn;
+
+    if (isLoggedIn) {
+      messageLoginPrompt.hidden = true;
+      messageFormContainer.hidden = false;
+      messageModalFooter.hidden = false;
       setTimeout(() => messageText.focus(), 100);
+    } else {
+      messageLoginPrompt.hidden = false;
+      messageFormContainer.hidden = true;
+      messageModalFooter.hidden = true;
     }
+
+    updateCharCount();
   }
 
   // Close message modal
@@ -1874,6 +1881,11 @@
   async function sendMessage() {
     if (messageState.isSending || !messageText.value.trim()) return;
 
+    if (!messageState.isLoggedIn) {
+      showError('برای ارسال پیام باید وارد شوید.');
+      return;
+    }
+
     const text = messageText.value.trim();
     if (!text) {
       showError('لطفاً متن پیام را وارد کنید.');
@@ -1894,13 +1906,10 @@
     messageError.hidden = true;
 
     try {
-      const token = getAuthToken();
-      
       const response = await fetch('/api/chats', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify({
