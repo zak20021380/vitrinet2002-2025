@@ -1744,6 +1744,8 @@
   const messageProductSeller = document.getElementById('messageProductSeller');
   const messageSendText = document.getElementById('messageSendText');
   const messageSendIcon = document.getElementById('messageSendIcon');
+  const successPopup = document.getElementById('successPopup');
+  const successPopupClose = document.getElementById('successPopupClose');
 
   if (!messageBtn || !messageModal) return;
 
@@ -1948,15 +1950,17 @@
         throw new Error(data.error || data.message || 'خطا در ارسال پیام');
       }
 
-      // Success
-      messageSuccess.hidden = false;
+      // Success - نمایش پاپ‌آپ موفقیت
       messageText.value = '';
       updateCharCount();
       
-      // Close modal after delay
+      // بستن مدال پیام
+      closeMessageModal();
+      
+      // نمایش پاپ‌آپ موفقیت
       setTimeout(() => {
-        closeMessageModal();
-      }, 2000);
+        showSuccessPopup();
+      }, 300);
 
     } catch (error) {
       console.error('Send message error:', error);
@@ -1973,6 +1977,33 @@
   function showError(message) {
     messageError.hidden = false;
     messageErrorText.textContent = message;
+  }
+
+  // Show success popup
+  function showSuccessPopup() {
+    if (!successPopup) return;
+    
+    successPopup.hidden = false;
+    requestAnimationFrame(() => {
+      successPopup.classList.add('is-visible');
+    });
+    document.body.classList.add('modal-open');
+    
+    // Auto close after 4 seconds
+    setTimeout(() => {
+      closeSuccessPopup();
+    }, 4000);
+  }
+
+  // Close success popup
+  function closeSuccessPopup() {
+    if (!successPopup) return;
+    
+    successPopup.classList.remove('is-visible');
+    setTimeout(() => {
+      successPopup.hidden = true;
+      document.body.classList.remove('modal-open');
+    }, 300);
   }
 
   // Event listeners
@@ -1995,8 +2026,26 @@
     }
   });
 
+  // Success popup close button
+  if (successPopupClose) {
+    successPopupClose.addEventListener('click', closeSuccessPopup);
+  }
+
+  // Close success popup on backdrop click
+  if (successPopup) {
+    successPopup.addEventListener('click', (e) => {
+      if (e.target === successPopup) {
+        closeSuccessPopup();
+      }
+    });
+  }
+
   // Close on Escape
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && successPopup && successPopup.classList.contains('is-visible')) {
+      closeSuccessPopup();
+      return;
+    }
     if (e.key === 'Escape' && messageModal.classList.contains('is-visible')) {
       closeMessageModal();
     }
