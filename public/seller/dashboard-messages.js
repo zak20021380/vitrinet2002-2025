@@ -74,6 +74,19 @@ const chatModalMsgsBox = document.getElementById('chatModalMessages');
 const chatReplyForm    = document.getElementById('chatReplyForm');
 const chatReplyInput   = document.getElementById('chatReplyInput');
 
+// تمام شناسه‌های ممکن فروشنده را جمع‌آوری می‌کنیم تا بتوانیم نقش پیام را با اطمینان تشخیص دهیم
+const sellerIds = new Set(
+  [
+    window.seller?.id,
+    window.seller?._id,
+    window.seller?.sellerId,
+    window.seller?.seller_id,
+    window.__SELLER_ID__
+  ]
+    .filter(Boolean)
+    .map(String)
+);
+
 function hideChatModal() {
   chatModalBg.classList.add('hidden');
   document.body.style.overflow = '';
@@ -144,6 +157,89 @@ function getCustomerName(chat) {
 
 function countUnreadMessages(chat) {
   return (chat.messages || []).filter(m => m.from !== 'seller' && !m.readBySeller).length;
+}
+
+function normalizeRole(value) {
+  return typeof value === 'string' ? value.toLowerCase().trim() : '';
+}
+
+function extractSenderId(message) {
+  return (
+    message.senderId?._id ||
+    message.senderId?.id ||
+    message.senderId ||
+    message.sender?._id ||
+    message.sender?.id ||
+    message.fromId ||
+    message.from?._id ||
+    message.from?.id ||
+    ''
+  );
+}
+
+function resolveMessageRole(message, chat, customerName) {
+  const participants = Array.isArray(chat?.participants) ? chat.participants : [];
+
+  const participantRoleById = new Map();
+  const participantSellerIds = [];
+  participants.forEach(p => {
+    const pid = p?._id || p.id || p.userId || p.sellerId;
+    if (!pid) return;
+    const normalized = normalizeRole(p.role);
+    participantRoleById.set(String(pid), normalized);
+    if (normalized === 'seller') {
+      participantSellerIds.push(String(pid));
+    }
+  });
+
+  participantSellerIds.forEach(id => sellerIds.add(id));
+
+  const senderId = String(extractSenderId(message) || '');
+  const roleCandidates = [
+    message.from,
+    message.sender?.role,
+    message.senderRole,
+    message.senderId?.role,
+    participantRoleById.get(senderId)
+  ];
+
+  let normalizedRole = roleCandidates.map(normalizeRole).find(r => !!r) || '';
+
+  // اگر نقش «فروشنده» ارسال شده ولی شناسه فرستنده متعلق به فروشنده نیست، نقش را بر اساس شرکت‌کنندگان تصحیح کن
+  if (
+    normalizedRole === 'seller' &&
+    senderId &&
+    participantRoleById.has(senderId) &&
+    participantRoleById.get(senderId) !== 'seller'
+  ) {
+    normalizedRole = participantRoleById.get(senderId) || '';
+  }
+
+  const fromAdmin = normalizedRole === 'admin' || normalizedRole === 'support';
+  const fromSeller = normalizedRole === 'seller' || (senderId && sellerIds.has(senderId));
+  const fromUser =
+    normalizedRole === 'user' ||
+    normalizedRole === 'customer' ||
+    normalizedRole === 'buyer' ||
+    (!fromAdmin && !fromSeller);
+
+  let senderName;
+  if (fromSeller) {
+    senderName = 'شما';
+  } else if (fromAdmin) {
+    senderName = 'مدیر سایت';
+  } else if (fromUser) {
+    senderName = customerName || 'مشتری';
+  }
+
+  const roleClass = fromAdmin ? 'msg-admin' : fromSeller ? 'msg-seller' : 'msg-customer';
+  const alignClass = fromSeller ? 'self-end' : 'self-start';
+
+  return {
+    senderName: senderName || customerName || 'مشتری',
+    roleClass,
+    alignClass
+  };
 }
 
 function showNewMessageToast(title, desc) {
@@ -523,64 +619,11 @@ function renderChatModal(chat) {
   msgs.forEach(m => {
     const bubble = document.createElement('div');
 
-    // تشخیص نقش فرستنده پیام با بررسی همه فیلدهای ممکن
-    let role = '';
-    
-    // اولویت ۱: فیلد from (استاندارد در مدل Chat)
-    if (m.from && typeof m.from === 'string') {
-      role = m.from;
-    }
-    // اولویت ۲: sender.role
-    else if (m.sender?.role && typeof m.sender.role === 'string') {
-      role = m.sender.role;
-    }
-    // اولویت ۳: senderId.role
-    else if (m.senderId?.role && typeof m.senderId.role === 'string') {
-      role = m.senderId.role;
-    }
-    // اولویت ۴: senderRole
-    else if (m.senderRole && typeof m.senderRole === 'string') {
-      role = m.senderRole;
-    }
-    
-    const normalizedRole = role.toLowerCase().trim();
-    
-    // تشخیص دقیق نقش‌ها
-    const fromSeller = normalizedRole === 'seller';
-    const fromAdmin  = normalizedRole === 'admin';
-    const fromUser   = normalizedRole === 'user' || normalizedRole === 'customer';
-
-    // تعیین موقعیت حباب پیام - پیام‌های فروشنده سمت چپ (self-end)، بقیه سمت راست (self-start)
-    const clsAlign = fromSeller ? 'self-end' : 'self-start';
-    
-    // تعیین کلاس رنگ حباب
-    let clsRole;
-    if (fromAdmin) {
-      clsRole = 'msg-admin';
-    } else if (fromSeller) {
-      clsRole = 'msg-seller';
-    } else {
-      clsRole = 'msg-customer';
-    }
-    
-    // تعیین نام فرستنده
-    let senderName;
-    if (fromSeller) {
-      senderName = 'شما';
-    } else if (fromAdmin) {
-      senderName = 'مدیر سایت';
-    } else if (fromUser) {
-      senderName = customerName || 'مشتری';
-    } else {
-      // اگر نقش مشخص نیست، فرض کن پیام از مشتری است (چون فروشنده در پنل خودش است)
-      senderName = customerName || 'مشتری';
-      // همچنین کلاس را به مشتری تغییر بده
-      clsRole = 'msg-customer';
-    }
+    const { senderName, roleClass, alignClass } = resolveMessageRole(m, chat, customerName);
 
     const timeISO = m.createdAt || m.created_at || m.date || m.updatedAt || m.timestamp;
 
-    bubble.className = `msg-bubble ${clsRole} ${clsAlign} px-4 py-2 rounded-2xl text-sm leading-relaxed`;
+    bubble.className = `msg-bubble ${roleClass} ${alignClass} px-4 py-2 rounded-2xl text-sm leading-relaxed`;
     bubble.innerHTML = `
       <div class="font-semibold text-xs mb-1">${senderName}</div>
       <div>${m.text}</div>
