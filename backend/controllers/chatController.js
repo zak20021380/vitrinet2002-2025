@@ -338,11 +338,27 @@ exports.createChat = async (req, res) => {
     console.log('Final chatType:', chatType);
     console.log('Participants model:', participantsModel);
 
-    const finder = {
-      participants: sortIdArray(participants),
-      type: chatType,
-      productId: pid || null
-    };
+    // استفاده از $all و $size برای مقایسه دقیق آرایه participants
+    const sortedParticipants = sortIdArray(participants);
+    let finder;
+    
+    if (pid) {
+      // اگر productId داریم، مستقیم جستجو کن
+      finder = {
+        participants: { $all: sortedParticipants, $size: sortedParticipants.length },
+        type: chatType,
+        productId: pid
+      };
+    } else {
+      // اگر productId نداریم، چک کن که یا null باشه یا وجود نداشته باشه
+      finder = {
+        $and: [
+          { participants: { $all: sortedParticipants, $size: sortedParticipants.length } },
+          { type: chatType },
+          { $or: [{ productId: null }, { productId: { $exists: false } }] }
+        ]
+      };
+    }
 
     let chat = await Chat.findOne(finder);
     const text = (rawText || '').trim();
@@ -461,11 +477,27 @@ exports.createAdminUserChat = async (req, res) => {
     const participants = rawParticipants.map(p => new mongoose.Types.ObjectId(p.id));
     const participantsModel = rawParticipants.map(p => p.model);
 
-    const finder = {
-      participants: sortIdArray(participants),
-      type: 'admin-user',
-      productId: productId || null
-    };
+    // استفاده از $all و $size برای مقایسه دقیق آرایه participants
+    const sortedParticipants = sortIdArray(participants);
+    let finder;
+    
+    if (productId) {
+      // اگر productId داریم، مستقیم جستجو کن
+      finder = {
+        participants: { $all: sortedParticipants, $size: sortedParticipants.length },
+        type: 'admin-user',
+        productId: new mongoose.Types.ObjectId(productId)
+      };
+    } else {
+      // اگر productId نداریم، چک کن که یا null باشه یا وجود نداشته باشه
+      finder = {
+        $and: [
+          { participants: { $all: sortedParticipants, $size: sortedParticipants.length } },
+          { type: 'admin-user' },
+          { $or: [{ productId: null }, { productId: { $exists: false } }] }
+        ]
+      };
+    }
 
     let chat = await Chat.findOne(finder);
     if (chat) {
@@ -602,11 +634,28 @@ exports.ensureChat = async (req, res) => {
     }
     console.log('Chat Type:', chatType);
 
-    const finder = {
-      participants: sortIdArray(participants),
-      productId: productId || null,
-      type: chatType
-    };
+    // استفاده از $all و $size برای مقایسه دقیق آرایه participants
+    const sortedParticipants = sortIdArray(participants);
+    let finder;
+    
+    if (productId) {
+      // اگر productId داریم، مستقیم جستجو کن
+      finder = {
+        participants: { $all: sortedParticipants, $size: sortedParticipants.length },
+        type: chatType,
+        productId: new mongoose.Types.ObjectId(productId)
+      };
+    } else {
+      // اگر productId نداریم، چک کن که یا null باشه یا وجود نداشته باشه
+      finder = {
+        $and: [
+          { participants: { $all: sortedParticipants, $size: sortedParticipants.length } },
+          { type: chatType },
+          { $or: [{ productId: null }, { productId: { $exists: false } }] }
+        ]
+      };
+    }
+    
     let chat = await Chat.findOne(finder);
     if (!chat) {
       try {

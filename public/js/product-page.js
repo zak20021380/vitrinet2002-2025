@@ -1807,12 +1807,12 @@
   async function openMessageModal() {
     if (!messageModal) return;
 
-    // Get product data from analytics state
+    // Get product data from analytics state or existing messageState
     const analyticsState = window.__PRODUCT_ANALYTICS__ || {};
-    messageState.productId = analyticsState.item_id || new URLSearchParams(window.location.search).get('id');
-    messageState.sellerId = analyticsState.seller_id || '';
-    messageState.productTitle = analyticsState.item_name || document.getElementById('productTitle')?.textContent || '';
-    messageState.sellerName = analyticsState.shop_name || document.getElementById('productSeller')?.textContent || '';
+    messageState.productId = messageState.productId || analyticsState.item_id || new URLSearchParams(window.location.search).get('id');
+    messageState.sellerId = messageState.sellerId || analyticsState.seller_id || '';
+    messageState.productTitle = messageState.productTitle || analyticsState.item_name || document.getElementById('productTitle')?.textContent || '';
+    messageState.sellerName = messageState.sellerName || analyticsState.shop_name || document.getElementById('productSeller')?.textContent || '';
     
     // Get product image
     const sliderImage = document.querySelector('.slide.is-active img, .slide img');
