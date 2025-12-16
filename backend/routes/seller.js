@@ -47,6 +47,23 @@ router.put('/me', authMiddleware('seller'), async (req, res) => {
     const sellerId = req.user.id || req.user._id;
     const { phone, address, storename } = req.body;
     
+    // اعتبارسنجی نام کسب‌وکار
+    if (storename !== undefined) {
+      const trimmedName = String(storename).trim();
+      if (trimmedName.length < 2) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'نام کسب‌وکار باید حداقل ۲ کاراکتر باشد.' 
+        });
+      }
+      if (trimmedName.length > 50) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'نام کسب‌وکار نباید بیشتر از ۵۰ کاراکتر باشد.' 
+        });
+      }
+    }
+    
     // اعتبارسنجی شماره تلفن
     if (phone !== undefined) {
       const phoneRegex = /^09[0-9]{9}$/;

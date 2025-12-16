@@ -171,7 +171,6 @@
   bottom: 0;
   margin-top: 1.5rem;
   padding: 1rem 0;
-  background: linear-gradient(to top, rgba(15, 15, 35, 0.98) 0%, rgba(15, 15, 35, 0.9) 70%, transparent 100%);
   z-index: 10;
 }
 
@@ -184,16 +183,19 @@
   min-height: 52px;
   padding: 0 24px;
   border: none;
-  border-radius: 14px;
+  border-radius: 16px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  background: linear-gradient(135deg, rgba(100, 116, 139, 0.3) 0%, rgba(100, 116, 139, 0.15) 100%);
-  color: rgba(255, 255, 255, 0.4);
-  box-shadow: none;
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.25) 0%, rgba(100, 116, 139, 0.12) 100%);
+  color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .btn-save-settings__content {
@@ -216,6 +218,7 @@
 .btn-save-settings:disabled {
   cursor: not-allowed;
   pointer-events: none;
+  opacity: 0.6;
 }
 
 /* Enabled State (Has Changes) */
@@ -223,28 +226,31 @@
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   box-shadow: 
-    0 4px 15px rgba(16, 185, 129, 0.3),
-    0 0 0 1px rgba(16, 185, 129, 0.2) inset;
+    0 6px 20px rgba(16, 185, 129, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   cursor: pointer;
 }
 
 .btn-save-settings:not(:disabled):hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: 
-    0 8px 25px rgba(16, 185, 129, 0.4),
-    0 0 0 1px rgba(16, 185, 129, 0.3) inset;
+    0 10px 30px rgba(16, 185, 129, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
 .btn-save-settings:not(:disabled):hover .btn-save-settings__icon {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(-5deg);
 }
 
 .btn-save-settings:not(:disabled):active {
-  transform: translateY(0);
+  transform: translateY(-1px);
   box-shadow: 
-    0 2px 10px rgba(16, 185, 129, 0.3),
-    0 0 0 1px rgba(16, 185, 129, 0.2) inset;
+    0 4px 15px rgba(16, 185, 129, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 /* Loading State */
@@ -252,7 +258,7 @@
   position: absolute;
   width: 22px;
   height: 22px;
-  border: 2.5px solid rgba(255, 255, 255, 0.2);
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
   border-top-color: white;
   border-radius: 50%;
   opacity: 0;
@@ -263,17 +269,21 @@
 .btn-save-settings.is-loading .btn-save-settings__content {
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.8);
+  transform: scale(0.85);
 }
 
 .btn-save-settings.is-loading .btn-save-settings__loader {
   opacity: 1;
   visibility: visible;
-  animation: btnSpinner 0.8s linear infinite;
+  animation: btnSpinner 0.7s linear infinite;
 }
 
 .btn-save-settings.is-loading {
   background: linear-gradient(135deg, #0d9668 0%, #047857 100%);
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   pointer-events: none;
 }
 
@@ -284,6 +294,10 @@
 /* Success State */
 .btn-save-settings.is-success {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
   pointer-events: none;
 }
 
@@ -291,16 +305,24 @@
   opacity: 1;
   visibility: visible;
   transform: scale(1);
+  animation: successBounce 0.5s ease;
 }
 
 .btn-save-settings.is-success .btn-save-settings__icon {
-  animation: successPop 0.4s ease;
+  animation: successRotate 0.5s ease;
 }
 
-@keyframes successPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+@keyframes successBounce {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes successRotate {
+  0% { transform: rotate(0deg) scale(1); }
+  30% { transform: rotate(-10deg) scale(1.2); }
+  60% { transform: rotate(10deg) scale(1.2); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
 /* ============================================

@@ -9687,6 +9687,18 @@ function initBusinessInfoSave(initialData) {
     const address = addressEl?.value?.trim() || '';
     const storename = nameEl?.value?.trim() || '';
     
+    // Validate storename
+    if (storename && storename.length < 2) {
+      UIComponents.showToast('نام کسب‌وکار باید حداقل ۲ کاراکتر باشد.', 'error');
+      nameEl?.focus();
+      return;
+    }
+    if (storename && storename.length > 50) {
+      UIComponents.showToast('نام کسب‌وکار نباید بیشتر از ۵۰ کاراکتر باشد.', 'error');
+      nameEl?.focus();
+      return;
+    }
+    
     // Validate phone
     if (phone) {
       const normalizedPhone = phone.replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]);
