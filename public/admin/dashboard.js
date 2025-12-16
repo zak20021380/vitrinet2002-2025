@@ -10683,3 +10683,431 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+// ============================================
+// بخش ارسال پیام به فروشنده خاص
+// ============================================
+
+(function() {
+  'use strict';
+
+  // المان‌ها
+  const directMessageCard = document.getElementById('directMessageCard');
+  const directMessageHeader = document.getElementById('directMessageHeader');
+  const directSellerSearch = document.getElementById('directSellerSearch');
+  const directSellerSearchClear = document.getElementById('directSellerSearchClear');
+  const directSellerResults = document.getElementById('directSellerResults');
+  const selectedSellerEl = document.getElementById('selectedSeller');
+  const selectedSellerAvatar = document.getElementById('selectedSellerAvatar');
+  const selectedSellerName = document.getElementById('selectedSellerName');
+  const selectedSellerShop = document.getElementById('selectedSellerShop');
+  const removeSelectedSeller = document.getElementById('removeSelectedSeller');
+  const directMessageForm = document.getElementById('directMessageForm');
+  const directMessageType = document.getElementById('directMessageType');
+  const directMessageText = document.getElementById('directMessageText');
+  const sendDirectMessage = document.getElementById('sendDirectMessage');
+  const clearDirectMessage = document.getElementById('clearDirectMessage');
+  const directMessageStatus = document.getElementById('directMessageStatus');
+
+  // State
+  let selectedSeller = null;
+  let searchTimeout = null;
+  let allSellers = [];
+  let focusedIndex = -1;
+
+  // Toggle کارت
+  if (directMessageHeader && directMessageCard) {
+    directMessageHeader.addEventListener('click', () => {
+      directMessageCard.classList.toggle('collapsed');
+    });
+  }
+
+  // دریافت لیست فروشندگان
+  async function fetchAllSellers() {
+    try {
+      // استفاده از همان API که در fetchShops استفاده می‌شود
+      const response = await fetch(`${ADMIN_API_BASE}/sellers`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('خطا در دریافت لیست فروشندگان');
+      
+      const data = await response.json();
+      // ساختار داده می‌تواند متفاوت باشد
+      allSellers = data.sellers || data.data || data || [];
+      console.log('Loaded sellers:', allSellers.length);
+      return allSellers;
+    } catch (error) {
+      console.error('Error fetching sellers:', error);
+      return [];
+    }
+  }
+
+  // جستجوی فروشندگان
+  function searchSellers(query) {
+    if (!query || query.length < 2) return [];
+    
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    return allSellers.filter(seller => {
+      const shopName = (seller.shopName || '').toLowerCase();
+      const ownerName = (seller.ownerName || seller.name || '').toLowerCase();
+      const phone = (seller.phone || '').toLowerCase();
+      const firstName = (seller.firstName || '').toLowerCase();
+      const lastName = (seller.lastName || '').toLowerCase();
+      
+      return shopName.includes(normalizedQuery) ||
+             ownerName.includes(normalizedQuery) ||
+             phone.includes(normalizedQuery) ||
+             firstName.includes(normalizedQuery) ||
+             lastName.includes(normalizedQuery) ||
+             `${firstName} ${lastName}`.includes(normalizedQuery);
+    }).slice(0, 10); // حداکثر 10 نتیجه
+  }
+
+  // رندر نتایج جستجو
+  function renderSearchResults(results, query) {
+    if (!directSellerResults) return;
+    
+    if (results.length === 0) {
+      directSellerResults.innerHTML = `
+        <div class="seller-search-empty">
+          <i class="ri-user-search-line"></i>
+          <p>فروشنده‌ای با عبارت «${query}» یافت نشد</p>
+        </div>
+      `;
+      directSellerResults.classList.add('visible');
+      return;
+    }
+    
+    directSellerResults.innerHTML = results.map((seller, index) => {
+      const avatar = seller.logo || seller.avatar;
+      const initials = getInitials(seller.shopName || seller.ownerName || 'ف');
+      const isService = seller.isServiceSeller || seller.sellerType === 'service';
+      
+      return `
+        <div class="seller-result-item" data-index="${index}" data-seller-id="${seller._id || seller.id}">
+          <div class="seller-result-avatar">
+            ${avatar ? `<img src="${avatar}" alt="${seller.shopName}" onerror="this.parentElement.innerHTML='${initials}'">` : initials}
+          </div>
+          <div class="seller-result-info">
+            <div class="seller-result-name">${highlightMatch(seller.ownerName || seller.name || 'بدون نام', query)}</div>
+            <div class="seller-result-shop">
+              <i class="ri-store-2-line"></i>
+              ${highlightMatch(seller.shopName || 'بدون نام مغازه', query)}
+            </div>
+          </div>
+          ${isService ? '<span class="seller-result-badge service">خدماتی</span>' : '<span class="seller-result-badge">فروشگاهی</span>'}
+        </div>
+      `;
+    }).join('');
+    
+    directSellerResults.classList.add('visible');
+    focusedIndex = -1;
+  }
+
+  // هایلایت کردن متن جستجو
+  function highlightMatch(text, query) {
+    if (!query) return text;
+    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    return text.replace(regex, '<mark style="background:#fef08a;padding:0 2px;border-radius:2px;">$1</mark>');
+  }
+
+  function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // گرفتن حروف اول
+  function getInitials(name) {
+    if (!name) return 'ف';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return parts[0].charAt(0) + parts[1].charAt(0);
+    }
+    return name.charAt(0);
+  }
+
+  // انتخاب فروشنده
+  function selectSeller(seller) {
+    selectedSeller = seller;
+    
+    // آپدیت UI
+    const avatar = seller.logo || seller.avatar;
+    const initials = getInitials(seller.shopName || seller.ownerName || 'ف');
+    
+    if (selectedSellerAvatar) {
+      selectedSellerAvatar.innerHTML = avatar 
+        ? `<img src="${avatar}" alt="${seller.shopName}" onerror="this.parentElement.innerHTML='${initials}'">`
+        : initials;
+    }
+    
+    if (selectedSellerName) {
+      selectedSellerName.textContent = seller.ownerName || seller.name || 'بدون نام';
+    }
+    
+    if (selectedSellerShop) {
+      selectedSellerShop.textContent = seller.shopName || 'بدون نام مغازه';
+    }
+    
+    // نمایش بخش‌ها
+    if (selectedSellerEl) selectedSellerEl.classList.add('visible');
+    if (directMessageForm) directMessageForm.classList.add('visible');
+    
+    // مخفی کردن نتایج و پاک کردن input
+    if (directSellerResults) directSellerResults.classList.remove('visible');
+    if (directSellerSearch) directSellerSearch.value = '';
+    if (directSellerSearchClear) directSellerSearchClear.classList.remove('visible');
+    
+    // فعال کردن دکمه ارسال
+    updateSendButtonState();
+  }
+
+  // حذف انتخاب فروشنده
+  function clearSelectedSeller() {
+    selectedSeller = null;
+    
+    if (selectedSellerEl) selectedSellerEl.classList.remove('visible');
+    if (directMessageForm) directMessageForm.classList.remove('visible');
+    if (directMessageText) directMessageText.value = '';
+    
+    updateSendButtonState();
+    hideStatus();
+  }
+
+  // آپدیت وضعیت دکمه ارسال
+  function updateSendButtonState() {
+    if (!sendDirectMessage) return;
+    
+    const hasText = directMessageText && directMessageText.value.trim().length > 0;
+    const hasSeller = selectedSeller !== null;
+    
+    sendDirectMessage.disabled = !(hasText && hasSeller);
+  }
+
+  // نمایش وضعیت
+  function showStatus(message, type = 'success') {
+    if (!directMessageStatus) return;
+    
+    directMessageStatus.className = `direct-message-status visible is-${type}`;
+    directMessageStatus.innerHTML = `
+      <i class="ri-${type === 'success' ? 'checkbox-circle' : 'error-warning'}-fill"></i>
+      <span>${message}</span>
+    `;
+  }
+
+  // مخفی کردن وضعیت
+  function hideStatus() {
+    if (!directMessageStatus) return;
+    directMessageStatus.classList.remove('visible');
+  }
+
+  // ارسال پیام
+  async function sendMessage() {
+    if (!selectedSeller || !directMessageText) return;
+    
+    const text = directMessageText.value.trim();
+    if (!text) return;
+    
+    // گرفتن نوع پیام
+    const activeTypeBtn = directMessageType?.querySelector('.message-type-btn.active');
+    const messageType = activeTypeBtn?.dataset.type || 'info';
+    
+    // نمایش لودینگ
+    sendDirectMessage.classList.add('is-loading');
+    sendDirectMessage.disabled = true;
+    hideStatus();
+    
+    try {
+      const sellerId = selectedSeller._id || selectedSeller.id;
+      const sellerName = selectedSeller.shopName || selectedSeller.ownerName || 'فروشنده';
+      
+      // استفاده از API صحیح admin-seller-notifications
+      const response = await fetch(`${ADMIN_API_BASE}/admin-seller-notifications`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sellerId: sellerId,
+          title: `پیام از مدیریت`,
+          content: text,
+          type: messageType
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'خطا در ارسال پیام');
+      }
+      
+      // موفقیت
+      showStatus(`پیام با موفقیت به «${sellerName}» ارسال شد`, 'success');
+      directMessageText.value = '';
+      updateSendButtonState();
+      
+      // بعد از 3 ثانیه مخفی کردن وضعیت
+      setTimeout(hideStatus, 3000);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      showStatus(error.message || 'خطا در ارسال پیام', 'error');
+    } finally {
+      sendDirectMessage.classList.remove('is-loading');
+      updateSendButtonState();
+    }
+  }
+
+  // Event Listeners
+  
+  // جستجو
+  if (directSellerSearch) {
+    directSellerSearch.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      
+      // نمایش/مخفی دکمه پاک کردن
+      if (directSellerSearchClear) {
+        directSellerSearchClear.classList.toggle('visible', query.length > 0);
+      }
+      
+      // Debounce جستجو
+      clearTimeout(searchTimeout);
+      
+      if (query.length < 2) {
+        if (directSellerResults) directSellerResults.classList.remove('visible');
+        return;
+      }
+      
+      // نمایش لودینگ
+      if (directSellerResults) {
+        directSellerResults.innerHTML = `
+          <div class="seller-search-loading">
+            <i class="ri-loader-4-line"></i>
+          </div>
+        `;
+        directSellerResults.classList.add('visible');
+      }
+      
+      searchTimeout = setTimeout(async () => {
+        // اگر لیست خالی است، ابتدا دریافت کن
+        if (allSellers.length === 0) {
+          await fetchAllSellers();
+        }
+        
+        const results = searchSellers(query);
+        renderSearchResults(results, query);
+      }, 300);
+    });
+    
+    // کیبورد ناوبری
+    directSellerSearch.addEventListener('keydown', (e) => {
+      const items = directSellerResults?.querySelectorAll('.seller-result-item') || [];
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
+        updateFocusedItem(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusedIndex = Math.max(focusedIndex - 1, 0);
+        updateFocusedItem(items);
+      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+        e.preventDefault();
+        const focusedItem = items[focusedIndex];
+        if (focusedItem) {
+          const sellerId = focusedItem.dataset.sellerId;
+          const seller = allSellers.find(s => (s._id || s.id) === sellerId);
+          if (seller) selectSeller(seller);
+        }
+      } else if (e.key === 'Escape') {
+        if (directSellerResults) directSellerResults.classList.remove('visible');
+      }
+    });
+    
+    // Focus
+    directSellerSearch.addEventListener('focus', async () => {
+      if (allSellers.length === 0) {
+        await fetchAllSellers();
+      }
+    });
+  }
+  
+  function updateFocusedItem(items) {
+    items.forEach((item, index) => {
+      item.classList.toggle('focused', index === focusedIndex);
+    });
+    
+    if (focusedIndex >= 0 && items[focusedIndex]) {
+      items[focusedIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+  
+  // کلیک روی نتایج
+  if (directSellerResults) {
+    directSellerResults.addEventListener('click', (e) => {
+      const item = e.target.closest('.seller-result-item');
+      if (!item) return;
+      
+      const sellerId = item.dataset.sellerId;
+      const seller = allSellers.find(s => (s._id || s.id) === sellerId);
+      if (seller) selectSeller(seller);
+    });
+  }
+  
+  // پاک کردن جستجو
+  if (directSellerSearchClear) {
+    directSellerSearchClear.addEventListener('click', () => {
+      if (directSellerSearch) directSellerSearch.value = '';
+      directSellerSearchClear.classList.remove('visible');
+      if (directSellerResults) directSellerResults.classList.remove('visible');
+    });
+  }
+  
+  // حذف فروشنده انتخاب شده
+  if (removeSelectedSeller) {
+    removeSelectedSeller.addEventListener('click', clearSelectedSeller);
+  }
+  
+  // انتخاب نوع پیام
+  if (directMessageType) {
+    directMessageType.addEventListener('click', (e) => {
+      const btn = e.target.closest('.message-type-btn');
+      if (!btn) return;
+      
+      directMessageType.querySelectorAll('.message-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  }
+  
+  // تغییر متن پیام
+  if (directMessageText) {
+    directMessageText.addEventListener('input', updateSendButtonState);
+  }
+  
+  // ارسال پیام
+  if (sendDirectMessage) {
+    sendDirectMessage.addEventListener('click', sendMessage);
+  }
+  
+  // پاک کردن فرم
+  if (clearDirectMessage) {
+    clearDirectMessage.addEventListener('click', () => {
+      if (directMessageText) directMessageText.value = '';
+      hideStatus();
+      updateSendButtonState();
+    });
+  }
+  
+  // بستن نتایج با کلیک بیرون
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.seller-search-section')) {
+      if (directSellerResults) directSellerResults.classList.remove('visible');
+    }
+  });
+  
+  // لود اولیه فروشندگان
+  fetchAllSellers();
+  
+})();

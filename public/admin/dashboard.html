@@ -1428,7 +1428,6 @@
 
 
 <!-- فیلتر پیام‌ها -->
-<!-- فیلتر پیام‌ها -->
 <div class="messages-filters" style="display:flex;gap:0.7rem;margin-bottom:1.1rem;flex-wrap:wrap;">
   <button class="seller-filter-btn active" data-filter="seller">پیام‌های فروشنده</button>
   <button class="seller-filter-btn" data-filter="customer">پیام‌های مشتری</button>
@@ -1437,9 +1436,115 @@
   <button class="seller-filter-btn" data-filter="unanswered">پاسخ‌نداده‌ها</button>
 </div>
 
+<!-- 🎯 کارت ارسال پیام به فروشنده خاص -->
+<div class="direct-message-card collapsed" id="directMessageCard">
+  <div class="direct-message-header" id="directMessageHeader">
+    <i class="ri-user-search-line"></i>
+    <h4>ارسال پیام به فروشنده خاص</h4>
+    <i class="ri-arrow-down-s-line toggle-icon"></i>
+  </div>
+  <div class="direct-message-body" id="directMessageBody">
+    <!-- بخش جستجوی فروشنده -->
+    <div class="seller-search-section">
+      <div class="seller-search-label">
+        <i class="ri-search-2-line"></i>
+        <span>جستجوی فروشنده یا مغازه</span>
+      </div>
+      <div class="seller-search-wrapper">
+        <input 
+          type="text" 
+          class="seller-search-input" 
+          id="directSellerSearch" 
+          placeholder="نام فروشنده، نام مغازه یا شماره تلفن را وارد کنید..."
+          autocomplete="off"
+        >
+        <i class="ri-search-line seller-search-icon"></i>
+        <button type="button" class="seller-search-clear" id="directSellerSearchClear" aria-label="پاک کردن">
+          <i class="ri-close-line"></i>
+        </button>
+        
+        <!-- نتایج جستجو -->
+        <div class="seller-search-results" id="directSellerResults">
+          <!-- نتایج به صورت داینامیک اضافه می‌شوند -->
+        </div>
+      </div>
+      
+      <!-- فروشنده انتخاب شده -->
+      <div class="selected-seller" id="selectedSeller">
+        <div class="selected-seller-avatar" id="selectedSellerAvatar">
+          <!-- آواتار یا حرف اول -->
+        </div>
+        <div class="selected-seller-info">
+          <div class="selected-seller-name" id="selectedSellerName">نام فروشنده</div>
+          <div class="selected-seller-shop">
+            <i class="ri-store-2-line"></i>
+            <span id="selectedSellerShop">نام مغازه</span>
+          </div>
+        </div>
+        <button type="button" class="selected-seller-remove" id="removeSelectedSeller" aria-label="حذف انتخاب">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- فرم ارسال پیام -->
+    <div class="direct-message-form" id="directMessageForm">
+      <div class="message-field">
+        <label>
+          <i class="ri-price-tag-3-line"></i>
+          نوع پیام
+        </label>
+        <div class="message-type-selector" id="directMessageType">
+          <button type="button" class="message-type-btn active" data-type="info">
+            <i class="ri-information-line"></i>
+            اطلاع‌رسانی
+          </button>
+          <button type="button" class="message-type-btn" data-type="warning">
+            <i class="ri-alert-line"></i>
+            هشدار
+          </button>
+          <button type="button" class="message-type-btn" data-type="success">
+            <i class="ri-checkbox-circle-line"></i>
+            تایید
+          </button>
+          <button type="button" class="message-type-btn" data-type="urgent">
+            <i class="ri-alarm-warning-line"></i>
+            فوری
+          </button>
+        </div>
+      </div>
+      
+      <div class="message-field">
+        <label for="directMessageText">
+          <i class="ri-chat-3-line"></i>
+          متن پیام
+        </label>
+        <textarea 
+          id="directMessageText" 
+          placeholder="پیام خود را برای فروشنده بنویسید..."
+          rows="4"
+        ></textarea>
+      </div>
+      
+      <div class="direct-message-actions">
+        <button type="button" class="direct-message-btn direct-message-btn--send" id="sendDirectMessage" disabled>
+          <i class="ri-send-plane-fill"></i>
+          ارسال پیام
+        </button>
+        <button type="button" class="direct-message-btn direct-message-btn--clear" id="clearDirectMessage">
+          <i class="ri-eraser-line"></i>
+          پاک کردن
+        </button>
+      </div>
+      
+      <div class="direct-message-status" id="directMessageStatus">
+        <i class="ri-checkbox-circle-fill"></i>
+        <span></span>
+      </div>
+    </div>
+  </div>
+</div>
 
-
-<!-- 📢 کارت ارسال پیام همگانی -->
 <!-- 📢 کارت ارسال پیام همگانی -->
 <div class="broadcast-card collapsed" id="broadcastCard">
   <div class="broadcast-header" id="broadcastHeader">
@@ -1448,7 +1553,6 @@
     <i class="ri-arrow-down-s-line toggle-icon" id="broadcastToggleIcon"></i>
   </div>
   <div class="broadcast-body" id="broadcastBody">
-    <!-- بقیه فرم بدون تغییر -->
     <div class="broadcast-row">
       <label for="broadcastTarget">ارسال به:</label>
       <select id="broadcastTarget">

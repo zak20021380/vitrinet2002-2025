@@ -1984,15 +1984,7 @@
     margin-bottom: 7px;
   }
 
-  .top-left-actions {
-    position: fixed;
-    top: 0.8rem;
-    left: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    z-index: 160;
-  }
+
 
   /* Floating Action Button - Notification Icon */
   .notif-btn {
@@ -2313,175 +2305,239 @@
     }
   }
 
-  .install-app-btn {
+  /* دکمه نصب اپلیکیشن در سایدبار - طراحی متمایز و رسپانسیو */
+  .sidebar-install-btn {
     position: relative;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.55rem;
-    padding: 0.55rem 1.25rem;
+    justify-content: center;
+    gap: 10px;
+    width: 48px;
+    height: 48px;
+    margin-top: auto;
+    padding: 0;
     border: none;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #10b981 0%, #0ea5e9 50%, #10b981 100%);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #10b981 0%, #0ea5e9 50%, #06b6d4 100%);
     background-size: 200% 200%;
     color: #ffffff;
     font-weight: 800;
-    letter-spacing: -0.3px;
-    font-size: 14px;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35),
-                0 4px 12px rgba(14, 165, 233, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    font-size: 13px;
     cursor: pointer;
-    overflow: visible;
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    animation: gradientFlow 6s ease infinite, btnBreathing 4s ease-in-out infinite;
-    z-index: 10;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: installGradient 4s ease infinite;
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.35),
+      0 3px 10px rgba(14, 165, 233, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
-  .install-app-btn i {
-    font-size: 16px;
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    border-radius: 999px;
-    padding: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
-                inset 0 1px 2px rgba(255, 255, 255, 0.3);
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    animation: iconBounce 3s ease-in-out infinite;
-  }
-
-  .install-app-btn::before {
-    content: "";
+  .sidebar-install-btn::before {
+    content: '';
     position: absolute;
     inset: 0;
-    border-radius: 999px;
+    border-radius: 16px;
     padding: 2px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent 50%, rgba(255, 255, 255, 0.2));
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent 60%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
   }
 
-  .install-app-btn::after {
-    content: "";
+  .sidebar-install-btn::after {
+    content: '';
     position: absolute;
-    inset: -100%;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5), transparent 60%);
-    transform: scale(0);
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    animation: shimmerEffect 3s ease-in-out infinite;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: installShimmer 3s ease-in-out infinite;
   }
 
-  .install-app-btn:hover,
-  .install-app-btn:focus {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 16px 40px rgba(16, 185, 129, 0.5),
-                0 8px 20px rgba(14, 165, 233, 0.4),
-                0 0 0 6px rgba(16, 185, 129, 0.2),
-                0 0 20px rgba(14, 165, 233, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    background-position: 100% 50%;
+  .sidebar-install-btn__icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-install-btn__icon i {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-install-btn__text {
+    display: none;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-install-btn__badge {
+    display: none;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease 0.1s;
+  }
+
+  /* سایدبار باز شده */
+  .sidebar.expanded .sidebar-install-btn {
+    width: 200px;
+    height: auto;
+    padding: 14px 16px;
+    justify-content: flex-start;
+    border-radius: 14px;
+  }
+
+  .sidebar.expanded .sidebar-install-btn__text {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .sidebar.expanded .sidebar-install-btn__badge {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+    margin-right: auto;
+  }
+
+  .sidebar-install-btn:hover,
+  .sidebar-install-btn:focus {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 12px 30px rgba(16, 185, 129, 0.45),
+      0 6px 16px rgba(14, 165, 233, 0.35),
+      0 0 0 4px rgba(16, 185, 129, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
     outline: none;
-    animation: gradientFlow 2s ease infinite, btnPulse 1.5s ease-in-out infinite;
   }
 
-  .install-app-btn:hover i,
-  .install-app-btn:focus i {
-    transform: rotate(360deg) scale(1.2);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2),
-                inset 0 1px 3px rgba(255, 255, 255, 0.5);
-    animation: iconSpin 1s linear infinite;
+  .sidebar-install-btn:hover .sidebar-install-btn__icon,
+  .sidebar-install-btn:focus .sidebar-install-btn__icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
   }
 
-  .install-app-btn:hover::after,
-  .install-app-btn:focus::after {
-    transform: scale(1.5);
-    animation: pulseGlow 1.5s ease-in-out infinite;
+  .sidebar-install-btn:hover .sidebar-install-btn__icon i,
+  .sidebar-install-btn:focus .sidebar-install-btn__icon i {
+    transform: translateY(-2px);
+    animation: installBounce 0.6s ease infinite;
   }
 
-  .install-app-btn:active {
-    transform: translateY(-1px) scale(1.02);
-    transition: all 0.1s ease;
+  .sidebar-install-btn:active {
+    transform: translateY(0) scale(0.98);
   }
 
-  .dark .install-app-btn {
-    background: linear-gradient(135deg, #059669 0%, #0284c7 50%, #059669 100%);
-    background-size: 200% 200%;
-    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.4),
-                0 4px 12px rgba(2, 132, 199, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
-
-  .dark .install-app-btn i {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2),
-                inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  }
-
-  .dark .install-app-btn:hover,
-  .dark .install-app-btn:focus {
-    box-shadow: 0 16px 40px rgba(5, 150, 105, 0.6),
-                0 8px 20px rgba(2, 132, 199, 0.5),
-                0 0 0 6px rgba(5, 150, 105, 0.25),
-                0 0 20px rgba(2, 132, 199, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  }
-
-  /* انیمیشن‌های حرفه‌ای */
-  @keyframes gradientFlow {
+  /* انیمیشن‌ها */
+  @keyframes installGradient {
     0%, 100% { background-position: 0% 50%; }
-    25% { background-position: 50% 50%; }
     50% { background-position: 100% 50%; }
-    75% { background-position: 50% 50%; }
   }
 
-  @keyframes pulseGlow {
-    0%, 100% { opacity: 0.55; transform: scale(1); }
-    50% { opacity: 0; transform: scale(1.8); }
+  @keyframes installShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 
-  @keyframes btnBreathing {
-    0%, 100% { box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35),
-                            0 4px 12px rgba(14, 165, 233, 0.25),
-                            inset 0 1px 0 rgba(255, 255, 255, 0.25); }
-    50% { box-shadow: 0 10px 28px rgba(16, 185, 129, 0.4),
-                      0 5px 14px rgba(14, 165, 233, 0.3),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+  @keyframes installBounce {
+    0%, 100% { transform: translateY(-2px); }
+    50% { transform: translateY(-6px); }
   }
 
-  @keyframes btnPulse {
-    0%, 100% { transform: translateY(-3px) scale(1.05); }
-    50% { transform: translateY(-4px) scale(1.06); }
+  /* دارک مود */
+  .dark .sidebar-install-btn {
+    background: linear-gradient(145deg, #059669 0%, #0284c7 50%, #0891b2 100%);
+    box-shadow: 
+      0 6px 20px rgba(5, 150, 105, 0.4),
+      0 3px 10px rgba(2, 132, 199, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  @keyframes iconBounce {
-    0%, 100% { transform: translateY(0); }
-    25% { transform: translateY(-2px); }
-    50% { transform: translateY(0); }
-    75% { transform: translateY(-1px); }
+  .dark .sidebar-install-btn:hover,
+  .dark .sidebar-install-btn:focus {
+    box-shadow: 
+      0 12px 30px rgba(5, 150, 105, 0.5),
+      0 6px 16px rgba(2, 132, 199, 0.4),
+      0 0 0 4px rgba(5, 150, 105, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
-  @keyframes iconSpin {
-    from { transform: rotate(0deg) scale(1.2); }
-    to { transform: rotate(360deg) scale(1.2); }
-  }
-
-  @keyframes shimmerEffect {
-    0%, 100% { opacity: 0; transform: translateX(-100%) scale(0.5); }
-    50% { opacity: 0.3; transform: translateX(100%) scale(1); }
-  }
-
-  @media (max-width: 640px) {
-    .top-left-actions {
-      top: 0.65rem;
-      left: 0.65rem;
-      gap: 0.5rem;
-      flex-direction: row;
-      align-items: center;
-      flex-wrap: wrap;
-      max-width: calc(100vw - 80px);
+  /* رسپانسیو موبایل */
+  @media (max-width: 1024px) {
+    .sidebar-install-btn {
+      width: 100%;
+      height: auto;
+      padding: 14px 16px;
+      justify-content: flex-start;
+      border-radius: 14px;
+      margin-top: 12px;
     }
 
+    .sidebar-install-btn__text {
+      display: block;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .sidebar-install-btn__badge {
+      display: block;
+      opacity: 1;
+      transform: scale(1);
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sidebar-install-btn {
+      padding: 12px 14px;
+      border-radius: 12px;
+    }
+
+    .sidebar-install-btn__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+    }
+
+    .sidebar-install-btn__icon i {
+      font-size: 16px;
+    }
+
+    .sidebar-install-btn__text {
+      font-size: 12px;
+    }
+
+    .sidebar-install-btn__badge {
+      padding: 2px 6px;
+      font-size: 9px;
+    }
+  }
+
+
+
+  @media (max-width: 640px) {
     /* Floating Action Button در موبایل */
     .home-btn {
       bottom: 1.25rem;
@@ -2495,34 +2551,9 @@
     .home-btn i {
       font-size: 22px;
     }
-
-    .install-app-btn {
-      padding: 0.5rem 0.85rem;
-      font-size: 12.5px;
-      gap: 0.35rem;
-      white-space: nowrap;
-      flex-shrink: 1;
-      min-width: 0;
-    }
-
-    .install-app-btn i {
-      font-size: 15px;
-      padding: 3.5px;
-    }
-
-    .install-app-btn span {
-      display: inline;
-    }
   }
 
   @media (max-width: 400px) {
-    .top-left-actions {
-      top: 3.9rem;
-      left: 0.45rem;
-      gap: 0.4rem;
-      max-width: calc(100vw - 70px);
-    }
-
     /* Floating Action Button در موبایل کوچک */
     .home-btn {
       bottom: 1rem;
@@ -2533,17 +2564,6 @@
 
     .home-btn i {
       font-size: 20px;
-    }
-
-    .install-app-btn {
-      padding: 0.45rem 0.75rem;
-      font-size: 11.5px;
-      gap: 0.3rem;
-    }
-
-    .install-app-btn i {
-      font-size: 13px;
-      padding: 2.5px;
     }
   }
 
@@ -3451,7 +3471,821 @@
   }
 }
 
+/* ========== کارت‌های Streak و اعتبار فروشگاه ========== */
+.dashboard-hero-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
 
+/* کارت Streak روزانه */
+.streak-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff8f0 0%, #fff5eb 100%);
+  border: 1px solid rgba(251, 146, 60, 0.15);
+  box-shadow: 0 8px 24px rgba(251, 146, 60, 0.12);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.streak-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.streak-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(251, 146, 60, 0.2);
+  border-color: rgba(251, 146, 60, 0.3);
+}
+
+.streak-card__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fb923c 0%, #f97316 100%);
+  color: #fff;
+  font-size: 26px;
+  box-shadow: 0 6px 16px rgba(251, 146, 60, 0.35);
+  flex-shrink: 0;
+}
+
+.streak-card__icon::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(251, 146, 60, 0.4), transparent);
+  z-index: -1;
+  animation: streakPulse 2s ease-in-out infinite;
+}
+
+@keyframes streakPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}
+
+.streak-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.streak-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a3412;
+  margin-bottom: 4px;
+}
+
+.streak-card__value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.streak-card__number {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ea580c;
+  line-height: 1;
+}
+
+.streak-card__unit {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c2410c;
+}
+
+.streak-card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(251, 146, 60, 0.15);
+  font-size: 10px;
+  font-weight: 800;
+  color: #c2410c;
+}
+
+/* کارت اعتبار فروشگاه */
+.rank-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.rank-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.rank-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.rank-card__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-size: 26px;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  flex-shrink: 0;
+}
+
+.rank-card__icon::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.4), transparent);
+  z-index: -1;
+  animation: rankGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes rankGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}
+
+.rank-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 4px;
+}
+
+.rank-card__value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.rank-card__title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #059669;
+  line-height: 1.2;
+}
+
+.rank-card__stars {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.rank-card__stars i {
+  font-size: 14px;
+  color: #fbbf24;
+}
+
+.rank-card__stars i.empty {
+  color: #d1d5db;
+}
+
+.rank-card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  font-size: 10px;
+  font-weight: 800;
+  color: #065f46;
+}
+
+/* ========== مدال Streak ========== */
+.streak-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.streak-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.streak-modal__card {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #fffbf5 0%, #fff8f0 100%);
+  box-shadow: 0 24px 60px rgba(251, 146, 60, 0.25);
+  padding: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.streak-modal.active .streak-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.streak-modal__header {
+  position: relative;
+  padding: 28px 24px 20px;
+  background: linear-gradient(145deg, #fb923c 0%, #f97316 100%);
+  border-radius: 24px 24px 0 0;
+  text-align: center;
+  color: #fff;
+}
+
+.streak-modal__header-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.streak-modal__title {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+
+.streak-modal__subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.streak-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.streak-modal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(-90deg);
+}
+
+.streak-modal__body {
+  padding: 24px;
+}
+
+.streak-modal__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.streak-stat {
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(251, 146, 60, 0.1);
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.08);
+}
+
+.streak-stat__value {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ea580c;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.streak-stat__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.streak-modal__calendar {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(251, 146, 60, 0.1);
+  margin-bottom: 20px;
+}
+
+.streak-calendar__title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.streak-day {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f8fafc;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.streak-day.active {
+  background: linear-gradient(145deg, #fb923c, #f97316);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+}
+
+.streak-day.today {
+  border: 2px solid #fb923c;
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.streak-modal__tips {
+  background: linear-gradient(145deg, #fef3c7, #fef9c3);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.streak-tips__title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #92400e;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.streak-tips__text {
+  font-size: 12px;
+  color: #78350f;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ========== مدال اعتبار فروشگاه ========== */
+.rank-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.rank-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.rank-modal__card {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 100%);
+  box-shadow: 0 24px 60px rgba(16, 185, 129, 0.25);
+  padding: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rank-modal.active .rank-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.rank-modal__header {
+  position: relative;
+  padding: 28px 24px 20px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  border-radius: 24px 24px 0 0;
+  text-align: center;
+  color: #fff;
+}
+
+.rank-modal__header-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.rank-modal__title {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+
+.rank-modal__subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.rank-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.rank-modal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(-90deg);
+}
+
+.rank-modal__body {
+  padding: 24px;
+}
+
+.rank-modal__current {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.1);
+  margin-bottom: 20px;
+}
+
+.rank-current__badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #10b981, #059669);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 28px;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+.rank-current__info {
+  flex: 1;
+}
+
+.rank-current__title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #059669;
+  margin: 0 0 4px;
+}
+
+.rank-current__stars {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.rank-current__stars i {
+  font-size: 16px;
+  color: #fbbf24;
+}
+
+.rank-current__stars i.empty {
+  color: #e5e7eb;
+}
+
+.rank-current__progress {
+  font-size: 12px;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.rank-modal__progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.rank-modal__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.rank-modal__levels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.rank-level {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.rank-level.current {
+  border-color: #10b981;
+  background: linear-gradient(145deg, #f0fdf4, #ecfdf5);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.rank-level__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.rank-level__icon.bronze { background: linear-gradient(145deg, #d97706, #b45309); color: #fff; }
+.rank-level__icon.silver { background: linear-gradient(145deg, #9ca3af, #6b7280); color: #fff; }
+.rank-level__icon.gold { background: linear-gradient(145deg, #fbbf24, #f59e0b); color: #fff; }
+.rank-level__icon.diamond { background: linear-gradient(145deg, #06b6d4, #0891b2); color: #fff; }
+
+.rank-level__info {
+  flex: 1;
+}
+
+.rank-level__name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px;
+}
+
+.rank-level__desc {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+
+.rank-level__check {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: #10b981;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.rank-modal__benefits {
+  background: linear-gradient(145deg, #eff6ff, #dbeafe);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.rank-benefits__title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e40af;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rank-benefits__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank-benefits__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #1e3a8a;
+}
+
+.rank-benefits__list li i {
+  color: #3b82f6;
+  font-size: 14px;
+}
+
+/* ========== رسپانسیو ========== */
+@media (max-width: 640px) {
+  .dashboard-hero-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 100%;
+  }
+
+  .streak-card,
+  .rank-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .streak-card__icon,
+  .rank-card__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    font-size: 22px;
+  }
+
+  .streak-card__number {
+    font-size: 24px;
+  }
+
+  .rank-card__title {
+    font-size: 16px;
+  }
+
+  .streak-modal__card,
+  .rank-modal__card {
+    border-radius: 20px;
+    max-height: 85vh;
+  }
+
+  .streak-modal__header,
+  .rank-modal__header {
+    padding: 24px 20px 18px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .streak-modal__header-icon,
+  .rank-modal__header-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+
+  .streak-modal__title,
+  .rank-modal__title {
+    font-size: 20px;
+  }
+
+  .streak-modal__body,
+  .rank-modal__body {
+    padding: 20px;
+  }
+
+  .streak-modal__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .streak-stat {
+    padding: 12px 8px;
+  }
+
+  .streak-stat__value {
+    font-size: 20px;
+  }
+
+  .streak-stat__label {
+    font-size: 10px;
+  }
+
+  .streak-calendar__grid {
+    gap: 4px;
+  }
+
+  .streak-day {
+    font-size: 11px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .streak-card__badge,
+  .rank-card__badge {
+    display: none;
+  }
+
+  .streak-modal__stats {
+    gap: 6px;
+  }
+
+  .streak-stat {
+    padding: 10px 6px;
+  }
+
+  .streak-stat__value {
+    font-size: 18px;
+  }
+}
 
 </style>
   <script src="/nav-active.js" defer></script>
@@ -3602,6 +4436,15 @@
       </svg>
       <span>راهنمای استفاده</span>
     </button>
+
+    <!-- دکمه نصب اپلیکیشن در سایدبار -->
+    <button class="sidebar-install-btn" id="installAppCta" title="نصب نسخه اپلیکیشن" aria-label="نصب اپلیکیشن ویترینت">
+      <div class="sidebar-install-btn__icon">
+        <i class="ri-smartphone-line"></i>
+      </div>
+      <span class="sidebar-install-btn__text">نصب اپلیکیشن</span>
+      <div class="sidebar-install-btn__badge">PWA</div>
+    </button>
   </aside>
 
 
@@ -3636,13 +4479,7 @@
     </div>
   </div>
 
-  <!-- App Install CTA -->
-  <div class="top-left-actions" aria-label="میانبرهای دسترسی سریع">
-    <button class="install-app-btn" id="installAppCta" title="نصب نسخه اپلیکیشن" aria-label="نصب اپلیکیشن ویترینت">
-      <i class="ri-download-2-fill"></i>
-      <span>نصب اپلیکیشن</span>
-    </button>
-  </div>
+
 
   <!-- Main Content -->
   <div class="main-container flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 md:p-10">
@@ -3651,7 +4488,53 @@
 <h1 class="text-2xl md:text-3xl font-extrabold text-[#10b981] text-center mb-2">
   <span id="seller-welcome" style="color:#0ea5e9;">فروشنده عزیز</span>
 </h1>
-      <div class="text-gray-500 text-[15px] mb-8 text-center">آمار و وضعیت فروشگاهت رو یکجا ببین و مدیریت کن!</div>
+      <div class="text-gray-500 text-[15px] mb-6 text-center">آمار و وضعیت فروشگاهت رو یکجا ببین و مدیریت کن!</div>
+
+      <!-- کارت‌های Streak و اعتبار فروشگاه -->
+      <div class="dashboard-hero-cards">
+        <!-- کارت Streak روزانه -->
+        <div class="streak-card" id="openStreakModal" role="button" tabindex="0" aria-label="مشاهده جزئیات فعالیت روزانه">
+          <div class="streak-card__icon">
+            <i class="ri-fire-fill"></i>
+          </div>
+          <div class="streak-card__content">
+            <div class="streak-card__label">فعالیت متوالی</div>
+            <div class="streak-card__value">
+              <span class="streak-card__number" id="streakCount">12</span>
+              <span class="streak-card__unit">روز</span>
+            </div>
+          </div>
+          <div class="streak-card__badge">
+            <i class="ri-arrow-up-line"></i>
+            رکورد!
+          </div>
+        </div>
+
+        <!-- کارت اعتبار فروشگاه -->
+        <div class="rank-card" id="openRankModal" role="button" tabindex="0" aria-label="مشاهده جزئیات اعتبار فروشگاه">
+          <div class="rank-card__icon">
+            <i class="ri-medal-fill"></i>
+          </div>
+          <div class="rank-card__content">
+            <div class="rank-card__label">اعتبار فروشگاه</div>
+            <div class="rank-card__value">
+              <span class="rank-card__title" id="rankTitle">طلایی</span>
+            </div>
+            <div class="rank-card__stars" id="rankStars">
+              <i class="ri-star-fill"></i>
+              <i class="ri-star-fill"></i>
+              <i class="ri-star-fill"></i>
+              <i class="ri-star-fill"></i>
+              <i class="ri-star-line empty"></i>
+            </div>
+          </div>
+          <div class="rank-card__badge">
+            <i class="ri-shield-check-fill"></i>
+            تایید شده
+          </div>
+        </div>
+      </div>
+
       <div class="w-full max-w-2xl flex flex-wrap justify-center gap-4 mb-7">
         <div class="stat-card w-full sm:w-auto">
           <div class="icon">
@@ -4489,7 +5372,6 @@
     const productsMobileList = document.getElementById('productsMobileList');
     const noProductMsg = document.getElementById('noProductMsg');
     const noProductAddBtn = document.getElementById('noProductAddBtn');
-    const installAppActions = document.querySelector('.top-left-actions');
     let performanceLoaded = false;
 
     function updateActiveButton(sectionName) {
@@ -4499,11 +5381,6 @@
       if (performanceBtn) {
         performanceBtn.classList.toggle('active', sectionName === 'performance');
       }
-    }
-
-    function updateInstallCtaVisibility(isVisitSection) {
-      if (!installAppActions) return;
-      installAppActions.style.display = isVisitSection ? '' : 'none';
     }
 
     async function loadPerformanceSection() {
@@ -4536,7 +5413,6 @@
         section.style.display = section.id === `section-${sectionName}` ? '' : 'none';
       });
 
-      updateInstallCtaVisibility(sectionName === 'visit');
       updateActiveButton(sectionName);
     }
 
@@ -4550,7 +5426,6 @@
         await loadPerformanceSection();
       }
 
-      updateInstallCtaVisibility(false);
       updateActiveButton('performance');
     }
 
@@ -5845,6 +6720,266 @@
 
 
 
+
+<!-- مدال Streak روزانه -->
+<div class="streak-modal" id="streakModal" role="dialog" aria-modal="true" aria-labelledby="streak-modal-title">
+  <div class="streak-modal__card" tabindex="-1">
+    <div class="streak-modal__header">
+      <div class="streak-modal__header-icon">
+        <i class="ri-fire-fill"></i>
+      </div>
+      <h3 class="streak-modal__title" id="streak-modal-title">فعالیت متوالی شما</h3>
+      <p class="streak-modal__subtitle">هر روز فعال باش، امتیاز بیشتری بگیر!</p>
+      <button class="streak-modal__close" id="closeStreakModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="streak-modal__body">
+      <div class="streak-modal__stats">
+        <div class="streak-stat">
+          <div class="streak-stat__value" id="streakCurrentDays">12</div>
+          <div class="streak-stat__label">روز متوالی</div>
+        </div>
+        <div class="streak-stat">
+          <div class="streak-stat__value" id="streakBestRecord">28</div>
+          <div class="streak-stat__label">بهترین رکورد</div>
+        </div>
+        <div class="streak-stat">
+          <div class="streak-stat__value" id="streakTotalDays">156</div>
+          <div class="streak-stat__label">کل روزها</div>
+        </div>
+      </div>
+
+      <div class="streak-modal__calendar">
+        <div class="streak-calendar__title">
+          <i class="ri-calendar-check-fill" style="color:#fb923c;"></i>
+          فعالیت ۱۴ روز اخیر
+        </div>
+        <div class="streak-calendar__grid" id="streakCalendarGrid">
+          <!-- روزها با جاوااسکریپت پر می‌شوند -->
+        </div>
+      </div>
+
+      <div class="streak-modal__tips">
+        <div class="streak-tips__title">
+          <i class="ri-lightbulb-flash-fill"></i>
+          نکته طلایی
+        </div>
+        <p class="streak-tips__text">
+          با فعالیت روزانه در پنل فروشگاه (افزودن محصول، پاسخ به پیام‌ها، بروزرسانی قیمت‌ها) امتیاز streak خود را افزایش دهید. هر ۷ روز متوالی، یک جایزه ویژه دریافت کنید!
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- مدال اعتبار فروشگاه -->
+<div class="rank-modal" id="rankModal" role="dialog" aria-modal="true" aria-labelledby="rank-modal-title">
+  <div class="rank-modal__card" tabindex="-1">
+    <div class="rank-modal__header">
+      <div class="rank-modal__header-icon">
+        <i class="ri-medal-fill"></i>
+      </div>
+      <h3 class="rank-modal__title" id="rank-modal-title">اعتبار فروشگاه شما</h3>
+      <p class="rank-modal__subtitle">با فعالیت بیشتر، رتبه بالاتری کسب کنید</p>
+      <button class="rank-modal__close" id="closeRankModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    <div class="rank-modal__body">
+      <div class="rank-modal__current">
+        <div class="rank-current__badge">
+          <i class="ri-vip-crown-fill"></i>
+        </div>
+        <div class="rank-current__info">
+          <h4 class="rank-current__title" id="rankCurrentTitle">فروشگاه طلایی</h4>
+          <div class="rank-current__stars" id="rankCurrentStars">
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-line empty"></i>
+          </div>
+          <div class="rank-current__progress">۸۵۰ از ۱۰۰۰ امتیاز برای سطح بعدی</div>
+        </div>
+      </div>
+
+      <div class="rank-modal__progress-bar">
+        <div class="rank-modal__progress-fill" style="width: 85%;"></div>
+      </div>
+
+      <div class="rank-modal__levels">
+        <div class="rank-level">
+          <div class="rank-level__icon bronze">
+            <i class="ri-medal-line"></i>
+          </div>
+          <div class="rank-level__info">
+            <h5 class="rank-level__name">برنزی</h5>
+            <p class="rank-level__desc">۰ تا ۲۵۰ امتیاز</p>
+          </div>
+          <div class="rank-level__check">
+            <i class="ri-check-line"></i>
+          </div>
+        </div>
+        <div class="rank-level">
+          <div class="rank-level__icon silver">
+            <i class="ri-medal-line"></i>
+          </div>
+          <div class="rank-level__info">
+            <h5 class="rank-level__name">نقره‌ای</h5>
+            <p class="rank-level__desc">۲۵۰ تا ۵۰۰ امتیاز</p>
+          </div>
+          <div class="rank-level__check">
+            <i class="ri-check-line"></i>
+          </div>
+        </div>
+        <div class="rank-level current">
+          <div class="rank-level__icon gold">
+            <i class="ri-medal-fill"></i>
+          </div>
+          <div class="rank-level__info">
+            <h5 class="rank-level__name">طلایی</h5>
+            <p class="rank-level__desc">۵۰۰ تا ۱۰۰۰ امتیاز</p>
+          </div>
+          <div class="rank-level__check">
+            <i class="ri-check-line"></i>
+          </div>
+        </div>
+        <div class="rank-level">
+          <div class="rank-level__icon diamond">
+            <i class="ri-vip-diamond-line"></i>
+          </div>
+          <div class="rank-level__info">
+            <h5 class="rank-level__name">الماسی</h5>
+            <p class="rank-level__desc">بیش از ۱۰۰۰ امتیاز</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rank-modal__benefits">
+        <div class="rank-benefits__title">
+          <i class="ri-gift-fill"></i>
+          مزایای سطح طلایی
+        </div>
+        <ul class="rank-benefits__list">
+          <li><i class="ri-check-double-line"></i> نمایش برجسته در نتایج جستجو</li>
+          <li><i class="ri-check-double-line"></i> بج تایید شده کنار نام فروشگاه</li>
+          <li><i class="ri-check-double-line"></i> دسترسی به آمار پیشرفته</li>
+          <li><i class="ri-check-double-line"></i> پشتیبانی اولویت‌دار</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // مدیریت مدال‌های Streak و اعتبار
+  (function() {
+    // Streak Modal
+    const streakCard = document.getElementById('openStreakModal');
+    const streakModal = document.getElementById('streakModal');
+    const closeStreakBtn = document.getElementById('closeStreakModal');
+    const streakModalCard = streakModal?.querySelector('.streak-modal__card');
+    const streakCalendarGrid = document.getElementById('streakCalendarGrid');
+
+    // Rank Modal
+    const rankCard = document.getElementById('openRankModal');
+    const rankModal = document.getElementById('rankModal');
+    const closeRankBtn = document.getElementById('closeRankModal');
+    const rankModalCard = rankModal?.querySelector('.rank-modal__card');
+
+    let lastFocusedElement = null;
+
+    // تولید تقویم streak
+    function generateStreakCalendar() {
+      if (!streakCalendarGrid) return;
+      const today = new Date();
+      const days = [];
+      
+      // ۱۴ روز اخیر
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dayNum = date.getDate();
+        const isActive = Math.random() > 0.3; // شبیه‌سازی فعالیت
+        const isToday = i === 0;
+        
+        days.push({
+          day: dayNum,
+          active: isActive,
+          today: isToday
+        });
+      }
+
+      streakCalendarGrid.innerHTML = days.map(d => `
+        <div class="streak-day ${d.active ? 'active' : ''} ${d.today ? 'today' : ''}">
+          ${d.day}
+        </div>
+      `).join('');
+    }
+
+    // باز کردن مدال
+    function openModal(modal, card) {
+      if (!modal) return;
+      lastFocusedElement = document.activeElement;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => card?.focus({ preventScroll: true }), 50);
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    // بستن مدال
+    function closeModal(modal) {
+      if (!modal) return;
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscape);
+      if (lastFocusedElement) {
+        lastFocusedElement.focus({ preventScroll: true });
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        closeModal(streakModal);
+        closeModal(rankModal);
+      }
+    }
+
+    // Event Listeners - Streak
+    streakCard?.addEventListener('click', () => {
+      generateStreakCalendar();
+      openModal(streakModal, streakModalCard);
+    });
+    streakCard?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        generateStreakCalendar();
+        openModal(streakModal, streakModalCard);
+      }
+    });
+    closeStreakBtn?.addEventListener('click', () => closeModal(streakModal));
+    streakModal?.addEventListener('click', (e) => {
+      if (e.target === streakModal) closeModal(streakModal);
+    });
+
+    // Event Listeners - Rank
+    rankCard?.addEventListener('click', () => openModal(rankModal, rankModalCard));
+    rankCard?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openModal(rankModal, rankModalCard);
+      }
+    });
+    closeRankBtn?.addEventListener('click', () => closeModal(rankModal));
+    rankModal?.addEventListener('click', (e) => {
+      if (e.target === rankModal) closeModal(rankModal);
+    });
+
+    // تولید تقویم اولیه
+    generateStreakCalendar();
+  })();
+</script>
 
 <script src="performance-status.js"></script>
 <script src="dashboard-content.js"></script>
