@@ -49,6 +49,54 @@ exports.createTicket = async (req, res) => {
   }
 };
 
+// ادمین: ثبت تیکت برای یک فروشنده خاص
+exports.adminCreateTicket = async (req, res) => {
+  try {
+    const { sellerId, subject, message, category, priority } = req.body || {};
+
+    if (!sellerId) {
+      return res.status(400).json({ message: 'شناسه فروشنده الزامی است.' });
+    }
+
+    if (!subject || !message) {
+      return res.status(400).json({ message: 'موضوع و متن تیکت الزامی است.' });
+    }
+
+    const seller = await Seller.findById(sellerId).select('firstname lastname storename shopurl phone');
+    if (!seller) {
+      return res.status(404).json({ message: 'فروشنده پیدا نشد.' });
+    }
+
+    const ticket = await SupportTicket.create({
+      sellerId: seller._id,
+      sellerName: normalizeSellerName(seller) || 'فروشنده خدماتی',
+      shopurl: seller.shopurl || '',
+      phone: seller.phone || '',
+      subject: String(subject).trim(),
+      category: (category || 'عمومی').toString().trim(),
+      message: String(message).trim(),
+      priority: priority === 'high' ? 'high' : 'normal',
+      lastUpdatedBy: 'admin'
+    });
+
+    if (seller._id) {
+      const summary = ticket.message.length > 120
+        ? `${ticket.message.slice(0, 120)}…`
+        : ticket.message;
+      await createNotification(seller._id, `تیکت جدید از طرف پشتیبانی: «${ticket.subject}»`, {
+        relatedTicketId: ticket._id,
+        type: 'support_ticket',
+        preview: summary
+      });
+    }
+
+    res.status(201).json({ ticket, message: 'تیکت اختصاصی ایجاد شد.' });
+  } catch (err) {
+    console.error('adminCreateTicket error:', err);
+    res.status(500).json({ message: 'ثبت تیکت ادمین با خطا مواجه شد.' });
+  }
+};
+
 exports.listTickets = async (req, res) => {
   try {
     const { status } = req.query || {};
@@ -137,6 +185,23 @@ exports.replyToTicket = async (req, res) => {
   } catch (err) {
     console.error('replyToTicket error:', err);
     res.status(500).json({ message: 'ارسال پاسخ با خطا مواجه شد.' });
+  }
+};
+
+// ادمین: حذف کامل تیکت
+exports.deleteTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ticket = await SupportTicket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: 'تیکت پیدا نشد.' });
+    }
+
+    await SupportTicket.deleteOne({ _id: id });
+    res.json({ success: true, message: 'تیکت حذف شد.' });
+  } catch (err) {
+    console.error('deleteTicket error:', err);
+    res.status(500).json({ message: 'حذف تیکت با خطا مواجه شد.' });
   }
 };
 

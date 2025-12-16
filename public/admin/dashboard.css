@@ -7964,6 +7964,200 @@ tr:last-child td {
   flex-wrap: wrap;
 }
 
+.ticket-composer {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 12px 30px rgba(15, 118, 110, 0.06);
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.ticket-composer__label {
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+.ticket-composer__search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ticket-search {
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ticket-search i {
+  color: #64748b;
+  font-size: 1.2rem;
+}
+
+.ticket-search input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  padding: 0.65rem 0.3rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ticket-search input:focus {
+  outline: none;
+}
+
+.ticket-search__results {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 0.3rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.07);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.ticket-search__result {
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: right;
+}
+
+.ticket-search__result:last-child {
+  border-bottom: none;
+}
+
+.ticket-search__result:hover {
+  background: #f8fafc;
+}
+
+.ticket-search__result-title {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ticket-search__result-meta {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ticket-search__hint {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.ticket-composer__body {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ticket-composer__target {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ticket-composer__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.ticket-composer__fields input,
+.ticket-composer__fields textarea {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.ticket-composer__fields textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.ticket-composer__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ticket-composer__meta {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+
+.pill--muted { background: #fff; color: #475569; }
+.pill--success { background: #ecfdf3; color: #0f766e; border-color: #a7f3d0; }
+
+.ticket-composer__actions button {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.ticket-composer__actions button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ticket-composer__actions button:not([disabled]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(14, 165, 233, 0.35);
+}
+
 .ticket-filters {
   display: flex;
   gap: 0.6rem;
@@ -8077,6 +8271,12 @@ tr:last-child td {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.ticket-action-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .ticket-status-select {
@@ -8336,6 +8536,20 @@ tr:last-child td {
 
   .ticket-actions {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .ticket-composer {
+    grid-template-columns: 1fr;
+  }
+  .ticket-composer__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ticket-composer__actions button {
+    width: 100%;
+    justify-content: center;
   }
 }
 

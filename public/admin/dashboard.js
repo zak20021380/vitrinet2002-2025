@@ -1385,6 +1385,8 @@ let supportTickets = [];
 let supportTicketsLoaded = false;
 let ticketFilterMode = 'all';
 let ticketModalCurrentId = null;
+let ticketComposerSelectedSeller = null;
+let ticketSearchTimer = null;
 
 let sellerPerformanceMap = {};
 let sellerPerformanceLoaded = false;
@@ -3315,7 +3317,12 @@ function renderSupportTickets(list = supportTickets) {
             <option value="in_progress" ${ticket.status === 'in_progress' ? 'selected' : ''}>در حال بررسی</option>
             <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>حل شده</option>
           </select>
-          <button class="action-btn view" data-ticket-open="${ticket._id}">مشاهده</button>
+          <div class="ticket-action-buttons">
+            <button class="action-btn view" data-ticket-open="${ticket._id}">مشاهده</button>
+            <button class="action-btn delete" data-ticket-delete="${ticket._id}" title="حذف تیکت">
+              <i class="ri-delete-bin-6-line" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
       </td>`;
 
@@ -3328,6 +3335,9 @@ function renderSupportTickets(list = supportTickets) {
 
     const viewBtn = row.querySelector('button[data-ticket-open]');
     viewBtn?.addEventListener('click', () => openTicketModal(ticket._id));
+
+    const deleteBtn = row.querySelector('button[data-ticket-delete]');
+    deleteBtn?.addEventListener('click', () => deleteTicket(ticket._id, deleteBtn));
   });
 }
 
@@ -3343,6 +3353,185 @@ async function fetchSupportTickets() {
   } catch (err) {
     console.error('fetchSupportTickets error:', err);
     return [];
+  }
+}
+
+function normaliseTicketText(value) {
+  return (value || '').toString().toLowerCase().trim();
+}
+
+function mapSellerForTicketSearch(raw) {
+  if (!raw) return null;
+  const id = toIdString(raw.sellerId || raw._sid || raw._id || raw.id || raw.shopurl || '');
+  const title = raw.storename || raw.shopLogoText || raw.shopName || raw.ownerName || raw.ownerFirstname || raw.ownerLastname || 'فروشنده';
+  const ownerName = `${raw.ownerFirstname || ''} ${raw.ownerLastname || ''}`.trim();
+  const shopurl = raw.shopurl || raw.shopUrl || '';
+  const phone = raw.phone || raw.ownerPhone || raw.mobile || '';
+  const searchText = normaliseTicketText(`${title} ${shopurl} ${ownerName} ${phone}`);
+
+  return { id, title, ownerName, shopurl, phone, searchText };
+}
+
+function searchSellersForTickets(query) {
+  const q = normaliseTicketText(query);
+  if (!q || q.length < 2) return [];
+
+  const deduped = new Map();
+  shopsList.forEach((seller) => {
+    const mapped = mapSellerForTicketSearch(seller);
+    if (!mapped || !mapped.id) return;
+    if (deduped.has(mapped.id)) return;
+    if (mapped.searchText.includes(q)) {
+      deduped.set(mapped.id, mapped);
+    }
+  });
+
+  return Array.from(deduped.values()).slice(0, 8);
+}
+
+function renderTicketSellerResults(results = []) {
+  const wrap = document.getElementById('ticket-seller-results');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  if (!results.length) {
+    wrap.innerHTML = '<div class="ticket-search__result">فروشنده‌ای با این نام پیدا نشد.</div>';
+    wrap.hidden = false;
+    return;
+  }
+
+  results.forEach((item) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'ticket-search__result';
+    button.innerHTML = `
+      <div class="ticket-search__result-title">${escapeHtml(item.title)}</div>
+      <div class="ticket-search__result-meta">
+        <span>${escapeHtml(item.shopurl || 'بدون لینک')}</span>
+        ${item.ownerName ? `<span>${escapeHtml(item.ownerName)}</span>` : ''}
+        ${item.phone ? `<span>${escapeHtml(item.phone)}</span>` : ''}
+      </div>
+    `;
+    button.addEventListener('click', () => selectTicketComposerSeller(item));
+    wrap.appendChild(button);
+  });
+
+  wrap.hidden = false;
+}
+
+function selectTicketComposerSeller(seller) {
+  ticketComposerSelectedSeller = seller;
+  const targetEl = document.getElementById('ticket-composer-target');
+  const pillEl = document.getElementById('ticket-composer-pill');
+  const inputEl = document.getElementById('ticket-seller-input');
+  const resultsEl = document.getElementById('ticket-seller-results');
+
+  if (inputEl) inputEl.value = seller?.title || '';
+  if (targetEl) targetEl.textContent = seller?.title ? `ارسال به: ${seller.title}` : 'فروشنده‌ای انتخاب نشده است.';
+  if (pillEl) {
+    pillEl.textContent = seller?.shopurl ? `لینک فروشگاه: ${seller.shopurl}` : 'فروشنده انتخاب شده';
+    pillEl.className = 'pill pill--success';
+  }
+  if (resultsEl) resultsEl.hidden = true;
+  updateTicketComposerButtonState();
+}
+
+function resetTicketComposerSelection() {
+  ticketComposerSelectedSeller = null;
+  const targetEl = document.getElementById('ticket-composer-target');
+  const pillEl = document.getElementById('ticket-composer-pill');
+  const resultsEl = document.getElementById('ticket-seller-results');
+  if (targetEl) targetEl.textContent = 'فروشنده‌ای انتخاب نشده است.';
+  if (pillEl) {
+    pillEl.textContent = 'انتخاب فروشنده از نتایج بالا';
+    pillEl.className = 'pill pill--muted';
+  }
+  if (resultsEl) resultsEl.hidden = true;
+}
+
+function updateTicketComposerButtonState() {
+  const btn = document.getElementById('ticket-send-btn');
+  const subjectVal = (document.getElementById('ticket-new-subject')?.value || '').trim();
+  const messageVal = (document.getElementById('ticket-new-message')?.value || '').trim();
+  const ready = !!(ticketComposerSelectedSeller && subjectVal.length >= 3 && messageVal.length >= 5);
+  if (btn) btn.disabled = !ready;
+}
+
+async function createAdminSupportTicket() {
+  const subjectInput = document.getElementById('ticket-new-subject');
+  const messageInput = document.getElementById('ticket-new-message');
+  const sendBtn = document.getElementById('ticket-send-btn');
+
+  if (!ticketComposerSelectedSeller?.id) {
+    alert('ابتدا فروشنده را از نتایج جستجو انتخاب کنید.');
+    return;
+  }
+
+  const subject = (subjectInput?.value || '').trim();
+  const message = (messageInput?.value || '').trim();
+
+  if (subject.length < 3 || message.length < 5) {
+    alert('موضوع و متن تیکت را کامل بنویسید.');
+    return;
+  }
+
+  const originalHtml = sendBtn?.innerHTML;
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> در حال ارسال';
+  }
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/admin`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sellerId: ticketComposerSelectedSeller.id,
+        subject,
+        message,
+        category: 'پیام ادمین',
+        priority: 'high'
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'ثبت تیکت انجام نشد.');
+    }
+
+    if (data.ticket) {
+      supportTickets.unshift(data.ticket);
+      renderSupportTickets();
+      updateSidebarCounts();
+      updateHeaderCounts();
+    }
+
+    if (subjectInput) subjectInput.value = '';
+    if (messageInput) messageInput.value = '';
+    const sellerInputEl = document.getElementById('ticket-seller-input');
+    if (sellerInputEl) sellerInputEl.value = '';
+    resetTicketComposerSelection();
+    updateTicketComposerButtonState();
+
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('تیکت اختصاصی با موفقیت ثبت شد.', 'success');
+    } else {
+      alert('تیکت اختصاصی با موفقیت ثبت شد.');
+    }
+  } catch (err) {
+    console.error('createAdminSupportTicket error:', err);
+    const errorMsg = err.message || 'امکان ثبت تیکت جدید نیست.';
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast(errorMsg, 'error');
+    } else {
+      alert(errorMsg);
+    }
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = originalHtml || 'ارسال تیکت اختصاصی';
+    }
   }
 }
 
@@ -3382,6 +3571,53 @@ async function updateTicketStatus(ticketId, status, selectEl) {
     alert(err.message || 'خطا در بروزرسانی وضعیت');
   } finally {
     if (selectEl) selectEl.disabled = false;
+  }
+}
+
+async function deleteTicket(ticketId, triggerBtn) {
+  if (!ticketId) return;
+  if (!confirm('آیا از حذف کامل این تیکت مطمئن هستید؟')) return;
+
+  const prevContent = triggerBtn?.innerHTML;
+  if (triggerBtn) {
+    triggerBtn.disabled = true;
+    triggerBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+  }
+
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/support-tickets/${ticketId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'حذف تیکت انجام نشد.');
+    }
+
+    supportTickets = supportTickets.filter(t => t._id !== ticketId);
+    renderSupportTickets();
+    updateSidebarCounts();
+    updateHeaderCounts();
+    if (ticketModalCurrentId === ticketId) closeTicketModal();
+
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast('تیکت حذف شد.', 'success');
+    } else {
+      alert('تیکت حذف شد.');
+    }
+  } catch (err) {
+    console.error('deleteTicket error:', err);
+    const errorMsg = err.message || 'خطا در حذف تیکت رخ داد.';
+    if (window.UIComponents?.showToast) {
+      window.UIComponents.showToast(errorMsg, 'error');
+    } else {
+      alert(errorMsg);
+    }
+  } finally {
+    if (triggerBtn) {
+      triggerBtn.disabled = false;
+      triggerBtn.innerHTML = prevContent || '';
+    }
   }
 }
 
@@ -3620,6 +3856,54 @@ ticketReplyForm?.addEventListener('submit', (e) => {
   }
   sendTicketReply(ticketId, message, status);
 });
+
+const ticketSellerInput = document.getElementById('ticket-seller-input');
+const ticketSubjectInput = document.getElementById('ticket-new-subject');
+const ticketMessageInput = document.getElementById('ticket-new-message');
+
+ticketSubjectInput?.addEventListener('input', updateTicketComposerButtonState);
+ticketMessageInput?.addEventListener('input', updateTicketComposerButtonState);
+
+ticketSellerInput?.addEventListener('input', (e) => {
+  const value = e.target.value || '';
+  const normalisedValue = normaliseTicketText(value);
+  if (!ticketComposerSelectedSeller || normaliseTicketText(ticketComposerSelectedSeller.title) !== normalisedValue) {
+    resetTicketComposerSelection();
+  }
+  updateTicketComposerButtonState();
+
+  if (ticketSearchTimer) clearTimeout(ticketSearchTimer);
+  if (normalisedValue.length < 2) {
+    const results = document.getElementById('ticket-seller-results');
+    if (results) results.hidden = true;
+    return;
+  }
+
+  ticketSearchTimer = setTimeout(() => {
+    const matches = searchSellersForTickets(value);
+    renderTicketSellerResults(matches);
+  }, 180);
+});
+
+ticketSellerInput?.addEventListener('focus', () => {
+  const value = ticketSellerInput.value || '';
+  if (normaliseTicketText(value).length >= 2) {
+    const matches = searchSellersForTickets(value);
+    renderTicketSellerResults(matches);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const searchBox = document.getElementById('ticket-seller-searchbox');
+  const results = document.getElementById('ticket-seller-results');
+  if (!results || !searchBox) return;
+  if (!searchBox.contains(e.target)) {
+    results.hidden = true;
+  }
+});
+
+const ticketSendBtn = document.getElementById('ticket-send-btn');
+ticketSendBtn?.addEventListener('click', createAdminSupportTicket);
 
 
 
