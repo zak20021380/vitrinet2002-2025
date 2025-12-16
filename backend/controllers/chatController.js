@@ -452,10 +452,14 @@ exports.createAdminUserChat = async (req, res) => {
 
     const adminId = adminDoc._id.toString();
 
-    const participants = [userId, adminId].sort();
-    const participantsModel = participants.map(id =>
-      id === userId ? 'User' : 'Admin'
-    );
+    // ساخت آرایه با ObjectId و مرتب‌سازی صحیح
+    const rawParticipants = [
+      { id: userId, model: 'User' },
+      { id: adminId, model: 'Admin' }
+    ].sort((a, b) => a.id.localeCompare(b.id));
+
+    const participants = rawParticipants.map(p => new mongoose.Types.ObjectId(p.id));
+    const participantsModel = rawParticipants.map(p => p.model);
 
     const finder = {
       participants: sortIdArray(participants),
@@ -673,6 +677,7 @@ exports.ensureChat = async (req, res) => {
 exports.getMyChats = async (req, res) => {
   try {
     const myId = new mongoose.Types.ObjectId(req.user.id);
+    const myRole = req.user.role;
 
     // کل چت‌هایی که کاربر عضوشه رو بیار و همه شرکت‌کننده‌ها رو populate کن
     const chats = await Chat.find({ participants: myId })
@@ -706,6 +711,75 @@ exports.getMyChats = async (req, res) => {
         chat.otherParticipant = null;
       }
     });
+
+    // اگر کاربر عادی است، پیام‌های AdminUserMessage رو هم به عنوان یک چت مجازی اضافه کن
+    if (myRole === 'user') {
+      const AdminUserMessage = require('../models/adminUserMessage');
+      const adminDoc = await Admin.findOne().select('_id');
+      
+      if (adminDoc) {
+        const adminId = adminDoc._id;
+        
+        // چک کن آیا پیامی بین کاربر و ادمین وجود داره
+        const adminMessages = await AdminUserMessage.find({
+          $or: [
+            { senderId: myId, receiverId: adminId },
+            { senderId: adminId, receiverId: myId }
+          ]
+        })
+          .sort({ timestamp: -1 })
+          .lean();
+
+        if (adminMessages.length > 0) {
+          // آیا قبلاً چت admin-user در لیست هست؟
+          const existingAdminChat = chats.find(c => 
+            c.type === 'admin-user' || 
+            (c.participantsModel && c.participantsModel.includes('Admin'))
+          );
+
+          if (!existingAdminChat) {
+            // یک چت مجازی برای پیام‌های ادمین بساز
+            const lastMsg = adminMessages[0];
+            const unreadCount = adminMessages.filter(m => 
+              !m.read && m.receiverId.toString() === myId.toString()
+            ).length;
+
+            const virtualAdminChat = {
+              _id: `admin-user-${myId}`, // شناسه مجازی
+              type: 'admin-user',
+              participants: [
+                { _id: myId, role: 'user' },
+                { _id: adminId, role: 'admin', firstname: 'مدیر', lastname: 'سایت' }
+              ],
+              participantsModel: ['User', 'Admin'],
+              messages: adminMessages.map(m => ({
+                from: m.senderModel === 'User' ? 'user' : 'admin',
+                text: m.message,
+                date: m.timestamp || m.createdAt,
+                read: m.read,
+                readByAdmin: m.senderModel === 'User' ? m.read : true
+              })),
+              lastUpdated: lastMsg.timestamp || lastMsg.createdAt,
+              otherParticipant: {
+                _id: adminId,
+                firstname: 'مدیر',
+                lastname: 'سایت',
+                role: 'admin',
+                storename: '',
+                shopurl: ''
+              },
+              isVirtualAdminChat: true, // علامت‌گذاری به عنوان چت مجازی
+              unreadCount
+            };
+
+            chats.push(virtualAdminChat);
+          }
+        }
+      }
+    }
+
+    // مرتب‌سازی نهایی بر اساس lastUpdated
+    chats.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
 
     res.json(chats);
   } catch (err) {

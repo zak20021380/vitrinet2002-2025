@@ -1,6 +1,12 @@
 const AdminUserMessage = require('../models/adminUserMessage');
 const Admin = require('../models/admin');
+const Chat = require('../models/chat');
 const mongoose = require('mongoose');
+
+// تابع کمکی برای مرتب‌سازی آرایه ObjectId
+function sortIdArray(ids = []) {
+  return [...ids].sort((a, b) => a.toString().localeCompare(b.toString()));
+}
 
 // لیست کاربران که با مدیر گفتگو داشته‌اند
 exports.listUsers = async (req, res) => {
@@ -148,6 +154,67 @@ exports.sendMessage = async (req, res) => {
     await saved.populate('senderId', 'role firstname lastname phone name');
     const obj = saved.toObject();
     if (!obj.createdAt) obj.createdAt = obj.timestamp;
+
+    // همزمان چت در سیستم Chat هم ایجاد یا به‌روزرسانی کن
+    try {
+      const userObjId = sender.role === 'user' 
+        ? new mongoose.Types.ObjectId(sender.id)
+        : new mongoose.Types.ObjectId(userId);
+      
+      // ساخت آرایه با ObjectId و مرتب‌سازی صحیح
+      const rawParticipants = [
+        { id: userObjId.toString(), model: 'User' },
+        { id: adminId, model: 'Admin' }
+      ].sort((a, b) => a.id.localeCompare(b.id));
+
+      const participants = rawParticipants.map(p => new mongoose.Types.ObjectId(p.id));
+      const participantsModel = rawParticipants.map(p => p.model);
+
+      const finder = {
+        participants: sortIdArray(participants),
+        type: 'admin-user',
+        productId: null
+      };
+
+      let chat = await Chat.findOne(finder);
+      const senderRole = sender.role === 'admin' ? 'admin' : 'user';
+
+      if (chat) {
+        // چت موجود است، پیام جدید اضافه کن
+        chat.messages.push({
+          from: senderRole,
+          text: message,
+          date: new Date(),
+          read: false,
+          readByAdmin: senderRole === 'admin',
+          readBySeller: true
+        });
+        chat.lastUpdated = Date.now();
+        await chat.save();
+      } else {
+        // چت جدید ایجاد کن
+        chat = new Chat({
+          participants,
+          participantsModel,
+          type: 'admin-user',
+          productId: null,
+          messages: [{
+            from: senderRole,
+            text: message,
+            date: new Date(),
+            read: false,
+            readByAdmin: senderRole === 'admin',
+            readBySeller: true
+          }]
+        });
+        chat.lastUpdated = Date.now();
+        await chat.save();
+      }
+    } catch (chatErr) {
+      // اگر خطایی در ایجاد چت رخ داد، فقط لاگ کن و ادامه بده
+      console.error('Error syncing to Chat system:', chatErr);
+    }
+
     res.json(obj);
   } catch (err) {
     console.error('sendMessage error', err);
