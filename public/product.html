@@ -453,70 +453,102 @@
       align-items: center;
       justify-content: center;
       gap: 0.6rem;
-      padding: 0.85rem 1.6rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(29, 78, 216, 0.15);
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--primary);
+      padding: 0.95rem 1.8rem;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--text-main);
       font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
       min-width: clamp(200px, 48vw, 320px);
       flex: 1 1 clamp(220px, 48vw, 320px);
       text-align: center;
+      overflow: hidden;
+    }
+
+    .product-action::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .product-action svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       color: currentColor;
+      transition: transform 0.3s ease;
     }
 
     .product-action:disabled {
       cursor: not-allowed;
-      opacity: 0.75;
+      opacity: 0.6;
       box-shadow: none;
-      background: rgba(148, 163, 184, 0.15);
-      color: rgba(15, 23, 42, 0.6);
+      background: rgba(148, 163, 184, 0.2);
+      color: rgba(15, 23, 42, 0.5);
     }
 
     .product-action.is-disabled {
       pointer-events: none;
       cursor: not-allowed;
-      opacity: 0.75;
+      opacity: 0.6;
       box-shadow: none;
-      background: rgba(148, 163, 184, 0.15);
-      color: rgba(15, 23, 42, 0.6);
+      background: rgba(148, 163, 184, 0.2);
+      color: rgba(15, 23, 42, 0.5);
     }
 
     .product-action:not(:disabled):hover,
     .product-action:not(:disabled):focus-visible {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 32px rgba(29, 78, 216, 0.25);
+      transform: translateY(-3px);
       outline: none;
     }
 
+    .product-action:not(:disabled):hover svg {
+      transform: scale(1.1);
+    }
+
     .product-action:not(:disabled):focus-visible {
-      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.22);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
     }
 
+    /* دکمه مشاهده آدرس مغازه - استایل مینیمال و شیک */
     .product-action--secondary {
-      color: var(--text-main);
-      border-color: rgba(148, 163, 184, 0.35);
-      background: var(--surface);
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      color: #475569;
+      border: 1.5px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
+    .product-action--secondary:not(:disabled):hover {
+      background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      color: #334155;
+    }
+
+    /* دکمه مشاهده صفحه مغازه - گرادیانت سبز-آبی */
     .product-action--primary {
-      background: linear-gradient(135deg, rgba(29, 78, 216, 0.9), rgba(14, 165, 233, 0.9));
+      background: linear-gradient(135deg, #059669, #0891b2);
       color: #fff;
-      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3), 0 2px 6px rgba(8, 145, 178, 0.2);
+    }
+
+    .product-action--primary::before {
+      background: linear-gradient(135deg, #047857, #0e7490);
     }
 
     .product-action--primary:not(:disabled):hover,
     .product-action--primary:not(:disabled):focus-visible {
-      background: linear-gradient(135deg, #153aa8, #0b8ed1);
+      box-shadow: 0 12px 32px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(8, 145, 178, 0.3);
+    }
+
+    .product-action--primary:not(:disabled):hover::before {
+      opacity: 1;
     }
 
     .meta-card {
@@ -2268,17 +2300,24 @@
     }
 
     /* ===== Message to Seller Button & Modal ===== */
+    /* دکمه پیام به فروشنده - گرادیانت بنفش-صورتی */
     .product-action--message {
-      background: linear-gradient(135deg, #8b5cf6, #a855f7);
+      background: linear-gradient(135deg, #7c3aed, #db2777);
       color: #fff;
-      border-color: transparent;
-      box-shadow: 0 14px 28px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3), 0 2px 6px rgba(219, 39, 119, 0.2);
+    }
+
+    .product-action--message::before {
+      background: linear-gradient(135deg, #6d28d9, #be185d);
     }
 
     .product-action--message:not(:disabled):hover,
     .product-action--message:not(:disabled):focus-visible {
-      background: linear-gradient(135deg, #7c3aed, #9333ea);
-      box-shadow: 0 18px 36px rgba(139, 92, 246, 0.35);
+      box-shadow: 0 12px 32px rgba(124, 58, 237, 0.4), 0 4px 12px rgba(219, 39, 119, 0.3);
+    }
+
+    .product-action--message:not(:disabled):hover::before {
+      opacity: 1;
     }
 
     .product-action--message svg {
@@ -2451,14 +2490,14 @@
 
     .message-textarea {
       width: 100%;
-      min-height: 120px;
-      max-height: 200px;
-      padding: 1rem;
+      min-height: 90px;
+      max-height: 150px;
+      padding: 0.85rem;
       border: 2px solid var(--border);
       border-radius: var(--radius-md);
       font-family: inherit;
-      font-size: 0.95rem;
-      line-height: 1.7;
+      font-size: 0.92rem;
+      line-height: 1.6;
       color: var(--text-main);
       background: var(--surface);
       resize: vertical;
@@ -2893,8 +2932,8 @@
       }
 
       #messageModal .message-textarea {
-        min-height: 80px;
-        max-height: 140px;
+        min-height: 70px;
+        max-height: 110px;
       }
 
       #messageModal .message-modal-footer {
@@ -2960,8 +2999,8 @@
       }
 
       #messageModal .message-textarea {
-        min-height: 70px;
-        max-height: 120px;
+        min-height: 60px;
+        max-height: 100px;
         font-size: 0.9rem;
       }
 

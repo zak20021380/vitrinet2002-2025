@@ -81,6 +81,14 @@ function hideChatModal() {
   currentChatId = null;
   chatModalMsgsBox.innerHTML = '';
   chatReplyInput.value = '';
+  
+  // Show notification FAB when chat modal closes
+  const notificationFab = document.querySelector('.notification-fab');
+  if (notificationFab) {
+    notificationFab.style.opacity = '';
+    notificationFab.style.pointerEvents = '';
+    notificationFab.style.transform = '';
+  }
 }
 
 closeChatModal.addEventListener('click', hideChatModal);
@@ -306,9 +314,13 @@ function renderChatListItem(chat, highlightNew = false) {
   const unread        = countUnreadMessages(chat);
   const productObj    = chat.productId || {};
   const productImg    = productObj.images?.[0] || '';
-  const productTitle  = productObj.title;
-  const productSlug   = productObj.slug || productObj._id || '';      // اولویت با اسلاگ
-  const productLink   = productSlug ? `/product/${productSlug}` : '#';
+  const productTitle  = productObj.title || '';
+  const productPrice  = productObj.price;
+  const productDesc   = productObj.desc || productObj.description || '';
+  const productCategory = productObj.category || '';
+  const productTag    = productObj.tag || productObj.tags?.[0] || '';
+  const productId     = productObj._id || '';
+  const productLink   = productId ? `/product.html?id=${productId}` : '';
 
   const lastMsg  = chat.messages?.slice(-1)[0];
   const lastText = lastMsg ? (lastMsg.text || '').slice(0, 40) : '';
@@ -329,25 +341,35 @@ function renderChatListItem(chat, highlightNew = false) {
   wrapper.className = `chat-item cursor-pointer bg-white border rounded-xl p-4 flex justify-between items-center${highlightNew ? ' chat-item--new' : ''}`;
   wrapper.dataset.chatId = chat._id;
 
-  /* === بخش تصویر و عنوان محصول با لینک قابل‌کلیک === */
+  /* === بخش تصویر و عنوان محصول + دکمه مشاهده محصول در سمت راست === */
   wrapper.innerHTML = `
-    <div class="flex items-center gap-3 overflow-hidden">
+    <div class="flex items-center gap-3 overflow-hidden flex-1">
       ${productImg
-        ? `<a href="${productLink}" target="_blank" rel="noopener" data-link>
-             <img src="${productImg}" class="w-10 h-10 rounded-lg border hidden sm:block flex-shrink-0" alt="">
-           </a>`
+        ? `<img src="${productImg}" class="w-10 h-10 rounded-lg border hidden sm:block flex-shrink-0 object-cover" alt="">`
         : ''}
       <div class="flex flex-col min-w-0">
-        ${productTitle
-          ? `<a href="${productLink}" target="_blank" rel="noopener" data-link
-                 class="font-bold text-[#10b981] truncate max-w-[160px] sm:max-w-[220px]">
-               ${title}
-             </a>`
-          : `<span class="font-bold text-[#10b981] truncate max-w-[160px] sm:max-w-[220px]">${title}</span>`}
-        <span class="text-xs text-gray-500 mt-0.5 block truncate leading-5 sm:leading-4">${lastText}</span>
+        <span class="font-bold text-[#10b981] truncate max-w-[140px] sm:max-w-[200px]">${title}</span>
+        <span class="text-xs text-gray-500 mt-0.5 block truncate leading-5 sm:leading-4">${customerName}</span>
       </div>
     </div>
-    <div class="flex items-center gap-3 flex-shrink-0">
+    <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+      ${productId
+        ? `<button type="button" data-product-preview
+               class="product-view-link inline-flex items-center gap-1 text-[10px] sm:text-[11px] text-[#0ea5e9] hover:text-[#0284c7] font-semibold transition-all"
+               data-product-img="${productImg}"
+               data-product-title="${productTitle}"
+               data-product-price="${productPrice || ''}"
+               data-product-desc="${productDesc.replace(/"/g, '&quot;')}"
+               data-product-category="${productCategory}"
+               data-product-tag="${productTag}"
+               data-product-link="${productLink}">
+             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+             </svg>
+             <span class="hidden sm:inline">مشاهده محصول</span>
+           </button>`
+        : ''}
       <span class="hidden sm:inline text-xs text-gray-400" id="chat-time-${chat._id}">${formatAgo(chat.lastUpdated)}</span>
       <span id="badge-${chat._id}" class="inline-flex items-center justify-center h-5 min-w-[20px] text-xs font-bold rounded-full bg-red-500 text-white ${unread ? '' : 'hidden'} ${highlightNew && unread ? 'badge-pulse' : ''}">
         ${fa(unread)}
@@ -357,10 +379,22 @@ function renderChatListItem(chat, highlightNew = false) {
     </div>
   `;
 
-  /* جلوگیری از بازشدن مدال هنگام کلیک روی لینک محصول */
-  wrapper.querySelectorAll('[data-link]').forEach(a =>
-    a.addEventListener('click', e => e.stopPropagation())
-  );
+  /* باز کردن مدال پیش‌نمایش محصول */
+  const previewBtn = wrapper.querySelector('[data-product-preview]');
+  if (previewBtn) {
+    previewBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openProductPreviewModal({
+        img: previewBtn.dataset.productImg,
+        title: previewBtn.dataset.productTitle,
+        price: previewBtn.dataset.productPrice,
+        desc: previewBtn.dataset.productDesc,
+        category: previewBtn.dataset.productCategory,
+        tag: previewBtn.dataset.productTag,
+        link: previewBtn.dataset.productLink
+      });
+    });
+  }
 
   /* باز کردن مدال گفتگو */
   wrapper.addEventListener('click', () => openChatById(chat._id));
@@ -391,6 +425,62 @@ function renderChatListItem(chat, highlightNew = false) {
   });
 
   return wrapper;
+}
+
+/***********************************************
+ * مدال پیش‌نمایش محصول
+ ***********************************************/
+const productPreviewModalBg = document.getElementById('productPreviewModalBg');
+const closeProductPreviewModal = document.getElementById('closeProductPreviewModal');
+const closeProductPreviewBtn = document.getElementById('closeProductPreviewBtn');
+
+function openProductPreviewModal(product) {
+  if (!productPreviewModalBg) return;
+  
+  const imgEl = document.getElementById('productPreviewImage');
+  const titleEl = document.getElementById('productPreviewTitle');
+  const priceEl = document.getElementById('productPreviewPrice');
+  const descEl = document.getElementById('productPreviewDesc');
+  const categoryEl = document.getElementById('productPreviewCategory');
+  const tagEl = document.getElementById('productPreviewTag');
+  const linkEl = document.getElementById('productPreviewLink');
+  
+  if (imgEl) {
+    imgEl.src = product.img || '/assets/images/placeholder.png';
+    imgEl.alt = product.title || 'تصویر محصول';
+  }
+  if (titleEl) titleEl.textContent = product.title || 'بدون عنوان';
+  if (priceEl) {
+    const price = product.price ? Number(product.price).toLocaleString('fa-IR') : '-';
+    priceEl.textContent = price;
+  }
+  if (descEl) descEl.textContent = product.desc || 'توضیحاتی برای این محصول ثبت نشده است.';
+  if (categoryEl) categoryEl.textContent = product.category || 'نامشخص';
+  if (tagEl) tagEl.textContent = product.tag || 'بدون برچسب';
+  if (linkEl) linkEl.href = product.link || '#';
+  
+  productPreviewModalBg.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  document.body.classList.add('product-modal-open');
+}
+
+function hideProductPreviewModal() {
+  if (!productPreviewModalBg) return;
+  productPreviewModalBg.classList.add('hidden');
+  document.body.style.overflow = '';
+  document.body.classList.remove('product-modal-open');
+}
+
+if (closeProductPreviewModal) {
+  closeProductPreviewModal.addEventListener('click', hideProductPreviewModal);
+}
+if (closeProductPreviewBtn) {
+  closeProductPreviewBtn.addEventListener('click', hideProductPreviewModal);
+}
+if (productPreviewModalBg) {
+  productPreviewModalBg.addEventListener('click', e => {
+    if (e.target === productPreviewModalBg) hideProductPreviewModal();
+  });
 }
 
 
@@ -463,6 +553,14 @@ function renderChatModal(chat) {
   chatModalBg.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   document.body.classList.add('chat-modal-open');
+  
+  // Hide notification FAB when chat modal opens
+  const notificationFab = document.querySelector('.notification-fab');
+  if (notificationFab) {
+    notificationFab.style.opacity = '0';
+    notificationFab.style.pointerEvents = 'none';
+    notificationFab.style.transform = 'translateY(20px)';
+  }
 }
 
 

@@ -52,14 +52,198 @@
       60% {transform:scale(1.15); box-shadow:0 0 0 14px rgba(239,68,68,0);}
       100% {transform:scale(1); box-shadow:0 0 0 0 rgba(239,68,68,0);}
     }
-    /* پنهان کردن دکمه‌های ناوبری روی موبایل هنگام باز بودن مدال چت */
+    /* پنهان کردن دکمه‌های ناوبری روی موبایل هنگام باز بودن مدال چت یا مدال محصول */
     @media (max-width: 768px){
       body.chat-modal-open .home-btn,
       body.chat-modal-open #sidebarHamburger,
       body.chat-modal-open .sidebar-hamburger,
-      body.chat-modal-open .hamburger-menu {display:none !important;}
+      body.chat-modal-open .hamburger-menu,
+      body.product-modal-open .home-btn,
+      body.product-modal-open #sidebarHamburger,
+      body.product-modal-open .sidebar-hamburger,
+      body.product-modal-open .hamburger-menu,
+      body.product-modal-open .notification-bell,
+      body.product-modal-open [class*="notification"],
+      body.product-modal-open [class*="hamburger"] {display:none !important;}
     }
     .chat-item--new {border-color:#10b98144; background:linear-gradient(90deg,#f0fdfa,#ffffff);}
+    
+    /* استایل لینک مشاهده محصول - بالا سمت چپ */
+    .product-view-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 10px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.08));
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #0ea5e9;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.1);
+    }
+    .product-view-link:hover {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.12));
+      border-color: rgba(14, 165, 233, 0.4);
+      color: #0284c7;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+      transform: translateY(-1px);
+    }
+    .product-view-link svg {
+      transition: transform 0.2s ease;
+    }
+    .product-view-link:hover svg {
+      transform: scale(1.15);
+    }
+    
+    /* استایل مدال پیش‌نمایش محصول - ارتقا یافته */
+    #productPreviewModalBg {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .product-preview-modal {
+      animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: linear-gradient(165deg, #ffffff 0%, #f8fffe 50%, #f0fdfa 100%);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      box-shadow: 
+        0 32px 100px rgba(15, 23, 42, 0.35),
+        0 16px 40px rgba(16, 185, 129, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .product-preview-image-wrapper {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding: 1.5rem;
+    }
+    .product-preview-image-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.35), transparent 50%),
+        radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.35), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), transparent 60%);
+      pointer-events: none;
+    }
+    .product-preview-image-wrapper::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.5), transparent);
+      pointer-events: none;
+    }
+    .product-preview-image-wrapper img {
+      filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.4));
+      transition: transform 0.3s ease;
+    }
+    .product-preview-modal:hover .product-preview-image-wrapper img {
+      transform: scale(1.02);
+    }
+    .product-preview-content {
+      background: linear-gradient(180deg, #ffffff 0%, #fafffe 100%);
+      position: relative;
+    }
+    .product-preview-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      border-radius: 2px;
+      opacity: 0.5;
+    }
+    .product-preview-actions {
+      background: linear-gradient(180deg, #f8fffe 0%, #ecfdf5 100%);
+      border-top: 1px solid rgba(16, 185, 129, 0.15);
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* دکمه بستن مدال */
+    .product-preview-modal #closeProductPreviewModal {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      transition: all 0.25s ease;
+    }
+    .product-preview-modal #closeProductPreviewModal:hover {
+      background: #fee2e2;
+      transform: rotate(90deg) scale(1.1);
+    }
+    /* دسته‌بندی badge */
+    .product-preview-category-badge {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    /* قیمت با استایل بهتر */
+    .product-preview-price-wrapper {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.05));
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    /* دکمه مشاهده در سایت */
+    .product-preview-actions a {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+    }
+    .product-preview-actions a:hover {
+      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.45);
+      transform: translateY(-2px);
+    }
+    @media (max-width: 480px) {
+      .product-preview-modal {
+        max-height: 90vh;
+        border-radius: 1.75rem 1.75rem 0 0;
+        margin-top: auto;
+      }
+      #productPreviewModalBg {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .product-preview-image-wrapper {
+        padding: 1rem;
+      }
+      .product-preview-content {
+        padding: 1.25rem 1.25rem 1rem;
+      }
+      .product-preview-actions {
+        padding: 1rem 1.25rem;
+        padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 12px));
+      }
+    }
+    
     .cost-box {
       background:linear-gradient(90deg,#f0fdfa 85%,#f8fafc 100%);
       color:#10b981;font-weight:bold;border-radius:1em;font-size:15px;
@@ -304,6 +488,67 @@
   <!-- === پایان مدال مسدودسازی مشتری === -->
 
   <div id="blockSuccess">✔️ کاربر با موفقیت مسدود شد</div>
+
+  <!-- === مدال پیش‌نمایش محصول === -->
+  <div id="productPreviewModalBg" class="fixed z-50 inset-0 hidden modal-bg flex items-center justify-center p-4">
+    <div class="product-preview-modal bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden relative flex flex-col">
+      <!-- دکمه بستن -->
+      <button id="closeProductPreviewModal" class="absolute left-4 top-4 w-10 h-10 rounded-full flex items-center justify-center z-20" type="button">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      
+      <!-- تصویر محصول -->
+      <div class="product-preview-image-wrapper relative">
+        <img id="productPreviewImage" src="" alt="" class="w-full h-52 sm:h-60 object-contain rounded-xl">
+        <div class="product-preview-category-badge absolute bottom-4 right-4 px-4 py-2 rounded-full text-xs font-bold text-[#10b981]">
+          <span id="productPreviewCategory">دسته‌بندی</span>
+        </div>
+      </div>
+      
+      <!-- محتوای محصول -->
+      <div class="product-preview-content flex-1 overflow-y-auto p-5 sm:p-6 pt-6">
+        <h3 id="productPreviewTitle" class="text-lg sm:text-xl font-extrabold text-[#0f172a] mb-4 leading-relaxed"></h3>
+        
+        <!-- قیمت -->
+        <div class="product-preview-price-wrapper mb-4">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="text-2xl font-black text-[#10b981]" id="productPreviewPrice">-</span>
+          <span class="text-sm text-gray-500 font-medium">تومان</span>
+        </div>
+        
+        <!-- توضیحات -->
+        <p id="productPreviewDesc" class="text-sm text-gray-600 leading-7 mb-4 line-clamp-3"></p>
+        
+        <!-- اطلاعات اضافی -->
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[#f0fdfa] to-[#ecfdf5] text-[#10b981] rounded-xl text-xs font-bold border border-[#10b98120]">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            <span id="productPreviewTag">برچسب</span>
+          </span>
+        </div>
+      </div>
+      
+      <!-- دکمه‌های اکشن -->
+      <div class="product-preview-actions p-4 sm:p-5 flex gap-3">
+        <a id="productPreviewLink" href="#" target="_blank" rel="noopener" class="flex-1 flex items-center justify-center gap-2 text-white font-bold py-3.5 px-4 rounded-xl">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+          مشاهده در سایت
+        </a>
+        <button id="closeProductPreviewBtn" class="px-5 py-3.5 bg-white border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all">
+          بستن
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- === پایان مدال پیش‌نمایش محصول === -->
 
   <script src="dashboard-messages.js"></script>
 
