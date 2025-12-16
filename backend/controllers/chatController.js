@@ -101,19 +101,41 @@ async function unbanSellerPhoneIfNoOtherBlocked(sellerDoc) {
 exports.getChatsBySeller = async (req, res) => {
   try {
     const sid = new mongoose.Types.ObjectId(req.user.id);
+    
+    // همچنین چت‌های product که فروشنده در participants هست را هم برگردان
     const chats = await Chat.find({
       $or: [
         { sellerId: sid },
-        { participants: sid }
+        { participants: sid },
+        // چت‌های product که sellerId ندارند ولی فروشنده در participants هست
+        { type: 'product', participants: sid }
       ]
     })
       .sort({ lastUpdated: -1 })
-      .populate('participants', 'firstname lastname role')
-      .populate('productId', 'title images')
+      .populate({
+        path: 'participants',
+        select: 'firstname lastname role storename ownerName ownerFirstname ownerLastname phone email'
+      })
+      .populate('productId', 'title images price desc')
       .lean();
 
-    return res.json(chats);
+    // اضافه کردن اطلاعات بیشتر برای هر چت
+    const enrichedChats = chats.map(chat => {
+      // پیدا کردن شرکت‌کننده‌ای که فروشنده نیست (مشتری)
+      const customerParticipant = chat.participants?.find(p => {
+        const pId = p._id?.toString() || p.toString();
+        return pId !== sid.toString();
+      });
+      
+      return {
+        ...chat,
+        customerInfo: customerParticipant || null
+      };
+    });
+
+    return res.json(enrichedChats);
   } catch (err) {
+    console.error('getChatsBySeller error:', err);
     return res.status(500).json({ error: 'خطای داخلی سرور در دریافت چت‌ها' });
   }
 };
@@ -344,11 +366,13 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
 
     // اگر چت پیدا نشد، سعی در ایجاد آن
     try {
+      // sellerId باید برای چت‌های product و user-seller ذخیره شود تا فروشنده بتواند آن‌ها را ببیند
+      const shouldStoreSellerId = (chatType === 'user-seller' || chatType === 'product') && sid;
       chat = new Chat({
         participants,
         participantsModel,
         type: chatType,
-        sellerId: chatType === 'user-seller' ? sid : null,
+        sellerId: shouldStoreSellerId ? sid : null,
         productId: pid,
         messages: []
       });
@@ -979,10 +1003,23 @@ exports.adminReplyToChat = async (req, res) => {
     exports.deleteChat = async (req, res) => {
       try {
         const { id } = req.params;
-        const result = await Chat.findByIdAndDelete(id);
-        if (!result) {
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        
+        // اول چت رو پیدا کن
+        const chat = await Chat.findById(id);
+        if (!chat) {
           return res.status(404).json({ error: 'چت پیدا نشد' });
         }
+        
+        // بررسی کن که کاربر عضو این چت باشه (یا ادمین باشه)
+        const isParticipant = chat.participants.some(p => p.toString() === userId.toString());
+        const isAdmin = req.user.role === 'admin';
+        
+        if (!isParticipant && !isAdmin) {
+          return res.status(403).json({ error: 'شما اجازه حذف این چت را ندارید' });
+        }
+        
+        await Chat.findByIdAndDelete(id);
         res.json({ success: true });
       } catch (err) {
         console.error('❌ deleteChat error:', err);

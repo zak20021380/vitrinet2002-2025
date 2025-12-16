@@ -1431,6 +1431,715 @@
         transform: translateX(-4px);
         box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
       }
+
+      /* ═══════════════════════════════════════════════════════════════
+         استایل‌های بخش پیام‌های من - حرفه‌ای و رسپانسیو
+         ═══════════════════════════════════════════════════════════════ */
+      
+      /* کانتینر اصلی پیام‌ها */
+      .messages-container {
+        background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(249,250,251,0.95));
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.08);
+      }
+
+      /* هدر بخش پیام‌ها */
+      .messages-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(16, 185, 129, 0.1);
+      }
+
+      .messages-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .messages-title-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      .messages-title h2 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+      }
+
+      .messages-count {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+      }
+
+      /* فیلترهای پیام */
+      .messages-filters {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .msg-filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1.5px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .msg-filter-btn:hover {
+        border-color: #10b981;
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+      }
+
+      .msg-filter-btn.active {
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      /* لیست چت‌ها */
+      .chats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      /* کارت چت - طراحی جدید */
+      .chat-card-new {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+        background: white;
+        border-radius: 1.25rem;
+        border: 1.5px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+      }
+
+      .chat-card-new::before {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #10b981, #0ea5e9);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .chat-card-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.2);
+      }
+
+      .chat-card-new:hover::before {
+        opacity: 1;
+      }
+
+      .chat-card-new.has-unread {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), rgba(14, 165, 233, 0.03));
+        border-color: rgba(16, 185, 129, 0.15);
+      }
+
+      .chat-card-new.has-unread::before {
+        opacity: 1;
+      }
+
+      .chat-card-new.is-blocked {
+        opacity: 0.6;
+        filter: grayscale(0.3);
+      }
+
+      /* آواتار چت */
+      .chat-avatar {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .chat-avatar-img {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-avatar-seller {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      .chat-avatar-admin {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+      }
+
+      .chat-avatar-user {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      }
+
+      .chat-avatar-badge {
+        position: absolute;
+        bottom: -4px;
+        left: -4px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ef4444;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+      }
+
+      /* محتوای چت */
+      .chat-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .chat-recipient {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .chat-recipient-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .chat-recipient-name a {
+        color: #10b981;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .chat-recipient-name a:hover {
+        color: #059669;
+        text-decoration: underline;
+      }
+
+      .chat-type-badge {
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      .chat-type-badge.seller {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+      }
+
+      .chat-type-badge.admin {
+        background: rgba(99, 102, 241, 0.1);
+        color: #4f46e5;
+      }
+
+      .chat-type-badge.product {
+        background: rgba(14, 165, 233, 0.1);
+        color: #0284c7;
+      }
+
+      .chat-time {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      /* محصول مرتبط */
+      .chat-product {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(16, 185, 129, 0.05));
+        border-radius: 0.75rem;
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        margin-top: 0.25rem;
+      }
+
+      .chat-product-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
+      }
+
+      .chat-product-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .chat-product-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .chat-product-link {
+        font-size: 0.75rem;
+        color: #0ea5e9;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .chat-product-link:hover {
+        text-decoration: underline;
+      }
+
+      /* پیش‌نمایش پیام */
+      .chat-preview {
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .chat-preview.unread {
+        color: #334155;
+        font-weight: 600;
+      }
+
+      /* اکشن‌های چت */
+      .chat-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .chat-action-btn {
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .chat-action-btn.delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+      }
+
+      .chat-action-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+      }
+
+      .chat-action-btn.block {
+        background: rgba(100, 116, 139, 0.1);
+        color: #475569;
+      }
+
+      .chat-action-btn.block:hover {
+        background: rgba(100, 116, 139, 0.2);
+      }
+
+      .chat-action-btn.blocked {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        cursor: default;
+      }
+
+      /* حالت خالی */
+      .messages-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+        text-align: center;
+      }
+
+      .messages-empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .messages-empty-icon svg {
+        width: 40px;
+        height: 40px;
+        stroke: #10b981;
+        stroke-width: 1.5;
+      }
+
+      .messages-empty h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #334155;
+        margin: 0 0 0.5rem;
+      }
+
+      .messages-empty p {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 0;
+        max-width: 280px;
+      }
+
+      /* مودال چت - طراحی جدید */
+      .chat-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.25s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .chat-modal-card {
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .chat-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(14, 165, 233, 0.05));
+        border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+      }
+
+      .chat-modal-recipient {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .chat-modal-recipient-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .chat-modal-recipient-link {
+        font-size: 0.85rem;
+        color: #0ea5e9;
+        text-decoration: none;
+      }
+
+      .chat-modal-recipient-link:hover {
+        text-decoration: underline;
+      }
+
+      .chat-modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.1);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ef4444;
+        transition: all 0.2s ease;
+      }
+
+      .chat-modal-close:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: rotate(90deg);
+      }
+
+      .chat-modal-product {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(14, 165, 233, 0.05);
+        border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+      }
+
+      .chat-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 1.25rem;
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: 300px;
+        max-height: 400px;
+      }
+
+      /* پیام‌ها در مودال */
+      .chat-message {
+        display: flex;
+        flex-direction: column;
+        max-width: 85%;
+      }
+
+      .chat-message.sent {
+        align-self: flex-end;
+        align-items: flex-end;
+      }
+
+      .chat-message.received {
+        align-self: flex-start;
+        align-items: flex-start;
+      }
+
+      .chat-message-sender {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 0.25rem;
+        padding: 0 0.5rem;
+      }
+
+      .chat-message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+      }
+
+      .chat-message.sent .chat-message-bubble {
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        color: white;
+        border-bottom-left-radius: 1rem;
+        border-bottom-right-radius: 0.25rem;
+      }
+
+      .chat-message.received .chat-message-bubble {
+        background: white;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        border-bottom-right-radius: 1rem;
+        border-bottom-left-radius: 0.25rem;
+      }
+
+      .chat-message-time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+        padding: 0 0.5rem;
+      }
+
+      /* فرم ارسال پیام */
+      .chat-modal-footer {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .chat-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-family: inherit;
+        resize: none;
+        transition: all 0.2s ease;
+        min-height: 44px;
+        max-height: 100px;
+      }
+
+      .chat-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+
+      .chat-send-btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      .chat-send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+      }
+
+      .chat-send-btn:active {
+        transform: translateY(0);
+      }
+
+      /* رسپانسیو */
+      @media (max-width: 640px) {
+        .messages-container {
+          padding: 1rem;
+          border-radius: 1.25rem;
+        }
+
+        .messages-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .messages-filters {
+          width: 100%;
+          overflow-x: auto;
+          padding-bottom: 0.5rem;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .msg-filter-btn {
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        .chat-card-new {
+          padding: 1rem;
+          gap: 0.75rem;
+        }
+
+        .chat-avatar-img {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          font-size: 1.1rem;
+        }
+
+        .chat-recipient-name {
+          font-size: 0.95rem;
+        }
+
+        .chat-product {
+          padding: 0.5rem;
+        }
+
+        .chat-product-img {
+          width: 36px;
+          height: 36px;
+        }
+
+        .chat-modal-card {
+          max-height: 95vh;
+          border-radius: 1.25rem;
+        }
+
+        .chat-modal-body {
+          min-height: 250px;
+        }
+
+        .chat-message {
+          max-width: 90%;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .chat-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+
+        .chat-actions {
+          width: 100%;
+        }
+
+        .chat-action-btn {
+          flex: 1;
+          justify-content: center;
+        }
+      }
     </style>
     <script src="/nav-active.js" defer></script>
 
@@ -3690,12 +4399,40 @@
 async function loadMessagesSection() {
   const box = document.getElementById('mainContent');
   box.innerHTML = `
-    <div id="messages-section" class="glass px-4 py-7 fadein">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-xl font-black primary-text">پیام‌های من</span>
-        <button class="open-admin-msg brand-btn text-sm px-3 py-1.5 rounded-xl">چت با مدیر سایت</button>
+    <div id="messages-section" class="messages-container fadein">
+      <!-- هدر بخش پیام‌ها -->
+      <div class="messages-header">
+        <div class="messages-title">
+          <div class="messages-title-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h2>پیام‌های من</h2>
+            <span class="messages-count" id="messagesCount">در حال بارگذاری...</span>
+          </div>
+        </div>
+        <div class="messages-filters">
+          <button class="msg-filter-btn active" data-filter="all">همه</button>
+          <button class="msg-filter-btn" data-filter="seller">فروشندگان</button>
+          <button class="msg-filter-btn" data-filter="admin">مدیر سایت</button>
+          <button class="msg-filter-btn" data-filter="product">محصولات</button>
+        </div>
       </div>
-      <div id="userChatsList" class="w-full min-h-[180px]"></div>
+
+      <!-- دکمه چت با مدیر -->
+      <div class="flex justify-end mb-4">
+        <button class="open-admin-msg brand-btn text-sm px-4 py-2 rounded-xl flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          چت با مدیر سایت
+        </button>
+      </div>
+
+      <!-- لیست چت‌ها -->
+      <div id="userChatsList" class="chats-list"></div>
     </div>
   `;
 
@@ -3705,11 +4442,37 @@ async function loadMessagesSection() {
     adminMsgBtn.addEventListener('click', openAdminMsgModal);
   }
 
+  // Add filter button listeners
+  document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMsgFilter = btn.dataset.filter;
+      renderMessagesList();
+    });
+  });
+
+  // اگر currentUserId تنظیم نشده، اول پروفایل رو بگیر
+  if (!window.currentUserId) {
+    try {
+      const res = await fetch('/api/user/profile', { credentials: 'include' });
+      if (res.ok) {
+        const user = await res.json();
+        window.currentUserId = user._id;
+        console.log('✅ currentUserId تنظیم شد:', window.currentUserId);
+      }
+    } catch (e) {
+      console.error('خطا در دریافت پروفایل:', e);
+    }
+  }
+
   await fetchBlockedSellers(); // فروشنده‌های مسدودشده را بگیر
   await fetchUserChats();  // لیست چت‌ها رو بگیر
   renderMessagesList();    // رندر کن
   startMsgPolling();       // polling شروع کن
 }
+
+let currentMsgFilter = 'all';
 
   /* گرفتن لیست چت‌ها */
   /*  دریافت لیست چت‌های *خودِ کاربر*  */
@@ -3720,26 +4483,27 @@ async function fetchUserChats() {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
     });
+    
+    if (!res.ok) {
+      console.error('fetchUserChats: HTTP error', res.status);
+      chatsList = [];
+      return;
+    }
+    
     const data = await res.json();
+    console.log('📨 چت‌های دریافتی از سرور:', data);
 
-    const allChats = Array.isArray(data) ? data : (data.chats || []);
-    const uid = window.currentUserId;
+    // API /chats/my خودش فقط چت‌های کاربر لاگین شده رو برمی‌گردونه
+    // پس نیازی به فیلتر اضافی نیست
+    chatsList = Array.isArray(data) ? data : (data.chats || []);
 
-    chatsList = allChats.filter(c => {
-      if (!uid) return false;
-      if (c.type === 'admin' || c.type === 'user-admin' || c.type === 'admin-user') return true;
-      if (c.userId && c.userId === uid) return true;
-      if (Array.isArray(c.participants) && c.participants.some(p => {
-        if (!p) return false;
-        return (typeof p === 'string' && p === uid) ||
-               (typeof p === 'object' && p._id === uid);
-      })) return true;
-      if (Array.isArray(c.users) && c.users.some(u => u._id === uid)) return true;
-      return false;
-    });
-
+    // مرتب‌سازی بر اساس آخرین به‌روزرسانی
+    chatsList.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+    
+    console.log('📋 لیست چت‌ها پس از مرتب‌سازی:', chatsList.length, 'چت');
 
   } catch (e) {
+    console.error('fetchUserChats error:', e);
     chatsList = [];
   }
 }
@@ -3754,28 +4518,59 @@ async function loadMessages() {
 }
 
 
-  /* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
-/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
-/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
-/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
-/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
-/* رندر لیست چت‌ها (با شخص/مدیر/فروشنده و محصول مرتبط) */
+  /* رندر لیست چت‌ها - نسخه جدید با استایل حرفه‌ای */
 function renderMessagesList() {
   const box = document.getElementById('userChatsList');
+  const countEl = document.getElementById('messagesCount');
   console.log("لیست چت‌ها:", chatsList);
 
-  if (!chatsList.length) {
-    box.innerHTML = `<div class="text-gray-400 text-center py-8">هیچ گفتگویی نداری! از دکمه پیام جدید به مدیر استفاده کن.</div>`;
+  // فیلتر کردن چت‌ها بر اساس فیلتر انتخابی
+  let filteredChats = chatsList;
+  if (currentMsgFilter !== 'all') {
+    filteredChats = chatsList.filter(c => {
+      if (currentMsgFilter === 'seller') {
+        return c.type === 'user-seller' || (c.participantsModel && c.participantsModel.includes('Seller') && !c.participantsModel.includes('Admin'));
+      }
+      if (currentMsgFilter === 'admin') {
+        return c.type === 'admin-user' || c.type === 'user-admin' || c.type === 'admin' || (c.participantsModel && c.participantsModel.includes('Admin'));
+      }
+      if (currentMsgFilter === 'product') {
+        return c.type === 'product' || c.productId;
+      }
+      return true;
+    });
+  }
+
+  // بروزرسانی تعداد
+  if (countEl) {
+    const totalUnread = chatsList.reduce((sum, c) => {
+      return sum + (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
+    }, 0);
+    countEl.textContent = totalUnread > 0 
+      ? `${chatsList.length} گفتگو • ${totalUnread} پیام خوانده نشده`
+      : `${chatsList.length} گفتگو`;
+  }
+
+  if (!filteredChats.length) {
+    box.innerHTML = `
+      <div class="messages-empty">
+        <div class="messages-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری!' : 'گفتگویی در این دسته وجود ندارد'}</h3>
+        <p>${currentMsgFilter === 'all' ? 'از دکمه «چت با مدیر سایت» استفاده کن یا از صفحه محصولات به فروشندگان پیام بده.' : 'فیلتر دیگری را امتحان کنید.'}</p>
+      </div>
+    `;
     return;
   }
 
   // شناسه کاربر فعلی
   const myId = window.currentUserId;
 
-  box.innerHTML = chatsList.map(c => {
-    console.log('ساختار چت در لیست:', c._id, c);
-
-    let whom = 'مخاطب'; // پیش‌فرض
+  box.innerHTML = filteredChats.map(c => {
+    let whom = 'مخاطب';
     let role = '';
     let sellerId = null;
     let storeName = '';
@@ -3809,135 +4604,163 @@ function renderMessagesList() {
 
     // fallback از type
     if (!role && c.type) {
-      if (c.type === 'user-seller' || c.type === 'seller-admin') {
+      if (c.type === 'user-seller' || c.type === 'seller-admin' || c.type === 'product') {
         whom = 'فروشنده';
         role = 'seller';
         sellerId = c.sellerId;
-    } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
-      whom = 'مدیر سایت';
-      role = 'admin';
-    }
+      } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
+        whom = 'مدیر سایت';
+        role = 'admin';
+      }
     }
 
-    let whomDisplay = whom;
+    // تعیین آواتار
+    const avatarClass = role === 'seller' ? 'chat-avatar-seller' : (role === 'admin' ? 'chat-avatar-admin' : 'chat-avatar-user');
+    const avatarIcon = role === 'admin' 
+      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`
+      : (role === 'seller' 
+        ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
+        : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`);
+
+    // نام نمایشی
+    let recipientName = whom;
+    let recipientLink = '';
     if (role === 'seller' && sellerId) {
-      const linkUrl = shopUrl ? `/store/${shopUrl}` : `/store.html?id=${sellerId}`;
-      const linkText = storeName ? `فروشنده (${storeName})` : 'فروشنده';
-      whomDisplay = `<a href="${linkUrl}" class="text-[#10b981] hover:text-blue-700 hover:underline font-semibold" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+      const linkUrl = shopUrl ? `/shop.html?shopurl=${shopUrl}` : `/shop.html?id=${sellerId}`;
+      recipientName = storeName || 'فروشنده';
+      recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${recipientName}</a>`;
     }
 
-let prodBlock = '';
-if (c.productId && c.productId.title) {
-  const productUrl = `/product.html?id=${c.productId._id}`;
-  prodBlock = `
-    <div class="flex items-center gap-2 mt-2">
-      <!-- فقط عکس لینک‌دار -->
-      <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
-        <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
-             class="w-10 h-10 object-cover rounded-lg border" alt="">
-      </a>
-      <!-- اسم محصول بدون لینک -->
-      <span class="text-xs text-gray-600">${c.productId.title}</span>
-    </div>
-  `;
-}
+    // نوع چت badge
+    let typeBadge = '';
+    if (c.productId) {
+      typeBadge = '<span class="chat-type-badge product">محصول</span>';
+    } else if (role === 'admin') {
+      typeBadge = '<span class="chat-type-badge admin">پشتیبانی</span>';
+    } else if (role === 'seller') {
+      typeBadge = '<span class="chat-type-badge seller">فروشنده</span>';
+    }
 
+    // محصول مرتبط
+    let productBlock = '';
+    if (c.productId && c.productId.title) {
+      const productUrl = `/product.html?id=${c.productId._id}`;
+      productBlock = `
+        <div class="chat-product">
+          <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
+            <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
+                 class="chat-product-img" alt="${c.productId.title}">
+          </a>
+          <div class="chat-product-info">
+            <div class="chat-product-title">${c.productId.title}</div>
+            <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
+              مشاهده محصول
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      `;
+    }
 
+    // آخرین پیام
     const last = c.messages?.[c.messages.length - 1] || {};
-    const txt = (last.text || '-').slice(0, 45) + (last.text?.length > 45 ? '…' : '');
-    const date = last.createdAt
-      ? new Date(last.createdAt).toLocaleDateString('fa-IR', { year: '2-digit', month: '2-digit', day: '2-digit' })
-      : '—';
+    const txt = (last.text || 'بدون پیام').slice(0, 60) + (last.text?.length > 60 ? '…' : '');
     const unread = (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
 
-    let avatarText = '؟';
-    if (whom && typeof whom === 'string') {
-      avatarText = whom.slice(0, 2);
-    }
+    // زمان
+    const msgDate = last.date || last.createdAt || c.lastUpdated;
+    const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '—';
 
-return `
-  <div class="chat-card flex items-start gap-3 p-3 mb-2 bg-[#f9fafb] rounded-xl shadow-sm hover:bg-[#e6fcf7] cursor-pointer transition ${isBlocked ? 'opacity-50' : ''}"
-       data-chat-id="${c._id}">
-
-    <!-- آواتار -->
-    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#10b981]
-                flex items-center justify-center text-white font-bold text-lg shrink-0">
-      ${avatarText}
-    </div>
-
-    <!-- بدنه -->
-    <div class="flex-1 min-w-0">
-
-      <!-- ❶ هِدِر کارت: اسم + نشان unread سمت راست، دکمه حذف سمت چپ  -->
-      <div class="flex items-center justify-between flex-wrap gap-2">
-
-        <!-- گروهِ اسم و نشان -->
-        <div class="flex items-center gap-2">
-          <span class="font-bold primary-text">${whomDisplay}</span>
-          ${
-            unread
-              ? `<span class="inline-flex items-center justify-center
-                         bg-red-500 text-white rounded-full w-5 h-5 text-xs">
-                     ${unread}
-                 </span>`
-              : ""
-          }
+    return `
+      <div class="chat-card-new ${unread > 0 ? 'has-unread' : ''} ${isBlocked ? 'is-blocked' : ''}"
+           data-chat-id="${c._id}">
+        
+        <!-- آواتار -->
+        <div class="chat-avatar">
+          <div class="chat-avatar-img ${avatarClass}">
+            ${avatarIcon}
+          </div>
+          ${unread > 0 ? `<span class="chat-avatar-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
         </div>
 
-        <!-- دکمه‌ها -->
-        <div class="flex items-center gap-1">
-          <button
-            class="delete-chat px-2 py-0.5 text-xs rounded-xl bg-red-50 text-red-600 border border-red-100
-                   hover:bg-red-200 hover:text-red-900 transition"
-            data-chat-id="${c._id}">
-            حذف
-          </button>
-          ${role === 'seller' && !isBlocked ? `<button class="block-seller px-2 py-0.5 text-xs rounded-xl bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition" data-seller-id="${sellerId}">مسدودسازی فروشنده</button>` : ''}
-          ${role === 'seller' && isBlocked ? `<span class="text-xs text-red-500">مسدود شده</span>` : ''}
+        <!-- محتوا -->
+        <div class="chat-content">
+          <div class="chat-header">
+            <div class="chat-recipient">
+              <span class="chat-recipient-name">${recipientLink || recipientName}</span>
+              ${typeBadge}
+            </div>
+            <span class="chat-time">${timeDisplay}</span>
+          </div>
+
+          ${productBlock}
+
+          <p class="chat-preview ${unread > 0 ? 'unread' : ''}">${txt}</p>
+
+          <div class="chat-actions">
+            <button class="chat-action-btn delete" data-chat-id="${c._id}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              حذف
+            </button>
+            ${role === 'seller' && !isBlocked ? `
+              <button class="chat-action-btn block" data-seller-id="${sellerId}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                مسدودسازی
+              </button>
+            ` : ''}
+            ${role === 'seller' && isBlocked ? `
+              <span class="chat-action-btn blocked">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                مسدود شده
+              </span>
+            ` : ''}
+          </div>
         </div>
       </div>
-
-      ${prodBlock}
-      <div class="text-sm text-gray-700 mt-2">${txt}</div>
-      <div class="text-xs text-gray-400 mt-1">${date}</div>
-    </div>
-  </div>
-`;
-
+    `;
   }).join('');
 
-  // Add event listeners for chat cards and buttons
+  // Add event listeners
   setTimeout(() => {
-    // Chat card click listeners
-    document.querySelectorAll('.chat-card').forEach(card => {
+    document.querySelectorAll('.chat-card-new').forEach(card => {
       card.addEventListener('click', (e) => {
-        // Don't open chat if clicking on buttons
-        if (e.target.closest('.delete-chat') || e.target.closest('.block-seller')) {
-          return;
-        }
-        const chatId = card.dataset.chatId;
-        openChat(chatId);
+        if (e.target.closest('.chat-action-btn')) return;
+        if (e.target.closest('a')) return;
+        openChat(card.dataset.chatId);
       });
     });
 
-    // Delete chat button listeners
-    document.querySelectorAll('.delete-chat').forEach(btn => {
+    document.querySelectorAll('.chat-action-btn.delete').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const chatId = btn.dataset.chatId;
-        deleteChat(chatId);
+        deleteChat(btn.dataset.chatId);
       });
     });
 
-    // Block seller button listeners
-    document.querySelectorAll('.block-seller').forEach(btn => {
+    document.querySelectorAll('.chat-action-btn.block').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const sellerId = btn.dataset.sellerId;
-        blockSeller(sellerId);
+        blockSeller(btn.dataset.sellerId);
       });
     });
   }, 0);
+}
+
+// تابع کمکی برای نمایش زمان نسبی
+function getRelativeTime(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'همین الان';
+  if (diffMin < 60) return `${diffMin} دقیقه پیش`;
+  if (diffHour < 24) return `${diffHour} ساعت پیش`;
+  if (diffDay < 7) return `${diffDay} روز پیش`;
+  
+  return date.toLocaleDateString('fa-IR', { year: '2-digit', month: '2-digit', day: '2-digit' });
 }
 
 
@@ -4130,7 +4953,7 @@ async function ensureShopUrl(sid, existing) {
   }
 }
 
-/* ساختار مودال چت (async برای fetch جزئیات) */
+/* ساختار مودال چت - نسخه جدید با استایل حرفه‌ای */
 async function showChatModal() {
   console.log("در حال نمایش مودال چت...");
 
@@ -4146,14 +4969,10 @@ async function showChatModal() {
     if (m.from !== 'user') m.read = true;
   });
 
-  console.log('messages:', chat.messages); // دیباگ
-
   // بروزرسانی لیست محلی
   const idx = chatsList.findIndex(c => c._id === currentCid);
   if (idx !== -1) chatsList[idx] = chat;
   updateBadge();
-
-  console.log('ساختار چت کامل:', chat);
 
   // استخراج طرف مقابل
   let whom = 'مخاطب';
@@ -4185,7 +5004,7 @@ async function showChatModal() {
 
   // fallback از type
   if (!role && chat.type) {
-    if (chat.type === 'user-seller' || chat.type === 'seller-admin') {
+    if (chat.type === 'user-seller' || chat.type === 'seller-admin' || chat.type === 'product') {
       whom = 'فروشنده';
       role = 'seller';
       sellerId = chat.sellerId;
@@ -4195,65 +5014,82 @@ async function showChatModal() {
     }
   }
 
-  let whomDisplay = whom;
-  let sellerLink = '';
+  // لینک فروشگاه
+  let recipientLink = '';
   if (role === 'seller' && sellerId) {
     shopUrl = await ensureShopUrl(sellerId, shopUrl);
-    const linkUrl = shopUrl ? `/shop.html?shopurl=${shopUrl}` : '';
-    const linkText = storeName ? `مغازه ${storeName}` : `مغازه فروشنده`;
-    sellerLink = linkUrl
-      ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-[#0ea5e9] hover:text-blue-700 hover:underline ml-3 text-sm font-semibold">${linkText}</a>`
-      : '';
+    if (shopUrl) {
+      const linkUrl = `/shop.html?shopurl=${shopUrl}`;
+      const linkText = storeName ? `مشاهده مغازه ${storeName}` : 'مشاهده مغازه';
+      recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="chat-modal-recipient-link">${linkText} ←</a>`;
+    }
   }
 
-  let prodBlock = '';
+  // محصول مرتبط
+  let productBlock = '';
   if (chat.productId && chat.productId.title) {
     const productUrl = `/product.html?id=${chat.productId._id}`;
-    prodBlock = `
-      <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-[#e0fdfa] px-2 py-1 rounded-lg my-2 hover:bg-[#d1f8f5] transition">
-        <img src="${chat.productId.images?.[0] || '/assets/images/noimage.png'}" class="w-9 h-9 object-cover rounded-md border" alt="">
-        <span class="text-xs text-gray-700">${chat.productId.title}</span>
-      </a>
+    productBlock = `
+      <div class="chat-modal-product">
+        <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
+          <img src="${chat.productId.images?.[0] || '/assets/images/noimage.png'}" 
+               class="chat-product-img" alt="${chat.productId.title}">
+        </a>
+        <div class="chat-product-info">
+          <div class="chat-product-title">${chat.productId.title}</div>
+          <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
+            مشاهده محصول
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
     `;
   }
 
-  // مودال HTML
-  // هنگام نمایش مودال، ناوبری پایین موبایل را پنهان می‌کنیم
+  // مودال HTML با استایل جدید
   document.body.classList.add('hide-mobile-nav');
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="chatModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
-      <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
-        <div class="px-4 py-3 border-b flex justify-between items-center gap-3">
-          <div>
-            <div class="flex items-center">
-              <span class="font-bold primary-text">${whomDisplay}</span>
-              ${sellerLink}
-            </div>
-            ${prodBlock}
+    <div id="chatModal" class="chat-modal-overlay">
+      <div class="chat-modal-card">
+        <!-- هدر -->
+        <div class="chat-modal-header">
+          <div class="chat-modal-recipient">
+            <span class="chat-modal-recipient-name">${storeName || whom}</span>
+            ${recipientLink}
           </div>
-          <button class="close-chat-modal text-2xl font-black text-gray-400 hover:text-red-500 rounded-full w-8 h-8 flex items-center justify-center">×</button>
+          <button class="chat-modal-close close-chat-modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-        <div id="chatBody" class="flex-1 overflow-y-auto p-4 space-y-4 text-[15px] scrollbar-hide bg-[#f9fafb]"></div>
-        <div class="border-t p-3 flex gap-2 bg-white">
-          <textarea id="msgBox" rows="2" class="flex-1 border rounded-xl p-2 resize-none focus:outline-none" placeholder="پیام خود را وارد کنید"></textarea>
-          <button class="send-msg brand-btn px-5 py-2 rounded-xl font-bold shrink-0">ارسال</button>
+
+        <!-- محصول مرتبط -->
+        ${productBlock}
+
+        <!-- بدنه چت -->
+        <div id="chatBody" class="chat-modal-body scrollbar-hide"></div>
+
+        <!-- فرم ارسال -->
+        <div class="chat-modal-footer">
+          <textarea id="msgBox" class="chat-input" rows="1" placeholder="پیام خود را بنویسید..."></textarea>
+          <button class="chat-send-btn send-msg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            ارسال
+          </button>
         </div>
       </div>
     </div>
   `);
 
-  // Add event listeners for chat modal buttons
-  const closeBtn = document.querySelector('.close-chat-modal');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeChat);
-  }
-
-  const sendBtn = document.querySelector('.send-msg');
-  if (sendBtn) {
-    sendBtn.addEventListener('click', sendMsg);
-  }
-
-  // Also allow sending message with Enter key
+  // Event listeners
+  document.querySelector('.close-chat-modal')?.addEventListener('click', closeChat);
+  document.querySelector('.send-msg')?.addEventListener('click', sendMsg);
+  
   const msgBox = document.getElementById('msgBox');
   if (msgBox) {
     msgBox.addEventListener('keypress', (e) => {
@@ -4262,10 +5098,15 @@ async function showChatModal() {
         sendMsg();
       }
     });
+    // Auto-resize textarea
+    msgBox.addEventListener('input', () => {
+      msgBox.style.height = 'auto';
+      msgBox.style.height = Math.min(msgBox.scrollHeight, 100) + 'px';
+    });
   }
 
   renderChat();
-  setTimeout(() => document.getElementById('msgBox').focus(), 120);
+  setTimeout(() => msgBox?.focus(), 120);
 }
   // بستن مودال چت
   function closeChat() {
@@ -4300,8 +5141,7 @@ async function showChatModal() {
     }
   }
 
-  /* رندر مکالمه داخل مودال */
-/* رندر مکالمه داخل مودال */
+  /* رندر مکالمه داخل مودال - نسخه جدید */
 function renderChat() {
   const chat = chatsList.find(c => c._id === currentCid);
   const target = document.getElementById('chatBody');
@@ -4322,6 +5162,19 @@ function renderChat() {
     return 'مخاطب';
   }
 
+  if (!chat.messages || chat.messages.length === 0) {
+    target.innerHTML = `
+      <div class="flex flex-col items-center justify-center h-full text-center py-8">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" class="mb-3">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p class="text-gray-400 text-sm">هنوز پیامی ارسال نشده</p>
+        <p class="text-gray-300 text-xs mt-1">اولین پیام را ارسال کنید!</p>
+      </div>
+    `;
+    return;
+  }
+
   target.innerHTML = (chat.messages || []).map(m => {
     const roleHint = (m.senderRole || m?.senderId?.role || '').toLowerCase();
     const isMe =
@@ -4330,18 +5183,19 @@ function renderChat() {
       roleHint === 'user' ||
       m.from === 'user' ||
       m.from === window.currentUserId;
-    const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
-    const name = `<span class="text-xs font-bold text-[#10b981]">${getSenderRoleText(m, isMe)}</span>`;
+    
+    const msgTime = new Date(m.date || m.createdAt);
+    const timeStr = msgTime.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+    
     return `
-      <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-        <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">
-          ${name}
-          <div>${m.text || ''}</div>
-          <div class="text-xs text-gray-400 mt-1 text-left">${new Date(m.date || m.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</div>
-        </div>
+      <div class="chat-message ${isMe ? 'sent' : 'received'}">
+        <span class="chat-message-sender">${getSenderRoleText(m, isMe)}</span>
+        <div class="chat-message-bubble">${m.text || ''}</div>
+        <span class="chat-message-time">${timeStr}</span>
       </div>
     `;
   }).join('');
+  
   target.scrollTop = target.scrollHeight;
 }
 
@@ -4535,7 +5389,9 @@ async function fetchChatDetails(cid) {
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       showSection('dashboard');
-      updateSidebarUser();
+      // اول اطلاعات کاربر رو بگیر تا currentUserId تنظیم بشه
+      await updateSidebarUser();
+      // بعد پیام‌ها و رزروها رو لود کن
       await loadMessages();
       await loadBookings();
     } catch (error) {

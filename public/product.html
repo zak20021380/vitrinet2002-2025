@@ -731,14 +731,40 @@
 }
 
 @media (max-width: 640px) {
-  .modern-like-btn {
-    width: 100%;
-    justify-content: space-between;
-    padding: 8px 12px 8px 10px;
+  .modern-like-wrapper {
+    margin: 0.75rem 0;
   }
 
-  .modern-like-wrapper {
-    margin: 1rem 0;
+  .modern-like-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    gap: 10px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    box-shadow: 0 8px 20px rgba(236, 72, 153, 0.12);
+  }
+
+  .heart-icon-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .heart-svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .like-text {
+    font-size: 0.85rem;
+  }
+
+  .like-counter {
+    font-size: 0.95rem;
+  }
+
+  .like-separator {
+    font-size: 1rem;
   }
 }
     .meta-label {
@@ -1737,15 +1763,32 @@
         min-height: 220px;
       }
 
+      /* ===== Mobile Product Actions - Compact Professional Layout ===== */
       .product-actions {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
       }
 
       .product-action {
         flex: 1 1 auto;
         width: 100%;
         min-width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.88rem;
+        border-radius: 12px;
+        gap: 0.5rem;
+      }
+
+      .product-action svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* دکمه پیام به فروشنده - برجسته‌تر */
+      .product-action--message {
+        order: -1;
       }
 
       .hero-image {
@@ -1809,8 +1852,52 @@
     }
 
     @media (max-width: 540px) {
+      /* ===== Mobile Meta Grid - Compact Professional Layout ===== */
       .meta-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+      }
+
+      .meta-card {
+        padding: 0.7rem 0.8rem;
+        border-radius: 14px;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      }
+
+      .meta-card::after {
+        display: none;
+      }
+
+      .meta-card__icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+      }
+
+      .meta-card__icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .meta-card__content {
+        gap: 0.15rem;
+      }
+
+      .meta-label {
+        font-size: 0.72rem;
+        font-weight: 500;
+      }
+
+      .meta-value {
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
       }
 
       .panel {
@@ -1819,6 +1906,38 @@
 
       h1 {
         font-size: clamp(1.35rem, 7vw, 1.8rem);
+      }
+    }
+
+    /* ===== Extra Small Mobile - Single Column with Horizontal Cards ===== */
+    @media (max-width: 380px) {
+      .meta-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .meta-card {
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
+      }
+
+      .meta-card__icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .meta-card__icon svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .meta-label {
+        font-size: 0.68rem;
+      }
+
+      .meta-value {
+        font-size: 0.82rem;
       }
     }
 

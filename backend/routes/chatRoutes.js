@@ -75,7 +75,7 @@ router.post('/:id/mark-read',
 
 /*━━━━━━━━━━ ۷) حذف چت ━━━━━━━━━━*/
 router.delete('/:id',
-  auth('seller'),
+  auth(),  // هر کاربر لاگین شده می‌تونه چت خودش رو حذف کنه
   chatController.deleteChat
 );
 
