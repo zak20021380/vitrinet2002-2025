@@ -1022,6 +1022,96 @@
           <div id="reviews-list" class="reviews-container" role="list"></div>
         </div>
       </section>
+
+      <!-- Customer Messages Section -->
+      <section id="messages-view" class="view-section" role="region" aria-labelledby="messages-title" data-page="messages">
+        <div class="view-container">
+          <header class="view-header">
+            <div class="header-content">
+              <h2 class="view-title" id="messages-title">پیام‌های مشتریان</h2>
+              <p class="view-subtitle">پیام‌های دریافتی از مشتریان درباره محصولات شما</p>
+            </div>
+          </header>
+          
+          <div class="messages-stats-row" id="messages-stats">
+            <div class="messages-stat-card">
+              <div class="messages-stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <div class="messages-stat-content">
+                <span class="messages-stat-value" id="total-messages-count">۰</span>
+                <span class="messages-stat-label">کل پیام‌ها</span>
+              </div>
+            </div>
+            <div class="messages-stat-card messages-stat-card--unread">
+              <div class="messages-stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <div class="messages-stat-content">
+                <span class="messages-stat-value" id="unread-messages-count">۰</span>
+                <span class="messages-stat-label">خوانده نشده</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="messages-list-container">
+            <div class="messages-empty" id="messages-empty">
+              <div class="messages-empty__icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <path d="M8 9h8M8 13h5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h3 class="messages-empty__title">پیامی وجود ندارد</h3>
+              <p class="messages-empty__text">پیام‌های مشتریان درباره محصولات شما اینجا نمایش داده می‌شوند</p>
+            </div>
+            <div class="messages-list" id="messages-list" role="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat Detail Modal -->
+      <div class="chat-modal-overlay" id="chat-modal" hidden>
+        <div class="chat-modal" role="dialog" aria-modal="true" aria-labelledby="chat-modal-title">
+          <header class="chat-modal-header">
+            <button type="button" class="chat-modal-close" id="chat-modal-close" aria-label="بستن">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 6-12 12M6 6l12 12"/>
+              </svg>
+            </button>
+            <div class="chat-modal-user">
+              <div class="chat-modal-avatar" id="chat-modal-avatar">م</div>
+              <div class="chat-modal-info">
+                <h3 class="chat-modal-title" id="chat-modal-title">مشتری</h3>
+                <p class="chat-modal-subtitle" id="chat-modal-subtitle">درباره محصول</p>
+              </div>
+            </div>
+          </header>
+          <div class="chat-modal-body" id="chat-modal-body">
+            <!-- Messages will be rendered here -->
+          </div>
+          <footer class="chat-modal-footer">
+            <textarea 
+              class="chat-modal-input" 
+              id="chat-modal-input" 
+              placeholder="پاسخ خود را بنویسید..."
+              rows="2"
+            ></textarea>
+            <button type="button" class="chat-modal-send" id="chat-modal-send">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+              <span>ارسال</span>
+            </button>
+          </footer>
+        </div>
+      </div>
+
 <section
   id="plans-view"
   class="view-section plans-disabled"
@@ -1388,6 +1478,13 @@
     <a href="#/reviews" class="nav-item" data-page="reviews">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       <span class="nav-label">نظرات</span>
+    </a>
+    <a href="#/messages" class="nav-item" data-page="messages">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="nav-label">پیام‌ها</span>
+      <span class="nav-badge" id="messages-nav-badge" hidden>۰</span>
     </a>
     <a href="#/plans" class="nav-item" data-page="plans" aria-hidden="true" hidden>
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/><path d="M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z"/><path d="m14 17 2 2 4-4"/></svg>

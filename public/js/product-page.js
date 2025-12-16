@@ -132,6 +132,7 @@
     },
     sellerActions: document.getElementById('sellerActions'),
     sellerAddressButton: document.getElementById('sellerAddressButton'),
+    messageSellerButton: document.getElementById('messageSellerButton'),
     sellerLink: document.getElementById('sellerLink'),
     addressModal: document.getElementById('addressModal'),
     addressModalTitle: document.getElementById('addressModalTitle'),
@@ -1288,6 +1289,11 @@
         dom.sellerAddressButton.dataset.hasAddress = 'false';
         dom.sellerAddressButton.setAttribute('aria-label', 'آدرس فروشنده برای این محصول ثبت نشده است.');
       }
+      if (dom.messageSellerButton) {
+        dom.messageSellerButton.hidden = false;
+        dom.messageSellerButton.disabled = false;
+        dom.messageSellerButton.classList.remove('is-disabled');
+      }
       if (dom.sellerLink) {
         dom.sellerLink.classList.remove('is-disabled');
         dom.sellerLink.removeAttribute('aria-disabled');
@@ -1316,6 +1322,12 @@
       dom.sellerAddressButton.hidden = false;
       dom.sellerAddressButton.disabled = false;
       dom.sellerAddressButton.classList.remove('is-disabled');
+    }
+
+    if (dom.messageSellerButton) {
+      dom.messageSellerButton.hidden = false;
+      dom.messageSellerButton.disabled = false;
+      dom.messageSellerButton.classList.remove('is-disabled');
     }
 
     if (addressText) {
@@ -1707,4 +1719,263 @@
       }
     });
   })();
+})();
+
+// ===== Message to Seller Feature =====
+(function initMessageToSeller() {
+  'use strict';
+
+  const messageBtn = document.getElementById('messageSellerButton');
+  const messageModal = document.getElementById('messageModal');
+  const messageModalClose = document.getElementById('messageModalClose');
+  const messageCancelBtn = document.getElementById('messageCancelBtn');
+  const messageSendBtn = document.getElementById('messageSendBtn');
+  const messageText = document.getElementById('messageText');
+  const messageCharCount = document.getElementById('messageCharCount');
+  const messageSuccess = document.getElementById('messageSuccess');
+  const messageError = document.getElementById('messageError');
+  const messageErrorText = document.getElementById('messageErrorText');
+  const messageLoginPrompt = document.getElementById('messageLoginPrompt');
+  const messageFormContainer = document.getElementById('messageFormContainer');
+  const messageModalFooter = document.getElementById('messageModalFooter');
+  const messageProductImage = document.getElementById('messageProductImage');
+  const messageProductTitle = document.getElementById('messageProductTitle');
+  const messageProductSeller = document.getElementById('messageProductSeller');
+  const messageSendText = document.getElementById('messageSendText');
+  const messageSendIcon = document.getElementById('messageSendIcon');
+
+  if (!messageBtn || !messageModal) return;
+
+  const messageState = {
+    productId: null,
+    sellerId: null,
+    productTitle: '',
+    sellerName: '',
+    productImage: '',
+    isLoggedIn: false,
+    isSending: false
+  };
+
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  function toPersianNumber(num) {
+    return String(num).replace(/\d/g, d => persianDigits[d]);
+  }
+
+  // Check if user is logged in
+  function checkUserLogin() {
+    const token = document.cookie.split('; ').find(r => r.startsWith('user_token='));
+    return Boolean(token);
+  }
+
+  // Update character count
+  function updateCharCount() {
+    const length = messageText.value.length;
+    const maxLength = 1000;
+    messageCharCount.textContent = `${toPersianNumber(length)} / ${toPersianNumber(maxLength)}`;
+    
+    messageCharCount.classList.remove('is-warning', 'is-error');
+    if (length >= maxLength) {
+      messageCharCount.classList.add('is-error');
+    } else if (length >= maxLength * 0.9) {
+      messageCharCount.classList.add('is-warning');
+    }
+
+    // Enable/disable send button
+    messageSendBtn.disabled = length === 0 || messageState.isSending;
+  }
+
+  // Open message modal
+  function openMessageModal() {
+    if (!messageModal) return;
+
+    // Get product data from analytics state
+    const analyticsState = window.__PRODUCT_ANALYTICS__ || {};
+    messageState.productId = analyticsState.item_id || new URLSearchParams(window.location.search).get('id');
+    messageState.sellerId = analyticsState.seller_id || '';
+    messageState.productTitle = analyticsState.item_name || document.getElementById('productTitle')?.textContent || '';
+    messageState.sellerName = analyticsState.shop_name || document.getElementById('productSeller')?.textContent || '';
+    
+    // Get product image
+    const sliderImage = document.querySelector('.slide.is-active img, .slide img');
+    messageState.productImage = sliderImage?.src || '/assets/images/placeholder.png';
+
+    // Update modal content
+    messageProductTitle.textContent = messageState.productTitle || 'محصول';
+    messageProductSeller.textContent = `فروشنده: ${messageState.sellerName || 'نامشخص'}`;
+    messageProductImage.src = messageState.productImage;
+    messageProductImage.alt = messageState.productTitle;
+
+    // Check login status
+    messageState.isLoggedIn = checkUserLogin();
+
+    if (messageState.isLoggedIn) {
+      messageLoginPrompt.hidden = true;
+      messageFormContainer.hidden = false;
+      messageModalFooter.hidden = false;
+    } else {
+      messageLoginPrompt.hidden = false;
+      messageFormContainer.hidden = true;
+      messageModalFooter.hidden = true;
+    }
+
+    // Reset form
+    messageText.value = '';
+    updateCharCount();
+    messageSuccess.hidden = true;
+    messageError.hidden = true;
+    messageSendBtn.disabled = true;
+    messageSendBtn.classList.remove('is-loading');
+    messageSendText.textContent = 'ارسال پیام';
+
+    // Show modal
+    messageModal.hidden = false;
+    requestAnimationFrame(() => {
+      messageModal.classList.add('is-visible');
+      messageModal.removeAttribute('aria-hidden');
+    });
+    document.body.classList.add('modal-open');
+
+    // Focus on textarea if logged in
+    if (messageState.isLoggedIn) {
+      setTimeout(() => messageText.focus(), 100);
+    }
+  }
+
+  // Close message modal
+  function closeMessageModal() {
+    if (!messageModal) return;
+    
+    messageModal.classList.remove('is-visible');
+    messageModal.setAttribute('aria-hidden', 'true');
+    
+    setTimeout(() => {
+      messageModal.hidden = true;
+    }, 200);
+    
+    document.body.classList.remove('modal-open');
+    messageBtn.focus({ preventScroll: true });
+  }
+
+  // Send message
+  async function sendMessage() {
+    if (messageState.isSending || !messageText.value.trim()) return;
+
+    const text = messageText.value.trim();
+    if (!text) {
+      showError('لطفاً متن پیام را وارد کنید.');
+      return;
+    }
+
+    if (!messageState.productId) {
+      showError('شناسه محصول یافت نشد.');
+      return;
+    }
+
+    messageState.isSending = true;
+    messageSendBtn.disabled = true;
+    messageSendBtn.classList.add('is-loading');
+    messageSendText.textContent = 'در حال ارسال...';
+    messageSendIcon.innerHTML = '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.4" stroke-dashoffset="10"/>';
+    messageSuccess.hidden = true;
+    messageError.hidden = true;
+
+    try {
+      const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+      
+      const response = await fetch('/api/chats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          text: text,
+          productId: messageState.productId,
+          sellerId: messageState.sellerId || null,
+          recipientRole: 'seller'
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'خطا در ارسال پیام');
+      }
+
+      // Success
+      messageSuccess.hidden = false;
+      messageText.value = '';
+      updateCharCount();
+      
+      // Close modal after delay
+      setTimeout(() => {
+        closeMessageModal();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Send message error:', error);
+      showError(error.message || 'خطا در ارسال پیام. لطفاً دوباره تلاش کنید.');
+    } finally {
+      messageState.isSending = false;
+      messageSendBtn.classList.remove('is-loading');
+      messageSendText.textContent = 'ارسال پیام';
+      messageSendIcon.innerHTML = '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      updateCharCount();
+    }
+  }
+
+  function showError(message) {
+    messageError.hidden = false;
+    messageErrorText.textContent = message;
+  }
+
+  // Event listeners
+  messageBtn.addEventListener('click', openMessageModal);
+  messageModalClose.addEventListener('click', closeMessageModal);
+  messageCancelBtn.addEventListener('click', closeMessageModal);
+  messageSendBtn.addEventListener('click', sendMessage);
+  
+  messageText.addEventListener('input', updateCharCount);
+  messageText.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey && !messageSendBtn.disabled) {
+      sendMessage();
+    }
+  });
+
+  // Close on backdrop click
+  messageModal.addEventListener('click', (e) => {
+    if (e.target === messageModal) {
+      closeMessageModal();
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && messageModal.classList.contains('is-visible')) {
+      closeMessageModal();
+    }
+  });
+
+  // Listen for product data updates to enable button
+  document.addEventListener('product:updated', (event) => {
+    const detail = event?.detail || {};
+    const state = detail.state || {};
+    
+    if (state.seller_id || state.item_id) {
+      messageBtn.disabled = false;
+      messageState.sellerId = state.seller_id;
+      messageState.productId = state.item_id;
+      messageState.productTitle = state.item_name || '';
+      messageState.sellerName = state.shop_name || '';
+    }
+  });
+
+  // Check if product data is already available
+  const existingState = window.__PRODUCT_ANALYTICS__ || {};
+  if (existingState.item_id) {
+    messageBtn.disabled = false;
+    messageState.productId = existingState.item_id;
+    messageState.sellerId = existingState.seller_id;
+  }
 })();

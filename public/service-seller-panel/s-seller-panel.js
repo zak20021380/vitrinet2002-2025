@@ -5716,6 +5716,7 @@ destroy() {
           }
           break;
         case 'settings': this.renderSettings(); break; // New call for settings
+        case 'messages': this.renderMessages(); break; // Customer messages
       }
     }
     clearTopPeersAutoRefresh() {
@@ -6819,6 +6820,317 @@ destroy() {
       if (!this.isSellerPlansEnabled()) return;
       // Logic is handled by handlePlanDurationChange on load
     }
+
+    // --- Customer Messages Rendering ---
+    async renderMessages() {
+      const listEl = document.getElementById('messages-list');
+      const emptyEl = document.getElementById('messages-empty');
+      const totalCountEl = document.getElementById('total-messages-count');
+      const unreadCountEl = document.getElementById('unread-messages-count');
+      const navBadge = document.getElementById('messages-nav-badge');
+
+      if (!listEl) return;
+
+      // Show loading state
+      listEl.innerHTML = `
+        <div class="loading-inline" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+          در حال بارگذاری پیام‌ها...
+        </div>`;
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      try {
+        const response = await fetch(`${API_BASE}/api/chats`, {
+          credentials: 'include',
+          headers: { ...NO_CACHE }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch chats');
+
+        const chats = await response.json();
+        const customerChats = Array.isArray(chats) 
+          ? chats.filter(c => c.type === 'product' || c.type === 'user-seller')
+          : [];
+
+        // Calculate stats
+        let totalMessages = 0;
+        let unreadMessages = 0;
+        customerChats.forEach(chat => {
+          const msgs = chat.messages || [];
+          totalMessages += msgs.length;
+          unreadMessages += msgs.filter(m => !m.readBySeller && m.from !== 'seller').length;
+        });
+
+        // Update stats
+        if (totalCountEl) totalCountEl.textContent = this.toPersianNumber(customerChats.length);
+        if (unreadCountEl) unreadCountEl.textContent = this.toPersianNumber(unreadMessages);
+        
+        // Update nav badge
+        if (navBadge) {
+          if (unreadMessages > 0) {
+            navBadge.textContent = this.toPersianNumber(unreadMessages);
+            navBadge.hidden = false;
+          } else {
+            navBadge.hidden = true;
+          }
+        }
+
+        if (customerChats.length === 0) {
+          listEl.innerHTML = '';
+          if (emptyEl) emptyEl.style.display = 'flex';
+          return;
+        }
+
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        // Sort by last message date
+        customerChats.sort((a, b) => {
+          const aDate = a.messages?.length ? new Date(a.messages[a.messages.length - 1].date) : new Date(0);
+          const bDate = b.messages?.length ? new Date(b.messages[b.messages.length - 1].date) : new Date(0);
+          return bDate - aDate;
+        });
+
+        listEl.innerHTML = customerChats.map(chat => {
+          const lastMsg = chat.messages?.[chat.messages.length - 1];
+          const unreadCount = (chat.messages || []).filter(m => !m.readBySeller && m.from !== 'seller').length;
+          const isUnread = unreadCount > 0;
+          
+          // Get customer info
+          let customerName = 'مشتری';
+          let customerInitial = 'م';
+          if (chat.participants && chat.participantsModel) {
+            const userIdx = chat.participantsModel.findIndex(m => m === 'User');
+            if (userIdx !== -1 && chat.participants[userIdx]) {
+              const user = chat.participants[userIdx];
+              if (typeof user === 'object') {
+                customerName = user.name || user.fullName || user.phone || 'مشتری';
+                customerInitial = customerName.charAt(0);
+              }
+            }
+          }
+
+          // Get product info
+          let productTitle = '';
+          if (chat.productId && typeof chat.productId === 'object') {
+            productTitle = chat.productId.title || '';
+          }
+
+          const lastMsgText = lastMsg?.text || '';
+          const lastMsgDate = lastMsg?.date 
+            ? new Date(lastMsg.date).toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' })
+            : '';
+
+          return `
+            <article class="message-item ${isUnread ? 'is-unread' : ''}" data-chat-id="${chat._id}" role="listitem">
+              <div class="message-item__avatar">${customerInitial}</div>
+              <div class="message-item__content">
+                <div class="message-item__header">
+                  <h3 class="message-item__name">${customerName}</h3>
+                  <span class="message-item__time">${lastMsgDate}</span>
+                </div>
+                ${productTitle ? `
+                  <p class="message-item__product">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                      <line x1="7" y1="7" x2="7.01" y2="7"/>
+                    </svg>
+                    ${productTitle}
+                  </p>
+                ` : ''}
+                <p class="message-item__preview">${lastMsgText.slice(0, 80)}${lastMsgText.length > 80 ? '...' : ''}</p>
+              </div>
+              ${isUnread ? `<span class="message-item__badge">${this.toPersianNumber(unreadCount)}</span>` : ''}
+            </article>
+          `;
+        }).join('');
+
+        // Bind click events
+        if (!listEl.dataset.messagesBound) {
+          listEl.addEventListener('click', (e) => {
+            const item = e.target.closest('.message-item');
+            if (item) {
+              const chatId = item.dataset.chatId;
+              this.openChatModal(chatId);
+            }
+          });
+          listEl.dataset.messagesBound = 'true';
+        }
+
+      } catch (err) {
+        console.error('Load messages failed:', err);
+        listEl.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+            خطا در بارگذاری پیام‌ها. لطفاً دوباره تلاش کنید.
+          </div>`;
+      }
+    }
+
+    async openChatModal(chatId) {
+      const modal = document.getElementById('chat-modal');
+      const modalBody = document.getElementById('chat-modal-body');
+      const modalTitle = document.getElementById('chat-modal-title');
+      const modalSubtitle = document.getElementById('chat-modal-subtitle');
+      const modalAvatar = document.getElementById('chat-modal-avatar');
+      const modalInput = document.getElementById('chat-modal-input');
+      const modalSend = document.getElementById('chat-modal-send');
+      const modalClose = document.getElementById('chat-modal-close');
+
+      if (!modal || !modalBody) return;
+
+      this._currentChatId = chatId;
+
+      // Show modal
+      modal.hidden = false;
+      document.body.classList.add('modal-open');
+
+      modalBody.innerHTML = `
+        <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+          در حال بارگذاری...
+        </div>`;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/chats/${chatId}`, {
+          credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch chat');
+
+        const chat = await response.json();
+
+        // Get customer info
+        let customerName = 'مشتری';
+        let customerInitial = 'م';
+        if (chat.participants && chat.participantsModel) {
+          const userIdx = chat.participantsModel.findIndex(m => m === 'User');
+          if (userIdx !== -1 && chat.participants[userIdx]) {
+            const user = chat.participants[userIdx];
+            if (typeof user === 'object') {
+              customerName = user.name || user.fullName || user.phone || 'مشتری';
+              customerInitial = customerName.charAt(0);
+            }
+          }
+        }
+
+        // Get product info
+        let productTitle = '';
+        if (chat.productId && typeof chat.productId === 'object') {
+          productTitle = chat.productId.title || '';
+        }
+
+        if (modalTitle) modalTitle.textContent = customerName;
+        if (modalSubtitle) modalSubtitle.textContent = productTitle ? `درباره: ${productTitle}` : 'گفتگو با مشتری';
+        if (modalAvatar) modalAvatar.textContent = customerInitial;
+
+        // Render messages
+        const messages = chat.messages || [];
+        modalBody.innerHTML = messages.map(msg => {
+          const isSent = msg.from === 'seller';
+          const time = msg.date 
+            ? new Date(msg.date).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
+            : '';
+          return `
+            <div class="chat-message ${isSent ? 'chat-message--sent' : 'chat-message--received'}">
+              ${msg.text}
+              <span class="chat-message__time">${time}</span>
+            </div>
+          `;
+        }).join('');
+
+        // Scroll to bottom
+        modalBody.scrollTop = modalBody.scrollHeight;
+
+        // Mark as read
+        await fetch(`${API_BASE}/api/chats/${chatId}/mark-read`, {
+          method: 'POST',
+          credentials: 'include'
+        }).catch(() => {});
+
+        // Refresh messages list to update unread count
+        this.renderMessages();
+
+      } catch (err) {
+        console.error('Load chat failed:', err);
+        modalBody.innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+            خطا در بارگذاری گفتگو
+          </div>`;
+      }
+
+      // Bind events
+      if (!modal.dataset.chatBound) {
+        modalClose.addEventListener('click', () => this.closeChatModal());
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) this.closeChatModal();
+        });
+
+        modalSend.addEventListener('click', () => this.sendChatReply());
+        modalInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && e.ctrlKey) {
+            this.sendChatReply();
+          }
+        });
+
+        modal.dataset.chatBound = 'true';
+      }
+    }
+
+    closeChatModal() {
+      const modal = document.getElementById('chat-modal');
+      if (modal) {
+        modal.hidden = true;
+        document.body.classList.remove('modal-open');
+      }
+      this._currentChatId = null;
+    }
+
+    async sendChatReply() {
+      const modalInput = document.getElementById('chat-modal-input');
+      const modalSend = document.getElementById('chat-modal-send');
+      const modalBody = document.getElementById('chat-modal-body');
+
+      if (!modalInput || !this._currentChatId) return;
+
+      const text = modalInput.value.trim();
+      if (!text) return;
+
+      modalSend.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/chats/${this._currentChatId}/reply`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) throw new Error('Failed to send reply');
+
+        // Add message to UI
+        const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        const msgHtml = `
+          <div class="chat-message chat-message--sent">
+            ${text}
+            <span class="chat-message__time">${time}</span>
+          </div>
+        `;
+        modalBody.insertAdjacentHTML('beforeend', msgHtml);
+        modalBody.scrollTop = modalBody.scrollHeight;
+
+        modalInput.value = '';
+        UIComponents?.showToast?.('پیام ارسال شد', 'success');
+
+      } catch (err) {
+        console.error('Send reply failed:', err);
+        UIComponents?.showToast?.('خطا در ارسال پیام', 'error');
+      } finally {
+        modalSend.disabled = false;
+      }
+    }
+
+    toPersianNumber(num) {
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      return String(num).replace(/\d/g, d => persianDigits[d]);
+    }
+
     // --- NEW: Settings Rendering Logic ---
     renderSettings() {
         // This function is now called when the settings view is active
