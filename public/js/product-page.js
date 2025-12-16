@@ -1738,6 +1738,7 @@
   const messageLoginPrompt = document.getElementById('messageLoginPrompt');
   const messageFormContainer = document.getElementById('messageFormContainer');
   const messageModalFooter = document.getElementById('messageModalFooter');
+  const messageFooterHint = document.getElementById('messageFooterHint');
   const messageProductImage = document.getElementById('messageProductImage');
   const messageProductTitle = document.getElementById('messageProductTitle');
   const messageProductSeller = document.getElementById('messageProductSeller');
@@ -1825,7 +1826,15 @@
     messageState.isLoggedIn = false;
     messageLoginPrompt.hidden = true;
     messageFormContainer.hidden = true;
-    messageModalFooter.hidden = true;
+    messageModalFooter.hidden = false;
+    messageModalFooter.classList.remove('is-locked');
+    if (messageFooterHint) {
+      const footerHintText = messageFooterHint.querySelector('span');
+      if (footerHintText) {
+        footerHintText.textContent = '';
+      }
+      messageFooterHint.hidden = true;
+    }
 
     // Reset form
     messageText.value = '';
@@ -1852,11 +1861,24 @@
       messageLoginPrompt.hidden = true;
       messageFormContainer.hidden = false;
       messageModalFooter.hidden = false;
+      messageModalFooter.classList.remove('is-locked');
+      if (messageFooterHint) {
+        messageFooterHint.hidden = true;
+      }
       setTimeout(() => messageText.focus(), 100);
     } else {
       messageLoginPrompt.hidden = false;
       messageFormContainer.hidden = true;
-      messageModalFooter.hidden = true;
+      messageModalFooter.hidden = false;
+      messageModalFooter.classList.add('is-locked');
+      messageSendBtn.disabled = true;
+      if (messageFooterHint) {
+        const footerHintText = messageFooterHint.querySelector('span');
+        if (footerHintText) {
+          footerHintText.textContent = 'برای ارسال پیام باید وارد حساب کاربری شوید.';
+        }
+        messageFooterHint.hidden = false;
+      }
     }
 
     updateCharCount();

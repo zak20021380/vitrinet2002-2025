@@ -2485,10 +2485,41 @@
     }
 
     .message-modal-footer {
-      padding: 1rem 1.75rem 1.5rem;
+      padding: 1rem 1.75rem 1.35rem;
       display: flex;
+      flex-direction: column;
       gap: 0.75rem;
       border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), #fff);
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+    }
+
+    .message-modal-footer.is-locked {
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.08), rgba(255, 255, 255, 0.95));
+    }
+
+    .message-footer-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      line-height: 1.6;
+    }
+
+    .message-footer-hint svg {
+      width: 16px;
+      height: 16px;
+      color: #8b5cf6;
+      flex-shrink: 0;
+    }
+
+    .message-footer-actions {
+      display: flex;
+      gap: 0.75rem;
     }
 
     .message-btn {
@@ -2654,6 +2685,9 @@
 
       .message-modal-footer {
         padding: 1rem 1.25rem 1.25rem;
+      }
+
+      .message-footer-actions {
         flex-direction: column;
       }
 
@@ -3045,13 +3079,21 @@
       </div>
 
       <footer class="message-modal-footer" id="messageModalFooter">
-        <button class="message-btn message-btn--cancel" type="button" id="messageCancelBtn">انصراف</button>
-        <button class="message-btn message-btn--send" type="button" id="messageSendBtn" disabled>
-          <svg viewBox="0 0 24 24" fill="none" id="messageSendIcon">
-            <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <p class="message-footer-hint" id="messageFooterHint" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m12 5 5 5m-5-5-5 5m5-5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span id="messageSendText">ارسال پیام</span>
-        </button>
+          <span>برای ارسال پیام باید وارد حساب کاربری شوید.</span>
+        </p>
+        <div class="message-footer-actions">
+          <button class="message-btn message-btn--cancel" type="button" id="messageCancelBtn">انصراف</button>
+          <button class="message-btn message-btn--send" type="button" id="messageSendBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" id="messageSendIcon">
+              <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="messageSendText">ارسال پیام</span>
+          </button>
+        </div>
       </footer>
     </div>
   </div>
