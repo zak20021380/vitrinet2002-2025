@@ -8738,12 +8738,13 @@ function closeSellerModal() {
   }
 }
 
-// ← این تابع را جایگزین کنید
+// ارسال پیام از ادمین به فروشنده (از مدال فروشنده)
 async function sendSellerMessage(e) {
   e.preventDefault();
-  const form  = e.currentTarget;
-  let   rawId = form.dataset.sellerId;  // "shopurl:slug" یا ObjectId
-  const text  = form.querySelector('textarea').value.trim();
+  const form = e.currentTarget;
+  let rawId = form.dataset.sellerId; // "shopurl:slug" یا ObjectId
+  const text = form.querySelector('textarea').value.trim();
+  const submitBtn = form.querySelector('button[type="submit"]');
 
   if (!text) {
     return alert('متن پیام نمی‌تواند خالی باشد.');
@@ -8752,23 +8753,39 @@ async function sendSellerMessage(e) {
     return alert('شناسه فروشنده پیدا نشد!');
   }
 
-  // آماده‌سازی payload
-  const body = { text, from: 'admin' };
+  // استخراج sellerId واقعی
+  let sellerId = rawId;
   if (rawId.startsWith('shopurl:')) {
-    body.shopurl = rawId.replace(/^shopurl:/, '');
-  } else {
-    body.sellerId = rawId;
+    // پیدا کردن فروشنده با shopurl
+    const shopurl = rawId.replace(/^shopurl:/, '');
+    const shop = shopsList.find(s => s.shopurl === shopurl || s.shopUrl === shopurl);
+    if (shop) {
+      sellerId = toIdString(shop._id) || toIdString(shop.id) || toIdString(shop.sellerId);
+    } else {
+      return alert('فروشنده با این آدرس یافت نشد!');
+    }
+  }
+
+  // غیرفعال کردن دکمه
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'در حال ارسال...';
   }
 
   try {
-    const res = await fetch(`${ADMIN_API_BASE}/chats`, {
+    // استفاده از API صحیح admin-seller-notifications
+    const res = await fetch(`${ADMIN_API_BASE}/admin-seller-notifications`, {
       method: 'POST',
       headers: {
-        'Content-Type':  'application/json'
-        // هدر Authorization لازم نیست چون با کوکی کار می‌کنی
+        'Content-Type': 'application/json'
       },
       credentials: 'include',
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        sellerId: sellerId,
+        title: 'پیام از مدیریت',
+        content: text,
+        type: 'info'
+      })
     });
 
     const data = await res.json();
@@ -8784,8 +8801,14 @@ async function sendSellerMessage(e) {
     setTimeout(() => okBox.style.display = 'none', 2500);
 
   } catch (err) {
-    console.error('sendSellerMessage error:', err, body);
+    console.error('sendSellerMessage error:', err);
     alert('❌ خطا در ارسال پیام:\n' + err.message);
+  } finally {
+    // فعال کردن مجدد دکمه
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'ارسال پیام';
+    }
   }
 }
 
