@@ -553,7 +553,7 @@ exports.ensureChat = async (req, res) => {
     if (recipientRole === 'admin' && !recipientId) {
       const adminDoc = await Admin.findOne().select('_id');
       if (!adminDoc)
-        return res.status(500).json({ error: 'ادمین یافت نشد' });
+        return res.status(404).json({ error: 'ادمین یافت نشد' });
       recipientId = adminDoc._id.toString();
     }
     console.log('Ensuring chat between:', { recipientId, recipientRole, productId });
@@ -564,6 +564,16 @@ exports.ensureChat = async (req, res) => {
 
     if (!recipientId || !recipientRole) {
       return res.status(400).json({ error: 'recipientId و recipientRole الزامی است.' });
+    }
+
+    if (productId === '') productId = null;
+    if (productId && !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: 'productId نامعتبر است.' });
+    }
+
+    const invalidParticipantId = [myId, recipientId].find(id => !mongoose.Types.ObjectId.isValid(id));
+    if (invalidParticipantId) {
+      return res.status(400).json({ error: 'شناسه شرکت‌کنندگان نامعتبر است.' });
     }
 
     const sorted = [
