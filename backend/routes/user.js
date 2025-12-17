@@ -18,7 +18,7 @@ const { protect } = require('../middlewares/authMiddleware');
 router.get('/profile', auth('user'), async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select('firstname lastname city phone mobile favorites lastVisit')
+      .select('firstname lastname city phone mobile favorites lastVisit referralCode createdAt')
       .populate({
         path: 'favorites',
         select: 'title images price sellerId'
@@ -37,6 +37,8 @@ router.get('/profile', auth('user'), async (req, res) => {
       favorites:      user.favorites,
       favoritesCount: user.favorites ? user.favorites.length : 0,
       lastVisit:      user.lastVisit || '',
+      referralCode:   user.referralCode || '',
+      createdAt:      user.createdAt,
       name:           `${user.firstname || ''} ${user.lastname || ''}`.trim()
     });
   } catch (err) {
