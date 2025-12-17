@@ -47,8 +47,8 @@
     if (!mobileQuery.matches) return;
     const target = event.target;
     if (nav.dataset.expanded === 'true' &&
-        !nav.contains(target) &&
-        !toggle.contains(target)) {
+      !nav.contains(target) &&
+      !toggle.contains(target)) {
       setExpanded(false);
     }
   });
@@ -678,9 +678,9 @@
     document.title = `${title} | ویترینت`;
 
     const seller =
-(product.seller && typeof product.seller === 'object') ? product.seller :
-(product.sellerId && typeof product.sellerId === 'object') ? product.sellerId :
-{};
+      (product.seller && typeof product.seller === 'object') ? product.seller :
+        (product.sellerId && typeof product.sellerId === 'object') ? product.sellerId :
+          {};
 
 
     const summary = extractSummary(product.desc);
@@ -1707,13 +1707,13 @@
     prizeBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
 
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
       if (e.target === modal) {
         closeModal();
       }
     });
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && modal.classList.contains('active')) {
         closeModal();
       }
@@ -1791,7 +1791,7 @@
     const length = messageText.value.length;
     const maxLength = 1000;
     messageCharCount.textContent = `${toPersianNumber(length)} / ${toPersianNumber(maxLength)}`;
-    
+
     messageCharCount.classList.remove('is-warning', 'is-error');
     if (length >= maxLength) {
       messageCharCount.classList.add('is-error');
@@ -1813,7 +1813,7 @@
     messageState.sellerId = messageState.sellerId || analyticsState.seller_id || '';
     messageState.productTitle = messageState.productTitle || analyticsState.item_name || document.getElementById('productTitle')?.textContent || '';
     messageState.sellerName = messageState.sellerName || analyticsState.shop_name || document.getElementById('productSeller')?.textContent || '';
-    
+
     // Get product image
     const sliderImage = document.querySelector('.slide.is-active img, .slide img');
     messageState.productImage = sliderImage?.src || '/assets/images/placeholder.png';
@@ -1889,14 +1889,14 @@
   // Close message modal
   function closeMessageModal() {
     if (!messageModal) return;
-    
+
     messageModal.classList.remove('is-visible');
     messageModal.setAttribute('aria-hidden', 'true');
-    
+
     setTimeout(() => {
       messageModal.hidden = true;
     }, 200);
-    
+
     document.body.classList.remove('modal-open');
     messageBtn.focus({ preventScroll: true });
   }
@@ -1953,10 +1953,10 @@
       // Success - نمایش پاپ‌آپ موفقیت
       messageText.value = '';
       updateCharCount();
-      
+
       // بستن مدال پیام
       closeMessageModal();
-      
+
       // نمایش پاپ‌آپ موفقیت
       setTimeout(() => {
         showSuccessPopup();
@@ -1982,13 +1982,13 @@
   // Show success popup
   function showSuccessPopup() {
     if (!successPopup) return;
-    
+
     successPopup.hidden = false;
     requestAnimationFrame(() => {
       successPopup.classList.add('is-visible');
     });
     document.body.classList.add('modal-open');
-    
+
     // Auto close after 4 seconds
     setTimeout(() => {
       closeSuccessPopup();
@@ -1998,7 +1998,7 @@
   // Close success popup
   function closeSuccessPopup() {
     if (!successPopup) return;
-    
+
     successPopup.classList.remove('is-visible');
     setTimeout(() => {
       successPopup.hidden = true;
@@ -2011,7 +2011,7 @@
   messageModalClose.addEventListener('click', closeMessageModal);
   messageCancelBtn.addEventListener('click', closeMessageModal);
   messageSendBtn.addEventListener('click', sendMessage);
-  
+
   messageText.addEventListener('input', updateCharCount);
   messageText.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.ctrlKey && !messageSendBtn.disabled) {
@@ -2055,7 +2055,7 @@
   document.addEventListener('product:updated', (event) => {
     const detail = event?.detail || {};
     const state = detail.state || {};
-    
+
     if (state.seller_id || state.item_id) {
       messageBtn.disabled = false;
       messageState.sellerId = state.seller_id;
@@ -2072,4 +2072,242 @@
     messageState.productId = existingState.item_id;
     messageState.sellerId = existingState.seller_id;
   }
+})();
+
+// ===== Request Discount Feature =====
+(function initRequestDiscount() {
+  'use strict';
+
+  const discountBtn = document.getElementById('discountButton');
+  const discountModal = document.getElementById('discountModal');
+  const discountModalClose = document.getElementById('discountModalClose');
+  const discountCancelBtn = document.getElementById('discountCancelBtn');
+  const discountSendBtn = document.getElementById('discountSendBtn');
+  const discountPrice = document.getElementById('discountPrice');
+  const discountText = document.getElementById('discountText');
+  const discountSuccess = document.getElementById('discountSuccess');
+  const discountError = document.getElementById('discountError');
+  const discountErrorText = document.getElementById('discountErrorText');
+  const discountLoginPrompt = document.getElementById('discountLoginPrompt');
+  const discountFormContainer = document.getElementById('discountFormContainer');
+  const discountModalFooter = document.getElementById('discountModalFooter');
+  const discountFooterHint = document.getElementById('discountFooterHint');
+  const discountProductImage = document.getElementById('discountProductImage');
+  const discountProductTitle = document.getElementById('discountProductTitle');
+  const discountProductSeller = document.getElementById('discountProductSeller');
+  const discountSendText = document.getElementById('discountSendText');
+  const successPopup = document.getElementById('successPopup');
+
+  if (!discountBtn || !discountModal) return;
+
+  const discountState = {
+    productId: null,
+    sellerId: null,
+    productTitle: '',
+    sellerName: '',
+    productImage: '',
+    isLoggedIn: false,
+    isSending: false
+  };
+
+  // Check login (duplicated from message feature)
+  async function checkUserLogin() {
+    try {
+      const userRes = await fetch('/api/auth/getCurrentUser', { credentials: 'include' });
+      if (userRes.ok) return true;
+      const sellerRes = await fetch('/api/auth/getCurrentSeller', { credentials: 'include' });
+      return sellerRes.ok;
+    } catch (error) {
+      console.error('checkUserLogin error:', error);
+      return false;
+    }
+  }
+
+  // Open modal
+  async function openDiscountModal() {
+    const analyticsState = window.__PRODUCT_ANALYTICS__ || {};
+    discountState.productId = discountState.productId || analyticsState.item_id || new URLSearchParams(window.location.search).get('id');
+    discountState.sellerId = discountState.sellerId || analyticsState.seller_id || '';
+    discountState.productTitle = discountState.productTitle || analyticsState.item_name || document.getElementById('productTitle')?.textContent || '';
+    discountState.sellerName = discountState.sellerName || analyticsState.shop_name || document.getElementById('productSeller')?.textContent || '';
+
+    // Get product image
+    const sliderImage = document.querySelector('.slide.is-active img, .slide img');
+    discountState.productImage = sliderImage?.src || '/assets/images/placeholder.png';
+
+    // Update modal content
+    if (discountProductTitle) discountProductTitle.textContent = discountState.productTitle || 'محصول';
+    if (discountProductSeller) discountProductSeller.textContent = `فروشنده: ${discountState.sellerName || 'نامشخص'}`;
+    if (discountProductImage) discountProductImage.src = discountState.productImage;
+
+    // Reset UI
+    if (discountPrice) discountPrice.value = '';
+    if (discountText) discountText.value = '';
+    if (discountSuccess) discountSuccess.hidden = true;
+    if (discountError) discountError.hidden = true;
+    if (discountSendBtn) {
+      discountSendBtn.disabled = true;
+      discountSendBtn.classList.remove('is-loading');
+    }
+    if (discountSendText) discountSendText.textContent = 'ارسال درخواست';
+    if (discountLoginPrompt) discountLoginPrompt.hidden = true;
+    if (discountFormContainer) discountFormContainer.hidden = true;
+    if (discountModalFooter) discountModalFooter.hidden = false;
+
+    // Show modal
+    discountModal.hidden = false;
+    requestAnimationFrame(() => {
+      discountModal.classList.add('is-visible');
+      discountModal.removeAttribute('aria-hidden');
+    });
+    document.body.classList.add('modal-open');
+
+    // Check auth
+    const isLoggedIn = await checkUserLogin();
+    discountState.isLoggedIn = isLoggedIn;
+
+    if (isLoggedIn) {
+      if (discountLoginPrompt) discountLoginPrompt.hidden = true;
+      if (discountFormContainer) discountFormContainer.hidden = false;
+      if (discountFooterHint) discountFooterHint.hidden = true;
+      setTimeout(() => discountPrice && discountPrice.focus(), 100);
+    } else {
+      if (discountLoginPrompt) discountLoginPrompt.hidden = false;
+      if (discountFormContainer) discountFormContainer.hidden = true;
+      if (discountSendBtn) discountSendBtn.disabled = true;
+      if (discountFooterHint) {
+        discountFooterHint.hidden = false;
+        const hintSpan = discountFooterHint.querySelector('span');
+        if (hintSpan) hintSpan.textContent = 'برای درخواست تخفیف باید وارد حساب کاربری شوید.';
+      }
+    }
+  }
+
+  function closeDiscountModal() {
+    discountModal.classList.remove('is-visible');
+    discountModal.setAttribute('aria-hidden', 'true');
+    setTimeout(() => { discountModal.hidden = true; }, 200);
+    document.body.classList.remove('modal-open');
+  }
+
+  function updateSendButton() {
+    if (!discountPrice || !discountSendBtn) return;
+    const price = discountPrice.value.trim();
+    discountSendBtn.disabled = !price || discountState.isSending || !discountState.isLoggedIn;
+  }
+
+  async function sendDiscountRequest() {
+    if (discountState.isSending) return;
+
+    const price = discountPrice.value.trim();
+    const comment = discountText ? discountText.value.trim() : '';
+
+    if (!price) {
+      showError('لطفاً قیمت پیشنهادی یا درصد تخفیف مد نظر خود را وارد کنید.');
+      return;
+    }
+
+    discountState.isSending = true;
+    if (discountSendBtn) {
+      discountSendBtn.disabled = true;
+      discountSendBtn.classList.add('is-loading');
+    }
+    if (discountSendText) discountSendText.textContent = 'در حال ارسال...';
+    if (discountSuccess) discountSuccess.hidden = true;
+    if (discountError) discountError.hidden = true;
+
+    // Format message
+    const messageBody = `⚠️ درخواست تخفیف \n\n💰 قیمت/تخفیف پیشنهادی: ${price} \n\n📝 توضیحات: ${comment || '-'}`;
+
+    try {
+      const response = await fetch('/api/chats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          text: messageBody,
+          productId: discountState.productId,
+          sellerId: discountState.sellerId || null,
+          recipientRole: 'seller'
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'خطا در ارسال درخواست');
+
+      // Success
+      if (discountPrice) discountPrice.value = '';
+      if (discountText) discountText.value = '';
+      closeDiscountModal();
+
+      // Show success popup (reusing the one from message)
+      if (successPopup) {
+        const successTitle = successPopup.querySelector('.success-popup-title');
+        const successMsg = successPopup.querySelector('.success-popup-message');
+
+        // Save original text to restore later
+        const originalTitle = successTitle ? successTitle.textContent : '';
+        const originalMsg = successMsg ? successMsg.textContent : '';
+
+        if (successTitle) successTitle.textContent = 'درخواست تخفیف ارسال شد!';
+        if (successMsg) successMsg.textContent = 'درخواست شما برای فروشنده ارسال شد. در صورت موافقت با شما تماس گرفته خواهد شد.';
+
+        successPopup.hidden = false;
+        requestAnimationFrame(() => successPopup.classList.add('is-visible'));
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+          successPopup.classList.remove('is-visible');
+          setTimeout(() => {
+            successPopup.hidden = true;
+            document.body.classList.remove('modal-open');
+            // Restore text
+            if (successTitle) successTitle.textContent = originalTitle;
+            if (successMsg) successMsg.textContent = originalMsg;
+          }, 300);
+        }, 4000);
+      }
+
+    } catch (error) {
+      console.error('Discount request error:', error);
+      showError('خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.');
+    } finally {
+      discountState.isSending = false;
+      if (discountSendBtn) {
+        discountSendBtn.classList.remove('is-loading');
+      }
+      if (discountSendText) discountSendText.textContent = 'ارسال درخواست';
+      updateSendButton();
+    }
+  }
+
+  function showError(msg) {
+    if (discountError) discountError.hidden = false;
+    if (discountErrorText) discountErrorText.textContent = msg;
+  }
+
+  // Event Listeners
+  if (discountBtn) discountBtn.addEventListener('click', openDiscountModal);
+  if (discountModalClose) discountModalClose.addEventListener('click', closeDiscountModal);
+  if (discountCancelBtn) discountCancelBtn.addEventListener('click', closeDiscountModal);
+  if (discountSendBtn) discountSendBtn.addEventListener('click', sendDiscountRequest);
+  if (discountPrice) discountPrice.addEventListener('input', updateSendButton);
+
+  if (discountModal) {
+    discountModal.addEventListener('click', (e) => {
+      if (e.target === discountModal) closeDiscountModal();
+    });
+  }
+
+  // Enable button when product data loads
+  document.addEventListener('product:updated', (event) => {
+    const state = event?.detail?.state || {};
+    if (state.seller_id || state.item_id) {
+      if (discountBtn) discountBtn.disabled = false;
+      discountState.sellerId = state.seller_id;
+      discountState.productId = state.item_id;
+      discountState.productTitle = state.item_name || '';
+      discountState.sellerName = state.shop_name || '';
+    }
+  });
 })();
