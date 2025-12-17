@@ -210,13 +210,13 @@ function getCategoryParentId(item) {
   if (typeof item === 'string') return '';
   return toIdString(
     item.parentId
-      || item.parentID
-      || item.parent
-      || item.parentCategory
-      || item.parentCategoryId
-      || item.parentCategoryID
-      || (item.parent && (item.parent._id || item.parent.id))
-      || ''
+    || item.parentID
+    || item.parent
+    || item.parentCategory
+    || item.parentCategoryId
+    || item.parentCategoryID
+    || (item.parent && (item.parent._id || item.parent.id))
+    || ''
   );
 }
 
@@ -277,8 +277,8 @@ function normaliseCategoryItem(raw, fallbackType = 'category') {
     isDefault: typeof raw.isDefault === 'boolean'
       ? raw.isDefault
       : (type === 'service-subcategory'
-          ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
-          : DEFAULT_CATEGORIES.includes(name)),
+        ? DEFAULT_SERVICE_SUBCATEGORY_NAMES.includes(name)
+        : DEFAULT_CATEGORIES.includes(name)),
     parentId,
     parentName
   };
@@ -626,15 +626,15 @@ if (categorySelect) {
 }
 
 // force category dropdown to open downward
-categorySelect.addEventListener('focus', function(){
+categorySelect.addEventListener('focus', function () {
   this.size = this.options.length;
   this.classList.add('open');
 });
-categorySelect.addEventListener('blur', function(){
+categorySelect.addEventListener('blur', function () {
   this.size = 1;
   this.classList.remove('open');
 });
-categorySelect.addEventListener('change', function(){
+categorySelect.addEventListener('change', function () {
   this.size = 1;
   this.classList.remove('open');
   this.blur();
@@ -802,6 +802,10 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     descHint.classList.add("hidden");
   }
 
+  // کد معرف
+  const referralInput = document.getElementById("referral_code");
+  const referralCode = referralInput ? referralInput.value.trim() : "";
+
   // رمز عبور
   const pass1Input = document.getElementById("pass1");
   const pass2Input = document.getElementById("pass2");
@@ -870,6 +874,7 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     subcategory: subcategory,
     address: address,
     desc: descValue,
+    referralCode: referralCode,
     password: pass1,
   };
 
@@ -917,122 +922,122 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
 
 // مرحله تأیید شماره موبایل
 function showVerifySection(phone) {
-// مقدار shopurl رو از localStorage بخون
-var shopurl = localStorage.getItem('shopurl');
-// ریدایرکت به صفحه verify.html با پارامتر
-window.location.href = `verify.html?shopurl=${encodeURIComponent(shopurl)}&phone=${encodeURIComponent(phone)}`;
+  // مقدار shopurl رو از localStorage بخون
+  var shopurl = localStorage.getItem('shopurl');
+  // ریدایرکت به صفحه verify.html با پارامتر
+  window.location.href = `verify.html?shopurl=${encodeURIComponent(shopurl)}&phone=${encodeURIComponent(phone)}`;
 }
 
 
 // تایید کد پیامک
 // --- تایید کد پیامک با سرور ---
 document.getElementById("verify-form").addEventListener("submit", function (e) {
-e.preventDefault();
-var code = document.getElementById("sms-code").value.trim();
-var codeHint = document.getElementById("code-hint");
-var params = new URLSearchParams(window.location.search);
-var shopurl = params.get("shopurl");
-var phone = params.get("phone");
-if (!/^\d{5}$/.test(code)) {
-  codeHint.innerText = "کد تأیید باید دقیقاً ۵ رقم باشد.";
-  codeHint.classList.remove("hidden");
-  return false;
-}
+  e.preventDefault();
+  var code = document.getElementById("sms-code").value.trim();
+  var codeHint = document.getElementById("code-hint");
+  var params = new URLSearchParams(window.location.search);
+  var shopurl = params.get("shopurl");
+  var phone = params.get("phone");
+  if (!/^\d{5}$/.test(code)) {
+    codeHint.innerText = "کد تأیید باید دقیقاً ۵ رقم باشد.";
+    codeHint.classList.remove("hidden");
+    return false;
+  }
 
-fetch(`${API_ORIGIN}/api/auth/verify`, {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({ shopurl, phone, code })
-})
-.then(res => res.json())
-.then(result => {
-  if (result.success) {
-    // رمز رو از sessionStorage بخون برای لاگین
-    var password = SafeSS.getJSON('signup_pwd'); // SafeSS
-    if (!password) {
-      codeHint.innerText = "خطا: رمز ثبت‌نام پیدا نشد. لطفا مجدد ثبت‌نام کنید.";
-      codeHint.classList.remove("hidden");
-      return;
-    }
-    // درخواست لاگین به سرور
-    fetch(`${API_ORIGIN}/api/auth/login`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ phone, password })
-    })
-    .then(res2 => res2.json())
-    .then(loginRes => {
-      if (loginRes.success && loginRes.seller) {
-        // توکن و اطلاعات رو ذخیره کن (در صورت نیاز)
-        localStorage.setItem('token', loginRes.token);
-        localStorage.setItem('seller', JSON.stringify(loginRes.seller));
-        // sessionStorage رو پاک کن
-        sessionStorage.removeItem('signup_pwd');
-        // ریدایرکت به داشبورد
-        window.location.href = "seller/dashboard.html?shopurl=" + encodeURIComponent(loginRes.seller.shopurl);
+  fetch(`${API_ORIGIN}/api/auth/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ shopurl, phone, code })
+  })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        // رمز رو از sessionStorage بخون برای لاگین
+        var password = SafeSS.getJSON('signup_pwd'); // SafeSS
+        if (!password) {
+          codeHint.innerText = "خطا: رمز ثبت‌نام پیدا نشد. لطفا مجدد ثبت‌نام کنید.";
+          codeHint.classList.remove("hidden");
+          return;
+        }
+        // درخواست لاگین به سرور
+        fetch(`${API_ORIGIN}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, password })
+        })
+          .then(res2 => res2.json())
+          .then(loginRes => {
+            if (loginRes.success && loginRes.seller) {
+              // توکن و اطلاعات رو ذخیره کن (در صورت نیاز)
+              localStorage.setItem('token', loginRes.token);
+              localStorage.setItem('seller', JSON.stringify(loginRes.seller));
+              // sessionStorage رو پاک کن
+              sessionStorage.removeItem('signup_pwd');
+              // ریدایرکت به داشبورد
+              window.location.href = "seller/dashboard.html?shopurl=" + encodeURIComponent(loginRes.seller.shopurl);
+            } else {
+              codeHint.innerText = loginRes.message || "ورود ناموفق!";
+              codeHint.classList.remove("hidden");
+            }
+          })
+          .catch(() => {
+            codeHint.innerText = "خطای ورود به اکانت!";
+            codeHint.classList.remove("hidden");
+          });
       } else {
-        codeHint.innerText = loginRes.message || "ورود ناموفق!";
+        codeHint.innerText = result.message || "کد تایید اشتباه است!";
         codeHint.classList.remove("hidden");
       }
     })
     .catch(() => {
-      codeHint.innerText = "خطای ورود به اکانت!";
+      codeHint.innerText = "مشکل ارتباط با سرور!";
       codeHint.classList.remove("hidden");
     });
-  } else {
-    codeHint.innerText = result.message || "کد تایید اشتباه است!";
-    codeHint.classList.remove("hidden");
-  }
-})
-.catch(() => {
-  codeHint.innerText = "مشکل ارتباط با سرور!";
-  codeHint.classList.remove("hidden");
-});
 });
 
 document.getElementById("sms-code").addEventListener("input", function () {
-document.getElementById("code-hint").classList.add("hidden");
+  document.getElementById("code-hint").classList.add("hidden");
 });
 
 // تایمر ارسال مجدد کد
 var resendBtn = document.getElementById("resend-btn");
 var timerSpan = document.getElementById("resend-timer");
 function startResendTimer() {
-resendBtn.disabled = true;
-let time = 60;
-timerSpan.innerText = `(${time})`;
-resendBtn.innerHTML = 'ارسال مجدد کد <span id="resend-timer">(' + time + ')</span>';
-timerSpan = document.getElementById("resend-timer");
-let t = setInterval(function () {
-  time--;
+  resendBtn.disabled = true;
+  let time = 60;
   timerSpan.innerText = `(${time})`;
-  if (time <= 0) {
-    clearInterval(t);
-    resendBtn.disabled = false;
-    timerSpan.innerText = '';
-    resendBtn.innerText = 'ارسال مجدد کد';
-  }
-}, 1000);
+  resendBtn.innerHTML = 'ارسال مجدد کد <span id="resend-timer">(' + time + ')</span>';
+  timerSpan = document.getElementById("resend-timer");
+  let t = setInterval(function () {
+    time--;
+    timerSpan.innerText = `(${time})`;
+    if (time <= 0) {
+      clearInterval(t);
+      resendBtn.disabled = false;
+      timerSpan.innerText = '';
+      resendBtn.innerText = 'ارسال مجدد کد';
+    }
+  }, 1000);
 }
 
 resendBtn.addEventListener("click", function () {
-if (resendBtn.disabled) return;
-alert("کد جدید ارسال شد! (در حالت واقعی)");
-startResendTimer();
+  if (resendBtn.disabled) return;
+  alert("کد جدید ارسال شد! (در حالت واقعی)");
+  startResendTimer();
 });
 
 
 
 // Mini toast for quick feedback
 function showToast(msg) {
-const el = document.createElement('div');
-el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-[999] px-4 py-2 rounded-xl bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] text-white text-sm shadow-lg";
-el.textContent = msg;
-document.body.appendChild(el);
-setTimeout(() => {
-  el.style.transition = "opacity .3s, transform .3s";
-  el.style.opacity = "0";
-  el.style.transform = "translate(-50%, 8px)";
-  setTimeout(() => el.remove(), 300);
-}, 1400);
+  const el = document.createElement('div');
+  el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-[999] px-4 py-2 rounded-xl bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] text-white text-sm shadow-lg";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = "opacity .3s, transform .3s";
+    el.style.opacity = "0";
+    el.style.transform = "translate(-50%, 8px)";
+    setTimeout(() => el.remove(), 300);
+  }, 1400);
 }

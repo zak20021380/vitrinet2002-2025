@@ -12,6 +12,7 @@ const sellerSchema = new mongoose.Schema({
   city: String,
   region: String,
   desc: String,
+  referralCode: String, // کد معرف که موقع ثبت‌نام وارد کرده
   startTime: { type: String, default: '' },
   endTime: { type: String, default: '' },
   password: {
