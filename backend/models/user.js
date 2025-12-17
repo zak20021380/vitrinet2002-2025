@@ -1,22 +1,23 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  firstname : { type: String, required: true },
-  lastname  : { type: String, required: true },
-  phone     : { type: String, required: true, unique: true },
-  password  : { type: String, required: true },
-  role      : { type: String, default: 'user' },
+  firstname: { type: String, required: true },
+  lastname: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, default: 'user' },
+  referralCode: { type: String }, // کد معرف
 
   /* ─── فیلدهای جدید برای حذف نرم ─── */
-  deleted   : { type: Boolean, default: false },      // نشانهٔ حذف کاربر
-  deletedAt : { type: Date },                         // زمان حذف (در صورت وجود)
+  deleted: { type: Boolean, default: false },      // نشانهٔ حذف کاربر
+  deletedAt: { type: Date },                         // زمان حذف (در صورت وجود)
 
-  favorites : [{
+  favorites: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref : 'Product'
+    ref: 'Product'
   }]
   ,
-  lastVisit : { type: Date },
+  lastVisit: { type: Date },
 
   activityLog: [{
     action: { type: String, required: true },

@@ -306,7 +306,7 @@ function validateIranianPhone(phone) {
 // ----------- ثبت‌نام کاربر -----------
 exports.registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, phone, password } = req.body;
+    const { firstname, lastname, phone, password, referralCode } = req.body;
 
     /* اعتبارسنجى اولیه */
     if (
@@ -341,6 +341,7 @@ exports.registerUser = async (req, res) => {
       firstname: firstname.trim(),
       lastname: lastname.trim(),
       phone,
+      referralCode,
       password: hashedPassword
     });
     await user.save();
