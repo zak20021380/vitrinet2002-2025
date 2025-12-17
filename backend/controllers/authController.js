@@ -302,6 +302,32 @@ function validateIranianPhone(phone) {
   return /^(\+98|0)?9\d{9}$/.test(phone);
 }
 
+// ----------- تولید کد معرف یکتا -----------
+async function generateUniqueReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // بدون حروف مشابه (O, 0, I, 1)
+  const codeLength = 8;
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  while (attempts < maxAttempts) {
+    let code = 'VT'; // پیشوند ویترینت
+    for (let i = 0; i < codeLength - 2; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // چک یکتا بودن
+    const exists = await User.findOne({ referralCode: code });
+    if (!exists) {
+      return code;
+    }
+    attempts++;
+  }
+
+  // اگر بعد از چند تلاش یکتا نبود، از timestamp استفاده کن
+  const timestamp = Date.now().toString(36).toUpperCase();
+  return `VT${timestamp}`.slice(0, 8);
+}
+
 // ----------- ثبت‌نام کاربر ----------- 
 // ----------- ثبت‌نام کاربر -----------
 exports.registerUser = async (req, res) => {
@@ -336,12 +362,16 @@ exports.registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    /* تولید کد معرف یکتا برای کاربر جدید */
+    const userReferralCode = await generateUniqueReferralCode();
+
     /* ایجاد و ذخیره کاربر */
     const user = new User({
       firstname: firstname.trim(),
       lastname: lastname.trim(),
       phone,
-      referralCode,
+      referralCode: userReferralCode, // کد معرف یکتای کاربر
+      referredBy: referralCode || null, // کد معرفی که با آن ثبت‌نام کرده (اختیاری)
       password: hashedPassword
     });
     await user.save();

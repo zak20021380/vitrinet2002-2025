@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, default: 'user' },
-  referralCode: { type: String }, // کد معرف
+  referralCode: { type: String, unique: true, sparse: true }, // کد معرف یکتای کاربر
+  referredBy: { type: String }, // کد معرفی که با آن ثبت‌نام کرده
 
   /* ─── فیلدهای جدید برای حذف نرم ─── */
   deleted: { type: Boolean, default: false },      // نشانهٔ حذف کاربر
