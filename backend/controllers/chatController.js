@@ -12,6 +12,25 @@ const Admin = require('../models/admin');
 const BlockedSeller = require('../models/BlockedSeller');
 const BannedPhone = require('../models/BannedPhone');
 const { normalizePhone, buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
+const { 
+  processMessage, 
+  checkRateLimit, 
+  isValidObjectId, 
+  securityLog 
+} = require('../utils/messageSecurity');
+
+// Rate limit map برای جلوگیری از spam
+const messageRateLimitMap = new Map();
+
+// پاکسازی rate limit map هر 5 دقیقه
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of messageRateLimitMap.entries()) {
+    if (now - value.firstRequest > 300000) { // 5 دقیقه
+      messageRateLimitMap.delete(key);
+    }
+  }
+}, 300000);
 
 function buildAllPhoneVariants(phone) {
   const variants = new Set();
@@ -203,20 +222,108 @@ function sortIdArray(ids = []) {
 // controllers/chatController.js
 // تابع createChat
 // POST /api/chats  → ایجاد چت جدید یا افزودن پیام اولیه
-// تابع ارسال چت
+// تابع ارسال چت - با امنیت کامل
 exports.createChat = async (req, res) => {
   try {
     let { text: rawText, productId = null, sellerId = null, shopurl = null, recipientRole } = req.body;
-    console.log('Creating a new chat:', { rawText, productId, sellerId, shopurl, recipientRole });
-
-    if (!req.user) {
-      console.log('Token invalid or expired');
+    
+    // ═══════════════════════════════════════════════════════════════
+    // ۱) اعتبارسنجی توکن و کاربر
+    // ═══════════════════════════════════════════════════════════════
+    if (!req.user || !req.user.id) {
+      securityLog('UNAUTHORIZED_ACCESS', { 
+        ip: req.ip, 
+        userAgent: req.get('User-Agent'),
+        endpoint: 'createChat'
+      });
       return res.status(401).json({ error: 'توکن نامعتبر یا منقضی.' });
     }
 
-    const senderId = new mongoose.Types.ObjectId(req.user.id);
+    const senderId = req.user.id;
     const senderRole = req.user.role;
-    console.log('Sender ID:', senderId, 'Sender Role:', senderRole);
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۲) اعتبارسنجی نقش فرستنده
+    // ═══════════════════════════════════════════════════════════════
+    const validRoles = ['user', 'seller', 'admin'];
+    if (!validRoles.includes(senderRole)) {
+      securityLog('INVALID_ROLE', { senderId, senderRole });
+      return res.status(403).json({ error: 'نقش کاربری نامعتبر است.' });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۳) Rate Limiting - جلوگیری از spam
+    // ═══════════════════════════════════════════════════════════════
+    const rateCheck = checkRateLimit(messageRateLimitMap, senderId, 15, 60000); // 15 پیام در دقیقه
+    if (!rateCheck.allowed) {
+      securityLog('RATE_LIMIT_EXCEEDED', { 
+        senderId, 
+        senderRole,
+        resetInSeconds: rateCheck.resetInSeconds 
+      });
+      return res.status(429).json({ 
+        error: rateCheck.error,
+        retryAfter: rateCheck.resetInSeconds
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۴) اعتبارسنجی و پاکسازی متن پیام
+    // ═══════════════════════════════════════════════════════════════
+    const messageResult = processMessage(rawText, {
+      minLength: 1,
+      maxLength: 2000,
+      strictMode: true
+    });
+
+    if (!messageResult.success) {
+      if (messageResult.code === 'DANGEROUS_CONTENT') {
+        securityLog('DANGEROUS_CONTENT_BLOCKED', { 
+          senderId, 
+          senderRole,
+          threats: messageResult.threats,
+          ip: req.ip
+        });
+      }
+      return res.status(400).json({ error: messageResult.error });
+    }
+
+    const text = messageResult.sanitizedText;
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۵) اعتبارسنجی recipientRole
+    // ═══════════════════════════════════════════════════════════════
+    const validRecipientRoles = ['user', 'seller', 'admin'];
+    if (!recipientRole || !validRecipientRoles.includes(recipientRole)) {
+      return res.status(400).json({ error: 'نقش گیرنده نامعتبر است.' });
+    }
+
+    // جلوگیری از ارسال پیام به خود
+    if (senderRole === recipientRole && !productId) {
+      return res.status(400).json({ error: 'نمی‌توانید به خودتان پیام ارسال کنید.' });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۶) اعتبارسنجی ObjectId ها
+    // ═══════════════════════════════════════════════════════════════
+    if (productId && !isValidObjectId(productId)) {
+      return res.status(400).json({ error: 'شناسه محصول نامعتبر است.' });
+    }
+
+    if (sellerId && !isValidObjectId(sellerId)) {
+      return res.status(400).json({ error: 'شناسه فروشنده نامعتبر است.' });
+    }
+
+    // پاکسازی shopurl
+    if (shopurl) {
+      shopurl = String(shopurl).trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+      if (shopurl.length > 100) {
+        return res.status(400).json({ error: 'آدرس فروشگاه نامعتبر است.' });
+      }
+    }
+
+    const senderObjectId = new mongoose.Types.ObjectId(senderId);
+    console.log('Creating chat - Sender:', senderId, 'Role:', senderRole);
 
     // جلوگیری از ارسال پیام در صورت مسدودی توسط ادمین
     if (['user', 'seller'].includes(senderRole) && recipientRole === 'admin') {
@@ -361,7 +468,7 @@ exports.createChat = async (req, res) => {
     }
 
     let chat = await Chat.findOne(finder);
-    const text = (rawText || '').trim();
+    // text قبلاً با processMessage پاکسازی شده
 
     if (chat) {
       if (text) {
@@ -843,24 +950,75 @@ exports.getMyChats = async (req, res) => {
     -------------------------------------------------------------------*/
 // controllers/chatController.js
 // تابع ارسال پیام
-// POST /api/chats/:id  → ارسال پیام عمومی
+// POST /api/chats/:id  → ارسال پیام عمومی - با امنیت کامل
 exports.sendMessage = async (req, res) => {
   try {
     const { id } = req.params;
     const { text } = req.body;
-    const senderId = new mongoose.Types.ObjectId(req.user.id);
-    const senderRole = req.user.role;
 
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: 'متن پیام الزامی است.' });
+    // ═══════════════════════════════════════════════════════════════
+    // ۱) اعتبارسنجی کاربر
+    // ═══════════════════════════════════════════════════════════════
+    if (!req.user || !req.user.id) {
+      securityLog('UNAUTHORIZED_MESSAGE', { ip: req.ip, chatId: id });
+      return res.status(401).json({ error: 'توکن نامعتبر یا منقضی.' });
     }
 
+    const senderId = req.user.id;
+    const senderRole = req.user.role;
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۲) اعتبارسنجی شناسه چت
+    // ═══════════════════════════════════════════════════════════════
+    if (!id || !isValidObjectId(id)) {
+      return res.status(400).json({ error: 'شناسه چت نامعتبر است.' });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۳) Rate Limiting
+    // ═══════════════════════════════════════════════════════════════
+    const rateCheck = checkRateLimit(messageRateLimitMap, senderId, 20, 60000);
+    if (!rateCheck.allowed) {
+      securityLog('RATE_LIMIT_EXCEEDED', { senderId, chatId: id });
+      return res.status(429).json({ 
+        error: rateCheck.error,
+        retryAfter: rateCheck.resetInSeconds
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۴) اعتبارسنجی و پاکسازی متن پیام
+    // ═══════════════════════════════════════════════════════════════
+    const messageResult = processMessage(text, {
+      minLength: 1,
+      maxLength: 2000,
+      strictMode: true
+    });
+
+    if (!messageResult.success) {
+      if (messageResult.code === 'DANGEROUS_CONTENT') {
+        securityLog('DANGEROUS_CONTENT_BLOCKED', { 
+          senderId, 
+          chatId: id,
+          threats: messageResult.threats 
+        });
+      }
+      return res.status(400).json({ error: messageResult.error });
+    }
+
+    const sanitizedText = messageResult.sanitizedText;
+    const senderObjectId = new mongoose.Types.ObjectId(senderId);
+
+    // ═══════════════════════════════════════════════════════════════
+    // ۵) بررسی وجود چت و دسترسی
+    // ═══════════════════════════════════════════════════════════════
     const chat = await Chat.findById(id);
     if (!chat) {
       return res.status(404).json({ error: 'چت پیدا نشد.' });
     }
 
-    if (!chat.participants.some(p => p.equals(senderId))) {
+    if (!chat.participants.some(p => p.equals(senderObjectId))) {
+      securityLog('UNAUTHORIZED_CHAT_ACCESS', { senderId, chatId: id });
       return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
     }
 
@@ -903,9 +1061,12 @@ exports.sendMessage = async (req, res) => {
     const readByAdmin = ['seller-admin', 'user-admin', 'admin-user', 'admin'].includes(chat.type) ? false : true;
     const readBySeller = senderRole === 'seller';
 
+    // ═══════════════════════════════════════════════════════════════
+    // ۶) ذخیره پیام با متن پاکسازی شده
+    // ═══════════════════════════════════════════════════════════════
     chat.messages.push({
       from: senderRole,
-      text: text.trim(),
+      text: sanitizedText, // استفاده از متن پاکسازی شده
       date: new Date(),
       read: false,
       readByAdmin,
@@ -914,10 +1075,17 @@ exports.sendMessage = async (req, res) => {
     chat.lastUpdated = Date.now();
     await chat.save();
 
+    securityLog('MESSAGE_SENT', { 
+      senderId, 
+      chatId: id, 
+      messageLength: sanitizedText.length 
+    });
+
     return res.json({ success: true });
 
   } catch (err) {
     console.error('sendMessage ➜', err);
+    securityLog('MESSAGE_ERROR', { error: err.message });
     return res.status(500).json({ error: 'خطا در ارسال پیام.' });
   }
 };

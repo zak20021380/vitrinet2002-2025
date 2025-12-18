@@ -2,8 +2,51 @@
 
 const express = require('express');
 const router  = express.Router();
-const auth = require('../middlewares/authMiddleware');       // ← این را اضافه کنید
+const rateLimit = require('express-rate-limit');
+const auth = require('../middlewares/authMiddleware');
 const chatController = require('../controllers/chatController');
+
+// ═══════════════════════════════════════════════════════════════
+// Rate Limiters برای امنیت بیشتر
+// ═══════════════════════════════════════════════════════════════
+
+// Rate limiter برای ایجاد چت جدید
+const createChatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 دقیقه
+  max: 10, // حداکثر 10 درخواست در دقیقه
+  message: { 
+    error: 'تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip
+});
+
+// Rate limiter برای ارسال پیام
+const sendMessageLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 دقیقه
+  max: 20, // حداکثر 20 پیام در دقیقه
+  message: { 
+    error: 'تعداد پیام‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip
+});
+
+// Rate limiter سخت‌گیرانه برای جلوگیری از حملات brute force
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 دقیقه
+  max: 100, // حداکثر 100 درخواست در 15 دقیقه
+  message: { 
+    error: 'فعالیت مشکوک شناسایی شد. لطفاً بعداً تلاش کنید.',
+    retryAfter: 900
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 
 
@@ -48,9 +91,10 @@ router.get('/all',
 
 
 
-/*━━━━━━━━━━ ۳) ایجاد چت جدید ━━━━━━━━━━*/
+/*━━━━━━━━━━ ۳) ایجاد چت جدید - با Rate Limiting ━━━━━━━━━━*/
 router.post('/',
-  // اگر مشتری ایجاد می‌کنه نیازی به auth، اما اگر فروشنده یا admin هست:
+  strictLimiter,         // محافظت در برابر حملات
+  createChatLimiter,     // محدودیت ایجاد چت
   auth(),                // نقش null یعنی هر کسی با توکن معتبر (seller|admin|user)
   chatController.createChat
 );
@@ -135,10 +179,12 @@ router.post(
 
 router.get('/:id', auth(), chatController.getChatById);
 
-/*━━━━━━━━━━ ارسال پیام داخل یک چت ━━━━━━━━━━*/
+/*━━━━━━━━━━ ارسال پیام داخل یک چت - با Rate Limiting ━━━━━━━━━━*/
 // POST /api/chats/:id
 router.post(
   '/:id',
+  strictLimiter,               // محافظت در برابر حملات
+  sendMessageLimiter,          // محدودیت ارسال پیام
   auth(),                      // هر کسی که صاحب چت باشد
   chatController.sendMessage   // ← متدِ sendMessage داخل کنترلر
 );

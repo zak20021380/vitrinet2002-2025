@@ -1901,23 +1901,103 @@
     messageBtn.focus({ preventScroll: true });
   }
 
-  // Send message
+  // ═══════════════════════════════════════════════════════════════
+  // توابع امنیتی سمت کلاینت
+  // ═══════════════════════════════════════════════════════════════
+  
+  // الگوهای خطرناک برای شناسایی
+  const DANGEROUS_PATTERNS = [
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    /javascript\s*:/gi,
+    /on\w+\s*=/gi,
+    /\$where\s*:/gi,
+    /\$gt\s*:/gi,
+    /\$ne\s*:/gi
+  ];
+
+  // پاکسازی متن از کاراکترهای خطرناک
+  function sanitizeClientText(text) {
+    if (!text || typeof text !== 'string') return '';
+    
+    // حذف کاراکترهای کنترلی
+    let sanitized = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    
+    // حذف null bytes
+    sanitized = sanitized.replace(/\0/g, '');
+    
+    return sanitized.trim();
+  }
+
+  // بررسی الگوهای خطرناک
+  function containsDangerousContent(text) {
+    if (!text) return false;
+    
+    for (const pattern of DANGEROUS_PATTERNS) {
+      if (pattern.test(text)) {
+        pattern.lastIndex = 0;
+        return true;
+      }
+      pattern.lastIndex = 0;
+    }
+    return false;
+  }
+
+  // اعتبارسنجی طول پیام
+  function validateMessageText(text, minLength = 1, maxLength = 2000) {
+    if (!text || typeof text !== 'string') {
+      return { valid: false, error: 'متن پیام الزامی است.' };
+    }
+    
+    const trimmed = text.trim();
+    
+    if (trimmed.length < minLength) {
+      return { valid: false, error: 'پیام خیلی کوتاه است.' };
+    }
+    
+    if (trimmed.length > maxLength) {
+      return { valid: false, error: `پیام نمی‌تواند بیشتر از ${maxLength} کاراکتر باشد.` };
+    }
+    
+    if (containsDangerousContent(trimmed)) {
+      return { valid: false, error: 'محتوای پیام مجاز نیست.' };
+    }
+    
+    return { valid: true };
+  }
+
+  // Send message - با امنیت کامل
   async function sendMessage() {
-    if (messageState.isSending || !messageText.value.trim()) return;
+    if (messageState.isSending) return;
 
     if (!messageState.isLoggedIn) {
       showError('برای ارسال پیام باید وارد شوید.');
       return;
     }
 
-    const text = messageText.value.trim();
-    if (!text) {
-      showError('لطفاً متن پیام را وارد کنید.');
+    // پاکسازی و اعتبارسنجی متن
+    const rawText = messageText.value;
+    const sanitizedText = sanitizeClientText(rawText);
+    
+    const validation = validateMessageText(sanitizedText);
+    if (!validation.valid) {
+      showError(validation.error);
       return;
     }
 
     if (!messageState.productId) {
       showError('شناسه محصول یافت نشد.');
+      return;
+    }
+
+    // اعتبارسنجی شناسه‌ها
+    const objectIdRegex = /^[a-fA-F0-9]{24}$/;
+    if (!objectIdRegex.test(messageState.productId)) {
+      showError('شناسه محصول نامعتبر است.');
+      return;
+    }
+
+    if (messageState.sellerId && !objectIdRegex.test(messageState.sellerId)) {
+      showError('شناسه فروشنده نامعتبر است.');
       return;
     }
 
@@ -1937,7 +2017,7 @@
         },
         credentials: 'include',
         body: JSON.stringify({
-          text: text,
+          text: sanitizedText,
           productId: messageState.productId,
           sellerId: messageState.sellerId || null,
           recipientRole: 'seller'
