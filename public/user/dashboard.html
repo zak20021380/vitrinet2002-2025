@@ -408,6 +408,16 @@
       box-shadow: 0 8px 30px rgba(16, 185, 129, 0.45);
     }
 
+    /* کارت گردشگر بازار - فیروزه‌ای */
+    .mission-card.explore {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
+    }
+
+    .mission-card.explore:hover {
+      box-shadow: 0 8px 30px rgba(6, 182, 212, 0.45);
+    }
+
     .mission-reward {
       display: flex;
       align-items: center;
@@ -569,6 +579,10 @@
 
     .mission-modal-header.profile {
       background: linear-gradient(145deg, #10b981 0%, #059669 50%, #047857 100%);
+    }
+
+    .mission-modal-header.explore {
+      background: linear-gradient(145deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
     }
 
     .mission-modal-close {
@@ -822,6 +836,98 @@
       margin: 0;
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       بخش پیشرفت ماموریت گردشگر بازار
+       ═══════════════════════════════════════════════════════════════ */
+    .explore-progress-section {
+      background: linear-gradient(145deg, #ecfeff 0%, #cffafe 100%);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      margin-bottom: 1rem;
+    }
+
+    .explore-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .explore-progress-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0e7490;
+      margin: 0;
+    }
+
+    .explore-progress-count {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0891b2;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .explore-progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(6, 182, 212, 0.15);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .explore-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #06b6d4, #0891b2);
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .explore-progress-hint {
+      font-size: 0.75rem;
+      color: #0e7490;
+      margin: 0.5rem 0 0;
+      text-align: center;
+    }
+
+    /* Toast برای پیشرفت ماموریت */
+    .mission-progress-toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: linear-gradient(145deg, #06b6d4, #0891b2);
+      color: #fff;
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 2100;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
+    }
+
+    .mission-progress-toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mission-progress-toast svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .mission-progress-toast.complete {
+      background: linear-gradient(145deg, #22c55e, #16a34a);
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+    }
+
     @media (max-width: 360px) {
       .invite-reward-card {
         padding: 0.875rem 1rem;
@@ -912,6 +1018,15 @@
 
     .mission-modal-btn.primary.profile:hover {
       box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .mission-modal-btn.primary.explore {
+      background: linear-gradient(145deg, #06b6d4 0%, #0891b2 100%);
+    }
+
+    .mission-modal-btn.primary.explore:hover {
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.4);
       transform: translateY(-2px);
     }
 
@@ -7656,6 +7771,15 @@
     <span id="missionCopyToastText">کپی شد!</span>
   </div>
 
+  <!-- پیام پیشرفت ماموریت گردشگر -->
+  <div class="mission-progress-toast" id="exploreProgressToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+    </svg>
+    <span id="exploreProgressText">فروشگاه بازدید شد! (۱/۳)</span>
+  </div>
+
   <!-- بخش کیف پول -->
   <div class="streak-wallet-container fadein">
     <!-- کارت کیف پول -->
@@ -7826,6 +7950,20 @@
             ۵۰۰ تومان
           </div>
           <p class="mission-title">ثبت تاریخ تولد</p>
+          <div class="mission-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- گردشگر بازار -->
+        <div class="mission-card explore" id="missionExplore" onclick="showExploreMission()">
+          <div class="mission-reward">
+            <span class="mission-reward-icon">🧭</span>
+            ۵۰۰ تومان
+          </div>
+          <p class="mission-title">گردش در بازار</p>
           <div class="mission-arrow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -8104,6 +8242,19 @@
           action: 'edit'
         },
         secondaryBtn: null
+      },
+      explore: {
+        icon: '🧭',
+        reward: '۵۰۰ تومان',
+        title: 'بگرد و جایزه بگیر!',
+        isExploreModal: true, // نشانگر مودال ویژه گردشگر
+        desc: 'از پروفایل ۳ فروشگاه مختلف بازدید کن تا ۵۰۰ تومان جایزه بگیری!',
+        primaryBtn: {
+          text: 'شروع گردش',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>`,
+          action: 'startExplore'
+        },
+        secondaryBtn: null
       }
     };
 
@@ -8208,6 +8359,32 @@
             <p class="invite-code-value" dir="ltr">${code}</p>
           </div>
         `;
+      } else if (data.isExploreModal) {
+        // مودال گردشگر بازار با نمایش پیشرفت
+        reward.style.display = '';
+        reward.textContent = data.reward;
+        
+        const progress = getExploreProgress();
+        const progressPercent = (progress.count / 3) * 100;
+        const isComplete = progress.count >= 3;
+        
+        bodyContent.innerHTML = `
+          <div class="mission-modal-desc-card">
+            <p class="mission-modal-desc">${data.desc}</p>
+          </div>
+          
+          <!-- بخش پیشرفت -->
+          <div class="explore-progress-section">
+            <div class="explore-progress-header">
+              <p class="explore-progress-label">پیشرفت شما</p>
+              <span class="explore-progress-count">${progress.count}/۳</span>
+            </div>
+            <div class="explore-progress-bar">
+              <div class="explore-progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            ${isComplete ? '<p class="explore-progress-hint" style="color:#16a34a;">🎉 تبریک! ماموریت تکمیل شد!</p>' : '<p class="explore-progress-hint">از پروفایل فروشگاه‌ها بازدید کنید</p>'}
+          </div>
+        `;
       } else {
         reward.style.display = '';
         reward.textContent = data.reward;
@@ -8273,6 +8450,10 @@
         case 'edit':
           closeMissionModal();
           showSection('profile');
+          break;
+        case 'startExplore':
+          closeMissionModal();
+          window.location.href = '/all-shops.html';
           break;
       }
     }
@@ -8393,6 +8574,112 @@
     function showBookingMission() {
       showMissionModal('booking');
     }
+
+    function showExploreMission() {
+      showMissionModal('explore');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // سیستم ردیابی ماموریت گردشگر بازار
+    // ═══════════════════════════════════════════════════════════════
+    
+    const EXPLORE_STORAGE_KEY = 'vitrint_explore_mission';
+    const EXPLORE_REQUIRED_VISITS = 3;
+
+    // دریافت پیشرفت ماموریت گردشگر
+    function getExploreProgress() {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const stored = localStorage.getItem(EXPLORE_STORAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored);
+          // اگر تاریخ امروز نیست، ریست کن
+          if (data.date !== today) {
+            return { date: today, visitedShops: [], count: 0, completed: false, rewarded: false };
+          }
+          return data;
+        }
+      } catch (e) {
+        console.error('Error reading explore progress:', e);
+      }
+      return { date: new Date().toISOString().split('T')[0], visitedShops: [], count: 0, completed: false, rewarded: false };
+    }
+
+    // ذخیره پیشرفت ماموریت گردشگر
+    function saveExploreProgress(progress) {
+      try {
+        localStorage.setItem(EXPLORE_STORAGE_KEY, JSON.stringify(progress));
+      } catch (e) {
+        console.error('Error saving explore progress:', e);
+      }
+    }
+
+    // ثبت بازدید از فروشگاه
+    function trackShopVisit(shopId) {
+      if (!shopId) return;
+      
+      const progress = getExploreProgress();
+      
+      // اگر قبلاً تکمیل شده و پاداش گرفته، کاری نکن
+      if (progress.completed && progress.rewarded) return;
+      
+      // اگر این فروشگاه قبلاً بازدید شده، کاری نکن
+      if (progress.visitedShops.includes(shopId)) return;
+      
+      // اضافه کردن فروشگاه به لیست بازدید شده‌ها
+      progress.visitedShops.push(shopId);
+      progress.count = progress.visitedShops.length;
+      
+      // نمایش toast پیشرفت
+      showExploreProgressToast(progress.count);
+      
+      // بررسی تکمیل ماموریت
+      if (progress.count >= EXPLORE_REQUIRED_VISITS && !progress.completed) {
+        progress.completed = true;
+        // نمایش پیام تکمیل با تاخیر
+        setTimeout(() => {
+          showExploreCompleteToast();
+          // TODO: اینجا می‌تونید API call برای ثبت پاداش اضافه کنید
+          progress.rewarded = true;
+          saveExploreProgress(progress);
+        }, 1500);
+      }
+      
+      saveExploreProgress(progress);
+    }
+
+    // نمایش toast پیشرفت
+    function showExploreProgressToast(count) {
+      const toast = document.getElementById('exploreProgressToast');
+      const text = document.getElementById('exploreProgressText');
+      if (!toast || !text) return;
+      
+      const persianCount = count.toString().replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+      text.textContent = `فروشگاه بازدید شد! (${persianCount}/۳)`;
+      toast.classList.remove('complete');
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // نمایش toast تکمیل ماموریت
+    function showExploreCompleteToast() {
+      const toast = document.getElementById('exploreProgressToast');
+      const text = document.getElementById('exploreProgressText');
+      if (!toast || !text) return;
+      
+      text.textContent = '🎉 تبریک! ۵۰۰ تومان جایزه گرفتی!';
+      toast.classList.add('complete', 'show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show', 'complete');
+      }, 4000);
+    }
+
+    // تابع global برای استفاده در صفحات دیگر
+    window.trackShopVisit = trackShopVisit;
 
     // هندل کردن SPA و رسپانسیو
     function showSection(section) {
