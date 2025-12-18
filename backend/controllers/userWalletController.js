@@ -1,5 +1,8 @@
 const UserWallet = require('../models/UserWallet');
 const UserWalletTransaction = require('../models/UserWalletTransaction');
+const User = require('../models/user');
+
+const BIRTHDAY_REWARD_AMOUNT = 500; // مبلغ جایزه ثبت تاریخ تولد (تومان)
 
 /**
  * دریافت اطلاعات کیف پول کاربر
@@ -149,6 +152,7 @@ function getCategoryLabel(category) {
     referral: 'دعوت دوستان',
     first_booking: 'اولین رزرو',
     profile_complete: 'تکمیل پروفایل',
+    birthday: 'ثبت تاریخ تولد',
     discount_used: 'استفاده از تخفیف',
     admin_bonus: 'پاداش ویژه',
     admin_penalty: 'کسر اعتبار',
@@ -170,6 +174,7 @@ function getCategoryIcon(category) {
     referral: '👥',
     first_booking: '🎉',
     profile_complete: '📝',
+    birthday: '🎂',
     discount_used: '🏷️',
     admin_bonus: '🎁',
     admin_penalty: '⚠️',
@@ -177,3 +182,89 @@ function getCategoryIcon(category) {
   };
   return icons[category] || '💰';
 }
+
+
+/**
+ * ثبت تاریخ تولد و دریافت جایزه
+ * POST /api/user/birthday
+ */
+exports.setBirthDate = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { birthDate } = req.body;
+
+    // اعتبارسنجی فرمت تاریخ (مثلاً "1375/06/20")
+    if (!birthDate || !/^\d{4}\/\d{2}\/\d{2}$/.test(birthDate)) {
+      return res.status(400).json({ 
+        message: 'فرمت تاریخ تولد نامعتبر است. فرمت صحیح: 1375/06/20' 
+      });
+    }
+
+    // دریافت کاربر
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+
+    // بررسی آیا قبلاً تاریخ تولد ثبت شده و جایزه گرفته
+    const isFirstTime = !user.birthDateRewardClaimed;
+
+    // ذخیره تاریخ تولد
+    user.birthDate = birthDate;
+
+    let rewardGiven = false;
+    let newBalance = 0;
+
+    // اگر اولین بار است، جایزه بده
+    if (isFirstTime) {
+      // دریافت یا ایجاد کیف پول
+      const wallet = await UserWallet.getOrCreate(userId);
+      const balanceBefore = wallet.balance;
+      
+      // افزایش موجودی
+      wallet.balance += BIRTHDAY_REWARD_AMOUNT;
+      wallet.totalEarned += BIRTHDAY_REWARD_AMOUNT;
+      wallet.lastTransactionAt = new Date();
+      await wallet.save();
+
+      // ثبت تراکنش
+      await UserWalletTransaction.create({
+        user: userId,
+        type: 'bonus',
+        amount: BIRTHDAY_REWARD_AMOUNT,
+        balanceBefore: balanceBefore,
+        balanceAfter: wallet.balance,
+        category: 'birthday',
+        title: 'جایزه ثبت تاریخ تولد',
+        description: `تاریخ تولد: ${birthDate}`
+      });
+
+      // علامت‌گذاری دریافت جایزه
+      user.birthDateRewardClaimed = true;
+      rewardGiven = true;
+      newBalance = wallet.balance;
+    } else {
+      // فقط آپدیت تاریخ تولد بدون جایزه
+      const wallet = await UserWallet.getOrCreate(userId);
+      newBalance = wallet.balance;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: rewardGiven 
+        ? 'تاریخ تولد ثبت شد و جایزه به کیف پول اضافه شد!' 
+        : 'تاریخ تولد به‌روزرسانی شد',
+      birthDate: user.birthDate,
+      rewardGiven,
+      rewardAmount: rewardGiven ? BIRTHDAY_REWARD_AMOUNT : 0,
+      newBalance,
+      formattedBalance: newBalance.toLocaleString('fa-IR')
+    });
+
+  } catch (error) {
+    console.error('setBirthDate error:', error);
+    res.status(500).json({ message: 'خطا در ثبت تاریخ تولد' });
+  }
+};

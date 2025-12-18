@@ -21,7 +21,7 @@ const { protect } = require('../middlewares/authMiddleware');
 router.get('/profile', auth('user'), async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select('firstname lastname city phone mobile favorites lastVisit referralCode createdAt')
+      .select('firstname lastname city phone mobile favorites lastVisit referralCode birthDate birthDateRewardClaimed createdAt')
       .populate({
         path: 'favorites',
         select: 'title images price sellerId'
@@ -41,6 +41,8 @@ router.get('/profile', auth('user'), async (req, res) => {
       favoritesCount: user.favorites ? user.favorites.length : 0,
       lastVisit:      user.lastVisit || '',
       referralCode:   user.referralCode || '',
+      birthDate:      user.birthDate || '',
+      birthDateRewardClaimed: user.birthDateRewardClaimed || false,
       createdAt:      user.createdAt,
       name:           `${user.firstname || ''} ${user.lastname || ''}`.trim()
     });
@@ -223,5 +225,10 @@ router.get('/streak/leaderboard', auth('user'), userStreakController.getLeaderbo
 router.get('/wallet', auth('user'), userWalletController.getWallet);
 router.get('/wallet/transactions', auth('user'), userWalletController.getTransactions);
 router.get('/wallet/summary', auth('user'), userWalletController.getWalletSummary);
+
+// ───────────────────────────────
+// ثبت تاریخ تولد و دریافت جایزه
+// ───────────────────────────────
+router.post('/birthday', auth('user'), userWalletController.setBirthDate);
 
 module.exports = router;

@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: 'user' },
   referralCode: { type: String, unique: true, sparse: true }, // کد معرف یکتای کاربر
   referredBy: { type: String }, // کد معرفی که با آن ثبت‌نام کرده
+  
+  // تاریخ تولد (فرمت شمسی: "1375/06/20")
+  birthDate: { type: String, default: null },
+  // آیا جایزه ثبت تاریخ تولد دریافت شده؟
+  birthDateRewardClaimed: { type: Boolean, default: false },
 
   /* ─── فیلدهای جدید برای حذف نرم ─── */
   deleted: { type: Boolean, default: false },      // نشانهٔ حذف کاربر

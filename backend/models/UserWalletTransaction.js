@@ -50,6 +50,7 @@ const userWalletTransactionSchema = new mongoose.Schema({
       'referral',          // دعوت دوستان
       'first_booking',     // اولین رزرو
       'profile_complete',  // تکمیل پروفایل
+      'birthday',          // ثبت تاریخ تولد
       'discount_used',     // استفاده از تخفیف
       'admin_bonus',       // پاداش ادمین
       'admin_penalty',     // جریمه ادمین
