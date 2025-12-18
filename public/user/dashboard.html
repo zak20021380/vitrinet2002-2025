@@ -304,6 +304,528 @@
       }
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       ماموریت‌های پولساز - Mission Cards
+       ═══════════════════════════════════════════════════════════════ */
+    .missions-section {
+      margin-top: 1rem;
+      padding: 0;
+    }
+
+    .missions-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+      padding: 0 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .missions-title svg {
+      width: 16px;
+      height: 16px;
+      stroke: #f59e0b;
+    }
+
+    .missions-scroll {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding: 0.25rem 0.25rem 0.5rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .missions-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .missions-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .mission-card {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      min-width: 160px;
+      padding: 1rem;
+      border-radius: 1rem;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.1;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .mission-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .mission-card:active {
+      transform: scale(0.98);
+    }
+
+    /* کارت دعوت از دوستان - بنفش */
+    .mission-card.invite {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    }
+
+    .mission-card.invite:hover {
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.45);
+    }
+
+    /* کارت اولین رزرو - آبی */
+    .mission-card.booking {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+    }
+
+    .mission-card.booking:hover {
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.45);
+    }
+
+    /* کارت تکمیل پروفایل - سبز */
+    .mission-card.profile {
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    .mission-card.profile:hover {
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.45);
+    }
+
+    .mission-reward {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .mission-reward-icon {
+      font-size: 1.25rem;
+    }
+
+    .mission-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+
+    .mission-arrow {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .mission-card:hover .mission-arrow {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-4px);
+    }
+
+    .mission-arrow svg {
+      width: 14px;
+      height: 14px;
+      stroke: #fff;
+    }
+
+    .mission-card.completed {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .mission-card.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+    }
+
+    @media (max-width: 640px) {
+      .missions-section {
+        margin-top: 0.875rem;
+      }
+
+      .missions-title {
+        font-size: 0.8rem;
+      }
+
+      .mission-card {
+        min-width: 145px;
+        padding: 0.875rem;
+      }
+
+      .mission-reward {
+        font-size: 1rem;
+      }
+
+      .mission-title {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       مودال جزئیات ماموریت - Mission Detail Modal
+       ═══════════════════════════════════════════════════════════════ */
+    .mission-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mission-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mission-modal {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 1.5rem 1.5rem 0 0;
+      overflow: hidden;
+      box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.2);
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .mission-modal-overlay.active .mission-modal {
+      transform: translateY(0);
+    }
+
+    /* هدر مودال */
+    .mission-modal-header {
+      position: relative;
+      padding: 2rem 1.5rem 2.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .mission-modal-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* رنگ‌های هدر بر اساس نوع ماموریت */
+    .mission-modal-header.invite {
+      background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+    }
+
+    .mission-modal-header.booking {
+      background: linear-gradient(145deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+    }
+
+    .mission-modal-header.profile {
+      background: linear-gradient(145deg, #10b981 0%, #059669 50%, #047857 100%);
+    }
+
+    .mission-modal-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 1;
+    }
+
+    .mission-modal-close:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .mission-modal-close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .mission-modal-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    .mission-modal-reward {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .mission-modal-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* بدنه مودال */
+    .mission-modal-body {
+      padding: 1.75rem;
+      margin-top: -1rem;
+      position: relative;
+    }
+
+    .mission-modal-desc-card {
+      background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      margin-bottom: 1.25rem;
+    }
+
+    .mission-modal-desc {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.7;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* دکمه‌های اکشن */
+    .mission-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .mission-modal-btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mission-modal-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .mission-modal-btn.primary {
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .mission-modal-btn.primary.invite {
+      background: linear-gradient(145deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .mission-modal-btn.primary.invite:hover {
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .mission-modal-btn.primary.booking {
+      background: linear-gradient(145deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .mission-modal-btn.primary.booking:hover {
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .mission-modal-btn.primary.profile {
+      background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+    }
+
+    .mission-modal-btn.primary.profile:hover {
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .mission-modal-btn.secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .mission-modal-btn.secondary:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .mission-modal-btn.secondary.invite:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      color: #7c3aed;
+    }
+
+    /* دکمه بستن پایین */
+    .mission-modal-dismiss {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mission-modal-dismiss:hover {
+      color: #64748b;
+      background: rgba(15, 23, 42, 0.03);
+    }
+
+    /* پیام موفقیت کپی */
+    .mission-copy-toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 2100;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mission-copy-toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mission-copy-toast svg {
+      width: 18px;
+      height: 18px;
+      stroke: #22c55e;
+    }
+
+    @media (min-width: 640px) {
+      .mission-modal-overlay {
+        align-items: center;
+        padding: 1rem;
+      }
+
+      .mission-modal {
+        border-radius: 1.5rem;
+        max-height: 90vh;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .mission-modal-header {
+        padding: 1.5rem 1.25rem 2rem;
+      }
+
+      .mission-modal-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.75rem;
+      }
+
+      .mission-modal-body {
+        padding: 1.5rem 1.25rem;
+      }
+
+      .mission-modal-btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+      }
+    }
+
     /* Profile Edit Modal */
     .profile-modal-overlay {
       position: fixed;
@@ -3077,7 +3599,7 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       استایل‌های استریک روزانه - پاپ‌آپ شیک و مدرن
+       استایل‌های استریک روزانه - طراحی حرفه‌ای و مینیمال
        ═══════════════════════════════════════════════════════════════ */
 
     /* کانتینر کیف پول (بدون استریک) */
@@ -3087,7 +3609,7 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       پاپ‌آپ استریک روزانه - طراحی حرفه‌ای
+       پاپ‌آپ استریک روزانه - طراحی حرفه‌ای و مدرن
        ═══════════════════════════════════════════════════════════════ */
     .streak-popup-overlay {
       position: fixed;
@@ -3097,8 +3619,8 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
       opacity: 0;
       visibility: hidden;
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3111,11 +3633,11 @@
 
     .streak-popup {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       background: #ffffff;
-      border-radius: 1.75rem;
+      border-radius: 1.5rem;
       overflow: hidden;
-      box-shadow: 0 25px 80px rgba(249, 115, 22, 0.25), 0 10px 30px rgba(15, 23, 42, 0.15);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2), 0 10px 25px rgba(15, 23, 42, 0.1);
       transform: translateY(30px) scale(0.95);
       opacity: 0;
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -3129,8 +3651,8 @@
     /* هدر پاپ‌آپ */
     .streak-popup-header {
       position: relative;
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
-      padding: 1.75rem 1.5rem 2.5rem;
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      padding: 2rem 1.75rem 2.75rem;
       text-align: center;
       overflow: hidden;
     }
@@ -3138,22 +3660,13 @@
     .streak-popup-header::before {
       content: '';
       position: absolute;
-      top: -50%;
-      right: -30%;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .streak-popup-header::after {
-      content: '';
-      position: absolute;
-      bottom: -30%;
-      left: -20%;
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(249, 115, 22, 0.1) 0%, transparent 50%);
       pointer-events: none;
     }
 
@@ -3161,13 +3674,13 @@
       position: absolute;
       top: 1rem;
       left: 1rem;
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.2);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -3177,7 +3690,8 @@
     }
 
     .streak-popup-close:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
       transform: scale(1.05);
     }
 
@@ -3189,125 +3703,165 @@
     .streak-popup-icon {
       width: 72px;
       height: 72px;
-      margin: 0 auto 1rem;
-      background: rgba(255, 255, 255, 0.2);
+      margin: 0 auto 1.25rem;
+      background: linear-gradient(145deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.15) 100%);
       backdrop-filter: blur(10px);
-      border-radius: 20px;
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.25rem;
-      border: 2px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      box-shadow: 0 8px 32px rgba(249, 115, 22, 0.2);
       position: relative;
       z-index: 1;
     }
 
+    .streak-popup-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: #f97316;
+      fill: none;
+      stroke-width: 2;
+    }
+
     .streak-popup-title {
       margin: 0;
-      font-size: 1.35rem;
-      font-weight: 900;
+      font-size: 1.4rem;
+      font-weight: 800;
       color: #fff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      letter-spacing: -0.02em;
       position: relative;
       z-index: 1;
     }
 
     .streak-popup-subtitle {
-      margin: 0.35rem 0 0;
+      margin: 0.5rem 0 0;
       font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.9);
-      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
       position: relative;
       z-index: 1;
     }
 
     /* بدنه پاپ‌آپ */
     .streak-popup-body {
-      padding: 0 1.5rem 1.5rem;
-      margin-top: -1.25rem;
+      padding: 0 1.75rem 1.75rem;
+      margin-top: -1.5rem;
       position: relative;
     }
 
     /* کارت شمارنده استریک */
     .streak-counter-card {
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
       border-radius: 1.25rem;
-      padding: 1.5rem;
+      padding: 1.75rem;
       text-align: center;
-      border: 2px solid rgba(249, 115, 22, 0.15);
-      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
     }
 
     .streak-counter-number {
-      font-size: 4rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #f97316, #c2410c);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 4.5rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      color: #1e293b;
       line-height: 1;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
     }
 
     .streak-counter-label {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #9a3412;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 0.75rem;
     }
 
     .streak-counter-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 0.75rem;
-      padding: 0.4rem 1rem;
-      background: linear-gradient(135deg, #f97316, #ea580c);
-      border-radius: 999px;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid rgba(249, 115, 22, 0.15);
+      border-radius: 10px;
       font-size: 0.8rem;
-      font-weight: 800;
-      color: #fff;
-      box-shadow: 0 2px 10px rgba(249, 115, 22, 0.35);
+      font-weight: 700;
+      color: #9a3412;
+    }
+
+    .streak-counter-badge svg {
+      width: 16px;
+      height: 16px;
+      stroke: #f97316;
+      fill: none;
     }
 
     /* آمار استریک */
     .streak-popup-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-top: 1rem;
+      gap: 0.875rem;
+      margin-top: 1.25rem;
     }
 
     .streak-popup-stat {
-      background: #f8fafc;
+      background: #ffffff;
       border-radius: 1rem;
-      padding: 1rem;
+      padding: 1.125rem;
       text-align: center;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      transition: all 0.25s ease;
     }
 
     .streak-popup-stat:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
+      border-color: rgba(15, 23, 42, 0.1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
     }
 
     .streak-popup-stat-icon {
-      font-size: 1.25rem;
-      margin-bottom: 0.35rem;
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 0.5rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .streak-popup-stat-icon.trophy {
+      background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .streak-popup-stat-icon.trophy svg {
+      width: 18px;
+      height: 18px;
+      stroke: #d97706;
+      fill: none;
+    }
+
+    .streak-popup-stat-icon.calendar {
+      background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+    }
+
+    .streak-popup-stat-icon.calendar svg {
+      width: 18px;
+      height: 18px;
+      stroke: #2563eb;
+      fill: none;
     }
 
     .streak-popup-stat-value {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 800;
-      color: #0f172a;
+      font-family: 'Poppins', sans-serif;
+      color: #1e293b;
     }
 
     .streak-popup-stat-label {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: #64748b;
       font-weight: 600;
-      margin-top: 0.15rem;
+      margin-top: 0.2rem;
     }
 
     /* تاریخچه هفتگی */
@@ -3316,10 +3870,10 @@
       justify-content: space-between;
       gap: 0.5rem;
       margin-top: 1.25rem;
-      padding: 1rem;
-      background: #fafbfc;
+      padding: 1.125rem;
+      background: #ffffff;
       border-radius: 1rem;
-      border: 1px solid #f1f5f9;
+      border: 1px solid rgba(15, 23, 42, 0.06);
     }
 
     .streak-popup-day {
@@ -3327,58 +3881,73 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
 
     .streak-popup-day-name {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      color: #64748b;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .streak-popup-day-dot {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
+    }
+
+    .streak-popup-day-dot svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.5;
     }
 
     .streak-popup-day-dot.hit {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(34, 197, 94, 0.35);
+      background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .streak-popup-day-dot.hit svg {
+      stroke: #16a34a;
     }
 
     .streak-popup-day-dot.missed {
-      background: rgba(239, 68, 68, 0.1);
-      color: #dc2626;
-      border: 2px dashed rgba(239, 68, 68, 0.35);
+      background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .streak-popup-day-dot.missed svg {
+      stroke: #dc2626;
     }
 
     .streak-popup-day-dot.pending {
-      background: rgba(148, 163, 184, 0.15);
-      color: #94a3b8;
-      border: 2px dashed rgba(148, 163, 184, 0.35);
+      background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+    }
+
+    .streak-popup-day-dot.pending svg {
+      stroke: #94a3b8;
     }
 
     .streak-popup-day-dot.today {
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.35);
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(249, 115, 22, 0.4);
     }
 
     /* دکمه چک‌این */
     .streak-popup-checkin-btn {
       width: 100%;
-      margin-top: 1.25rem;
+      margin-top: 1.5rem;
       padding: 1rem 1.5rem;
-      border-radius: 14px;
+      border-radius: 12px;
       border: none;
-      font-weight: 800;
-      font-size: 1rem;
+      font-weight: 700;
+      font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -3388,38 +3957,38 @@
     }
 
     .streak-popup-checkin-btn.active {
-      background: linear-gradient(135deg, #f97316, #ea580c);
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
       color: #fff;
-      box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25);
     }
 
     .streak-popup-checkin-btn.active:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 32px rgba(249, 115, 22, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
     }
 
     .streak-popup-checkin-btn.active:active {
-      transform: translateY(-1px);
+      transform: translateY(0);
     }
 
     .streak-popup-checkin-btn.done {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
+      background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+      color: #15803d;
       cursor: default;
-      box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35);
+      border: 1px solid rgba(34, 197, 94, 0.2);
     }
 
     .streak-popup-checkin-btn svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
     }
 
     /* دکمه بستن پایین */
     .streak-popup-dismiss {
       width: 100%;
       margin-top: 0.75rem;
-      padding: 0.75rem;
-      border-radius: 12px;
+      padding: 0.875rem;
+      border-radius: 10px;
       border: none;
       background: transparent;
       color: #94a3b8;
@@ -3431,7 +4000,7 @@
 
     .streak-popup-dismiss:hover {
       color: #64748b;
-      background: #f8fafc;
+      background: rgba(15, 23, 42, 0.03);
     }
 
     /* انیمیشن موفقیت */
@@ -3475,14 +4044,14 @@
        ═══════════════════════════════════════════════════════════════ */
     @media (max-width: 480px) {
       .streak-popup-overlay {
-        padding: 0.75rem;
+        padding: 0;
         align-items: flex-end;
       }
 
       .streak-popup {
         max-width: 100%;
-        border-radius: 1.5rem 1.5rem 0 0;
-        max-height: 90vh;
+        border-radius: 1.25rem 1.25rem 0 0;
+        max-height: 92vh;
         overflow-y: auto;
       }
 
@@ -3495,10 +4064,14 @@
       }
 
       .streak-popup-icon {
-        width: 64px;
-        height: 64px;
-        font-size: 2rem;
-        border-radius: 18px;
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+      }
+
+      .streak-popup-icon svg {
+        width: 30px;
+        height: 30px;
       }
 
       .streak-popup-title {
@@ -3510,7 +4083,7 @@
       }
 
       .streak-popup-body {
-        padding: 0 1.25rem 1.25rem;
+        padding: 0 1.25rem 1.5rem;
       }
 
       .streak-counter-card {
@@ -3518,7 +4091,7 @@
       }
 
       .streak-counter-number {
-        font-size: 3.25rem;
+        font-size: 3.5rem;
       }
 
       .streak-counter-label {
@@ -3543,19 +4116,33 @@
       }
 
       .streak-popup-day-dot {
-        width: 28px;
-        height: 28px;
+        width: 30px;
+        height: 30px;
         border-radius: 8px;
-        font-size: 0.7rem;
+      }
+
+      .streak-popup-day-dot svg {
+        width: 14px;
+        height: 14px;
       }
 
       .streak-popup-day-name {
-        font-size: 0.6rem;
+        font-size: 0.65rem;
       }
 
       .streak-popup-checkin-btn {
         padding: 0.9rem 1.25rem;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+      }
+
+      .streak-popup-stat-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .streak-popup-stat-icon svg {
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -3565,46 +4152,68 @@
       }
 
       .streak-popup-icon {
-        width: 56px;
-        height: 56px;
-        font-size: 1.75rem;
+        width: 52px;
+        height: 52px;
+      }
+
+      .streak-popup-icon svg {
+        width: 26px;
+        height: 26px;
       }
 
       .streak-popup-body {
-        padding: 0 1rem 1rem;
+        padding: 0 1rem 1.25rem;
       }
 
       .streak-counter-number {
-        font-size: 2.75rem;
+        font-size: 3rem;
       }
 
       .streak-popup-day-dot {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
+      }
+
+      .streak-popup-day-dot svg {
+        width: 12px;
+        height: 12px;
       }
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       بنر کوچک استریک (برای نمایش بعد از بستن پاپ‌آپ)
+       بنر کوچک استریک - طراحی حرفه‌ای و مینیمال
        ═══════════════════════════════════════════════════════════════ */
     .streak-mini-banner {
       display: none;
       align-items: center;
-      gap: 0.875rem;
-      padding: 0.875rem 1.25rem;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-      border-radius: 1rem;
-      border: 1.5px solid rgba(249, 115, 22, 0.2);
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
       margin-bottom: 1rem;
       cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 2px 12px rgba(249, 115, 22, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .streak-mini-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+      border-radius: 0 1.25rem 1.25rem 0;
     }
 
     .streak-mini-banner:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.18);
-      border-color: rgba(249, 115, 22, 0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(249, 115, 22, 0.12);
+      border-color: rgba(249, 115, 22, 0.15);
     }
 
     .streak-mini-banner.visible {
@@ -3612,16 +4221,29 @@
     }
 
     .streak-mini-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #f97316, #ea580c);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid rgba(249, 115, 22, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      box-shadow: 0 3px 12px rgba(249, 115, 22, 0.3);
       flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .streak-mini-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: #ea580c;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .streak-mini-banner:hover .streak-mini-icon {
+      background: linear-gradient(145deg, #ffedd5 0%, #fed7aa 100%);
+      transform: scale(1.05);
     }
 
     .streak-mini-content {
@@ -3630,272 +4252,451 @@
     }
 
     .streak-mini-title {
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #9a3412;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
       margin: 0;
+      letter-spacing: -0.01em;
     }
 
     .streak-mini-subtitle {
-      font-size: 0.75rem;
-      color: #c2410c;
-      margin: 0.15rem 0 0;
-      font-weight: 600;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
+      font-weight: 500;
+    }
+
+    .streak-mini-subtitle.checked {
+      color: #059669;
     }
 
     .streak-mini-count {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0.5rem 0.875rem;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 10px;
-      border: 1px solid rgba(249, 115, 22, 0.15);
+      align-items: baseline;
+      gap: 0.35rem;
+      padding: 0.625rem 1rem;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border-radius: 12px;
+      border: 1px solid rgba(249, 115, 22, 0.1);
     }
 
     .streak-mini-number {
-      font-size: 1.35rem;
-      font-weight: 900;
+      font-size: 1.5rem;
+      font-weight: 800;
       color: #ea580c;
       line-height: 1;
+      font-family: 'Poppins', sans-serif;
     }
 
     .streak-mini-label {
-      font-size: 0.6rem;
+      font-size: 0.75rem;
       color: #9a3412;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .streak-mini-arrow {
       width: 20px;
       height: 20px;
-      color: #f97316;
+      color: #94a3b8;
       flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .streak-mini-banner:hover .streak-mini-arrow {
+      color: #f97316;
+      transform: translateX(-4px);
     }
 
     @media (max-width: 480px) {
       .streak-mini-banner {
-        padding: 0.75rem 1rem;
-        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        gap: 0.875rem;
+        border-radius: 1rem;
       }
 
       .streak-mini-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1.1rem;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+      }
+
+      .streak-mini-icon svg {
+        width: 20px;
+        height: 20px;
       }
 
       .streak-mini-title {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
       }
 
       .streak-mini-subtitle {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .streak-mini-count {
+        padding: 0.5rem 0.75rem;
       }
 
       .streak-mini-number {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
+      }
+
+      .streak-mini-label {
+        font-size: 0.7rem;
       }
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       کارت کیف پول - طراحی حرفه‌ای و مدرن
+       کارت کیف پول - طراحی حرفه‌ای و مدرن V2
        ═══════════════════════════════════════════════════════════════ */
     .wallet-card {
       position: relative;
-      background: #ffffff;
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
       border-radius: 1.75rem;
       padding: 0;
-      border: none;
-      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(16, 185, 129, 0.08);
+      box-shadow: 
+        0 4px 6px -1px rgba(16, 185, 129, 0.06),
+        0 10px 15px -3px rgba(16, 185, 129, 0.08),
+        0 20px 25px -5px rgba(15, 23, 42, 0.05);
       overflow: hidden;
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .wallet-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #0ea5e9, #8b5cf6, #10b981);
+      background-size: 300% 100%;
+      animation: wallet-shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes wallet-shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
 
     .wallet-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.18), 0 8px 24px rgba(15, 23, 42, 0.08);
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 
+        0 8px 10px -3px rgba(16, 185, 129, 0.1),
+        0 20px 25px -5px rgba(16, 185, 129, 0.12),
+        0 35px 45px -10px rgba(15, 23, 42, 0.08);
+      border-color: rgba(16, 185, 129, 0.15);
     }
 
     /* هدر کیف پول با گرادیانت */
     .wallet-header {
       position: relative;
-      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
-      padding: 1.5rem;
+      background: linear-gradient(135deg, #059669 0%, #10b981 40%, #34d399 100%);
+      padding: 1.75rem 1.5rem;
       overflow: hidden;
     }
 
     .wallet-header::before {
       content: '';
       position: absolute;
-      top: -60%;
-      right: -30%;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      top: -80%;
+      right: -40%;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
       pointer-events: none;
+      animation: float-bubble 8s ease-in-out infinite;
     }
 
     .wallet-header::after {
       content: '';
       position: absolute;
-      bottom: -40%;
-      left: -20%;
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      bottom: -60%;
+      left: -30%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+      animation: float-bubble 6s ease-in-out infinite reverse;
+    }
+
+    @keyframes float-bubble {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(15px, -15px) scale(1.05); }
+    }
+
+    /* پترن دکوراتیو هدر */
+    .wallet-header-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%);
       pointer-events: none;
     }
 
     .wallet-title {
       display: flex;
       align-items: center;
-      gap: 0.875rem;
+      gap: 1rem;
       position: relative;
       z-index: 1;
     }
 
     .wallet-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.6rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-size: 1.75rem;
+      box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .wallet-card:hover .wallet-icon {
+      transform: rotate(-5deg) scale(1.05);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     }
 
     .wallet-title-text h3 {
       margin: 0;
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+      letter-spacing: -0.01em;
     }
 
     .wallet-title-text p {
-      margin: 0.2rem 0 0;
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.85);
+      margin: 0.3rem 0 0;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
     }
 
     /* بخش موجودی اصلی */
     .wallet-main {
       text-align: center;
-      padding: 1.75rem 1.5rem;
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, transparent 100%);
+      padding: 2rem 1.5rem;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
       position: relative;
+    }
+
+    .wallet-main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.15), transparent);
     }
 
     .wallet-balance-label {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      font-size: 0.8rem;
+      gap: 0.5rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #64748b;
-      margin-bottom: 0.5rem;
-      padding: 0.35rem 0.85rem;
-      background: rgba(100, 116, 139, 0.08);
+      margin-bottom: 0.75rem;
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
       border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.1);
     }
 
     .wallet-balance-label::before {
       content: '';
-      width: 6px;
-      height: 6px;
-      background: #10b981;
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
       border-radius: 50%;
-      animation: pulse-dot 2s ease-in-out infinite;
+      animation: pulse-glow 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
     }
 
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
+    @keyframes pulse-glow {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+      }
+      50% { 
+        opacity: 0.7; 
+        transform: scale(1.3);
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.7);
+      }
     }
 
     .wallet-balance {
-      font-size: 2.75rem;
+      font-size: 3rem;
       font-weight: 900;
-      color: #0f172a;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       line-height: 1.1;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
       display: flex;
       align-items: baseline;
       justify-content: center;
       gap: 0.5rem;
+      position: relative;
+    }
+
+    .wallet-balance::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      border-radius: 999px;
+      opacity: 0.6;
     }
 
     .wallet-balance-unit {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #64748b;
+      background: linear-gradient(135deg, #64748b, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     /* آمار کیف پول */
     .wallet-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: #e2e8f0;
+      gap: 0;
       margin: 0;
+      position: relative;
+    }
+
+    .wallet-stats::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.08), transparent);
+    }
+
+    .wallet-stats::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.06), transparent);
     }
 
     .wallet-stat {
-      padding: 1.25rem 1rem;
-      background: #ffffff;
+      padding: 1.5rem 1.25rem;
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
       text-align: center;
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .wallet-stat::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(16, 185, 129, 0.02) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .wallet-stat:hover::before {
+      opacity: 1;
     }
 
     .wallet-stat:hover {
-      background: #fafbfc;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
     .wallet-stat-icon {
-      width: 44px;
-      height: 44px;
-      margin: 0 auto 0.75rem;
-      border-radius: 12px;
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 1rem;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.25rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .wallet-stat:hover .wallet-stat-icon {
+      transform: scale(1.08) translateY(-2px);
     }
 
     .wallet-stat.earned .wallet-stat-icon {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(34, 197, 94, 0.08));
+      box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .wallet-stat.spent .wallet-stat-icon {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.08));
+      box-shadow: 
+        0 4px 12px rgba(239, 68, 68, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .wallet-stat-value {
-      font-size: 1.35rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+      transition: all 0.3s ease;
+    }
+
+    .wallet-stat:hover .wallet-stat-value {
+      transform: scale(1.02);
     }
 
     .wallet-stat.earned .wallet-stat-value {
-      color: #059669;
+      background: linear-gradient(135deg, #059669, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .wallet-stat.spent .wallet-stat-value {
-      color: #dc2626;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .wallet-stat-label {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: #64748b;
       font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
     /* تراکنش‌های اخیر */
@@ -4296,34 +5097,59 @@
     /* رسپانسیو کیف پول */
     @media (max-width: 640px) {
       .wallet-card {
-        border-radius: 1.25rem;
+        border-radius: 1.5rem;
+      }
+
+      .wallet-card::before {
+        height: 2px;
       }
 
       .wallet-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 1.5rem;
       }
 
       .wallet-header {
-        padding: 1.25rem;
+        padding: 1.35rem 1.25rem;
       }
 
       .wallet-title-text h3 {
-        font-size: 1.05rem;
+        font-size: 1.1rem;
+      }
+
+      .wallet-title-text p {
+        font-size: 0.78rem;
       }
 
       .wallet-main {
-        padding: 1.25rem 1rem;
+        padding: 1.5rem 1rem;
       }
 
       .wallet-balance {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
+      }
+
+      .wallet-balance::after {
+        width: 50px;
+        height: 2px;
+        bottom: -6px;
       }
 
       .wallet-balance-label {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.85rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .wallet-balance-label::before {
+        width: 7px;
+        height: 7px;
+      }
+
+      .wallet-balance-unit {
+        font-size: 0.95rem;
       }
 
       .wallet-stats {
@@ -4331,26 +5157,27 @@
       }
 
       .wallet-stat {
-        padding: 1rem 0.75rem;
+        padding: 1.25rem 1rem;
       }
 
       .wallet-stat-icon {
-        width: 38px;
-        height: 38px;
-        margin-bottom: 0.5rem;
+        width: 44px;
+        height: 44px;
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
       }
 
       .wallet-stat-icon svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
       }
 
       .wallet-stat-value {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
       }
 
       .wallet-stat-label {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
       }
 
       .wallet-transactions-header {
@@ -4389,15 +5216,52 @@
     }
 
     @media (max-width: 400px) {
+      .wallet-card {
+        border-radius: 1.25rem;
+      }
+
       .wallet-header {
-        padding: 1rem;
+        padding: 1.1rem 1rem;
       }
 
       .wallet-title {
-        gap: 0.65rem;
+        gap: 0.75rem;
       }
 
       .wallet-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 1.35rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 1rem;
+      }
+
+      .wallet-main {
+        padding: 1.25rem 0.875rem;
+      }
+
+      .wallet-balance {
+        font-size: 2.15rem;
+      }
+
+      .wallet-stat {
+        padding: 1rem 0.75rem;
+      }
+
+      .wallet-stat-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0.6rem;
+      }
+
+      .wallet-stat-value {
+        font-size: 1.1rem;
+      }
+
+      .old-wallet-icon {
         width: 40px;
         height: 40px;
         font-size: 1.25rem;
@@ -5087,6 +5951,10 @@
         const memberSince = formatDate(user.createdAt || user.created_at || user.signupDate);
         const lastSeen = formatDate(user.lastLogin || user.last_seen || user.updatedAt || user.lastSeen);
         const referralCode = user.referralCode || '---';
+        // ذخیره کد معرف برای استفاده در مودال ماموریت
+        if (typeof userReferralCode !== 'undefined') {
+          userReferralCode = referralCode !== '---' ? referralCode : null;
+        }
         const filledFields = [firstName, lastName, safeCity, phone]
           .filter(Boolean).length;
         const completionProgress = Math.min(100, Math.round((filledFields / 4) * 100));
@@ -6443,14 +7311,22 @@
       <!-- هدر -->
       <div class="streak-popup-header">
         <button type="button" class="streak-popup-close" id="streakPopupClose">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        <div class="streak-popup-icon">🔥</div>
-        <h2 class="streak-popup-title">استریک روزانه</h2>
-        <p class="streak-popup-subtitle">هر روز وارد شو، جایزه بگیر!</p>
+        <div class="streak-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+            <line x1="16" x2="16" y1="2" y2="6"></line>
+            <line x1="8" x2="8" y1="2" y2="6"></line>
+            <line x1="3" x2="21" y1="10" y2="10"></line>
+            <path d="m9 16 2 2 4-4"></path>
+          </svg>
+        </div>
+        <h2 class="streak-popup-title">ورود روزانه</h2>
+        <p class="streak-popup-subtitle">هر روز وارد شو، امتیاز بگیر</p>
       </div>
 
       <!-- بدنه -->
@@ -6459,18 +7335,44 @@
         <div class="streak-counter-card">
           <div class="streak-counter-number" id="streakNumber">0</div>
           <div class="streak-counter-label">روز متوالی</div>
-          <span class="streak-counter-badge" id="streakLevel">🌱 تازه‌کار</span>
+          <span class="streak-counter-badge" id="streakLevel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+            <span id="streakLevelText">تازه‌کار</span>
+          </span>
         </div>
 
         <!-- آمار -->
         <div class="streak-popup-stats">
           <div class="streak-popup-stat">
-            <div class="streak-popup-stat-icon">🏆</div>
+            <div class="streak-popup-stat-icon trophy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+              </svg>
+            </div>
             <div class="streak-popup-stat-value" id="longestStreak">0</div>
             <div class="streak-popup-stat-label">بیشترین رکورد</div>
           </div>
           <div class="streak-popup-stat">
-            <div class="streak-popup-stat-icon">📅</div>
+            <div class="streak-popup-stat-icon calendar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                <line x1="16" x2="16" y1="2" y2="6"></line>
+                <line x1="8" x2="8" y1="2" y2="6"></line>
+                <line x1="3" x2="21" y1="10" y2="10"></line>
+              </svg>
+            </div>
             <div class="streak-popup-stat-value" id="totalLoginDays">0</div>
             <div class="streak-popup-stat-label">کل ورودها</div>
           </div>
@@ -6499,9 +7401,17 @@
 
   <!-- بنر کوچک استریک -->
   <div class="streak-mini-banner" id="streakMiniBanner">
-    <div class="streak-mini-icon">🔥</div>
+    <div class="streak-mini-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+        <line x1="16" x2="16" y1="2" y2="6"></line>
+        <line x1="8" x2="8" y1="2" y2="6"></line>
+        <line x1="3" x2="21" y1="10" y2="10"></line>
+        <path d="m9 16 2 2 4-4"></path>
+      </svg>
+    </div>
     <div class="streak-mini-content">
-      <h4 class="streak-mini-title">استریک روزانه</h4>
+      <h4 class="streak-mini-title">ورود روزانه</h4>
       <p class="streak-mini-subtitle" id="streakMiniSubtitle">برای دریافت پاداش کلیک کنید</p>
     </div>
     <div class="streak-mini-count">
@@ -6513,14 +7423,64 @@
     </svg>
   </div>
 
+  <!-- مودال جزئیات ماموریت -->
+  <div class="mission-modal-overlay" id="missionModalOverlay">
+    <div class="mission-modal" id="missionModal">
+      <!-- هدر -->
+      <div class="mission-modal-header" id="missionModalHeader">
+        <button type="button" class="mission-modal-close" id="missionModalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="mission-modal-icon" id="missionModalIcon">🎁</div>
+        <div class="mission-modal-reward" id="missionModalReward">۵,۰۰۰ تومان</div>
+        <h2 class="mission-modal-title" id="missionModalTitle">دعوت از دوستان</h2>
+      </div>
+
+      <!-- بدنه -->
+      <div class="mission-modal-body">
+        <div class="mission-modal-desc-card">
+          <p class="mission-modal-desc" id="missionModalDesc">
+            دوستانت رو دعوت کن! وقتی اولین رزروشون رو انجام بدن، تو ۵ هزار تومان و اونا ۳ هزار تومان هدیه می‌گیرن.
+          </p>
+        </div>
+
+        <div class="mission-modal-actions" id="missionModalActions">
+          <!-- دکمه‌ها با جاوااسکریپت پر می‌شوند -->
+        </div>
+
+        <button type="button" class="mission-modal-dismiss" id="missionModalDismiss">
+          بعداً
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- پیام موفقیت کپی -->
+  <div class="mission-copy-toast" id="missionCopyToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="missionCopyToastText">کپی شد!</span>
+  </div>
+
   <!-- بخش کیف پول -->
   <div class="streak-wallet-container fadein">
     <!-- کارت کیف پول -->
     <div class="wallet-card" id="walletCard">
       <!-- هدر با گرادیانت -->
       <div class="wallet-header">
+        <div class="wallet-header-pattern"></div>
         <div class="wallet-title">
-          <div class="wallet-icon">💰</div>
+          <div class="wallet-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"></path>
+            </svg>
+          </div>
           <div class="wallet-title-text">
             <h3>کیف پول من</h3>
             <p>اعتبار و پاداش‌های شما</p>
@@ -6541,7 +7501,7 @@
       <div class="wallet-stats">
         <div class="wallet-stat earned">
           <div class="wallet-stat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
               <polyline points="17 6 23 6 23 12"></polyline>
             </svg>
@@ -6551,7 +7511,7 @@
         </div>
         <div class="wallet-stat spent">
           <div class="wallet-stat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
               <polyline points="17 18 23 18 23 12"></polyline>
             </svg>
@@ -6629,6 +7589,60 @@
         </svg>
         <span class="quick-action-label">پروفایل</span>
       </button>
+    </div>
+
+    <!-- ماموریت‌های پولساز -->
+    <div class="missions-section">
+      <div class="missions-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="6"></circle>
+          <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+        </svg>
+        ماموریت‌های پولساز
+      </div>
+      <div class="missions-scroll">
+        <!-- دعوت از دوستان -->
+        <div class="mission-card invite" id="missionInvite" onclick="showReferralSection()">
+          <div class="mission-reward">
+            <span class="mission-reward-icon">🎁</span>
+            ۵,۰۰۰ تومان
+          </div>
+          <p class="mission-title">دعوت از دوستان</p>
+          <div class="mission-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- اولین رزرو -->
+        <div class="mission-card booking" id="missionBooking" onclick="showBookingMission()">
+          <div class="mission-reward">
+            <span class="mission-reward-icon">✨</span>
+            ۲,۰۰۰ تومان
+          </div>
+          <p class="mission-title">اولین رزرو</p>
+          <div class="mission-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- تکمیل پروفایل -->
+        <div class="mission-card profile" id="missionProfile" onclick="showProfileSection()">
+          <div class="mission-reward">
+            <span class="mission-reward-icon">✍️</span>
+            ۵۰۰ تومان
+          </div>
+          <p class="mission-title">تکمیل پروفایل</p>
+          <div class="mission-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -6860,6 +7874,232 @@
 
 
 
+
+    // ═══════════════════════════════════════════════════════════════
+    // مودال جزئیات ماموریت‌ها
+    // ═══════════════════════════════════════════════════════════════
+    
+    // داده‌های ماموریت‌ها
+    const missionData = {
+      invite: {
+        icon: '🎁',
+        reward: '۵,۰۰۰ تومان',
+        title: 'دعوت از دوستان',
+        desc: 'دوستانت رو دعوت کن! وقتی اولین رزروشون رو انجام بدن، تو ۵ هزار تومان و اونا ۳ هزار تومان هدیه می‌گیرن.',
+        primaryBtn: {
+          text: 'اشتراک‌گذاری لینک',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`,
+          action: 'share'
+        },
+        secondaryBtn: {
+          text: 'کپی کد معرف',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`,
+          action: 'copy'
+        }
+      },
+      booking: {
+        icon: '✨',
+        reward: '۲,۰۰۰ تومان',
+        title: 'اولین رزرو',
+        desc: 'اولین سرویست رو همین امروز رزرو کن و فوری کش‌بک بگیر!',
+        primaryBtn: {
+          text: 'مشاهده خدمات',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+          action: 'browse'
+        },
+        secondaryBtn: null
+      },
+      profile: {
+        icon: '✍️',
+        reward: '۵۰۰ تومان',
+        title: 'تکمیل پروفایل',
+        desc: 'اطلاعات پروفایلت (نام، تاریخ تولد) رو کامل کن و جایزه‌ات رو بگیر!',
+        primaryBtn: {
+          text: 'ویرایش پروفایل',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+          action: 'edit'
+        },
+        secondaryBtn: null
+      }
+    };
+
+    let currentMissionType = null;
+    let userReferralCode = null;
+
+    // نمایش مودال ماموریت
+    function showMissionModal(type) {
+      const data = missionData[type];
+      if (!data) return;
+
+      currentMissionType = type;
+
+      const overlay = document.getElementById('missionModalOverlay');
+      const header = document.getElementById('missionModalHeader');
+      const icon = document.getElementById('missionModalIcon');
+      const reward = document.getElementById('missionModalReward');
+      const title = document.getElementById('missionModalTitle');
+      const desc = document.getElementById('missionModalDesc');
+      const actions = document.getElementById('missionModalActions');
+
+      // تنظیم کلاس رنگ
+      header.className = 'mission-modal-header ' + type;
+
+      // تنظیم محتوا
+      icon.textContent = data.icon;
+      reward.textContent = data.reward;
+      title.textContent = data.title;
+      desc.textContent = data.desc;
+
+      // ساخت دکمه‌ها
+      let actionsHTML = '';
+      
+      if (data.primaryBtn) {
+        actionsHTML += `
+          <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
+            ${data.primaryBtn.icon}
+            ${data.primaryBtn.text}
+          </button>
+        `;
+      }
+
+      if (data.secondaryBtn) {
+        actionsHTML += `
+          <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
+            ${data.secondaryBtn.icon}
+            ${data.secondaryBtn.text}
+          </button>
+        `;
+      }
+
+      actions.innerHTML = actionsHTML;
+
+      // نمایش مودال
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // بستن مودال ماموریت
+    function closeMissionModal() {
+      const overlay = document.getElementById('missionModalOverlay');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      currentMissionType = null;
+    }
+
+    // هندل کردن اکشن‌های ماموریت
+    async function handleMissionAction(action) {
+      switch (action) {
+        case 'share':
+          await shareMissionLink();
+          break;
+        case 'copy':
+          await copyReferralCode();
+          break;
+        case 'browse':
+          closeMissionModal();
+          window.location.href = '/service-directory.html';
+          break;
+        case 'edit':
+          closeMissionModal();
+          showSection('profile');
+          break;
+      }
+    }
+
+    // اشتراک‌گذاری لینک
+    async function shareMissionLink() {
+      const code = userReferralCode || 'VITRINT';
+      const shareUrl = `${window.location.origin}/register.html?ref=${code}`;
+      const shareText = `با این لینک ثبت‌نام کن و ۳ هزار تومان هدیه بگیر! 🎁`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'دعوت به ویترینت',
+            text: shareText,
+            url: shareUrl
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            await copyToClipboard(shareUrl, 'لینک کپی شد!');
+          }
+        }
+      } else {
+        await copyToClipboard(shareUrl, 'لینک کپی شد!');
+      }
+    }
+
+    // کپی کد معرف
+    async function copyReferralCode() {
+      const code = userReferralCode || 'VITRINT';
+      await copyToClipboard(code, 'کد معرف کپی شد!');
+    }
+
+    // کپی به کلیپ‌بورد
+    async function copyToClipboard(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopyToast(message);
+      } catch (err) {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showCopyToast(message);
+      }
+    }
+
+    // نمایش پیام کپی
+    function showCopyToast(message) {
+      const toast = document.getElementById('missionCopyToast');
+      const toastText = document.getElementById('missionCopyToastText');
+      toastText.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Event Listeners برای مودال
+    document.addEventListener('DOMContentLoaded', () => {
+      // بستن با دکمه X
+      document.getElementById('missionModalClose')?.addEventListener('click', closeMissionModal);
+      
+      // بستن با دکمه بعداً
+      document.getElementById('missionModalDismiss')?.addEventListener('click', closeMissionModal);
+      
+      // بستن با کلیک روی overlay
+      document.getElementById('missionModalOverlay')?.addEventListener('click', (e) => {
+        if (e.target.id === 'missionModalOverlay') {
+          closeMissionModal();
+        }
+      });
+
+      // بستن با Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeMissionModal();
+        }
+      });
+    });
+
+    // توابع کمکی برای کلیک روی کارت‌های ماموریت
+    function showReferralSection() {
+      showMissionModal('invite');
+    }
+
+    function showProfileSection() {
+      showMissionModal('profile');
+    }
+
+    function showBookingMission() {
+      showMissionModal('booking');
+    }
 
     // هندل کردن SPA و رسپانسیو
     function showSection(section) {
@@ -8575,8 +9815,9 @@
       if (streakNumber) streakNumber.textContent = streakData.currentStreak || 0;
       if (streakMiniNumber) streakMiniNumber.textContent = streakData.currentStreak || 0;
       
-      if (streakLevel && streakData.level) {
-        streakLevel.textContent = `${streakData.level.icon || '🌱'} ${streakData.level.name || 'تازه‌کار'}`;
+      const streakLevelText = document.getElementById('streakLevelText');
+      if (streakLevelText && streakData.level) {
+        streakLevelText.textContent = streakData.level.name || 'تازه‌کار';
       }
       if (longestStreak) longestStreak.textContent = streakData.longestStreak || 0;
       if (totalLoginDays) totalLoginDays.textContent = streakData.totalLoginDays || 0;
@@ -8587,14 +9828,14 @@
         streakWeek.innerHTML = streakData.weekHistory.map(day => {
           const isToday = day.date === today;
           let dotClass = 'pending';
-          let dotContent = '?';
+          let dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle></svg>`;
           
           if (day.status === 'hit') {
             dotClass = 'hit';
-            dotContent = '✓';
+            dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
           } else if (day.status === 'missed') {
             dotClass = 'missed';
-            dotContent = '✗';
+            dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
           }
           
           return `
@@ -8611,16 +9852,22 @@
         if (streakData.checkedInToday) {
           streakCheckinBtn.classList.remove('active');
           streakCheckinBtn.classList.add('done');
-          streakCheckinText.textContent = '✓ امروز ثبت شده';
+          streakCheckinText.textContent = 'امروز ثبت شده';
           streakCheckinBtn.disabled = true;
-          if (streakMiniSubtitle) streakMiniSubtitle.textContent = '✓ امروز ثبت شده';
+          if (streakMiniSubtitle) {
+            streakMiniSubtitle.textContent = 'امروز ثبت شده';
+            streakMiniSubtitle.classList.add('checked');
+          }
           if (streakPopupDismiss) streakPopupDismiss.textContent = 'بستن';
         } else {
           streakCheckinBtn.classList.add('active');
           streakCheckinBtn.classList.remove('done');
           streakCheckinText.textContent = 'ثبت ورود امروز';
           streakCheckinBtn.disabled = false;
-          if (streakMiniSubtitle) streakMiniSubtitle.textContent = 'برای دریافت پاداش کلیک کنید';
+          if (streakMiniSubtitle) {
+            streakMiniSubtitle.textContent = 'برای دریافت امتیاز کلیک کنید';
+            streakMiniSubtitle.classList.remove('checked');
+          }
           if (streakPopupDismiss) streakPopupDismiss.textContent = 'بعداً یادآوری کن';
         }
       }
