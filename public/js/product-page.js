@@ -2012,11 +2012,31 @@
   messageCancelBtn.addEventListener('click', closeMessageModal);
   messageSendBtn.addEventListener('click', sendMessage);
 
-  messageText.addEventListener('input', updateCharCount);
+  // Auto-resize textarea function
+  function autoResizeTextarea(textarea) {
+    if (!textarea) return;
+    // فقط برای مرورگرهایی که field-sizing رو ساپورت نمی‌کنند
+    if (CSS.supports && CSS.supports('field-sizing', 'content')) return;
+    
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(textarea.scrollHeight, 150);
+    textarea.style.height = newHeight + 'px';
+  }
+
+  messageText.addEventListener('input', () => {
+    updateCharCount();
+    autoResizeTextarea(messageText);
+  });
+  
   messageText.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.ctrlKey && !messageSendBtn.disabled) {
       sendMessage();
     }
+  });
+
+  // Reset textarea height when modal opens
+  messageText.addEventListener('focus', () => {
+    autoResizeTextarea(messageText);
   });
 
   // Close on backdrop click

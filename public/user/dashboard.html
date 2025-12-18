@@ -2966,383 +2966,811 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       استایل‌های استریک روزانه و کیف پول - حرفه‌ای و رسپانسیو
+       استایل‌های استریک روزانه - پاپ‌آپ شیک و مدرن
        ═══════════════════════════════════════════════════════════════ */
 
-    /* کانتینر اصلی استریک و کیف پول */
+    /* کانتینر کیف پول (بدون استریک) */
     .streak-wallet-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
+      display: block;
       margin-bottom: 1.5rem;
     }
 
-    @media (max-width: 768px) {
-      .streak-wallet-container {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-    }
-
-    /* کارت استریک روزانه */
-    .streak-card {
-      position: relative;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      border: 2px solid rgba(251, 146, 60, 0.2);
-      box-shadow: 0 8px 32px rgba(251, 146, 60, 0.15);
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .streak-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 48px rgba(251, 146, 60, 0.25);
-    }
-
-    .streak-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .streak-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .streak-title {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .streak-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #f97316, #ea580c);
+    /* ═══════════════════════════════════════════════════════════════
+       پاپ‌آپ استریک روزانه - طراحی حرفه‌ای
+       ═══════════════════════════════════════════════════════════════ */
+    .streak-popup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .streak-title-text h3 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 800;
-      color: #9a3412;
+    .streak-popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
     }
 
-    .streak-title-text p {
-      margin: 0.15rem 0 0;
-      font-size: 0.8rem;
-      color: #c2410c;
-      font-weight: 600;
+    .streak-popup {
+      width: 100%;
+      max-width: 380px;
+      background: #ffffff;
+      border-radius: 1.75rem;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(249, 115, 22, 0.25), 0 10px 30px rgba(15, 23, 42, 0.15);
+      transform: translateY(30px) scale(0.95);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .streak-badge {
-      padding: 0.4rem 0.85rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #f97316, #ea580c);
+    .streak-popup-overlay.active .streak-popup {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* هدر پاپ‌آپ */
+    .streak-popup-header {
+      position: relative;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+      padding: 1.75rem 1.5rem 2.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .streak-popup-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .streak-popup-header::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -20%;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .streak-popup-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-    }
-
-    .streak-main {
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 1.25rem;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 1;
     }
 
-    .streak-count {
+    .streak-popup-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .streak-popup-close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .streak-popup-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.25rem;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    .streak-popup-title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .streak-popup-subtitle {
+      margin: 0.35rem 0 0;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* بدنه پاپ‌آپ */
+    .streak-popup-body {
+      padding: 0 1.5rem 1.5rem;
+      margin-top: -1.25rem;
+      position: relative;
+    }
+
+    /* کارت شمارنده استریک */
+    .streak-counter-card {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
       text-align: center;
+      border: 2px solid rgba(249, 115, 22, 0.15);
+      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
     }
 
-    .streak-number {
-      font-size: 3.5rem;
+    .streak-counter-number {
+      font-size: 4rem;
       font-weight: 900;
       background: linear-gradient(135deg, #f97316, #c2410c);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       line-height: 1;
-      text-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+      margin-bottom: 0.25rem;
     }
 
-    .streak-label {
-      font-size: 0.85rem;
+    .streak-counter-label {
+      font-size: 1rem;
       font-weight: 700;
       color: #9a3412;
-      margin-top: 0.25rem;
     }
 
-    .streak-stats {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .streak-stat {
-      display: flex;
+    .streak-counter-badge {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 10px;
-      border: 1px solid rgba(251, 146, 60, 0.15);
-    }
-
-    .streak-stat-label {
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border-radius: 999px;
       font-size: 0.8rem;
-      color: #9a3412;
-      font-weight: 600;
-    }
-
-    .streak-stat-value {
-      font-size: 0.9rem;
       font-weight: 800;
-      color: #c2410c;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(249, 115, 22, 0.35);
     }
 
-    /* تاریخچه هفتگی */
-    .streak-week {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.35rem;
-      margin-bottom: 1rem;
+    /* آمار استریک */
+    .streak-popup-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
     }
 
-    .streak-day {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .streak-day-name {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #9a3412;
-    }
-
-    .streak-day-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
+    .streak-popup-stat {
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid #e2e8f0;
       transition: all 0.2s ease;
     }
 
-    .streak-day-dot.hit {
+    .streak-popup-stat:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .streak-popup-stat-icon {
+      font-size: 1.25rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .streak-popup-stat-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .streak-popup-stat-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: 0.15rem;
+    }
+
+    /* تاریخچه هفتگی */
+    .streak-popup-week {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      padding: 1rem;
+      background: #fafbfc;
+      border-radius: 1rem;
+      border: 1px solid #f1f5f9;
+    }
+
+    .streak-popup-day {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .streak-popup-day-name {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .streak-popup-day-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .streak-popup-day-dot.hit {
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 3px 10px rgba(34, 197, 94, 0.35);
     }
 
-    .streak-day-dot.missed {
-      background: rgba(239, 68, 68, 0.15);
+    .streak-popup-day-dot.missed {
+      background: rgba(239, 68, 68, 0.1);
       color: #dc2626;
-      border: 2px dashed rgba(239, 68, 68, 0.4);
+      border: 2px dashed rgba(239, 68, 68, 0.35);
     }
 
-    .streak-day-dot.pending {
-      background: rgba(148, 163, 184, 0.2);
-      color: #64748b;
-      border: 2px dashed rgba(148, 163, 184, 0.4);
+    .streak-popup-day-dot.pending {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 2px dashed rgba(148, 163, 184, 0.35);
     }
 
-    .streak-day-dot.today {
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+    .streak-popup-day-dot.today {
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.35);
     }
 
     /* دکمه چک‌این */
-    .streak-checkin-btn {
+    .streak-popup-checkin-btn {
       width: 100%;
-      padding: 0.875rem 1.25rem;
-      border-radius: 12px;
+      margin-top: 1.25rem;
+      padding: 1rem 1.5rem;
+      border-radius: 14px;
       border: none;
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .streak-checkin-btn.active {
-      background: linear-gradient(135deg, #f97316, #ea580c);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
-    }
-
-    .streak-checkin-btn.active:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.5);
-    }
-
-    .streak-checkin-btn.done {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
-      cursor: default;
-      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
-    }
-
-    .streak-checkin-btn svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* کارت کیف پول */
-    .wallet-card {
-      position: relative;
-      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      border: 2px solid rgba(16, 185, 129, 0.2);
-      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
-      overflow: hidden;
+      gap: 0.6rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .wallet-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 48px rgba(16, 185, 129, 0.25);
+    .streak-popup-checkin-btn.active {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
     }
 
-    .wallet-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
+    .streak-popup-checkin-btn.active:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(249, 115, 22, 0.5);
+    }
+
+    .streak-popup-checkin-btn.active:active {
+      transform: translateY(-1px);
+    }
+
+    .streak-popup-checkin-btn.done {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      cursor: default;
+      box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35);
+    }
+
+    .streak-popup-checkin-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* دکمه بستن پایین */
+    .streak-popup-dismiss {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .streak-popup-dismiss:hover {
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    /* انیمیشن موفقیت */
+    @keyframes streakSuccessPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .streak-popup.success-animation {
+      animation: streakSuccessPulse 0.5s ease;
+    }
+
+    /* کانفتی انیمیشن */
+    @keyframes confettiFall {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .streak-confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 2001;
+      overflow: hidden;
+    }
+
+    .streak-confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ریسپانسیو پاپ‌آپ استریک
+       ═══════════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .streak-popup-overlay {
+        padding: 0.75rem;
+        align-items: flex-end;
+      }
+
+      .streak-popup {
+        max-width: 100%;
+        border-radius: 1.5rem 1.5rem 0 0;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .streak-popup-overlay.active .streak-popup {
+        transform: translateY(0) scale(1);
+      }
+
+      .streak-popup-header {
+        padding: 1.5rem 1.25rem 2.25rem;
+      }
+
+      .streak-popup-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
+        border-radius: 18px;
+      }
+
+      .streak-popup-title {
+        font-size: 1.2rem;
+      }
+
+      .streak-popup-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .streak-popup-body {
+        padding: 0 1.25rem 1.25rem;
+      }
+
+      .streak-counter-card {
+        padding: 1.25rem;
+      }
+
+      .streak-counter-number {
+        font-size: 3.25rem;
+      }
+
+      .streak-counter-label {
+        font-size: 0.9rem;
+      }
+
+      .streak-popup-stats {
+        gap: 0.5rem;
+      }
+
+      .streak-popup-stat {
+        padding: 0.875rem 0.75rem;
+      }
+
+      .streak-popup-stat-value {
+        font-size: 1rem;
+      }
+
+      .streak-popup-week {
+        padding: 0.875rem;
+        gap: 0.35rem;
+      }
+
+      .streak-popup-day-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+      }
+
+      .streak-popup-day-name {
+        font-size: 0.6rem;
+      }
+
+      .streak-popup-checkin-btn {
+        padding: 0.9rem 1.25rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .streak-popup-header {
+        padding: 1.25rem 1rem 2rem;
+      }
+
+      .streak-popup-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.75rem;
+      }
+
+      .streak-popup-body {
+        padding: 0 1rem 1rem;
+      }
+
+      .streak-counter-number {
+        font-size: 2.75rem;
+      }
+
+      .streak-popup-day-dot {
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       بنر کوچک استریک (برای نمایش بعد از بستن پاپ‌آپ)
+       ═══════════════════════════════════════════════════════════════ */
+    .streak-mini-banner {
+      display: none;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.875rem 1.25rem;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border-radius: 1rem;
+      border: 1.5px solid rgba(249, 115, 22, 0.2);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 12px rgba(249, 115, 22, 0.1);
+    }
+
+    .streak-mini-banner:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.18);
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+
+    .streak-mini-banner.visible {
+      display: flex;
+    }
+
+    .streak-mini-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 3px 12px rgba(249, 115, 22, 0.3);
+      flex-shrink: 0;
+    }
+
+    .streak-mini-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .streak-mini-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #9a3412;
+      margin: 0;
+    }
+
+    .streak-mini-subtitle {
+      font-size: 0.75rem;
+      color: #c2410c;
+      margin: 0.15rem 0 0;
+      font-weight: 600;
+    }
+
+    .streak-mini-count {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 0.875rem;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(249, 115, 22, 0.15);
+    }
+
+    .streak-mini-number {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #ea580c;
+      line-height: 1;
+    }
+
+    .streak-mini-label {
+      font-size: 0.6rem;
+      color: #9a3412;
+      font-weight: 700;
+    }
+
+    .streak-mini-arrow {
+      width: 20px;
+      height: 20px;
+      color: #f97316;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 480px) {
+      .streak-mini-banner {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .streak-mini-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+
+      .streak-mini-title {
+        font-size: 0.85rem;
+      }
+
+      .streak-mini-subtitle {
+        font-size: 0.7rem;
+      }
+
+      .streak-mini-number {
+        font-size: 1.15rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       کارت کیف پول - طراحی حرفه‌ای و مدرن
+       ═══════════════════════════════════════════════════════════════ */
+    .wallet-card {
+      position: relative;
+      background: #ffffff;
+      border-radius: 1.75rem;
+      padding: 0;
+      border: none;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .wallet-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.18), 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    /* هدر کیف پول با گرادیانت */
+    .wallet-header {
+      position: relative;
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .wallet-header::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      right: -30%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    .wallet-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
+    .wallet-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -20%;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      pointer-events: none;
     }
 
     .wallet-title {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.875rem;
+      position: relative;
+      z-index: 1;
     }
 
     .wallet-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #10b981, #059669);
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+      font-size: 1.6rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
     .wallet-title-text h3 {
       margin: 0;
-      font-size: 1rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      color: #065f46;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .wallet-title-text p {
-      margin: 0.15rem 0 0;
+      margin: 0.2rem 0 0;
       font-size: 0.8rem;
-      color: #047857;
-      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
     }
 
+    /* بخش موجودی اصلی */
     .wallet-main {
       text-align: center;
-      margin-bottom: 1.25rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 16px;
-      border: 1px solid rgba(16, 185, 129, 0.15);
+      padding: 1.75rem 1.5rem;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, transparent 100%);
+      position: relative;
     }
 
     .wallet-balance-label {
-      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #065f46;
-      margin-bottom: 0.35rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(100, 116, 139, 0.08);
+      border-radius: 999px;
+    }
+
+    .wallet-balance-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
     }
 
     .wallet-balance {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       font-weight: 900;
-      background: linear-gradient(135deg, #10b981, #047857);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #0f172a;
       line-height: 1.1;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     .wallet-balance-unit {
       font-size: 1rem;
       font-weight: 700;
-      color: #059669;
-      margin-right: 0.25rem;
+      color: #64748b;
     }
 
+    /* آمار کیف پول */
     .wallet-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      gap: 1px;
+      background: #e2e8f0;
+      margin: 0;
     }
 
     .wallet-stat {
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 12px;
-      border: 1px solid rgba(16, 185, 129, 0.15);
+      padding: 1.25rem 1rem;
+      background: #ffffff;
       text-align: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .wallet-stat:hover {
+      background: #fafbfc;
     }
 
     .wallet-stat-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 0.75rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.25rem;
-      margin-bottom: 0.25rem;
+    }
+
+    .wallet-stat.earned .wallet-stat-icon {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+    }
+
+    .wallet-stat.spent .wallet-stat-icon {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
     }
 
     .wallet-stat-value {
-      font-size: 1.1rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      color: #065f46;
-    }
-
-    .wallet-stat-label {
-      font-size: 0.7rem;
-      color: #047857;
-      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
     }
 
     .wallet-stat.earned .wallet-stat-value {
@@ -3353,21 +3781,74 @@
       color: #dc2626;
     }
 
+    .wallet-stat-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
     /* تراکنش‌های اخیر */
     .wallet-transactions {
-      max-height: 150px;
+      max-height: 180px;
       overflow-y: auto;
+      padding: 0 1rem;
+      margin: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+    }
+
+    .wallet-transactions::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .wallet-transactions::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .wallet-transactions::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 4px;
+    }
+
+    .wallet-transactions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .wallet-transactions-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .wallet-transactions-title svg {
+      width: 16px;
+      height: 16px;
+      stroke: #64748b;
     }
 
     .wallet-transaction {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5rem 0.75rem;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 10px;
+      padding: 0.875rem 1rem;
+      background: #fafbfc;
+      border-radius: 12px;
       margin-bottom: 0.5rem;
-      border: 1px solid rgba(16, 185, 129, 0.1);
+      border: 1px solid #f1f5f9;
+      transition: all 0.2s ease;
+    }
+
+    .wallet-transaction:hover {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      transform: translateX(-2px);
     }
 
     .wallet-transaction:last-child {
@@ -3377,52 +3858,126 @@
     .wallet-transaction-info {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 0;
     }
 
     .wallet-transaction-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .wallet-transaction.positive .wallet-transaction-icon {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+    }
+
+    .wallet-transaction.negative .wallet-transaction-icon {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    }
+
+    .wallet-transaction-details {
+      flex: 1;
+      min-width: 0;
     }
 
     .wallet-transaction-title {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #065f46;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.15rem;
+    }
+
+    .wallet-transaction-date {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-weight: 500;
     }
 
     .wallet-transaction-amount {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 800;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      flex-shrink: 0;
     }
 
     .wallet-transaction-amount.positive {
       color: #059669;
+      background: rgba(16, 185, 129, 0.1);
     }
 
     .wallet-transaction-amount.negative {
       color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* پیام خالی بودن تراکنش‌ها */
+    .wallet-empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #94a3b8;
+    }
+
+    .wallet-empty-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 0.75rem;
+      background: #f8fafc;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .wallet-empty-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0;
     }
 
     /* دکمه مشاهده همه تراکنش‌ها */
     .wallet-view-all {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
       width: 100%;
-      padding: 0.75rem;
-      border-radius: 10px;
-      border: 1.5px dashed rgba(16, 185, 129, 0.3);
-      background: transparent;
-      color: #059669;
+      padding: 1rem;
+      border: none;
+      border-top: 1px solid #f1f5f9;
+      background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+      color: #10b981;
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.875rem;
       cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease;
-      margin-top: 0.75rem;
+      transition: all 0.25s ease;
     }
 
     .wallet-view-all:hover {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%);
+      color: #059669;
+    }
+
+    .wallet-view-all svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .wallet-view-all:hover svg {
+      transform: translateX(-4px);
     }
 
     /* مودال تراکنش‌ها */
@@ -3579,63 +4134,148 @@
       color: #dc2626;
     }
 
-    /* رسپانسیو */
+    /* رسپانسیو کیف پول */
     @media (max-width: 640px) {
-      .streak-card,
       .wallet-card {
-        padding: 1.25rem;
         border-radius: 1.25rem;
       }
 
-      .streak-icon,
       .wallet-icon {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
       }
 
-      .streak-number {
-        font-size: 2.75rem;
+      .wallet-header {
+        padding: 1.25rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 1.05rem;
+      }
+
+      .wallet-main {
+        padding: 1.25rem 1rem;
       }
 
       .wallet-balance {
-        font-size: 2rem;
+        font-size: 2.25rem;
       }
 
-      .streak-main {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .streak-stats {
-        width: 100%;
-      }
-
-      .streak-day-dot {
-        width: 24px;
-        height: 24px;
-        font-size: 0.65rem;
-      }
-
-      .streak-day-name {
-        font-size: 0.6rem;
+      .wallet-balance-label {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.7rem;
       }
 
       .wallet-stats {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .wallet-stat {
+        padding: 1rem 0.75rem;
+      }
+
+      .wallet-stat-icon {
+        width: 38px;
+        height: 38px;
+        margin-bottom: 0.5rem;
+      }
+
+      .wallet-stat-icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .wallet-stat-value {
+        font-size: 1.15rem;
+      }
+
+      .wallet-stat-label {
+        font-size: 0.7rem;
+      }
+
+      .wallet-transactions-header {
+        padding: 0.875rem 1rem 0.5rem;
+      }
+
+      .wallet-transactions {
+        padding: 0 0.75rem;
+        max-height: 160px;
+      }
+
+      .wallet-transaction {
+        padding: 0.75rem;
+        border-radius: 10px;
+      }
+
+      .wallet-transaction-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .wallet-transaction-title {
+        font-size: 0.8rem;
+      }
+
+      .wallet-transaction-amount {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+      }
+
+      .wallet-view-all {
+        padding: 0.875rem;
+        font-size: 0.8rem;
       }
     }
 
     @media (max-width: 400px) {
-      .streak-header,
       .wallet-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
+        padding: 1rem;
       }
 
-      .streak-badge {
-        align-self: flex-start;
+      .wallet-title {
+        gap: 0.65rem;
+      }
+
+      .wallet-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 0.95rem;
+      }
+
+      .wallet-title-text p {
+        font-size: 0.7rem;
+      }
+
+      .wallet-main {
+        padding: 1rem 0.75rem;
+      }
+
+      .wallet-balance {
+        font-size: 1.85rem;
+        gap: 0.35rem;
+      }
+
+      .wallet-balance-unit {
+        font-size: 0.85rem;
+      }
+
+      .wallet-stat {
+        padding: 0.875rem 0.5rem;
+      }
+
+      .wallet-stat-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .wallet-stat-value {
+        font-size: 1rem;
       }
     }
 
@@ -5638,52 +6278,87 @@
     </div>
   </div>
 
-  <!-- بخش استریک روزانه و کیف پول -->
-  <div class="streak-wallet-container fadein">
-    <!-- کارت استریک روزانه -->
-    <div class="streak-card" id="streakCard">
-      <div class="streak-header">
-        <div class="streak-title">
-          <div class="streak-icon">🔥</div>
-          <div class="streak-title-text">
-            <h3>استریک روزانه</h3>
-            <p>هر روز وارد شو، جایزه بگیر!</p>
-          </div>
-        </div>
-        <span class="streak-badge" id="streakLevel">تازه‌کار</span>
-      </div>
-      
-      <div class="streak-main">
-        <div class="streak-count">
-          <div class="streak-number" id="streakNumber">0</div>
-          <div class="streak-label">روز متوالی</div>
-        </div>
-        <div class="streak-stats">
-          <div class="streak-stat">
-            <span class="streak-stat-label">🏆 رکورد</span>
-            <span class="streak-stat-value" id="longestStreak">0 روز</span>
-          </div>
-          <div class="streak-stat">
-            <span class="streak-stat-label">📅 کل ورودها</span>
-            <span class="streak-stat-value" id="totalLoginDays">0 روز</span>
-          </div>
-        </div>
+  <!-- پاپ‌آپ استریک روزانه -->
+  <div class="streak-popup-overlay" id="streakPopupOverlay">
+    <div class="streak-popup" id="streakPopup">
+      <!-- هدر -->
+      <div class="streak-popup-header">
+        <button type="button" class="streak-popup-close" id="streakPopupClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="streak-popup-icon">🔥</div>
+        <h2 class="streak-popup-title">استریک روزانه</h2>
+        <p class="streak-popup-subtitle">هر روز وارد شو، جایزه بگیر!</p>
       </div>
 
-      <div class="streak-week" id="streakWeek">
-        <!-- تاریخچه هفتگی با جاوااسکریپت پر می‌شود -->
-      </div>
+      <!-- بدنه -->
+      <div class="streak-popup-body">
+        <!-- کارت شمارنده -->
+        <div class="streak-counter-card">
+          <div class="streak-counter-number" id="streakNumber">0</div>
+          <div class="streak-counter-label">روز متوالی</div>
+          <span class="streak-counter-badge" id="streakLevel">🌱 تازه‌کار</span>
+        </div>
 
-      <button type="button" class="streak-checkin-btn active" id="streakCheckinBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span id="streakCheckinText">ثبت ورود امروز</span>
-      </button>
+        <!-- آمار -->
+        <div class="streak-popup-stats">
+          <div class="streak-popup-stat">
+            <div class="streak-popup-stat-icon">🏆</div>
+            <div class="streak-popup-stat-value" id="longestStreak">0</div>
+            <div class="streak-popup-stat-label">بیشترین رکورد</div>
+          </div>
+          <div class="streak-popup-stat">
+            <div class="streak-popup-stat-icon">📅</div>
+            <div class="streak-popup-stat-value" id="totalLoginDays">0</div>
+            <div class="streak-popup-stat-label">کل ورودها</div>
+          </div>
+        </div>
+
+        <!-- تاریخچه هفتگی -->
+        <div class="streak-popup-week" id="streakWeek">
+          <!-- با جاوااسکریپت پر می‌شود -->
+        </div>
+
+        <!-- دکمه چک‌این -->
+        <button type="button" class="streak-popup-checkin-btn active" id="streakCheckinBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span id="streakCheckinText">ثبت ورود امروز</span>
+        </button>
+
+        <!-- دکمه بستن -->
+        <button type="button" class="streak-popup-dismiss" id="streakPopupDismiss">
+          بعداً یادآوری کن
+        </button>
+      </div>
     </div>
+  </div>
 
+  <!-- بنر کوچک استریک -->
+  <div class="streak-mini-banner" id="streakMiniBanner">
+    <div class="streak-mini-icon">🔥</div>
+    <div class="streak-mini-content">
+      <h4 class="streak-mini-title">استریک روزانه</h4>
+      <p class="streak-mini-subtitle" id="streakMiniSubtitle">برای دریافت پاداش کلیک کنید</p>
+    </div>
+    <div class="streak-mini-count">
+      <span class="streak-mini-number" id="streakMiniNumber">0</span>
+      <span class="streak-mini-label">روز</span>
+    </div>
+    <svg class="streak-mini-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </div>
+
+  <!-- بخش کیف پول -->
+  <div class="streak-wallet-container fadein">
     <!-- کارت کیف پول -->
     <div class="wallet-card" id="walletCard">
+      <!-- هدر با گرادیانت -->
       <div class="wallet-header">
         <div class="wallet-title">
           <div class="wallet-icon">💰</div>
@@ -5694,6 +6369,7 @@
         </div>
       </div>
 
+      <!-- موجودی اصلی -->
       <div class="wallet-main">
         <div class="wallet-balance-label">موجودی فعلی</div>
         <div class="wallet-balance">
@@ -5702,24 +6378,49 @@
         </div>
       </div>
 
+      <!-- آمار کسب و مصرف -->
       <div class="wallet-stats">
         <div class="wallet-stat earned">
-          <div class="wallet-stat-icon">📈</div>
+          <div class="wallet-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
           <div class="wallet-stat-value" id="totalEarned">0</div>
           <div class="wallet-stat-label">کل کسب شده</div>
         </div>
         <div class="wallet-stat spent">
-          <div class="wallet-stat-icon">📉</div>
+          <div class="wallet-stat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+              <polyline points="17 18 23 18 23 12"></polyline>
+            </svg>
+          </div>
           <div class="wallet-stat-value" id="totalSpent">0</div>
           <div class="wallet-stat-label">کل مصرف شده</div>
         </div>
       </div>
 
+      <!-- تراکنش‌های اخیر -->
+      <div class="wallet-transactions-header">
+        <span class="wallet-transactions-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          تراکنش‌های اخیر
+        </span>
+      </div>
       <div class="wallet-transactions" id="recentTransactions">
         <!-- تراکنش‌های اخیر با جاوااسکریپت پر می‌شود -->
       </div>
 
+      <!-- دکمه مشاهده همه -->
       <button type="button" class="wallet-view-all" id="viewAllTransactions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
         مشاهده همه تراکنش‌ها
       </button>
     </div>
@@ -7686,7 +8387,7 @@
     }
 
     /**
-     * رندر کارت استریک
+     * رندر پاپ‌آپ استریک
      */
     function renderStreakCard() {
       if (!streakData) return;
@@ -7698,13 +8399,18 @@
       const streakWeek = document.getElementById('streakWeek');
       const streakCheckinBtn = document.getElementById('streakCheckinBtn');
       const streakCheckinText = document.getElementById('streakCheckinText');
+      const streakMiniNumber = document.getElementById('streakMiniNumber');
+      const streakMiniSubtitle = document.getElementById('streakMiniSubtitle');
+      const streakPopupDismiss = document.getElementById('streakPopupDismiss');
 
       if (streakNumber) streakNumber.textContent = streakData.currentStreak || 0;
+      if (streakMiniNumber) streakMiniNumber.textContent = streakData.currentStreak || 0;
+      
       if (streakLevel && streakData.level) {
         streakLevel.textContent = `${streakData.level.icon || '🌱'} ${streakData.level.name || 'تازه‌کار'}`;
       }
-      if (longestStreak) longestStreak.textContent = `${streakData.longestStreak || 0} روز`;
-      if (totalLoginDays) totalLoginDays.textContent = `${streakData.totalLoginDays || 0} روز`;
+      if (longestStreak) longestStreak.textContent = streakData.longestStreak || 0;
+      if (totalLoginDays) totalLoginDays.textContent = streakData.totalLoginDays || 0;
 
       // رندر تاریخچه هفتگی
       if (streakWeek && streakData.weekHistory) {
@@ -7723,9 +8429,9 @@
           }
           
           return `
-            <div class="streak-day">
-              <span class="streak-day-name">${day.dayName || ''}</span>
-              <div class="streak-day-dot ${dotClass} ${isToday ? 'today' : ''}">${dotContent}</div>
+            <div class="streak-popup-day">
+              <span class="streak-popup-day-name">${day.dayName || ''}</span>
+              <div class="streak-popup-day-dot ${dotClass} ${isToday ? 'today' : ''}">${dotContent}</div>
             </div>
           `;
         }).join('');
@@ -7738,14 +8444,139 @@
           streakCheckinBtn.classList.add('done');
           streakCheckinText.textContent = '✓ امروز ثبت شده';
           streakCheckinBtn.disabled = true;
+          if (streakMiniSubtitle) streakMiniSubtitle.textContent = '✓ امروز ثبت شده';
+          if (streakPopupDismiss) streakPopupDismiss.textContent = 'بستن';
         } else {
           streakCheckinBtn.classList.add('active');
           streakCheckinBtn.classList.remove('done');
           streakCheckinText.textContent = 'ثبت ورود امروز';
           streakCheckinBtn.disabled = false;
+          if (streakMiniSubtitle) streakMiniSubtitle.textContent = 'برای دریافت پاداش کلیک کنید';
+          if (streakPopupDismiss) streakPopupDismiss.textContent = 'بعداً یادآوری کن';
         }
       }
+
+      // نمایش پاپ‌آپ اگر امروز چک‌این نشده و قبلاً بسته نشده
+      checkAndShowStreakPopup();
     }
+
+    /**
+     * بررسی و نمایش پاپ‌آپ استریک
+     */
+    function checkAndShowStreakPopup() {
+      const today = new Date().toISOString().split('T')[0];
+      const dismissedDate = localStorage.getItem('streakPopupDismissed');
+      const miniBanner = document.getElementById('streakMiniBanner');
+      
+      // اگر امروز چک‌این شده، فقط بنر کوچک نشون بده
+      if (streakData && streakData.checkedInToday) {
+        hideStreakPopup();
+        if (miniBanner) miniBanner.classList.add('visible');
+        return;
+      }
+
+      // اگر امروز پاپ‌آپ بسته شده، بنر کوچک نشون بده
+      if (dismissedDate === today) {
+        if (miniBanner) miniBanner.classList.add('visible');
+        return;
+      }
+
+      // نمایش پاپ‌آپ
+      showStreakPopup();
+    }
+
+    /**
+     * نمایش پاپ‌آپ استریک
+     */
+    function showStreakPopup() {
+      const overlay = document.getElementById('streakPopupOverlay');
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      if (miniBanner) miniBanner.classList.remove('visible');
+    }
+
+    /**
+     * بستن پاپ‌آپ استریک
+     */
+    function hideStreakPopup() {
+      const overlay = document.getElementById('streakPopupOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    /**
+     * بستن پاپ‌آپ و ذخیره در localStorage
+     */
+    function dismissStreakPopup() {
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('streakPopupDismissed', today);
+      hideStreakPopup();
+      
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (miniBanner) miniBanner.classList.add('visible');
+    }
+
+    /**
+     * نمایش کانفتی
+     */
+    function showConfetti() {
+      const container = document.createElement('div');
+      container.className = 'streak-confetti';
+      document.body.appendChild(container);
+
+      const colors = ['#f97316', '#22c55e', '#3b82f6', '#eab308', '#ec4899', '#8b5cf6'];
+      
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'streak-confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 0.5 + 's';
+        piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+        container.appendChild(piece);
+      }
+
+      setTimeout(() => container.remove(), 4000);
+    }
+
+    // Event listeners برای پاپ‌آپ استریک
+    document.addEventListener('DOMContentLoaded', function() {
+      // دکمه بستن پاپ‌آپ
+      const closeBtn = document.getElementById('streakPopupClose');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', dismissStreakPopup);
+      }
+
+      // دکمه بعداً یادآوری کن
+      const dismissBtn = document.getElementById('streakPopupDismiss');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', dismissStreakPopup);
+      }
+
+      // کلیک روی overlay برای بستن
+      const overlay = document.getElementById('streakPopupOverlay');
+      if (overlay) {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) {
+            dismissStreakPopup();
+          }
+        });
+      }
+
+      // کلیک روی بنر کوچک برای باز کردن پاپ‌آپ
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (miniBanner) {
+        miniBanner.addEventListener('click', function() {
+          localStorage.removeItem('streakPopupDismissed');
+          showStreakPopup();
+        });
+      }
+    });
 
     /**
      * رندر کارت کیف پول
@@ -7844,12 +8675,22 @@
         
         showStreakToast(`🎉 ${rewardText}`, 'success');
 
-        // انیمیشن موفقیت
-        const streakCard = document.getElementById('streakCard');
-        if (streakCard) {
-          streakCard.classList.add('streak-success-animation');
-          setTimeout(() => streakCard.classList.remove('streak-success-animation'), 500);
+        // انیمیشن موفقیت و کانفتی
+        const streakPopup = document.getElementById('streakPopup');
+        if (streakPopup) {
+          streakPopup.classList.add('success-animation');
+          setTimeout(() => streakPopup.classList.remove('success-animation'), 500);
         }
+        
+        // نمایش کانفتی
+        showConfetti();
+
+        // بستن پاپ‌آپ بعد از 2 ثانیه
+        setTimeout(() => {
+          hideStreakPopup();
+          const miniBanner = document.getElementById('streakMiniBanner');
+          if (miniBanner) miniBanner.classList.add('visible');
+        }, 2500);
 
       } catch (error) {
         console.error('doCheckIn error:', error);
