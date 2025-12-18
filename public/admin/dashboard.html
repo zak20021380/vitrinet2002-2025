@@ -290,13 +290,53 @@
 <!-- ۲) کاربران -->
 <div class="section-panel" id="users-panel" style="display:none;">
   <div class="content-header">کاربران <span class="header-count" id="header-users-count"></span></div>
-  <div style="margin-bottom:1rem;display:flex;gap:0.5rem;align-items:center;">
-    <input type="text" id="userSearch" placeholder="جستجو نام، نام خانوادگی یا تلفن..." 
-           style="width:100%;max-width:400px;padding:0.7rem 1rem;border-radius:12px;border:1.5px solid #10b98144;font-size:1rem;font-family:inherit;outline:none;transition:border .15s;">
+  
+  <!-- فیلترها و جستجو -->
+  <div class="users-filters-row">
+    <input type="text" id="userSearch" placeholder="جستجو نام، نام خانوادگی یا تلفن..." class="user-search-input">
+    
+    <!-- فیلتر تولد -->
+    <div class="birthday-filters">
+      <button type="button" class="birthday-filter-btn" id="todayBirthdayBtn" data-filter="today">
+        <i class="ri-cake-2-line"></i>
+        <span>🎂 متولدین امروز</span>
+        <span class="birthday-count" id="todayBirthdayCount">0</span>
+      </button>
+      
+      <div class="birthday-month-filter">
+        <label for="birthdayMonthSelect"><i class="ri-calendar-line"></i></label>
+        <select id="birthdayMonthSelect" class="birthday-month-select">
+          <option value="">همه ماه‌ها</option>
+          <option value="01">فروردین</option>
+          <option value="02">اردیبهشت</option>
+          <option value="03">خرداد</option>
+          <option value="04">تیر</option>
+          <option value="05">مرداد</option>
+          <option value="06">شهریور</option>
+          <option value="07">مهر</option>
+          <option value="08">آبان</option>
+          <option value="09">آذر</option>
+          <option value="10">دی</option>
+          <option value="11">بهمن</option>
+          <option value="12">اسفند</option>
+        </select>
+      </div>
+      
+      <button type="button" class="birthday-filter-clear" id="clearBirthdayFilter" style="display:none;">
+        <i class="ri-close-line"></i> پاک کردن فیلتر
+      </button>
+    </div>
   </div>
+  
+  <!-- نمایش وضعیت فیلتر -->
+  <div class="birthday-filter-status" id="birthdayFilterStatus" style="display:none;">
+    <i class="ri-filter-3-line"></i>
+    <span id="birthdayFilterText"></span>
+  </div>
+  
   <div class="table-wrap">
     <table id="usersTable">
-      <thead><tr><th>نام</th><th>ایمیل</th><th>عملیات</th></tr></thead>
+      <thead><tr><th>نام</th><th>تاریخ تولد</th><th>ایمیل</th><th>عملیات</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>

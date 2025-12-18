@@ -23,8 +23,16 @@
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
+  <!-- Preconnect to Google Fonts for faster loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Load fonts with error handling -->
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" onerror="this.remove()">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" onerror="this.remove()">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+  </noscript>
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
@@ -2742,13 +2750,418 @@
       flex-shrink: 0;
     }
 
-    /* Header Styles - Modern & Professional */
+    /* ═══════════════════════════════════════════════════════════════
+       Hero Header - Modern Mobile App Style (Redesigned)
+       ═══════════════════════════════════════════════════════════════ */
+    .hero-header {
+      background: linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%);
+      border-radius: 0 0 32px 32px;
+      padding: 1.25rem 1.5rem 1.75rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(20, 184, 166, 0.3);
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-header::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -20%;
+      width: 60%;
+      height: 100%;
+      background: radial-gradient(ellipse, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Top Row - Nav Icons */
+    .hero-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-menu-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .hero-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    .hero-menu-btn span {
+      width: 18px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .hero-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .hero-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .hero-logo-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: #fff;
+    }
+
+    .hero-logo-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-notification-btn {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .hero-notification-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    .hero-notification-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: #fff;
+    }
+
+    .hero-notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 9px;
+      height: 9px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid rgba(20, 184, 166, 0.9);
+      animation: notifPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes notifPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    /* Middle Row - User Info (Redesigned with Flexbox) */
+    .hero-user-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Avatar - Modern User Placeholder Icon */
+    .hero-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .hero-avatar:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-avatar:active {
+      transform: scale(0.98);
+    }
+
+    .hero-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* User placeholder icon - gray silhouette on white background */
+    .hero-avatar .hero-avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    }
+
+    .hero-avatar .hero-avatar-placeholder svg {
+      width: 36px;
+      height: 36px;
+      fill: none;
+    }
+
+    .hero-avatar .hero-avatar-placeholder svg circle {
+      fill: #94a3b8;
+    }
+
+    .hero-avatar .hero-avatar-placeholder svg path {
+      fill: #94a3b8;
+    }
+
+    /* Greeting Section */
+    .hero-greeting {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .hero-greeting-main {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-greeting-sub {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    /* Bottom Element - Glassmorphism Info Pills (Redesigned) */
+    .hero-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-info-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 140px;
+      justify-content: center;
+    }
+
+    .hero-info-pill:hover {
+      background: rgba(255, 255, 255, 0.28);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Professional White SVG Icons */
+    .hero-info-svg {
+      width: 16px;
+      height: 16px;
+      stroke: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .hero-info-text {
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+
+    /* VIP pill with subtle golden accent */
+    .hero-info-pill--vip {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .hero-info-pill--vip:hover {
+      background: rgba(255, 255, 255, 0.32);
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* Info Row Responsive */
+    @media (max-width: 480px) {
+      .hero-info-row {
+        gap: 0.5rem;
+      }
+
+      .hero-info-pill {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.75rem;
+        max-width: 120px;
+      }
+
+      .hero-info-svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hero-info-row {
+        gap: 0.4rem;
+      }
+
+      .hero-info-pill {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        max-width: 100px;
+      }
+
+      .hero-info-svg {
+        width: 13px;
+        height: 13px;
+      }
+    }
+
+    /* Hero Header Responsive */
+    @media (max-width: 480px) {
+      .hero-header {
+        padding: 1rem 1rem 1.5rem;
+        border-radius: 0 0 26px 26px;
+      }
+
+      .hero-menu-btn,
+      .hero-notification-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .hero-logo-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .hero-logo-text {
+        font-size: 1.05rem;
+      }
+
+      .hero-avatar {
+        width: 54px;
+        height: 54px;
+      }
+
+      .hero-avatar .hero-avatar-placeholder svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      .hero-greeting-main {
+        font-size: 1.2rem;
+      }
+
+      .hero-greeting-sub {
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hero-header {
+        padding: 0.875rem 0.875rem 1.25rem;
+        border-radius: 0 0 22px 22px;
+      }
+
+      .hero-avatar {
+        width: 50px;
+        height: 50px;
+      }
+
+      .hero-avatar .hero-avatar-placeholder svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      .hero-greeting-main {
+        font-size: 1.1rem;
+      }
+
+      .hero-greeting-sub {
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Legacy Header Styles - Keep for compatibility */
     .main-header {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(16, 185, 129, 0.1);
       box-shadow: 0 4px 24px rgba(16, 185, 129, 0.08);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: none; /* Hidden - using hero header instead */
     }
 
     .main-header.scrolled {
@@ -6086,66 +6499,92 @@
 
 <body class="text-gray-800 overflow-x-hidden">
 
-  <!-- Header - Modern & Professional -->
-  <header class="main-header fixed top-0 inset-x-0 z-20" style="padding: 1rem 1.5rem;">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      <!-- Header Actions (Left Side) -->
-      <div class="header-actions">
-        <!-- Mobile Menu Toggle -->
-        <button id="hamBtn" class="menu-toggle lg:hidden" aria-label="منو" title="منو">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span id="hamBadge" class="notification-badge hidden" style="top: -6px; right: -6px;">0</span>
-        </button>
+  <!-- Hero Header - Modern Mobile App Style -->
+  <header class="hero-header">
+    <!-- Top Row: Menu | Logo | Notification -->
+    <div class="hero-top-row">
+      <!-- Hamburger Menu (Right in RTL) -->
+      <button id="hamBtn" class="hero-menu-btn" aria-label="منو" title="منو">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-        <!-- Profile Button -->
-        <button id="profileBtn" type="button" class="profile-button">
-          <div class="profile-avatar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <span class="profile-name">پروفایل من</span>
-        </button>
-
-        <!-- Notification Button -->
-        <button id="notificationBtn" class="notification-btn" aria-label="اعلان‌ها" title="اعلان‌ها">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span id="notificationBadge" class="notification-badge hidden">0</span>
-        </button>
-      </div>
-
-      <!-- Navigation Links (Desktop) -->
-      <nav class="nav-links flex-1 hidden md:flex justify-center">
-        <a href="index.html" class="nav-link active">
-          <span>داشبورد</span>
-        </a>
-        <a href="../index.html" class="nav-link">
-          <span>صفحه اصلی</span>
-        </a>
-        <a href="#" class="nav-link" data-section="bookings">
-          <span>رزروها</span>
-        </a>
-      </nav>
-
-      <!-- Logo Section (Right Side) -->
-      <a href="../index.html" class="logo-container" aria-label="بازگشت به خانه">
-        <div class="logo-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="white" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M9 22V12h6v10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <!-- Center Logo -->
+      <a href="../index.html" class="hero-logo" aria-label="بازگشت به خانه">
+        <div class="hero-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M9 22V12h6v10" />
           </svg>
         </div>
-        <span class="logo-text">ویترینت</span>
+        <span class="hero-logo-text">ویترینت</span>
       </a>
+
+      <!-- Notification Bell (Left in RTL) -->
+      <button id="notificationBtn" class="hero-notification-btn" aria-label="اعلان‌ها" title="اعلان‌ها">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        <span id="notificationBadge" class="hero-notification-dot"></span>
+      </button>
+    </div>
+
+    <!-- Middle Row: User Info (Redesigned) -->
+    <div class="hero-user-row">
+      <!-- User Avatar - Modern Placeholder Icon -->
+      <button class="hero-avatar" id="heroAvatar" type="button" aria-label="پروفایل من">
+        <div class="hero-avatar-placeholder">
+          <!-- Modern User Silhouette SVG -->
+          <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <circle cx="40" cy="28" r="14" fill="#94a3b8"/>
+            <!-- Body/Shoulders -->
+            <path d="M40 46c-16 0-28 8-28 18v4h56v-4c0-10-12-18-28-18z" fill="#94a3b8"/>
+          </svg>
+        </div>
+      </button>
+
+      <!-- Greeting Text -->
+      <div class="hero-greeting">
+        <h1 class="hero-greeting-main">
+          <span id="heroUserName">سلام کاربر عزیز</span>
+        </h1>
+        <p class="hero-greeting-sub">امروز چه برنامه‌ای داری؟</p>
+      </div>
+    </div>
+
+    <!-- Bottom: Glassmorphism Info Row - Professional White SVG Icons -->
+    <div class="hero-info-row">
+      <!-- Location - Map Pin Icon -->
+      <div class="hero-info-pill" id="heroLocationPill">
+        <svg class="hero-info-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span class="hero-info-text" id="heroLocationText">سنندج</span>
+      </div>
+
+      <!-- Date - Calendar Icon -->
+      <div class="hero-info-pill">
+        <svg class="hero-info-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span class="hero-info-text" id="heroDateText">۲۷ آذر</span>
+      </div>
+
+      <!-- VIP Status - Crown Icon -->
+      <div class="hero-info-pill hero-info-pill--vip" id="heroStatusPill">
+        <svg class="hero-info-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/>
+          <path d="M3 20h18"/>
+        </svg>
+        <span class="hero-info-text" id="heroStatusText">کاربر ویژه</span>
+      </div>
     </div>
   </header>
 
@@ -6265,7 +6704,7 @@
     </div>
   </aside>
 
-  <main class="max-w-6xl mx-auto mt-32 mb-14 px-2 sm:px-4">
+  <main class="max-w-6xl mx-auto mt-6 mb-14 px-2 sm:px-4">
     <div class="grid main-grid grid-cols-3 gap-7">
       <!-- سایدبار دسکتاپ -->
       <aside class="glass sidebar flex-col items-center py-7 px-4 sm:px-8 mb-3 fadein hidden lg:flex">
@@ -6579,6 +7018,31 @@
 
       const initialsPreview = document.getElementById('editInitialsPreview');
       if (initialsPreview) initialsPreview.textContent = initials;
+
+      // Update Hero Header
+      const heroUserName = document.getElementById('heroUserName');
+      if (heroUserName) {
+        heroUserName.textContent = isAuthenticated && firstName 
+          ? `سلام ${firstName} جان` 
+          : 'سلام کاربر عزیز';
+      }
+
+      // Hero Avatar - Keep the modern placeholder SVG icon (don't replace with initials)
+      // The avatar now uses a professional user silhouette placeholder
+
+      // Update Hero Info Row - Location
+      const heroLocationText = document.getElementById('heroLocationText');
+      if (heroLocationText && city) {
+        heroLocationText.textContent = city;
+      }
+
+      // Update Hero Info Row - Status (VIP or regular)
+      const heroStatusText = document.getElementById('heroStatusText');
+      const heroStatusPill = document.getElementById('heroStatusPill');
+      if (heroStatusText && isAuthenticated) {
+        // You can customize this based on user's actual VIP status
+        heroStatusText.textContent = 'کاربر ویژه';
+      }
     }
 
     function openEditProfileModal() {
@@ -8116,14 +8580,8 @@
       return div.innerHTML;
     }
 
-    // داشبورد پیش‌فرض
+    // داشبورد پیش‌فرض - Welcome is now in Hero Header
     const dashboardSection = `
-  <div class="glass flex flex-col md:flex-row items-center justify-between px-5 md:px-8 py-5 md:py-7 fadein gap-3 md:gap-0">
-    <div>
-      <div class="text-xl md:text-2xl font-black primary-text mb-1">👋 خوش آمدید، کاربر عزیز!</div>
-      <div class="text-gray-500 text-sm md:text-base">امیدواریم تجربه‌ی خوبی داشته باشید.</div>
-    </div>
-  </div>
 
   <!-- پاپ‌آپ استریک روزانه -->
   <div class="streak-popup-overlay" id="streakPopupOverlay">
@@ -9492,11 +9950,14 @@
 
 
 
-    // سوییچ کردن با دکمه پروفایل
-    document.getElementById('profileBtn').onclick = function () {
-      showSection('profile');
-      // Don't open sidebar when clicking profile - just show profile section
-    };
+    // سوییچ کردن با دکمه پروفایل (Hero Avatar)
+    const heroAvatarBtn = document.getElementById('heroAvatar');
+    if (heroAvatarBtn) {
+      heroAvatarBtn.onclick = function () {
+        showSection('profile');
+        // Don't open sidebar when clicking profile - just show profile section
+      };
+    }
 
     // همبرگر موبایل
     function openSidebar() {
@@ -10758,7 +11219,28 @@
       } catch (error) {
         console.error('Initialization error:', error);
       }
+
+      // Hero Info Row - Update date dynamically
+      updateHeroInfoRow();
     });
+
+    // Update Hero Info Row with current Persian date
+    function updateHeroInfoRow() {
+      const heroDateText = document.getElementById('heroDateText');
+      if (heroDateText) {
+        try {
+          const now = new Date();
+          const persianDate = now.toLocaleDateString('fa-IR', {
+            day: 'numeric',
+            month: 'long'
+          });
+          heroDateText.textContent = persianDate;
+        } catch (e) {
+          // Fallback if Persian locale not supported
+          heroDateText.textContent = '۲۷ آذر';
+        }
+      }
+    }
 
 
 
@@ -10938,10 +11420,14 @@
       unreadCount = notificationsData.filter(n => !n.read).length;
 
       if (unreadCount > 0) {
-        notificationBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-        notificationBadge.classList.remove('hidden');
+        // Hero header uses a dot indicator
+        if (notificationBadge) {
+          notificationBadge.style.display = 'block';
+        }
       } else {
-        notificationBadge.classList.add('hidden');
+        if (notificationBadge) {
+          notificationBadge.style.display = 'none';
+        }
       }
     }
 

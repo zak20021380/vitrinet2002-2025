@@ -5174,15 +5174,66 @@ function updateHeaderCounts() {
 
 // -------- نمایش کاربران --------
 // -------- نمایش کاربران --------
+// ماه‌های شمسی
+const PERSIAN_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
+// تبدیل تاریخ میلادی به شمسی
+function getTodayPersianDate() {
+  const today = new Date();
+  const persianDate = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(today);
+  // تبدیل اعداد فارسی به انگلیسی
+  const toEnglishNum = (str) => str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  return toEnglishNum(persianDate);
+}
+
+// بررسی اینکه آیا امروز تولد کاربر است
+function isTodayBirthday(birthDate) {
+  if (!birthDate) return false;
+  const today = getTodayPersianDate();
+  const todayParts = today.split('/');
+  const birthParts = birthDate.split('/');
+  if (todayParts.length !== 3 || birthParts.length !== 3) return false;
+  return todayParts[1] === birthParts[1].padStart(2, '0') && todayParts[2] === birthParts[2].padStart(2, '0');
+}
+
+// شمارش متولدین امروز
+function countTodayBirthdays(users) {
+  return users.filter(u => isTodayBirthday(u.birthDate)).length;
+}
+
+// فیلتر فعلی تولد
+let birthdayFilter = { today: false, month: '' };
+
 function renderUsers(filteredUsers = usersList) {
   const tbody = document.querySelector('#usersTable tbody');
   tbody.innerHTML = '';
+  
+  // به‌روزرسانی شمارنده متولدین امروز
+  const todayCount = countTodayBirthdays(usersList);
+  const todayCountEl = document.getElementById('todayBirthdayCount');
+  if (todayCountEl) todayCountEl.textContent = todayCount;
+  
   filteredUsers.forEach((user, i) => {
     const fullName = `${user.firstname || user.name || ''} ${user.lastname || ''}`.trim();
     const contact = user.email || user.phone || '';
+    const birthDate = user.birthDate || '';
+    const isToday = isTodayBirthday(birthDate);
+    
+    // فرمت نمایش تاریخ تولد
+    let birthDateDisplay = '<span class="user-birthdate-placeholder">---</span>';
+    if (birthDate) {
+      const bdClass = isToday ? 'user-birthdate has-birthday today-birthday' : 'user-birthdate has-birthday';
+      birthDateDisplay = `<span class="${bdClass}">${birthDate}</span>`;
+    }
+    
     let tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="user-cell user-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${fullName}</td>
+      <td class="user-cell user-modal-trigger" style="cursor:pointer">${birthDateDisplay}</td>
       <td class="user-cell user-modal-trigger" style="cursor:pointer">${contact}</td>
       <td>
         <button class="action-btn delete" onclick="deleteUser(${i})"><i class="ri-delete-bin-line"></i> حذف</button>
@@ -5198,7 +5249,7 @@ function renderUsers(filteredUsers = usersList) {
     tbody.appendChild(tr);
   });
   if (!filteredUsers.length) {
-    tbody.innerHTML = `<tr><td colspan="3" style="color:#888;text-align:center">هیچ کاربری یافت نشد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="color:#888;text-align:center">هیچ کاربری یافت نشد.</td></tr>`;
   }
 }
 
@@ -5208,6 +5259,8 @@ function showUserModal(user) {
   const uid = toIdString(user._id || user.id || '');
   const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.name || '-';
   const fDate = d => d ? new Date(d).toLocaleDateString('fa-IR',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const birthDate = user.birthDate || '';
+  const isToday = isTodayBirthday(birthDate);
 
   const modalHtml = `
     <div class="user-modal">
@@ -5215,6 +5268,7 @@ function showUserModal(user) {
       <div class="user-modal-title">
         مشخصات کاربر:
         <span style="color:#0ea5e9">${fullName}</span>
+        ${isToday ? '<span style="margin-right:0.5rem">🎂</span>' : ''}
       </div>
       <div class="user-modal-row">
         <span class="user-modal-label">نام:</span>
@@ -5236,6 +5290,23 @@ function showUserModal(user) {
         <span class="user-modal-label">ثبت‌نام:</span>
         <span class="user-modal-value">${fDate(user.createdAt)}</span>
       </div>
+      <div class="user-modal-row user-modal-birthdate-row">
+        <span class="user-modal-label">تاریخ تولد:</span>
+        <input type="text" 
+               id="userBirthDateInput" 
+               class="user-modal-birthdate-input" 
+               value="${birthDate}" 
+               placeholder="1375/06/21"
+               pattern="\\d{4}/\\d{2}/\\d{2}"
+               title="فرمت: 1375/06/21">
+        <button type="button" 
+                id="saveBirthDateBtn" 
+                class="user-modal-birthdate-save"
+                onclick="saveUserBirthDate('${uid}')">
+          ذخیره
+        </button>
+      </div>
+      <div id="birthdate-save-message" style="display:none;margin-bottom:0.85rem;padding:0.5rem;border-radius:8px;font-size:0.9rem;"></div>
       <form id="userMessageForm" class="user-modal-form" data-user-id="${uid}">
         <label for="userMessage">ارسال پیام به این کاربر:</label>
         <textarea id="userMessage" name="msg" placeholder="پیام خود را بنویسید…" required></textarea>
@@ -5248,6 +5319,69 @@ function showUserModal(user) {
   overlay.style.display = 'flex';
 
   document.getElementById('userMessageForm').addEventListener('submit', sendUserMessage);
+}
+
+// ذخیره تاریخ تولد کاربر
+async function saveUserBirthDate(userId) {
+  const input = document.getElementById('userBirthDateInput');
+  const btn = document.getElementById('saveBirthDateBtn');
+  const msgBox = document.getElementById('birthdate-save-message');
+  const birthDate = input.value.trim();
+  
+  // اعتبارسنجی فرمت
+  if (birthDate && !/^\d{4}\/\d{2}\/\d{2}$/.test(birthDate)) {
+    msgBox.textContent = '❌ فرمت تاریخ نامعتبر است. فرمت صحیح: 1375/06/21';
+    msgBox.style.background = '#fee2e2';
+    msgBox.style.color = '#dc2626';
+    msgBox.style.display = 'block';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = '...';
+  
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/user/${userId}/birthdate`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ birthDate: birthDate || null })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.message || 'خطا در ذخیره تاریخ تولد');
+    }
+    
+    // به‌روزرسانی لیست کاربران
+    const userIndex = usersList.findIndex(u => toIdString(u._id || u.id) === userId);
+    if (userIndex !== -1) {
+      usersList[userIndex].birthDate = birthDate || null;
+    }
+    
+    msgBox.textContent = '✅ تاریخ تولد با موفقیت ذخیره شد';
+    msgBox.style.background = '#dcfce7';
+    msgBox.style.color = '#166534';
+    msgBox.style.display = 'block';
+    
+    // به‌روزرسانی جدول
+    applyBirthdayFilter();
+    
+    setTimeout(() => {
+      msgBox.style.display = 'none';
+    }, 2500);
+    
+  } catch (err) {
+    console.error('saveUserBirthDate error:', err);
+    msgBox.textContent = '❌ ' + err.message;
+    msgBox.style.background = '#fee2e2';
+    msgBox.style.color = '#dc2626';
+    msgBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ذخیره';
+  }
 }
 
 function closeUserModal() {
@@ -5295,18 +5429,108 @@ async function sendUserMessage(e) {
     alert('❌ خطا در ارسال پیام:\n' + err.message);
   }
 }
+// اعمال فیلتر تولد
+function applyBirthdayFilter() {
+  const searchQuery = (document.getElementById('userSearch')?.value || '').trim().toLowerCase();
+  
+  let filtered = [...usersList];
+  
+  // فیلتر جستجو
+  if (searchQuery) {
+    filtered = filtered.filter(u => {
+      return (
+        (u.firstname || '').toLowerCase().includes(searchQuery) ||
+        (u.lastname || '').toLowerCase().includes(searchQuery) ||
+        (u.name || '').toLowerCase().includes(searchQuery) ||
+        (u.phone || '').toLowerCase().includes(searchQuery)
+      );
+    });
+  }
+  
+  // فیلتر متولدین امروز
+  if (birthdayFilter.today) {
+    filtered = filtered.filter(u => isTodayBirthday(u.birthDate));
+  }
+  
+  // فیلتر ماه تولد
+  if (birthdayFilter.month) {
+    const targetMonth = birthdayFilter.month.padStart(2, '0');
+    filtered = filtered.filter(u => {
+      if (!u.birthDate) return false;
+      const parts = u.birthDate.split('/');
+      if (parts.length !== 3) return false;
+      return parts[1].padStart(2, '0') === targetMonth;
+    });
+  }
+  
+  // به‌روزرسانی وضعیت فیلتر
+  updateBirthdayFilterStatus();
+  
+  renderUsers(filtered);
+}
+
+// به‌روزرسانی نمایش وضعیت فیلتر
+function updateBirthdayFilterStatus() {
+  const statusEl = document.getElementById('birthdayFilterStatus');
+  const textEl = document.getElementById('birthdayFilterText');
+  const clearBtn = document.getElementById('clearBirthdayFilter');
+  const todayBtn = document.getElementById('todayBirthdayBtn');
+  const monthSelect = document.getElementById('birthdayMonthSelect');
+  
+  const hasFilter = birthdayFilter.today || birthdayFilter.month;
+  
+  if (statusEl) statusEl.style.display = hasFilter ? 'flex' : 'none';
+  if (clearBtn) clearBtn.style.display = hasFilter ? 'inline-flex' : 'none';
+  
+  if (todayBtn) {
+    todayBtn.classList.toggle('active', birthdayFilter.today);
+  }
+  
+  if (textEl) {
+    let text = '';
+    if (birthdayFilter.today) {
+      text = 'نمایش متولدین امروز';
+    } else if (birthdayFilter.month) {
+      const monthIndex = parseInt(birthdayFilter.month, 10) - 1;
+      const monthName = PERSIAN_MONTHS[monthIndex] || '';
+      text = `نمایش متولدین ماه ${monthName}`;
+    }
+    textEl.textContent = text;
+  }
+}
+
 // جستجو کاربران
 document.getElementById('userSearch').addEventListener('input', e => {
-  const q = e.target.value.trim().toLowerCase();
-  const filtered = usersList.filter(u => {
-    return (
-      (u.firstname || '').toLowerCase().includes(q) ||
-      (u.lastname || '').toLowerCase().includes(q) ||
-      (u.name || '').toLowerCase().includes(q) ||
-      (u.phone || '').toLowerCase().includes(q)
-    );
-  });
-  renderUsers(filtered);
+  applyBirthdayFilter();
+});
+
+// فیلتر متولدین امروز
+document.getElementById('todayBirthdayBtn')?.addEventListener('click', () => {
+  birthdayFilter.today = !birthdayFilter.today;
+  if (birthdayFilter.today) {
+    birthdayFilter.month = '';
+    const monthSelect = document.getElementById('birthdayMonthSelect');
+    if (monthSelect) monthSelect.value = '';
+  }
+  applyBirthdayFilter();
+});
+
+// فیلتر ماه تولد
+document.getElementById('birthdayMonthSelect')?.addEventListener('change', (e) => {
+  birthdayFilter.month = e.target.value;
+  if (birthdayFilter.month) {
+    birthdayFilter.today = false;
+  }
+  applyBirthdayFilter();
+});
+
+// پاک کردن فیلتر تولد
+document.getElementById('clearBirthdayFilter')?.addEventListener('click', () => {
+  birthdayFilter.today = false;
+  birthdayFilter.month = '';
+  const monthSelect = document.getElementById('birthdayMonthSelect');
+  if (monthSelect) monthSelect.value = '';
+  applyBirthdayFilter();
 });
 
 

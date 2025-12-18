@@ -189,16 +189,93 @@ router.get('/bookings', protect, async (req, res) => {
 
 // ───────────────────────────────
 // GET /api/user/   – فقط ادمین
+// با پشتیبانی از فیلتر تاریخ تولد
 // ───────────────────────────────
 router.get('/', auth('admin'), async (req, res) => {
   try {
-    const users = await User.find(
+    const { birthdayToday, birthdayMonth } = req.query;
+    
+    let users = await User.find(
       {},
-      'firstname lastname email city phone mobile createdAt blockedByAdmin'
+      'firstname lastname email city phone mobile createdAt blockedByAdmin birthDate'
     );
+    
+    // فیلتر متولدین امروز (بر اساس ماه و روز شمسی)
+    if (birthdayToday === 'true') {
+      const today = new Date();
+      // تبدیل به تاریخ شمسی
+      const persianDate = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(today);
+      
+      // استخراج ماه و روز (فرمت: ۱۴۰۳/۰۹/۲۸)
+      const parts = persianDate.split('/');
+      const todayMonth = parts[1];
+      const todayDay = parts[2];
+      
+      // تبدیل اعداد فارسی به انگلیسی
+      const toEnglishNum = (str) => str.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+      const monthEn = toEnglishNum(todayMonth).padStart(2, '0');
+      const dayEn = toEnglishNum(todayDay).padStart(2, '0');
+      
+      users = users.filter(user => {
+        if (!user.birthDate) return false;
+        // فرمت birthDate: "1375/06/21"
+        const userParts = user.birthDate.split('/');
+        if (userParts.length !== 3) return false;
+        const userMonth = userParts[1].padStart(2, '0');
+        const userDay = userParts[2].padStart(2, '0');
+        return userMonth === monthEn && userDay === dayEn;
+      });
+    }
+    
+    // فیلتر بر اساس ماه تولد
+    if (birthdayMonth && birthdayMonth !== '') {
+      const targetMonth = birthdayMonth.padStart(2, '0');
+      users = users.filter(user => {
+        if (!user.birthDate) return false;
+        const userParts = user.birthDate.split('/');
+        if (userParts.length !== 3) return false;
+        const userMonth = userParts[1].padStart(2, '0');
+        return userMonth === targetMonth;
+      });
+    }
+    
     res.json(users);
   } catch (err) {
+    console.error('Error fetching users:', err);
     res.status(500).json({ message: 'خطا در دریافت کاربران.' });
+  }
+});
+
+// ───────────────────────────────
+// PUT /api/user/:id/birthdate – ویرایش تاریخ تولد توسط ادمین
+// ───────────────────────────────
+router.put('/:id/birthdate', auth('admin'), async (req, res) => {
+  try {
+    const { birthDate } = req.body;
+    
+    // اعتبارسنجی فرمت تاریخ شمسی (YYYY/MM/DD)
+    if (birthDate && !/^\d{4}\/\d{2}\/\d{2}$/.test(birthDate)) {
+      return res.status(400).json({ message: 'فرمت تاریخ تولد نامعتبر است. فرمت صحیح: 1375/06/21' });
+    }
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { birthDate: birthDate || null },
+      { new: true, select: 'firstname lastname birthDate' }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ message: 'کاربر یافت نشد' });
+    }
+    
+    res.json({ message: 'تاریخ تولد با موفقیت به‌روزرسانی شد', user });
+  } catch (err) {
+    console.error('Error updating birthdate:', err);
+    res.status(500).json({ message: 'خطا در به‌روزرسانی تاریخ تولد' });
   }
 });
 
