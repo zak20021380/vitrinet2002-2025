@@ -7,6 +7,9 @@ const userController = require('../controllers/userController');
 const userCtrl = require('../controllers/userController');
 const isAdmin = require('../middlewares/authMiddleware')('admin');
 
+// کنترلرهای استریک و کیف پول
+const userStreakController = require('../controllers/userStreakController');
+const userWalletController = require('../controllers/userWalletController');
 
 // ✳️ به‌جای خودِ تابع، خروجی فراخوانی‌اش را می‌دهیم
 const auth = require('../middlewares/authMiddleware');
@@ -206,5 +209,19 @@ router.delete('/:id', isAdmin, userCtrl.softDelete);   // ← اضافه شود
 // ───────────────────────────────
 router.post('/block/:userId',  auth('seller'), userController.blockCustomer);
 router.delete('/block/:userId', auth('seller'), userController.unblockCustomer);
+
+// ───────────────────────────────
+// روت‌های استریک کاربر
+// ───────────────────────────────
+router.get('/streak', auth('user'), userStreakController.getStreak);
+router.post('/streak/checkin', auth('user'), userStreakController.checkIn);
+router.get('/streak/leaderboard', auth('user'), userStreakController.getLeaderboard);
+
+// ───────────────────────────────
+// روت‌های کیف پول کاربر
+// ───────────────────────────────
+router.get('/wallet', auth('user'), userWalletController.getWallet);
+router.get('/wallet/transactions', auth('user'), userWalletController.getTransactions);
+router.get('/wallet/summary', auth('user'), userWalletController.getWalletSummary);
 
 module.exports = router;
