@@ -187,3 +187,36 @@ exports.createCustomerMessageNotification = async (sellerId, customerName, produ
     return null;
   }
 };
+
+/**
+ * ایجاد اعلان تست (فقط برای تست)
+ * POST /api/seller/notifications/test
+ */
+exports.createTestNotification = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    
+    const notification = new SellerNotification({
+      sellerId,
+      type: 'customer_message',
+      title: 'پیام جدید از مشتری',
+      message: 'این یک پیام تست است. مشتری درباره محصول شما سوال دارد.',
+      relatedData: {
+        customerName: 'مشتری تست',
+        productTitle: 'محصول نمونه'
+      }
+    });
+    
+    await notification.save();
+    console.log('Test notification created:', notification._id);
+    
+    res.json({ 
+      success: true, 
+      notification,
+      message: 'اعلان تست با موفقیت ایجاد شد'
+    });
+  } catch (err) {
+    console.error('createTestNotification error:', err);
+    res.status(500).json({ error: 'خطا در ایجاد اعلان تست' });
+  }
+};

@@ -4044,9 +4044,15 @@ const Notifications = {
 
   async fetchFromServer() {
     try {
-      // دریافت نوتیفیکیشن‌های عادی
-      const items = await API.getNotifications();
       const existing = this.load();
+      
+      // دریافت نوتیفیکیشن‌های عادی
+      let items = [];
+      try {
+        items = await API.getNotifications();
+      } catch (notifErr) {
+        console.warn('Failed to load regular notifications', notifErr);
+      }
       
       // دریافت پیام‌های ادمین (بدون نیاز به sellerId - از توکن استفاده می‌شود)
       let adminNotifications = [];
@@ -4065,6 +4071,7 @@ const Notifications = {
       let sellerNotifications = [];
       try {
         const sellerData = await API.getSellerNotifications({ limit: 30 });
+        console.log('Seller notifications loaded:', sellerData);
         sellerNotifications = (sellerData.notifications || []).map(n => ({
           ...n,
           isCustomerMessage: n.type === 'customer_message'
@@ -4075,6 +4082,7 @@ const Notifications = {
       
       // ترکیب همه نوتیفیکیشن‌ها
       const allItems = [...items, ...adminNotifications, ...sellerNotifications];
+      console.log('All notifications combined:', allItems.length, 'items');
       
       // اگر سرور نوتیفیکیشن جدید برگرداند، آن‌ها را با موجودی‌ها ادغام کن
       if (allItems && allItems.length > 0) {
@@ -4162,6 +4170,30 @@ const Notifications = {
       this.save(all);
       this.render();
       UIComponents.showToast('همه اعلان‌ها خوانده شد.', 'success');
+    });
+
+    // دکمه تست اعلان
+    const testBtn = document.getElementById('notif-test-btn');
+    testBtn?.addEventListener('click', async () => {
+      try {
+        testBtn.disabled = true;
+        testBtn.textContent = 'در حال ایجاد...';
+        await API.createTestNotification();
+        await this.fetchFromServer();
+        this.render();
+        UIComponents.showToast('اعلان تست ایجاد شد!', 'success');
+      } catch (err) {
+        console.error('Test notification failed:', err);
+        UIComponents.showToast('خطا در ایجاد اعلان تست', 'error');
+      } finally {
+        testBtn.disabled = false;
+        testBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          ایجاد اعلان تست
+        `;
+      }
     });
 
     // دلیگیشن برای آیتم‌ها (حذف/خواندن)

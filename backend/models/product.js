@@ -65,6 +65,14 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  discountCeiling: {
+    type: Number,
+    default: null
+  },
+  isNegotiable: {
+    type: Boolean,
+    default: false
+  },
   likesCount: {
     type: Number,
     default: 0

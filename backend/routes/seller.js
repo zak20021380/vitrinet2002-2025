@@ -360,5 +360,8 @@ router.put('/notifications/:id/read', authMiddleware('seller'), sellerNotificati
 // حذف یک اعلان
 router.delete('/notifications/:id', authMiddleware('seller'), sellerNotificationController.deleteNotification);
 
+// ایجاد اعلان تست (فقط برای تست)
+router.post('/notifications/test', authMiddleware('seller'), sellerNotificationController.createTestNotification);
+
 
 module.exports = router;

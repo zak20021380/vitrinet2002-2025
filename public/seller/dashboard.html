@@ -4287,6 +4287,237 @@
   }
 }
 
+/* ===== سقف تخفیف - Discount Ceiling Section ===== */
+.discount-ceiling-section {
+  position: relative;
+  padding: 16px;
+  border: 2px dashed #0ea5e933;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.discount-ceiling-section:focus-within {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+.discount-ceiling-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.discount-ceiling-header svg {
+  flex-shrink: 0;
+}
+
+.discount-ceiling-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #e0fdfa 0%, #d1fae5 100%);
+  border: 1px solid #10b98133;
+  border-radius: 12px;
+  animation: fadeInUp 0.25s ease;
+}
+
+.discount-ceiling-preview-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 10px;
+  color: #10b981;
+}
+
+.discount-ceiling-preview-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #0f172a;
+}
+
+.discount-ceiling-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  animation: shake 0.4s ease;
+}
+
+.discount-ceiling-error svg {
+  flex-shrink: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+/* Dark mode support */
+.dark .discount-ceiling-section {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #0ea5e944;
+}
+
+.dark .discount-ceiling-header label {
+  color: #38bdf8 !important;
+}
+
+.dark .discount-ceiling-preview {
+  background: linear-gradient(135deg, #134e4a 0%, #064e3b 100%);
+  border-color: #10b98155;
+}
+
+.dark .discount-ceiling-preview-text {
+  color: #f1f5f9;
+}
+
+.dark .discount-ceiling-preview-text .font-bold {
+  color: #34d399 !important;
+}
+
+.dark .discount-ceiling-error {
+  background: #450a0a;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .discount-ceiling-section {
+    padding: 14px 12px;
+  }
+
+  .discount-ceiling-preview {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .discount-ceiling-preview-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .discount-ceiling-preview-text {
+    font-size: 12px;
+  }
+
+  .credit-transfer-info {
+    padding: 10px 12px;
+  }
+
+  .credit-transfer-info-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .credit-transfer-info-text {
+    font-size: 12px;
+  }
+
+  .credit-incentive-text {
+    font-size: 11px;
+    text-align: center;
+  }
+}
+
+/* ===== Credit Transfer Info Card ===== */
+.credit-transfer-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e0fdfa 0%, #ccfbf1 100%);
+  border: 1px solid #14b8a633;
+  border-radius: 14px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.credit-transfer-info-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%);
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+.credit-transfer-info-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.credit-transfer-info-text strong {
+  color: #0ea5e9;
+  font-weight: 700;
+}
+
+/* Incentive Text */
+.credit-incentive-text {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-radius: 10px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Dark mode for credit transfer */
+.dark .credit-transfer-info {
+  background: linear-gradient(135deg, #134e4a 0%, #115e59 100%);
+  border-color: #14b8a644;
+}
+
+.dark .credit-transfer-info-text {
+  color: #f1f5f9;
+}
+
+.dark .credit-transfer-info-text strong {
+  color: #38bdf8;
+}
+
+.dark .credit-incentive-text {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  color: #6ee7b7;
+}
+
 </style>
   <script src="/nav-active.js" defer></script>
 
@@ -4763,6 +4994,68 @@
         <label class="block font-bold mb-1 text-[#10b981]">توضیحات <span class="text-red-500">*</span></label>
         <textarea name="desc" class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10b981] text-lg" rows="3" placeholder="توضیحات محصول ..." required></textarea>
       </div>
+
+      <!-- سقف تخفیف اعتباری - Credit Discount Ceiling -->
+      <div class="mb-5 discount-ceiling-section">
+        <div class="discount-ceiling-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="3" ry="3"/>
+            <path d="M16 12h4"/>
+            <circle cx="16" cy="12" r="1.5"/>
+          </svg>
+          <label class="font-bold text-[#0ea5e9]">حداکثر تخفیف مجاز (از محل اعتبار مشتری)</label>
+        </div>
+        <input 
+          name="discountCeiling" 
+          id="discountCeilingInput"
+          type="text" 
+          inputmode="numeric"
+          class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] text-lg mt-2" 
+          placeholder="مثلاً ۲۰٬۰۰۰ تومان"
+        >
+        
+        <!-- کارت توضیح انتقال اعتبار -->
+        <div class="credit-transfer-info">
+          <div class="credit-transfer-info-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 1l4 4-4 4"/>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <path d="M7 23l-4-4 4-4"/>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </div>
+          <p class="credit-transfer-info-text">
+            💡 با هر تخفیفی که می‌دهید، معادل همان مبلغ از اعتبار کیف پول مشتری کسر و به <strong>«صندوق فروشگاه»</strong> شما اضافه می‌شود.
+          </p>
+        </div>
+        
+        <!-- کارت نمایش بازه قیمت -->
+        <div id="discountCeilingPreview" class="discount-ceiling-preview hidden">
+          <div class="discount-ceiling-preview-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+          </div>
+          <p class="discount-ceiling-preview-text">
+            مشتری قیمت را در بازه <span id="discountFinalPrice" class="font-bold text-[#10b981]">—</span> تا <span id="discountOriginalPrice" class="font-bold text-[#0f172a]">—</span> تومان مشاهده خواهد کرد.
+          </p>
+        </div>
+        
+        <!-- پیام انگیزشی -->
+        <p class="credit-incentive-text">تخفیف بیشتر = جذب مشتری سریع‌تر + افزایش موجودی کیف پول شما 🚀</p>
+        
+        <!-- پیام خطا -->
+        <div id="discountCeilingError" class="discount-ceiling-error hidden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span>سقف تخفیف نمی‌تواند بیشتر از قیمت اصلی باشد.</span>
+        </div>
+      </div>
+
       <!-- آپلود عکس با دکمه سفارشی و مدرن -->
       <div class="mb-5">
         <label class="block font-bold mb-2 text-[#10b981]">عکس محصول <span class="text-red-500">*</span>

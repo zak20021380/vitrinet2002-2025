@@ -689,6 +689,10 @@
     if (product.badge) {
       dom.badge.textContent = product.badge;
       dom.badge.hidden = false;
+    } else if (product.isNegotiable || product.discountCeiling > 0) {
+      dom.badge.textContent = 'قابلیت تخفیف';
+      dom.badge.hidden = false;
+      dom.badge.classList.add('badge--negotiable');
     } else {
       dom.badge.hidden = true;
     }
@@ -706,8 +710,18 @@
     updateLikeUI();
 
     const priceValue = normaliseNumber(product.price);
+    const discountCeiling = normaliseNumber(product.discountCeiling);
+    
     if (priceValue !== null) {
-      dom.meta.price.textContent = new Intl.NumberFormat('fa-IR').format(priceValue) + ' تومان';
+      // If product has discount ceiling, show price range
+      if (discountCeiling && discountCeiling > 0 && discountCeiling <= priceValue) {
+        const minPrice = priceValue - discountCeiling;
+        const formattedMin = new Intl.NumberFormat('fa-IR').format(minPrice);
+        const formattedMax = new Intl.NumberFormat('fa-IR').format(priceValue);
+        dom.meta.price.innerHTML = `<span class="price-range">${formattedMin} <span class="price-range-separator">تا</span> ${formattedMax}</span> تومان`;
+      } else {
+        dom.meta.price.textContent = new Intl.NumberFormat('fa-IR').format(priceValue) + ' تومان';
+      }
       dom.meta.priceCard.hidden = false;
     } else {
       dom.meta.priceCard.hidden = true;

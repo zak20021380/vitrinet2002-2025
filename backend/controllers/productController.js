@@ -66,7 +66,7 @@ function resolveRequestActor(req, { allowIpFallback = true } = {}) {
 // افزودن محصول جدید
 exports.addProduct = async (req, res) => {
   try {
-    const { sellerId, title, price, category, tags, desc, images, mainImageIndex } = req.body;
+    const { sellerId, title, price, category, tags, desc, images, mainImageIndex, discountCeiling, isNegotiable } = req.body;
 
     const uploadedImages = Array.isArray(req.files)
       ? req.files.map((file) => normalizeUploadedPath(file)).filter(Boolean)
@@ -88,15 +88,26 @@ exports.addProduct = async (req, res) => {
       return res.status(400).json({ message: 'لطفاً تصویر را به‌صورت فایل آپلود کنید؛ ارسال رشته‌های data:URL پشتیبانی نمی‌شود.' });
     }
 
+    // پردازش سقف تخفیف
+    const parsedDiscountCeiling = discountCeiling ? Number(discountCeiling) : null;
+    const parsedPrice = Number(price);
+    
+    // اعتبارسنجی: سقف تخفیف نباید بیشتر از قیمت باشد
+    if (parsedDiscountCeiling && parsedDiscountCeiling > parsedPrice) {
+      return res.status(400).json({ message: 'سقف تخفیف نمی‌تواند بیشتر از قیمت اصلی باشد.' });
+    }
+
     const productData = {
       sellerId,
       title,
-      price,
+      price: parsedPrice,
       category,
       tags: _tags,
       desc,
       images: _images,
-      mainImageIndex: Number.isInteger(Number(mainImageIndex)) ? Number(mainImageIndex) : 0
+      mainImageIndex: Number.isInteger(Number(mainImageIndex)) ? Number(mainImageIndex) : 0,
+      discountCeiling: parsedDiscountCeiling,
+      isNegotiable: parsedDiscountCeiling > 0 || isNegotiable === 'true' || isNegotiable === true
     };
 
     // جلوگیری از ذخیره سند بزرگ‌تر از محدودیت BSON (16MB)

@@ -629,6 +629,79 @@ const imgInput = document.getElementById("productImagesInput");
 const previewBox = document.getElementById("imagePreview");
 const imgErrorMsg = document.getElementById("imgErrorMsg");
 
+// ----------- سقف تخفیف (Discount Ceiling) ----------
+const discountCeilingInput = document.getElementById("discountCeilingInput");
+const discountCeilingPreview = document.getElementById("discountCeilingPreview");
+const discountCeilingError = document.getElementById("discountCeilingError");
+const discountFinalPrice = document.getElementById("discountFinalPrice");
+const discountOriginalPrice = document.getElementById("discountOriginalPrice");
+const priceInput = document.querySelector('#addProductForm input[name="price"]');
+
+function formatPersianNumber(num) {
+  if (!num && num !== 0) return '—';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, d => persianDigits[d]).replace(/\B(?=(\d{3})+(?!\d))/g, '٬');
+}
+
+function parseInputNumber(value) {
+  if (!value) return 0;
+  // Convert Persian digits to English and remove separators
+  const persianToEnglish = { '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' };
+  const cleaned = value.replace(/[۰-۹]/g, d => persianToEnglish[d]).replace(/[٬,\s]/g, '');
+  return parseInt(cleaned, 10) || 0;
+}
+
+function updateDiscountCeilingPreview() {
+  if (!discountCeilingInput || !discountCeilingPreview || !discountCeilingError) return;
+  
+  const price = priceInput ? Number(priceInput.value) || 0 : 0;
+  const ceiling = parseInputNumber(discountCeilingInput.value);
+  
+  // Hide both initially
+  discountCeilingPreview.classList.add('hidden');
+  discountCeilingError.classList.add('hidden');
+  
+  if (!ceiling || ceiling <= 0) return;
+  
+  // Validation: ceiling cannot be greater than price
+  if (price > 0 && ceiling > price) {
+    discountCeilingError.classList.remove('hidden');
+    return;
+  }
+  
+  // Show preview
+  if (price > 0) {
+    const finalPrice = price - ceiling;
+    discountFinalPrice.textContent = formatPersianNumber(finalPrice);
+    discountOriginalPrice.textContent = formatPersianNumber(price);
+    discountCeilingPreview.classList.remove('hidden');
+  }
+}
+
+function formatDiscountCeilingInput() {
+  if (!discountCeilingInput) return;
+  const value = parseInputNumber(discountCeilingInput.value);
+  if (value > 0) {
+    discountCeilingInput.value = formatPersianNumber(value);
+  }
+}
+
+if (discountCeilingInput) {
+  discountCeilingInput.addEventListener('input', () => {
+    updateDiscountCeilingPreview();
+  });
+  
+  discountCeilingInput.addEventListener('blur', () => {
+    formatDiscountCeilingInput();
+    updateDiscountCeilingPreview();
+  });
+}
+
+if (priceInput) {
+  priceInput.addEventListener('input', updateDiscountCeilingPreview);
+  priceInput.addEventListener('change', updateDiscountCeilingPreview);
+}
+
 function renderNewImages(files) {
   if (!previewBox) return;
   previewBox.innerHTML = "";
@@ -728,13 +801,30 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
     tags = [form.tag.value.trim()];
   }
 
+  // سقف تخفیف
+  const discountCeilingValue = form.discountCeiling ? parseInputNumber(form.discountCeiling.value) : 0;
+  const priceValue = Number(form.price.value);
+  
+  // Validation: discount ceiling cannot exceed price
+  if (discountCeilingValue > 0 && discountCeilingValue > priceValue) {
+    if (discountCeilingError) discountCeilingError.classList.remove('hidden');
+    return;
+  }
+
   const formData = new FormData();
   formData.append('sellerId', window.seller.id);
   formData.append('title', form.title.value.trim());
-  formData.append('price', Number(form.price.value));
+  formData.append('price', priceValue);
   formData.append('category', form.category.value.trim());
   formData.append('tags', tags.join(','));
   formData.append('desc', form.desc.value.trim());
+  
+  // Add discount ceiling if provided
+  if (discountCeilingValue > 0) {
+    formData.append('discountCeiling', discountCeilingValue);
+    formData.append('isNegotiable', 'true');
+  }
+  
   files.forEach((file) => formData.append('images', file));
 
   try {
@@ -748,6 +838,9 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
       window._productFiles = [];
       previewBox.innerHTML = "";
       imgErrorMsg.classList.add("hidden");
+      // Reset discount ceiling preview
+      if (discountCeilingPreview) discountCeilingPreview.classList.add('hidden');
+      if (discountCeilingError) discountCeilingError.classList.add('hidden');
       showProductSuccessPopup(); // پاپ‌آپ شیک و جدید نمایش داده میشه
       if (typeof renderProducts === "function") renderProducts();
     } else {
