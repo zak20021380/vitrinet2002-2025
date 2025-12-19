@@ -242,18 +242,73 @@ function resolveMessageRole(message, chat, customerName) {
   };
 }
 
-function showNewMessageToast(title, desc) {
+function showNewMessageToast(title, desc, isAdmin = false) {
   const toast = document.getElementById('newMessageToast');
   const toastTitle = document.getElementById('toastTitle');
   const toastDesc = document.getElementById('toastDesc');
+  const toastTime = document.getElementById('toastTime');
+  const toastIcon = document.getElementById('toastIcon');
+  const toastProgress = document.getElementById('toastProgress');
+  const toastClose = document.getElementById('toastClose');
+  
   if (!toast || !toastTitle || !toastDesc) return;
 
+  // تنظیم محتوا
   toastTitle.textContent = title;
   toastDesc.textContent = desc;
+  if (toastTime) {
+    toastTime.textContent = 'همین الان';
+  }
+  
+  // تنظیم استایل بر اساس نوع پیام (مشتری یا ادمین)
+  toast.classList.remove('toast--admin');
+  if (isAdmin) {
+    toast.classList.add('toast--admin');
+    if (toastIcon) {
+      toastIcon.innerHTML = `
+        <svg fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+      `;
+    }
+  } else {
+    if (toastIcon) {
+      toastIcon.innerHTML = `
+        <svg fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+        </svg>
+      `;
+    }
+  }
+  
+  // ریست انیمیشن progress bar
+  if (toastProgress) {
+    toastProgress.style.animation = 'none';
+    toastProgress.offsetHeight; // force reflow
+    toastProgress.style.animation = 'toastProgress 4s linear forwards';
+  }
+  
+  // نمایش toast
   toast.classList.add('show');
+  
+  // پخش صدای نوتیفیکیشن (اختیاری)
+  try {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100]);
+    }
+  } catch (e) {}
 
+  // تایمر برای بستن خودکار
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+  
+  // دکمه بستن
+  if (toastClose) {
+    toastClose.onclick = () => {
+      toast.classList.remove('show');
+      if (toastTimer) clearTimeout(toastTimer);
+    };
+  }
 }
 
 
@@ -277,7 +332,7 @@ function detectNewMessages(chats) {
       const subtitle = fromAdmin
         ? 'پاسخ جدید مدیریت دریافت شد.'
         : `${getCustomerName(chat)}${chat.productId?.title ? ` • ${chat.productId.title}` : ''}`;
-      notifications.push({ title, subtitle });
+      notifications.push({ title, subtitle, isAdmin: fromAdmin });
     }
     unreadSnapshot[chat._id] = unread;
   });
@@ -333,7 +388,7 @@ async function fetchChats() {
     removeErrorBar();
     firstLoad = false;
 
-    notifications.forEach(n => showNewMessageToast(n.title, n.subtitle));
+    notifications.forEach(n => showNewMessageToast(n.title, n.subtitle, n.isAdmin));
 
     // اگر مدال باز است آن را هم تازه کن
     if (currentChatId) {
@@ -373,7 +428,9 @@ function removeErrorBar() {
 async function openChatById(chatId) {
   if (!chatId) return;
   let chat = chatsData.find(c => c._id === chatId);
+  
   try {
+    // ۱) واکشی چت (این درخواست پیام‌ها را به عنوان خوانده شده علامت‌گذاری می‌کند)
     const res = await fetch(apiUrl(`/api/chats/${chatId}`), withCreds());
     if (res.ok) {
       const fresh = await res.json();
@@ -384,12 +441,40 @@ async function openChatById(chatId) {
   } catch (err) {
     console.error('openChatById fetch:', err);
   }
+  
   if (!chat) return;
 
+  // ۲) نمایش مدال چت
   renderChatModal(chat);
   currentChatId = chat._id;
-  const badge = document.getElementById(`badge-${chat._id}`);
+  
+  // ۳) علامت‌گذاری پیام‌ها به عنوان خوانده شده در سرور
+  try {
+    await fetch(apiUrl(`/api/chats/${chatId}/mark-read-seller`), withCreds({
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }));
+  } catch (err) {
+    console.error('mark-read-seller error:', err);
+  }
+  
+  // ۴) آپدیت unreadSnapshot برای این چت (صفر کردن چون همه پیام‌ها خوانده شدند)
+  unreadSnapshot[chatId] = 0;
+  
+  // ۵) مخفی کردن badge این چت
+  const badge = document.getElementById(`badge-${chatId}`);
   if (badge) badge.classList.add('hidden');
+  
+  // ۶) آپدیت chatsData برای این چت (علامت‌گذاری همه پیام‌ها به عنوان خوانده شده)
+  const chatIdx = chatsData.findIndex(c => c._id === chatId);
+  if (chatIdx !== -1 && chatsData[chatIdx].messages) {
+    chatsData[chatIdx].messages = chatsData[chatIdx].messages.map(m => ({
+      ...m,
+      readBySeller: m.from === 'seller' ? m.readBySeller : true
+    }));
+  }
+  
+  // ۷) آپدیت شمارنده کلی پیام‌های خوانده نشده
   if (typeof window.updateBadge === 'function') {
     const totalUnread = chatsData.reduce(
       (s, c) => s + countUnreadMessages(c),
@@ -398,7 +483,7 @@ async function openChatById(chatId) {
     window.updateBadge(totalUnread);
   }
 
-  // هم‌زمان لیست را تازه کن تا بج‌ها و شمارنده کلی دقیق بمانند
+  // ۸) تازه‌سازی لیست چت‌ها برای اطمینان از همگام‌سازی با سرور
   try {
     await fetchChats();
   } catch (err) {

@@ -4051,9 +4051,7 @@ const Notifications = {
       // دریافت پیام‌های ادمین (بدون نیاز به sellerId - از توکن استفاده می‌شود)
       let adminNotifications = [];
       try {
-        // استفاده از endpoint /my که نیازی به sellerId ندارد
         adminNotifications = await API.getAdminNotifications();
-        // تبدیل پیام‌های ادمین به فرمت نوتیفیکیشن
         adminNotifications = adminNotifications.map(n => ({
           ...n,
           type: 'admin_message',
@@ -4063,8 +4061,20 @@ const Notifications = {
         console.warn('Failed to load admin notifications', adminErr);
       }
       
+      // دریافت اعلان‌های فروشنده (شامل پیام‌های مشتریان)
+      let sellerNotifications = [];
+      try {
+        const sellerData = await API.getSellerNotifications({ limit: 30 });
+        sellerNotifications = (sellerData.notifications || []).map(n => ({
+          ...n,
+          isCustomerMessage: n.type === 'customer_message'
+        }));
+      } catch (sellerErr) {
+        console.warn('Failed to load seller notifications', sellerErr);
+      }
+      
       // ترکیب همه نوتیفیکیشن‌ها
-      const allItems = [...items, ...adminNotifications];
+      const allItems = [...items, ...adminNotifications, ...sellerNotifications];
       
       // اگر سرور نوتیفیکیشن جدید برگرداند، آن‌ها را با موجودی‌ها ادغام کن
       if (allItems && allItems.length > 0) {
@@ -4091,8 +4101,6 @@ const Notifications = {
         this.save(finalList);
       } else if (existing.length > 0) {
         // اگر سرور خالی برگرداند ولی نوتیفیکیشن‌های محلی داریم، آن‌ها را حفظ کن
-        // همه نوتیفیکیشن‌های موجود را نگه دار
-        // فقط اگر سرور واقعاً پاسخ داد (نه خطا)
       }
     } catch (err) {
       console.error('Failed to load notifications', err);
@@ -4162,13 +4170,31 @@ const Notifications = {
       if (!li) return;
       
       const isAdminMessage = li.classList.contains('is-admin-message');
+      const isCustomerMessage = li.classList.contains('is-customer-message');
       
       if (e.target.closest('.notif-delete')) {
-        // حذف پیام (برای پیام‌های ادمین از API مخصوص استفاده می‌شود)
+        // حذف پیام
         if (isAdminMessage) {
           await this.removeAdminMessage(li.dataset.id);
+        } else if (isCustomerMessage) {
+          await this.removeSellerNotification(li.dataset.id);
         } else {
           this.remove(li.dataset.id);
+        }
+      } else if (e.target.closest('.notif-view-chat')) {
+        // مشاهده گفتگو با مشتری
+        e.preventDefault();
+        const chatId = e.target.closest('.notif-view-chat')?.dataset?.chatId || li.dataset.chatId;
+        if (chatId) {
+          // علامت‌گذاری به عنوان خوانده شده
+          await this.markSellerNotificationRead(li.dataset.id);
+          // باز کردن مدال چت
+          if (typeof SellerDashboard !== 'undefined' && SellerDashboard.openChatModal) {
+            SellerDashboard.openChatModal(chatId);
+          } else {
+            // اگر تابع موجود نبود، به صفحه پیام‌ها برو
+            window.location.href = `/seller/dashboard-messages.html?chat=${chatId}`;
+          }
         }
       } else if (e.target.closest('.notif-mark-read-single')) {
         // علامت‌گذاری پیام ادمین به عنوان خوانده شده
@@ -4189,6 +4215,8 @@ const Notifications = {
         // کلیک روی آیتم - علامت‌گذاری به عنوان خوانده شده
         if (isAdminMessage) {
           await this.markAdminMessageRead(li.dataset.id);
+        } else if (isCustomerMessage) {
+          await this.markSellerNotificationRead(li.dataset.id);
         } else {
           this.markRead(li.dataset.id);
         }
@@ -4310,6 +4338,32 @@ const Notifications = {
     }
   },
 
+  // علامت‌گذاری اعلان فروشنده (پیام مشتری) به عنوان خوانده شده
+  async markSellerNotificationRead(id) {
+    try {
+      await API.markSellerNotificationRead(id);
+      const items = this.load().map(n => n.id === id ? ({ ...n, read: true }) : n);
+      this.save(items);
+      this.render();
+    } catch (e) {
+      console.error('Failed to mark seller notification as read:', e);
+    }
+  },
+
+  // حذف اعلان فروشنده (پیام مشتری)
+  async removeSellerNotification(id) {
+    try {
+      await API.deleteSellerNotification(id);
+      const items = this.load().filter(n => n.id !== id);
+      this.save(items);
+      this.render();
+      UIComponents.showToast('اعلان حذف شد', 'info');
+    } catch (e) {
+      console.error('Failed to delete seller notification:', e);
+      UIComponents.showToast('خطا در حذف اعلان', 'error');
+    }
+  },
+
   add(payload, fallbackType = 'info') {
     const items = this.load();
     const nowLabel = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
@@ -4384,7 +4438,11 @@ const Notifications = {
                              notifType === 'admin_message' ||
                              notifType === 'admin';
 
-      const isTicket = !isAdminMessage && (
+      // بررسی پیام مشتری
+      const isCustomerMessage = n.isCustomerMessage === true ||
+                                notifType === 'customer_message';
+
+      const isTicket = !isAdminMessage && !isCustomerMessage && (
                        notifType === 'ticket' ||
                        notifType === 'ticket_reply' ||
                        notifType === 'support' ||
@@ -4474,6 +4532,64 @@ const Notifications = {
                   خوانده شد
                 </button>
               ` : ''}
+            </footer>
+          </article>
+        </li>
+        `;
+      }
+
+      // Customer message notification layout
+      if (isCustomerMessage) {
+        const customerName = n.relatedData?.customerName || 'مشتری';
+        const productTitle = n.relatedData?.productTitle || '';
+        const chatId = n.relatedData?.chatId || '';
+        
+        return `
+        <li class="notification-item is-customer-message ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" data-chat-id="${chatId}" role="listitem">
+          <article class="customer-message-card">
+            <header class="customer-message-card__header">
+              <div class="customer-message-card__badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+                پیام مشتری
+              </div>
+              <button class="customer-message-card__delete notif-delete" type="button" aria-label="حذف اعلان">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </header>
+            
+            <div class="customer-message-card__body">
+              <h4 class="customer-message-card__title">${this._escapeHtml(n.title || 'پیام جدید از مشتری')}</h4>
+              <p class="customer-message-card__content">${this._escapeHtml(n.message || n.text || '')}</p>
+              ${productTitle ? `
+                <div class="customer-message-card__product">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                    <line x1="7" y1="7" x2="7.01" y2="7"/>
+                  </svg>
+                  ${this._escapeHtml(productTitle)}
+                </div>
+              ` : ''}
+            </div>
+            
+            <footer class="customer-message-card__footer">
+              <div class="customer-message-card__meta">
+                <span class="customer-message-card__sender">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  ${this._escapeHtml(customerName)}
+                </span>
+                <time class="customer-message-card__time">${n.time || ''}</time>
+              </div>
+              <button class="customer-message-card__view-chat notif-view-chat" type="button" data-chat-id="${chatId}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                مشاهده گفتگو
+              </button>
             </footer>
           </article>
         </li>
@@ -7038,10 +7154,11 @@ destroy() {
         // Scroll to bottom
         modalBody.scrollTop = modalBody.scrollHeight;
 
-        // Mark as read
-        await fetch(`${API_BASE}/api/chats/${chatId}/mark-read`, {
+        // Mark as read by seller
+        await fetch(`${API_BASE}/api/chats/${chatId}/mark-read-seller`, {
           method: 'POST',
-          credentials: 'include'
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
         }).catch(() => {});
 
         // Refresh messages list to update unread count

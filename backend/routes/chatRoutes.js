@@ -117,6 +117,12 @@ router.post('/:id/mark-read',
   chatController.markMessagesRead
 );
 
+/*━━━━━━━━━━ ۶-ب) علامت خوانده شدن پیام توسط فروشنده ━━━━━━━━━━*/
+router.post('/:id/mark-read-seller',
+  auth('seller'),
+  chatController.markMessagesReadBySeller
+);
+
 /*━━━━━━━━━━ ۷) حذف چت ━━━━━━━━━━*/
 router.delete('/:id',
   auth(),  // هر کاربر لاگین شده می‌تونه چت خودش رو حذف کنه

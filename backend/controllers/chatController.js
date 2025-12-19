@@ -18,6 +18,7 @@ const {
   isValidObjectId, 
   securityLog 
 } = require('../utils/messageSecurity');
+const { createCustomerMessageNotification } = require('./sellerNotificationController');
 
 // Rate limit map برای جلوگیری از spam
 const messageRateLimitMap = new Map();
@@ -483,6 +484,29 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
         });
         chat.lastUpdated = Date.now();
         await chat.save();
+        
+        // ایجاد اعلان برای فروشنده اگر پیام از طرف مشتری باشد
+        if (senderRole === 'user' && sid && (chatType === 'product' || chatType === 'user-seller')) {
+          try {
+            const senderDoc = await User.findById(senderId).select('firstname lastname phone');
+            const customerName = senderDoc 
+              ? `${senderDoc.firstname || ''} ${senderDoc.lastname || ''}`.trim() || senderDoc.phone || 'مشتری'
+              : 'مشتری';
+            const productDoc = pid ? await Product.findById(pid).select('title') : null;
+            const productTitle = productDoc?.title || '';
+            
+            await createCustomerMessageNotification(
+              sid.toString(),
+              customerName,
+              productTitle,
+              chat._id,
+              senderId,
+              pid
+            );
+          } catch (notifErr) {
+            console.error('Failed to create notification:', notifErr);
+          }
+        }
       }
       return res.status(200).json(chat);
     }
@@ -514,6 +538,29 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
       chat.lastUpdated = Date.now();
       await chat.save();
       if (text) console.log('Chat message added:', chat);
+
+      // ایجاد اعلان برای فروشنده اگر پیام از طرف مشتری باشد
+      if (text && senderRole === 'user' && sid && (chatType === 'product' || chatType === 'user-seller')) {
+        try {
+          const senderDoc = await User.findById(senderId).select('firstname lastname phone');
+          const customerName = senderDoc 
+            ? `${senderDoc.firstname || ''} ${senderDoc.lastname || ''}`.trim() || senderDoc.phone || 'مشتری'
+            : 'مشتری';
+          const productDoc = pid ? await Product.findById(pid).select('title') : null;
+          const productTitle = productDoc?.title || '';
+          
+          await createCustomerMessageNotification(
+            sid.toString(),
+            customerName,
+            productTitle,
+            chat._id,
+            senderId,
+            pid
+          );
+        } catch (notifErr) {
+          console.error('Failed to create notification:', notifErr);
+        }
+      }
 
       return res.status(201).json(chat);
     } catch (err) {
@@ -1413,6 +1460,51 @@ exports.getAllChats = async (req, res) => {
       } catch (err) {
         console.error('markMessagesRead error:', err);
         res.status(500).json({ error: 'خطاى سرور در علامت‌گذاری پیام‌ها.' });
+      }
+    };
+
+
+    /**
+     * علامت‌گذاری پیام‌ها به عنوان خوانده شده توسط فروشنده
+     * POST /api/chats/:id/mark-read-seller
+     */
+    exports.markMessagesReadBySeller = async (req, res) => {
+      try {
+        const chatId = req.params.id;
+        const sellerId = req.user.id;
+
+        // اعتبارسنجی ObjectId
+        if (!mongoose.Types.ObjectId.isValid(chatId)) {
+          return res.status(400).json({ error: 'شناسه چت نامعتبر است.' });
+        }
+
+        // پیدا کردن چت و بررسی دسترسی
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+          return res.status(404).json({ error: 'چت پیدا نشد.' });
+        }
+
+        // بررسی اینکه فروشنده عضو این چت باشد
+        const isParticipant = chat.participants.some(p => p.toString() === sellerId);
+        if (!isParticipant) {
+          return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+        }
+
+        // علامت‌گذاری همه پیام‌های غیر فروشنده به عنوان خوانده شده
+        await Chat.updateOne(
+          { _id: chatId },
+          { $set: { 'messages.$[m].readBySeller': true, 'messages.$[m].read': true } },
+          { arrayFilters: [{ 'm.from': { $ne: 'seller' }, 'm.readBySeller': false }] }
+        );
+
+        const updatedChat = await Chat.findById(chatId)
+          .populate('participants', 'firstname lastname role storename shopurl')
+          .populate('productId', 'title images');
+
+        return res.json(updatedChat);
+      } catch (err) {
+        console.error('markMessagesReadBySeller error:', err);
+        res.status(500).json({ error: 'خطای سرور در علامت‌گذاری پیام‌ها.' });
       }
     };
 

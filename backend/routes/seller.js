@@ -337,6 +337,28 @@ router.post(
 );
 
 
+// ═══════════════════════════════════════════════════════════════
+// Routes اعلان‌های فروشنده
+// ═══════════════════════════════════════════════════════════════
+const sellerNotificationController = require('../controllers/sellerNotificationController');
+
+// دریافت لیست اعلان‌ها
+router.get('/notifications', authMiddleware('seller'), sellerNotificationController.getNotifications);
+
+// دریافت تعداد اعلان‌های خوانده نشده
+router.get('/notifications/unread-count', authMiddleware('seller'), sellerNotificationController.getUnreadCount);
+
+// علامت‌گذاری همه اعلان‌ها به عنوان خوانده شده
+router.put('/notifications/mark-all-read', authMiddleware('seller'), sellerNotificationController.markAllAsRead);
+
+// حذف همه اعلان‌ها
+router.delete('/notifications/clear-all', authMiddleware('seller'), sellerNotificationController.clearAll);
+
+// علامت‌گذاری یک اعلان به عنوان خوانده شده
+router.put('/notifications/:id/read', authMiddleware('seller'), sellerNotificationController.markAsRead);
+
+// حذف یک اعلان
+router.delete('/notifications/:id', authMiddleware('seller'), sellerNotificationController.deleteNotification);
 
 
 module.exports = router;

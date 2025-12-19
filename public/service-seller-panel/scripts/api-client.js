@@ -629,6 +629,107 @@ async deletePortfolioItem(id) {
     return { count: data?.count || 0 };
   },
 
+  // ===== Seller Notifications API Methods (پیام‌های مشتریان و سیستم) =====
+  
+  /**
+   * دریافت اعلان‌های فروشنده (شامل پیام‌های مشتریان)
+   */
+  async getSellerNotifications(options = {}) {
+    const { limit = 50, skip = 0, unreadOnly = false } = options;
+    const params = new URLSearchParams({ limit, skip, unreadOnly });
+    const r = await fetch(bust(`${API_BASE}/api/seller/notifications?${params}`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) throw new Error('FETCH_SELLER_NOTIFICATIONS_FAILED');
+    const data = await this._json(r);
+    const arr = Array.isArray(data?.notifications) ? data.notifications : [];
+    const fmt = (d) => {
+      const diff = (Date.now() - new Date(d).getTime()) / 1000;
+      if (diff < 3600) return `${Math.floor(diff/60)} دقیقه پیش`;
+      if (diff < 86400) return `${Math.floor(diff/3600)} ساعت پیش`;
+      return `${Math.floor(diff/86400)} روز پیش`;
+    };
+    return {
+      notifications: arr.map(n => ({
+        id: n._id || n.id,
+        _id: n._id || n.id,
+        text: n.message || '',
+        message: n.message || '',
+        time: n.createdAt ? fmt(n.createdAt) : '',
+        createdAt: n.createdAt,
+        read: !!n.read,
+        type: n.type || 'info',
+        title: n.title || '',
+        relatedData: n.relatedData || {},
+        isCustomerMessage: n.type === 'customer_message'
+      })),
+      unreadCount: data?.unreadCount || 0,
+      total: data?.total || 0
+    };
+  },
+
+  /**
+   * دریافت تعداد اعلان‌های خوانده نشده فروشنده
+   */
+  async getSellerNotificationsUnreadCount() {
+    const r = await fetch(bust(`${API_BASE}/api/seller/notifications/unread-count`), {
+      credentials: 'include',
+      ...NO_CACHE
+    });
+    if (!r.ok && r.status !== 304) return { count: 0 };
+    const data = await this._json(r);
+    return { count: data?.count || 0 };
+  },
+
+  /**
+   * علامت‌گذاری اعلان فروشنده به عنوان خوانده شده
+   */
+  async markSellerNotificationRead(id) {
+    const r = await fetch(`${API_BASE}/api/seller/notifications/${id}/read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('MARK_SELLER_NOTIFICATION_READ_FAILED');
+    return true;
+  },
+
+  /**
+   * علامت‌گذاری همه اعلان‌های فروشنده به عنوان خوانده شده
+   */
+  async markAllSellerNotificationsRead() {
+    const r = await fetch(`${API_BASE}/api/seller/notifications/mark-all-read`, {
+      method: 'PUT',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('MARK_ALL_SELLER_NOTIFICATIONS_READ_FAILED');
+    return true;
+  },
+
+  /**
+   * حذف اعلان فروشنده
+   */
+  async deleteSellerNotification(id) {
+    const r = await fetch(`${API_BASE}/api/seller/notifications/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('DELETE_SELLER_NOTIFICATION_FAILED');
+    return true;
+  },
+
+  /**
+   * حذف همه اعلان‌های فروشنده
+   */
+  async clearAllSellerNotifications() {
+    const r = await fetch(`${API_BASE}/api/seller/notifications/clear-all`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!r.ok) throw new Error('CLEAR_ALL_SELLER_NOTIFICATIONS_FAILED');
+    return true;
+  },
+
   // ===== Streak API Methods =====
   
   /**
