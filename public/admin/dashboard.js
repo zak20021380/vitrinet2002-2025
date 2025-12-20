@@ -7625,7 +7625,8 @@ const panels = {
   'home-section': document.getElementById('home-section-panel'),
   messages:  document.getElementById('messages-panel'),
   tickets: document.getElementById('tickets-panel'),
-  'daily-visits': document.getElementById('daily-visits-panel')
+  'daily-visits': document.getElementById('daily-visits-panel'),
+  missions: document.getElementById('missions-panel')
 };
 
 menuLinks.forEach(link => {
@@ -7698,6 +7699,11 @@ menuLinks.forEach(link => {
 
     if (section === 'income-insights') {
       loadIncomeInsightsContent();
+    }
+
+    // Initialize missions panel
+    if (section === 'missions') {
+      initMissionsPanel();
     }
 
     // 5) بستن سایدبار در موبایل
@@ -11642,3 +11648,186 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAllSellers();
   
 })();
+
+
+// ============================================
+// مدیریت جوایز و ماموریت‌ها - Missions Management
+// ============================================
+
+const missionsState = {
+  hasChanges: false,
+  initialValues: {},
+  currentValues: {}
+};
+
+function initMissionsPanel() {
+  const panel = document.getElementById('missions-panel');
+  if (!panel) return;
+
+  // Tab switching
+  const tabs = panel.querySelectorAll('.missions-tab');
+  const tabContents = panel.querySelectorAll('.missions-tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.dataset.tab;
+
+      // Update tab states
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      // Update content visibility
+      tabContents.forEach(content => {
+        const isTarget = content.id === `missions-${targetTab}-tab`;
+        content.classList.toggle('active', isTarget);
+        content.hidden = !isTarget;
+      });
+    });
+  });
+
+  // Track changes on inputs and toggles
+  const inputs = panel.querySelectorAll('input[type="number"]');
+  const toggles = panel.querySelectorAll('input[type="checkbox"]');
+
+  // Store initial values
+  inputs.forEach(input => {
+    missionsState.initialValues[input.id] = input.value;
+    missionsState.currentValues[input.id] = input.value;
+
+    input.addEventListener('input', () => {
+      missionsState.currentValues[input.id] = input.value;
+      checkMissionsChanges();
+    });
+  });
+
+  toggles.forEach(toggle => {
+    missionsState.initialValues[toggle.id] = toggle.checked;
+    missionsState.currentValues[toggle.id] = toggle.checked;
+
+    toggle.addEventListener('change', () => {
+      missionsState.currentValues[toggle.id] = toggle.checked;
+      checkMissionsChanges();
+    });
+  });
+
+  // Save button
+  const saveBtn = document.getElementById('missions-save-btn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveMissionsSettings);
+  }
+
+  // Load saved settings from localStorage
+  loadMissionsSettings();
+}
+
+function checkMissionsChanges() {
+  const saveBar = document.querySelector('.missions-save-bar');
+  if (!saveBar) return;
+
+  let hasChanges = false;
+
+  for (const key in missionsState.initialValues) {
+    if (missionsState.initialValues[key] !== missionsState.currentValues[key]) {
+      hasChanges = true;
+      break;
+    }
+  }
+
+  missionsState.hasChanges = hasChanges;
+  saveBar.classList.toggle('visible', hasChanges);
+}
+
+function loadMissionsSettings() {
+  try {
+    const saved = localStorage.getItem('vitrinnet_missions_settings');
+    if (!saved) return;
+
+    const settings = JSON.parse(saved);
+    const panel = document.getElementById('missions-panel');
+    if (!panel) return;
+
+    // Apply saved values
+    for (const key in settings) {
+      const element = document.getElementById(key);
+      if (!element) continue;
+
+      if (element.type === 'checkbox') {
+        element.checked = settings[key];
+        missionsState.initialValues[key] = settings[key];
+        missionsState.currentValues[key] = settings[key];
+      } else if (element.type === 'number') {
+        element.value = settings[key];
+        missionsState.initialValues[key] = settings[key];
+        missionsState.currentValues[key] = settings[key];
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to load missions settings:', err);
+  }
+}
+
+function saveMissionsSettings() {
+  const panel = document.getElementById('missions-panel');
+  if (!panel) return;
+
+  const settings = {};
+
+  // Collect all input values
+  const inputs = panel.querySelectorAll('input[type="number"]');
+  const toggles = panel.querySelectorAll('input[type="checkbox"]');
+
+  inputs.forEach(input => {
+    settings[input.id] = input.value;
+    missionsState.initialValues[input.id] = input.value;
+  });
+
+  toggles.forEach(toggle => {
+    settings[toggle.id] = toggle.checked;
+    missionsState.initialValues[toggle.id] = toggle.checked;
+  });
+
+  // Save to localStorage
+  try {
+    localStorage.setItem('vitrinnet_missions_settings', JSON.stringify(settings));
+  } catch (err) {
+    console.warn('Failed to save missions settings:', err);
+  }
+
+  // Hide save bar
+  const saveBar = document.querySelector('.missions-save-bar');
+  if (saveBar) {
+    saveBar.classList.remove('visible');
+  }
+
+  // Show success message
+  showMissionsMessage();
+
+  missionsState.hasChanges = false;
+
+  // TODO: Send to backend API
+  // sendMissionsToBackend(settings);
+}
+
+function showMissionsMessage() {
+  const message = document.getElementById('missions-message');
+  if (!message) return;
+
+  message.hidden = false;
+  message.classList.add('show');
+
+  setTimeout(() => {
+    message.classList.remove('show');
+    setTimeout(() => {
+      message.hidden = true;
+    }, 300);
+  }, 3000);
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initMissionsPanel();
+});

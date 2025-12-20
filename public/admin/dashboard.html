@@ -82,6 +82,7 @@
           <span class="count" id="count-tickets">0</span>
         </a>
 <a href="#" data-section="reports"><i class="ri-file-list-line"></i> گزارشات <span class="count" id="count-reports">0</span></a>
+        <a href="#" data-section="missions"><i class="ri-trophy-line"></i> مدیریت جوایز و ماموریت‌ها</a>
 
 
       </div>
@@ -1713,6 +1714,543 @@
 <!-- پنل جدید برای گزارش‌ها -->
 <div class="section-panel" id="reports-panel" style="display:none;">
   <p style="text-align:center">در حال بارگیری...</p>
+</div>
+
+<!-- پنل مدیریت جوایز و ماموریت‌ها -->
+<div class="section-panel" id="missions-panel" style="display:none;">
+  <div class="content-header">
+    <i class="ri-trophy-line"></i>
+    مدیریت جوایز و ماموریت‌ها
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="missions-tabs" role="tablist">
+    <button class="missions-tab active" role="tab" aria-selected="true" data-tab="users">
+      <i class="ri-user-3-line"></i>
+      <span>کاربران</span>
+    </button>
+    <button class="missions-tab" role="tab" aria-selected="false" data-tab="product-sellers">
+      <i class="ri-store-2-line"></i>
+      <span>فروشندگان کالا</span>
+    </button>
+    <button class="missions-tab" role="tab" aria-selected="false" data-tab="service-sellers">
+      <i class="ri-hand-heart-line"></i>
+      <span>فروشندگان خدماتی</span>
+    </button>
+  </div>
+
+  <!-- Tab Content: Users -->
+  <div class="missions-tab-content active" id="missions-users-tab">
+    <div class="missions-section-header">
+      <div class="missions-section-icon">
+        <i class="ri-user-3-line"></i>
+      </div>
+      <div>
+        <h3>جوایز کاربران</h3>
+        <p>تنظیم پاداش‌های مربوط به ثبت‌نام، نصب اپلیکیشن و فعالیت‌های کاربری</p>
+      </div>
+    </div>
+
+    <div class="missions-grid">
+      <!-- ثبت‌نام کاربر جدید -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-user-add-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>ثبت‌نام کاربر جدید</h4>
+            <p>پاداش برای هر کاربر جدید که ثبت‌نام می‌کند</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-register" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-register-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-register-amount" value="5000" min="0" step="1000" placeholder="مثلاً 5000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- نصب اپلیکیشن -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-smartphone-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>نصب اپلیکیشن</h4>
+            <p>پاداش برای نصب اپلیکیشن موبایل</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-app-install" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-app-install-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-app-install-amount" value="10000" min="0" step="1000" placeholder="مثلاً 10000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- تکمیل پروفایل -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-profile-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>تکمیل پروفایل</h4>
+            <p>پاداش برای تکمیل اطلاعات پروفایل</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-profile-complete" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-profile-complete-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-profile-complete-amount" value="3000" min="0" step="1000" placeholder="مثلاً 3000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- دعوت دوستان -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-user-shared-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>دعوت دوستان</h4>
+            <p>پاداش برای هر دوست دعوت‌شده که ثبت‌نام کند</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-referral" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-referral-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-referral-amount" value="15000" min="0" step="1000" placeholder="مثلاً 15000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- اولین خرید -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-shopping-bag-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>اولین خرید</h4>
+            <p>پاداش برای انجام اولین خرید</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-first-purchase">
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-first-purchase-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-first-purchase-amount" value="20000" min="0" step="1000" placeholder="مثلاً 20000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ثبت نظر -->
+      <div class="mission-card">
+        <div class="mission-card__header">
+          <div class="mission-card__icon">
+            <i class="ri-chat-quote-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>ثبت نظر</h4>
+            <p>پاداش برای ثبت نظر روی محصولات</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-user-review">
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-user-review-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-user-review-amount" value="2000" min="0" step="1000" placeholder="مثلاً 2000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Product Sellers -->
+  <div class="missions-tab-content" id="missions-product-sellers-tab" hidden>
+    <div class="missions-section-header">
+      <div class="missions-section-icon missions-section-icon--seller">
+        <i class="ri-store-2-line"></i>
+      </div>
+      <div>
+        <h3>جوایز فروشندگان کالا</h3>
+        <p>تنظیم پاداش‌های مربوط به فروش موفق، امتیازات و استریک‌ها</p>
+      </div>
+    </div>
+
+    <div class="missions-grid">
+      <!-- فروش موفق -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-shopping-cart-2-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>فروش موفق</h4>
+            <p>پاداش برای هر فروش تکمیل‌شده</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-sale" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-sale-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-sale-amount" value="5000" min="0" step="1000" placeholder="مثلاً 5000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- نظر ۵ ستاره -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-star-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>نظر ۵ ستاره</h4>
+            <p>پاداش برای دریافت نظر ۵ ستاره از مشتری</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-5star" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-5star-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-5star-amount" value="3000" min="0" step="1000" placeholder="مثلاً 3000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- استریک ۷ روزه -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-fire-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>استریک ۷ روزه</h4>
+            <p>پاداش برای فعالیت متوالی ۷ روزه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-streak-7" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-streak-7-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-streak-7-amount" value="25000" min="0" step="1000" placeholder="مثلاً 25000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- استریک ۳۰ روزه -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-fire-fill"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>استریک ۳۰ روزه</h4>
+            <p>پاداش برای فعالیت متوالی ۳۰ روزه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-streak-30" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-streak-30-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-streak-30-amount" value="100000" min="0" step="1000" placeholder="مثلاً 100000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- افزودن محصول جدید -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-add-box-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>افزودن محصول جدید</h4>
+            <p>پاداش برای هر محصول جدید ثبت‌شده</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-new-product">
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-new-product-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-new-product-amount" value="1000" min="0" step="1000" placeholder="مثلاً 1000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- تکمیل پروفایل فروشگاه -->
+      <div class="mission-card mission-card--seller">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--seller">
+            <i class="ri-store-3-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>تکمیل پروفایل فروشگاه</h4>
+            <p>پاداش برای تکمیل اطلاعات فروشگاه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-seller-profile-complete" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-seller-profile-complete-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-seller-profile-complete-amount" value="10000" min="0" step="1000" placeholder="مثلاً 10000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Service Sellers -->
+  <div class="missions-tab-content" id="missions-service-sellers-tab" hidden>
+    <div class="missions-section-header">
+      <div class="missions-section-icon missions-section-icon--service">
+        <i class="ri-hand-heart-line"></i>
+      </div>
+      <div>
+        <h3>جوایز فروشندگان خدماتی</h3>
+        <p>تنظیم پاداش‌های مربوط به رزروها، نظرات و فعالیت‌های خدماتی</p>
+      </div>
+    </div>
+
+    <div class="missions-grid">
+      <!-- رزرو موفق -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-calendar-check-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>رزرو موفق</h4>
+            <p>پاداش برای هر رزرو تکمیل‌شده</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-booking" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-booking-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-booking-amount" value="8000" min="0" step="1000" placeholder="مثلاً 8000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- نظر ۵ ستاره خدماتی -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-star-smile-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>نظر ۵ ستاره</h4>
+            <p>پاداش برای دریافت نظر ۵ ستاره از مشتری</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-5star" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-5star-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-5star-amount" value="4000" min="0" step="1000" placeholder="مثلاً 4000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- استریک ۷ روزه خدماتی -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-fire-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>استریک ۷ روزه</h4>
+            <p>پاداش برای فعالیت متوالی ۷ روزه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-streak-7" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-streak-7-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-streak-7-amount" value="30000" min="0" step="1000" placeholder="مثلاً 30000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- استریک ۳۰ روزه خدماتی -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-fire-fill"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>استریک ۳۰ روزه</h4>
+            <p>پاداش برای فعالیت متوالی ۳۰ روزه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-streak-30" checked>
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-streak-30-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-streak-30-amount" value="120000" min="0" step="1000" placeholder="مثلاً 120000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- افزودن سرویس جدید -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-service-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>افزودن سرویس جدید</h4>
+            <p>پاداش برای هر سرویس جدید ثبت‌شده</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-new-service">
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-new-service-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-new-service-amount" value="2000" min="0" step="1000" placeholder="مثلاً 2000">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- پاسخ سریع به مشتری -->
+      <div class="mission-card mission-card--service">
+        <div class="mission-card__header">
+          <div class="mission-card__icon mission-card__icon--service">
+            <i class="ri-chat-check-line"></i>
+          </div>
+          <div class="mission-card__title">
+            <h4>پاسخ سریع به مشتری</h4>
+            <p>پاداش برای پاسخ در کمتر از ۱۵ دقیقه</p>
+          </div>
+          <label class="mission-toggle">
+            <input type="checkbox" id="mission-service-quick-reply">
+            <span class="mission-toggle__slider"></span>
+          </label>
+        </div>
+        <div class="mission-card__body">
+          <label for="mission-service-quick-reply-amount">مبلغ پاداش (تومان)</label>
+          <div class="mission-input-group">
+            <i class="ri-money-dollar-circle-line"></i>
+            <input type="number" id="mission-service-quick-reply-amount" value="1500" min="0" step="1000" placeholder="مثلاً 1500">
+            <span class="mission-input-suffix">تومان</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Save Button -->
+  <div class="missions-save-bar">
+    <div class="missions-save-bar__info">
+      <i class="ri-information-line"></i>
+      <span>تغییرات ذخیره نشده دارید</span>
+    </div>
+    <button type="button" class="missions-save-btn" id="missions-save-btn">
+      <i class="ri-save-3-line"></i>
+      ذخیره تغییرات
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  <div class="missions-message" id="missions-message" hidden>
+    <i class="ri-checkbox-circle-line"></i>
+    <span>تنظیمات با موفقیت ذخیره شد</span>
+  </div>
 </div>
 
 
