@@ -1012,6 +1012,552 @@
       font-weight: 500;
     }
 
+    /* ============================================
+       Product Reviews - Compact Summary Bar + Modal
+       ============================================ */
+    
+    /* Summary Bar (Compact Trigger) */
+    .reviews-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+    }
+
+    .reviews-bar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .reviews-bar:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+    }
+
+    .reviews-bar__info {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .reviews-bar__score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 0.5rem;
+      background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 14px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #b45309;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+    }
+
+    .reviews-bar__details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .reviews-bar__stars {
+      display: flex;
+      gap: 3px;
+    }
+
+    /* Modern Rounded Star Icon */
+    .star-icon {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .star-icon--filled {
+      color: #fbbf24;
+      filter: drop-shadow(0 1px 2px rgba(251, 191, 36, 0.4));
+    }
+
+    .star-icon--empty {
+      color: #e2e8f0;
+    }
+
+    .reviews-bar__count {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .reviews-bar__action {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%);
+      border: 1px solid rgba(15, 118, 110, 0.15);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0f766e;
+      transition: all 0.2s ease;
+    }
+
+    .reviews-bar:hover .reviews-bar__action {
+      background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .reviews-bar__action svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Reviews Modal */
+    .reviews-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reviews-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .reviews-modal__panel {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.2);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .reviews-modal.is-open .reviews-modal__panel {
+      transform: translateY(0);
+    }
+
+    /* Modal Header */
+    .reviews-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+
+    .reviews-modal__handle {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+
+    .reviews-modal__title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .reviews-modal__title-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 10px;
+    }
+
+    .reviews-modal__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #f8fafc;
+      border: none;
+      border-radius: 12px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .reviews-modal__close:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .reviews-modal__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Modal CTA Area */
+    .reviews-modal__cta {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+
+    /* Write Review Button (Logged In) */
+    .reviews-modal__write-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3);
+    }
+
+    .reviews-modal__write-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(15, 118, 110, 0.4);
+    }
+
+    .reviews-modal__write-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Login Prompt (Logged Out) */
+    .reviews-modal__login-box {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 1rem 1.15rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+    }
+
+    .reviews-modal__login-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      background: #fff;
+      border-radius: 12px;
+      color: #94a3b8;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      flex-shrink: 0;
+    }
+
+    .reviews-modal__login-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .reviews-modal__login-text {
+      margin: 0;
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .reviews-modal__login-link {
+      color: #0f766e;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .reviews-modal__login-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Modal Body (Scrollable) */
+    .reviews-modal__body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.5rem 1.5rem;
+      overscroll-behavior: contain;
+    }
+
+    /* Reviews List in Modal */
+    .reviews-modal__list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    /* Review Card (Modal Version) */
+    .review-card {
+      padding: 1rem 1.15rem;
+      background: #fafbfc;
+      border: 1px solid #f1f5f9;
+      border-radius: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .review-card:hover {
+      border-color: #e2e8f0;
+      background: #fff;
+    }
+
+    .review-card__header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .review-card__avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0284c7;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .review-card__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .review-card__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .review-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .review-card__name {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .review-card__date {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    .review-card__rating {
+      display: flex;
+      gap: 2px;
+    }
+
+    .review-card__star {
+      width: 14px;
+      height: 14px;
+    }
+
+    .review-card__star--filled {
+      color: #fbbf24;
+    }
+
+    .review-card__star--empty {
+      color: #e2e8f0;
+    }
+
+    .review-card__body {
+      margin: 0;
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+
+    /* Empty State */
+    .reviews-modal__empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .reviews-modal__empty-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      background: #f8fafc;
+      border-radius: 50%;
+      color: #cbd5e1;
+    }
+
+    .reviews-modal__empty-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .reviews-modal__empty-text {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .reviews-modal__empty-hint {
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    /* Loading State */
+    .reviews-modal__loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2.5rem;
+    }
+
+    .reviews-modal__spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #0f766e;
+      border-radius: 50%;
+      animation: reviewsModalSpin 0.7s linear infinite;
+    }
+
+    @keyframes reviewsModalSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .reviews-modal__loading-text {
+      font-size: 0.88rem;
+      color: #64748b;
+    }
+
+    /* Load More */
+    .reviews-modal__load-more {
+      display: flex;
+      justify-content: center;
+      padding-top: 1rem;
+    }
+
+    .reviews-modal__load-more-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .reviews-modal__load-more-btn:hover {
+      border-color: #0f766e;
+      color: #0f766e;
+      background: rgba(15, 118, 110, 0.05);
+    }
+
+    .reviews-modal__load-more-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Desktop: Center Modal */
+    @media (min-width: 640px) {
+      .reviews-modal {
+        align-items: center;
+        padding: 1.5rem;
+      }
+
+      .reviews-modal__panel {
+        border-radius: 24px;
+        max-height: 80vh;
+      }
+
+      .reviews-modal__handle {
+        display: none;
+      }
+    }
+
+    /* Small Mobile */
+    @media (max-width: 380px) {
+      .reviews-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+        padding: 1rem;
+      }
+
+      .reviews-bar__action {
+        justify-content: center;
+      }
+
+      .reviews-modal__header {
+        padding: 1rem 1.25rem;
+      }
+
+      .reviews-modal__body {
+        padding: 1rem 1.25rem 1.25rem;
+      }
+
+      .review-card {
+        padding: 0.85rem 1rem;
+      }
+    }
+
     footer {
       background: #0f172a;
       color: #e2e8f0;
@@ -3858,8 +4404,125 @@
         </div>
       </section>
 
+      <!-- Product Reviews - Compact Summary Bar -->
+      <div class="reviews-bar" id="reviewsBar" role="button" tabindex="0" aria-label="مشاهده نظرات کاربران">
+        <div class="reviews-bar__info">
+          <div class="reviews-bar__score" id="reviewsBarScore">۰</div>
+          <div class="reviews-bar__details">
+            <div class="reviews-bar__stars" id="reviewsBarStars">
+              <!-- Modern Rounded Star Icons -->
+              <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              </svg>
+              <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              </svg>
+              <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              </svg>
+              <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              </svg>
+              <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              </svg>
+            </div>
+            <span class="reviews-bar__count" id="reviewsBarCount">(از ۰ نظر)</span>
+          </div>
+        </div>
+        <div class="reviews-bar__action">
+          <span>مشاهده همه نظرات</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </div>
+      </div>
+
     </div>
   </main>
+
+  <!-- Reviews Modal -->
+  <div class="reviews-modal" id="reviewsModal" role="dialog" aria-modal="true" aria-labelledby="reviewsModalTitle">
+    <div class="reviews-modal__panel">
+      <div class="reviews-modal__handle"></div>
+      
+      <!-- Modal Header -->
+      <header class="reviews-modal__header">
+        <h2 class="reviews-modal__title" id="reviewsModalTitle">
+          <span class="reviews-modal__title-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b">
+              <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+            </svg>
+          </span>
+          دیدگاه‌های کاربران
+        </h2>
+        <button type="button" class="reviews-modal__close" id="reviewsModalClose" aria-label="بستن">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- CTA Area -->
+      <div class="reviews-modal__cta">
+        <!-- Logged Out State (Default) -->
+        <div class="reviews-modal__login-box" id="reviewsModalLoggedOut">
+          <div class="reviews-modal__login-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <p class="reviews-modal__login-text">
+            برای ثبت نظر، لطفاً <a href="/login.html" class="reviews-modal__login-link">وارد حساب کاربری</a> خود شوید.
+          </p>
+        </div>
+
+        <!-- Logged In State (Hidden) -->
+        <button type="button" class="reviews-modal__write-btn" id="reviewsModalWriteBtn" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          <span>ثبت نظر جدید</span>
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="reviews-modal__body" id="reviewsModalBody">
+        <!-- Loading State -->
+        <div class="reviews-modal__loading" id="reviewsModalLoading">
+          <div class="reviews-modal__spinner"></div>
+          <span class="reviews-modal__loading-text">در حال بارگذاری نظرات...</span>
+        </div>
+
+        <!-- Reviews List (populated by JS) -->
+        <div class="reviews-modal__list" id="reviewsModalList" hidden></div>
+
+        <!-- Empty State -->
+        <div class="reviews-modal__empty" id="reviewsModalEmpty" hidden>
+          <div class="reviews-modal__empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <p class="reviews-modal__empty-text">هنوز نظری برای این محصول ثبت نشده است</p>
+          <p class="reviews-modal__empty-hint">اولین نفری باشید که نظر خود را ثبت می‌کند!</p>
+        </div>
+
+        <!-- Load More -->
+        <div class="reviews-modal__load-more" id="reviewsModalLoadMore" hidden>
+          <button type="button" class="reviews-modal__load-more-btn" id="reviewsModalLoadMoreBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <span>نمایش بیشتر</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="overlay address-modal-overlay" id="addressModal" hidden>
     <div class="overlay-dialog address-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="addressModalTitle">

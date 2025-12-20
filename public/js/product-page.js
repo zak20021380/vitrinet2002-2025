@@ -2425,3 +2425,426 @@
     }
   });
 })();
+
+// ============================================
+// Product Reviews - Modal Version
+// ============================================
+(function initProductReviewsModal() {
+  'use strict';
+
+  const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
+
+  // Modern rounded star SVG path
+  const STAR_PATH = 'M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z';
+
+  const dom = {
+    // Summary Bar
+    bar: document.getElementById('reviewsBar'),
+    barScore: document.getElementById('reviewsBarScore'),
+    barStars: document.getElementById('reviewsBarStars'),
+    barCount: document.getElementById('reviewsBarCount'),
+    // Modal
+    modal: document.getElementById('reviewsModal'),
+    modalClose: document.getElementById('reviewsModalClose'),
+    modalLoggedOut: document.getElementById('reviewsModalLoggedOut'),
+    modalWriteBtn: document.getElementById('reviewsModalWriteBtn'),
+    modalBody: document.getElementById('reviewsModalBody'),
+    modalLoading: document.getElementById('reviewsModalLoading'),
+    modalList: document.getElementById('reviewsModalList'),
+    modalEmpty: document.getElementById('reviewsModalEmpty'),
+    modalLoadMore: document.getElementById('reviewsModalLoadMore'),
+    modalLoadMoreBtn: document.getElementById('reviewsModalLoadMoreBtn')
+  };
+
+  const state = {
+    productId: null,
+    reviews: [],
+    page: 1,
+    limit: 5,
+    hasMore: false,
+    totalCount: 0,
+    avgRating: 0,
+    isLoggedIn: false,
+    isLoading: false,
+    isModalOpen: false,
+    dataLoaded: false
+  };
+
+  // Check if user is logged in
+  function checkLoginStatus() {
+    try {
+      const user = localStorage.getItem('user');
+      state.isLoggedIn = !!user;
+    } catch (e) {
+      state.isLoggedIn = false;
+    }
+    updateCtaVisibility();
+  }
+
+  // Update CTA visibility based on login status
+  function updateCtaVisibility() {
+    if (dom.modalLoggedOut) dom.modalLoggedOut.hidden = state.isLoggedIn;
+    if (dom.modalWriteBtn) dom.modalWriteBtn.hidden = !state.isLoggedIn;
+  }
+
+  // Render star rating with modern rounded icons
+  function renderStars(container, rating, starClass = 'star-icon') {
+    if (!container) return;
+    const fullStars = Math.floor(rating);
+    
+    container.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      star.setAttribute('viewBox', '0 0 24 24');
+      star.setAttribute('fill', 'currentColor');
+      star.classList.add(starClass);
+      
+      if (i < fullStars) {
+        star.classList.add(`${starClass}--filled`);
+      } else {
+        star.classList.add(`${starClass}--empty`);
+      }
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', STAR_PATH);
+      star.appendChild(path);
+      container.appendChild(star);
+    }
+  }
+
+  // Update summary bar UI
+  function updateSummaryBar() {
+    if (dom.barScore) {
+      const scoreText = state.avgRating > 0 
+        ? persianNumberFormatter.format(state.avgRating.toFixed(1))
+        : '۰';
+      dom.barScore.textContent = scoreText;
+    }
+    if (dom.barStars) {
+      renderStars(dom.barStars, state.avgRating, 'star-icon');
+    }
+    if (dom.barCount) {
+      dom.barCount.textContent = `(از ${persianNumberFormatter.format(state.totalCount)} نظر)`;
+    }
+  }
+
+  // Format relative time
+  function formatRelativeTime(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'همین الان';
+      if (diffMins < 60) return `${persianNumberFormatter.format(diffMins)} دقیقه پیش`;
+      if (diffHours < 24) return `${persianNumberFormatter.format(diffHours)} ساعت پیش`;
+      if (diffDays < 7) return `${persianNumberFormatter.format(diffDays)} روز پیش`;
+      if (diffDays < 30) return `${persianNumberFormatter.format(Math.floor(diffDays / 7))} هفته پیش`;
+      
+      return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }).format(date);
+    } catch {
+      return '';
+    }
+  }
+
+  // Get user initials
+  function getUserInitials(name) {
+    if (!name) return '؟';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return parts[0].charAt(0) + parts[1].charAt(0);
+    }
+    return name.charAt(0);
+  }
+
+  // Escape HTML
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Create review card element
+  function createReviewCard(review) {
+    const card = document.createElement('article');
+    card.className = 'review-card';
+
+    const userName = review.userName || review.user?.name || 'کاربر ناشناس';
+    const userAvatar = review.userAvatar || review.user?.avatar;
+    const rating = review.rating || 0;
+    const text = review.text || review.comment || '';
+    const date = review.createdAt || review.date;
+
+    // Create stars HTML with modern rounded icons
+    let starsHtml = '';
+    for (let i = 0; i < 5; i++) {
+      const isFilled = i < rating;
+      starsHtml += `<svg class="review-card__star${isFilled ? ' review-card__star--filled' : ' review-card__star--empty'}" viewBox="0 0 24 24" fill="currentColor"><path d="${STAR_PATH}"/></svg>`;
+    }
+
+    card.innerHTML = `
+      <header class="review-card__header">
+        <div class="review-card__avatar">
+          ${userAvatar 
+            ? `<img src="${userAvatar}" alt="${escapeHtml(userName)}" loading="lazy">` 
+            : getUserInitials(userName)}
+        </div>
+        <div class="review-card__info">
+          <div class="review-card__top">
+            <h3 class="review-card__name">${escapeHtml(userName)}</h3>
+            <span class="review-card__date">${formatRelativeTime(date)}</span>
+          </div>
+          <div class="review-card__rating" aria-label="امتیاز ${persianNumberFormatter.format(rating)} از ۵">
+            ${starsHtml}
+          </div>
+        </div>
+      </header>
+      <p class="review-card__body">${escapeHtml(text)}</p>
+    `;
+
+    return card;
+  }
+
+  // Render reviews in modal
+  function renderReviews() {
+    if (!dom.modalList) return;
+
+    // Hide loading
+    if (dom.modalLoading) dom.modalLoading.hidden = true;
+
+    if (state.reviews.length === 0) {
+      // Show empty state
+      if (dom.modalList) dom.modalList.hidden = true;
+      if (dom.modalEmpty) dom.modalEmpty.hidden = false;
+      if (dom.modalLoadMore) dom.modalLoadMore.hidden = true;
+      return;
+    }
+
+    // Show list, hide empty
+    if (dom.modalEmpty) dom.modalEmpty.hidden = true;
+    if (dom.modalList) dom.modalList.hidden = false;
+
+    // Clear list if first page
+    if (state.page === 1) {
+      dom.modalList.innerHTML = '';
+    }
+
+    // Render each review
+    state.reviews.forEach(review => {
+      const card = createReviewCard(review);
+      dom.modalList.appendChild(card);
+    });
+
+    // Show/hide load more button
+    if (dom.modalLoadMore) {
+      dom.modalLoadMore.hidden = !state.hasMore;
+    }
+  }
+
+  // Fetch reviews from API
+  async function fetchReviews(append = false) {
+    if (!state.productId || state.isLoading) return;
+
+    state.isLoading = true;
+    
+    if (!append) {
+      if (dom.modalLoading) dom.modalLoading.hidden = false;
+      if (dom.modalList) dom.modalList.hidden = true;
+      if (dom.modalEmpty) dom.modalEmpty.hidden = true;
+      if (dom.modalLoadMore) dom.modalLoadMore.hidden = true;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/products/${encodeURIComponent(state.productId)}/reviews?page=${state.page}&limit=${state.limit}`,
+        { credentials: 'include' }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviews');
+      }
+
+      const data = await response.json();
+      
+      if (append) {
+        // Append to existing reviews
+        const newReviews = data.reviews || [];
+        newReviews.forEach(review => {
+          const card = createReviewCard(review);
+          dom.modalList.appendChild(card);
+        });
+      } else {
+        state.reviews = data.reviews || [];
+      }
+      
+      state.totalCount = data.totalCount || data.total || 0;
+      state.avgRating = data.avgRating || data.averageRating || 0;
+      state.hasMore = data.hasMore || (state.page * state.limit < state.totalCount);
+      state.dataLoaded = true;
+
+      updateSummaryBar();
+      
+      if (!append) {
+        renderReviews();
+      } else {
+        // Just update load more visibility
+        if (dom.modalLoadMore) {
+          dom.modalLoadMore.hidden = !state.hasMore;
+        }
+      }
+
+    } catch (error) {
+      console.warn('Failed to load reviews:', error);
+      state.reviews = [];
+      state.totalCount = 0;
+      state.avgRating = 0;
+      state.dataLoaded = true;
+      updateSummaryBar();
+      
+      if (!append) {
+        if (dom.modalLoading) dom.modalLoading.hidden = true;
+        if (dom.modalEmpty) dom.modalEmpty.hidden = false;
+      }
+    } finally {
+      state.isLoading = false;
+      if (dom.modalLoading) dom.modalLoading.hidden = true;
+    }
+  }
+
+  // Open modal
+  function openModal() {
+    if (!dom.modal) return;
+    
+    state.isModalOpen = true;
+    dom.modal.classList.add('is-open');
+    document.body.classList.add('modal-open');
+    
+    // Load reviews if not loaded yet
+    if (!state.dataLoaded && state.productId) {
+      fetchReviews();
+    }
+  }
+
+  // Close modal
+  function closeModal() {
+    if (!dom.modal) return;
+    
+    state.isModalOpen = false;
+    dom.modal.classList.remove('is-open');
+    document.body.classList.remove('modal-open');
+  }
+
+  // Load more reviews
+  function loadMoreReviews() {
+    if (state.isLoading || !state.hasMore) return;
+    state.page += 1;
+    fetchReviews(true);
+  }
+
+  // Handle write review button click
+  function handleWriteReview() {
+    alert('قابلیت ثبت نظر به زودی فعال می‌شود!');
+  }
+
+  // Initialize
+  function init() {
+    checkLoginStatus();
+
+    // Summary bar click - open modal
+    if (dom.bar) {
+      dom.bar.addEventListener('click', openModal);
+      dom.bar.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openModal();
+        }
+      });
+    }
+
+    // Modal close button
+    if (dom.modalClose) {
+      dom.modalClose.addEventListener('click', closeModal);
+    }
+
+    // Click outside modal to close
+    if (dom.modal) {
+      dom.modal.addEventListener('click', (e) => {
+        if (e.target === dom.modal) {
+          closeModal();
+        }
+      });
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && state.isModalOpen) {
+        closeModal();
+      }
+    });
+
+    // Load more button
+    if (dom.modalLoadMoreBtn) {
+      dom.modalLoadMoreBtn.addEventListener('click', loadMoreReviews);
+    }
+
+    // Write review button
+    if (dom.modalWriteBtn) {
+      dom.modalWriteBtn.addEventListener('click', handleWriteReview);
+    }
+
+    // Listen for product data
+    document.addEventListener('product:updated', (event) => {
+      const detail = event?.detail?.state || {};
+      if (detail.item_id) {
+        state.productId = detail.item_id;
+        // Pre-fetch summary data
+        fetchSummaryOnly();
+      }
+    });
+
+    // Get product ID from URL if available
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    if (productId) {
+      state.productId = productId;
+      setTimeout(() => {
+        if (!state.dataLoaded) {
+          fetchSummaryOnly();
+        }
+      }, 500);
+    }
+  }
+
+  // Fetch only summary data (for bar display)
+  async function fetchSummaryOnly() {
+    if (!state.productId) return;
+    
+    try {
+      const response = await fetch(
+        `/api/products/${encodeURIComponent(state.productId)}/reviews?page=1&limit=1`,
+        { credentials: 'include' }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      state.totalCount = data.totalCount || data.total || 0;
+      state.avgRating = data.avgRating || data.averageRating || 0;
+      updateSummaryBar();
+
+    } catch (error) {
+      console.warn('Failed to load reviews summary:', error);
+    }
+  }
+
+  init();
+})();
