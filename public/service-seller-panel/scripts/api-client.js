@@ -734,9 +734,10 @@ async deletePortfolioItem(id) {
   
   /**
    * دریافت وضعیت استریک فروشنده
+   * @param {number} days - تعداد روزهای تقویم (پیش‌فرض: 14)
    */
-  async getStreak() {
-    const r = await fetch(bust(`${API_BASE}/api/streak`), {
+  async getStreak(days = 14) {
+    const r = await fetch(bust(`${API_BASE}/api/streak?days=${days}`), {
       credentials: 'include',
       ...NO_CACHE
     });
@@ -951,16 +952,3 @@ async deletePortfolioItem(id) {
 
 export { API, bookedCache, collectBookingKeys, createBookingKey, normalizeKeyPart, toEn, toFaDigits };
 export default API;
-
-  /**
-   * ایجاد اعلان تست (فقط برای تست)
-   */
-  async createTestNotification() {
-    const r = await fetch(`${API_BASE}/api/seller/notifications/test`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    if (!r.ok) throw new Error('CREATE_TEST_NOTIFICATION_FAILED');
-    return await this._json(r);
-  },

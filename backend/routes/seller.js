@@ -238,6 +238,82 @@ router.get('/dashboard/stats', authMiddleware('seller'), getDashboardStats);
 router.get('/dashboard/bookings/monthly', authMiddleware('seller'), getMonthlyBookingInsights);
 router.get('/top-peers', authMiddleware('seller'), getTopServicePeers);
 
+// ===== Dashboard Metrics API =====
+// GET /api/sellers/me/dashboard-metrics
+// دریافت متریک‌های داشبورد شامل streak و wallet
+router.get('/me/dashboard-metrics', authMiddleware('seller'), async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    
+    // Import models
+    const SellerStreak = require('../models/SellerStreak');
+    const SellerWallet = require('../models/SellerWallet');
+    
+    // دریافت داده‌ها به صورت موازی
+    const [streak, wallet] = await Promise.all([
+      SellerStreak.findOne({ seller: sellerId }).lean(),
+      SellerWallet.findOne({ seller: sellerId }).lean()
+    ]);
+    
+    // محاسبه وضعیت استریک
+    const todayStr = SellerStreak.getTehranDateString();
+    const yesterdayStr = SellerStreak.getTehranYesterdayString();
+    
+    let currentStreakDays = 0;
+    let longestStreakDays = 0;
+    let lastActiveDate = null;
+    let streakAtRisk = false;
+    
+    if (streak) {
+      currentStreakDays = streak.currentStreak || 0;
+      longestStreakDays = streak.longestStreak || 0;
+      lastActiveDate = streak.lastActiveDate;
+      
+      // بررسی وضعیت استریک
+      if (lastActiveDate === yesterdayStr) {
+        streakAtRisk = true;
+      } else if (lastActiveDate && lastActiveDate !== todayStr) {
+        const daysDiff = SellerStreak.getDaysDiff(lastActiveDate, todayStr);
+        if (daysDiff > 1) {
+          const checkpoint = Math.floor(currentStreakDays / 7) * 7;
+          currentStreakDays = checkpoint > 0 ? checkpoint : 0;
+        }
+      }
+    }
+    
+    // محاسبه موجودی کیف پول
+    const storeBalanceIrr = wallet?.balance || 0;
+    const availableBalance = wallet ? Math.max(0, wallet.balance - (wallet.pendingBalance || 0)) : 0;
+    const pendingBalance = wallet?.pendingBalance || 0;
+    
+    res.json({
+      success: true,
+      data: {
+        // Streak metrics
+        current_streak_days: currentStreakDays,
+        longest_streak_days: longestStreakDays,
+        last_active_date: lastActiveDate,
+        streak_at_risk: streakAtRisk,
+        
+        // Wallet metrics
+        store_balance_irr: storeBalanceIrr,
+        available_balance_irr: availableBalance,
+        pending_balance_irr: pendingBalance,
+        
+        // Timestamps
+        fetched_at: new Date().toISOString()
+      }
+    });
+    
+  } catch (err) {
+    console.error('❌ خطا در دریافت متریک‌های داشبورد:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت متریک‌های داشبورد'
+    });
+  }
+});
+
 // ارتقا حساب فروشنده (خرید اشتراک/پرمیوم)
 router.post('/upgrade', authMiddleware('seller'), upgradeSeller);
 

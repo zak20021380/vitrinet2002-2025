@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 /**
  * مدل استریک فروشنده
  * هر فروشنده یک رکورد استریک دارد که روزانه آپدیت می‌شود
+ * 
+ * Source of Truth: این مدل تنها منبع معتبر برای داده‌های استریک است
+ * Timezone: تمام محاسبات بر اساس Asia/Tehran انجام می‌شود
  */
 const sellerStreakSchema = new mongoose.Schema({
   // شناسه فروشنده
@@ -28,7 +31,14 @@ const sellerStreakSchema = new mongoose.Schema({
     min: 0
   },
 
-  // آخرین تاریخ ورود (فقط تاریخ، بدون ساعت)
+  // آخرین تاریخ فعالیت معتبر (فرمت: YYYY-MM-DD در timezone تهران)
+  lastActiveDate: {
+    type: String,
+    default: null,
+    index: true
+  },
+
+  // آخرین تاریخ ورود (برای سازگاری با کد قبلی)
   lastLoginDate: {
     type: Date,
     default: null
@@ -78,6 +88,7 @@ const sellerStreakSchema = new mongoose.Schema({
   // تاریخچه هفتگی (7 روز اخیر)
   weekHistory: [{
     date: Date,
+    dateStr: String, // YYYY-MM-DD
     status: {
       type: String,
       enum: ['hit', 'missed', 'frozen'],
@@ -95,14 +106,22 @@ const sellerStreakSchema = new mongoose.Schema({
   lastMonthlyRewardAt: {
     type: Date,
     default: null
+  },
+
+  // نسخه برای optimistic locking
+  __v: {
+    type: Number,
+    default: 0
   }
 
 }, {
-  timestamps: true
+  timestamps: true,
+  optimisticConcurrency: true
 });
 
 // ایندکس‌های کارآمد
 sellerStreakSchema.index({ currentStreak: -1 });
+sellerStreakSchema.index({ lastActiveDate: -1 });
 sellerStreakSchema.index({ lastLoginDate: -1 });
 
 /**
@@ -114,6 +133,47 @@ sellerStreakSchema.statics.getOrCreate = async function(sellerId) {
     streak = await this.create({ seller: sellerId });
   }
   return streak;
+};
+
+/**
+ * متد استاتیک: دریافت تاریخ امروز در timezone تهران
+ * @returns {string} YYYY-MM-DD
+ */
+sellerStreakSchema.statics.getTehranDateString = function() {
+  const now = new Date();
+  // تبدیل به timezone تهران
+  const tehranTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+  const year = tehranTime.getFullYear();
+  const month = String(tehranTime.getMonth() + 1).padStart(2, '0');
+  const day = String(tehranTime.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * متد استاتیک: دریافت تاریخ دیروز در timezone تهران
+ * @returns {string} YYYY-MM-DD
+ */
+sellerStreakSchema.statics.getTehranYesterdayString = function() {
+  const now = new Date();
+  const tehranTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+  tehranTime.setDate(tehranTime.getDate() - 1);
+  const year = tehranTime.getFullYear();
+  const month = String(tehranTime.getMonth() + 1).padStart(2, '0');
+  const day = String(tehranTime.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * متد استاتیک: محاسبه تفاوت روزها بین دو تاریخ
+ * @param {string} date1 YYYY-MM-DD
+ * @param {string} date2 YYYY-MM-DD
+ * @returns {number}
+ */
+sellerStreakSchema.statics.getDaysDiff = function(date1, date2) {
+  if (!date1 || !date2) return Infinity;
+  const d1 = new Date(date1 + 'T00:00:00');
+  const d2 = new Date(date2 + 'T00:00:00');
+  return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
 };
 
 /**

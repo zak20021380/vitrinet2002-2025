@@ -973,28 +973,46 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid #fecdd3;
-    background: #fff1f2;
-    color: #e11d48;
-    font-weight: 800;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #f87171;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .discount-delete .trash-icon-mini {
+    stroke: #f87171;
+    stroke-width: 1.75;
+    flex-shrink: 0;
+    transition: stroke 0.2s ease;
   }
 
   .discount-delete:hover,
   .discount-delete:focus {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(225, 29, 72, 0.16);
+    background: rgba(248, 113, 113, 0.08);
+    color: #ef4444;
     outline: none;
   }
 
+  .discount-delete:hover .trash-icon-mini,
+  .discount-delete:focus .trash-icon-mini {
+    stroke: #ef4444;
+  }
+
+  .discount-delete:active {
+    transform: scale(0.96);
+  }
+
   .discount-delete.loading {
-    opacity: 0.9;
+    opacity: 0.7;
     gap: 10px;
   }
 
-  .discount-delete.loading i {
+  .discount-delete.loading .trash-icon-mini {
     animation: spin 0.9s linear infinite;
   }
 
@@ -1746,38 +1764,423 @@
     .sidebar {
       top: 0;
       right: -100%;
-      width: 70vw;
-      max-width: 280px;
+      width: 85vw;
+      max-width: 320px;
       height: 100vh;
       border-radius: 0;
-      padding: 20px;
-      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
-      transition: right 0.3s ease-in-out;
+      padding: 0;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fffe 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .sidebar.expanded {
       right: 0;
-      width: 70vw;
-      max-width: 280px;
+      width: 85vw;
+      max-width: 320px;
     }
 
-    .sidebar .sidebar-toggle {
-      margin-bottom: 0;
-      margin-right: 0;
-      display: block;
+    /* ========== Mobile Sidebar Header - Minimal Profile ========== */
+    .sidebar-mobile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 20px 16px;
+      background: transparent;
+      position: relative;
     }
 
-    .sidebar.expanded .sidebar-user {
+    .sidebar-mobile-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #10b981, #0ea5e9);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 22px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      flex-shrink: 0;
+    }
+
+    .sidebar-mobile-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      object-fit: cover;
+    }
+
+    .sidebar-mobile-user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-mobile-user-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-mobile-user-level {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .sidebar-mobile-user-level i {
+      font-size: 12px;
+      color: #f59e0b;
+    }
+
+    .sidebar-mobile-close {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      border: none;
+      display: grid;
+      place-items: center;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-mobile-close:hover {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    /* ========== Primary Action Buttons - Mobile-First Compact ========== */
+    .sidebar-primary-actions {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px 12px;
+    }
+
+    .sidebar-action-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      background: #ffffff;
+    }
+
+    .sidebar-action-card:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .sidebar-action-card:active {
+      transform: scale(0.98);
+    }
+
+    .sidebar-action-card--accounting {
+      border-color: rgba(79, 70, 229, 0.15);
+    }
+
+    .sidebar-action-card--accounting:hover {
+      background: #f5f3ff;
+      border-color: rgba(79, 70, 229, 0.25);
+    }
+
+    .sidebar-action-card--stats {
+      border-color: rgba(5, 150, 105, 0.15);
+    }
+
+    .sidebar-action-card--stats:hover {
+      background: #ecfdf5;
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+
+    .sidebar-action-card__icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
       font-size: 14px;
-      opacity: 1;
-      max-width: 100%;
+      flex-shrink: 0;
     }
 
-    .sidebar .sidebar-user {
-      display: block;
-      opacity: 0;
-      max-width: 0;
+    .sidebar-action-card--accounting .sidebar-action-card__icon {
+      background: #eef2ff;
+      color: #4f46e5;
     }
+
+    .sidebar-action-card--stats .sidebar-action-card__icon {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .sidebar-action-card__text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ========== Menu Items Container - Breathable ========== */
+    .sidebar-menu-container {
+      flex: 1;
+      padding: 0 16px 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar-menu-group {
+      margin-bottom: 4px;
+    }
+
+    .sidebar-menu-divider {
+      height: 1px;
+      background: #f1f5f9;
+      margin: 16px 12px;
+    }
+
+    /* ========== Lightweight Menu Items ========== */
+    .sidebar-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 2px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .sidebar-menu-item:hover {
+      background: #f8fafc;
+    }
+
+    .sidebar-menu-item:active {
+      background: #f1f5f9;
+    }
+
+    .sidebar-menu-item.active {
+      background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+    }
+
+    .sidebar-menu-item.active .sidebar-menu-item__icon {
+      background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .sidebar-menu-item.active .sidebar-menu-item__text {
+      color: #047857;
+      font-weight: 700;
+    }
+
+    .sidebar-menu-item__icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      display: grid;
+      place-items: center;
+      color: #64748b;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-menu-item:hover .sidebar-menu-item__icon {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .sidebar-menu-item__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .sidebar-menu-item__icon--orange {
+      background: #fff7ed;
+      color: #ea580c;
+    }
+
+    .sidebar-menu-item:hover .sidebar-menu-item__icon--orange {
+      background: #ffedd5;
+    }
+
+    .sidebar-menu-item__icon--blue {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .sidebar-menu-item:hover .sidebar-menu-item__icon--blue {
+      background: #dbeafe;
+    }
+
+    .sidebar-menu-item__icon--purple {
+      background: #faf5ff;
+      color: #9333ea;
+    }
+
+    .sidebar-menu-item:hover .sidebar-menu-item__icon--purple {
+      background: #f3e8ff;
+    }
+
+    .sidebar-menu-item__icon--amber {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .sidebar-menu-item:hover .sidebar-menu-item__icon--amber {
+      background: #fef3c7;
+    }
+
+    .sidebar-menu-item__text {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+      text-align: right;
+    }
+
+    .sidebar-menu-item__badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+
+    /* ========== Footer Install Button - Subtle ========== */
+    .sidebar-footer {
+      padding: 12px 20px 24px;
+      background: transparent;
+    }
+
+    .sidebar-install-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.25s ease;
+    }
+
+    .sidebar-install-banner:hover {
+      border-color: #10b981;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+    }
+
+    .sidebar-install-banner__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #10b981 0%, #0ea5e9 100%);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-install-banner__icon i {
+      font-size: 20px;
+      color: #fff;
+    }
+
+    .sidebar-install-banner__content {
+      flex: 1;
+      text-align: right;
+    }
+
+    .sidebar-install-banner__title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .sidebar-install-banner__subtitle {
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748b;
+      margin-top: 1px;
+    }
+
+    .sidebar-install-banner__badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #f0fdf4;
+      font-size: 10px;
+      font-weight: 800;
+      color: #059669;
+      letter-spacing: 0.5px;
+    }
+
+    /* Hide desktop sidebar elements on mobile */
+    .sidebar .sidebar-toggle,
+    .sidebar .sidebar-avatar,
+    .sidebar .sidebar-user,
+    .sidebar .sidebar-link,
+    .sidebar .sidebar-install-btn {
+      display: none !important;
+    }
+
+    /* Show mobile-specific elements */
+    .sidebar-mobile-header,
+    .sidebar-primary-actions,
+    .sidebar-menu-container,
+    .sidebar-footer {
+      display: flex;
+    }
+
+    .sidebar-menu-container {
+      display: block;
+    }
+  }
+
+  /* Desktop: Hide mobile elements */
+  @media (min-width: 769px) {
+    .sidebar-mobile-header,
+    .sidebar-primary-actions,
+    .sidebar-menu-container,
+    .sidebar-footer {
+      display: none !important;
+    }
+  }
 
     .sidebar-link span {
       font-size: 15px;
@@ -2252,23 +2655,52 @@
 
   .notification-remove {
     border: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: #fef2f2;
-    color: #ef4444;
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    color: #f87171;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+  }
+
+  .notification-remove .trash-icon {
+    width: 16px;
+    height: 16px;
+    stroke: #f87171;
+    stroke-width: 1.75;
+    flex-shrink: 0;
+    transition: stroke 0.2s ease;
+  }
+
+  .notification-remove__text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f87171;
+    transition: color 0.2s ease;
   }
 
   .notification-remove:hover,
   .notification-remove:focus {
-    background: #ef4444;
-    color: #fff;
-    transform: translateY(-2px);
+    background: rgba(248, 113, 113, 0.08);
     outline: none;
+  }
+
+  .notification-remove:hover .trash-icon,
+  .notification-remove:focus .trash-icon {
+    stroke: #ef4444;
+  }
+
+  .notification-remove:hover .notification-remove__text,
+  .notification-remove:focus .notification-remove__text {
+    color: #ef4444;
+  }
+
+  .notification-remove:active {
+    transform: scale(0.96);
   }
 
   .notification-empty {
@@ -3472,6 +3904,163 @@
 }
 
 /* ========== کارت‌های Streak و اعتبار فروشگاه ========== */
+
+/* ========== Streak Celebration Toast ========== */
+/* 
+ * DESIGN GUIDELINES:
+ * - Triggers ONLY ONCE per 24-hour cycle when streak increments
+ * - Uses localStorage to track last shown date
+ * - Subsequent app launches within same day will NOT show this toast
+ * - Auto-dismisses after 4 seconds
+ */
+.streak-celebration-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(145deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
+  border-radius: 50px;
+  box-shadow: 
+    0 8px 32px rgba(251, 146, 60, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+
+.streak-celebration-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.streak-celebration-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 20px;
+  flex-shrink: 0;
+  animation: fireGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes fireGlow {
+  0%, 100% { 
+    box-shadow: 0 0 8px rgba(255, 200, 100, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 16px rgba(255, 200, 100, 0.7);
+    transform: scale(1.05);
+  }
+}
+
+.streak-celebration-toast__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.streak-celebration-toast__text {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.streak-celebration-toast__subtext {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.streak-celebration-toast__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  margin-right: -4px;
+}
+
+.streak-celebration-toast__close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+/* Progress bar for auto-dismiss */
+.streak-celebration-toast__progress {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0 0 50px 50px;
+  overflow: hidden;
+}
+
+.streak-celebration-toast__progress-bar {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  transform-origin: right;
+  animation: progressShrink 4s linear forwards;
+}
+
+@keyframes progressShrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .streak-celebration-toast {
+    bottom: 16px;
+    padding: 12px 16px;
+    gap: 10px;
+    border-radius: 40px;
+  }
+
+  .streak-celebration-toast__icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .streak-celebration-toast__text {
+    font-size: 14px;
+  }
+
+  .streak-celebration-toast__close {
+    width: 26px;
+    height: 26px;
+  }
+}
+
 .dashboard-hero-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -3589,7 +4178,7 @@
   color: #c2410c;
 }
 
-/* کارت اعتبار فروشگاه */
+/* کارت اعتبار فروشگاه - Wallet Balance Focus */
 .rank-card {
   position: relative;
   display: flex;
@@ -3660,7 +4249,7 @@
   font-size: 12px;
   font-weight: 600;
   color: #065f46;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .rank-card__value {
@@ -3669,26 +4258,53 @@
   gap: 6px;
 }
 
-.rank-card__title {
-  font-size: 18px;
+/* Wallet Balance Amount - Bold & Readable */
+.rank-card__balance {
+  font-size: 20px;
   font-weight: 900;
   color: #059669;
   line-height: 1.2;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  direction: rtl;
 }
 
-.rank-card__stars {
-  display: flex;
-  gap: 2px;
-  margin-top: 4px;
+.rank-card__currency {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10b981;
+  margin-right: 4px;
 }
 
-.rank-card__stars i {
-  font-size: 14px;
-  color: #fbbf24;
+/* Wallet Action Button - Prominent Trigger */
+.rank-card__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.rank-card__stars i.empty {
-  color: #d1d5db;
+.rank-card__action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.rank-card__action-btn:active {
+  transform: translateY(0);
+}
+
+.rank-card__action-btn i {
+  font-size: 16px;
 }
 
 .rank-card__badge {
@@ -3704,6 +4320,39 @@
   font-size: 10px;
   font-weight: 800;
   color: #065f46;
+}
+
+/* Mobile Responsive for Wallet Card */
+@media (max-width: 480px) {
+  .rank-card {
+    padding: 16px 18px;
+    gap: 12px;
+  }
+
+  .rank-card__icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+    border-radius: 14px;
+  }
+
+  .rank-card__balance {
+    font-size: 18px;
+  }
+
+  .rank-card__currency {
+    font-size: 11px;
+  }
+
+  .rank-card__action-btn {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .rank-card__action-btn i {
+    font-size: 14px;
+  }
 }
 
 /* ========== مدال Streak ========== */
@@ -3905,6 +4554,281 @@
   color: #78350f;
   line-height: 1.7;
   margin: 0;
+}
+
+/* ========== مدال راه‌های افزایش اعتبار ========== */
+.credit-increase-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 600;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.credit-increase-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.credit-increase-modal__card {
+  position: relative;
+  width: min(400px, calc(100% - 32px));
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(16, 185, 129, 0.1);
+  transform: translateY(30px) scale(0.9);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.credit-increase-modal.active .credit-increase-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.credit-increase-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.credit-increase-modal__title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credit-increase-modal__title-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+  display: grid;
+  place-items: center;
+  color: #10b981;
+  font-size: 18px;
+}
+
+.credit-increase-modal__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: none;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.credit-increase-modal__close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.credit-increase-modal__body {
+  padding: 20px 24px;
+}
+
+.credit-increase-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.credit-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  transition: all 0.25s ease;
+}
+
+.credit-task-item:hover {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateX(-4px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+}
+
+.credit-task-item__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.credit-task-item__icon--cart {
+  background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+}
+
+.credit-task-item__icon--star {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+}
+
+.credit-task-item__icon--profile {
+  background: linear-gradient(145deg, #f3e8ff 0%, #e9d5ff 100%);
+  color: #9333ea;
+}
+
+.credit-task-item__icon--streak {
+  background: linear-gradient(145deg, #ffedd5 0%, #fed7aa 100%);
+  color: #ea580c;
+}
+
+.credit-task-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.credit-task-item__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.credit-task-item__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+  font-size: 13px;
+  font-weight: 800;
+  color: #059669;
+}
+
+.credit-task-item__reward i {
+  font-size: 14px;
+}
+
+.credit-task-item__note {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.credit-increase-modal__footer {
+  padding: 16px 24px 24px;
+}
+
+.credit-increase-modal__cta {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.credit-increase-modal__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 32px rgba(16, 185, 129, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.credit-increase-modal__cta:active {
+  transform: translateY(0);
+}
+
+.credit-increase-modal__cta i {
+  font-size: 20px;
+}
+
+/* Mobile responsive for credit modal */
+@media (max-width: 480px) {
+  .credit-increase-modal__card {
+    border-radius: 20px;
+    max-height: 90vh;
+  }
+
+  .credit-increase-modal__header {
+    padding: 16px 20px;
+  }
+
+  .credit-increase-modal__title {
+    font-size: 16px;
+  }
+
+  .credit-increase-modal__body {
+    padding: 16px 20px;
+  }
+
+  .credit-task-item {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .credit-task-item__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .credit-task-item__title {
+    font-size: 13px;
+  }
+
+  .credit-task-item__reward {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .credit-increase-modal__footer {
+    padding: 12px 20px 20px;
+  }
+
+  .credit-increase-modal__cta {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
 }
 
 /* ========== مدال اعتبار فروشگاه ========== */
@@ -4180,6 +5104,299 @@
 .rank-benefits__list li i {
   color: #3b82f6;
   font-size: 14px;
+}
+
+/* ========== Diamond Level Styles ========== */
+.rank-level--diamond {
+  position: relative;
+  background: linear-gradient(145deg, #ecfeff, #e0f2fe) !important;
+  border: 2px solid #06b6d4 !important;
+  overflow: hidden;
+}
+
+.rank-level--diamond::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, #06b6d4, #0ea5e9, #8b5cf6, #06b6d4);
+  background-size: 300% 300%;
+  animation: diamondGlow 3s ease infinite;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+@keyframes diamondGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.rank-level__icon.diamond {
+  position: relative;
+  background: linear-gradient(145deg, #06b6d4, #0891b2);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+}
+
+.rank-level__blue-tick {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.rank-level__verified-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.rank-level__highlight {
+  font-size: 10px;
+  color: #0891b2;
+  font-weight: 600;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Diamond Benefits Section */
+.rank-modal__benefits--diamond {
+  background: linear-gradient(145deg, #ecfeff, #cffafe);
+  border: 1px solid #06b6d433;
+  margin-top: 16px;
+}
+
+.rank-benefits__title--diamond {
+  color: #0e7490;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rank-benefits__title--diamond i {
+  color: #06b6d4;
+}
+
+.rank-benefits__blue-tick {
+  display: inline-flex;
+  margin-right: auto;
+}
+
+.rank-benefits__list--diamond {
+  color: #164e63;
+}
+
+.rank-benefits__list--diamond li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #06b6d422;
+}
+
+.rank-benefits__list--diamond li:last-child {
+  border-bottom: none;
+}
+
+.rank-benefits__list--diamond li i {
+  flex-shrink: 0;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.rank-benefits__list--diamond li span {
+  line-height: 1.6;
+}
+
+.rank-benefits__list--diamond li strong {
+  color: #1d9bf0;
+  font-weight: 700;
+}
+
+/* Diamond CTA - Modern Premium Button */
+.rank-diamond-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+  border-radius: 12px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 
+    0 4px 16px rgba(14, 165, 233, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.rank-diamond-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rank-diamond-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 8px 28px rgba(14, 165, 233, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.rank-diamond-cta:hover::before {
+  opacity: 1;
+}
+
+.rank-diamond-cta:hover .rank-diamond-cta__arrow {
+  transform: translateX(-4px);
+}
+
+.rank-diamond-cta:active {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 10px rgba(14, 165, 233, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.rank-diamond-cta__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rank-diamond-cta__icon svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.rank-diamond-cta__text {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+}
+
+.rank-diamond-cta__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .rank-diamond-cta {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .rank-diamond-cta__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rank-diamond-cta__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .rank-diamond-cta__text {
+    font-size: 13px;
+  }
+
+  .rank-diamond-cta__arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Profile Glow Effect Preview */
+.rank-glow-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 16px;
+  background: linear-gradient(145deg, #0f172a, #1e293b);
+  border-radius: 14px;
+}
+
+.rank-glow-preview__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #10b981, #0ea5e9);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 24px;
+  position: relative;
+  animation: profileGlow 2s ease-in-out infinite;
+}
+
+@keyframes profileGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6), 0 0 40px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.8), 0 0 60px rgba(6, 182, 212, 0.5);
+  }
+}
+
+.rank-glow-preview__text {
+  color: #94a3b8;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Dark mode for Diamond */
+.dark .rank-level--diamond {
+  background: linear-gradient(145deg, #164e63, #155e75) !important;
+}
+
+.dark .rank-modal__benefits--diamond {
+  background: linear-gradient(145deg, #164e63, #0e7490);
+  border-color: #06b6d455;
+}
+
+.dark .rank-benefits__title--diamond {
+  color: #67e8f9;
+}
+
+.dark .rank-benefits__list--diamond {
+  color: #e0f2fe;
+}
+
+.dark .rank-benefits__list--diamond li {
+  border-color: #06b6d433;
+}
+
+.dark .rank-level__highlight {
+  color: #67e8f9;
 }
 
 /* ========== رسپانسیو ========== */
@@ -4563,6 +5780,147 @@
   <!-- Sidebar -->
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
+    <!-- ========== Mobile Sidebar Structure ========== -->
+    <!-- Header with User Profile -->
+    <div class="sidebar-mobile-header">
+      <div class="sidebar-mobile-avatar" id="mobileAvatar">
+        <i class="ri-store-2-fill"></i>
+      </div>
+      <div class="sidebar-mobile-user-info">
+        <h3 class="sidebar-mobile-user-name" id="mobileUserName">فروشنده عزیز</h3>
+        <div class="sidebar-mobile-user-level">
+          <i class="ri-vip-crown-fill"></i>
+          <span id="mobileUserLevel">سطح طلایی</span>
+        </div>
+      </div>
+      <button class="sidebar-mobile-close" id="mobileMenuClose" aria-label="بستن منو">
+        <i class="ri-close-line" style="font-size: 18px;"></i>
+      </button>
+    </div>
+
+    <!-- Primary Action Cards -->
+    <div class="sidebar-primary-actions">
+      <button class="sidebar-action-card sidebar-action-card--accounting" id="mobileAccountingBtn" aria-label="حسابداری">
+        <div class="sidebar-action-card__icon">
+          <i class="ri-calculator-fill"></i>
+        </div>
+        <span class="sidebar-action-card__text">حسابداری</span>
+      </button>
+      <button class="sidebar-action-card sidebar-action-card--stats" id="mobileStatsBtn" data-section="visit" aria-label="آمار">
+        <div class="sidebar-action-card__icon">
+          <i class="ri-bar-chart-box-fill"></i>
+        </div>
+        <span class="sidebar-action-card__text">آمار</span>
+      </button>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="sidebar-menu-container">
+      <!-- گروه آمار و ثبت -->
+      <div class="sidebar-menu-group">
+        <button class="sidebar-menu-item" data-section="register-visit">
+          <div class="sidebar-menu-item__icon">
+            <i class="ri-calendar-check-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">ثبت آمار بازدید</span>
+        </button>
+        <button class="sidebar-menu-item" id="mobilePerformanceBtn">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--blue">
+            <i class="ri-line-chart-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">وضعیت عملکرد</span>
+        </button>
+      </div>
+
+      <div class="sidebar-menu-divider"></div>
+
+      <!-- گروه مدیریت محصولات -->
+      <div class="sidebar-menu-group">
+        <button class="sidebar-menu-item" data-section="add">
+          <div class="sidebar-menu-item__icon">
+            <i class="ri-add-circle-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">افزودن محصول</span>
+        </button>
+        <button class="sidebar-menu-item" data-section="products">
+          <div class="sidebar-menu-item__icon">
+            <i class="ri-shopping-bag-3-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">مدیریت محصولات</span>
+        </button>
+        <button class="sidebar-menu-item" data-section="discounts">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--orange">
+            <i class="ri-price-tag-3-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">تخفیف‌ها</span>
+        </button>
+      </div>
+
+      <div class="sidebar-menu-divider"></div>
+
+      <!-- گروه مدیریت فروشگاه -->
+      <div class="sidebar-menu-group">
+        <button class="sidebar-menu-item" data-section="content">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--purple">
+            <i class="ri-palette-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">مدیریت ظاهر فروشگاه</span>
+        </button>
+        <button class="sidebar-menu-item" id="mobilePreviewBtn">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--blue">
+            <i class="ri-eye-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">پیشنمایش سایت</span>
+        </button>
+        <button class="sidebar-menu-item" data-section="notif">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--orange">
+            <i class="ri-notification-3-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">تابلو فروشگاه</span>
+        </button>
+      </div>
+
+      <div class="sidebar-menu-divider"></div>
+
+      <!-- گروه ارتباطات و ارتقا -->
+      <div class="sidebar-menu-group">
+        <button class="sidebar-menu-item" data-section="msg">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--blue">
+            <i class="ri-message-3-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">پیام‌ها</span>
+          <span class="sidebar-menu-item__badge" id="mobileMsgBadge" style="display: none;">0</span>
+        </button>
+        <button class="sidebar-menu-item" id="mobileUpgradeBtn">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--amber">
+            <i class="ri-vip-diamond-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">ارتقا</span>
+        </button>
+        <button class="sidebar-menu-item" data-section="guide">
+          <div class="sidebar-menu-item__icon">
+            <i class="ri-question-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">راهنمای استفاده</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer with Install Banner -->
+    <div class="sidebar-footer">
+      <button class="sidebar-install-banner" id="mobileInstallBtn" aria-label="نصب اپلیکیشن">
+        <div class="sidebar-install-banner__icon">
+          <i class="ri-smartphone-fill"></i>
+        </div>
+        <div class="sidebar-install-banner__content">
+          <div class="sidebar-install-banner__title">نصب اپلیکیشن</div>
+          <div class="sidebar-install-banner__subtitle">دسترسی سریع‌تر به پنل</div>
+        </div>
+        <span class="sidebar-install-banner__badge">PWA</span>
+      </button>
+    </div>
+
+    <!-- ========== Desktop Sidebar Elements ========== -->
     <!-- دکمه باز/بستن سایدبار -->
     <button class="sidebar-toggle" id="sidebarToggle" title="باز/بستن منو" aria-label="باز/بستن منو" aria-expanded="false">
       <svg width="28" height="28" viewBox="0 0 24 24">
@@ -4731,11 +6089,11 @@
           <div class="streak-card__content">
             <div class="streak-card__label">فعالیت متوالی</div>
             <div class="streak-card__value">
-              <span class="streak-card__number" id="streakCount">12</span>
+              <span class="streak-card__number" id="streakCount">—</span>
               <span class="streak-card__unit">روز</span>
             </div>
           </div>
-          <div class="streak-card__badge">
+          <div class="streak-card__badge" id="streakBadge" style="display: none;">
             <i class="ri-arrow-up-line"></i>
             رکورد!
           </div>
@@ -4744,22 +6102,20 @@
         <!-- کارت اعتبار فروشگاه -->
         <div class="rank-card" id="openRankModal" role="button" tabindex="0" aria-label="مشاهده جزئیات اعتبار فروشگاه">
           <div class="rank-card__icon">
-            <i class="ri-medal-fill"></i>
+            <i class="ri-wallet-3-fill"></i>
           </div>
           <div class="rank-card__content">
             <div class="rank-card__label">اعتبار فروشگاه</div>
             <div class="rank-card__value">
-              <span class="rank-card__title" id="rankTitle">طلایی</span>
+              <span class="rank-card__balance" id="walletBalance">—</span>
+              <span class="rank-card__currency">تومان</span>
             </div>
-            <div class="rank-card__stars" id="rankStars">
-              <i class="ri-star-fill"></i>
-              <i class="ri-star-fill"></i>
-              <i class="ri-star-fill"></i>
-              <i class="ri-star-fill"></i>
-              <i class="ri-star-line empty"></i>
-            </div>
+            <button class="rank-card__action-btn" id="openCreditModalBtn" type="button" aria-label="افزایش اعتبار">
+              <i class="ri-add-circle-fill"></i>
+              افزایش اعتبار
+            </button>
           </div>
-          <div class="rank-card__badge">
+          <div class="rank-card__badge" id="walletBadge" style="display: none;">
             <i class="ri-shield-check-fill"></i>
             تایید شده
           </div>
@@ -6240,7 +7596,7 @@
                     <i class="ri-edit-2-line" aria-hidden="true"></i>
                     تنظیم / ویرایش تخفیف
                   </button>
-                  ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
+                  ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><svg class="trash-icon-mini" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> حذف تخفیف</button>` : ''}
                 </div>
               </td>
             </tr>`;
@@ -6279,7 +7635,7 @@
               </div>
               <div class="flex flex-col gap-2">
                 <button type="button" class="discount-cta" data-discount-id="${product.id}">تنظیم / ویرایش</button>
-                ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><i class="ri-close-circle-line" aria-hidden="true"></i> حذف تخفیف</button>` : ''}
+                ${isActive ? `<button type="button" class="discount-delete" data-discount-remove-id="${product.id}"><svg class="trash-icon-mini" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> حذف تخفیف</button>` : ''}
               </div>
             </div>`;
           })
@@ -6880,7 +8236,14 @@
             </div>
           </div>
           <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
-            <i class="ri-delete-bin-6-line"></i>
+            <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"/>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+            <span class="notification-remove__text">حذف</span>
           </button>
         `;
 
@@ -7022,7 +8385,7 @@
         <i class="ri-fire-fill"></i>
       </div>
       <h3 class="streak-modal__title" id="streak-modal-title">فعالیت متوالی شما</h3>
-      <p class="streak-modal__subtitle">هر روز فعال باش، امتیاز بیشتری بگیر!</p>
+      <p class="streak-modal__subtitle">هر روز فعال باش، اعتبار بیشتری کسب کن!</p>
       <button class="streak-modal__close" id="closeStreakModal" aria-label="بستن">
         <i class="ri-close-line"></i>
       </button>
@@ -7030,15 +8393,15 @@
     <div class="streak-modal__body">
       <div class="streak-modal__stats">
         <div class="streak-stat">
-          <div class="streak-stat__value" id="streakCurrentDays">12</div>
+          <div class="streak-stat__value" id="streakCurrentDays">0</div>
           <div class="streak-stat__label">روز متوالی</div>
         </div>
         <div class="streak-stat">
-          <div class="streak-stat__value" id="streakBestRecord">28</div>
+          <div class="streak-stat__value" id="streakBestRecord">0</div>
           <div class="streak-stat__label">بهترین رکورد</div>
         </div>
         <div class="streak-stat">
-          <div class="streak-stat__value" id="streakTotalDays">156</div>
+          <div class="streak-stat__value" id="streakTotalDays">0</div>
           <div class="streak-stat__label">کل روزها</div>
         </div>
       </div>
@@ -7059,9 +8422,94 @@
           نکته طلایی
         </div>
         <p class="streak-tips__text">
-          با فعالیت روزانه در پنل فروشگاه (افزودن محصول، پاسخ به پیام‌ها، بروزرسانی قیمت‌ها) امتیاز streak خود را افزایش دهید. هر ۷ روز متوالی، یک جایزه ویژه دریافت کنید!
+          با فعالیت روزانه در پنل فروشگاه (افزودن محصول، پاسخ به پیام‌ها، بروزرسانی قیمت‌ها) اعتبار فروشگاه خود را افزایش دهید. هر ۷ روز متوالی، یک جایزه ویژه دریافت کنید!
         </p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- مدال راه‌های افزایش اعتبار -->
+<div class="credit-increase-modal" id="creditIncreaseModal" role="dialog" aria-modal="true" aria-labelledby="credit-increase-title">
+  <div class="credit-increase-modal__card">
+    <div class="credit-increase-modal__header">
+      <h3 class="credit-increase-modal__title" id="credit-increase-title">
+        <span class="credit-increase-modal__title-icon">
+          <i class="ri-coins-fill"></i>
+        </span>
+        راه‌های افزایش اعتبار فروشگاه
+      </h3>
+      <button class="credit-increase-modal__close" id="closeCreditIncreaseModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+    
+    <div class="credit-increase-modal__body">
+      <ul class="credit-increase-modal__list">
+        <!-- فروش موفق -->
+        <li class="credit-task-item">
+          <div class="credit-task-item__icon credit-task-item__icon--cart">
+            <i class="ri-shopping-cart-2-fill"></i>
+          </div>
+          <div class="credit-task-item__content">
+            <h4 class="credit-task-item__title">فروش موفق هر محصول</h4>
+            <div class="credit-task-item__reward">
+              <i class="ri-add-line"></i>
+              +۱۰,۰۰۰ تومان اعتبار
+            </div>
+          </div>
+        </li>
+        
+        <!-- دریافت نظر ۵ ستاره -->
+        <li class="credit-task-item">
+          <div class="credit-task-item__icon credit-task-item__icon--star">
+            <i class="ri-star-smile-fill"></i>
+          </div>
+          <div class="credit-task-item__content">
+            <h4 class="credit-task-item__title">دریافت نظر ۵ ستاره</h4>
+            <div class="credit-task-item__reward">
+              <i class="ri-add-line"></i>
+              +۵,۰۰۰ تومان اعتبار
+            </div>
+          </div>
+        </li>
+        
+        <!-- تکمیل پروفایل -->
+        <li class="credit-task-item">
+          <div class="credit-task-item__icon credit-task-item__icon--profile">
+            <i class="ri-user-settings-fill"></i>
+          </div>
+          <div class="credit-task-item__content">
+            <h4 class="credit-task-item__title">تکمیل اطلاعات پروفایل</h4>
+            <div class="credit-task-item__reward">
+              <i class="ri-add-line"></i>
+              +۲۰,۰۰۰ تومان اعتبار
+            </div>
+            <div class="credit-task-item__note">(یکبار)</div>
+          </div>
+        </li>
+        
+        <!-- فعالیت روزانه -->
+        <li class="credit-task-item">
+          <div class="credit-task-item__icon credit-task-item__icon--streak">
+            <i class="ri-fire-fill"></i>
+          </div>
+          <div class="credit-task-item__content">
+            <h4 class="credit-task-item__title">فعالیت روزانه مداوم (۷ روز)</h4>
+            <div class="credit-task-item__reward">
+              <i class="ri-add-line"></i>
+              +۱۵,۰۰۰ تومان اعتبار
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="credit-increase-modal__footer">
+      <button class="credit-increase-modal__cta" id="startEarningCreditBtn">
+        <i class="ri-rocket-2-fill"></i>
+        شروع کسب اعتبار
+      </button>
     </div>
   </div>
 </div>
@@ -7073,8 +8521,8 @@
       <div class="rank-modal__header-icon">
         <i class="ri-medal-fill"></i>
       </div>
-      <h3 class="rank-modal__title" id="rank-modal-title">اعتبار فروشگاه شما</h3>
-      <p class="rank-modal__subtitle">با فعالیت بیشتر، رتبه بالاتری کسب کنید</p>
+      <h3 class="rank-modal__title" id="rank-modal-title">سطح اعتبار فروشگاه شما</h3>
+      <p class="rank-modal__subtitle">با افزایش اعتبار کیف پول، به سطوح بالاتر برسید</p>
       <button class="rank-modal__close" id="closeRankModal" aria-label="بستن">
         <i class="ri-close-line"></i>
       </button>
@@ -7093,63 +8541,79 @@
             <i class="ri-star-fill"></i>
             <i class="ri-star-line empty"></i>
           </div>
-          <div class="rank-current__progress">۸۵۰ از ۱۰۰۰ امتیاز برای سطح بعدی</div>
+          <div class="rank-current__progress" id="rankCurrentProgress">۳٬۴۰۰٬۰۰۰ از ۵٬۰۰۰٬۰۰۰ تومان اعتبار برای سطح بعدی</div>
         </div>
       </div>
 
       <div class="rank-modal__progress-bar">
-        <div class="rank-modal__progress-fill" style="width: 85%;"></div>
+        <div class="rank-modal__progress-fill" id="rankProgressFill" style="width: 68%;"></div>
       </div>
 
       <div class="rank-modal__levels">
-        <div class="rank-level">
+        <div class="rank-level" data-level="bronze">
           <div class="rank-level__icon bronze">
             <i class="ri-medal-line"></i>
           </div>
           <div class="rank-level__info">
             <h5 class="rank-level__name">برنزی</h5>
-            <p class="rank-level__desc">۰ تا ۲۵۰ امتیاز</p>
+            <p class="rank-level__desc">۰ تا ۵۰۰٬۰۰۰ تومان اعتبار</p>
           </div>
           <div class="rank-level__check">
             <i class="ri-check-line"></i>
           </div>
         </div>
-        <div class="rank-level">
+        <div class="rank-level" data-level="silver">
           <div class="rank-level__icon silver">
             <i class="ri-medal-line"></i>
           </div>
           <div class="rank-level__info">
             <h5 class="rank-level__name">نقره‌ای</h5>
-            <p class="rank-level__desc">۲۵۰ تا ۵۰۰ امتیاز</p>
+            <p class="rank-level__desc">۵۰۰٬۰۰۰ تا ۲٬۰۰۰٬۰۰۰ تومان اعتبار</p>
           </div>
           <div class="rank-level__check">
             <i class="ri-check-line"></i>
           </div>
         </div>
-        <div class="rank-level current">
+        <div class="rank-level current" data-level="gold">
           <div class="rank-level__icon gold">
             <i class="ri-medal-fill"></i>
           </div>
           <div class="rank-level__info">
             <h5 class="rank-level__name">طلایی</h5>
-            <p class="rank-level__desc">۵۰۰ تا ۱۰۰۰ امتیاز</p>
+            <p class="rank-level__desc">۲٬۰۰۰٬۰۰۰ تا ۵٬۰۰۰٬۰۰۰ تومان اعتبار</p>
           </div>
           <div class="rank-level__check">
             <i class="ri-check-line"></i>
           </div>
         </div>
-        <div class="rank-level">
+        <div class="rank-level rank-level--diamond" data-level="diamond">
           <div class="rank-level__icon diamond">
-            <i class="ri-vip-diamond-line"></i>
+            <i class="ri-vip-diamond-fill"></i>
+            <span class="rank-level__blue-tick" title="تیک آبی تایید">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="#1d9bf0"/>
+                <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </div>
           <div class="rank-level__info">
-            <h5 class="rank-level__name">الماسی</h5>
-            <p class="rank-level__desc">بیش از ۱۰۰۰ امتیاز</p>
+            <h5 class="rank-level__name">
+              الماسی
+              <span class="rank-level__verified-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" fill="#1d9bf0"/>
+                  <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </h5>
+            <p class="rank-level__desc">بیش از ۵٬۰۰۰٬۰۰۰ تومان اعتبار</p>
+            <p class="rank-level__highlight">بالاترین سطح اعتبار + دریافت تیک آبی و افکت نوری ویژه</p>
           </div>
         </div>
       </div>
 
-      <div class="rank-modal__benefits">
+      <!-- مزایای سطح طلایی -->
+      <div class="rank-modal__benefits" id="goldBenefits">
         <div class="rank-benefits__title">
           <i class="ri-gift-fill"></i>
           مزایای سطح طلایی
@@ -7159,6 +8623,42 @@
           <li><i class="ri-check-double-line"></i> بج تایید شده کنار نام فروشگاه</li>
           <li><i class="ri-check-double-line"></i> دسترسی به آمار پیشرفته</li>
           <li><i class="ri-check-double-line"></i> پشتیبانی اولویت‌دار</li>
+        </ul>
+      </div>
+
+      <!-- مزایای سطح الماسی -->
+      <div class="rank-modal__benefits rank-modal__benefits--diamond" id="diamondBenefits">
+        <div class="rank-benefits__title rank-benefits__title--diamond">
+          <i class="ri-vip-diamond-fill"></i>
+          مزایای ویژه سطح الماسی
+          <span class="rank-benefits__blue-tick">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" fill="#1d9bf0"/>
+              <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <ul class="rank-benefits__list rank-benefits__list--diamond">
+          <li>
+            <i class="ri-verified-badge-fill" style="color: #1d9bf0;"></i>
+            <span>نشان معتبر <strong>تیک آبی</strong> (Verification Badge)</span>
+          </li>
+          <li>
+            <i class="ri-sparkling-2-fill" style="color: #f59e0b;"></i>
+            <span>افکت نوری (Glow) متمایز و درخشان دور تصویر پروفایل در تمام لیست‌ها و جستجوها</span>
+          </li>
+          <li>
+            <i class="ri-money-dollar-circle-fill" style="color: #10b981;"></i>
+            <span>کمترین نرخ کارمزد در کل پلتفرم</span>
+          </li>
+          <li>
+            <i class="ri-rocket-2-fill" style="color: #8b5cf6;"></i>
+            <span>اولویت نمایش در صفحه اصلی و نتایج جستجو</span>
+          </li>
+          <li>
+            <i class="ri-customer-service-2-fill" style="color: #0ea5e9;"></i>
+            <span>پشتیبانی VIP اختصاصی ۲۴ ساعته</span>
+          </li>
         </ul>
       </div>
     </div>
@@ -7182,33 +8682,59 @@
     const rankModalCard = rankModal?.querySelector('.rank-modal__card');
 
     let lastFocusedElement = null;
+    
+    // ذخیره داده‌های streak از API
+    let streakApiData = null;
 
-    // تولید تقویم streak
-    function generateStreakCalendar() {
+    // تبدیل عدد به فارسی
+    const toFaDigits = (num) => {
+      if (num == null) return '۰';
+      return String(num).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    };
+
+    // تولید تقویم streak از داده‌های واقعی API
+    function generateStreakCalendar(calendarDays) {
       if (!streakCalendarGrid) return;
-      const today = new Date();
-      const days = [];
       
-      // ۱۴ روز اخیر
-      for (let i = 13; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const dayNum = date.getDate();
-        const isActive = Math.random() > 0.3; // شبیه‌سازی فعالیت
-        const isToday = i === 0;
-        
-        days.push({
-          day: dayNum,
-          active: isActive,
-          today: isToday
-        });
+      // اگر داده‌ای نداریم، تقویم خالی نمایش بده
+      if (!calendarDays || calendarDays.length === 0) {
+        // تولید ۱۴ روز اخیر بدون هیچ فعالیتی
+        const today = new Date();
+        const emptyDays = [];
+        for (let i = 13; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          emptyDays.push({
+            day: date.getDate(),
+            active: false,
+            today: i === 0
+          });
+        }
+        streakCalendarGrid.innerHTML = emptyDays.map(d => `
+          <div class="streak-day ${d.today ? 'today' : ''}">
+            ${d.day}
+          </div>
+        `).join('');
+        return;
       }
 
-      streakCalendarGrid.innerHTML = days.map(d => `
+      // نمایش داده‌های واقعی از API
+      streakCalendarGrid.innerHTML = calendarDays.map(d => `
         <div class="streak-day ${d.active ? 'active' : ''} ${d.today ? 'today' : ''}">
           ${d.day}
         </div>
       `).join('');
+    }
+
+    // آپدیت متریک‌های مدال streak
+    function updateStreakModalMetrics(data) {
+      const currentDaysEl = document.getElementById('streakCurrentDays');
+      const bestRecordEl = document.getElementById('streakBestRecord');
+      const totalDaysEl = document.getElementById('streakTotalDays');
+      
+      if (currentDaysEl) currentDaysEl.textContent = toFaDigits(data?.currentStreak || 0);
+      if (bestRecordEl) bestRecordEl.textContent = toFaDigits(data?.longestStreak || 0);
+      if (totalDaysEl) totalDaysEl.textContent = toFaDigits(data?.totalLoginDays || 0);
     }
 
     // باز کردن مدال
@@ -7240,14 +8766,28 @@
     }
 
     // Event Listeners - Streak
-    streakCard?.addEventListener('click', () => {
-      generateStreakCalendar();
+    streakCard?.addEventListener('click', async () => {
+      // آپدیت متریک‌ها و تقویم از داده‌های ذخیره شده
+      if (streakApiData) {
+        updateStreakModalMetrics(streakApiData);
+        generateStreakCalendar(streakApiData.calendarDays || []);
+      } else {
+        // اگر داده نداریم، مقادیر صفر نمایش بده
+        updateStreakModalMetrics({ currentStreak: 0, longestStreak: 0, totalLoginDays: 0 });
+        generateStreakCalendar([]);
+      }
       openModal(streakModal, streakModalCard);
     });
     streakCard?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        generateStreakCalendar();
+        if (streakApiData) {
+          updateStreakModalMetrics(streakApiData);
+          generateStreakCalendar(streakApiData.calendarDays || []);
+        } else {
+          updateStreakModalMetrics({ currentStreak: 0, longestStreak: 0, totalLoginDays: 0 });
+          generateStreakCalendar([]);
+        }
         openModal(streakModal, streakModalCard);
       }
     });
@@ -7269,13 +8809,367 @@
       if (e.target === rankModal) closeModal(rankModal);
     });
 
-    // تولید تقویم اولیه
-    generateStreakCalendar();
+    // تولید تقویم اولیه (خالی)
+    generateStreakCalendar([]);
+    
+    // Expose function to update streak data from API
+    window.updateStreakModalData = function(data) {
+      streakApiData = data;
+    };
+  })();
+
+  // ========== Streak Celebration Toast System ==========
+  // LOGIC: Shows ONLY ONCE per 24-hour cycle when streak increments
+  // Uses localStorage to prevent repetition within the same day
+  (function() {
+    const STORAGE_KEY = 'streak_celebration_shown';
+    const TOAST_DURATION = 4000; // 4 seconds
+
+    /**
+     * Check if celebration was already shown today
+     * @returns {boolean}
+     */
+    function wasShownToday() {
+      const lastShown = localStorage.getItem(STORAGE_KEY);
+      if (!lastShown) return false;
+      
+      const lastDate = new Date(lastShown).toDateString();
+      const today = new Date().toDateString();
+      return lastDate === today;
+    }
+
+    /**
+     * Mark celebration as shown for today
+     */
+    function markAsShown() {
+      localStorage.setItem(STORAGE_KEY, new Date().toISOString());
+    }
+
+    /**
+     * Show the streak celebration toast
+     * @param {number} streakDays - Current streak count
+     */
+    function showStreakCelebration(streakDays) {
+      // Prevent showing if already shown today
+      if (wasShownToday()) {
+        console.log('[Streak Toast] Already shown today, skipping.');
+        return;
+      }
+
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = 'streak-celebration-toast';
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'polite');
+      toast.innerHTML = `
+        <div class="streak-celebration-toast__icon">🔥</div>
+        <div class="streak-celebration-toast__content">
+          <div class="streak-celebration-toast__text">رکوردت شد ${streakDays} روز! 🔥</div>
+          <div class="streak-celebration-toast__subtext">ادامه بده، عالی پیش میری!</div>
+        </div>
+        <button class="streak-celebration-toast__close" aria-label="بستن">
+          <i class="ri-close-line"></i>
+        </button>
+        <div class="streak-celebration-toast__progress">
+          <div class="streak-celebration-toast__progress-bar"></div>
+        </div>
+      `;
+
+      document.body.appendChild(toast);
+
+      // Show with animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          toast.classList.add('visible');
+        });
+      });
+
+      // Mark as shown for today
+      markAsShown();
+
+      // Close button handler
+      const closeBtn = toast.querySelector('.streak-celebration-toast__close');
+      closeBtn?.addEventListener('click', () => dismissToast(toast));
+
+      // Auto-dismiss after duration
+      setTimeout(() => dismissToast(toast), TOAST_DURATION);
+    }
+
+    /**
+     * Dismiss the toast with animation
+     * @param {HTMLElement} toast
+     */
+    function dismissToast(toast) {
+      if (!toast || !toast.parentNode) return;
+      toast.classList.remove('visible');
+      setTimeout(() => toast.remove(), 400);
+    }
+
+    /**
+     * Check streak and show celebration if incremented
+     * Called when streak data is loaded/updated
+     * @param {number} currentStreak - Current streak from API
+     * @param {number} previousStreak - Previous streak (optional, for increment detection)
+     */
+    window.checkStreakCelebration = function(currentStreak, previousStreak = null) {
+      // If previousStreak provided, only celebrate on increment
+      if (previousStreak !== null && currentStreak <= previousStreak) {
+        return;
+      }
+      
+      // Show celebration if streak > 0 and not shown today
+      if (currentStreak > 0 && !wasShownToday()) {
+        // Small delay for better UX (let page load first)
+        setTimeout(() => showStreakCelebration(currentStreak), 1500);
+      }
+    };
+
+    // For testing: window.testStreakCelebration = (days) => showStreakCelebration(days);
+  })();
+
+  // ========== Credit Increase Modal System ==========
+  (function() {
+    const modal = document.getElementById('creditIncreaseModal');
+    const closeBtn = document.getElementById('closeCreditIncreaseModal');
+    const ctaBtn = document.getElementById('startEarningCreditBtn');
+    const actionBtn = document.getElementById('openCreditModalBtn');
+    const plusTrigger = document.getElementById('openCreditModalTrigger');
+    
+    let lastFocusedElement = null;
+
+    function openCreditModal(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!modal) return;
+      lastFocusedElement = document.activeElement;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Focus trap
+      setTimeout(() => {
+        closeBtn?.focus();
+      }, 100);
+      
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    function closeCreditModal() {
+      if (!modal) return;
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscapeKey);
+      
+      if (lastFocusedElement) {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function handleEscapeKey(e) {
+      if (e.key === 'Escape') {
+        closeCreditModal();
+      }
+    }
+
+    // Event listeners
+    closeBtn?.addEventListener('click', closeCreditModal);
+    
+    // Close on backdrop click
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeCreditModal();
+      }
+    });
+
+    // Action button trigger
+    actionBtn?.addEventListener('click', openCreditModal);
+    
+    // Plus trigger button
+    plusTrigger?.addEventListener('click', openCreditModal);
+
+    // CTA button action
+    ctaBtn?.addEventListener('click', () => {
+      closeCreditModal();
+      // Navigate to add product section or relevant action
+      const addProductBtn = document.getElementById('menu-add');
+      if (addProductBtn) {
+        addProductBtn.click();
+      }
+    });
+
+    // Expose function globally for external triggers
+    window.openCreditIncreaseModal = openCreditModal;
+    window.closeCreditIncreaseModal = closeCreditModal;
   })();
 </script>
 
 <script src="performance-status.js"></script>
 <script src="dashboard-content.js"></script>
+
+<!-- بارگذاری داده‌های واقعی Streak و Wallet از سرور -->
+<script>
+(function() {
+  'use strict';
+  
+  const API_BASE = window.VITRINET_API?.backendOrigin || 'http://localhost:5000';
+  
+  // تبدیل عدد به فارسی
+  const toFaDigits = (num) => {
+    if (num == null) return '—';
+    return String(num).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  };
+  
+  // فرمت مبلغ به تومان
+  const formatTomans = (amount) => {
+    if (amount == null || isNaN(amount)) return '0';
+    return toFaDigits(Number(amount).toLocaleString('fa-IR'));
+  };
+  
+  // ===== بارگذاری Streak از سرور =====
+  async function loadStreak() {
+    const streakCountEl = document.getElementById('streakCount');
+    const streakBadgeEl = document.getElementById('streakBadge');
+    
+    try {
+      // ابتدا چک‌این کن (ثبت ورود روزانه)
+      const checkInRes = await fetch(`${API_BASE}/api/streak/checkin`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      let streakData = null;
+      
+      if (checkInRes.ok) {
+        const checkInResult = await checkInRes.json();
+        if (checkInResult.success) {
+          streakData = checkInResult.data;
+          
+          // نمایش پیام موفقیت اگر اولین بار امروز است
+          if (!checkInResult.alreadyCheckedIn && window.checkStreakCelebration) {
+            window.checkStreakCelebration(streakData.currentStreak);
+          }
+        }
+      }
+      
+      // اگر چک‌این موفق نبود، فقط داده‌ها رو بگیر (با تقویم ۱۴ روزه)
+      if (!streakData) {
+        const getRes = await fetch(`${API_BASE}/api/streak?days=14`, {
+          credentials: 'include'
+        });
+        if (getRes.ok) {
+          const getResult = await getRes.json();
+          streakData = getResult.data;
+        }
+      }
+      
+      // آپدیت UI کارت اصلی
+      if (streakCountEl) {
+        const days = streakData?.currentStreak || 0;
+        streakCountEl.textContent = toFaDigits(days);
+        
+        // نمایش بج رکورد اگر به رکورد رسیده
+        if (streakBadgeEl) {
+          if (days > 0 && days === streakData?.longestStreak) {
+            streakBadgeEl.style.display = 'flex';
+          } else {
+            streakBadgeEl.style.display = 'none';
+          }
+        }
+      }
+      
+      // ارسال داده‌ها به مدال streak
+      if (window.updateStreakModalData) {
+        window.updateStreakModalData(streakData || {
+          currentStreak: 0,
+          longestStreak: 0,
+          totalLoginDays: 0,
+          calendarDays: []
+        });
+      }
+      
+    } catch (err) {
+      console.error('Failed to load streak:', err);
+      // در صورت خطا، نمایش 0 (نه «—»)
+      if (streakCountEl) {
+        streakCountEl.textContent = toFaDigits(0);
+      }
+      // ارسال داده‌های خالی به مدال
+      if (window.updateStreakModalData) {
+        window.updateStreakModalData({
+          currentStreak: 0,
+          longestStreak: 0,
+          totalLoginDays: 0,
+          calendarDays: []
+        });
+      }
+    }
+  }
+  
+  // ===== بارگذاری Wallet از سرور =====
+  async function loadWallet() {
+    const walletBalanceEl = document.getElementById('walletBalance');
+    const walletBadgeEl = document.getElementById('walletBadge');
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/wallet`, {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch wallet');
+      }
+      
+      const result = await res.json();
+      const walletData = result.data;
+      
+      // آپدیت UI
+      const balance = walletData?.balance || 0;
+      if (walletBalanceEl) {
+        walletBalanceEl.textContent = formatTomans(balance);
+      }
+      
+      // نمایش بج تایید شده اگر موجودی بالای صفر است
+      if (walletBadgeEl) {
+        if (balance > 0) {
+          walletBadgeEl.style.display = 'flex';
+        } else {
+          walletBadgeEl.style.display = 'none';
+        }
+      }
+      
+    } catch (err) {
+      console.error('Failed to load wallet:', err);
+      // در صورت خطا، نمایش 0 (نه «—»)
+      if (walletBalanceEl) {
+        walletBalanceEl.textContent = formatTomans(0);
+      }
+      if (walletBadgeEl) {
+        walletBadgeEl.style.display = 'none';
+      }
+    }
+  }
+  
+  // بارگذاری داده‌ها در شروع
+  document.addEventListener('DOMContentLoaded', () => {
+    // بررسی لاگین بودن
+    const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+    if (!seller.id && !seller._id) {
+      console.warn('Seller not logged in, skipping streak/wallet load');
+      return;
+    }
+    
+    // بارگذاری موازی
+    loadStreak();
+    loadWallet();
+  });
+  
+  // Expose functions globally for manual refresh
+  window.refreshStreak = loadStreak;
+  window.refreshWallet = loadWallet;
+})();
+</script>
 
 
 

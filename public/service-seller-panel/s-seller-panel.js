@@ -124,6 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // آپدیت کارت استریک در داشبورد
     const streakEl = document.getElementById('daily-streak');
+    const streakHintEl = document.getElementById('streak-hint');
+    
     if (streakEl) {
       const days = streakData.currentStreak || 0;
       streakEl.textContent = `${toFaDigits(days)} روز متوالی`;
@@ -135,6 +137,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           streakCard.classList.remove('has-checkpoint');
         }
+      }
+    }
+    
+    // آپدیت hint استریک
+    if (streakHintEl) {
+      const days = streakData.currentStreak || 0;
+      if (days === 0) {
+        streakHintEl.textContent = 'شروع کن! اولین روز استریکت رو ثبت کن.';
+      } else if (streakData.checkpointReached) {
+        streakHintEl.textContent = `🎉 تبریک! به چک‌پوینت ${toFaDigits(days)} روزه رسیدی!`;
+      } else if (days === streakData.longestStreak && days > 1) {
+        streakHintEl.textContent = `🔥 رکورد جدید! ${toFaDigits(days)} روز متوالی!`;
+      } else {
+        const daysToCheckpoint = 7 - (days % 7);
+        streakHintEl.textContent = `ادامه بده! ${toFaDigits(daysToCheckpoint)} روز تا چک‌پوینت بعدی`;
       }
     }
     

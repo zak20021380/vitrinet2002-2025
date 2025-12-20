@@ -545,6 +545,109 @@ window.addEventListener('resize', handleSidebarOnResize);
 window.addEventListener('orientationchange', handleSidebarOnResize);
 handleSidebarOnResize();
 
+// ----------- Mobile Sidebar Menu Handlers ----------
+(function initMobileSidebar() {
+  // Mobile close button
+  const mobileClose = document.getElementById('mobileMenuClose');
+  if (mobileClose) {
+    mobileClose.addEventListener('click', toggleSidebar);
+  }
+
+  // Mobile accounting button
+  const mobileAccountingBtn = document.getElementById('mobileAccountingBtn');
+  if (mobileAccountingBtn) {
+    mobileAccountingBtn.addEventListener('click', () => {
+      toggleSidebar();
+      window.location.href = '../hesabketab/accountant.html';
+    });
+  }
+
+  // Mobile stats button
+  const mobileStatsBtn = document.getElementById('mobileStatsBtn');
+  if (mobileStatsBtn) {
+    mobileStatsBtn.addEventListener('click', () => {
+      showSection('visit');
+      toggleSidebar();
+    });
+  }
+
+  // Mobile performance button
+  const mobilePerformanceBtn = document.getElementById('mobilePerformanceBtn');
+  if (mobilePerformanceBtn) {
+    mobilePerformanceBtn.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+      document.getElementById('menu-performance')?.classList.add('active');
+      document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
+      document.getElementById('main-content').innerHTML = '';
+      if (typeof loadPerformanceStatus === 'function') loadPerformanceStatus();
+      toggleSidebar();
+    });
+  }
+
+  // Mobile preview button
+  const mobilePreviewBtn = document.getElementById('mobilePreviewBtn');
+  if (mobilePreviewBtn) {
+    mobilePreviewBtn.addEventListener('click', () => {
+      document.getElementById('btn-shop-preview')?.click();
+      toggleSidebar();
+    });
+  }
+
+  // Mobile upgrade button
+  const mobileUpgradeBtn = document.getElementById('mobileUpgradeBtn');
+  if (mobileUpgradeBtn) {
+    mobileUpgradeBtn.addEventListener('click', () => {
+      document.getElementById('menu-upgrade')?.click();
+      toggleSidebar();
+    });
+  }
+
+  // Mobile install button
+  const mobileInstallBtn = document.getElementById('mobileInstallBtn');
+  if (mobileInstallBtn) {
+    mobileInstallBtn.addEventListener('click', () => {
+      toggleSidebar();
+      document.getElementById('installAppCta')?.click();
+    });
+  }
+
+  // Mobile menu items with data-section
+  document.querySelectorAll('.sidebar-menu-item[data-section]').forEach(item => {
+    item.addEventListener('click', () => {
+      const section = item.dataset.section;
+      if (section) {
+        // Update active state for desktop sidebar
+        document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+        const desktopBtn = document.querySelector(`.sidebar-link[data-section="${section}"]`);
+        if (desktopBtn) desktopBtn.classList.add('active');
+        
+        // Update active state for mobile menu
+        document.querySelectorAll('.sidebar-menu-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+        
+        showSection(section);
+        toggleSidebar();
+      }
+    });
+  });
+
+  // Sync message badge with mobile
+  const observer = new MutationObserver(() => {
+    const desktopBadge = document.getElementById('msgBadge');
+    const mobileBadge = document.getElementById('mobileMsgBadge');
+    if (desktopBadge && mobileBadge) {
+      const count = desktopBadge.textContent || '0';
+      mobileBadge.textContent = count;
+      mobileBadge.style.display = desktopBadge.style.display;
+    }
+  });
+
+  const msgBadge = document.getElementById('msgBadge');
+  if (msgBadge) {
+    observer.observe(msgBadge, { attributes: true, childList: true, characterData: true });
+  }
+})();
+
 // ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
 function showSection(section) {
   // اگر بخش انتخابی "content" (یعنی مدیریت ظاهر فروشگاه) نیست،
