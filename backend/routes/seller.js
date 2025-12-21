@@ -329,6 +329,66 @@ router.patch('/:sellerId/unblock', authMiddleware('admin'), unblockSeller);
 // وضعیت عملکرد برای خود فروشنده
 router.get('/performance/status', authMiddleware('seller'), getCurrentSellerPerformanceStatus);
 
+// ═══════════════════════════════════════════════════════════════
+// Routes نظرات محصولات فروشنده
+// ═══════════════════════════════════════════════════════════════
+const productCommentController = require('../controllers/productCommentController');
+
+// دریافت نظرات در انتظار تأیید
+router.get('/pending-comments', authMiddleware('seller'), productCommentController.getPendingComments);
+
+// دریافت تعداد نظرات در انتظار
+router.get('/pending-comments/count', authMiddleware('seller'), productCommentController.getPendingCount);
+
+// دریافت همه نظرات فروشنده (با فیلتر)
+router.get('/comments', authMiddleware('seller'), productCommentController.getSellerComments);
+
+// ═══════════════════════════════════════════════════════════════
+// Routes اعلان‌های فروشنده
+// ═══════════════════════════════════════════════════════════════
+const sellerNotificationController = require('../controllers/sellerNotificationController');
+
+// دریافت لیست اعلان‌ها
+router.get('/notifications', authMiddleware('seller'), sellerNotificationController.getNotifications);
+
+// دریافت تعداد اعلان‌های خوانده نشده
+router.get('/notifications/unread-count', authMiddleware('seller'), sellerNotificationController.getUnreadCount);
+
+// علامت‌گذاری همه اعلان‌ها به عنوان خوانده شده
+router.put('/notifications/mark-all-read', authMiddleware('seller'), sellerNotificationController.markAllAsRead);
+
+// حذف همه اعلان‌ها
+router.delete('/notifications/clear-all', authMiddleware('seller'), sellerNotificationController.clearAll);
+
+// علامت‌گذاری یک اعلان به عنوان خوانده شده
+router.put('/notifications/:id/read', authMiddleware('seller'), sellerNotificationController.markAsRead);
+
+// حذف یک اعلان
+router.delete('/notifications/:id', authMiddleware('seller'), sellerNotificationController.deleteNotification);
+
+// ایجاد اعلان تست (فقط برای تست)
+router.post('/notifications/test', authMiddleware('seller'), sellerNotificationController.createTestNotification);
+
+// ——— ارسال پیام از فروشنده به مدیر سایت ———
+router.post(
+  '/contact-admin',
+  authMiddleware('seller'),
+  async (req, res) => {
+    try {
+      const sellerId = req.user && (req.user.id || req.user._id);
+      const { message } = req.body;
+      if (!message || !message.trim()) {
+        return res.status(400).json({ error: 'متن پیام لازم است.' });
+      }
+      console.log(`پیام از فروشنده ${sellerId}: ${message}`);
+      return res.json({ message: 'پیام شما با موفقیت ارسال شد.' });
+    } catch (err) {
+      console.error('❌ خطا در ارسال پیام به مدیر:', err);
+      return res.status(500).json({ error: 'خطای سرور، لطفاً مجدداً تلاش کنید.' });
+    }
+  }
+);
+
 // حذف فروشنده - فقط ادمین
 router.delete('/:sellerId', authMiddleware('admin'), deleteSeller);
 
@@ -387,71 +447,6 @@ router.get(
 
 
 
-
-
-// ——— ارسال پیام از فروشنده به مدیر سایت ———
-router.post(
-  '/contact-admin',
-  authMiddleware('seller'),
-  async (req, res) => {
-    try {
-      const sellerId = req.user && (req.user.id || req.user._id);
-      const { message } = req.body;
-      if (!message || !message.trim()) {
-        return res.status(400).json({ error: 'متن پیام لازم است.' });
-      }
-      // اینجا می‌توانید پیام را در دیتابیس ذخیره کنید یا به ادمین ایمیل بزنید
-      console.log(`پیام از فروشنده ${sellerId}: ${message}`);
-      
-      // پاسخ موفق
-      return res.json({ message: 'پیام شما با موفقیت ارسال شد.' });
-    } catch (err) {
-      console.error('❌ خطا در ارسال پیام به مدیر:', err);
-      return res.status(500).json({ error: 'خطای سرور، لطفاً مجدداً تلاش کنید.' });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════════════════════════════
-// Routes نظرات محصولات فروشنده
-// ═══════════════════════════════════════════════════════════════
-const productCommentController = require('../controllers/productCommentController');
-
-// دریافت نظرات در انتظار تأیید
-router.get('/pending-comments', authMiddleware('seller'), productCommentController.getPendingComments);
-
-// دریافت تعداد نظرات در انتظار
-router.get('/pending-comments/count', authMiddleware('seller'), productCommentController.getPendingCount);
-
-// دریافت همه نظرات فروشنده (با فیلتر)
-router.get('/comments', authMiddleware('seller'), productCommentController.getSellerComments);
-
-// ═══════════════════════════════════════════════════════════════
-// Routes اعلان‌های فروشنده
-// ═══════════════════════════════════════════════════════════════
-const sellerNotificationController = require('../controllers/sellerNotificationController');
-
-// دریافت لیست اعلان‌ها
-router.get('/notifications', authMiddleware('seller'), sellerNotificationController.getNotifications);
-
-// دریافت تعداد اعلان‌های خوانده نشده
-router.get('/notifications/unread-count', authMiddleware('seller'), sellerNotificationController.getUnreadCount);
-
-// علامت‌گذاری همه اعلان‌ها به عنوان خوانده شده
-router.put('/notifications/mark-all-read', authMiddleware('seller'), sellerNotificationController.markAllAsRead);
-
-// حذف همه اعلان‌ها
-router.delete('/notifications/clear-all', authMiddleware('seller'), sellerNotificationController.clearAll);
-
-// علامت‌گذاری یک اعلان به عنوان خوانده شده
-router.put('/notifications/:id/read', authMiddleware('seller'), sellerNotificationController.markAsRead);
-
-// حذف یک اعلان
-router.delete('/notifications/:id', authMiddleware('seller'), sellerNotificationController.deleteNotification);
-
-// ایجاد اعلان تست (فقط برای تست)
-router.post('/notifications/test', authMiddleware('seller'), sellerNotificationController.createTestNotification);
 
 
 module.exports = router;

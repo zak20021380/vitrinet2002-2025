@@ -65,4 +65,40 @@ router.patch(
   productCommentController.updateCommentStatus
 );
 
+// حذف نظر
+// DELETE /api/comments/:id
+router.delete(
+  '/comments/:id',
+  authMiddleware('seller'),
+  productCommentController.deleteComment
+);
+
+// ═══════════════════════════════════════════════════════════════
+// روت‌های مدیریت کاربران مسدود شده
+// ═══════════════════════════════════════════════════════════════
+
+// مسدود کردن کاربر
+// POST /api/seller/block-commenter
+router.post(
+  '/seller/block-commenter',
+  authMiddleware('seller'),
+  productCommentController.blockCommenter
+);
+
+// رفع مسدودیت کاربر
+// DELETE /api/seller/block-commenter/:userId
+router.delete(
+  '/seller/block-commenter/:userId',
+  authMiddleware('seller'),
+  productCommentController.unblockCommenter
+);
+
+// دریافت لیست کاربران مسدود شده
+// GET /api/seller/blocked-commenters
+router.get(
+  '/seller/blocked-commenters',
+  authMiddleware('seller'),
+  productCommentController.getBlockedCommenters
+);
+
 module.exports = router;

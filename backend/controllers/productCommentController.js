@@ -152,6 +152,22 @@ exports.submitComment = async (req, res) => {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // 6.5. بررسی مسدودیت کاربر توسط فروشنده
+    // ═══════════════════════════════════════════════════════════
+    const { BlockedCommentUser } = require('../models/ProductComment');
+    const isBlocked = await BlockedCommentUser.findOne({ 
+      sellerId: product.sellerId, 
+      userId 
+    });
+    
+    if (isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: 'شما امکان ثبت نظر برای محصولات این فروشگاه را ندارید.'
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // 7. بررسی نظر تکراری
     // ═══════════════════════════════════════════════════════════
     const existingComment = await ProductComment.findOne({
@@ -238,22 +254,35 @@ exports.getPendingComments = async (req, res) => {
     ]);
 
     // فرمت‌دهی پاسخ
-    const formattedComments = comments.map(c => ({
-      id: c._id,
-      content: c.content,
-      rating: c.rating,
-      createdAt: c.createdAt,
-      user: c.userId ? {
-        id: c.userId._id,
-        name: [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر',
-        phone: c.userId.phone ? `****${c.userId.phone.slice(-4)}` : null
-      } : { name: 'کاربر ناشناس' },
-      product: c.productId ? {
-        id: c.productId._id,
-        title: c.productId.title,
-        image: c.productId.images?.[0] || null
-      } : null
-    }));
+    const formattedComments = comments.map(c => {
+      // تعیین تصویر محصول - اگر data URI بود، null برگردون تا frontend از placeholder استفاده کنه
+      let productImage = null;
+      if (c.productId?.images?.[0]) {
+        const img = c.productId.images[0];
+        // فقط اگر data URI نبود، تصویر رو برگردون
+        if (!img.startsWith('data:')) {
+          productImage = img;
+        }
+      }
+      
+      return {
+        id: c._id,
+        content: c.content,
+        rating: c.rating,
+        status: c.status, // اضافه کردن وضعیت برای نمایش دکمه‌های تأیید/رد
+        createdAt: c.createdAt,
+        user: c.userId ? {
+          id: c.userId._id,
+          name: [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر',
+          phone: c.userId.phone ? `****${c.userId.phone.slice(-4)}` : null
+        } : { name: 'کاربر ناشناس' },
+        product: c.productId ? {
+          id: c.productId._id,
+          title: c.productId.title,
+          image: productImage
+        } : null
+      };
+    });
 
     res.json({
       success: true,
@@ -478,25 +507,36 @@ exports.getSellerComments = async (req, res) => {
     ]);
 
     // فرمت‌دهی پاسخ
-    const formattedComments = comments.map(c => ({
-      id: c._id,
-      content: c.content,
-      rating: c.rating,
-      status: c.status,
-      createdAt: c.createdAt,
-      statusChangedAt: c.statusChangedAt,
-      rejectionReason: c.rejectionReason,
-      user: c.userId ? {
-        id: c.userId._id,
-        name: [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر',
-        phone: c.userId.phone ? `****${c.userId.phone.slice(-4)}` : null
-      } : { name: 'کاربر ناشناس' },
-      product: c.productId ? {
-        id: c.productId._id,
-        title: c.productId.title,
-        image: c.productId.images?.[0] || null
-      } : null
-    }));
+    const formattedComments = comments.map(c => {
+      // تعیین تصویر محصول - اگر data URI بود، null برگردون
+      let productImage = null;
+      if (c.productId?.images?.[0]) {
+        const img = c.productId.images[0];
+        if (!img.startsWith('data:')) {
+          productImage = img;
+        }
+      }
+      
+      return {
+        id: c._id,
+        content: c.content,
+        rating: c.rating,
+        status: c.status,
+        createdAt: c.createdAt,
+        statusChangedAt: c.statusChangedAt,
+        rejectionReason: c.rejectionReason,
+        user: c.userId ? {
+          id: c.userId._id,
+          name: [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر',
+          phone: c.userId.phone ? `****${c.userId.phone.slice(-4)}` : null
+        } : { name: 'کاربر ناشناس' },
+        product: c.productId ? {
+          id: c.productId._id,
+          title: c.productId.title,
+          image: productImage
+        } : null
+      };
+    });
 
     res.json({
       success: true,
@@ -517,5 +557,208 @@ exports.getSellerComments = async (req, res) => {
       success: false,
       message: 'خطا در دریافت نظرات.'
     });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// حذف نظر (فروشنده)
+// DELETE /api/comments/:id
+// ═══════════════════════════════════════════════════════════════
+exports.deleteComment = async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    const { id } = req.params;
+
+    // اعتبارسنجی ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'شناسه نظر نامعتبر است.'
+      });
+    }
+
+    // یافتن نظر
+    const comment = await ProductComment.findById(id);
+    
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'نظر مورد نظر یافت نشد.'
+      });
+    }
+
+    // بررسی مالکیت
+    if (comment.sellerId.toString() !== sellerId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'شما مجاز به حذف این نظر نیستید.'
+      });
+    }
+
+    await ProductComment.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: 'نظر با موفقیت حذف شد.'
+    });
+
+  } catch (err) {
+    console.error('❌ خطا در حذف نظر:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در حذف نظر.'
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// مسدود کردن کاربر از نظر دادن (فروشنده)
+// POST /api/seller/block-commenter
+// ═══════════════════════════════════════════════════════════════
+exports.blockCommenter = async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    const { userId, reason, deleteComments } = req.body;
+
+    // اعتبارسنجی
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'شناسه کاربر نامعتبر است.'
+      });
+    }
+
+    const { BlockedCommentUser } = require('../models/ProductComment');
+
+    // بررسی مسدودیت قبلی
+    const existingBlock = await BlockedCommentUser.findOne({ sellerId, userId });
+    if (existingBlock) {
+      return res.status(400).json({
+        success: false,
+        message: 'این کاربر قبلاً مسدود شده است.'
+      });
+    }
+
+    // ایجاد رکورد مسدودیت
+    const block = new BlockedCommentUser({
+      sellerId,
+      userId,
+      reason: reason ? String(reason).trim().slice(0, 500) : null
+    });
+    await block.save();
+
+    // حذف نظرات کاربر در صورت درخواست
+    let deletedCount = 0;
+    if (deleteComments) {
+      const result = await ProductComment.deleteMany({ sellerId, userId });
+      deletedCount = result.deletedCount || 0;
+    }
+
+    res.json({
+      success: true,
+      message: 'کاربر با موفقیت مسدود شد.',
+      deletedComments: deletedCount
+    });
+
+  } catch (err) {
+    console.error('❌ خطا در مسدود کردن کاربر:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در مسدود کردن کاربر.'
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// رفع مسدودیت کاربر (فروشنده)
+// DELETE /api/seller/block-commenter/:userId
+// ═══════════════════════════════════════════════════════════════
+exports.unblockCommenter = async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'شناسه کاربر نامعتبر است.'
+      });
+    }
+
+    const { BlockedCommentUser } = require('../models/ProductComment');
+    
+    const result = await BlockedCommentUser.findOneAndDelete({ sellerId, userId });
+    
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'این کاربر در لیست مسدودی‌ها نیست.'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'مسدودیت کاربر برداشته شد.'
+    });
+
+  } catch (err) {
+    console.error('❌ خطا در رفع مسدودیت:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در رفع مسدودیت.'
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// دریافت لیست کاربران مسدود شده (فروشنده)
+// GET /api/seller/blocked-commenters
+// ═══════════════════════════════════════════════════════════════
+exports.getBlockedCommenters = async (req, res) => {
+  try {
+    const sellerId = req.user.id || req.user._id;
+    const { BlockedCommentUser } = require('../models/ProductComment');
+
+    const blockedUsers = await BlockedCommentUser.find({ sellerId })
+      .populate('userId', 'firstname lastname phone')
+      .sort({ blockedAt: -1 })
+      .lean();
+
+    const formatted = blockedUsers.map(b => ({
+      id: b._id,
+      userId: b.userId?._id,
+      userName: b.userId 
+        ? [b.userId.firstname, b.userId.lastname].filter(Boolean).join(' ') || 'کاربر'
+        : 'کاربر حذف شده',
+      userPhone: b.userId?.phone ? `****${b.userId.phone.slice(-4)}` : null,
+      reason: b.reason,
+      blockedAt: b.blockedAt
+    }));
+
+    res.json({
+      success: true,
+      blockedUsers: formatted,
+      count: formatted.length
+    });
+
+  } catch (err) {
+    console.error('❌ خطا در دریافت لیست مسدودی‌ها:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت لیست.'
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// بررسی مسدودیت کاربر قبل از ثبت نظر
+// ═══════════════════════════════════════════════════════════════
+exports.checkUserBlocked = async (sellerId, userId) => {
+  try {
+    const { BlockedCommentUser } = require('../models/ProductComment');
+    const blocked = await BlockedCommentUser.findOne({ sellerId, userId });
+    return !!blocked;
+  } catch {
+    return false;
   }
 };

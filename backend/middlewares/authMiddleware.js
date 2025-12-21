@@ -55,9 +55,6 @@ const hasSellerAccess = (payload) => {
   const role = normalizeRole(payload.role);
   const userType = String(payload.userType || '').trim().toLowerCase();
   
-  // DEBUG: لاگ برای عیب‌یابی
-  // console.log(`🔐 [hasSellerAccess] role=${role}, userType=${userType}, payloadId=${payload.id}`);
-  
   if (role === 'seller') return true;
   if (userType === 'both' || userType === 'seller') return true;
   
@@ -158,7 +155,7 @@ const createAuthMiddleware = (requiredRole = null) => {
         }
 
         if (!sellerDoc) {
-          console.warn(`🔐 [AuthMiddleware] ⛔ CRITICAL: Seller not found.`);
+          console.warn(`🔐 [AuthMiddleware] ⛔ CRITICAL: Seller not found for payload.id=${payload.id}`);
           return res.status(403).json({ message: 'فروشگاهی برای این حساب کاربری یافت نشد.' });
         }
         

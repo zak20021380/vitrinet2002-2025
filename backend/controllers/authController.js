@@ -588,17 +588,16 @@ exports.getCurrentUser = async (req, res) => {
 // این را بالای بقیه exports در authController.js اضافه کن
 exports.getCurrentSeller = async (req, res) => {
   try {
-    // ۱) خواندن توکن از کوکی
-    const token = req.cookies.seller_token;
-    if (!token) {
+    // استفاده از req.user که توسط authMiddleware ست شده
+    // این روش از خواندن مستقیم کوکی بهتره چون middleware همه توکن‌ها رو چک میکنه
+    const sellerId = req.user?.id || req.user?._id;
+    
+    if (!sellerId) {
       return res.status(401).json({ success: false, message: 'عدم احراز هویت' });
     }
 
-    // ۲) اعتبارسنجی توکن
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    // ۳) دریافت فروشنده (بدون فیلدهای حساس)
-    const seller = await Seller.findById(decoded.id).select('-password -otp -otpExpire');
+    // دریافت فروشنده (بدون فیلدهای حساس)
+    const seller = await Seller.findById(sellerId).select('-password -otp -otpExpire');
     if (!seller) {
       return res.status(404).json({ success: false, message: 'فروشنده یافت نشد.' });
     }

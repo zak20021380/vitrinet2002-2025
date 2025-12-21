@@ -64,6 +64,13 @@ const productCommentSchema = new mongoose.Schema({
     type: String,
     default: null,
     maxlength: 500
+  },
+  
+  // متادیتا
+  metadata: {
+    userIp: String,
+    userAgent: String,
+    submittedAt: Date
   }
   
 }, { 
@@ -71,6 +78,45 @@ const productCommentSchema = new mongoose.Schema({
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// مدل کاربران مسدود شده برای نظرات
+// ═══════════════════════════════════════════════════════════════
+const blockedCommentUserSchema = new mongoose.Schema({
+  // فروشنده‌ای که کاربر رو مسدود کرده
+  sellerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Seller',
+    required: true,
+    index: true
+  },
+  
+  // کاربر مسدود شده
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
+  
+  // دلیل مسدودیت
+  reason: {
+    type: String,
+    default: null,
+    maxlength: 500
+  },
+  
+  // تاریخ مسدودیت
+  blockedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
+// ایندکس یکتا برای جلوگیری از مسدودیت تکراری
+blockedCommentUserSchema.index({ sellerId: 1, userId: 1 }, { unique: true });
 
 // ایندکس‌های ترکیبی برای کوئری‌های بهینه
 productCommentSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
@@ -105,4 +151,8 @@ productCommentSchema.statics.getPendingCountForSeller = async function(sellerId)
   return this.countDocuments({ sellerId, status: 'pending' });
 };
 
-module.exports = mongoose.model('ProductComment', productCommentSchema);
+const ProductComment = mongoose.model('ProductComment', productCommentSchema);
+const BlockedCommentUser = mongoose.model('BlockedCommentUser', blockedCommentUserSchema);
+
+module.exports = ProductComment;
+module.exports.BlockedCommentUser = BlockedCommentUser;
