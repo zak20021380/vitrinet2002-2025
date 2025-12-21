@@ -1,5 +1,4 @@
 const SellerStreak = require('../models/SellerStreak');
-const mongoose = require('mongoose');
 
 /**
  * کنترلر استریک فروشنده
@@ -29,25 +28,37 @@ const toPersianNumber = (num) => {
  * این عملیات idempotent است - اگر همان روز دوبار فراخوانی شود، streak خراب نمی‌شود
  */
 exports.checkIn = async (req, res) => {
-  const session = await mongoose.startSession();
-  
   try {
-    session.startTransaction();
+    const sellerId = req.user?.id || req.user?._id;
     
-    const sellerId = req.user.id || req.user._id;
+    if (!sellerId) {
+      return res.status(401).json({
+        success: false,
+        message: 'لطفاً وارد حساب کاربری شوید'
+      });
+    }
+
     const todayStr = SellerStreak.getTehranDateString();
     const yesterdayStr = SellerStreak.getTehranYesterdayString();
 
-    // دریافت یا ایجاد رکورد استریک با lock
-    let streak = await SellerStreak.findOneAndUpdate(
-      { seller: sellerId },
-      { $setOnInsert: { seller: sellerId } },
-      { upsert: true, new: true, session }
-    );
+    // دریافت یا ایجاد رکورد استریک
+    let streak = await SellerStreak.findOne({ seller: sellerId });
+    
+    if (!streak) {
+      // ایجاد رکورد جدید برای فروشنده
+      streak = new SellerStreak({
+        seller: sellerId,
+        currentStreak: 0,
+        longestStreak: 0,
+        totalLoginDays: 0,
+        loyaltyPoints: 0,
+        lastCheckpoint: 0,
+        weekHistory: []
+      });
+    }
 
     // بررسی آیا امروز قبلاً ثبت شده (idempotency)
     if (streak.lastActiveDate === todayStr) {
-      await session.commitTransaction();
       return res.json({
         success: true,
         alreadyCheckedIn: true,
@@ -109,8 +120,7 @@ exports.checkIn = async (req, res) => {
     // آپدیت تاریخچه هفتگی
     streak.weekHistory = updateWeekHistory(streak.weekHistory, todayStr);
 
-    await streak.save({ session });
-    await session.commitTransaction();
+    await streak.save();
 
     // اضافه کردن پاداش به کیف پول (خارج از transaction اصلی)
     try {
@@ -155,14 +165,11 @@ exports.checkIn = async (req, res) => {
     });
 
   } catch (err) {
-    await session.abortTransaction();
     console.error('❌ خطا در ثبت استریک:', err);
     res.status(500).json({
       success: false,
       message: 'خطا در ثبت ورود روزانه'
     });
-  } finally {
-    session.endSession();
   }
 };
 

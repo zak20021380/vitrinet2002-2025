@@ -2750,10 +2750,7 @@
     fetchReviews(true);
   }
 
-  // Handle write review button click
-  function handleWriteReview() {
-    alert('قابلیت ثبت نظر به زودی فعال می‌شود!');
-  }
+
 
   // Initialize
   function init() {
@@ -2796,10 +2793,7 @@
       dom.modalLoadMoreBtn.addEventListener('click', loadMoreReviews);
     }
 
-    // Write review button
-    if (dom.modalWriteBtn) {
-      dom.modalWriteBtn.addEventListener('click', handleWriteReview);
-    }
+
 
     // Listen for product data
     document.addEventListener('product:updated', (event) => {

@@ -28,16 +28,34 @@
   // ═══════════════════════════════════════════════════════════════
   // API Functions
   // ═══════════════════════════════════════════════════════════════
+  
+  // Helper to get auth headers
+  function getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    // Try to get token from localStorage (seller panel stores it there)
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
   async function fetchComments(filter = 'pending', page = 1) {
     const endpoint = filter === 'pending'
       ? `/api/seller/pending-comments?page=${page}&limit=${state.limit}`
       : `/api/seller/comments?status=${filter}&page=${page}&limit=${state.limit}`;
 
     const response = await fetch(endpoint, {
-      credentials: 'include'
+      credentials: 'include',
+      headers: getAuthHeaders()
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('لطفاً دوباره وارد شوید');
+      }
       throw new Error('خطا در دریافت نظرات');
     }
 
@@ -47,7 +65,8 @@
   async function fetchPendingCount() {
     try {
       const response = await fetch('/api/seller/pending-comments/count', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: getAuthHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -62,9 +81,7 @@
   async function updateCommentStatus(commentId, status) {
     const response = await fetch(`/api/comments/${commentId}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify({ status })
     });
@@ -212,6 +229,8 @@
       if (!append) {
         listEl.innerHTML = renderEmptyState('خطا در بارگذاری نظرات. لطفاً دوباره تلاش کنید.');
       }
+      // Show toast for user feedback
+      showToast(err.message || 'خطا در برقراری ارتباط با سرور', 'error');
     } finally {
       state.isLoading = false;
     }

@@ -414,6 +414,20 @@ router.post(
 
 
 // ═══════════════════════════════════════════════════════════════
+// Routes نظرات محصولات فروشنده
+// ═══════════════════════════════════════════════════════════════
+const productCommentController = require('../controllers/productCommentController');
+
+// دریافت نظرات در انتظار تأیید
+router.get('/pending-comments', authMiddleware('seller'), productCommentController.getPendingComments);
+
+// دریافت تعداد نظرات در انتظار
+router.get('/pending-comments/count', authMiddleware('seller'), productCommentController.getPendingCount);
+
+// دریافت همه نظرات فروشنده (با فیلتر)
+router.get('/comments', authMiddleware('seller'), productCommentController.getSellerComments);
+
+// ═══════════════════════════════════════════════════════════════
 // Routes اعلان‌های فروشنده
 // ═══════════════════════════════════════════════════════════════
 const sellerNotificationController = require('../controllers/sellerNotificationController');
