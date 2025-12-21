@@ -11781,6 +11781,137 @@
       }
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // Dynamic Missions Loading from Admin Settings
+    // ═══════════════════════════════════════════════════════════════
+    
+    // Mission card configurations with icons and styles
+    const missionCardConfigs = {
+      'user-referral': {
+        htmlId: 'missionInvite',
+        style: 'invite',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>`,
+        title: 'دعوت از دوستان',
+        onclick: 'showReferralSection()'
+      },
+      'user-app-install': {
+        htmlId: 'missionInstallApp',
+        style: 'install-app',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
+        title: 'نصب اپلیکیشن',
+        onclick: 'showInstallAppMission()',
+        badge: 'ویژه'
+      },
+      'user-profile-complete': {
+        htmlId: 'missionProfile',
+        style: 'profile',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 8v13"/><path d="M3 13h18"/><circle cx="12" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`,
+        title: 'ثبت تاریخ تولد',
+        onclick: 'showProfileSection()'
+      },
+      'user-first-purchase': {
+        htmlId: 'missionBooking',
+        style: 'booking',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
+        title: 'اولین خرید',
+        onclick: 'showBookingMission()'
+      },
+      'user-review': {
+        htmlId: 'missionExplore',
+        style: 'explore',
+        icon: '🧭',
+        title: 'گردش در بازار',
+        onclick: 'showExploreMission()'
+      }
+    };
+
+    // Load missions from API and render cards
+    async function loadUserMissions() {
+      const missionsScroll = document.querySelector('.missions-scroll');
+      if (!missionsScroll) return;
+
+      try {
+        const res = await fetch('/api/missions/users', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) {
+          console.warn('Failed to load missions from API');
+          return; // Keep static cards as fallback
+        }
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data)) {
+          return;
+        }
+
+        // Update existing cards with API data
+        data.data.forEach(mission => {
+          const config = missionCardConfigs[mission.missionId];
+          if (!config) return;
+
+          const card = document.getElementById(config.htmlId);
+          if (!card) return;
+
+          // Update reward amount
+          const rewardEl = card.querySelector('.mission-reward');
+          if (rewardEl) {
+            const formattedAmount = new Intl.NumberFormat('fa-IR').format(mission.amount);
+            const iconSpan = rewardEl.querySelector('.mission-reward-icon');
+            const iconHtml = iconSpan ? iconSpan.outerHTML : '';
+            rewardEl.innerHTML = `${iconHtml} ${formattedAmount} تومان`;
+          }
+
+          // Show/hide card based on isActive
+          card.style.display = mission.isActive !== false ? '' : 'none';
+        });
+
+        // Hide cards that are not in the API response (disabled missions)
+        const activeMissionIds = data.data.map(m => m.missionId);
+        Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
+          if (!activeMissionIds.includes(missionId)) {
+            const card = document.getElementById(config.htmlId);
+            if (card) {
+              card.style.display = 'none';
+            }
+          }
+        });
+
+        console.log('✅ User missions loaded from API');
+      } catch (err) {
+        console.warn('Error loading user missions:', err);
+        // Keep static cards as fallback
+      }
+    }
+
+    // Store mission amounts for use in modals
+    window.missionAmounts = {};
+
+    // Update missionData with dynamic amounts
+    async function updateMissionDataAmounts() {
+      try {
+        const res = await fetch('/api/missions/users', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data)) return;
+
+        data.data.forEach(mission => {
+          const formattedAmount = new Intl.NumberFormat('fa-IR').format(mission.amount);
+          window.missionAmounts[mission.missionId] = {
+            amount: mission.amount,
+            formatted: `${formattedAmount} تومان`,
+            isActive: mission.isActive
+          };
+        });
+      } catch (err) {
+        console.warn('Error updating mission amounts:', err);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         showSection('dashboard');
@@ -11789,6 +11920,9 @@
         // بعد پیام‌ها و رزروها رو لود کن
         await loadMessages();
         await loadBookings();
+        // Load dynamic missions from admin settings
+        await loadUserMissions();
+        await updateMissionDataAmounts();
       } catch (error) {
         console.error('Initialization error:', error);
       }

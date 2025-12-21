@@ -11686,6 +11686,9 @@ function initMissionsPanel() {
         content.classList.toggle('active', isTarget);
         content.hidden = !isTarget;
       });
+
+      // Update mobile preview for the new tab
+      renderMobilePreview();
     });
   });
 
@@ -11701,6 +11704,7 @@ function initMissionsPanel() {
     input.addEventListener('input', () => {
       missionsState.currentValues[input.id] = input.value;
       checkMissionsChanges();
+      updateMissionPreview(input.id);
     });
   });
 
@@ -11711,6 +11715,7 @@ function initMissionsPanel() {
     toggle.addEventListener('change', () => {
       missionsState.currentValues[toggle.id] = toggle.checked;
       checkMissionsChanges();
+      updateMissionPreview(toggle.id);
     });
   });
 
@@ -11720,8 +11725,8 @@ function initMissionsPanel() {
     saveBtn.addEventListener('click', saveMissionsSettings);
   }
 
-  // Load saved settings from localStorage
-  loadMissionsSettings();
+  // Load settings from backend API
+  loadMissionsFromAPI();
 }
 
 function checkMissionsChanges() {
@@ -11741,7 +11746,84 @@ function checkMissionsChanges() {
   saveBar.classList.toggle('visible', hasChanges);
 }
 
-function loadMissionsSettings() {
+// Map HTML element IDs to backend mission IDs
+const missionIdMap = {
+  'mission-user-register': 'user-register',
+  'mission-user-app-install': 'user-app-install',
+  'mission-user-profile-complete': 'user-profile-complete',
+  'mission-user-referral': 'user-referral',
+  'mission-user-first-purchase': 'user-first-purchase',
+  'mission-user-review': 'user-review',
+  'mission-seller-sale': 'seller-sale',
+  'mission-seller-5star': 'seller-5star',
+  'mission-seller-streak-7': 'seller-streak-7',
+  'mission-seller-streak-30': 'seller-streak-30',
+  'mission-seller-new-product': 'seller-new-product',
+  'mission-seller-profile-complete': 'seller-profile-complete',
+  'mission-service-booking': 'service-booking',
+  'mission-service-5star': 'service-5star',
+  'mission-service-streak-7': 'service-streak-7',
+  'mission-service-streak-30': 'service-streak-30',
+  'mission-service-new-service': 'service-new-service',
+  'mission-service-quick-reply': 'service-quick-reply'
+};
+
+// Load missions from backend API
+async function loadMissionsFromAPI() {
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/admin/missions`, {
+      credentials: 'include'
+    });
+    
+    if (!res.ok) {
+      console.warn('Failed to load missions from API, using localStorage fallback');
+      loadMissionsFromLocalStorage();
+      renderMobilePreview();
+      return;
+    }
+    
+    const data = await res.json();
+    if (!data.success || !data.missions) {
+      loadMissionsFromLocalStorage();
+      renderMobilePreview();
+      return;
+    }
+    
+    // Apply values from API
+    data.missions.forEach(mission => {
+      // Find the corresponding HTML element ID
+      const htmlId = Object.keys(missionIdMap).find(key => missionIdMap[key] === mission.missionId);
+      if (!htmlId) return;
+      
+      // Update toggle
+      const toggle = document.getElementById(htmlId);
+      if (toggle && toggle.type === 'checkbox') {
+        toggle.checked = mission.isActive;
+        missionsState.initialValues[htmlId] = mission.isActive;
+        missionsState.currentValues[htmlId] = mission.isActive;
+      }
+      
+      // Update amount input
+      const amountInput = document.getElementById(`${htmlId}-amount`);
+      if (amountInput) {
+        amountInput.value = mission.amount;
+        missionsState.initialValues[`${htmlId}-amount`] = String(mission.amount);
+        missionsState.currentValues[`${htmlId}-amount`] = String(mission.amount);
+      }
+    });
+    
+    // Render initial preview
+    renderMobilePreview();
+    
+    console.log('✅ Missions loaded from API');
+  } catch (err) {
+    console.warn('Error loading missions from API:', err);
+    loadMissionsFromLocalStorage();
+    renderMobilePreview();
+  }
+}
+
+function loadMissionsFromLocalStorage() {
   try {
     const saved = localStorage.getItem('vitrinnet_missions_settings');
     if (!saved) return;
@@ -11770,52 +11852,100 @@ function loadMissionsSettings() {
   }
 }
 
-function saveMissionsSettings() {
+async function saveMissionsSettings() {
   const panel = document.getElementById('missions-panel');
   if (!panel) return;
 
-  const settings = {};
+  const saveBtn = document.getElementById('missions-save-btn');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> در حال ذخیره...';
+  }
 
-  // Collect all input values
-  const inputs = panel.querySelectorAll('input[type="number"]');
-  const toggles = panel.querySelectorAll('input[type="checkbox"]');
+  // Collect all mission data
+  const missions = [];
+  
+  for (const [htmlId, missionId] of Object.entries(missionIdMap)) {
+    const toggle = document.getElementById(htmlId);
+    const amountInput = document.getElementById(`${htmlId}-amount`);
+    
+    if (toggle && amountInput) {
+      missions.push({
+        missionId,
+        isActive: toggle.checked,
+        amount: parseInt(amountInput.value, 10) || 0
+      });
+    }
+  }
 
-  inputs.forEach(input => {
-    settings[input.id] = input.value;
-    missionsState.initialValues[input.id] = input.value;
-  });
-
-  toggles.forEach(toggle => {
-    settings[toggle.id] = toggle.checked;
-    missionsState.initialValues[toggle.id] = toggle.checked;
-  });
-
-  // Save to localStorage
   try {
-    localStorage.setItem('vitrinnet_missions_settings', JSON.stringify(settings));
+    // Save to backend API
+    const res = await fetch(`${ADMIN_API_BASE}/admin/missions/bulk-update`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ missions })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'خطا در ذخیره تنظیمات');
+    }
+    
+    // Update initial values
+    for (const key in missionsState.currentValues) {
+      missionsState.initialValues[key] = missionsState.currentValues[key];
+    }
+    
+    // Also save to localStorage as backup
+    const localSettings = {};
+    const inputs = panel.querySelectorAll('input[type="number"]');
+    const toggles = panel.querySelectorAll('input[type="checkbox"]');
+    
+    inputs.forEach(input => {
+      localSettings[input.id] = input.value;
+    });
+    toggles.forEach(toggle => {
+      localSettings[toggle.id] = toggle.checked;
+    });
+    
+    localStorage.setItem('vitrinnet_missions_settings', JSON.stringify(localSettings));
+    
+    // Hide save bar
+    const saveBar = document.querySelector('.missions-save-bar');
+    if (saveBar) {
+      saveBar.classList.remove('visible');
+    }
+    
+    // Show success message
+    showMissionsMessage('success', 'تنظیمات با موفقیت ذخیره شد');
+    missionsState.hasChanges = false;
+    
   } catch (err) {
-    console.warn('Failed to save missions settings:', err);
+    console.error('Error saving missions:', err);
+    showMissionsMessage('error', err.message || 'خطا در ذخیره تنظیمات');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="ri-save-3-line"></i> ذخیره تغییرات';
+    }
   }
-
-  // Hide save bar
-  const saveBar = document.querySelector('.missions-save-bar');
-  if (saveBar) {
-    saveBar.classList.remove('visible');
-  }
-
-  // Show success message
-  showMissionsMessage();
-
-  missionsState.hasChanges = false;
-
-  // TODO: Send to backend API
-  // sendMissionsToBackend(settings);
 }
 
-function showMissionsMessage() {
+function showMissionsMessage(type = 'success', text = 'تنظیمات با موفقیت ذخیره شد') {
   const message = document.getElementById('missions-message');
   if (!message) return;
 
+  message.innerHTML = `
+    <i class="${type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'}"></i>
+    <span>${text}</span>
+  `;
+  
+  message.className = 'missions-message';
+  message.classList.add(type === 'success' ? 'success' : 'error');
   message.hidden = false;
   message.classList.add('show');
 
@@ -11825,6 +11955,96 @@ function showMissionsMessage() {
       message.hidden = true;
     }, 300);
   }, 3000);
+}
+
+// Update mobile preview when values change
+function updateMissionPreview(elementId) {
+  const previewContainer = document.getElementById('missions-mobile-preview');
+  if (!previewContainer) return;
+  
+  // Re-render the preview
+  renderMobilePreview();
+}
+
+// Render mobile preview of mission cards
+function renderMobilePreview() {
+  const previewContainer = document.getElementById('missions-mobile-preview');
+  if (!previewContainer) return;
+  
+  // Get current active tab
+  const activeTab = document.querySelector('.missions-tab.active');
+  const tabType = activeTab ? activeTab.dataset.tab : 'users';
+  
+  // Get missions for current tab
+  const missionCards = getMissionCardsForPreview(tabType);
+  
+  previewContainer.innerHTML = `
+    <div class="preview-phone-frame">
+      <div class="preview-phone-notch"></div>
+      <div class="preview-phone-screen">
+        <div class="preview-missions-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="6"></circle>
+            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+          </svg>
+          ماموریت‌های پولساز
+        </div>
+        <div class="preview-missions-scroll">
+          ${missionCards}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getMissionCardsForPreview(tabType) {
+  const missionConfigs = {
+    users: [
+      { id: 'mission-user-referral', title: 'دعوت از دوستان', style: 'invite', icon: '👥' },
+      { id: 'mission-user-app-install', title: 'نصب اپلیکیشن', style: 'install-app', icon: '📱', badge: 'ویژه' },
+      { id: 'mission-user-profile-complete', title: 'تکمیل پروفایل', style: 'profile', icon: '✏️' },
+      { id: 'mission-user-first-purchase', title: 'اولین خرید', style: 'booking', icon: '🛒' },
+      { id: 'mission-user-review', title: 'ثبت نظر', style: 'explore', icon: '💬' }
+    ],
+    'product-sellers': [
+      { id: 'mission-seller-sale', title: 'فروش موفق', style: 'booking', icon: '🛍️' },
+      { id: 'mission-seller-5star', title: 'نظر ۵ ستاره', style: 'profile', icon: '⭐' },
+      { id: 'mission-seller-streak-7', title: 'استریک ۷ روزه', style: 'invite', icon: '🔥' },
+      { id: 'mission-seller-streak-30', title: 'استریک ۳۰ روزه', style: 'install-app', icon: '🏆' }
+    ],
+    'service-sellers': [
+      { id: 'mission-service-booking', title: 'رزرو موفق', style: 'booking', icon: '📅' },
+      { id: 'mission-service-5star', title: 'نظر ۵ ستاره', style: 'profile', icon: '⭐' },
+      { id: 'mission-service-streak-7', title: 'استریک ۷ روزه', style: 'invite', icon: '🔥' },
+      { id: 'mission-service-streak-30', title: 'استریک ۳۰ روزه', style: 'install-app', icon: '🏆' }
+    ]
+  };
+  
+  const configs = missionConfigs[tabType] || missionConfigs.users;
+  
+  return configs.map(config => {
+    const toggle = document.getElementById(config.id);
+    const amountInput = document.getElementById(`${config.id}-amount`);
+    
+    const isActive = toggle ? toggle.checked : true;
+    const amount = amountInput ? parseInt(amountInput.value, 10) || 0 : 0;
+    
+    if (!isActive) return '';
+    
+    const formattedAmount = new Intl.NumberFormat('fa-IR').format(amount);
+    
+    return `
+      <div class="preview-mission-card ${config.style}">
+        ${config.badge ? `<span class="preview-mission-badge">${config.badge}</span>` : ''}
+        <div class="preview-mission-reward">
+          <span class="preview-mission-icon">${config.icon}</span>
+          ${formattedAmount} تومان
+        </div>
+        <p class="preview-mission-title">${config.title}</p>
+        <div class="preview-mission-arrow">←</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // Initialize when DOM is ready
