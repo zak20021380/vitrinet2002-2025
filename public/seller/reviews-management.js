@@ -29,32 +29,79 @@
   // API Functions
   // ═══════════════════════════════════════════════════════════════
   
-  // Helper to get auth headers
+  // Helper to get auth headers with detailed debugging
   function getAuthHeaders() {
     const headers = {
       'Content-Type': 'application/json'
     };
+    
+    // DEBUG: Log all localStorage keys related to auth
+    console.log('[ReviewsManagement] DEBUG - Checking localStorage for tokens:');
+    console.log('  - token:', localStorage.getItem('token') ? 'EXISTS' : 'NULL');
+    console.log('  - seller_token:', localStorage.getItem('seller_token') ? 'EXISTS' : 'NULL');
+    console.log('  - seller:', localStorage.getItem('seller') ? 'EXISTS' : 'NULL');
+    
     // Try to get token from localStorage (seller panel stores it there)
-    const token = localStorage.getItem('token');
+    // Check multiple possible keys for compatibility
+    const token = localStorage.getItem('token') || localStorage.getItem('seller_token');
+    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      // DEBUG: Log token info (first/last chars only for security)
+      const tokenPreview = token.length > 20 
+        ? `${token.substring(0, 10)}...${token.substring(token.length - 10)}`
+        : '[short token]';
+      console.log('[ReviewsManagement] DEBUG - Token found:', tokenPreview);
+      console.log('[ReviewsManagement] DEBUG - Authorization header set');
+    } else {
+      console.error('[ReviewsManagement] ERROR - No auth token found in localStorage!');
+      console.log('[ReviewsManagement] DEBUG - All localStorage keys:', Object.keys(localStorage));
     }
     return headers;
   }
 
+  // Check if user is authenticated before making API calls
+  function isAuthenticated() {
+    const token = localStorage.getItem('token') || localStorage.getItem('seller_token');
+    return !!token;
+  }
+
   async function fetchComments(filter = 'pending', page = 1) {
+    console.log('[ReviewsManagement] fetchComments called - filter:', filter, 'page:', page);
+    
+    if (!isAuthenticated()) {
+      console.error('[ReviewsManagement] Not authenticated - no token in localStorage');
+      throw new Error('لطفاً دوباره وارد شوید');
+    }
+
     const endpoint = filter === 'pending'
       ? `/api/seller/pending-comments?page=${page}&limit=${state.limit}`
       : `/api/seller/comments?status=${filter}&page=${page}&limit=${state.limit}`;
 
+    console.log('[ReviewsManagement] Fetching:', endpoint);
+    const headers = getAuthHeaders();
+    console.log('[ReviewsManagement] Request headers:', JSON.stringify(headers, null, 2));
+
     const response = await fetch(endpoint, {
       credentials: 'include',
-      headers: getAuthHeaders()
+      headers: headers
     });
+
+    console.log('[ReviewsManagement] Response status:', response.status);
 
     if (!response.ok) {
       if (response.status === 401) {
+        console.error('[ReviewsManagement] 401 Unauthorized - Token missing or invalid');
         throw new Error('لطفاً دوباره وارد شوید');
+      }
+      if (response.status === 403) {
+        console.error('[ReviewsManagement] 403 Forbidden - Role mismatch or token issue');
+        // Try to get error details from response
+        try {
+          const errorData = await response.json();
+          console.error('[ReviewsManagement] Server error message:', errorData);
+        } catch (e) {}
+        throw new Error('دسترسی غیرمجاز. لطفاً دوباره وارد شوید.');
       }
       throw new Error('خطا در دریافت نظرات');
     }
@@ -63,15 +110,29 @@
   }
 
   async function fetchPendingCount() {
+    if (!isAuthenticated()) {
+      console.warn('[ReviewsManagement] Skipping pending count fetch - not authenticated');
+      return;
+    }
+
     try {
+      console.log('[ReviewsManagement] Fetching pending count...');
       const response = await fetch('/api/seller/pending-comments/count', {
         credentials: 'include',
         headers: getAuthHeaders()
       });
+      console.log('[ReviewsManagement] Pending count response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
         state.pendingCount = data.count || 0;
         updatePendingBadge();
+      } else if (response.status === 403) {
+        console.error('[ReviewsManagement] 403 on pending count - auth issue');
+        try {
+          const errorData = await response.json();
+          console.error('[ReviewsManagement] Server error:', errorData);
+        } catch (e) {}
       }
     } catch (err) {
       console.warn('Failed to fetch pending count:', err);
