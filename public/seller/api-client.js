@@ -51,20 +51,7 @@
       }
 
       return originalFetch(resolvedResource, options).then((response) => {
-        if (!response || response.status !== 403) {
-          return response;
-        }
-
-        const url = typeof resolvedResource === 'string' ? resolvedResource : response.url;
-        if (!url || !url.includes('/api/seller/pending-comments')) {
-          return response;
-        }
-
-        const fallbackPayload = url.includes('/count') ? { count: 0 } : [];
-        return new Response(JSON.stringify(fallbackPayload), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
+        return response;
       });
     };
   }

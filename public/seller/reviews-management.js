@@ -29,79 +29,65 @@
   // API Functions
   // ═══════════════════════════════════════════════════════════════
   
-  // Helper to get auth headers with detailed debugging
+  // Helper to get auth headers
+  // توکن فروشنده در کوکی httpOnly ذخیره شده و با credentials: 'include' ارسال میشه
+  // فقط Content-Type لازمه
   function getAuthHeaders() {
     const headers = {
       'Content-Type': 'application/json'
     };
     
-    // DEBUG: Log all localStorage keys related to auth
-    console.log('[ReviewsManagement] DEBUG - Checking localStorage for tokens:');
-    console.log('  - token:', localStorage.getItem('token') ? 'EXISTS' : 'NULL');
-    console.log('  - seller_token:', localStorage.getItem('seller_token') ? 'EXISTS' : 'NULL');
-    console.log('  - seller:', localStorage.getItem('seller') ? 'EXISTS' : 'NULL');
-    
-    // Try to get token from localStorage (seller panel stores it there)
-    // Check multiple possible keys for compatibility
+    // اگر توکن در localStorage هم موجود باشه (برای سازگاری با پنل‌های قدیمی)
     const token = localStorage.getItem('token') || localStorage.getItem('seller_token');
-    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      // DEBUG: Log token info (first/last chars only for security)
-      const tokenPreview = token.length > 20 
-        ? `${token.substring(0, 10)}...${token.substring(token.length - 10)}`
-        : '[short token]';
-      console.log('[ReviewsManagement] DEBUG - Token found:', tokenPreview);
-      console.log('[ReviewsManagement] DEBUG - Authorization header set');
-    } else {
-      console.error('[ReviewsManagement] ERROR - No auth token found in localStorage!');
-      console.log('[ReviewsManagement] DEBUG - All localStorage keys:', Object.keys(localStorage));
     }
+    
     return headers;
   }
 
-  // Check if user is authenticated before making API calls
+  // Check if user is authenticated
+  // توکن اصلی در کوکی httpOnly هست که JavaScript نمیتونه بخونه
+  // پس فقط چک میکنیم که اطلاعات فروشنده در localStorage یا window موجوده
   function isAuthenticated() {
+    // روش ۱: چک کردن توکن در localStorage (پنل قدیمی)
     const token = localStorage.getItem('token') || localStorage.getItem('seller_token');
-    return !!token;
+    if (token) return true;
+    
+    // روش ۲: چک کردن اطلاعات فروشنده در localStorage
+    const seller = localStorage.getItem('seller');
+    if (seller) return true;
+    
+    // روش ۳: چک کردن window.seller (پنل جدید)
+    if (window.seller && (window.seller.id || window.seller._id)) return true;
+    
+    // اگر هیچکدام نبود، فرض میکنیم کوکی httpOnly موجوده
+    // و اجازه میدیم درخواست ارسال بشه - سرور تصمیم میگیره
+    return true;
   }
 
   async function fetchComments(filter = 'pending', page = 1) {
-    console.log('[ReviewsManagement] fetchComments called - filter:', filter, 'page:', page);
-    
-    if (!isAuthenticated()) {
-      console.error('[ReviewsManagement] Not authenticated - no token in localStorage');
-      throw new Error('لطفاً دوباره وارد شوید');
-    }
-
     const endpoint = filter === 'pending'
       ? `/api/seller/pending-comments?page=${page}&limit=${state.limit}`
       : `/api/seller/comments?status=${filter}&page=${page}&limit=${state.limit}`;
 
-    console.log('[ReviewsManagement] Fetching:', endpoint);
-    const headers = getAuthHeaders();
-    console.log('[ReviewsManagement] Request headers:', JSON.stringify(headers, null, 2));
-
     const response = await fetch(endpoint, {
       credentials: 'include',
-      headers: headers
+      headers: getAuthHeaders()
     });
-
-    console.log('[ReviewsManagement] Response status:', response.status);
 
     if (!response.ok) {
       if (response.status === 401) {
-        console.error('[ReviewsManagement] 401 Unauthorized - Token missing or invalid');
         throw new Error('لطفاً دوباره وارد شوید');
       }
       if (response.status === 403) {
-        console.error('[ReviewsManagement] 403 Forbidden - Role mismatch or token issue');
-        // Try to get error details from response
+        // دریافت پیام خطا از سرور
+        let errorMessage = 'دسترسی غیرمجاز';
         try {
           const errorData = await response.json();
-          console.error('[ReviewsManagement] Server error message:', errorData);
+          errorMessage = errorData.message || errorMessage;
         } catch (e) {}
-        throw new Error('دسترسی غیرمجاز. لطفاً دوباره وارد شوید.');
+        throw new Error(errorMessage);
       }
       throw new Error('خطا در دریافت نظرات');
     }
@@ -110,29 +96,16 @@
   }
 
   async function fetchPendingCount() {
-    if (!isAuthenticated()) {
-      console.warn('[ReviewsManagement] Skipping pending count fetch - not authenticated');
-      return;
-    }
-
     try {
-      console.log('[ReviewsManagement] Fetching pending count...');
       const response = await fetch('/api/seller/pending-comments/count', {
         credentials: 'include',
         headers: getAuthHeaders()
       });
-      console.log('[ReviewsManagement] Pending count response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
         state.pendingCount = data.count || 0;
         updatePendingBadge();
-      } else if (response.status === 403) {
-        console.error('[ReviewsManagement] 403 on pending count - auth issue');
-        try {
-          const errorData = await response.json();
-          console.error('[ReviewsManagement] Server error:', errorData);
-        } catch (e) {}
       }
     } catch (err) {
       console.warn('Failed to fetch pending count:', err);
