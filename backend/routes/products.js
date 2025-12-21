@@ -86,6 +86,56 @@ router.delete('/:id/discount', /* authMiddleware */ productController.removeDisc
 // -----------------------------
 router.get('/:id/like-status', productController.getLikeStatus);
 router.post('/:id/like', productController.toggleLike);
+
+// دریافت نظرات منتشر شده محصول (برای سازگاری با فرانت قدیمی)
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    const ProductComment = require('../models/ProductComment');
+    const productId = req.params.id;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: 'شناسه محصول نامعتبر است.' });
+    }
+
+    const [comments, totalCount, ratingStats] = await Promise.all([
+      ProductComment.find({ productId, status: 'published' })
+        .populate('userId', 'firstname lastname')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      ProductComment.countDocuments({ productId, status: 'published' }),
+      ProductComment.getProductRating(productId)
+    ]);
+
+    const formattedComments = comments.map(c => ({
+      id: c._id,
+      content: c.content,
+      rating: c.rating,
+      createdAt: c.createdAt,
+      userName: c.userId ? [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر' : 'کاربر',
+      user: { name: c.userId ? [c.userId.firstname, c.userId.lastname].filter(Boolean).join(' ') || 'کاربر' : 'کاربر' }
+    }));
+
+    res.json({
+      success: true,
+      reviews: formattedComments,
+      avgRating: ratingStats.avgRating,
+      averageRating: ratingStats.avgRating,
+      totalCount: ratingStats.totalCount,
+      total: ratingStats.totalCount,
+      hasMore: skip + comments.length < totalCount
+    });
+  } catch (err) {
+    console.error('خطا در دریافت نظرات محصول:', err);
+    res.status(500).json({ success: false, message: 'خطا در دریافت نظرات.' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)

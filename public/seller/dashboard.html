@@ -4,12 +4,14 @@
   <script src="/assets/js/seller-dashboard-config.js"></script>
   <script src="/js/analytics.js" defer></script>
   <script src="/js/seller-dashboard.js" defer></script>
+  <script src="/seller/reviews-management.js" defer></script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>داشبورد فروشنده | ویترینت</title>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/service-seller-panel/styles/23-reviews-management.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -6076,6 +6078,13 @@
           </div>
           <span class="sidebar-menu-item__text">تخفیف‌ها</span>
         </button>
+        <button class="sidebar-menu-item" data-section="reviews">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--amber">
+            <i class="ri-star-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">مدیریت نظرات</span>
+          <span class="sidebar-menu-item__badge sidebar-menu-badge" id="sidebarReviewsBadge" style="display: none;">0</span>
+        </button>
       </div>
 
       <div class="sidebar-menu-divider"></div>
@@ -6194,6 +6203,13 @@
         <path d="M9 12a3 3 0 116 0 3 3 0 01-6 0z" stroke="#10b981" stroke-width="2"/>
       </svg>
       <span>تخفیف‌ها</span>
+    </button>
+    <button class="sidebar-link" id="menu-reviews" data-section="reviews" aria-label="مدیریت نظرات">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" fill="#fbbf24"/>
+      </svg>
+      <span>مدیریت نظرات</span>
+      <span class="sidebar-menu-badge" id="desktopReviewsBadge" style="display: none;">0</span>
     </button>
     <button class="sidebar-link" id="menu-content" data-section="content" aria-label="مدیریت ظاهر فروشگاه">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
@@ -6794,6 +6810,11 @@
 
       <div id="discountMobileList" class="grid md:hidden gap-3 mt-4"></div>
     </div>
+  </section>
+
+  <!-- بخش مدیریت نظرات محصولات -->
+  <section id="section-reviews" style="display:none;">
+    <div id="reviewsManagementSection"></div>
   </section>
 
   <div class="add-discount-modal" id="addDiscountModal" role="dialog" aria-modal="true" aria-labelledby="addDiscountTitle" aria-describedby="addDiscountDesc">

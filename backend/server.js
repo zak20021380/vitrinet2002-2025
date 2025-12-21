@@ -110,6 +110,7 @@ app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/rank', require('./routes/rank'));
 app.use('/api/admin-seller-notifications', require('./routes/adminSellerNotifications'));
 app.use('/api', require('./routes/missionSettings'));
+app.use('/api', require('./routes/productComments'));
 
 // ------------------- Health Check -------------------
 app.get('/', (req, res) => {

@@ -435,7 +435,10 @@ function startMessagePolling() {
     startBadgePolling();
     startMessagePolling();
 
-    // ۳) نمایش نام و نام‌خانوادگی فروشنده
+    // ۳) بارگذاری تعداد نظرات در انتظار
+    loadPendingReviewsCount();
+
+    // ۴) نمایش نام و نام‌خانوادگی فروشنده
     const welcomeEl = document.getElementById('seller-welcome');
     if (welcomeEl) {
       const first = window.seller.firstname || '';
@@ -446,6 +449,34 @@ function startMessagePolling() {
     }
   }
 });
+
+// ————————— بارگذاری تعداد نظرات در انتظار —————————
+async function loadPendingReviewsCount() {
+  try {
+    const response = await apiFetch('/api/seller/pending-comments/count');
+    if (response.ok) {
+      const data = await response.json();
+      const count = data.count || 0;
+      
+      // Update mobile sidebar badge
+      const sidebarBadge = document.getElementById('sidebarReviewsBadge');
+      if (sidebarBadge) {
+        sidebarBadge.textContent = count;
+        sidebarBadge.style.display = count === 0 ? 'none' : 'grid';
+      }
+      
+      // Update desktop sidebar badge
+      const desktopBadge = document.getElementById('desktopReviewsBadge');
+      if (desktopBadge) {
+        desktopBadge.textContent = count;
+        desktopBadge.style.display = count === 0 ? 'none' : 'inline-flex';
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to load pending reviews count:', err);
+  }
+}
+
 // ————————— توقف پولینگ هنگام خروج —————————
 window.addEventListener('beforeunload', () => {
   if (window.badgeInterval) {
@@ -660,7 +691,8 @@ function showSection(section) {
 
   const allSections = [
     "visit", "notif", "msg", "profile", "settings", "add", "upgrade",
-    "products", "content", "seo", "guide", "register-visit", "performance"
+    "products", "content", "seo", "guide", "register-visit", "performance",
+    "discounts", "reviews"
   ];
   allSections.forEach(s => {
     const btn = document.getElementById('menu-' + s);
@@ -681,6 +713,9 @@ function showSection(section) {
   }
   if (section === 'performance') {
     loadPerformanceStatus();
+  }
+  if (section === 'reviews' && window.ReviewsManagement) {
+    window.ReviewsManagement.init();
   }
   if (window.innerWidth <= 768) toggleSidebar();
   if (section === "products") setupProductSection();

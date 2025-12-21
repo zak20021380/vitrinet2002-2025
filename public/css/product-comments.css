@@ -1,0 +1,342 @@
+/* ═══════════════════════════════════════════════════════════════
+   Product Comments - Form & Toast Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Review Form */
+.review-form {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+
+.review-form.is-visible {
+  display: flex;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-form__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-form__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.review-form__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.review-form__close:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.review-form__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Rating Stars */
+.review-form__rating {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-form__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.review-form__stars {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.review-form__star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #fff;
+  border-radius: 10px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.review-form__star:hover {
+  transform: scale(1.1);
+  color: #fbbf24;
+}
+
+.review-form__star.is-selected {
+  color: #fbbf24;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.review-form__star svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Textarea */
+.review-form__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.review-form__textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #0f172a;
+  background: #fff;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-form__textarea:focus {
+  outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.review-form__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.review-form__counter {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Actions */
+.review-form__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.review-form__cancel {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.review-form__cancel:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.review-form__submit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+}
+
+.review-form__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35);
+}
+
+.review-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.review-form__submit-spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+}
+
+.review-form__submit.is-loading .review-form__submit-text {
+  display: none;
+}
+
+.review-form__submit.is-loading .review-form__submit-spinner {
+  display: block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Notice */
+.review-form__notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem;
+  background: rgba(14, 165, 233, 0.08);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #0284c7;
+  line-height: 1.5;
+}
+
+.review-form__notice svg {
+  flex-shrink: 0;
+  color: #0ea5e9;
+}
+
+/* Toast Notification */
+.comment-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+  z-index: 10000;
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+}
+
+.comment-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.comment-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.comment-toast__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.comment-toast--success .comment-toast__icon {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.comment-toast--error .comment-toast__icon {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.comment-toast__message {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .review-form {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .review-form__star {
+    width: 36px;
+    height: 36px;
+  }
+
+  .review-form__star svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .review-form__actions {
+    flex-direction: column;
+  }
+
+  .comment-toast {
+    left: 1rem;
+    right: 1rem;
+    transform: translateX(0) translateY(100px);
+    max-width: none;
+  }
+
+  .comment-toast.is-visible {
+    transform: translateX(0) translateY(0);
+  }
+}
