@@ -476,6 +476,52 @@ exports.getLatestProducts = async (req, res) => {
   }
 };
 
+// دریافت محصولات مشابه بر اساس دسته‌بندی
+exports.getSimilarProducts = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const limit = Math.min(20, Math.max(1, parseInt(req.query.limit) || 10));
+
+    // پیدا کردن محصول فعلی برای دریافت دسته‌بندی
+    const currentProduct = await Product.findById(productId).select('category sellerId');
+    if (!currentProduct) {
+      return res.status(404).json({ success: false, message: 'محصول پیدا نشد!' });
+    }
+
+    const likeActor = resolveRequestActor(req, { allowIpFallback: false });
+    const now = new Date();
+
+    // جستجوی محصولات مشابه از همان دسته‌بندی (به جز محصول فعلی)
+    const docs = await Product.find({
+      category: currentProduct.category,
+      _id: { $ne: productId },
+      inStock: { $ne: false }
+    })
+      .sort({ likesCount: -1, createdAt: -1 })
+      .limit(limit)
+      .populate({
+        path: 'sellerId',
+        select: 'storename ownerName shopurl ownerFirstname ownerLastname category city'
+      });
+
+    const products = await Promise.all(docs.map(async (doc) => {
+      await enforceDiscountLifecycle(doc, now);
+      const response = buildProductResponse(req, doc, { likeActor });
+      // اضافه کردن نام فروشگاه برای نمایش در کارت
+      const seller = doc.sellerId || {};
+      response.shopName = seller.storename || seller.ownerName || 
+        [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || '';
+      response.shopUrl = seller.shopurl || '';
+      return response;
+    }));
+
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error('Error fetching similar products:', err);
+    res.status(500).json({ success: false, message: 'خطا در دریافت محصولات مشابه', error: err.message });
+  }
+};
+
 
 
 

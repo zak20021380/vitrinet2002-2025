@@ -2898,3 +2898,172 @@
 
   init();
 })();
+
+// ========== Similar Products Section ==========
+(function initSimilarProducts() {
+  'use strict';
+
+  const dom = {
+    section: document.getElementById('similarProductsSection'),
+    track: document.getElementById('similarProductsTrack'),
+    viewAllLink: document.getElementById('similarProductsViewAll')
+  };
+
+  const state = {
+    productId: null,
+    category: null,
+    loaded: false
+  };
+
+  const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
+
+  function formatPrice(price) {
+    if (price == null || isNaN(price)) return '';
+    return persianNumberFormatter.format(price);
+  }
+
+  function resolveMediaPath(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+      return path;
+    }
+    return `/uploads/${path}`;
+  }
+
+  function createProductCard(product) {
+    const card = document.createElement('a');
+    card.className = 'similar-product-card';
+    card.href = `/product.html?id=${encodeURIComponent(product._id || product.id)}`;
+
+    const imageUrl = product.images && product.images.length > 0
+      ? resolveMediaPath(product.images[product.mainImageIndex || 0] || product.images[0])
+      : '/assets/images/placeholder-product.svg';
+
+    const hasDiscount = product.discountActive && product.discountPrice && product.discountPrice < product.price;
+    const displayPrice = hasDiscount ? product.discountPrice : product.price;
+    const shopName = product.shopName || product.seller?.storename || '';
+
+    let discountBadgeHtml = '';
+    if (hasDiscount) {
+      const discountPercent = Math.round(((product.price - product.discountPrice) / product.price) * 100);
+      discountBadgeHtml = `
+        <div class="similar-product-discount-badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+          ${persianNumberFormatter.format(discountPercent)}٪
+        </div>
+      `;
+    }
+
+    let originalPriceHtml = '';
+    if (hasDiscount) {
+      originalPriceHtml = `<span class="similar-product-original-price">${formatPrice(product.price)} تومان</span>`;
+    }
+
+    card.innerHTML = `
+      <div class="similar-product-image-wrapper">
+        <img class="similar-product-image" src="${imageUrl}" alt="${product.title || 'محصول'}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
+        ${discountBadgeHtml}
+      </div>
+      <div class="similar-product-info">
+        <h3 class="similar-product-title">${product.title || 'بدون نام'}</h3>
+        ${shopName ? `
+          <div class="similar-product-shop">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>${shopName}</span>
+          </div>
+        ` : ''}
+        <div class="similar-product-price">
+          ${originalPriceHtml}
+          <span class="similar-product-price-value">${formatPrice(displayPrice)} تومان</span>
+        </div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  async function fetchSimilarProducts(productId) {
+    if (!productId || state.loaded) return;
+
+    try {
+      const response = await fetch(`/api/products/${encodeURIComponent(productId)}/similar?limit=12`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch similar products: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const products = data.products || [];
+
+      if (products.length === 0) {
+        // Hide section if no similar products
+        if (dom.section) dom.section.hidden = true;
+        return;
+      }
+
+      renderProducts(products);
+      state.loaded = true;
+
+    } catch (error) {
+      console.warn('Failed to load similar products:', error);
+      if (dom.section) dom.section.hidden = true;
+    }
+  }
+
+  function renderProducts(products) {
+    if (!dom.track || !dom.section) return;
+
+    dom.track.innerHTML = '';
+
+    products.forEach(product => {
+      const card = createProductCard(product);
+      dom.track.appendChild(card);
+    });
+
+    dom.section.hidden = false;
+
+    // Update view all link with category
+    if (dom.viewAllLink && state.category) {
+      dom.viewAllLink.href = `/all-products.html?category=${encodeURIComponent(state.category)}`;
+    }
+  }
+
+  function init() {
+    // Listen for product data from main product page
+    document.addEventListener('product:updated', (event) => {
+      const detail = event?.detail?.state || {};
+      if (detail.item_id) {
+        state.productId = detail.item_id;
+        state.category = detail.category || '';
+        
+        // Delay fetch to not block main content
+        setTimeout(() => {
+          fetchSimilarProducts(state.productId);
+        }, 800);
+      }
+    });
+
+    // Fallback: get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    if (productId) {
+      state.productId = productId;
+      
+      // Wait for main content to load first
+      setTimeout(() => {
+        if (!state.loaded) {
+          fetchSimilarProducts(productId);
+        }
+      }, 1500);
+    }
+  }
+
+  init();
+})();

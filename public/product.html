@@ -4181,6 +4181,340 @@
       }
     }
     /* ========== End Out of Stock Styles ========== */
+
+    /* ========== Similar Products Section ========== */
+    .similar-products-section {
+      margin-top: 2.5rem;
+      padding: 2rem 0 2.5rem;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .similar-products-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      gap: 1rem;
+    }
+
+    .similar-products-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .similar-products-title svg {
+      width: 22px;
+      height: 22px;
+      color: var(--primary);
+    }
+
+    .similar-products-view-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      background: rgba(15, 118, 110, 0.08);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .similar-products-view-all:hover {
+      background: rgba(15, 118, 110, 0.15);
+      transform: translateX(-2px);
+    }
+
+    .similar-products-view-all svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .similar-products-view-all:hover svg {
+      transform: translateX(-3px);
+    }
+
+    .similar-products-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin: 0 -3%;
+      padding: 0.5rem 3%;
+    }
+
+    .similar-products-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .similar-products-track {
+      display: flex;
+      gap: 0.85rem;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Similar Product Card */
+    .similar-product-card {
+      flex: 0 0 auto;
+      width: clamp(150px, 42vw, 180px);
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      scroll-snap-align: start;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .similar-product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+      border-color: rgba(15, 118, 110, 0.2);
+    }
+
+    .similar-product-card:active {
+      transform: translateY(-2px);
+    }
+
+    .similar-product-image-wrapper {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    }
+
+    .similar-product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .similar-product-card:hover .similar-product-image {
+      transform: scale(1.05);
+    }
+
+    .similar-product-discount-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 8px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .similar-product-discount-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .similar-product-info {
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    .similar-product-title {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 2.4em;
+    }
+
+    .similar-product-shop {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .similar-product-shop svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      color: #94a3b8;
+    }
+
+    .similar-product-price {
+      margin-top: auto;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .similar-product-price-value {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #059669;
+      direction: rtl;
+    }
+
+    .similar-product-price-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .similar-product-original-price {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      .similar-products-section {
+        margin-top: 3rem;
+        padding: 2.5rem 0 3rem;
+      }
+
+      .similar-products-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .similar-products-title {
+        font-size: 1.3rem;
+      }
+
+      .similar-products-scroll {
+        margin: 0 -2%;
+        padding: 0.5rem 2%;
+      }
+
+      .similar-products-track {
+        gap: 1rem;
+      }
+
+      .similar-product-card {
+        width: 200px;
+      }
+
+      .similar-product-info {
+        padding: 1rem;
+      }
+
+      .similar-product-title {
+        font-size: 0.9rem;
+      }
+
+      .similar-product-price-value {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .similar-products-section {
+        margin-top: 2rem;
+        padding: 1.5rem 0 2rem;
+      }
+
+      .similar-products-header {
+        margin-bottom: 1rem;
+      }
+
+      .similar-products-title {
+        font-size: 1rem;
+      }
+
+      .similar-products-title svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .similar-products-view-all {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.7rem;
+      }
+
+      .similar-products-track {
+        gap: 0.7rem;
+      }
+
+      .similar-product-card {
+        width: clamp(140px, 40vw, 160px);
+        border-radius: 14px;
+      }
+
+      .similar-product-info {
+        padding: 0.65rem;
+        gap: 0.35rem;
+      }
+
+      .similar-product-title {
+        font-size: 0.8rem;
+        min-height: 2.2em;
+      }
+
+      .similar-product-shop {
+        font-size: 0.68rem;
+      }
+
+      .similar-product-price-value {
+        font-size: 0.85rem;
+      }
+
+      .similar-product-discount-badge {
+        top: 6px;
+        right: 6px;
+        padding: 3px 6px;
+        font-size: 0.65rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .similar-product-card {
+        width: clamp(130px, 38vw, 150px);
+        border-radius: 12px;
+      }
+
+      .similar-product-info {
+        padding: 0.55rem;
+      }
+
+      .similar-product-title {
+        font-size: 0.75rem;
+      }
+
+      .similar-product-price-value {
+        font-size: 0.8rem;
+      }
+    }
+    /* ========== End Similar Products Section ========== */
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -4860,6 +5194,33 @@
       <div class="lightbox-thumbnails" id="lightboxThumbnails" hidden></div>
     </div>
   </div>
+
+  <!-- Similar Products Section -->
+  <section class="similar-products-section" id="similarProductsSection" hidden>
+    <div class="layout-width">
+      <div class="similar-products-header">
+        <h2 class="similar-products-title">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="22.08" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          محصولات مشابه
+        </h2>
+        <a href="#" class="similar-products-view-all" id="similarProductsViewAll">
+          مشاهده همه
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+      <div class="similar-products-scroll" id="similarProductsScroll">
+        <div class="similar-products-track" id="similarProductsTrack">
+          <!-- Cards will be injected here by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <div class="layout-width footer-inner">

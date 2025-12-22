@@ -93,6 +93,85 @@ router.patch('/:id/stock', /* authMiddleware */ productController.updateStock);
 router.get('/:id/like-status', productController.getLikeStatus);
 router.post('/:id/like', productController.toggleLike);
 
+// -----------------------------
+// دریافت محصولات مشابه
+// GET /api/products/:id/similar
+// -----------------------------
+router.get('/:id/similar', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const limit = Math.min(20, Math.max(1, parseInt(req.query.limit) || 10));
+    const mongoose = require('mongoose');
+
+    // اعتبارسنجی ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: 'شناسه محصول نامعتبر است.' });
+    }
+
+    // پیدا کردن محصول فعلی برای دریافت دسته‌بندی
+    const currentProduct = await Product.findById(productId).select('category sellerId');
+    if (!currentProduct) {
+      return res.status(404).json({ success: false, message: 'محصول پیدا نشد!' });
+    }
+
+    // جستجوی محصولات مشابه از همان دسته‌بندی (به جز محصول فعلی)
+    const docs = await Product.find({
+      category: currentProduct.category,
+      _id: { $ne: productId },
+      inStock: { $ne: false }
+    })
+      .sort({ likesCount: -1, createdAt: -1 })
+      .limit(limit)
+      .populate({
+        path: 'sellerId',
+        select: 'storename ownerName shopurl ownerFirstname ownerLastname category city'
+      })
+      .lean();
+
+    // ساخت پاسخ با فرمت مناسب
+    const products = docs.map(doc => {
+      const seller = doc.sellerId || {};
+      const now = new Date();
+      
+      // بررسی وضعیت تخفیف
+      let discountActive = doc.discountActive;
+      if (discountActive && doc.discountEnd && new Date(doc.discountEnd) < now) {
+        discountActive = false;
+      }
+      if (discountActive && doc.discountStart && new Date(doc.discountStart) > now) {
+        discountActive = false;
+      }
+
+      return {
+        _id: doc._id,
+        id: doc._id,
+        title: doc.title,
+        price: doc.price,
+        discountPrice: doc.discountPrice,
+        discountActive: discountActive,
+        images: doc.images || [],
+        mainImageIndex: doc.mainImageIndex || 0,
+        category: doc.category,
+        likesCount: doc.likesCount || 0,
+        inStock: doc.inStock !== false,
+        shopName: seller.storename || seller.ownerName || 
+          [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || '',
+        shopUrl: seller.shopurl || '',
+        seller: {
+          storename: seller.storename,
+          shopurl: seller.shopurl,
+          city: seller.city
+        }
+      };
+    });
+
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error('Error fetching similar products:', err);
+    res.status(500).json({ success: false, message: 'خطا در دریافت محصولات مشابه', error: err.message });
+  }
+});
+
 // دریافت نظرات منتشر شده محصول (برای سازگاری با فرانت قدیمی)
 router.get('/:id/reviews', async (req, res) => {
   try {
