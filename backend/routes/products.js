@@ -81,6 +81,12 @@ router.put('/:id/discount', /* authMiddleware */ productController.upsertDiscoun
 router.delete('/:id/discount', /* authMiddleware */ productController.removeDiscount);
 
 // -----------------------------
+// تغییر وضعیت موجودی محصول
+// PATCH /api/products/:id/stock
+// -----------------------------
+router.patch('/:id/stock', /* authMiddleware */ productController.updateStock);
+
+// -----------------------------
 // دریافت محصول تکی با آیدی
 // GET /api/products/:id
 // -----------------------------

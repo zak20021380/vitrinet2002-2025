@@ -603,6 +603,56 @@
     }
   }
 
+  // Apply out-of-stock visual feedback
+  function applyOutOfStockUI(isInStock) {
+    const heroWrapper = dom.heroWrapper;
+    const priceCard = dom.meta.priceCard;
+    const messageBtn = dom.messageSellerButton;
+    
+    // Add/remove out-of-stock class to body for global styling
+    document.body.classList.toggle('product-out-of-stock', !isInStock);
+    
+    // Apply grayscale and overlay to gallery
+    if (heroWrapper && !isInStock) {
+      heroWrapper.classList.add('out-of-stock-gallery');
+      
+      // Add out-of-stock badge if not exists
+      if (!heroWrapper.querySelector('.out-of-stock-ribbon')) {
+        const ribbon = document.createElement('div');
+        ribbon.className = 'out-of-stock-ribbon';
+        ribbon.innerHTML = '<span>ناموجود</span>';
+        heroWrapper.appendChild(ribbon);
+      }
+    } else if (heroWrapper) {
+      heroWrapper.classList.remove('out-of-stock-gallery');
+      const ribbon = heroWrapper.querySelector('.out-of-stock-ribbon');
+      if (ribbon) ribbon.remove();
+    }
+    
+    // Apply strikethrough to price
+    if (priceCard && !isInStock) {
+      priceCard.classList.add('out-of-stock-price');
+    } else if (priceCard) {
+      priceCard.classList.remove('out-of-stock-price');
+    }
+    
+    // Disable CTA button
+    if (messageBtn) {
+      if (!isInStock) {
+        messageBtn.disabled = true;
+        messageBtn.classList.add('is-disabled', 'out-of-stock-cta');
+        messageBtn.dataset.originalText = messageBtn.textContent;
+        messageBtn.innerHTML = '<i class="ri-close-circle-line"></i> این کالا در حال حاضر موجود نیست';
+      } else {
+        messageBtn.disabled = false;
+        messageBtn.classList.remove('is-disabled', 'out-of-stock-cta');
+        if (messageBtn.dataset.originalText) {
+          messageBtn.textContent = messageBtn.dataset.originalText;
+        }
+      }
+    }
+  }
+
   async function loadLikeStatus(productId) {
     if (!productId) return;
     try {
@@ -751,6 +801,11 @@
     renderDescription(product.desc);
     renderSellerCard(seller, product);
     renderContactPanel(seller);
+    
+    // Handle out-of-stock status
+    const isInStock = product.inStock !== false;
+    applyOutOfStockUI(isInStock);
+    
     updateMetaTags(product, seller, summary);
     updateStructuredData(product, seller, id);
     if (state.productId) {
@@ -1507,6 +1562,7 @@
     if (!dom.jsonLd) return;
 
     const images = state.images;
+    const isInStock = product.inStock !== false;
     const data = {
       '@context': 'https://schema.org',
       '@type': 'Product',
@@ -1537,7 +1593,7 @@
         '@type': 'Offer',
         priceCurrency: 'IRR',
         price: priceValue,
-        availability: 'https://schema.org/InStock',
+        availability: isInStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         url: window.location.href
       };
     }

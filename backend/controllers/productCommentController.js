@@ -202,6 +202,34 @@ exports.submitComment = async (req, res) => {
 
     await comment.save();
 
+    // ═══════════════════════════════════════════════════════════
+    // 9. ایجاد اعلان برای فروشنده
+    // ═══════════════════════════════════════════════════════════
+    try {
+      const SellerNotification = require('../models/SellerNotification');
+      const user = await User.findById(userId).select('firstname lastname').lean();
+      const userName = user 
+        ? [user.firstname, user.lastname].filter(Boolean).join(' ') || 'کاربر'
+        : 'کاربر';
+
+      await SellerNotification.create({
+        sellerId: product.sellerId,
+        type: 'review',
+        title: 'نظر جدید دریافت شد',
+        message: `${userName} برای محصول "${product.title}" نظر جدیدی ثبت کرده است.`,
+        relatedData: {
+          productId: productId,
+          customerId: userId,
+          customerName: userName,
+          productTitle: product.title,
+          commentId: comment._id
+        }
+      });
+    } catch (notifErr) {
+      console.warn('⚠️ خطا در ایجاد اعلان نظر جدید:', notifErr.message);
+      // خطای اعلان نباید مانع ثبت نظر شود
+    }
+
     // لاگ موفقیت
     securityLog('COMMENT_SUBMITTED', {
       userId,

@@ -146,6 +146,12 @@ async function fetchCurrentSeller() {
       throw new Error('Not authenticated');
     }
     const { seller } = await res.json();
+    
+    // ذخیره اطلاعات فروشنده در localStorage برای استفاده در سایر بخش‌ها
+    if (seller) {
+      localStorage.setItem('seller', JSON.stringify(seller));
+    }
+    
     return seller;
   } catch (err) {
     console.error('Error fetching seller:', err);
@@ -255,8 +261,9 @@ async function markAllRead() {
       await loadDashboardMessages();
     }
 
-    // بستن سایدبار در موبایل
-    if (window.innerWidth <= 768) {
+    // بستن سایدبار در همه حالات
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && sidebar.classList.contains('expanded')) {
       toggleSidebar();
     }
   });
@@ -417,13 +424,20 @@ function startMessagePolling() {
   const toggleBtn = document.getElementById('sidebarToggle');
   if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
 
-  const manualSections = new Set(['content', 'msg', 'performance']);
+  const manualSections = new Set(['content', 'msg', 'performance', 'notif']);
   document.querySelectorAll('.sidebar-link[data-section]').forEach((button) => {
     const section = button.dataset.section;
     if (!section || manualSections.has(section)) {
       return;
     }
-    button.addEventListener('click', () => showSection(section));
+    button.addEventListener('click', () => {
+      showSection(section);
+      // بستن سایدبار در همه حالات
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && sidebar.classList.contains('expanded')) {
+        toggleSidebar();
+      }
+    });
   });
 
   document.querySelectorAll('.chart-tab[data-chart]').forEach((button) => {
@@ -501,6 +515,12 @@ if (shopPreviewButton) {
     const url = new URL('/shop.html', window.location.origin);
     url.searchParams.set('shopurl', window.seller.shopurl);
     window.open(url.href, '_blank');
+    
+    // بستن سایدبار در همه حالات
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && sidebar.classList.contains('expanded')) {
+      toggleSidebar();
+    }
   });
 }
 
@@ -711,13 +731,17 @@ function showSection(section) {
   if (section === 'register-visit') {
     loadDailyVisits();
   }
+  if (section === 'notif') {
+    if (typeof window.loadDashboardLogo === 'function') {
+      window.loadDashboardLogo();
+    }
+  }
   if (section === 'performance') {
     loadPerformanceStatus();
   }
   if (section === 'reviews' && window.ReviewsManagement) {
     window.ReviewsManagement.init();
   }
-  if (window.innerWidth <= 768) toggleSidebar();
   if (section === "products") setupProductSection();
 }
 
@@ -1027,6 +1051,7 @@ if (!window.seller?.id) {
     // ---- رندر جدول (دسکتاپ) ----
     products.forEach((prod) => {
       const likeCountDisplay = Number(prod.likesCount || 0).toLocaleString('fa-IR');
+      const isInStock = prod.inStock !== false; // Default to true if not set
       // تعیین عکس شاخص بر اساس mainImageIndex یا اولین عکس
       let cover = "";
       if (prod.images && prod.images.length) {
@@ -1050,6 +1075,13 @@ if (!window.seller?.id) {
               <span>${likeCountDisplay}</span>
             </span>
           </td>
+          <td class="text-center">
+            <label class="stock-toggle" data-product-id="${prod._id}">
+              <input type="checkbox" class="stock-toggle__input" ${isInStock ? 'checked' : ''} />
+              <span class="stock-toggle__slider"></span>
+              <span class="stock-toggle__label">${isInStock ? 'موجود' : 'ناموجود'}</span>
+            </label>
+          </td>
           <td>
             <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-3 py-1 text-[14px] transition" data-action="edit-product" data-product-id="${prod._id}">ویرایش</button>
           </td>
@@ -1060,22 +1092,29 @@ if (!window.seller?.id) {
         tbody.appendChild(tr);
         const desktopEdit = tr.querySelector('[data-action="edit-product"]');
         const desktopDelete = tr.querySelector('[data-action="delete-product"]');
+        const stockToggle = tr.querySelector('.stock-toggle__input');
         if (desktopEdit) desktopEdit.addEventListener('click', () => showEditModal(prod._id));
         if (desktopDelete) desktopDelete.addEventListener('click', () => deleteProduct(prod._id));
+        if (stockToggle) stockToggle.addEventListener('change', (e) => handleStockToggle(prod._id, e.target.checked, tr));
       }
 
       // ---- رندر کارت موبایل (فقط نمایش در md و پایین‌تر) ----
       if (mobileList) {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transition-all hover:shadow-xl";
+        card.className = `bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transition-all hover:shadow-xl ${!isInStock ? 'product-card--out-of-stock' : ''}`;
         card.innerHTML = `
           <div class="flex flex-col">
             <!-- تصویر محصول -->
             <div class="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100">
-              <img src="${cover}" alt="${prod.title}" class="w-full h-full object-cover" />
+              <img src="${cover}" alt="${prod.title}" class="w-full h-full object-cover ${!isInStock ? 'grayscale opacity-60' : ''}" />
               ${prod.tags && prod.tags.length ? `
                 <div class="absolute top-3 right-3 bg-[#10b981] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                   ${prod.tags[0]}
+                </div>
+              ` : ''}
+              ${!isInStock ? `
+                <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                  <span class="bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full">ناموجود</span>
                 </div>
               ` : ''}
             </div>
@@ -1098,8 +1137,18 @@ if (!window.seller?.id) {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0ea5e9"/>
                     <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="#0ea5e9"/>
                   </svg>
-                  <span class="text-[#0ea5e9] font-bold text-lg">${prod.price ? prod.price.toLocaleString('fa-IR') : '0'} تومان</span>
+                  <span class="text-[#0ea5e9] font-bold text-lg ${!isInStock ? 'line-through opacity-60' : ''}">${prod.price ? prod.price.toLocaleString('fa-IR') : '0'} تومان</span>
                 </div>
+              </div>
+
+              <!-- Stock Toggle -->
+              <div class="stock-toggle-mobile" data-product-id="${prod._id}">
+                <span class="stock-toggle-mobile__label">وضعیت موجودی:</span>
+                <label class="stock-toggle stock-toggle--mobile">
+                  <input type="checkbox" class="stock-toggle__input" ${isInStock ? 'checked' : ''} />
+                  <span class="stock-toggle__slider"></span>
+                  <span class="stock-toggle__text">${isInStock ? 'موجود' : 'ناموجود'}</span>
+                </label>
               </div>
 
               <div class="flex items-center justify-between gap-2 flex-wrap bg-[#f8fafc] border border-gray-100 rounded-xl px-3 py-2">
@@ -1135,8 +1184,10 @@ if (!window.seller?.id) {
         mobileList.appendChild(card);
         const mobileEdit = card.querySelector('[data-action="edit-product"]');
         const mobileDelete = card.querySelector('[data-action="delete-product"]');
+        const mobileStockToggle = card.querySelector('.stock-toggle__input');
         if (mobileEdit) mobileEdit.addEventListener('click', () => showEditModal(prod._id));
         if (mobileDelete) mobileDelete.addEventListener('click', () => deleteProduct(prod._id));
+        if (mobileStockToggle) mobileStockToggle.addEventListener('change', (e) => handleStockToggle(prod._id, e.target.checked, card));
       }
     });
   } catch (err) {
@@ -1206,6 +1257,9 @@ async function deleteProduct(productId) {
     const input = document.getElementById("editProductImagesInput");
     if (input) input.value = "";
   }
+  
+  // Expose showEditModal globally for stale products modal
+  window.showEditModal = showEditModal;
 
 
   // پیش‌نمایش عکس‌های ویرایش (قبلی + جدید)
@@ -1338,6 +1392,11 @@ async function deleteProduct(productId) {
       if (res.ok) {
         closeEditModal();
         renderProducts();
+        
+        // Mark product as edited for stale products reward tracking
+        if (typeof window.markStaleProductAsEdited === 'function') {
+          window.markStaleProductAsEdited(productId);
+        }
       } else {
         alert(result.message || "خطا در ویرایش محصول!");
       }
@@ -1414,6 +1473,11 @@ function setMainImageIndex(idx) {
     menuContentBtn.addEventListener("click", function() {
       showSection('content');
       loadDashboardContent();
+      // بستن سایدبار در همه حالات
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && sidebar.classList.contains('expanded')) {
+        toggleSidebar();
+      }
     });
   }
 
@@ -1422,45 +1486,72 @@ function setMainImageIndex(idx) {
 
 
   /// --- لود کردن محتوای dashboard-logo.html و اجرای اسکریپت‌های لازم ---
-  async function loadDashboardLogo() {
+  window.loadDashboardLogo = async function loadDashboardLogo() {
     const mainContent = document.getElementById("main-content");
     mainContent.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری ...</div>';
+    
+    // مخفی کردن سایر سکشن‌ها
+    document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
+    
+    // هایلایت منوی تابلو فروشگاه
+    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+    const notifBtn = document.getElementById('menu-notif');
+    if (notifBtn) notifBtn.classList.add('active');
+    
     try {
       const res = await fetch("dashboard-logo.html");
       if (!res.ok) throw new Error("خطا در دریافت محتوا");
       const html = await res.text();
 
-      // فقط HTML رو بریز (اسکریپت‌ها رو جدا جدا لود می‌کنیم)
+      // تزریق HTML
       mainContent.innerHTML = html;
 
-      // بعدش اسکریپت مربوط به لوگو رو لود کن (اگه قبلاً لود نشده)
+      // لود و اجرای اسکریپت
       loadDashboardLogoScript(function() {
-        // بعد از لود شدن اسکریپت و تعریف شدن فانکشن، اجراش کن
+        // بعد از لود شدن اسکریپت، اجرای تابع مقداردهی
         if (typeof initLogoDashboard === "function") {
-          initLogoDashboard();
+          initLogoDashboard().catch(err => {
+            console.error('Error initializing logo dashboard:', err);
+          });
         }
       });
     } catch (err) {
+      console.error('Error loading logo dashboard:', err);
       mainContent.innerHTML = `<div class="text-red-500 text-center py-8">بارگذاری محتوا با مشکل مواجه شد!</div>`;
     }
   }
 
   // رویداد کلیک منوی تابلو فروشگاه
-  document.getElementById("menu-notif").addEventListener("click", function() {
-    loadDashboardLogo();
-  });
+  const menuNotifBtn = document.getElementById("menu-notif");
+  if (menuNotifBtn && !menuNotifBtn.dataset.listener) {
+    menuNotifBtn.addEventListener("click", function() {
+      window.loadDashboardLogo();
+      // بستن سایدبار در همه حالات
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && sidebar.classList.contains('expanded')) {
+        toggleSidebar();
+      }
+    });
+    menuNotifBtn.dataset.listener = '1';
+  }
 
-  // تابع برای لود اسکریپت فقط یک بار
+  // تابع برای لود اسکریپت
   function loadDashboardLogoScript(callback) {
-    if (window._logoScriptLoaded) {
-      if (typeof callback === "function") callback();
-      return;
-    }
+    // حذف اسکریپت قبلی برای اجازه اجرای مجدد
+    const oldScript = document.getElementById('dashboard-logo-script');
+    if (oldScript) oldScript.remove();
+    
+    // ریست کردن flag
+    window._logoDashboardInited = false;
+    
     var script = document.createElement("script");
+    script.id = 'dashboard-logo-script';
     script.src = "dashboard-logo.js";
     script.onload = function() {
-      window._logoScriptLoaded = true;
       if (typeof callback === "function") callback();
+    };
+    script.onerror = function() {
+      console.error('Failed to load dashboard-logo.js');
     };
     document.body.appendChild(script);
   }
@@ -1520,8 +1611,11 @@ function setMainImageIndex(idx) {
       /* لودِ محتواى ارتقا */
       loadDashboardUpgrade();
 
-      /* بستن سایدبار در موبایل */
-      if (innerWidth <= 768) toggleSidebar();
+      /* بستن سایدبار در همه حالات */
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && sidebar.classList.contains('expanded')) {
+        toggleSidebar();
+      }
     });
 
     btn.dataset.listener = '1';
@@ -1615,11 +1709,116 @@ btn.addEventListener('click', () => {
   loadDashboardMessages();
   // علامت‌گذاری همه‌ی پیام‌های خوانده‌نشده
 updateBadge(0);
-  // بستن سایدبار در موبایل
-  if (window.innerWidth <= 768) toggleSidebar();
+  // بستن سایدبار در همه حالات
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList.contains('expanded')) {
+    toggleSidebar();
+  }
 });
 btn.dataset.listener = '1';
 })();
+
+// ========== Stock Toggle Handler ==========
+function showStockToast(message, type = 'success') {
+  // Remove existing toast
+  const existingToast = document.querySelector('.stock-toast');
+  if (existingToast) existingToast.remove();
+
+  const toast = document.createElement('div');
+  toast.className = `stock-toast stock-toast--${type}`;
+  toast.innerHTML = `
+    <i class="ri-${type === 'success' ? 'checkbox-circle-fill' : 'error-warning-fill'}"></i>
+    <span>${message}</span>
+  `;
+  document.body.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // Auto remove
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+async function handleStockToggle(productId, inStock, containerEl) {
+  try {
+    const res = await apiFetch(`/api/products/${productId}/stock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inStock })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'خطا در تغییر وضعیت موجودی');
+    }
+
+    const data = await res.json();
+
+    // Update UI without page reload
+    if (containerEl) {
+      // Update label text
+      const labels = containerEl.querySelectorAll('.stock-toggle__label, .stock-toggle__text');
+      labels.forEach(label => {
+        label.textContent = inStock ? 'موجود' : 'ناموجود';
+      });
+
+      // Update card styles for mobile
+      if (containerEl.classList.contains('bg-white')) {
+        containerEl.classList.toggle('product-card--out-of-stock', !inStock);
+        
+        // Update image
+        const img = containerEl.querySelector('img');
+        if (img) {
+          img.classList.toggle('grayscale', !inStock);
+          img.classList.toggle('opacity-60', !inStock);
+        }
+
+        // Update price
+        const priceEl = containerEl.querySelector('.text-\\[\\#0ea5e9\\]');
+        if (priceEl) {
+          priceEl.classList.toggle('line-through', !inStock);
+          priceEl.classList.toggle('opacity-60', !inStock);
+        }
+
+        // Update out-of-stock badge overlay
+        const imageContainer = containerEl.querySelector('.relative.w-full.h-48');
+        if (imageContainer) {
+          let badge = imageContainer.querySelector('.out-of-stock-badge');
+          if (!inStock && !badge) {
+            badge = document.createElement('div');
+            badge.className = 'out-of-stock-badge absolute inset-0 flex items-center justify-center bg-black/20';
+            badge.innerHTML = '<span class="bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full">ناموجود</span>';
+            imageContainer.appendChild(badge);
+          } else if (inStock && badge) {
+            badge.remove();
+          }
+        }
+      }
+    }
+
+    // Show toast notification
+    showStockToast(
+      inStock ? 'محصول موجود شد ✓' : 'محصول ناموجود شد',
+      inStock ? 'success' : 'warning'
+    );
+
+  } catch (err) {
+    console.error('Stock toggle error:', err);
+    showStockToast('خطا در تغییر وضعیت موجودی', 'warning');
+    
+    // Revert checkbox state
+    if (containerEl) {
+      const checkbox = containerEl.querySelector('.stock-toggle__input');
+      if (checkbox) checkbox.checked = !inStock;
+    }
+  }
+}
+// ========== End Stock Toggle Handler ==========
 
 // گرفتن همه پیام‌ها و ذخیره در window.chats
 async function fetchSellerMessages() {
@@ -1666,7 +1865,11 @@ async function loadPerformanceStatus() {
     document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
     document.getElementById('main-content').innerHTML = '';
     loadPerformanceStatus();
-    if (window.innerWidth <= 768) toggleSidebar();
+    // بستن سایدبار در همه حالات
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && sidebar.classList.contains('expanded')) {
+      toggleSidebar();
+    }
   });
   btn.dataset.listener = '1';
 })();

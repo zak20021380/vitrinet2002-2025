@@ -80,7 +80,11 @@ const productSchema = new mongoose.Schema({
   likedBy: [{
     type: String,
     index: true
-  }]
+  }],
+  inStock: {
+    type: Boolean,
+    default: true
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.models.Product || mongoose.model('Product', productSchema);

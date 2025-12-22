@@ -2940,6 +2940,100 @@
     margin-top: 6px;
   }
 
+  /* استایل‌های اعلان نظرات جدید */
+  .notification-item--review {
+    border-color: rgba(251, 191, 36, 0.2);
+    background: linear-gradient(145deg, #ffffff 0%, #fffbeb 100%);
+  }
+
+  .notification-item--review .notification-icon {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+    color: #f59e0b;
+  }
+
+  .notification-item--review .notification-chip {
+    background: rgba(251, 191, 36, 0.12);
+    color: #d97706;
+  }
+
+  .notification-item--clickable {
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .notification-item--clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
+    border-color: rgba(14, 165, 233, 0.25);
+  }
+
+  .notification-item--clickable:active {
+    transform: translateY(0);
+  }
+
+  .notification-action-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .notification-action-hint i {
+    font-size: 12px;
+  }
+
+  /* استایل‌های اعلان پیام مشتری */
+  .notification-item--customer_message {
+    border-color: rgba(14, 165, 233, 0.2);
+    background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+  }
+
+  .notification-item--customer_message .notification-icon {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(6, 182, 212, 0.1));
+    color: #0ea5e9;
+  }
+
+  /* استایل‌های اعلان لایک محصول */
+  .notification-item--product_like {
+    border-color: rgba(239, 68, 68, 0.15);
+    background: linear-gradient(145deg, #ffffff 0%, #fef2f2 100%);
+  }
+
+  .notification-item--product_like .notification-icon {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(244, 63, 94, 0.08));
+    color: #ef4444;
+  }
+
+  .notification-item--product_like .notification-chip {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  /* استایل‌های اعلان سیستمی */
+  .notification-item--system,
+  .notification-item--admin_message {
+    border-color: rgba(99, 102, 241, 0.15);
+    background: linear-gradient(145deg, #ffffff 0%, #eef2ff 100%);
+  }
+
+  .notification-item--system .notification-icon,
+  .notification-item--admin_message .notification-icon {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+    color: #6366f1;
+  }
+
+  .notification-item--system .notification-chip,
+  .notification-item--admin_message .notification-chip {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+  }
+
   @media (max-width: 640px) {
     .notification-card {
       padding: 18px 16px 10px;
@@ -3922,6 +4016,141 @@
     box-shadow: none;
     padding-inline: 12px;
   }
+
+  /* ========== Stock Toggle Styles ========== */
+  .stock-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .stock-toggle__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .stock-toggle__slider {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    background: #d1d5db;
+    border-radius: 26px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    flex-shrink: 0;
+  }
+  .stock-toggle__slider::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .stock-toggle__input:checked + .stock-toggle__slider {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  }
+  .stock-toggle__input:checked + .stock-toggle__slider::before {
+    transform: translateX(-22px);
+  }
+  .stock-toggle__input:focus + .stock-toggle__slider {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  .stock-toggle__label,
+  .stock-toggle__text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+  }
+  .stock-toggle__input:checked ~ .stock-toggle__label,
+  .stock-toggle__input:checked ~ .stock-toggle__text {
+    color: #059669;
+  }
+
+  /* Mobile Stock Toggle Container */
+  .stock-toggle-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border: 1px solid #d1fae5;
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  .stock-toggle-mobile__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .stock-toggle--mobile {
+    gap: 6px;
+  }
+  .stock-toggle--mobile .stock-toggle__slider {
+    width: 52px;
+    height: 28px;
+  }
+  .stock-toggle--mobile .stock-toggle__slider::before {
+    width: 22px;
+    height: 22px;
+  }
+  .stock-toggle--mobile .stock-toggle__input:checked + .stock-toggle__slider::before {
+    transform: translateX(-24px);
+  }
+
+  /* Out of Stock Card Styles */
+  .product-card--out-of-stock {
+    opacity: 0.85;
+    border-color: #e5e7eb !important;
+  }
+  .product-card--out-of-stock:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  }
+
+  /* Stock Toggle Toast */
+  .stock-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stock-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .stock-toast--success {
+    background: linear-gradient(135deg, #059669, #047857);
+  }
+  .stock-toast--warning {
+    background: linear-gradient(135deg, #d97706, #b45309);
+  }
+  .stock-toast i {
+    font-size: 18px;
+  }
+  /* ========== End Stock Toggle Styles ========== */
+
   #section-products td {
     background: #fff;
     color: #334155;
@@ -4777,14 +5006,14 @@
   margin: 0;
 }
 
-/* ========== مدال راه‌های افزایش اعتبار ========== */
+/* ========== مدال راه‌های افزایش اعتبار - طراحی جدید ========== */
 .credit-increase-modal {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 16px;
+  padding: 0;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -4795,6 +5024,13 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@media (min-width: 640px) {
+  .credit-increase-modal {
+    align-items: center;
+    padding: 16px;
+  }
+}
+
 .credit-increase-modal.active {
   opacity: 1;
   visibility: visible;
@@ -4803,16 +5039,28 @@
 
 .credit-increase-modal__card {
   position: relative;
-  width: min(400px, calc(100% - 32px));
-  max-height: 85vh;
+  width: 100%;
+  max-height: 90vh;
   overflow-y: auto;
-  border-radius: 24px;
-  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fffe 100%);
   box-shadow: 
-    0 24px 60px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(16, 185, 129, 0.1);
-  transform: translateY(30px) scale(0.9);
+    0 -8px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(16, 185, 129, 0.08);
+  transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (min-width: 640px) {
+  .credit-increase-modal__card {
+    width: min(420px, calc(100% - 32px));
+    max-height: 85vh;
+    border-radius: 24px;
+    transform: translateY(30px) scale(0.9);
+    box-shadow: 
+      0 24px 60px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(16, 185, 129, 0.1);
+  }
 }
 
 .credit-increase-modal.active .credit-increase-modal__card {
@@ -4823,13 +5071,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 20px 20px 16px;
   border-bottom: 1px solid #f1f5f9;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fafffe 100%);
+  z-index: 10;
 }
 
 .credit-increase-modal__title {
-  font-size: 18px;
-  font-weight: 900;
+  font-size: 16px;
+  font-weight: 800;
   color: #0f172a;
   margin: 0;
   display: flex;
@@ -4838,14 +5090,14 @@
 }
 
 .credit-increase-modal__title-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
   display: grid;
   place-items: center;
   color: #10b981;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .credit-increase-modal__close {
@@ -4869,103 +5121,222 @@
 }
 
 .credit-increase-modal__body {
-  padding: 20px 24px;
+  padding: 16px 16px 8px;
 }
 
 .credit-increase-modal__list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.credit-task-item {
+/* کارت‌های ماموریت - طراحی جدید */
+.credit-task-card {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
+  gap: 12px;
   padding: 16px;
   border-radius: 16px;
-  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #ffffff;
   border: 1px solid #e2e8f0;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.02);
   transition: all 0.25s ease;
 }
 
-.credit-task-item:hover {
-  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+.credit-task-card:hover {
   border-color: rgba(16, 185, 129, 0.3);
-  transform: translateX(-4px);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+  box-shadow: 
+    0 4px 12px rgba(16, 185, 129, 0.08),
+    0 8px 24px rgba(16, 185, 129, 0.04);
+  transform: translateY(-2px);
 }
 
-.credit-task-item__icon {
+.credit-task-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.credit-task-card__icon {
   width: 48px;
   height: 48px;
   border-radius: 14px;
   display: grid;
   place-items: center;
-  font-size: 24px;
+  font-size: 22px;
   flex-shrink: 0;
 }
 
-.credit-task-item__icon--cart {
+.credit-task-card__icon--app {
   background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
   color: #2563eb;
 }
 
-.credit-task-item__icon--star {
+.credit-task-card__icon--products {
+  background: linear-gradient(145deg, #ccfbf1 0%, #99f6e4 100%);
+  color: #0d9488;
+}
+
+.credit-task-card__icon--update {
   background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
   color: #d97706;
 }
 
-.credit-task-item__icon--profile {
+.credit-task-card__icon--invite-seller {
   background: linear-gradient(145deg, #f3e8ff 0%, #e9d5ff 100%);
   color: #9333ea;
 }
 
-.credit-task-item__icon--streak {
-  background: linear-gradient(145deg, #ffedd5 0%, #fed7aa 100%);
-  color: #ea580c;
+.credit-task-card__icon--invite-customer {
+  background: linear-gradient(145deg, #fce7f3 0%, #fbcfe8 100%);
+  color: #db2777;
 }
 
-.credit-task-item__content {
+.credit-task-card__content {
   flex: 1;
   min-width: 0;
 }
 
-.credit-task-item__title {
+.credit-task-card__title {
   font-size: 14px;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   line-height: 1.4;
 }
 
-.credit-task-item__reward {
+.credit-task-card__desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Progress bar برای ماموریت ۲۰ محصول */
+.credit-task-card__progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.credit-task-card__progress-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 100px;
+  background: #e2e8f0;
+  overflow: hidden;
+  position: relative;
+}
+
+.credit-task-card__progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #14b8a6 0%, #0d9488 100%);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.credit-task-card__progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.credit-task-card__progress-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d9488;
+  min-width: 40px;
+  text-align: left;
+  direction: ltr;
+}
+
+/* Footer کارت */
+.credit-task-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.credit-task-card__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  font-size: 13px;
+  font-weight: 800;
+  color: #15803d;
+  white-space: nowrap;
+}
+
+.credit-task-card__action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #475569;
   font-size: 13px;
-  font-weight: 800;
-  color: #059669;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.credit-task-item__reward i {
-  font-size: 14px;
+.credit-task-card__action:hover {
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  transform: translateX(-2px);
 }
 
-.credit-task-item__note {
-  font-size: 11px;
-  color: #64748b;
-  margin-top: 4px;
+.credit-task-card__action i {
+  font-size: 16px;
 }
 
+/* حالت تکمیل‌شده */
+.credit-task-card.completed {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.credit-task-card.completed .credit-task-card__action {
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #15803d;
+  pointer-events: none;
+}
+
+.credit-task-card.completed .credit-task-card__action::before {
+  content: '\eb7b'; /* ri-check-line */
+  font-family: 'remixicon';
+  margin-left: 4px;
+}
+
+/* Footer مدال */
 .credit-increase-modal__footer {
-  padding: 16px 24px 24px;
+  padding: 12px 16px 24px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(0deg, #ffffff 60%, transparent 100%);
 }
 
 .credit-increase-modal__cta {
@@ -4975,7 +5346,7 @@
   border-radius: 14px;
   background: linear-gradient(145deg, #10b981 0%, #059669 100%);
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -5050,6 +5421,1534 @@
     padding: 14px 20px;
     font-size: 15px;
   }
+}
+
+/* ========== مدال دعوت دوستان - طراحی جدید ========== */
+.seller-referral-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 650;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seller-referral-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.seller-referral-modal__card {
+  position: relative;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fffe 100%);
+  box-shadow: 
+    0 -12px 50px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(16, 185, 129, 0.08);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (min-width: 640px) {
+  .seller-referral-modal {
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .seller-referral-modal__card {
+    width: min(440px, calc(100% - 40px));
+    max-height: 88vh;
+    border-radius: 28px;
+    transform: translateY(40px) scale(0.92);
+    box-shadow: 
+      0 30px 70px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(16, 185, 129, 0.1);
+  }
+}
+
+.seller-referral-modal.active .seller-referral-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+/* Handle bar for mobile */
+.seller-referral-modal__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 100px;
+  background: #cbd5e1;
+  margin: 12px auto 0;
+}
+
+@media (min-width: 640px) {
+  .seller-referral-modal__handle {
+    display: none;
+  }
+}
+
+/* Header */
+.seller-referral-modal__header {
+  position: relative;
+  padding: 20px 20px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+  border-radius: 28px 28px 0 0;
+}
+
+.seller-referral-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.seller-referral-modal__close:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.seller-referral-modal__icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  box-shadow: 
+    0 12px 30px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.seller-referral-modal__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.seller-referral-modal__subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.7;
+  max-width: 300px;
+  margin-inline: auto;
+}
+
+/* Body */
+.seller-referral-modal__body {
+  padding: 0 20px 20px;
+}
+
+/* Referral Stats Section */
+.referral-stats-section {
+  margin-bottom: 20px;
+}
+
+.referral-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.referral-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.25s ease;
+}
+
+.referral-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.referral-stat-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.referral-stat-card--total .referral-stat-card__icon {
+  background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #2563eb;
+}
+
+.referral-stat-card--sellers .referral-stat-card__icon {
+  background: linear-gradient(145deg, #f3e8ff 0%, #e9d5ff 100%);
+  color: #9333ea;
+}
+
+.referral-stat-card--customers .referral-stat-card__icon {
+  background: linear-gradient(145deg, #fce7f3 0%, #fbcfe8 100%);
+  color: #db2777;
+}
+
+.referral-stat-card--earned .referral-stat-card__icon {
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #16a34a;
+}
+
+.referral-stat-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.referral-stat-card__value {
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.referral-stat-card__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Referral Code Box */
+.referral-code-section {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 2px dashed rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.referral-code-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.referral-code-label i {
+  font-size: 14px;
+}
+
+.referral-code-display {
+  font-family: 'Poppins', 'Vazirmatn', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 3px;
+  direction: ltr;
+  margin: 0 0 8px;
+  user-select: all;
+}
+
+.referral-code-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0 0 16px;
+}
+
+.referral-code-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.referral-code-copy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(16, 185, 129, 0.4);
+}
+
+.referral-code-copy-btn:active {
+  transform: translateY(0);
+}
+
+.referral-code-copy-btn i {
+  font-size: 18px;
+}
+
+.referral-code-copy-btn.copied {
+  background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+  animation: copyBounce 0.4s ease;
+}
+
+/* Referral Link Box */
+.referral-link-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+/* Reward Info */
+.referral-reward-info {
+  display: flex;
+  gap: 12px;
+}
+
+.referral-reward-card {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+
+.referral-reward-card__icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 8px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.referral-reward-card--seller .referral-reward-card__icon {
+  background: linear-gradient(145deg, #f3e8ff 0%, #e9d5ff 100%);
+  color: #9333ea;
+}
+
+.referral-reward-card--customer .referral-reward-card__icon {
+  background: linear-gradient(145deg, #fce7f3 0%, #fbcfe8 100%);
+  color: #db2777;
+}
+
+.referral-reward-card__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 4px;
+}
+
+.referral-reward-card__value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #15803d;
+  margin: 0;
+}
+
+/* Footer */
+.seller-referral-modal__footer {
+  padding: 16px 20px 28px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.referral-close-btn {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.referral-close-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+/* Copy Toast */
+.referral-copy-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 700;
+}
+
+.referral-copy-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.referral-copy-toast i {
+  font-size: 18px;
+}
+
+/* ========== Stale Badge for Weekly Update Card ========== */
+.credit-task-card__stale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.credit-task-card__stale-badge i {
+  font-size: 14px;
+}
+
+.credit-task-card--stale.has-stale .credit-task-card__icon--update {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(217, 119, 6, 0); }
+}
+
+/* ========== مدال کالاهای نیاز به بررسی ========== */
+.stale-products-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 660;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stale-products-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.stale-products-modal__card {
+  position: relative;
+  width: 100%;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+  box-shadow: 
+    0 -12px 50px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(217, 119, 6, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (min-width: 640px) {
+  .stale-products-modal {
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .stale-products-modal__card {
+    width: min(480px, calc(100% - 40px));
+    max-height: 88vh;
+    border-radius: 28px;
+    transform: translateY(40px) scale(0.92);
+    box-shadow: 
+      0 30px 70px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(217, 119, 6, 0.1);
+  }
+}
+
+.stale-products-modal.active .stale-products-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+/* Step Guide */
+.stale-products-guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #0369a1;
+  line-height: 1.7;
+}
+
+.stale-products-guide__icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.stale-products-guide__text {
+  flex: 1;
+}
+
+.stale-products-guide__text strong {
+  color: #0c4a6e;
+}
+
+/* Dynamic Status Label - Replaces Warning Icon */
+.stale-product-item__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+.stale-product-item__status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+/* Pending Status - Needs Action */
+.stale-product-item__status-label--pending {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+/* Verified Status - Green Badge */
+.stale-product-item__status-label--verified {
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+/* Edited/Reward Status - Golden Star */
+.stale-product-item__status-label--reward {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+  border: 1px solid #fbbf24;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.stale-product-item__status-label--reward i {
+  color: #f59e0b;
+}
+
+.stale-products-modal__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 100px;
+  background: #cbd5e1;
+  margin: 12px auto 0;
+}
+
+@media (min-width: 640px) {
+  .stale-products-modal__handle {
+    display: none;
+  }
+}
+
+.stale-products-modal__header {
+  position: relative;
+  padding: 20px 20px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #fef3c7 0%, #ffffff 100%);
+  border-radius: 28px 28px 0 0;
+  flex-shrink: 0;
+}
+
+.stale-products-modal__close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stale-products-modal__close:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+.stale-products-modal__icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  color: #fff;
+  box-shadow: 
+    0 12px 30px rgba(245, 158, 11, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.stale-products-modal__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.stale-products-modal__subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.stale-products-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 20px;
+  min-height: 200px;
+}
+
+/* Loading State */
+.stale-products-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.stale-products-loading__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #fde68a;
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.stale-products-loading p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Empty State */
+.stale-products-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.stale-products-empty__icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+  color: #16a34a;
+  margin-bottom: 16px;
+}
+
+.stale-products-empty__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.stale-products-empty__desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Products List */
+.stale-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stale-product-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.stale-product-item:hover {
+  border-color: #fde68a;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.stale-product-item__image {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f1f5f9;
+  flex-shrink: 0;
+}
+
+.stale-product-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stale-product-item__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stale-product-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stale-product-item__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.stale-product-item__date i {
+  font-size: 12px;
+}
+
+.stale-product-item__warning {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  display: grid;
+  place-items: center;
+  color: #d97706;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Individual Edit Button */
+.stale-product-item__edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stale-product-item__edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35);
+}
+
+.stale-product-item__edit-btn:active {
+  transform: translateY(0);
+}
+
+.stale-product-item__edit-btn i {
+  font-size: 14px;
+}
+
+/* No Change / Verify Button */
+.stale-product-item__verify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 40px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stale-product-item__verify-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+}
+
+.stale-product-item__verify-btn:active {
+  transform: translateY(0);
+}
+
+.stale-product-item__verify-btn i {
+  font-size: 14px;
+}
+
+/* Action Buttons Container */
+.stale-product-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Verified/Reviewed State - No Change */
+.stale-product-item--verified {
+  background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+}
+
+.stale-product-item--verified .stale-product-item__warning {
+  background: linear-gradient(145deg, #e2e8f0 0%, #cbd5e1 100%);
+  color: #64748b;
+}
+
+.stale-product-item--verified .stale-product-item__date {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.stale-product-item__verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.stale-product-item__verified-badge i {
+  font-size: 12px;
+}
+
+/* Edited/Reward State - Golden */
+.stale-product-item--edited {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #fbbf24;
+}
+
+.stale-product-item--edited .stale-product-item__warning {
+  background: linear-gradient(145deg, #fde68a 0%, #fbbf24 100%);
+  color: #b45309;
+}
+
+.stale-product-item__reward-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #b45309;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+}
+
+.stale-product-item__reward-badge i {
+  font-size: 12px;
+  color: #f59e0b;
+}
+
+/* ========== Quick Edit Bottom Sheet Modal ========== */
+.quick-edit-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 680;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-edit-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.quick-edit-modal__card {
+  position: relative;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 
+    0 -16px 60px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(14, 165, 233, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quick-edit-modal.active .quick-edit-modal__card {
+  transform: translateY(0);
+}
+
+@media (min-width: 640px) {
+  .quick-edit-modal {
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .quick-edit-modal__card {
+    width: min(440px, calc(100% - 40px));
+    max-height: 85vh;
+    border-radius: 24px;
+    transform: translateY(30px) scale(0.95);
+  }
+  
+  .quick-edit-modal.active .quick-edit-modal__card {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.quick-edit-modal__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 100px;
+  background: #cbd5e1;
+  margin: 12px auto 0;
+}
+
+@media (min-width: 640px) {
+  .quick-edit-modal__handle {
+    display: none;
+  }
+}
+
+.quick-edit-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  flex-shrink: 0;
+}
+
+.quick-edit-modal__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-edit-modal__product-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+
+.quick-edit-modal__title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-edit-modal__close {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.quick-edit-modal__close:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+.quick-edit-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Form Fields */
+.quick-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-edit-field__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-edit-field__label i {
+  font-size: 16px;
+  color: #64748b;
+}
+
+.quick-edit-field__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.quick-edit-field__input {
+  width: 100%;
+  padding: 14px 16px;
+  padding-left: 60px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.quick-edit-field__input:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.quick-edit-field__input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.quick-edit-field__suffix {
+  position: absolute;
+  left: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Textarea */
+.quick-edit-field__textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  background: #ffffff;
+  resize: none;
+  min-height: 80px;
+  line-height: 1.6;
+  transition: all 0.2s ease;
+}
+
+.quick-edit-field__textarea:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+/* Stock Toggle */
+.quick-edit-stock-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.quick-edit-stock-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quick-edit-stock-option:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.quick-edit-stock-option.active {
+  border-color: #10b981;
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #059669;
+}
+
+.quick-edit-stock-option.active.out-of-stock {
+  border-color: #f87171;
+  background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+  color: #dc2626;
+}
+
+.quick-edit-stock-option i {
+  font-size: 18px;
+}
+
+/* Footer */
+.quick-edit-modal__footer {
+  padding: 16px 20px 28px;
+  border-top: 1px solid #e2e8f0;
+  background: linear-gradient(0deg, #f8fafc 0%, #ffffff 100%);
+  flex-shrink: 0;
+}
+
+.quick-edit-save-btn {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #0ea5e9 0%, #0284c7 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 
+    0 8px 24px rgba(14, 165, 233, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quick-edit-save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 32px rgba(14, 165, 233, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.quick-edit-save-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.quick-edit-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.quick-edit-save-btn i {
+  font-size: 20px;
+}
+
+/* Validation hint */
+.quick-edit-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.quick-edit-hint i {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Professional Toast */
+.quick-edit-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 750;
+  max-width: calc(100% - 40px);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.quick-edit-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.quick-edit-toast i {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .quick-edit-modal__header {
+    padding: 14px 16px;
+  }
+  
+  .quick-edit-modal__body {
+    padding: 16px;
+    gap: 14px;
+  }
+  
+  .quick-edit-field__input {
+    padding: 12px 14px;
+    padding-left: 55px;
+    font-size: 14px;
+  }
+  
+  .quick-edit-stock-option {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  
+  .quick-edit-modal__footer {
+    padding: 14px 16px 24px;
+  }
+  
+  .quick-edit-save-btn {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Footer */
+.stale-products-modal__footer {
+  padding: 16px 20px 28px;
+  border-top: 1px solid #fde68a;
+  background: linear-gradient(0deg, #fffbeb 0%, #ffffff 100%);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.stale-products-confirm-btn {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 
+    0 8px 24px rgba(245, 158, 11, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 20;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stale-products-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 32px rgba(245, 158, 11, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.stale-products-confirm-btn:active {
+  transform: translateY(0);
+}
+
+.stale-products-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stale-products-confirm-btn i {
+  font-size: 20px;
+}
+
+.stale-products-footer-hint {
+  font-size: 11px;
+  color: #92400e;
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+/* Toast */
+.stale-products-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 700;
+}
+
+.stale-products-toast.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.stale-products-toast i {
+  font-size: 18px;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 480px) {
+  .stale-product-item {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .stale-product-item__image {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .stale-product-item__actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .stale-product-item__edit-btn {
+    padding: 8px 10px;
+    font-size: 10px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+  
+  .stale-product-item__edit-btn span {
+    display: none;
+  }
+  
+  .stale-product-item__verify-btn {
+    padding: 6px 8px;
+    font-size: 10px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+  
+  .stale-product-item__verify-btn span {
+    display: none;
+  }
+  
+  .stale-product-item__warning {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .stale-products-footer-hint {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+}
+
+/* Footer Hint Warning */
+.stale-products-footer-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #b45309;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.stale-products-footer-warning i {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 /* ========== مدال اعتبار فروشگاه ========== */
@@ -5231,6 +7130,7 @@
 
 .rank-level {
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
@@ -5262,6 +7162,7 @@
 
 .rank-level__info {
   flex: 1;
+  text-align: right;
 }
 
 .rank-level__name {
@@ -5278,14 +7179,21 @@
 }
 
 .rank-level__check {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: #10b981;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #10b981, #059669);
   color: #fff;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  flex-shrink: 0;
+}
+
+.rank-level__check i {
+  font-weight: bold;
 }
 
 .rank-modal__benefits {
@@ -6708,6 +8616,7 @@
               <th class="min-w-[120px]">دسته‌بندی</th>
               <th class="min-w-[110px]">برچسب‌ها</th>
               <th class="min-w-[140px] text-center leading-6">تعداد مشتری‌هایی که این محصول را پسندیده‌اند</th>
+              <th class="min-w-[100px] text-center">موجودی</th>
               <th class="min-w-[80px] text-center">ویرایش</th>
               <th class="min-w-[80px] text-center">حذف</th>
             </tr>
@@ -8456,27 +10365,78 @@
         return;
       }
 
+      // تابع برای تعیین آیکون بر اساس نوع اعلان
+      const getNotificationIcon = (type) => {
+        const icons = {
+          review: 'ri-star-fill',
+          customer_message: 'ri-message-3-fill',
+          product_like: 'ri-heart-fill',
+          order: 'ri-shopping-cart-fill',
+          admin_message: 'ri-admin-fill',
+          system: 'ri-settings-3-fill',
+          info: 'ri-information-fill'
+        };
+        return icons[type] || 'ri-notification-3-line';
+      };
+
+      // تابع برای تعیین متن وضعیت بر اساس نوع
+      const getStatusText = (item) => {
+        if (item.read) return 'خوانده شده';
+        const statusTexts = {
+          review: 'نظر جدید',
+          customer_message: 'پیام جدید',
+          product_like: 'لایک جدید',
+          order: 'سفارش جدید',
+          admin_message: 'پیام مدیر',
+          system: 'سیستمی'
+        };
+        return statusTexts[item.type] || 'جدید';
+      };
+
+      // تابع برای تعیین اینکه آیا اعلان قابل کلیک است
+      const isClickable = (type) => {
+        return ['review', 'customer_message', 'product_like'].includes(type);
+      };
+
+      // تابع برای تعیین متن راهنمای عمل
+      const getActionHint = (type) => {
+        const hints = {
+          review: 'مشاهده و مدیریت نظرات',
+          customer_message: 'مشاهده پیام‌ها',
+          product_like: 'مشاهده محصول'
+        };
+        return hints[type] || null;
+      };
+
       notifications.forEach((item) => {
         const wrapper = document.createElement('article');
-        wrapper.className = 'notification-item';
+        const typeClass = item.type ? `notification-item--${item.type}` : '';
+        const clickableClass = isClickable(item.type) ? 'notification-item--clickable' : '';
+        wrapper.className = `notification-item ${typeClass} ${clickableClass}`.trim();
         wrapper.setAttribute('data-id', item.id);
+        wrapper.setAttribute('data-type', item.type || 'info');
 
         const accent = item.read ? '#cbd5e1' : '#0ea5e9';
         const accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(14, 165, 233, 0.16)';
         wrapper.style.setProperty('--accent', accent);
         wrapper.style.setProperty('--accent-soft', accentSoft);
 
+        const icon = getNotificationIcon(item.type);
+        const statusText = getStatusText(item);
+        const actionHint = getActionHint(item.type);
+
         wrapper.innerHTML = `
           <div class="notification-icon">
-            <i class="ri-notification-3-line"></i>
+            <i class="${icon}"></i>
           </div>
           <div class="notification-body">
             <h4>${item.title || 'اعلان جدید'}</h4>
             <p>${item.message}</p>
             <div class="notification-meta">
-              <span class="notification-chip"><i class="ri-flashlight-line"></i>${item.read ? 'خوانده شده' : 'جدید'}</span>
+              <span class="notification-chip"><i class="ri-flashlight-line"></i>${statusText}</span>
               <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
             </div>
+            ${actionHint ? `<div class="notification-action-hint"><i class="ri-arrow-left-line"></i>${actionHint}</div>` : ''}
           </div>
           <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
             <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -8502,7 +10462,7 @@
       renderNotifications();
 
       try {
-        const response = await fetch(buildApiUrl('/api/notifications'), withCredentials());
+        const response = await fetch(buildApiUrl('/api/seller/notifications'), withCredentials());
         if (response.status === 401) {
           throw new Error('برای مشاهده اعلان‌ها ابتدا وارد حساب خود شوید.');
         }
@@ -8511,14 +10471,16 @@
         }
 
         const data = await response.json();
-        const items = Array.isArray(data) ? data : [];
+        const items = Array.isArray(data.notifications) ? data.notifications : (Array.isArray(data) ? data : []);
         notifications = items
           .map((item) => ({
             id: item._id || item.id,
+            type: item.type || 'info',
             message: item.message || '',
             read: Boolean(item.read),
             time: formatRelativeTime(item.createdAt || item.updatedAt),
-            title: item.title || ''
+            title: item.title || '',
+            relatedData: item.relatedData || {}
           }))
           .filter((item) => item.id);
       } catch (error) {
@@ -8533,7 +10495,7 @@
 
     const markNotificationRead = async (id) => {
       try {
-        const response = await fetch(buildApiUrl(`/api/notifications/${id}/read`), withCredentials({ method: 'PUT' }));
+        const response = await fetch(buildApiUrl(`/api/seller/notifications/${id}/read`), withCredentials({ method: 'PUT' }));
         if (response.ok) {
           const target = notifications.find((item) => item.id === id);
           if (target) {
@@ -8559,7 +10521,7 @@
       renderNotifications();
 
       try {
-        const response = await fetch(buildApiUrl(`/api/notifications/${id}`), withCredentials({ method: 'DELETE' }));
+        const response = await fetch(buildApiUrl(`/api/seller/notifications/${id}`), withCredentials({ method: 'DELETE' }));
         if (!response.ok) {
           throw new Error('حذف اعلان انجام نشد');
         }
@@ -8609,6 +10571,46 @@
       if (!target) return;
       const id = target.getAttribute('data-remove');
       deleteNotification(id);
+    });
+
+    // هندل کلیک روی اعلان‌های قابل کلیک
+    listContainer.addEventListener('click', (event) => {
+      // اگر روی دکمه حذف کلیک شده، کاری نکن
+      if (event.target.closest('[data-remove]')) return;
+      
+      const notificationItem = event.target.closest('.notification-item--clickable');
+      if (!notificationItem) return;
+      
+      const type = notificationItem.getAttribute('data-type');
+      const id = notificationItem.getAttribute('data-id');
+      
+      // بستن مدال اعلان‌ها
+      closeModal();
+      
+      // هدایت به بخش مربوطه بر اساس نوع اعلان
+      setTimeout(() => {
+        switch (type) {
+          case 'review':
+            // هدایت به بخش مدیریت نظرات
+            if (typeof showSection === 'function') {
+              showSection('reviews');
+            }
+            break;
+          case 'customer_message':
+            // هدایت به بخش پیام‌ها
+            const msgBtn = document.getElementById('menu-msg');
+            if (msgBtn) msgBtn.click();
+            break;
+          case 'product_like':
+            // هدایت به بخش محصولات
+            if (typeof showSection === 'function') {
+              showSection('products');
+            }
+            break;
+          default:
+            break;
+        }
+      }, 150);
     });
 
     fetchNotifications();
@@ -8689,60 +10691,122 @@
     
     <div class="credit-increase-modal__body">
       <ul class="credit-increase-modal__list">
-        <!-- فروش موفق -->
-        <li class="credit-task-item">
-          <div class="credit-task-item__icon credit-task-item__icon--cart">
-            <i class="ri-shopping-cart-2-fill"></i>
+        <!-- نصب اپلیکیشن -->
+        <li class="credit-task-card" data-task="install-app">
+          <div class="credit-task-card__main">
+            <div class="credit-task-card__icon credit-task-card__icon--app">
+              <i class="ri-smartphone-fill"></i>
+            </div>
+            <div class="credit-task-card__content">
+              <h4 class="credit-task-card__title">نصب اپلیکیشن</h4>
+              <p class="credit-task-card__desc">اولین ورود از طریق اپلیکیشن موبایل</p>
+            </div>
           </div>
-          <div class="credit-task-item__content">
-            <h4 class="credit-task-item__title">فروش موفق هر محصول</h4>
-            <div class="credit-task-item__reward">
-              <i class="ri-add-line"></i>
+          <div class="credit-task-card__footer">
+            <span class="credit-task-card__reward">
               +۱۰,۰۰۰ تومان اعتبار
-            </div>
+            </span>
+            <button class="credit-task-card__action" data-action="install-app">
+              <i class="ri-arrow-left-s-line"></i>
+              انجام بده
+            </button>
           </div>
         </li>
         
-        <!-- دریافت نظر ۵ ستاره -->
-        <li class="credit-task-item">
-          <div class="credit-task-item__icon credit-task-item__icon--star">
-            <i class="ri-star-smile-fill"></i>
-          </div>
-          <div class="credit-task-item__content">
-            <h4 class="credit-task-item__title">دریافت نظر ۵ ستاره</h4>
-            <div class="credit-task-item__reward">
-              <i class="ri-add-line"></i>
-              +۵,۰۰۰ تومان اعتبار
+        <!-- رسیدن به ۲۰ محصول فعال -->
+        <li class="credit-task-card credit-task-card--has-progress" data-task="20-products">
+          <div class="credit-task-card__main">
+            <div class="credit-task-card__icon credit-task-card__icon--products">
+              <i class="ri-shopping-bag-3-fill"></i>
             </div>
+            <div class="credit-task-card__content">
+              <h4 class="credit-task-card__title">رسیدن به ۲۰ محصول فعال</h4>
+              <div class="credit-task-card__progress-wrap">
+                <div class="credit-task-card__progress-bar">
+                  <div class="credit-task-card__progress-fill" id="productProgressFill" style="width: 0%;"></div>
+                </div>
+                <span class="credit-task-card__progress-text" id="productProgressText">۰/۲۰</span>
+              </div>
+            </div>
+          </div>
+          <div class="credit-task-card__footer">
+            <span class="credit-task-card__reward">
+              +۲۵,۰۰۰ تومان اعتبار
+            </span>
+            <button class="credit-task-card__action" data-action="add-product">
+              <i class="ri-add-line"></i>
+              افزودن محصول
+            </button>
           </div>
         </li>
         
-        <!-- تکمیل پروفایل -->
-        <li class="credit-task-item">
-          <div class="credit-task-item__icon credit-task-item__icon--profile">
-            <i class="ri-user-settings-fill"></i>
-          </div>
-          <div class="credit-task-item__content">
-            <h4 class="credit-task-item__title">تکمیل اطلاعات پروفایل</h4>
-            <div class="credit-task-item__reward">
-              <i class="ri-add-line"></i>
-              +۲۰,۰۰۰ تومان اعتبار
+        <!-- به‌روزرسانی هفتگی -->
+        <li class="credit-task-card credit-task-card--stale" data-task="weekly-update" id="weeklyUpdateCard">
+          <div class="credit-task-card__main">
+            <div class="credit-task-card__icon credit-task-card__icon--update">
+              <i class="ri-refresh-fill"></i>
             </div>
-            <div class="credit-task-item__note">(یکبار)</div>
+            <div class="credit-task-card__content">
+              <h4 class="credit-task-card__title">به‌روزرسانی هفتگی</h4>
+              <p class="credit-task-card__desc" id="weeklyUpdateDesc">آپدیت قیمت یا موجودی هفته‌ای یکبار</p>
+              <span class="credit-task-card__stale-badge" id="staleProductsBadge" style="display: none;">
+                <i class="ri-alert-fill"></i>
+                <span id="staleProductsCount">۰</span> کالا نیاز به بررسی
+              </span>
+            </div>
+          </div>
+          <div class="credit-task-card__footer">
+            <span class="credit-task-card__reward">
+              +۷,۰۰۰ تومان اعتبار
+            </span>
+            <button class="credit-task-card__action" data-action="check-stale-products" id="checkStaleProductsBtn">
+              <i class="ri-eye-line"></i>
+              مشاهده لیست
+            </button>
           </div>
         </li>
         
-        <!-- فعالیت روزانه -->
-        <li class="credit-task-item">
-          <div class="credit-task-item__icon credit-task-item__icon--streak">
-            <i class="ri-fire-fill"></i>
-          </div>
-          <div class="credit-task-item__content">
-            <h4 class="credit-task-item__title">فعالیت روزانه مداوم (۷ روز)</h4>
-            <div class="credit-task-item__reward">
-              <i class="ri-add-line"></i>
-              +۱۵,۰۰۰ تومان اعتبار
+        <!-- دعوت از همکار -->
+        <li class="credit-task-card" data-task="invite-seller">
+          <div class="credit-task-card__main">
+            <div class="credit-task-card__icon credit-task-card__icon--invite-seller">
+              <i class="ri-user-add-fill"></i>
             </div>
+            <div class="credit-task-card__content">
+              <h4 class="credit-task-card__title">دعوت از همکار</h4>
+              <p class="credit-task-card__desc">به ازای هر فروشنده جدید معرفی‌شده</p>
+            </div>
+          </div>
+          <div class="credit-task-card__footer">
+            <span class="credit-task-card__reward">
+              +۳۰,۰۰۰ تومان اعتبار
+            </span>
+            <button class="credit-task-card__action" data-action="invite-seller">
+              <i class="ri-share-forward-fill"></i>
+              دعوت کن
+            </button>
+          </div>
+        </li>
+        
+        <!-- دعوت از مشتری -->
+        <li class="credit-task-card" data-task="invite-customer">
+          <div class="credit-task-card__main">
+            <div class="credit-task-card__icon credit-task-card__icon--invite-customer">
+              <i class="ri-group-fill"></i>
+            </div>
+            <div class="credit-task-card__content">
+              <h4 class="credit-task-card__title">دعوت از مشتری</h4>
+              <p class="credit-task-card__desc">جذب کاربر جدید با لینک معرفی</p>
+            </div>
+          </div>
+          <div class="credit-task-card__footer">
+            <span class="credit-task-card__reward">
+              +۱۰,۰۰۰ تومان اعتبار
+            </span>
+            <button class="credit-task-card__action" data-action="invite-customer">
+              <i class="ri-share-forward-fill"></i>
+              دعوت کن
+            </button>
           </div>
         </li>
       </ul>
@@ -8755,6 +10819,288 @@
       </button>
     </div>
   </div>
+</div>
+
+<!-- مدال دعوت دوستان و همکاران -->
+<div class="seller-referral-modal" id="sellerReferralModal" role="dialog" aria-modal="true" aria-labelledby="seller-referral-title">
+  <div class="seller-referral-modal__card">
+    <div class="seller-referral-modal__handle"></div>
+    
+    <header class="seller-referral-modal__header">
+      <button class="seller-referral-modal__close" id="closeSellerReferralModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+      
+      <div class="seller-referral-modal__icon">
+        <i class="ri-gift-2-fill" style="color: #fff;"></i>
+      </div>
+      
+      <h2 class="seller-referral-modal__title" id="seller-referral-title">دعوت از دوستان و همکاران</h2>
+      <p class="seller-referral-modal__subtitle">
+        کد اختصاصی خود را با دوستانتان به اشتراک بگذارید. هدیه اعتبار پس از ثبت‌نام موفق آن‌ها به صورت خودکار به حساب شما اضافه خواهد شد.
+      </p>
+    </header>
+    
+    <div class="seller-referral-modal__body">
+      <!-- آمار دعوت‌ها -->
+      <div class="referral-stats-section">
+        <div class="referral-stats-grid">
+          <div class="referral-stat-card referral-stat-card--total">
+            <div class="referral-stat-card__icon">
+              <i class="ri-team-fill"></i>
+            </div>
+            <div class="referral-stat-card__content">
+              <span class="referral-stat-card__value" id="referralTotalInvites">۰</span>
+              <span class="referral-stat-card__label">کل دعوت‌ها</span>
+            </div>
+          </div>
+          <div class="referral-stat-card referral-stat-card--sellers">
+            <div class="referral-stat-card__icon">
+              <i class="ri-store-3-fill"></i>
+            </div>
+            <div class="referral-stat-card__content">
+              <span class="referral-stat-card__value" id="referralSellerInvites">۰</span>
+              <span class="referral-stat-card__label">فروشندگان</span>
+            </div>
+          </div>
+          <div class="referral-stat-card referral-stat-card--customers">
+            <div class="referral-stat-card__icon">
+              <i class="ri-user-heart-fill"></i>
+            </div>
+            <div class="referral-stat-card__content">
+              <span class="referral-stat-card__value" id="referralCustomerInvites">۰</span>
+              <span class="referral-stat-card__label">مشتریان</span>
+            </div>
+          </div>
+          <div class="referral-stat-card referral-stat-card--earned">
+            <div class="referral-stat-card__icon">
+              <i class="ri-wallet-3-fill"></i>
+            </div>
+            <div class="referral-stat-card__content">
+              <span class="referral-stat-card__value" id="referralTotalEarned">۰</span>
+              <span class="referral-stat-card__label">اعتبار کسب‌شده</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- کد دعوت اختصاصی -->
+      <div class="referral-code-section">
+        <p class="referral-code-label">
+          <i class="ri-key-2-fill"></i>
+          کد دعوت اختصاصی شما
+        </p>
+        <p class="referral-code-display" id="sellerReferralCode">VIT-XXXXX</p>
+        <p class="referral-code-hint">این کد منحصر به فرد شماست</p>
+        <button class="referral-code-copy-btn" id="copyReferralCodeBtn">
+          <i class="ri-file-copy-line"></i>
+          کپی کد
+        </button>
+      </div>
+      
+      <!-- پاداش‌ها -->
+      <div class="referral-reward-info">
+        <div class="referral-reward-card referral-reward-card--seller">
+          <div class="referral-reward-card__icon">
+            <i class="ri-user-add-fill"></i>
+          </div>
+          <p class="referral-reward-card__title">دعوت همکار</p>
+          <p class="referral-reward-card__value">+۳۰,۰۰۰ تومان</p>
+        </div>
+        <div class="referral-reward-card referral-reward-card--customer">
+          <div class="referral-reward-card__icon">
+            <i class="ri-group-fill"></i>
+          </div>
+          <p class="referral-reward-card__title">دعوت مشتری</p>
+          <p class="referral-reward-card__value">+۱۰,۰۰۰ تومان</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="seller-referral-modal__footer">
+      <button class="referral-close-btn" id="closeReferralFooterBtn">
+        <i class="ri-arrow-right-line"></i>
+        بازگشت
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast کپی شد -->
+<div class="referral-copy-toast" id="referralCopyToast">
+  <i class="ri-check-line"></i>
+  کپی شد!
+</div>
+
+<!-- مدال کالاهای نیاز به بررسی -->
+<div class="stale-products-modal" id="staleProductsModal" role="dialog" aria-modal="true" aria-labelledby="stale-products-title">
+  <div class="stale-products-modal__card">
+    <div class="stale-products-modal__handle"></div>
+    
+    <header class="stale-products-modal__header">
+      <button class="stale-products-modal__close" id="closeStaleProductsModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+      
+      <div class="stale-products-modal__icon">
+        <i class="ri-refresh-line"></i>
+      </div>
+      
+      <h2 class="stale-products-modal__title" id="stale-products-title">کالاهای نیاز به بررسی</h2>
+      <p class="stale-products-modal__subtitle">
+        این محصولات بیش از ۱۰ روز است که آپدیت نشده‌اند
+      </p>
+    </header>
+    
+    <div class="stale-products-modal__body">
+      <!-- Step Guide -->
+      <div class="stale-products-guide" id="staleProductsGuide">
+        <span class="stale-products-guide__icon">💡</span>
+        <div class="stale-products-guide__text">
+          <strong>راهنما:</strong> اگر قیمت ثابت است، <strong>تیک سبز</strong> را بزنید. برای دریافت <strong>جایزه</strong>، از دکمه ویرایش استفاده کنید.
+        </div>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="stale-products-loading" id="staleProductsLoading">
+        <div class="stale-products-loading__spinner"></div>
+        <p>در حال بارگذاری...</p>
+      </div>
+      
+      <!-- Empty State -->
+      <div class="stale-products-empty" id="staleProductsEmpty" style="display: none;">
+        <div class="stale-products-empty__icon">
+          <i class="ri-checkbox-circle-fill"></i>
+        </div>
+        <h3 class="stale-products-empty__title">همه محصولات به‌روز هستند!</h3>
+        <p class="stale-products-empty__desc">تبریک! هیچ محصولی نیاز به بررسی ندارد.</p>
+      </div>
+      
+      <!-- Products List -->
+      <div class="stale-products-list" id="staleProductsList" style="display: none;">
+        <!-- Products will be rendered here -->
+      </div>
+    </div>
+    
+    <div class="stale-products-modal__footer" id="staleProductsFooter" style="display: none;">
+      <button class="stale-products-confirm-btn" id="confirmAllProductsBtn">
+        <i class="ri-check-double-line"></i>
+        تایید نهایی و به‌روزرسانی لیست
+      </button>
+      <p class="stale-products-footer-hint">با کلیک، تاریخ آپدیت محصولات تایید شده به امروز تغییر می‌کند</p>
+      <div class="stale-products-footer-warning">
+        <i class="ri-information-line"></i>
+        <span>جایزه اعتبار فقط در صورت ویرایش واقعی قیمت یا موجودی تعلق می‌گیرد.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Edit Modal -->
+<div class="quick-edit-modal" id="quickEditModal" role="dialog" aria-modal="true" aria-labelledby="quick-edit-title">
+  <div class="quick-edit-modal__card">
+    <div class="quick-edit-modal__handle"></div>
+    
+    <header class="quick-edit-modal__header">
+      <div class="quick-edit-modal__title-wrap">
+        <img class="quick-edit-modal__product-img" id="quickEditProductImg" src="/assets/images/placeholder.png" alt="">
+        <h3 class="quick-edit-modal__title" id="quickEditProductName">نام محصول</h3>
+      </div>
+      <button class="quick-edit-modal__close" id="closeQuickEditModal" aria-label="بستن">
+        <i class="ri-close-line"></i>
+      </button>
+    </header>
+    
+    <div class="quick-edit-modal__body">
+      <!-- Price Field -->
+      <div class="quick-edit-field">
+        <label class="quick-edit-field__label">
+          <i class="ri-price-tag-3-line"></i>
+          قیمت محصول
+        </label>
+        <div class="quick-edit-field__input-wrap">
+          <input type="text" class="quick-edit-field__input" id="quickEditPrice" inputmode="numeric" placeholder="مثال: ۱۵۰,۰۰۰">
+          <span class="quick-edit-field__suffix">تومان</span>
+        </div>
+      </div>
+      
+      <!-- Discount Price Field -->
+      <div class="quick-edit-field">
+        <label class="quick-edit-field__label">
+          <i class="ri-discount-percent-line"></i>
+          قیمت با تخفیف (اختیاری)
+        </label>
+        <div class="quick-edit-field__input-wrap">
+          <input type="text" class="quick-edit-field__input" id="quickEditDiscountPrice" inputmode="numeric" placeholder="خالی بگذارید اگر تخفیف ندارد">
+          <span class="quick-edit-field__suffix">تومان</span>
+        </div>
+      </div>
+      
+      <!-- Stock Status -->
+      <div class="quick-edit-field">
+        <label class="quick-edit-field__label">
+          <i class="ri-store-3-line"></i>
+          وضعیت موجودی
+        </label>
+        <div class="quick-edit-stock-toggle" id="quickEditStockToggle">
+          <button type="button" class="quick-edit-stock-option active" data-stock="available">
+            <i class="ri-checkbox-circle-line"></i>
+            موجود
+          </button>
+          <button type="button" class="quick-edit-stock-option out-of-stock" data-stock="unavailable">
+            <i class="ri-close-circle-line"></i>
+            ناموجود
+          </button>
+        </div>
+      </div>
+      
+      <!-- Inventory Count -->
+      <div class="quick-edit-field">
+        <label class="quick-edit-field__label">
+          <i class="ri-stack-line"></i>
+          تعداد موجودی
+        </label>
+        <div class="quick-edit-field__input-wrap">
+          <input type="text" class="quick-edit-field__input" id="quickEditInventory" inputmode="numeric" placeholder="مثال: ۱۰">
+          <span class="quick-edit-field__suffix">عدد</span>
+        </div>
+      </div>
+      
+      <!-- Short Description -->
+      <div class="quick-edit-field">
+        <label class="quick-edit-field__label">
+          <i class="ri-file-text-line"></i>
+          توضیحات کوتاه (اختیاری)
+        </label>
+        <textarea class="quick-edit-field__textarea" id="quickEditDescription" placeholder="توضیحات کوتاه درباره تغییرات..."></textarea>
+      </div>
+      
+      <!-- Validation Hint -->
+      <div class="quick-edit-hint" id="quickEditHint" style="display: none;">
+        <i class="ri-information-line"></i>
+        <span>برای دریافت جایزه، حداقل یک مقدار را تغییر دهید.</span>
+      </div>
+    </div>
+    
+    <footer class="quick-edit-modal__footer">
+      <button class="quick-edit-save-btn" id="quickEditSaveBtn">
+        <i class="ri-check-line"></i>
+        ثبت تغییرات
+      </button>
+    </footer>
+  </div>
+</div>
+
+<!-- Quick Edit Toast -->
+<div class="quick-edit-toast" id="quickEditToast">
+  <i class="ri-check-double-line"></i>
+  <span id="quickEditToastText">تغییرات با موفقیت ثبت شد. امتیاز این کالا فعال گردید.</span>
+</div>
+
+<!-- Toast تایید محصولات -->
+<div class="stale-products-toast" id="staleProductsToast">
+  <i class="ri-check-line"></i>
+  <span id="staleProductsToastText">محصولات با موفقیت به‌روزرسانی شدند!</span>
 </div>
 
 <!-- مدال اعتبار فروشگاه -->
@@ -8773,27 +11119,27 @@
     <div class="rank-modal__body">
       <div class="rank-modal__current">
         <div class="rank-current__badge">
-          <i class="ri-vip-crown-fill"></i>
+          <i class="ri-medal-line"></i>
         </div>
         <div class="rank-current__info">
-          <h4 class="rank-current__title" id="rankCurrentTitle">فروشگاه طلایی</h4>
+          <h4 class="rank-current__title" id="rankCurrentTitle">فروشگاه برنزی</h4>
           <div class="rank-current__stars" id="rankCurrentStars">
             <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
+            <i class="ri-star-line empty"></i>
+            <i class="ri-star-line empty"></i>
+            <i class="ri-star-line empty"></i>
             <i class="ri-star-line empty"></i>
           </div>
-          <div class="rank-current__progress" id="rankCurrentProgress">۳٬۴۰۰٬۰۰۰ از ۵٬۰۰۰٬۰۰۰ تومان اعتبار برای سطح بعدی</div>
+          <div class="rank-current__progress" id="rankCurrentProgress">در حال بارگذاری...</div>
         </div>
       </div>
 
       <div class="rank-modal__progress-bar">
-        <div class="rank-modal__progress-fill" id="rankProgressFill" style="width: 68%;"></div>
+        <div class="rank-modal__progress-fill" id="rankProgressFill" style="width: 0%;"></div>
       </div>
 
       <div class="rank-modal__levels">
-        <div class="rank-level" data-level="bronze">
+        <div class="rank-level current" data-level="bronze">
           <div class="rank-level__icon bronze">
             <i class="ri-medal-line"></i>
           </div>
@@ -8813,11 +11159,11 @@
             <h5 class="rank-level__name">نقره‌ای</h5>
             <p class="rank-level__desc">۵۰۰٬۰۰۰ تا ۲٬۰۰۰٬۰۰۰ تومان اعتبار</p>
           </div>
-          <div class="rank-level__check">
+          <div class="rank-level__check" style="display: none;">
             <i class="ri-check-line"></i>
           </div>
         </div>
-        <div class="rank-level current" data-level="gold">
+        <div class="rank-level" data-level="gold">
           <div class="rank-level__icon gold">
             <i class="ri-medal-fill"></i>
           </div>
@@ -8825,7 +11171,7 @@
             <h5 class="rank-level__name">طلایی</h5>
             <p class="rank-level__desc">۲٬۰۰۰٬۰۰۰ تا ۵٬۰۰۰٬۰۰۰ تومان اعتبار</p>
           </div>
-          <div class="rank-level__check">
+          <div class="rank-level__check" style="display: none;">
             <i class="ri-check-line"></i>
           </div>
         </div>
@@ -8855,11 +11201,11 @@
         </div>
       </div>
 
-      <!-- مزایای سطح طلایی -->
+      <!-- مزایای سطح فعلی -->
       <div class="rank-modal__benefits" id="goldBenefits">
         <div class="rank-benefits__title">
           <i class="ri-gift-fill"></i>
-          مزایای سطح طلایی
+          مزایای سطح برنزی
         </div>
         <ul class="rank-benefits__list">
           <li><i class="ri-check-double-line"></i> نمایش برجسته در نتایج جستجو</li>
@@ -9178,7 +11524,66 @@
     const actionBtn = document.getElementById('openCreditModalBtn');
     const plusTrigger = document.getElementById('openCreditModalTrigger');
     
+    // Progress bar elements
+    const progressFill = document.getElementById('productProgressFill');
+    const progressText = document.getElementById('productProgressText');
+    
     let lastFocusedElement = null;
+    let productCount = 0;
+    const TARGET_PRODUCTS = 20;
+
+    // تبدیل اعداد به فارسی
+    const toFaDigits = (value) => {
+      if (value == null) return '';
+      return String(value).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    };
+
+    // بارگذاری تعداد محصولات فروشنده
+    async function loadProductCount() {
+      try {
+        const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+        const sellerId = sellerData._id || sellerData.id;
+        if (!sellerId) return;
+
+        const API_BASE = window.API_BASE || '';
+        const res = await fetch(`${API_BASE}/api/products?sellerId=${sellerId}`, {
+          credentials: 'include'
+        });
+        
+        if (res.ok) {
+          const products = await res.json();
+          productCount = Array.isArray(products) ? products.filter(p => p.active !== false).length : 0;
+          updateProgressBar();
+        }
+      } catch (err) {
+        console.error('Failed to load product count:', err);
+      }
+    }
+
+    // آپدیت progress bar
+    function updateProgressBar() {
+      if (!progressFill || !progressText) return;
+      
+      const count = Math.min(productCount, TARGET_PRODUCTS);
+      const percentage = (count / TARGET_PRODUCTS) * 100;
+      
+      progressFill.style.width = `${percentage}%`;
+      progressText.textContent = `${toFaDigits(count)}/${toFaDigits(TARGET_PRODUCTS)}`;
+      
+      // اگر تکمیل شده، کارت را به حالت completed ببر
+      const productCard = document.querySelector('[data-task="20-products"]');
+      if (productCard) {
+        if (count >= TARGET_PRODUCTS) {
+          productCard.classList.add('completed');
+          const actionBtn = productCard.querySelector('.credit-task-card__action');
+          if (actionBtn) {
+            actionBtn.innerHTML = '<i class="ri-check-line"></i> تکمیل شد';
+          }
+        } else {
+          productCard.classList.remove('completed');
+        }
+      }
+    }
 
     function openCreditModal(e) {
       if (e) {
@@ -9189,6 +11594,9 @@
       lastFocusedElement = document.activeElement;
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      
+      // بارگذاری تعداد محصولات
+      loadProductCount();
       
       // Focus trap
       setTimeout(() => {
@@ -9241,9 +11649,1023 @@
       }
     });
 
+    // Handle card action buttons
+    modal?.addEventListener('click', (e) => {
+      const actionBtn = e.target.closest('.credit-task-card__action');
+      if (!actionBtn) return;
+      
+      const action = actionBtn.dataset.action;
+      
+      switch (action) {
+        case 'install-app':
+          // نمایش پیام یا هدایت به صفحه دانلود اپ
+          if (window.UIComponents?.showToast) {
+            window.UIComponents.showToast('به زودی اپلیکیشن موبایل منتشر می‌شود!', 'info');
+          }
+          break;
+          
+        case 'add-product':
+          closeCreditModal();
+          const addProductBtn = document.getElementById('menu-add');
+          if (addProductBtn) {
+            addProductBtn.click();
+          }
+          break;
+          
+        case 'update-products':
+          closeCreditModal();
+          const productsBtn = document.getElementById('menu-products');
+          if (productsBtn) {
+            productsBtn.click();
+          }
+          break;
+          
+        case 'check-stale-products':
+          closeCreditModal();
+          // باز کردن مدال کالاهای قدیمی
+          if (typeof window.openStaleProductsModal === 'function') {
+            setTimeout(() => window.openStaleProductsModal(), 200);
+          }
+          break;
+          
+        case 'invite-seller':
+        case 'invite-customer':
+          closeCreditModal();
+          // باز کردن مدال دعوت دوستان
+          if (typeof window.openReferralModal === 'function') {
+            window.openReferralModal();
+          } else {
+            const referralBtn = document.getElementById('open-referral-modal-btn');
+            if (referralBtn) {
+              referralBtn.click();
+            }
+          }
+          break;
+      }
+    });
+
     // Expose function globally for external triggers
     window.openCreditIncreaseModal = openCreditModal;
     window.closeCreditIncreaseModal = closeCreditModal;
+  })();
+
+  // ========== Seller Referral Modal System ==========
+  (function() {
+    const modal = document.getElementById('sellerReferralModal');
+    const closeBtn = document.getElementById('closeSellerReferralModal');
+    const closeFooterBtn = document.getElementById('closeReferralFooterBtn');
+    const copyCodeBtn = document.getElementById('copyReferralCodeBtn');
+    const codeDisplay = document.getElementById('sellerReferralCode');
+    const copyToast = document.getElementById('referralCopyToast');
+    
+    // Stats elements
+    const totalInvitesEl = document.getElementById('referralTotalInvites');
+    const sellerInvitesEl = document.getElementById('referralSellerInvites');
+    const customerInvitesEl = document.getElementById('referralCustomerInvites');
+    const totalEarnedEl = document.getElementById('referralTotalEarned');
+    
+    let lastFocusedElement = null;
+    let referralCode = null;
+    let referralStats = {
+      totalInvites: 0,
+      sellerInvites: 0,
+      customerInvites: 0,
+      totalEarned: 0
+    };
+
+    // تبدیل عدد به فارسی
+    const toFaDigits = (num) => {
+      if (num == null) return '۰';
+      return String(num).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    };
+
+    // فرمت مبلغ
+    const formatAmount = (amount) => {
+      if (!amount || amount === 0) return '۰';
+      if (amount >= 1000000) {
+        return toFaDigits((amount / 1000000).toFixed(1).replace('.0', '')) + 'M';
+      }
+      if (amount >= 1000) {
+        return toFaDigits(Math.floor(amount / 1000)) + 'K';
+      }
+      return toFaDigits(amount);
+    };
+
+    // تولید کد یکتا از shopurl یا sellerId
+    function generateReferralCode() {
+      const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+      const shopurl = sellerData.shopurl || sellerData.shopUrl || '';
+      const sellerId = sellerData._id || sellerData.id || '';
+      
+      // اگر shopurl وجود داره، از اون استفاده کن
+      if (shopurl) {
+        // گرفتن 5 کاراکتر اول shopurl و تبدیل به uppercase
+        const shortCode = shopurl.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
+        return `VIT-${shortCode || 'XXXXX'}`;
+      }
+      
+      // در غیر این صورت از sellerId استفاده کن
+      if (sellerId) {
+        const shortId = String(sellerId).slice(-5).toUpperCase();
+        return `VIT-${shortId}`;
+      }
+      
+      // اگر هیچکدوم نبود، یک کد رندوم بساز
+      const randomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+      return `VIT-${randomCode}`;
+    }
+
+    // بارگذاری آمار دعوت‌ها از سرور
+    async function loadReferralStats() {
+      try {
+        const API_BASE = window.API_BASE || window.VITRINET_API?.backendOrigin || '';
+        const res = await fetch(`${API_BASE}/api/seller/referral-stats`, {
+          credentials: 'include'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          referralStats = {
+            totalInvites: data.totalInvites || data.total || 0,
+            sellerInvites: data.sellerInvites || data.sellers || 0,
+            customerInvites: data.customerInvites || data.customers || 0,
+            totalEarned: data.totalEarned || data.earned || 0
+          };
+        }
+      } catch (err) {
+        console.log('Referral stats not available:', err.message);
+        // استفاده از داده‌های پیش‌فرض
+      }
+      
+      updateStatsUI();
+    }
+
+    // آپدیت UI آمار
+    function updateStatsUI() {
+      if (totalInvitesEl) totalInvitesEl.textContent = toFaDigits(referralStats.totalInvites);
+      if (sellerInvitesEl) sellerInvitesEl.textContent = toFaDigits(referralStats.sellerInvites);
+      if (customerInvitesEl) customerInvitesEl.textContent = toFaDigits(referralStats.customerInvites);
+      if (totalEarnedEl) totalEarnedEl.textContent = formatAmount(referralStats.totalEarned);
+    }
+
+    // آپدیت UI با کد رفرال
+    function updateReferralUI() {
+      referralCode = generateReferralCode();
+      
+      if (codeDisplay) {
+        codeDisplay.textContent = referralCode;
+      }
+      
+      // بارگذاری آمار
+      loadReferralStats();
+    }
+
+    // نمایش toast کپی شد
+    function showCopyToast() {
+      if (!copyToast) return;
+      
+      copyToast.classList.add('visible');
+      
+      clearTimeout(copyToast._hideTimer);
+      copyToast._hideTimer = setTimeout(() => {
+        copyToast.classList.remove('visible');
+      }, 2000);
+    }
+
+    // کپی متن به کلیپبورد
+    async function copyToClipboard(text, btn) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopyToast();
+        
+        // تغییر دکمه به حالت کپی شد
+        if (btn) {
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = '<i class="ri-check-line"></i> کپی شد!';
+          btn.classList.add('copied');
+          
+          setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('copied');
+          }, 2000);
+        }
+      } catch (err) {
+        // Fallback برای مرورگرهای قدیمی
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showCopyToast();
+      }
+    }
+
+    function openReferralModal(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!modal) return;
+      
+      lastFocusedElement = document.activeElement;
+      updateReferralUI();
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      setTimeout(() => {
+        closeBtn?.focus();
+      }, 100);
+      
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    function closeReferralModal() {
+      if (!modal) return;
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscapeKey);
+      
+      if (lastFocusedElement) {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function handleEscapeKey(e) {
+      if (e.key === 'Escape') {
+        closeReferralModal();
+      }
+    }
+
+    // Event listeners
+    closeBtn?.addEventListener('click', closeReferralModal);
+    closeFooterBtn?.addEventListener('click', closeReferralModal);
+    
+    // Close on backdrop click
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeReferralModal();
+      }
+    });
+
+    // Copy code button
+    copyCodeBtn?.addEventListener('click', () => {
+      copyToClipboard(referralCode, copyCodeBtn);
+    });
+
+    // Expose functions globally
+    window.openReferralModal = openReferralModal;
+    window.closeReferralModal = closeReferralModal;
+    window.openSellerReferralModal = openReferralModal;
+  })();
+
+  // ========== Stale Products Modal System ==========
+  (function() {
+    const modal = document.getElementById('staleProductsModal');
+    const closeBtn = document.getElementById('closeStaleProductsModal');
+    const loadingEl = document.getElementById('staleProductsLoading');
+    const emptyEl = document.getElementById('staleProductsEmpty');
+    const listEl = document.getElementById('staleProductsList');
+    const footerEl = document.getElementById('staleProductsFooter');
+    const guideEl = document.getElementById('staleProductsGuide');
+    const confirmBtn = document.getElementById('confirmAllProductsBtn');
+    const toast = document.getElementById('staleProductsToast');
+    const toastText = document.getElementById('staleProductsToastText');
+    
+    // Quick Edit Modal Elements
+    const quickEditModal = document.getElementById('quickEditModal');
+    const quickEditCloseBtn = document.getElementById('closeQuickEditModal');
+    const quickEditProductImg = document.getElementById('quickEditProductImg');
+    const quickEditProductName = document.getElementById('quickEditProductName');
+    const quickEditPrice = document.getElementById('quickEditPrice');
+    const quickEditDiscountPrice = document.getElementById('quickEditDiscountPrice');
+    const quickEditStockToggle = document.getElementById('quickEditStockToggle');
+    const quickEditInventory = document.getElementById('quickEditInventory');
+    const quickEditDescription = document.getElementById('quickEditDescription');
+    const quickEditSaveBtn = document.getElementById('quickEditSaveBtn');
+    const quickEditHint = document.getElementById('quickEditHint');
+    const quickEditToast = document.getElementById('quickEditToast');
+    const quickEditToastText = document.getElementById('quickEditToastText');
+    
+    // Card elements
+    const weeklyUpdateCard = document.getElementById('weeklyUpdateCard');
+    const weeklyUpdateDesc = document.getElementById('weeklyUpdateDesc');
+    const staleBadge = document.getElementById('staleProductsBadge');
+    const staleCountEl = document.getElementById('staleProductsCount');
+    const checkStaleBtn = document.getElementById('checkStaleProductsBtn');
+    
+    let lastFocusedElement = null;
+    let staleProducts = [];
+    let currentEditProduct = null;
+    let originalProductData = {};
+    
+    // State tracking
+    let verifiedProductIds = new Set();
+    let editedProductIds = new Set();
+    let pendingEditProductId = null;
+    
+    const STALE_DAYS = 10;
+
+    // تبدیل عدد به فارسی
+    const toFaDigits = (num) => {
+      if (num == null) return '۰';
+      return String(num).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    };
+    
+    // تبدیل عدد فارسی به انگلیسی
+    const toEnDigits = (str) => {
+      if (!str) return '';
+      return String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+    };
+    
+    // فرمت قیمت با کاما
+    const formatPrice = (num) => {
+      if (!num) return '';
+      const cleaned = String(num).replace(/[^\d]/g, '');
+      return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    // محاسبه روزهای گذشته
+    const getDaysAgo = (dateStr) => {
+      if (!dateStr) return 999;
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    // فرمت تاریخ نسبی
+    const formatRelativeDate = (dateStr) => {
+      const days = getDaysAgo(dateStr);
+      if (days === 0) return 'امروز';
+      if (days === 1) return 'دیروز';
+      return `${toFaDigits(days)} روز پیش`;
+    };
+
+    // بررسی توکن
+    const hasToken = () => {
+      return !!localStorage.getItem('token') || !!localStorage.getItem('seller');
+    };
+
+    // بارگذاری محصولات قدیمی
+    async function loadStaleProducts() {
+      if (!hasToken()) {
+        showToast('لطفاً ابتدا وارد حساب خود شوید', 'error');
+        return [];
+      }
+
+      try {
+        const sellerData = JSON.parse(localStorage.getItem('seller') || '{}');
+        const sellerId = sellerData._id || sellerData.id;
+        if (!sellerId) return [];
+
+        const API_BASE = window.API_BASE || window.VITRINET_API?.backendOrigin || '';
+        const res = await fetch(`${API_BASE}/api/products?sellerId=${sellerId}`, {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) return [];
+        
+        const products = await res.json();
+        if (!Array.isArray(products)) return [];
+        
+        // فیلتر محصولات قدیمی (بیش از 10 روز)
+        const now = new Date();
+        const staleThreshold = STALE_DAYS * 24 * 60 * 60 * 1000;
+        
+        return products.filter(p => {
+          const updatedAt = new Date(p.updatedAt || p.createdAt);
+          return (now - updatedAt) > staleThreshold;
+        }).map(p => ({
+          id: p._id || p.id,
+          name: p.name || p.title || 'بدون نام',
+          image: p.images?.[0] || p.image || '/assets/images/placeholder.png',
+          updatedAt: p.updatedAt || p.createdAt,
+          daysAgo: getDaysAgo(p.updatedAt || p.createdAt),
+          price: p.price || 0,
+          discountPrice: p.discountPrice || p.salePrice || null,
+          inStock: p.inStock !== false,
+          inventory: p.inventory || p.stock || 0,
+          description: p.shortDescription || p.description || ''
+        }));
+      } catch (err) {
+        console.error('Failed to load products:', err);
+        return [];
+      }
+    }
+
+    // آپدیت کارت Weekly Update
+    async function updateWeeklyCard() {
+      staleProducts = await loadStaleProducts();
+      const count = staleProducts.length;
+      
+      if (count > 0) {
+        weeklyUpdateCard?.classList.add('has-stale');
+        if (staleBadge) {
+          staleBadge.style.display = 'inline-flex';
+          staleCountEl.textContent = toFaDigits(count);
+        }
+        if (weeklyUpdateDesc) {
+          weeklyUpdateDesc.textContent = `${toFaDigits(count)} کالای شما بیش از ${toFaDigits(STALE_DAYS)} روز آپدیت نشده`;
+        }
+        if (checkStaleBtn) {
+          checkStaleBtn.innerHTML = '<i class="ri-eye-line"></i> مشاهده لیست';
+        }
+      } else {
+        weeklyUpdateCard?.classList.remove('has-stale');
+        if (staleBadge) staleBadge.style.display = 'none';
+        if (weeklyUpdateDesc) {
+          weeklyUpdateDesc.textContent = 'همه محصولات به‌روز هستند ✓';
+        }
+        if (checkStaleBtn) {
+          checkStaleBtn.innerHTML = '<i class="ri-check-line"></i> همه به‌روز';
+        }
+      }
+    }
+
+    // Get product status
+    function getProductStatus(productId) {
+      if (editedProductIds.has(productId)) return 'edited';
+      if (verifiedProductIds.has(productId)) return 'verified';
+      return 'pending';
+    }
+
+    // رندر لیست محصولات با Dynamic Status Labels
+    function renderProductsList() {
+      if (!listEl) return;
+      
+      if (staleProducts.length === 0) {
+        loadingEl.style.display = 'none';
+        emptyEl.style.display = 'flex';
+        listEl.style.display = 'none';
+        footerEl.style.display = 'none';
+        if (guideEl) guideEl.style.display = 'none';
+        return;
+      }
+      
+      loadingEl.style.display = 'none';
+      emptyEl.style.display = 'none';
+      listEl.style.display = 'flex';
+      footerEl.style.display = 'block';
+      if (guideEl) guideEl.style.display = 'flex';
+      
+      // Update button state
+      updateConfirmButtonState();
+      
+      listEl.innerHTML = staleProducts.map(p => {
+        const status = getProductStatus(p.id);
+        const isVerified = status === 'verified';
+        const isEdited = status === 'edited';
+        const isPending = status === 'pending';
+        
+        let statusClass = '';
+        if (isVerified) statusClass = 'stale-product-item--verified';
+        if (isEdited) statusClass = 'stale-product-item--edited';
+        
+        // Dynamic Status Label
+        let statusLabel = '';
+        if (isEdited) {
+          statusLabel = `
+            <div class="stale-product-item__status">
+              <span class="stale-product-item__status-label stale-product-item__status-label--reward">
+                <i class="ri-gift-fill"></i>
+                آماده جایزه
+              </span>
+            </div>
+          `;
+        } else if (isVerified) {
+          statusLabel = `
+            <div class="stale-product-item__status">
+              <span class="stale-product-item__status-label stale-product-item__status-label--verified">
+                <i class="ri-check-line"></i>
+                تایید شد
+              </span>
+            </div>
+          `;
+        } else {
+          statusLabel = `
+            <div class="stale-product-item__status">
+              <span class="stale-product-item__status-label stale-product-item__status-label--pending">
+                تغییری نکرده؟ تایید کنید
+              </span>
+            </div>
+          `;
+        }
+        
+        return `
+        <div class="stale-product-item ${statusClass}" data-id="${p.id}">
+          <img class="stale-product-item__image" src="${p.image}" alt="${p.name}" onerror="this.src='/assets/images/placeholder.png'">
+          <div class="stale-product-item__content">
+            <h4 class="stale-product-item__name">${p.name}</h4>
+            <div class="stale-product-item__meta">
+              <span class="stale-product-item__date">
+                <i class="ri-time-line"></i>
+                ${formatRelativeDate(p.updatedAt)}
+              </span>
+            </div>
+          </div>
+          ${isPending ? `
+            <div class="stale-product-item__actions">
+              <button type="button" class="stale-product-item__verify-btn" data-action="verify" data-product-id="${p.id}" title="بدون تغییر">
+                <i class="ri-check-line"></i>
+              </button>
+              <button type="button" class="stale-product-item__edit-btn" data-action="edit" data-product-id="${p.id}" title="ویرایش و دریافت جایزه">
+                <i class="ri-pencil-line"></i>
+              </button>
+            </div>
+          ` : statusLabel}
+        </div>
+      `}).join('');
+    }
+    
+    // Handle button clicks using event delegation
+    function handleButtonClick(e) {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const action = btn.dataset.action;
+      const productId = btn.dataset.productId;
+      
+      if (!productId) return;
+      
+      if (action === 'verify') {
+        handleVerifyNoChange(productId);
+      } else if (action === 'edit') {
+        openQuickEditModal(productId);
+      }
+    }
+    
+    // Handle "No Change" verification
+    function handleVerifyNoChange(productId) {
+      verifiedProductIds.add(productId);
+      editedProductIds.delete(productId); // Remove from edited if was there
+      renderProductsList();
+      showToast('تایید شد - بدون تغییر', 'info');
+    }
+    
+    // Open Quick Edit Modal
+    function openQuickEditModal(productId) {
+      const product = staleProducts.find(p => p.id === productId);
+      if (!product) return;
+      
+      currentEditProduct = product;
+      
+      // Store original data for comparison
+      originalProductData = {
+        price: product.price,
+        discountPrice: product.discountPrice,
+        inStock: product.inStock,
+        inventory: product.inventory,
+        description: product.description
+      };
+      
+      // Populate form
+      if (quickEditProductImg) {
+        quickEditProductImg.src = product.image;
+        quickEditProductImg.onerror = () => { quickEditProductImg.src = '/assets/images/placeholder.png'; };
+      }
+      if (quickEditProductName) quickEditProductName.textContent = product.name;
+      if (quickEditPrice) quickEditPrice.value = product.price ? formatPrice(product.price) : '';
+      if (quickEditDiscountPrice) quickEditDiscountPrice.value = product.discountPrice ? formatPrice(product.discountPrice) : '';
+      if (quickEditInventory) quickEditInventory.value = product.inventory ? toFaDigits(product.inventory) : '';
+      if (quickEditDescription) quickEditDescription.value = product.description || '';
+      
+      // Set stock status
+      if (quickEditStockToggle) {
+        const stockOptions = quickEditStockToggle.querySelectorAll('.quick-edit-stock-option');
+        stockOptions.forEach(opt => {
+          opt.classList.remove('active');
+          if (opt.dataset.stock === 'available' && product.inStock) {
+            opt.classList.add('active');
+          } else if (opt.dataset.stock === 'unavailable' && !product.inStock) {
+            opt.classList.add('active');
+          }
+        });
+      }
+      
+      // Hide validation hint initially
+      if (quickEditHint) quickEditHint.style.display = 'none';
+      
+      // Show modal
+      if (quickEditModal) {
+        quickEditModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      // Focus first input
+      setTimeout(() => quickEditPrice?.focus(), 100);
+    }
+    
+    // Close Quick Edit Modal
+    function closeQuickEditModal() {
+      if (quickEditModal) {
+        quickEditModal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      currentEditProduct = null;
+      originalProductData = {};
+    }
+    
+    // Check if any value changed
+    function hasChanges() {
+      if (!currentEditProduct) return false;
+      
+      const currentPrice = parseInt(toEnDigits(quickEditPrice?.value || '').replace(/[^\d]/g, '')) || 0;
+      const currentDiscountPrice = parseInt(toEnDigits(quickEditDiscountPrice?.value || '').replace(/[^\d]/g, '')) || 0;
+      const currentInventory = parseInt(toEnDigits(quickEditInventory?.value || '')) || 0;
+      const currentDescription = (quickEditDescription?.value || '').trim();
+      
+      const activeStockOption = quickEditStockToggle?.querySelector('.quick-edit-stock-option.active');
+      const currentInStock = activeStockOption?.dataset.stock === 'available';
+      
+      return (
+        currentPrice !== originalProductData.price ||
+        currentDiscountPrice !== (originalProductData.discountPrice || 0) ||
+        currentInStock !== originalProductData.inStock ||
+        currentInventory !== originalProductData.inventory ||
+        currentDescription !== (originalProductData.description || '')
+      );
+    }
+    
+    // Save Quick Edit
+    async function saveQuickEdit() {
+      if (!currentEditProduct) return;
+      
+      // Check for changes
+      if (!hasChanges()) {
+        if (quickEditHint) quickEditHint.style.display = 'flex';
+        return;
+      }
+      
+      if (quickEditSaveBtn) {
+        quickEditSaveBtn.disabled = true;
+        quickEditSaveBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite;"></i> در حال ذخیره...';
+      }
+      
+      try {
+        const API_BASE = window.API_BASE || window.VITRINET_API?.backendOrigin || '';
+        
+        const activeStockOption = quickEditStockToggle?.querySelector('.quick-edit-stock-option.active');
+        const inStock = activeStockOption?.dataset.stock === 'available';
+        
+        const updateData = {
+          price: parseInt(toEnDigits(quickEditPrice?.value || '').replace(/[^\d]/g, '')) || 0,
+          discountPrice: parseInt(toEnDigits(quickEditDiscountPrice?.value || '').replace(/[^\d]/g, '')) || null,
+          inStock: inStock,
+          inventory: parseInt(toEnDigits(quickEditInventory?.value || '')) || 0,
+          shortDescription: (quickEditDescription?.value || '').trim()
+        };
+        
+        const res = await fetch(`${API_BASE}/api/products/${currentEditProduct.id}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        });
+        
+        if (!res.ok) throw new Error('Failed to update product');
+        
+        // Mark as edited for reward
+        editedProductIds.add(currentEditProduct.id);
+        verifiedProductIds.delete(currentEditProduct.id);
+        
+        // Update local product data
+        const productIndex = staleProducts.findIndex(p => p.id === currentEditProduct.id);
+        if (productIndex !== -1) {
+          staleProducts[productIndex] = {
+            ...staleProducts[productIndex],
+            ...updateData
+          };
+        }
+        
+        // Close modal and update UI
+        closeQuickEditModal();
+        renderProductsList();
+        
+        // Show success toast
+        showQuickEditToast('تغییرات با موفقیت ثبت شد. امتیاز این کالا فعال گردید.');
+        
+      } catch (err) {
+        console.error('Failed to save product:', err);
+        showToast('خطا در ذخیره تغییرات', 'error');
+      } finally {
+        if (quickEditSaveBtn) {
+          quickEditSaveBtn.disabled = false;
+          quickEditSaveBtn.innerHTML = '<i class="ri-check-line"></i> ثبت تغییرات';
+        }
+      }
+    }
+    
+    // Show Quick Edit Toast
+    function showQuickEditToast(message) {
+      if (!quickEditToast || !quickEditToastText) return;
+      
+      quickEditToastText.textContent = message;
+      quickEditToast.classList.add('visible');
+      
+      clearTimeout(quickEditToast._hideTimer);
+      quickEditToast._hideTimer = setTimeout(() => {
+        quickEditToast.classList.remove('visible');
+      }, 4000);
+    }
+    
+    // Called when product edit is saved successfully
+    function markProductAsEdited(productId) {
+      if (productId) {
+        editedProductIds.add(productId);
+        verifiedProductIds.delete(productId);
+        pendingEditProductId = null;
+      }
+    }
+    
+    // Update confirm button state
+    function updateConfirmButtonState() {
+      if (!confirmBtn) return;
+      
+      const processedCount = verifiedProductIds.size + editedProductIds.size;
+      const totalCount = staleProducts.length;
+      
+      confirmBtn.innerHTML = `
+        <i class="ri-check-double-line"></i>
+        تایید نهایی و به‌روزرسانی لیست
+      `;
+    }
+
+    // نمایش toast
+    function showToast(message, type = 'success') {
+      if (!toast || !toastText) return;
+      
+      toastText.textContent = message;
+      
+      if (type === 'error') {
+        toast.style.background = 'linear-gradient(145deg, #ef4444 0%, #dc2626 100%)';
+      } else if (type === 'info') {
+        toast.style.background = 'linear-gradient(145deg, #0ea5e9 0%, #0284c7 100%)';
+      } else if (type === 'warning') {
+        toast.style.background = 'linear-gradient(145deg, #f59e0b 0%, #d97706 100%)';
+      } else {
+        toast.style.background = 'linear-gradient(145deg, #22c55e 0%, #16a34a 100%)';
+      }
+      
+      toast.classList.add('visible');
+      
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 3500);
+    }
+
+    // تایید نهایی و به‌روزرسانی
+    async function confirmAllProducts(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      if (!hasToken()) {
+        showToast('لطفاً ابتدا وارد حساب خود شوید', 'error');
+        return;
+      }
+
+      if (staleProducts.length === 0) {
+        showToast('هیچ محصولی برای به‌روزرسانی وجود ندارد', 'info');
+        return;
+      }
+      
+      // Get products to update (only verified "no change" items)
+      const verifiedIds = Array.from(verifiedProductIds);
+      const editedIds = Array.from(editedProductIds);
+      const allProcessedIds = [...verifiedIds, ...editedIds];
+      
+      // Check if any products have been processed
+      if (allProcessedIds.length === 0) {
+        showToast('لطفاً ابتدا وضعیت محصولات را مشخص کنید', 'warning');
+        return;
+      }
+      
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite;"></i> در حال به‌روزرسانی...';
+      
+      try {
+        const API_BASE = window.API_BASE || window.VITRINET_API?.backendOrigin || '';
+        
+        // Update timestamp for all processed products
+        const res = await fetch(`${API_BASE}/api/products/bulk-update-timestamp`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            productIds: allProcessedIds,
+            editedProductIds: editedIds // Send edited IDs for reward tracking
+          })
+        });
+        
+        // Show appropriate message based on whether any were edited for reward
+        if (editedIds.length > 0) {
+          showToast(`${toFaDigits(allProcessedIds.length)} محصول به‌روزرسانی شد! جایزه برای ${toFaDigits(editedIds.length)} محصول ویرایش شده.`, 'success');
+        } else {
+          showToast('وضعیت کالاها به‌روز شد، اما برای دریافت جایزه باید حداقل یک کالا را ویرایش کنید.', 'warning');
+        }
+        
+        // Clear state
+        staleProducts = staleProducts.filter(p => !allProcessedIds.includes(p.id));
+        verifiedProductIds.clear();
+        editedProductIds.clear();
+        
+        closeStaleModal();
+        updateWeeklyCard();
+        
+      } catch (err) {
+        console.error('Failed to update products:', err);
+        showToast('خطا در به‌روزرسانی محصولات', 'error');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="ri-check-double-line"></i> تایید نهایی و به‌روزرسانی لیست';
+      }
+    }
+
+    function openStaleModal(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!modal) return;
+      
+      lastFocusedElement = document.activeElement;
+      
+      // Reset state
+      loadingEl.style.display = 'flex';
+      emptyEl.style.display = 'none';
+      listEl.style.display = 'none';
+      footerEl.style.display = 'none';
+      if (guideEl) guideEl.style.display = 'none';
+      verifiedProductIds.clear();
+      editedProductIds.clear();
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Load and render products
+      loadStaleProducts().then(products => {
+        staleProducts = products;
+        renderProductsList();
+      });
+      
+      // Add event listener for button clicks
+      listEl?.addEventListener('click', handleButtonClick);
+      
+      setTimeout(() => {
+        closeBtn?.focus();
+      }, 100);
+      
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    function closeStaleModal() {
+      if (!modal) return;
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscapeKey);
+      
+      // Remove button click handler
+      listEl?.removeEventListener('click', handleButtonClick);
+      
+      if (lastFocusedElement) {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function handleEscapeKey(e) {
+      if (e.key === 'Escape') {
+        if (quickEditModal && quickEditModal.classList.contains('active')) {
+          closeQuickEditModal();
+        } else {
+          closeStaleModal();
+        }
+      }
+    }
+
+    // Event listeners - using event delegation for better reliability
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeStaleModal();
+      });
+    }
+    
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeStaleModal();
+        }
+      });
+    }
+    
+    // Quick Edit Modal Event Listeners
+    if (quickEditCloseBtn) {
+      quickEditCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeQuickEditModal();
+      });
+    }
+    
+    if (quickEditModal) {
+      quickEditModal.addEventListener('click', (e) => {
+        if (e.target === quickEditModal) {
+          closeQuickEditModal();
+        }
+      });
+    }
+    
+    // Stock toggle
+    if (quickEditStockToggle) {
+      quickEditStockToggle.addEventListener('click', (e) => {
+        const option = e.target.closest('.quick-edit-stock-option');
+        if (!option) return;
+        
+        quickEditStockToggle.querySelectorAll('.quick-edit-stock-option').forEach(opt => {
+          opt.classList.remove('active');
+        });
+        option.classList.add('active');
+        
+        // Hide hint when user makes changes
+        if (quickEditHint) quickEditHint.style.display = 'none';
+      });
+    }
+    
+    // Input change handlers to hide hint
+    [quickEditPrice, quickEditDiscountPrice, quickEditInventory, quickEditDescription].forEach(input => {
+      if (input) {
+        input.addEventListener('input', () => {
+          if (quickEditHint) quickEditHint.style.display = 'none';
+        });
+      }
+    });
+    
+    // Price formatting
+    if (quickEditPrice) {
+      quickEditPrice.addEventListener('input', (e) => {
+        const value = toEnDigits(e.target.value).replace(/[^\d]/g, '');
+        e.target.value = formatPrice(value);
+      });
+    }
+    
+    if (quickEditDiscountPrice) {
+      quickEditDiscountPrice.addEventListener('input', (e) => {
+        const value = toEnDigits(e.target.value).replace(/[^\d]/g, '');
+        e.target.value = formatPrice(value);
+      });
+    }
+    
+    // Save button
+    if (quickEditSaveBtn) {
+      quickEditSaveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        saveQuickEdit();
+      });
+    }
+
+    // Fix: Use proper event binding for confirm button
+    if (confirmBtn) {
+      // Remove any existing listeners by cloning
+      const newConfirmBtn = confirmBtn.cloneNode(true);
+      confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+      
+      // Add fresh event listener
+      newConfirmBtn.addEventListener('click', confirmAllProducts);
+      newConfirmBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        confirmAllProducts(e);
+      });
+    }
+    
+    if (checkStaleBtn) {
+      checkStaleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openStaleModal();
+      });
+    }
+
+    // بارگذاری اولیه کارت
+    setTimeout(() => {
+      updateWeeklyCard();
+    }, 1000);
+
+    // Expose functions globally
+    window.openStaleProductsModal = openStaleModal;
+    window.closeStaleProductsModal = closeStaleModal;
+    window.refreshStaleProducts = updateWeeklyCard;
+    window.markStaleProductAsEdited = markProductAsEdited;
+    window.goToProductEdit = openQuickEditModal;
+    window.openQuickEditModal = openQuickEditModal;
+    window.closeQuickEditModal = closeQuickEditModal;
   })();
 </script>
 
@@ -9254,7 +12676,6 @@
 <script>
 (function() {
   'use strict';
-  
   const API_BASE = window.VITRINET_API?.backendOrigin || 'http://localhost:5000';
   
   // تبدیل عدد به فارسی
@@ -9382,6 +12803,9 @@
         }
       }
       
+      // آپدیت مدال سطح اعتبار فروشگاه با داده‌های واقعی
+      updateRankModal(balance);
+      
     } catch (err) {
       console.error('Failed to load wallet:', err);
       // در صورت خطا، نمایش 0 (نه «—»)
@@ -9391,21 +12815,153 @@
       if (walletBadgeEl) {
         walletBadgeEl.style.display = 'none';
       }
+      // آپدیت مدال با موجودی صفر
+      updateRankModal(0);
+    }
+  }
+  
+  // ===== آپدیت مدال سطح اعتبار فروشگاه =====
+  function updateRankModal(balance) {
+    // تعریف سطوح اعتبار
+    const levels = [
+      { name: 'برنزی', min: 0, max: 500000, stars: 1, icon: 'bronze', benefits: 'goldBenefits' },
+      { name: 'نقره‌ای', min: 500000, max: 2000000, stars: 2, icon: 'silver', benefits: 'goldBenefits' },
+      { name: 'طلایی', min: 2000000, max: 5000000, stars: 4, icon: 'gold', benefits: 'goldBenefits' },
+      { name: 'الماسی', min: 5000000, max: Infinity, stars: 5, icon: 'diamond', benefits: 'diamondBenefits' }
+    ];
+    
+    // پیدا کردن سطح فعلی
+    let currentLevel = levels[0];
+    let currentLevelIndex = 0;
+    for (let i = 0; i < levels.length; i++) {
+      if (balance >= levels[i].min && balance < levels[i].max) {
+        currentLevel = levels[i];
+        currentLevelIndex = i;
+        break;
+      }
+      if (balance >= levels[i].min) {
+        currentLevel = levels[i];
+        currentLevelIndex = i;
+      }
+    }
+    
+    // محاسبه درصد پیشرفت
+    let progressPercent = 0;
+    let nextLevelMin = currentLevel.max;
+    if (currentLevel.max === Infinity) {
+      progressPercent = 100;
+      nextLevelMin = currentLevel.min;
+    } else {
+      const range = currentLevel.max - currentLevel.min;
+      const progress = balance - currentLevel.min;
+      progressPercent = Math.min(100, Math.max(0, (progress / range) * 100));
+    }
+    
+    // آپدیت عنوان سطح
+    const titleEl = document.getElementById('rankCurrentTitle');
+    if (titleEl) {
+      titleEl.textContent = `فروشگاه ${currentLevel.name}`;
+    }
+    
+    // آپدیت ستاره‌ها
+    const starsEl = document.getElementById('rankCurrentStars');
+    if (starsEl) {
+      let starsHtml = '';
+      for (let i = 0; i < 5; i++) {
+        if (i < currentLevel.stars) {
+          starsHtml += '<i class="ri-star-fill"></i>';
+        } else {
+          starsHtml += '<i class="ri-star-line empty"></i>';
+        }
+      }
+      starsEl.innerHTML = starsHtml;
+    }
+    
+    // آپدیت متن پیشرفت
+    const progressTextEl = document.getElementById('rankCurrentProgress');
+    if (progressTextEl) {
+      if (currentLevel.max === Infinity) {
+        progressTextEl.textContent = `${formatTomans(balance)} - بالاترین سطح اعتبار`;
+      } else {
+        progressTextEl.textContent = `${formatTomans(balance)} از ${formatTomans(currentLevel.max)} تومان اعتبار برای سطح بعدی`;
+      }
+    }
+    
+    // آپدیت نوار پیشرفت
+    const progressFillEl = document.getElementById('rankProgressFill');
+    if (progressFillEl) {
+      progressFillEl.style.width = `${progressPercent}%`;
+    }
+    
+    // آپدیت آیکون سطح فعلی
+    const badgeEl = document.querySelector('.rank-current__badge i');
+    if (badgeEl) {
+      if (currentLevel.icon === 'diamond') {
+        badgeEl.className = 'ri-vip-diamond-fill';
+      } else {
+        badgeEl.className = 'ri-vip-crown-fill';
+      }
+    }
+    
+    // آپدیت کلاس current روی سطوح
+    const levelEls = document.querySelectorAll('.rank-level');
+    levelEls.forEach((el, index) => {
+      el.classList.remove('current');
+      const checkEl = el.querySelector('.rank-level__check');
+      if (index < currentLevelIndex) {
+        // سطوح قبلی - تیک نمایش داده شود
+        if (checkEl) checkEl.style.display = 'flex';
+      } else if (index === currentLevelIndex) {
+        // سطح فعلی
+        el.classList.add('current');
+        if (checkEl) checkEl.style.display = 'flex';
+      } else {
+        // سطوح بعدی - تیک مخفی شود
+        if (checkEl) checkEl.style.display = 'none';
+      }
+    });
+    
+    // نمایش مزایای سطح مناسب
+    const goldBenefitsEl = document.getElementById('goldBenefits');
+    const diamondBenefitsEl = document.getElementById('diamondBenefits');
+    if (goldBenefitsEl && diamondBenefitsEl) {
+      if (currentLevel.icon === 'diamond') {
+        goldBenefitsEl.style.display = 'none';
+        diamondBenefitsEl.style.display = 'block';
+      } else {
+        goldBenefitsEl.style.display = 'block';
+        diamondBenefitsEl.style.display = 'none';
+        // آپدیت عنوان مزایا
+        const benefitsTitleEl = goldBenefitsEl.querySelector('.rank-benefits__title');
+        if (benefitsTitleEl) {
+          benefitsTitleEl.innerHTML = `<i class="ri-gift-fill"></i> مزایای سطح ${currentLevel.name}`;
+        }
+      }
     }
   }
   
   // بارگذاری داده‌ها در شروع
-  document.addEventListener('DOMContentLoaded', () => {
+  function initStreakWallet() {
     // بررسی لاگین بودن
-    const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+    const seller = window.seller || JSON.parse(localStorage.getItem('seller') || '{}');
     if (!seller.id && !seller._id) {
-      console.warn('Seller not logged in, skipping streak/wallet load');
-      return;
+      return false;
     }
     
     // بارگذاری موازی
     loadStreak();
     loadWallet();
+    return true;
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    // اول سعی کن لود کنی
+    if (!initStreakWallet()) {
+      // اگر فروشنده هنوز لاگین نشده، منتظر event seller:ready بمان
+      document.addEventListener('seller:ready', () => {
+        initStreakWallet();
+      }, { once: true });
+    }
   });
   
   // Expose functions globally for manual refresh

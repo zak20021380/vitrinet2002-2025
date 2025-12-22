@@ -1,7 +1,7 @@
-async function initLogoDashboard() {  // اضافه کردن async اینجا
-  // جلوگیری از چندبار اجرا
-  if (window._logoDashboardInited) return;
-  window._logoDashboardInited = true;
+// تابع اصلی برای مقداردهی اولیه بخش تابلو فروشگاه
+async function initLogoDashboard() {
+  // ریست کردن flag برای اجازه اجرای مجدد
+  window._logoDashboardInited = false;
 
   const API = window.VITRINET_API || null;
   const apiUrl = path => API ? API.buildUrl(path) : `http://localhost:5000${path}`;
@@ -14,25 +14,37 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
   };
 
   // المنت‌ها
-  const logoInput      = document.getElementById("logo-file-input");
-  const logoPreview    = document.getElementById("shop-logo-preview");
-  const noLogoMsg      = document.getElementById("no-logo-msg");
-  const logoSaveBtn    = document.getElementById("logo-save-btn");
-  const logoFileError  = document.getElementById("logo-file-error");
-  const logoSaveSuccess= document.getElementById("logo-save-success");
-  const dropzone       = document.getElementById("logo-dropzone");
-  const logoForm       = document.getElementById("logo-upload-form");
+  const logoInput = document.getElementById("logo-file-input");
+  const logoPreview = document.getElementById("shop-logo-preview");
+  const noLogoMsg = document.getElementById("no-logo-msg");
+  const logoSaveBtn = document.getElementById("logo-save-btn");
+  const logoFileError = document.getElementById("logo-file-error");
+  const logoSaveSuccess = document.getElementById("logo-save-success");
+  const dropzone = document.getElementById("logo-dropzone");
+  const logoForm = document.getElementById("logo-upload-form");
 
-  if (!logoInput || !logoPreview || !noLogoMsg || !logoSaveBtn || !logoFileError || !logoSaveSuccess || !dropzone || !logoForm) return;
+  // بررسی وجود المنت‌ها
+  if (!logoInput || !logoPreview || !noLogoMsg || !logoSaveBtn || !logoFileError || !logoSaveSuccess || !dropzone || !logoForm) {
+    console.warn('Logo dashboard elements not found');
+    return;
+  }
 
   let selectedLogoBase64 = "";
   let seller = null;
 
-  // تابع جدید fetchCurrentSellerLogo (جایگزین نسخه قدیمی)
+  // تابع دریافت اطلاعات فروشنده
   async function fetchCurrentSellerLogo() {
     try {
+      // ابتدا از window.seller استفاده کن (اگر موجود باشد)
+      if (window.seller && window.seller.id) {
+        seller = window.seller;
+        updateLogoPreview();
+        return;
+      }
+
+      // در غیر این صورت از API دریافت کن
       let res = await fetch(apiUrl('/api/auth/me'), withCreds({ method: 'GET' }));
-      if (res.status === 401 || res.status === 403) { // اگر unauthorized یا forbidden
+      if (res.status === 401 || res.status === 403) {
         window.location.href = "login.html";
         return;
       }
@@ -46,43 +58,49 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
         return;
       }
 
-      // ذخیره seller در localStorage برای استفاده‌های بعدی (اختیاری، اما برای cache مفید)
       localStorage.setItem("seller", JSON.stringify(seller));
-
-      if (seller.boardImage) {
-        logoPreview.src = seller.boardImage;
-        logoPreview.style.display = 'block';
-        noLogoMsg.style.display = 'none';
-      } else {
-        logoPreview.style.display = 'none';
-        noLogoMsg.style.display = 'block';
-      }
-      logoSaveBtn.disabled = true;
-      selectedLogoBase64 = "";
+      updateLogoPreview();
     } catch (e) {
       console.error(e);
-      logoFileError.innerText = "دریافت اطلاعات فروشنده با خطا مواجه شد. لطفاً دوباره لاگین کنید.";
+      logoFileError.innerText = "دریافت اطلاعات فروشنده با خطا مواجه شد.";
       logoFileError.classList.remove('hidden');
-      setTimeout(() => window.location.href = "login.html", 3000); // ریدایرکت پس از نمایش خطا
     }
   }
-  await fetchCurrentSellerLogo();  // اضافه کردن await اینجا
+
+  // تابع به‌روزرسانی پیش‌نمایش لوگو
+  function updateLogoPreview() {
+    if (seller && seller.boardImage) {
+      logoPreview.src = seller.boardImage;
+      logoPreview.style.display = 'block';
+      noLogoMsg.style.display = 'none';
+    } else {
+      logoPreview.style.display = 'none';
+      noLogoMsg.style.display = 'block';
+    }
+    logoSaveBtn.disabled = true;
+    selectedLogoBase64 = "";
+  }
+
+  // دریافت اطلاعات فروشنده
+  await fetchCurrentSellerLogo();
 
   // کلیک روی dropzone = کلیک روی input
-  dropzone.addEventListener('click', function (e) {
+  dropzone.addEventListener('click', function(e) {
     if (e.target === logoInput) return;
     logoInput.click();
   });
 
   // Drag & drop
-  dropzone.addEventListener('dragover', function (e) {
+  dropzone.addEventListener('dragover', function(e) {
     e.preventDefault();
     dropzone.classList.add('dragover');
   });
-  dropzone.addEventListener('dragleave', function (e) {
+  
+  dropzone.addEventListener('dragleave', function(e) {
     dropzone.classList.remove('dragover');
   });
-  dropzone.addEventListener('drop', function (e) {
+  
+  dropzone.addEventListener('drop', function(e) {
     e.preventDefault();
     dropzone.classList.remove('dragover');
     if (e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -92,7 +110,7 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
   });
 
   // انتخاب فایل جدید
-  logoInput.addEventListener('change', function (e) {
+  logoInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) handleLogoFile(file);
   });
@@ -108,7 +126,7 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
       return;
     }
     const reader = new FileReader();
-    reader.onload = function (ev) {
+    reader.onload = function(ev) {
       logoPreview.src = ev.target.result;
       logoPreview.style.display = 'block';
       noLogoMsg.style.display = 'none';
@@ -118,32 +136,44 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
     reader.readAsDataURL(file);
   }
 
-  // event listener جدید برای submit (جایگزین نسخه قدیمی)
-  logoForm.addEventListener('submit', async function (e) {
+  // ارسال فرم
+  logoForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     if (!selectedLogoBase64 || !seller || !seller.id) return;
+    
     logoSaveBtn.disabled = true;
     logoFileError.classList.add('hidden');
+    
     try {
       let res = await fetch(apiUrl(`/api/sellers/${seller.id}/logo`), withCreds({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logo: selectedLogoBase64 })
       }));
+      
       const data = await res.json();
+      
       if (res.ok) {
         seller.boardImage = selectedLogoBase64;
         localStorage.setItem("seller", JSON.stringify(seller));
+        
+        // به‌روزرسانی window.seller هم
+        if (window.seller) {
+          window.seller.boardImage = selectedLogoBase64;
+        }
+        
         logoSaveSuccess.classList.remove('hidden');
         setTimeout(() => {
           logoSaveSuccess.classList.add('hidden');
-        }, 1700);
-        fetchCurrentSellerLogo();
+        }, 2500);
+        
+        // ریست کردن فرم
+        selectedLogoBase64 = "";
+        logoSaveBtn.disabled = true;
       } else {
         if (res.status === 401 || res.status === 403) {
           logoFileError.innerText = "شما لاگین نیستید یا دسترسی ندارید!";
           logoFileError.classList.remove('hidden');
-          setTimeout(() => window.location.href = "login.html", 3000);
         } else {
           logoFileError.innerText = data.message || "ثبت تابلو با خطا مواجه شد!";
           logoFileError.classList.remove('hidden');
@@ -153,9 +183,18 @@ async function initLogoDashboard() {  // اضافه کردن async اینجا
       logoFileError.innerText = "ثبت تابلو با خطا مواجه شد!";
       logoFileError.classList.remove('hidden');
     }
-    logoSaveBtn.disabled = false;
+    
+    logoSaveBtn.disabled = !selectedLogoBase64;
   });
+
+  // علامت‌گذاری به عنوان مقداردهی شده
+  window._logoDashboardInited = true;
 }
 
-// اگر میخوای با لود صفحه خودش اجرا شه این خط رو بنداز آخرش:
-initLogoDashboard().catch(console.error);  // اضافه کردن catch برای مدیریت خطاهای async
+// اگر صفحه مستقیم لود شده، اجرا کن
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => initLogoDashboard().catch(console.error));
+} else {
+  // اگر DOM آماده است، مستقیم اجرا کن
+  initLogoDashboard().catch(console.error);
+}

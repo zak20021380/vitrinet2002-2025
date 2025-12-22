@@ -892,13 +892,52 @@
     showBlockedUsersModal
   };
 
-  // Auto-init
+  // Auto-init - منتظر می‌ماند تا فروشنده لاگین شود
+  function tryInit() {
+    // بررسی وجود فروشنده در localStorage یا window.seller
+    const seller = window.seller || JSON.parse(localStorage.getItem('seller') || '{}');
+    const hasValidSeller = seller && (seller.id || seller._id);
+    
+    if (hasValidSeller && document.getElementById('reviewsManagementSection')) {
+      renderSection();
+      return true;
+    }
+    return false;
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      if (document.getElementById('reviewsManagementSection')) renderSection();
+      // اول سعی کن init کنی
+      if (!tryInit()) {
+        // اگر فروشنده هنوز لاگین نشده، منتظر event seller:ready بمان
+        document.addEventListener('seller:ready', () => {
+          tryInit();
+        }, { once: true });
+        
+        // همچنین هر 500ms چک کن (برای حالت‌هایی که event fire نشود)
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          if (tryInit() || attempts > 20) {
+            clearInterval(checkInterval);
+          }
+        }, 500);
+      }
     });
   } else {
-    if (document.getElementById('reviewsManagementSection')) renderSection();
+    if (!tryInit()) {
+      document.addEventListener('seller:ready', () => {
+        tryInit();
+      }, { once: true });
+      
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (tryInit() || attempts > 20) {
+          clearInterval(checkInterval);
+        }
+      }, 500);
+    }
   }
 
 })();

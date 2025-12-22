@@ -383,6 +383,35 @@ exports.toggleLike = async (req, res) => {
   }
 };
 
+// تغییر وضعیت موجودی محصول
+exports.updateStock = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { inStock } = req.body;
+
+    if (typeof inStock !== 'boolean') {
+      return res.status(400).json({ message: 'مقدار inStock باید boolean باشد.' });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    }
+
+    product.inStock = inStock;
+    await product.save();
+
+    res.json({
+      success: true,
+      inStock: product.inStock,
+      message: inStock ? 'محصول موجود شد.' : 'محصول ناموجود شد.'
+    });
+  } catch (err) {
+    console.error('Failed to update product stock:', err);
+    res.status(500).json({ message: 'خطا در تغییر وضعیت موجودی', error: err.message });
+  }
+};
+
 
 // گرفتن محصول تکی با آیدی
 // گرفتن محصول تکی با آیدی و دادن مشخصات فروشنده
