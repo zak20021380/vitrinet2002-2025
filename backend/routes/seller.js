@@ -344,6 +344,19 @@ router.get('/pending-comments/count', authMiddleware('seller'), productCommentCo
 router.get('/comments', authMiddleware('seller'), productCommentController.getSellerComments);
 
 // ═══════════════════════════════════════════════════════════════
+// Routes مدیریت کاربران مسدود شده (نظرات)
+// ═══════════════════════════════════════════════════════════════
+
+// دریافت لیست کاربران مسدود شده
+router.get('/blocked-commenters', authMiddleware('seller'), productCommentController.getBlockedCommenters);
+
+// مسدود کردن کاربر از نظر دادن
+router.post('/block-commenter', authMiddleware('seller'), productCommentController.blockCommenter);
+
+// رفع مسدودیت کاربر
+router.delete('/block-commenter/:userId', authMiddleware('seller'), productCommentController.unblockCommenter);
+
+// ═══════════════════════════════════════════════════════════════
 // Routes اعلان‌های فروشنده
 // ═══════════════════════════════════════════════════════════════
 const sellerNotificationController = require('../controllers/sellerNotificationController');

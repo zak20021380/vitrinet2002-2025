@@ -33,11 +33,52 @@
   // API Functions
   // ═══════════════════════════════════════════════════════════════
   
+  /**
+   * دریافت هدرهای احراز هویت
+   * توکن از منابع مختلف خوانده می‌شود:
+   * 1. localStorage (برای پنل فروشنده قدیمی)
+   * 2. کوکی‌ها به صورت خودکار با credentials: 'include' ارسال می‌شوند
+   */
   function getAuthHeaders() {
     const headers = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('token') || localStorage.getItem('seller_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    
+    // تلاش برای خواندن توکن از localStorage (برای سازگاری با پنل‌های مختلف)
+    const token = localStorage.getItem('token') || 
+                  localStorage.getItem('seller_token') || 
+                  localStorage.getItem('user_token') ||
+                  localStorage.getItem('access_token');
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     return headers;
+  }
+
+  /**
+   * تابع کمکی برای درخواست‌های API با مدیریت خطا
+   */
+  async function apiRequest(url, options = {}) {
+    const defaultOptions = {
+      credentials: 'include', // مهم: برای ارسال کوکی‌ها
+      headers: getAuthHeaders()
+    };
+    
+    const response = await fetch(url, { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } });
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('لطفاً دوباره وارد شوید');
+      }
+      if (response.status === 403) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'دسترسی غیرمجاز');
+      }
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `خطای سرور (${response.status})`);
+    }
+    
+    return response.json();
   }
 
   async function fetchComments(filter = 'pending', page = 1) {
@@ -45,33 +86,14 @@
       ? `/api/seller/pending-comments?page=${page}&limit=${state.limit}`
       : `/api/seller/comments?status=${filter}&page=${page}&limit=${state.limit}`;
 
-    const response = await fetch(endpoint, {
-      credentials: 'include',
-      headers: getAuthHeaders()
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('لطفاً دوباره وارد شوید');
-      if (response.status === 403) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'دسترسی غیرمجاز');
-      }
-      throw new Error('خطا در دریافت نظرات');
-    }
-    return response.json();
+    return apiRequest(endpoint);
   }
 
   async function fetchPendingCount() {
     try {
-      const response = await fetch('/api/seller/pending-comments/count', {
-        credentials: 'include',
-        headers: getAuthHeaders()
-      });
-      if (response.ok) {
-        const data = await response.json();
-        state.pendingCount = data.count || 0;
-        updatePendingBadge();
-      }
+      const data = await apiRequest('/api/seller/pending-comments/count');
+      state.pendingCount = data.count || 0;
+      updatePendingBadge();
     } catch (err) {
       console.warn('Failed to fetch pending count:', err);
     }
@@ -81,71 +103,27 @@
     const body = { status };
     if (rejectionReason) body.rejectionReason = rejectionReason;
     
-    const response = await fetch(`/api/comments/${commentId}/status`, {
+    return apiRequest(`/api/comments/${commentId}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
-      credentials: 'include',
       body: JSON.stringify(body)
     });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'خطا در تغییر وضعیت نظر');
-    }
-    return response.json();
-  }
-
-  async function deleteComment(commentId) {
-    const response = await fetch(`/api/comments/${commentId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'خطا در حذف نظر');
-    }
-    return response.json();
   }
 
   async function blockUser(userId, reason = null, deleteComments = false) {
-    const response = await fetch('/api/seller/block-commenter', {
+    return apiRequest('/api/seller/block-commenter', {
       method: 'POST',
-      headers: getAuthHeaders(),
-      credentials: 'include',
       body: JSON.stringify({ userId, reason, deleteComments })
     });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'خطا در مسدود کردن کاربر');
-    }
-    return response.json();
   }
 
   async function unblockUser(userId) {
-    const response = await fetch(`/api/seller/block-commenter/${userId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      credentials: 'include'
+    return apiRequest(`/api/seller/block-commenter/${userId}`, {
+      method: 'DELETE'
     });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'خطا در رفع مسدودیت');
-    }
-    return response.json();
   }
 
   async function fetchBlockedUsers() {
-    const response = await fetch('/api/seller/blocked-commenters', {
-      credentials: 'include',
-      headers: getAuthHeaders()
-    });
-
-    if (!response.ok) throw new Error('خطا در دریافت لیست');
-    const data = await response.json();
+    const data = await apiRequest('/api/seller/blocked-commenters');
     return data.blockedUsers || [];
   }
 
@@ -338,8 +316,17 @@
   function renderComments() {
     if (!state.comments.length) {
       listEl.innerHTML = renderEmptyState(getEmptyMessage());
+      listEl.classList.remove('reviews-list--compact');
       return;
     }
+    
+    // Add compact class for published/rejected tabs
+    if (state.currentFilter === 'published' || state.currentFilter === 'rejected') {
+      listEl.classList.add('reviews-list--compact');
+    } else {
+      listEl.classList.remove('reviews-list--compact');
+    }
+    
     listEl.innerHTML = state.comments.map(renderCommentCard).join('');
   }
 
@@ -411,31 +398,15 @@
               رد
             </button>
           ` : ''}
-          <button type="button" class="review-action-btn review-action-btn--menu" data-action="menu" data-id="${comment.id}">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="5" r="2"/>
-              <circle cx="12" cy="12" r="2"/>
-              <circle cx="12" cy="19" r="2"/>
-            </svg>
-          </button>
-          <div class="review-card__dropdown" id="dropdown-${comment.id}" hidden>
-            ${comment.user?.id ? `
-              <button type="button" class="review-dropdown-item review-dropdown-item--block" data-action="block" data-id="${comment.id}" data-user-id="${comment.user.id}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                </svg>
-                مسدود کردن کاربر
-              </button>
-            ` : ''}
-            <button type="button" class="review-dropdown-item review-dropdown-item--delete" data-action="delete" data-id="${comment.id}">
+          ${comment.user?.id ? `
+            <button type="button" class="review-action-btn review-action-btn--block" data-action="block" data-id="${comment.id}" data-user-id="${comment.user.id}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
               </svg>
-              حذف نظر
+              <span class="review-action-btn__text">مسدود</span>
             </button>
-          </div>
+          ` : ''}
         </div>
       </article>
     `;
@@ -504,11 +475,6 @@
     const userId = btn.dataset.userId;
     const card = btn.closest('.review-card');
 
-    // Close any open dropdowns first
-    document.querySelectorAll('.review-card__dropdown:not([hidden])').forEach(d => {
-      if (d.id !== `dropdown-${commentId}`) d.hidden = true;
-    });
-
     switch (action) {
       case 'approve':
         await handleApprove(commentId, card);
@@ -516,22 +482,9 @@
       case 'reject':
         showRejectModal(commentId, card);
         break;
-      case 'menu':
-        toggleDropdown(commentId);
-        break;
       case 'block':
         showBlockModal(userId, commentId, card);
         break;
-      case 'delete':
-        showDeleteModal(commentId, card);
-        break;
-    }
-  }
-
-  function toggleDropdown(commentId) {
-    const dropdown = document.getElementById(`dropdown-${commentId}`);
-    if (dropdown) {
-      dropdown.hidden = !dropdown.hidden;
     }
   }
 
@@ -693,64 +646,6 @@
 
     openModal();
   }
-
-  function showDeleteModal(commentId, card) {
-    const modal = document.getElementById('reviewsModal');
-    modal.innerHTML = `
-      <div class="reviews-modal__content reviews-modal__content--danger">
-        <div class="reviews-modal__header">
-          <h3 class="reviews-modal__title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-            حذف نظر
-          </h3>
-          <button type="button" class="reviews-modal__close" onclick="window.ReviewsManagement.closeModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <div class="reviews-modal__body">
-          <p class="reviews-modal__desc">آیا از حذف این نظر مطمئن هستید؟ این عمل قابل بازگشت نیست.</p>
-        </div>
-        <div class="reviews-modal__footer">
-          <button type="button" class="reviews-modal__btn reviews-modal__btn--cancel" onclick="window.ReviewsManagement.closeModal()">
-            انصراف
-          </button>
-          <button type="button" class="reviews-modal__btn reviews-modal__btn--delete" id="confirmDeleteBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-            حذف
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('confirmDeleteBtn').onclick = async () => {
-      const btn = document.getElementById('confirmDeleteBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> در حال حذف...';
-
-      try {
-        await deleteComment(commentId);
-        closeModal();
-        animateCardRemoval(card, commentId);
-        showToast('نظر با موفقیت حذف شد', 'success');
-      } catch (err) {
-        showToast(err.message || 'خطا در حذف نظر', 'error');
-        btn.disabled = false;
-        btn.innerHTML = 'حذف';
-      }
-    };
-
-    openModal();
-  }
-
 
   async function showBlockedUsersModal() {
     const modal = document.getElementById('reviewsModal');

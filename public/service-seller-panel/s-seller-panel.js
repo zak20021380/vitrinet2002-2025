@@ -172,6 +172,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         monthlyReward: formatTomans(50_000),
         rules: 'هر ۷ روز یک چک‌پوینت ذخیره می‌شود. با از دست دادن روز، زنجیره به آخرین چک‌پوینت برمی‌گردد.',
         days: streakData.days || [],
+        calendarDays: streakData.calendarDays || [],
+        activeDaysInLast14: streakData.activeDaysInLast14 || 0,
+        totalLoginDays: streakData.totalLoginDays || 0,
         message: '',
         softPenalty: 0,
         isFrozen: false,
@@ -1562,7 +1565,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderStreakSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.streak;
-    bottomSheet.title.textContent = 'استریک و پاداش‌ها';
+    bottomSheet.title.textContent = 'فعالیت متوالی شما';
 
     // ساخت روزهای هفته
     const dayMarkup = (data.days || []).map((day, index) => {
@@ -1577,6 +1580,21 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <span class="streak-day__label">${day.label}</span>
           ${day.isGift ? '<span class="streak-day__gift">🎁</span>' : ''}
+        </div>
+      `;
+    }).join('');
+
+    // ساخت تقویم 14 روز اخیر - روزها از 1 شروع می‌شوند
+    const calendarDays = data.calendarDays || [];
+    const calendarMarkup = calendarDays.map((day, index) => {
+      const dayNumber = index + 1; // روزها از 1 شروع می‌شوند
+      const isActive = day.active;
+      const isToday = day.today;
+      return `
+        <div class="streak-calendar-day${isActive ? ' is-active' : ''}${isToday ? ' is-today' : ''}" 
+             aria-label="روز ${toFaDigits(dayNumber)}${isActive ? ' - فعال' : ''}${isToday ? ' - امروز' : ''}">
+          <span class="streak-calendar-day__number">${toFaDigits(dayNumber)}</span>
+          ${isActive ? '<span class="streak-calendar-day__check">✓</span>' : ''}
         </div>
       `;
     }).join('');
@@ -1609,12 +1627,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         <!-- Stats Row -->
         <div class="streak-stats-row">
           <div class="streak-stat">
-            <span class="streak-stat__value">${toFaDigits(data.longestStreak || 0)}</span>
-            <span class="streak-stat__label">بیشترین رکورد</span>
+            <span class="streak-stat__value">${toFaDigits(data.totalDays || 0)}</span>
+            <span class="streak-stat__label">روز متوالی</span>
           </div>
           <div class="streak-stat">
-            <span class="streak-stat__value">${toFaDigits(data.loyaltyPoints || 0)}</span>
-            <span class="streak-stat__label">امتیاز وفاداری</span>
+            <span class="streak-stat__value">${toFaDigits(data.longestStreak || 0)}</span>
+            <span class="streak-stat__label">بهترین رکورد</span>
+          </div>
+          <div class="streak-stat">
+            <span class="streak-stat__value">${toFaDigits(data.totalLoginDays || 0)}</span>
+            <span class="streak-stat__label">کل روزها</span>
+          </div>
+        </div>
+
+        <!-- 14-Day Calendar -->
+        <div class="streak-calendar-section">
+          <div class="streak-calendar-header">
+            <div class="streak-calendar-header__title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>فعالیت ${toFaDigits(14)} روز اخیر</span>
+            </div>
+            <div class="streak-calendar-header__badge">
+              <span class="streak-calendar-header__active">${toFaDigits(data.activeDaysInLast14 || 0)}</span>
+              <span class="streak-calendar-header__total">/ ${toFaDigits(14)}</span>
+            </div>
+          </div>
+          <div class="streak-calendar-grid">
+            ${calendarMarkup}
           </div>
         </div>
 
@@ -1675,6 +1716,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span class="streak-reward-card__value">${data.monthlyReward || '۵۰,۰۰۰ تومان'}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Golden Tip -->
+        <div class="streak-golden-tip">
+          <div class="streak-golden-tip__icon">💡</div>
+          <div class="streak-golden-tip__content">
+            <h5 class="streak-golden-tip__title">نکته طلایی</h5>
+            <p class="streak-golden-tip__text">با فعالیت روزانه در پنل فروشگاه (افزودن محصول، پاسخ به پیام‌ها، بروزرسانی قیمت‌ها) اعتبار فروشگاه خود را افزایش دهید. هر ۷ روز متوالی، یک جایزه ویژه دریافت کنید!</p>
           </div>
         </div>
 

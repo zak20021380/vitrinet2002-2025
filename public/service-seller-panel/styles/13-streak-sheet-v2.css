@@ -752,3 +752,351 @@
     border-width: 2px;
   }
 }
+
+
+/* ============================================
+   14-Day Calendar Section
+   ============================================ */
+.streak-calendar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+.streak-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.streak-calendar-header__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.streak-calendar-header__title svg {
+  color: #fbbf24;
+}
+
+.streak-calendar-header__badge {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+}
+
+.streak-calendar-header__active {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.streak-calendar-header__total {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.streak-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+/* Calendar Day Items */
+.streak-calendar-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.streak-calendar-day__number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1;
+}
+
+.streak-calendar-day__check {
+  position: absolute;
+  bottom: 2px;
+  font-size: 0.6rem;
+  color: #34d399;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+/* Active Day State */
+.streak-calendar-day.is-active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.12) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.streak-calendar-day.is-active .streak-calendar-day__number {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.streak-calendar-day.is-active .streak-calendar-day__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Today State */
+.streak-calendar-day.is-today {
+  border-color: #6366f1;
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.streak-calendar-day.is-today:not(.is-active) .streak-calendar-day__number {
+  color: #a5b4fc;
+}
+
+.streak-calendar-day.is-today.is-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%);
+  border-color: #6366f1;
+}
+
+/* ============================================
+   Golden Tip Section
+   ============================================ */
+.streak-golden-tip {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(245, 158, 11, 0.06) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 14px;
+}
+
+.streak-golden-tip__icon {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.streak-golden-tip__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.streak-golden-tip__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.streak-golden-tip__text {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+/* ============================================
+   Stats Row - 3 columns
+   ============================================ */
+.streak-stats-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.streak-stat__value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.streak-stat__label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ============================================
+   Responsive Styles for Calendar
+   ============================================ */
+@media (min-width: 480px) {
+  .streak-calendar-grid {
+    gap: 10px;
+  }
+  
+  .streak-calendar-day {
+    min-height: 44px;
+    border-radius: 12px;
+  }
+  
+  .streak-calendar-day__number {
+    font-size: 0.9rem;
+  }
+  
+  .streak-calendar-day__check {
+    font-size: 0.7rem;
+    bottom: 3px;
+  }
+  
+  .streak-golden-tip {
+    padding: 18px;
+  }
+  
+  .streak-golden-tip__title {
+    font-size: 0.95rem;
+  }
+  
+  .streak-golden-tip__text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .streak-calendar-section {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  
+  .streak-calendar-header__title {
+    font-size: 0.8rem;
+  }
+  
+  .streak-calendar-header__title svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .streak-calendar-header__badge {
+    padding: 5px 10px;
+  }
+  
+  .streak-calendar-header__active {
+    font-size: 1rem;
+  }
+  
+  .streak-calendar-grid {
+    gap: 6px;
+  }
+  
+  .streak-calendar-day {
+    min-height: 36px;
+    border-radius: 8px;
+  }
+  
+  .streak-calendar-day__number {
+    font-size: 0.75rem;
+  }
+  
+  .streak-calendar-day__check {
+    font-size: 0.5rem;
+    bottom: 1px;
+  }
+  
+  .streak-golden-tip {
+    padding: 12px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+  
+  .streak-golden-tip__icon {
+    font-size: 1.2rem;
+  }
+  
+  .streak-golden-tip__title {
+    font-size: 0.8rem;
+  }
+  
+  .streak-golden-tip__text {
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  
+  .streak-stats-row {
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .streak-stat__value {
+    font-size: 1.1rem;
+  }
+  
+  .streak-stat__label {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .streak-calendar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .streak-calendar-day {
+    min-height: 32px;
+  }
+  
+  .streak-calendar-day__number {
+    font-size: 0.7rem;
+  }
+  
+  .streak-golden-tip {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .streak-golden-tip__icon {
+    align-self: center;
+  }
+  
+  .streak-golden-tip__content {
+    align-items: center;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .streak-calendar-day,
+  .streak-calendar-day__check {
+    transition: none !important;
+  }
+}

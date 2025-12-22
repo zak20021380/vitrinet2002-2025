@@ -1,6 +1,5 @@
 const SellerWallet = require('../models/SellerWallet');
 const WalletTransaction = require('../models/WalletTransaction');
-const mongoose = require('mongoose');
 
 /**
  * کنترلر کیف پول فروشنده
@@ -9,7 +8,6 @@ const mongoose = require('mongoose');
  * - Source of Truth: WalletTransaction (ledger)
  * - همه تغییرات اعتبار فقط از طریق ایجاد ledger entry انجام می‌شود
  * - balance در SellerWallet یک کش است
- * - تمام عملیات با transaction انجام می‌شود
  * - از optimistic locking برای جلوگیری از race condition استفاده می‌شود
  */
 
@@ -361,11 +359,11 @@ exports.adminDeductCredit = async (req, res) => {
 };
 
 
-// ===== توابع کمکی با Transaction Support =====
+// ===== توابع کمکی =====
 
 /**
- * افزودن اعتبار به کیف پول (Transaction-Safe)
- * این تابع از MongoDB transaction استفاده می‌کند
+ * افزودن اعتبار به کیف پول
+ * این تابع بدون MongoDB transaction کار می‌کند (برای standalone MongoDB)
  */
 async function addCredit(sellerId, options) {
   const { amount, category, title, description, relatedId, relatedType, metadata, byAdmin, idempotencyKey } = options;
@@ -378,74 +376,60 @@ async function addCredit(sellerId, options) {
     }
   }
 
-  const session = await mongoose.startSession();
-  
-  try {
-    session.startTransaction();
-
-    // دریافت wallet با lock
-    const wallet = await SellerWallet.findOneAndUpdate(
-      { seller: sellerId },
-      { $setOnInsert: { seller: sellerId } },
-      { upsert: true, new: true, session }
-    );
-
-    const balanceBefore = wallet.balance;
-    const balanceAfter = balanceBefore + amount;
-
-    // ایجاد تراکنش در ledger
-    const transaction = await WalletTransaction.create([{
-      seller: sellerId,
-      type: byAdmin ? 'admin_add' : 'credit',
-      amount,
-      balanceBefore,
-      balanceAfter,
-      category,
-      title,
-      description,
-      relatedId,
-      relatedType,
-      referenceId: relatedId,
-      referenceType: relatedType,
-      metadata,
-      byAdmin,
-      status: 'completed',
-      idempotencyKey
-    }], { session });
-
-    // آپدیت کیف پول
-    wallet.balance = balanceAfter;
-    wallet.totalEarned += amount;
-    wallet.lastTransactionAt = new Date();
-    await wallet.save({ session });
-
-    await session.commitTransaction();
-
-    // آپدیت رتبه فروشنده (خارج از transaction)
-    try {
-      const { triggerRankUpdate } = require('./rankController');
-      triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
-    } catch (rankErr) {
-      // Rank controller might not be available
-    }
-
-    return {
-      wallet,
-      transaction: transaction[0],
-      message: `${formatTomans(amount)} تومان به کیف پول شما اضافه شد`
-    };
-
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
+  // دریافت یا ایجاد wallet
+  let wallet = await SellerWallet.findOne({ seller: sellerId });
+  if (!wallet) {
+    wallet = await SellerWallet.create({ seller: sellerId, balance: 0 });
   }
+
+  const balanceBefore = wallet.balance;
+  const balanceAfter = balanceBefore + amount;
+
+  // ایجاد تراکنش در ledger
+  const transaction = await WalletTransaction.create({
+    seller: sellerId,
+    type: byAdmin ? 'admin_add' : 'credit',
+    amount,
+    balanceBefore,
+    balanceAfter,
+    category,
+    title,
+    description,
+    relatedId,
+    relatedType,
+    referenceId: relatedId,
+    referenceType: relatedType,
+    metadata,
+    byAdmin,
+    status: 'completed',
+    idempotencyKey
+  });
+
+  // آپدیت کیف پول
+  wallet.balance = balanceAfter;
+  wallet.totalEarned += amount;
+  wallet.lastTransactionAt = new Date();
+  await wallet.save();
+
+  console.log(`✅ اعتبار ${amount} تومان به کیف پول فروشنده ${sellerId} اضافه شد. موجودی جدید: ${balanceAfter}`);
+
+  // آپدیت رتبه فروشنده
+  try {
+    const { triggerRankUpdate } = require('./rankController');
+    triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
+  } catch (rankErr) {
+    // Rank controller might not be available
+  }
+
+  return {
+    wallet,
+    transaction,
+    message: `${formatTomans(amount)} تومان به کیف پول شما اضافه شد`
+  };
 }
 
 /**
- * کسر اعتبار از کیف پول (Transaction-Safe)
- * این تابع از MongoDB transaction استفاده می‌کند
+ * کسر اعتبار از کیف پول
  */
 async function deductCredit(sellerId, options) {
   const { amount, category, title, description, relatedId, relatedType, metadata, byAdmin, idempotencyKey } = options;
@@ -458,75 +442,63 @@ async function deductCredit(sellerId, options) {
     }
   }
 
-  const session = await mongoose.startSession();
+  // دریافت wallet
+  const wallet = await SellerWallet.findOne({ seller: sellerId });
   
-  try {
-    session.startTransaction();
-
-    // دریافت wallet با lock
-    const wallet = await SellerWallet.findOne({ seller: sellerId }).session(session);
-    
-    if (!wallet) {
-      throw new Error('WALLET_NOT_FOUND');
-    }
-
-    const balanceBefore = wallet.balance;
-    const availableBalance = wallet.getAvailableBalance();
-    
-    if (availableBalance < amount) {
-      throw new Error('INSUFFICIENT_BALANCE');
-    }
-
-    const balanceAfter = balanceBefore - amount;
-
-    // ایجاد تراکنش در ledger
-    const transaction = await WalletTransaction.create([{
-      seller: sellerId,
-      type: byAdmin ? 'admin_deduct' : 'debit',
-      amount: -amount,
-      balanceBefore,
-      balanceAfter,
-      category,
-      title,
-      description,
-      relatedId,
-      relatedType,
-      referenceId: relatedId,
-      referenceType: relatedType,
-      metadata,
-      byAdmin,
-      status: 'completed',
-      idempotencyKey
-    }], { session });
-
-    // آپدیت کیف پول
-    wallet.balance = balanceAfter;
-    wallet.totalSpent += amount;
-    wallet.lastTransactionAt = new Date();
-    await wallet.save({ session });
-
-    await session.commitTransaction();
-
-    // آپدیت رتبه فروشنده (خارج از transaction)
-    try {
-      const { triggerRankUpdate } = require('./rankController');
-      triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
-    } catch (rankErr) {
-      // Rank controller might not be available
-    }
-
-    return {
-      wallet,
-      transaction: transaction[0],
-      message: `${formatTomans(amount)} تومان از کیف پول شما کسر شد`
-    };
-
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
+  if (!wallet) {
+    throw new Error('WALLET_NOT_FOUND');
   }
+
+  const balanceBefore = wallet.balance;
+  const availableBalance = wallet.getAvailableBalance();
+  
+  if (availableBalance < amount) {
+    throw new Error('INSUFFICIENT_BALANCE');
+  }
+
+  const balanceAfter = balanceBefore - amount;
+
+  // ایجاد تراکنش در ledger
+  const transaction = await WalletTransaction.create({
+    seller: sellerId,
+    type: byAdmin ? 'admin_deduct' : 'debit',
+    amount: -amount,
+    balanceBefore,
+    balanceAfter,
+    category,
+    title,
+    description,
+    relatedId,
+    relatedType,
+    referenceId: relatedId,
+    referenceType: relatedType,
+    metadata,
+    byAdmin,
+    status: 'completed',
+    idempotencyKey
+  });
+
+  // آپدیت کیف پول
+  wallet.balance = balanceAfter;
+  wallet.totalSpent += amount;
+  wallet.lastTransactionAt = new Date();
+  await wallet.save();
+
+  console.log(`💸 اعتبار ${amount} تومان از کیف پول فروشنده ${sellerId} کسر شد. موجودی جدید: ${balanceAfter}`);
+
+  // آپدیت رتبه فروشنده
+  try {
+    const { triggerRankUpdate } = require('./rankController');
+    triggerRankUpdate(sellerId).catch(err => console.warn('Rank update failed:', err));
+  } catch (rankErr) {
+    // Rank controller might not be available
+  }
+
+  return {
+    wallet,
+    transaction,
+    message: `${formatTomans(amount)} تومان از کیف پول شما کسر شد`
+  };
 }
 
 /**

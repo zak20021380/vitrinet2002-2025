@@ -126,27 +126,32 @@ exports.checkIn = async (req, res) => {
     try {
       const { addCredit, REWARD_CONFIG } = require('./walletController');
       
+      console.log(`🎁 در حال اضافه کردن پاداش استریک برای فروشنده ${sellerId}...`);
+      
       // پاداش روزانه
-      await addCredit(sellerId, {
+      const dailyReward = await addCredit(sellerId, {
         amount: REWARD_CONFIG.streak_daily || 1000,
         category: 'streak_daily',
         title: isNewStreak ? 'پاداش اولین ورود' : 'پاداش استریک روزانه',
         description: `روز ${newStreak} استریک`,
         relatedType: 'streak'
       });
+      
+      console.log(`✅ پاداش روزانه ${REWARD_CONFIG.streak_daily || 1000} تومان اضافه شد. موجودی جدید: ${dailyReward.wallet.balance}`);
 
       // پاداش چک‌پوینت
       if (checkpointReached) {
-        await addCredit(sellerId, {
+        const checkpointReward = await addCredit(sellerId, {
           amount: REWARD_CONFIG.streak_checkpoint || 5000,
           category: 'streak_checkpoint',
           title: 'پاداش چک‌پوینت استریک',
           description: `چک‌پوینت ${newStreak} روزه`,
           relatedType: 'streak'
         });
+        console.log(`🏆 پاداش چک‌پوینت ${REWARD_CONFIG.streak_checkpoint || 5000} تومان اضافه شد. موجودی جدید: ${checkpointReward.wallet.balance}`);
       }
     } catch (walletErr) {
-      console.warn('Failed to add streak reward to wallet:', walletErr.message);
+      console.error('❌ Failed to add streak reward to wallet:', walletErr.message, walletErr.stack);
     }
 
     // آپدیت رتبه فروشنده
