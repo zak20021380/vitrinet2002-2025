@@ -1259,11 +1259,65 @@ function formatToman(value) {
   return `${discountNumberFormatter.format(Math.round(num))} تومان`;
 }
 
+/**
+ * Resolves any image path to a valid URL
+ * Handles: data: URLs, blob: URLs, http(s): URLs, absolute paths, and relative paths
+ * @param {string} path - The raw image path
+ * @param {string} [fallback] - Fallback image if path is empty
+ * @returns {string} - Resolved image URL
+ */
+function resolveImagePath(path, fallback = 'assets/images/shop-placeholder.svg') {
+  if (!path) return fallback;
+  const trimmed = String(path).trim();
+  if (!trimmed) return fallback;
+  
+  // Handle data: URLs (Base64), blob: URLs, and full URLs directly
+  if (/^(https?:|data:|blob:)/i.test(trimmed)) {
+    return trimmed;
+  }
+  
+  // Handle absolute paths
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+  
+  // Handle relative paths
+  if (trimmed.includes('/')) {
+    return `/${trimmed}`;
+  }
+  
+  // Assume it's an uploaded file
+  return `/uploads/${trimmed}`;
+}
+
 function resolveProductImage(product) {
   if (!product) return 'assets/images/shop-placeholder.svg';
-  if (product.image) return product.image;
-  if (Array.isArray(product.images) && product.images.length) return product.images[0];
-  return 'assets/images/shop-placeholder.svg';
+  
+  // Get the raw image path
+  let rawPath = product.image 
+    || (Array.isArray(product.images) && product.images.length ? product.images[0] : null);
+  
+  if (!rawPath) return 'assets/images/shop-placeholder.svg';
+  
+  const trimmed = String(rawPath).trim();
+  
+  // Handle data: URLs (Base64), blob: URLs, and full URLs directly
+  if (/^(https?:|data:|blob:)/i.test(trimmed)) {
+    return trimmed;
+  }
+  
+  // Handle absolute paths
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+  
+  // Handle relative paths - check if it looks like a filename
+  if (trimmed.includes('/')) {
+    return `/${trimmed}`;
+  }
+  
+  // Assume it's a product image filename
+  return `/uploads/${trimmed}`;
 }
 
 function isDiscountCurrentlyActive(product, now = new Date()) {

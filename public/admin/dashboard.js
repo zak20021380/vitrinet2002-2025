@@ -1507,9 +1507,13 @@ function formatDateTime(value) {
 
 function buildUploadsUrl(path) {
   if (!path) return '';
-  if (/^https?:/i.test(path)) return path;
+  const trimmed = String(path).trim();
+  // Handle data: URLs (Base64), blob: URLs, and full URLs directly
+  if (/^(https?:|data:|blob:)/i.test(trimmed)) return trimmed;
+  // Handle absolute paths
+  if (trimmed.startsWith('/')) return trimmed;
   const base = ADMIN_API_BASE.replace(/\/api$/, '');
-  return `${base}/uploads/${path.replace(/^\/?uploads\//, '')}`;
+  return `${base}/uploads/${trimmed.replace(/^\/?uploads\//, '')}`;
 }
 
 function setAdOrdersStatus(message = '', type = 'info') {

@@ -727,10 +727,32 @@
     dom.title.textContent = title;
     document.title = `${title} | ویترینت`;
 
-    const seller =
-      (product.seller && typeof product.seller === 'object') ? product.seller :
-        (product.sellerId && typeof product.sellerId === 'object') ? product.sellerId :
-          {};
+    // Safely extract seller object - handle ObjectId, populated object, or plain object
+    let seller = {};
+    const rawSeller = product.seller || product.sellerId;
+    if (rawSeller && typeof rawSeller === 'object') {
+      // Check if it's a MongoDB ObjectId (has $oid or is a string-like object)
+      if (rawSeller.$oid || (rawSeller._bsontype === 'ObjectId') || (typeof rawSeller.toString === 'function' && /^[a-f0-9]{24}$/i.test(rawSeller.toString()))) {
+        // It's just an ObjectId, not a populated seller object
+        seller = {};
+      } else {
+        // It's a populated seller object - extract only safe fields
+        seller = {
+          storename: rawSeller.storename || rawSeller.ownerName || '',
+          ownerName: rawSeller.ownerName || '',
+          ownerFirstname: rawSeller.ownerFirstname || '',
+          ownerLastname: rawSeller.ownerLastname || '',
+          phone: rawSeller.phone || '',
+          address: rawSeller.address || '',
+          city: rawSeller.city || '',
+          category: rawSeller.category || '',
+          boardImage: rawSeller.boardImage || '',
+          desc: rawSeller.desc || '',
+          shopurl: rawSeller.shopurl || rawSeller.shopUrl || '',
+          _id: rawSeller._id || rawSeller.id || ''
+        };
+      }
+    }
 
 
     const summary = extractSummary(product.desc);
@@ -845,9 +867,32 @@
   }
 
   function renderGallery(product, seller) {
-    const resolved = Array.isArray(product.images) ? product.images.map(resolveMediaPath).filter(Boolean) : [];
-    if ((!resolved || !resolved.length) && seller && seller.boardImage) {
-      resolved.push(resolveMediaPath(seller.boardImage));
+    // Safely extract images array - filter out any non-string values and validate
+    let rawImages = [];
+    if (Array.isArray(product.images)) {
+      rawImages = product.images.filter(img => {
+        // Only accept strings
+        if (typeof img !== 'string') return false;
+        const trimmed = img.trim();
+        if (!trimmed) return false;
+        // Reject anything that looks like JSON, object data, or contains sensitive info
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) return false;
+        if (trimmed.includes('ObjectId') || trimmed.includes('password') || trimmed.includes('_bsontype')) return false;
+        // Reject if it looks like a MongoDB document dump
+        if (trimmed.includes('createdAt') && trimmed.includes('updatedAt')) return false;
+        return true;
+      });
+    }
+    
+    const resolved = rawImages.map(resolveMediaPath).filter(Boolean);
+    
+    // Only use seller boardImage if it's a valid string
+    if ((!resolved || !resolved.length) && seller && typeof seller.boardImage === 'string' && seller.boardImage.trim()) {
+      const boardImg = seller.boardImage.trim();
+      // Validate boardImage is not raw data
+      if (!boardImg.startsWith('{') && !boardImg.includes('ObjectId') && !boardImg.includes('password')) {
+        resolved.push(resolveMediaPath(boardImg));
+      }
     }
 
     state.images = resolved;
@@ -1602,10 +1647,39 @@
   }
 
   function resolveMediaPath(path) {
-    if (!path) return '';
-    const trimmed = String(path).trim();
-    if (/^(https?:|data:|blob:)/i.test(trimmed)) return trimmed;
-    return `${window.location.origin}/${trimmed.replace(/^\/+/, '')}`;
+    // Only accept string inputs - reject objects, arrays, etc.
+    if (!path || typeof path !== 'string') return '';
+    const trimmed = path.trim();
+    if (!trimmed) return '';
+    
+    // Reject anything that looks like raw data or JSON
+    if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.includes('ObjectId') || trimmed.includes('password')) {
+      console.warn('resolveMediaPath: Rejected invalid path:', trimmed.substring(0, 50));
+      return '';
+    }
+    
+    // Handle data: URLs (Base64) - use directly, NEVER prepend anything
+    if (trimmed.startsWith('data:image')) {
+      return trimmed;
+    }
+    
+    // Handle blob: URLs and full URLs directly
+    if (/^(https?:|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    
+    // Handle absolute paths starting with /uploads/
+    if (trimmed.startsWith('/uploads/')) {
+      return `http://localhost:5000${trimmed}`;
+    }
+    
+    // Handle relative paths - prepend full server URL
+    if (trimmed.startsWith('/')) {
+      return `http://localhost:5000${trimmed}`;
+    }
+    
+    // Handle filenames - prepend full uploads URL
+    return `http://localhost:5000/uploads/${trimmed}`;
   }
 
   function extractSummary(desc, maxLength = 220) {
@@ -2905,7 +2979,7 @@
 
   const dom = {
     section: document.getElementById('similarProductsSection'),
-    track: document.getElementById('similarProductsTrack'),
+    scroll: document.getElementById('similarProductsScroll'),
     viewAllLink: document.getElementById('similarProductsViewAll')
   };
 
@@ -2923,63 +2997,117 @@
   }
 
   function resolveMediaPath(path) {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
-      return path;
+    // Only accept string inputs - reject objects, arrays, etc.
+    if (!path || typeof path !== 'string') return '';
+    const trimmed = path.trim();
+    if (!trimmed) return '';
+    
+    // Reject anything that looks like raw data or JSON
+    if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.includes('ObjectId') || trimmed.includes('password')) {
+      return '';
     }
-    return `/uploads/${path}`;
+    
+    // Handle data: URLs (Base64) - use directly, NEVER prepend anything
+    if (trimmed.startsWith('data:image')) {
+      return trimmed;
+    }
+    
+    // Handle blob: URLs and full URLs directly
+    if (/^(https?:|blob:)/i.test(trimmed)) {
+      return trimmed;
+    }
+    
+    // Handle absolute paths starting with /uploads/
+    if (trimmed.startsWith('/uploads/')) {
+      return `http://localhost:5000${trimmed}`;
+    }
+    
+    // Handle relative paths - prepend full server URL
+    if (trimmed.startsWith('/')) {
+      return `http://localhost:5000${trimmed}`;
+    }
+    
+    // Handle filenames - prepend full uploads URL
+    return `http://localhost:5000/uploads/${trimmed}`;
   }
 
-  function createProductCard(product) {
+  function createProductCard(product, index) {
     const card = document.createElement('a');
-    card.className = 'similar-product-card';
+    // CRITICAL: flex-shrink-0 + fixed width for horizontal scroll to work on mobile
+    card.className = 'flex-shrink-0 snap-center bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-200 no-underline';
+    card.style.cssText = 'width: 160px; min-width: 160px; flex-shrink: 0;';
     card.href = `/product.html?id=${encodeURIComponent(product._id || product.id)}`;
 
-    const imageUrl = product.images && product.images.length > 0
-      ? resolveMediaPath(product.images[product.mainImageIndex || 0] || product.images[0])
-      : '/assets/images/placeholder-product.svg';
+    // Safely resolve image URL - handle Base64, URLs, and filenames
+    let imageUrl = '/assets/images/placeholder-product.svg';
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      // Filter to only valid string images
+      const validImages = product.images.filter(img => typeof img === 'string' && img.trim() && !img.includes('ObjectId'));
+      if (validImages.length > 0) {
+        const rawImage = validImages[product.mainImageIndex || 0] || validImages[0];
+        const resolved = resolveMediaPath(rawImage);
+        if (resolved) imageUrl = resolved;
+      }
+    }
 
     const hasDiscount = product.discountActive && product.discountPrice && product.discountPrice < product.price;
     const displayPrice = hasDiscount ? product.discountPrice : product.price;
-    const shopName = product.shopName || product.seller?.storename || '';
+    
+    // Safely extract shop name - handle ObjectId vs populated object
+    let shopName = '';
+    if (product.shopName) {
+      shopName = String(product.shopName);
+    } else if (product.seller && typeof product.seller === 'object') {
+      // Check if it's a populated object (not just an ObjectId)
+      if (product.seller.storename || product.seller.ownerName) {
+        shopName = product.seller.storename || product.seller.ownerName || '';
+      }
+    }
+
+    // Badge for new products (first 3 items)
+    let newBadgeHtml = '';
+    if (index < 3 && product.createdAt) {
+      const createdDate = new Date(product.createdAt);
+      const daysSinceCreated = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceCreated < 7) {
+        newBadgeHtml = '<span class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10">جدید</span>';
+      }
+    }
 
     let discountBadgeHtml = '';
     if (hasDiscount) {
       const discountPercent = Math.round(((product.price - product.discountPrice) / product.price) * 100);
-      discountBadgeHtml = `
-        <div class="similar-product-discount-badge">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
-          </svg>
-          ${persianNumberFormatter.format(discountPercent)}٪
-        </div>
-      `;
+      discountBadgeHtml = `<span class="absolute top-2 left-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10">${persianNumberFormatter.format(discountPercent)}٪</span>`;
     }
 
     let originalPriceHtml = '';
     if (hasDiscount) {
-      originalPriceHtml = `<span class="similar-product-original-price">${formatPrice(product.price)} تومان</span>`;
+      originalPriceHtml = `<span class="text-[11px] text-gray-400 line-through">${formatPrice(product.price)}</span>`;
     }
 
+    // Safely escape title
+    const safeTitle = (product.title || 'بدون نام').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const safeShopName = shopName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
     card.innerHTML = `
-      <div class="similar-product-image-wrapper">
-        <img class="similar-product-image" src="${imageUrl}" alt="${product.title || 'محصول'}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
+      <div class="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+        <img class="w-full h-full object-cover" src="${imageUrl}" alt="${safeTitle}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
+        ${newBadgeHtml}
         ${discountBadgeHtml}
       </div>
-      <div class="similar-product-info">
-        <h3 class="similar-product-title">${product.title || 'بدون نام'}</h3>
-        ${shopName ? `
-          <div class="similar-product-shop">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <div class="p-2.5 flex flex-col gap-1">
+        <h3 class="text-[13px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0" style="min-height: 2.4em;">${safeTitle}</h3>
+        ${safeShopName ? `
+          <div class="flex items-center gap-1 text-[11px] text-gray-400 truncate">
+            <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span>${shopName}</span>
+            <span class="truncate">${safeShopName}</span>
           </div>
         ` : ''}
-        <div class="similar-product-price">
+        <div class="mt-auto pt-1.5 flex flex-col">
           ${originalPriceHtml}
-          <span class="similar-product-price-value">${formatPrice(displayPrice)} تومان</span>
+          <span class="text-[14px] font-extrabold text-emerald-600">${formatPrice(displayPrice)} <span class="text-[11px] font-semibold text-gray-500">تومان</span></span>
         </div>
       </div>
     `;
@@ -2996,7 +3124,9 @@
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch similar products: ${response.status}`);
+        // Hide section on error (404 or other)
+        if (dom.section) dom.section.style.display = 'none';
+        return;
       }
 
       const data = await response.json();
@@ -3004,7 +3134,7 @@
 
       if (products.length === 0) {
         // Hide section if no similar products
-        if (dom.section) dom.section.hidden = true;
+        if (dom.section) dom.section.style.display = 'none';
         return;
       }
 
@@ -3013,21 +3143,22 @@
 
     } catch (error) {
       console.warn('Failed to load similar products:', error);
-      if (dom.section) dom.section.hidden = true;
+      if (dom.section) dom.section.style.display = 'none';
     }
   }
 
   function renderProducts(products) {
-    if (!dom.track || !dom.section) return;
+    if (!dom.scroll || !dom.section) return;
 
-    dom.track.innerHTML = '';
+    dom.scroll.innerHTML = '';
 
-    products.forEach(product => {
-      const card = createProductCard(product);
-      dom.track.appendChild(card);
+    products.forEach((product, index) => {
+      const card = createProductCard(product, index);
+      dom.scroll.appendChild(card);
     });
 
     dom.section.hidden = false;
+    dom.section.style.display = '';
 
     // Update view all link with category
     if (dom.viewAllLink && state.category) {
