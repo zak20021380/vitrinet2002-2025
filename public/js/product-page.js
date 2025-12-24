@@ -120,6 +120,7 @@
     lightboxThumbnails: document.getElementById('lightboxThumbnails'),
     lightboxTitle: document.getElementById('lightboxTitle'),
     tagList: document.getElementById('tagList'),
+    dynamicTags: document.getElementById('dynamicTags'),
     meta: {
       seller: document.getElementById('productSeller'),
       category: document.getElementById('productCategory'),
@@ -1302,9 +1303,15 @@
   }
 
   function renderTags(tags) {
+    // Clear old tagList if it exists (legacy)
     if (dom.tagList) {
       dom.tagList.innerHTML = '';
       dom.tagList.hidden = true;
+    }
+
+    // Clear dynamicTags container
+    if (dom.dynamicTags) {
+      dom.dynamicTags.innerHTML = '';
     }
 
     if (dom.featureList) {
@@ -1321,11 +1328,12 @@
     }
 
     list.forEach(tag => {
-      if (dom.tagList) {
-        const chip = document.createElement('li');
-        chip.className = 'tag-chip';
-        chip.textContent = tag;
-        dom.tagList.appendChild(chip);
+      // Render to new dynamicTags container with styled badges
+      if (dom.dynamicTags) {
+        const badge = document.createElement('span');
+        badge.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 shadow-sm';
+        badge.textContent = tag;
+        dom.dynamicTags.appendChild(badge);
       }
 
       if (dom.featureList) {
@@ -1335,8 +1343,9 @@
       }
     });
 
+    // Hide old tagList (no longer used)
     if (dom.tagList) {
-      dom.tagList.hidden = false;
+      dom.tagList.hidden = true;
     }
 
     if (dom.featuresPanel && dom.featureList) {

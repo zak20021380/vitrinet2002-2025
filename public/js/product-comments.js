@@ -1,8 +1,345 @@
 // public/js/product-comments.js
 // سیستم ثبت و نمایش نظرات محصولات با مدیریت وضعیت
+// نسخه امن با محافظت در برابر XSS، CSRF و حملات تزریق
 
 (function initProductComments() {
   'use strict';
+
+  // ═══════════════════════════════════════════════════════════════
+  // Security Module - Military-Grade Input Sanitization
+  // ═══════════════════════════════════════════════════════════════
+  const Security = {
+    // Maximum allowed length for comments
+    MAX_LENGTH: 500,
+    MIN_LENGTH: 3,
+    
+    // Rate limiting: 60 seconds between submissions
+    RATE_LIMIT_MS: 60000,
+    lastSubmitTime: 0,
+    
+    // CSRF Token storage
+    csrfToken: null,
+    
+    // Dangerous patterns to detect and block
+    DANGEROUS_PATTERNS: [
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+      /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
+      /<embed\b[^>]*>/gi,
+      /<link\b[^>]*>/gi,
+      /<meta\b[^>]*>/gi,
+      /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+      /<img\b[^>]*onerror[^>]*>/gi,
+      /<svg\b[^>]*onload[^>]*>/gi,
+      /javascript\s*:/gi,
+      /vbscript\s*:/gi,
+      /data\s*:\s*text\/html/gi,
+      /on\w+\s*=/gi,
+      /expression\s*\(/gi,
+      /url\s*\(\s*['"]?\s*javascript/gi
+    ],
+    
+    // SQL/NoSQL injection patterns
+    INJECTION_PATTERNS: [
+      /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE|EXEC|EXECUTE)\b)/gi,
+      /\$where\s*:/gi,
+      /\$gt\s*:/gi,
+      /\$lt\s*:/gi,
+      /\$ne\s*:/gi,
+      /\$regex\s*:/gi,
+      /\$or\s*:/gi,
+      /\$and\s*:/gi,
+      /\{\s*"\$\w+"/gi
+    ],
+    
+    // Whitelist: Only allow these characters (Persian, Arabic, English, numbers, basic punctuation)
+    WHITELIST_REGEX: /^[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u200C\u200Da-zA-Z0-9\s.,!?؟،؛:()«»\-_\n\r]+$/,
+    
+    /**
+     * Strip all HTML tags from input
+     * @param {string} input - Raw input string
+     * @returns {string} - Cleaned string
+     */
+    stripHtmlTags(input) {
+      if (!input || typeof input !== 'string') return '';
+      
+      // Create a temporary element to parse HTML
+      const temp = document.createElement('div');
+      temp.textContent = input;
+      let stripped = temp.innerHTML;
+      
+      // Additional regex cleanup for any remaining tags
+      stripped = stripped.replace(/<[^>]*>/g, '');
+      
+      return stripped;
+    },
+    
+    /**
+     * Escape special HTML characters
+     * @param {string} input - Input string
+     * @returns {string} - Escaped string
+     */
+    escapeHtml(input) {
+      if (!input || typeof input !== 'string') return '';
+      
+      const escapeMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '/': '&#x2F;',
+        '`': '&#x60;',
+        '=': '&#x3D;'
+      };
+      
+      return input.replace(/[&<>"'`=\/]/g, char => escapeMap[char]);
+    },
+    
+    /**
+     * Detect dangerous patterns in input
+     * @param {string} input - Input to check
+     * @returns {object} - { safe: boolean, threats: string[] }
+     */
+    detectThreats(input) {
+      if (!input || typeof input !== 'string') {
+        return { safe: true, threats: [] };
+      }
+      
+      const threats = [];
+      const lowerInput = input.toLowerCase();
+      
+      // Check XSS patterns
+      for (const pattern of this.DANGEROUS_PATTERNS) {
+        pattern.lastIndex = 0;
+        if (pattern.test(input)) {
+          threats.push('XSS_PATTERN');
+          break;
+        }
+      }
+      
+      // Check injection patterns
+      for (const pattern of this.INJECTION_PATTERNS) {
+        pattern.lastIndex = 0;
+        if (pattern.test(input)) {
+          threats.push('INJECTION_PATTERN');
+          break;
+        }
+      }
+      
+      // Check for suspicious keywords
+      const suspiciousKeywords = [
+        'eval(', 'function(', 'constructor', '__proto__',
+        'innerHTML', 'outerHTML', 'document.write', 'document.cookie',
+        'localstorage', 'sessionstorage', 'xmlhttprequest',
+        'window.location', 'alert(', 'confirm(', 'prompt('
+      ];
+      
+      for (const keyword of suspiciousKeywords) {
+        if (lowerInput.includes(keyword)) {
+          threats.push('SUSPICIOUS_KEYWORD');
+          break;
+        }
+      }
+      
+      return {
+        safe: threats.length === 0,
+        threats
+      };
+    },
+    
+    /**
+     * Full sanitization pipeline
+     * @param {string} input - Raw user input
+     * @returns {object} - { success: boolean, sanitized: string, error?: string }
+     */
+    sanitize(input) {
+      // Type check
+      if (typeof input !== 'string') {
+        return { success: false, sanitized: '', error: 'فرمت ورودی نامعتبر است.' };
+      }
+      
+      // Trim and normalize whitespace
+      let cleaned = input.trim().replace(/\s+/g, ' ');
+      
+      // Length validation
+      if (cleaned.length < this.MIN_LENGTH) {
+        return { success: false, sanitized: '', error: `نظر باید حداقل ${this.MIN_LENGTH} کاراکتر باشد.` };
+      }
+      
+      if (cleaned.length > this.MAX_LENGTH) {
+        return { success: false, sanitized: '', error: `نظر نمی‌تواند بیشتر از ${this.MAX_LENGTH} کاراکتر باشد.` };
+      }
+      
+      // Detect threats before sanitization
+      const threatCheck = this.detectThreats(cleaned);
+      if (!threatCheck.safe) {
+        console.warn('🚨 Security threat detected:', threatCheck.threats);
+        return { 
+          success: false, 
+          sanitized: '', 
+          error: 'محتوای نظر شامل کاراکترهای غیرمجاز است. لطفاً فقط از متن ساده استفاده کنید.',
+          threats: threatCheck.threats
+        };
+      }
+      
+      // Strip HTML tags
+      cleaned = this.stripHtmlTags(cleaned);
+      
+      // Escape remaining special characters
+      cleaned = this.escapeHtml(cleaned);
+      
+      // Remove null bytes and control characters
+      cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+      
+      // Final trim
+      cleaned = cleaned.trim();
+      
+      if (!cleaned) {
+        return { success: false, sanitized: '', error: 'نظر نمی‌تواند خالی باشد.' };
+      }
+      
+      return { success: true, sanitized: cleaned };
+    },
+    
+    /**
+     * Check rate limiting
+     * @returns {object} - { allowed: boolean, waitTime?: number }
+     */
+    checkRateLimit() {
+      const now = Date.now();
+      const timeSinceLastSubmit = now - this.lastSubmitTime;
+      
+      if (this.lastSubmitTime > 0 && timeSinceLastSubmit < this.RATE_LIMIT_MS) {
+        const waitTime = Math.ceil((this.RATE_LIMIT_MS - timeSinceLastSubmit) / 1000);
+        return { 
+          allowed: false, 
+          waitTime,
+          error: `لطفاً ${waitTime} ثانیه صبر کنید و سپس دوباره تلاش کنید.`
+        };
+      }
+      
+      return { allowed: true };
+    },
+    
+    /**
+     * Record submission time for rate limiting
+     */
+    recordSubmission() {
+      this.lastSubmitTime = Date.now();
+    },
+    
+    /**
+     * Fetch CSRF token from server
+     * @returns {Promise<string>}
+     */
+    async fetchCsrfToken() {
+      try {
+        const response = await fetch('/api/csrf-token', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch CSRF token');
+        }
+        
+        const data = await response.json();
+        if (data.success && data.csrfToken) {
+          this.csrfToken = data.csrfToken;
+          console.log('🔐 [CSRF] Token fetched from server');
+          return this.csrfToken;
+        }
+        
+        throw new Error('Invalid CSRF response');
+      } catch (err) {
+        console.warn('🔐 [CSRF] Failed to fetch token:', err.message);
+        // Fallback to cookie if available
+        return this.getTokenFromCookie();
+      }
+    },
+    
+    /**
+     * Get CSRF token from cookie
+     * @returns {string|null}
+     */
+    getTokenFromCookie() {
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrf_token') {
+          this.csrfToken = decodeURIComponent(value);
+          console.log('🔐 [CSRF] Token loaded from cookie');
+          return this.csrfToken;
+        }
+      }
+      return null;
+    },
+    
+    /**
+     * Get or fetch CSRF token (async)
+     * @returns {Promise<string>}
+     */
+    async getCsrfTokenAsync() {
+      // First check if we already have a token
+      if (this.csrfToken) {
+        return this.csrfToken;
+      }
+      
+      // Try to get from cookie
+      const cookieToken = this.getTokenFromCookie();
+      if (cookieToken) {
+        return cookieToken;
+      }
+      
+      // Try to get from meta tag
+      const metaToken = document.querySelector('meta[name="csrf-token"]');
+      if (metaToken) {
+        this.csrfToken = metaToken.getAttribute('content');
+        return this.csrfToken;
+      }
+      
+      // Fetch from server
+      return this.fetchCsrfToken();
+    },
+    
+    /**
+     * Get CSRF token (sync - for backward compatibility)
+     * @returns {string}
+     */
+    getCsrfToken() {
+      // Return cached token if available
+      if (this.csrfToken) {
+        return this.csrfToken;
+      }
+      
+      // Try cookie first
+      const cookieToken = this.getTokenFromCookie();
+      if (cookieToken) {
+        return cookieToken;
+      }
+      
+      // Try meta tag
+      const metaToken = document.querySelector('meta[name="csrf-token"]');
+      if (metaToken) {
+        this.csrfToken = metaToken.getAttribute('content');
+        return this.csrfToken;
+      }
+      
+      // No token available - will be fetched async before submit
+      return '';
+    },
+    
+    /**
+     * Generate a random token
+     * @returns {string}
+     */
+    generateToken() {
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+  };
 
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
   const STAR_PATH = 'M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z';
@@ -158,9 +495,8 @@
 
   function escapeHtml(str) {
     if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    // Use the Security module's escapeHtml for consistency
+    return Security.escapeHtml(str);
   }
 
   function createReviewCard(review) {
@@ -231,10 +567,19 @@
           id="reviewContent" 
           class="review-form__textarea" 
           placeholder="نظر خود را درباره این محصول بنویسید..."
-          maxlength="1000"
+          maxlength="${Security.MAX_LENGTH}"
           rows="4"
+          autocomplete="off"
+          spellcheck="false"
         ></textarea>
-        <span class="review-form__counter"><span id="reviewCharCount">0</span>/1000</span>
+        <span class="review-form__counter"><span id="reviewCharCount">0</span>/${Security.MAX_LENGTH}</span>
+      </div>
+      
+      <div class="review-form__security-notice">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+        </svg>
+        <span>نظر شما قبل از ارسال بررسی امنیتی می‌شود</span>
       </div>
       
       <div class="review-form__actions">
@@ -276,6 +621,13 @@
     if (textarea) textarea.value = '';
     updateFormStars(0);
     updateSubmitButton();
+    
+    // Pre-fetch CSRF token when form opens (non-blocking)
+    Security.getCsrfTokenAsync().then(token => {
+      if (token) {
+        console.log('🔐 [CSRF] Token pre-fetched for form');
+      }
+    }).catch(() => {});
   }
 
   function hideReviewForm() {
@@ -301,13 +653,46 @@
       });
     }
 
-    // Textarea
+    // Textarea with real-time security validation
     const textarea = form.querySelector('#reviewContent');
     const charCount = form.querySelector('#reviewCharCount');
     if (textarea && charCount) {
       textarea.addEventListener('input', () => {
-        charCount.textContent = textarea.value.length;
+        const value = textarea.value;
+        const length = value.length;
+        
+        // Update character count
+        charCount.textContent = length;
+        
+        // Visual feedback for approaching limit
+        if (length > Security.MAX_LENGTH * 0.9) {
+          charCount.parentElement.classList.add('is-warning');
+        } else {
+          charCount.parentElement.classList.remove('is-warning');
+        }
+        
+        // Real-time threat detection (lightweight check)
+        const threatCheck = Security.detectThreats(value);
+        if (!threatCheck.safe) {
+          textarea.classList.add('has-security-error');
+          showSecurityWarning(form, 'محتوای نامعتبر شناسایی شد. لطفاً فقط از متن ساده استفاده کنید.');
+        } else {
+          textarea.classList.remove('has-security-error');
+          hideSecurityWarning(form);
+        }
+        
         updateSubmitButton();
+      });
+      
+      // Prevent paste of potentially dangerous content
+      textarea.addEventListener('paste', (e) => {
+        const pastedText = e.clipboardData?.getData('text') || '';
+        const threatCheck = Security.detectThreats(pastedText);
+        
+        if (!threatCheck.safe) {
+          e.preventDefault();
+          showToast('محتوای کپی شده شامل کاراکترهای غیرمجاز است.', 'error');
+        }
       });
     }
 
@@ -329,6 +714,33 @@
       submitBtn.addEventListener('click', handleSubmitReview);
     }
   }
+  
+  function showSecurityWarning(form, message) {
+    let warning = form.querySelector('.review-form__security-warning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.className = 'review-form__security-warning';
+      warning.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+        <span class="warning-text"></span>
+      `;
+      const contentDiv = form.querySelector('.review-form__content');
+      if (contentDiv) {
+        contentDiv.appendChild(warning);
+      }
+    }
+    warning.querySelector('.warning-text').textContent = message;
+    warning.hidden = false;
+  }
+  
+  function hideSecurityWarning(form) {
+    const warning = form.querySelector('.review-form__security-warning');
+    if (warning) {
+      warning.hidden = true;
+    }
+  }
 
   function updateFormStars(rating) {
     const stars = document.querySelectorAll('#reviewFormStars .review-form__star');
@@ -342,13 +754,20 @@
     const textarea = document.getElementById('reviewContent');
     
     if (submitBtn && textarea) {
-      const isValid = state.selectedRating > 0 && textarea.value.trim().length >= 3;
+      const content = textarea.value.trim();
+      const threatCheck = Security.detectThreats(content);
+      
+      const isValid = state.selectedRating > 0 && 
+                      content.length >= Security.MIN_LENGTH && 
+                      content.length <= Security.MAX_LENGTH &&
+                      threatCheck.safe;
+      
       submitBtn.disabled = !isValid || state.isSubmitting;
     }
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // Submit Handler
+  // Submit Handler - With Security Validation
   // ═══════════════════════════════════════════════════════════════
   async function handleSubmitReview() {
     if (state.isSubmitting) return;
@@ -358,28 +777,89 @@
     
     if (!textarea || !submitBtn) return;
     
-    const content = textarea.value.trim();
+    const rawContent = textarea.value;
     const rating = state.selectedRating;
     
-    if (!content || content.length < 3) {
-      showToast('لطفاً متن نظر را وارد کنید (حداقل ۳ کاراکتر)', 'error');
+    // ═══════════════════════════════════════════════════════════
+    // 1. Rate Limiting Check
+    // ═══════════════════════════════════════════════════════════
+    const rateCheck = Security.checkRateLimit();
+    if (!rateCheck.allowed) {
+      showToast(rateCheck.error, 'error');
       return;
     }
     
+    // ═══════════════════════════════════════════════════════════
+    // 2. Rating Validation
+    // ═══════════════════════════════════════════════════════════
     if (rating < 1 || rating > 5) {
       showToast('لطفاً امتیاز خود را انتخاب کنید', 'error');
       return;
     }
     
+    // ═══════════════════════════════════════════════════════════
+    // 3. Content Sanitization & Validation
+    // ═══════════════════════════════════════════════════════════
+    const sanitizeResult = Security.sanitize(rawContent);
+    
+    if (!sanitizeResult.success) {
+      showToast(sanitizeResult.error, 'error');
+      
+      // Log security event (for debugging)
+      if (sanitizeResult.threats) {
+        console.warn('🚨 Security validation failed:', sanitizeResult.threats);
+      }
+      return;
+    }
+    
+    const sanitizedContent = sanitizeResult.sanitized;
+    
+    // ═══════════════════════════════════════════════════════════
+    // 4. Disable button to prevent double submission
+    // ═══════════════════════════════════════════════════════════
     state.isSubmitting = true;
     submitBtn.classList.add('is-loading');
     submitBtn.disabled = true;
     
     try {
-      await submitComment(content, rating);
+      // ═══════════════════════════════════════════════════════════
+      // 5. Fetch CSRF token from server (if not cached)
+      // ═══════════════════════════════════════════════════════════
+      const csrfToken = await Security.getCsrfTokenAsync();
+      console.log('🔐 [CSRF] Submitting with token:', csrfToken ? 'present' : 'missing');
+      
+      // ═══════════════════════════════════════════════════════════
+      // 6. Submit with CSRF token
+      // ═══════════════════════════════════════════════════════════
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          productId: state.productId,
+          content: sanitizedContent,
+          rating
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'خطا در ثبت نظر');
+      }
+      
+      // Record successful submission for rate limiting
+      Security.recordSubmission();
       
       showToast('نظر شما با موفقیت ثبت شد و پس از تأیید فروشنده نمایش داده می‌شود.', 'success');
       hideReviewForm();
+      
+      // Clear the textarea
+      textarea.value = '';
       
     } catch (err) {
       console.error('Failed to submit review:', err);

@@ -340,3 +340,221 @@
     transform: translateX(0) translateY(0);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Security Styles - Military-Grade Input Protection
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Security Notice */
+.review-form__security-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(14, 165, 233, 0.06) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #0f766e;
+}
+
+.review-form__security-notice svg {
+  flex-shrink: 0;
+  color: #10b981;
+}
+
+/* Security Warning */
+.review-form__security-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(249, 115, 22, 0.08) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-top: 0.5rem;
+  animation: shakeWarning 0.4s ease;
+}
+
+.review-form__security-warning svg {
+  flex-shrink: 0;
+  color: #ef4444;
+}
+
+.review-form__security-warning[hidden] {
+  display: none;
+}
+
+@keyframes shakeWarning {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Textarea Security Error State */
+.review-form__textarea.has-security-error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.review-form__textarea.has-security-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Character Counter Warning State */
+.review-form__counter.is-warning {
+  color: #f59e0b !important;
+  font-weight: 700;
+}
+
+.review-form__counter.is-warning span {
+  color: #dc2626;
+}
+
+/* Submit Button Loading State Enhancement */
+.review-form__submit.is-loading {
+  pointer-events: none;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.review-form__submit.is-loading .review-form__submit-text {
+  opacity: 0;
+}
+
+.review-form__submit.is-loading .review-form__submit-spinner {
+  display: block;
+  position: absolute;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Disabled Submit Button */
+.review-form__submit:disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none !important;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .review-form__security-notice {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .review-form__security-warning {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Extra Small Mobile (320px) - Security Warning Safe Layout
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 320px) {
+  .review-form {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+  
+  .review-form__title {
+    font-size: 0.9rem;
+  }
+  
+  .review-form__star {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .review-form__star svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .review-form__textarea {
+    font-size: 0.85rem;
+    padding: 0.65rem 0.75rem;
+    min-height: 80px;
+  }
+  
+  .review-form__security-notice {
+    font-size: 0.65rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+  }
+  
+  .review-form__security-notice svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+  
+  .review-form__security-warning {
+    font-size: 0.65rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+  }
+  
+  .review-form__security-warning svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  
+  /* Reduced shake animation for small screens to prevent layout shift */
+  @keyframes shakeWarning {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+  }
+  
+  .review-form__actions {
+    gap: 0.5rem;
+  }
+  
+  .review-form__cancel,
+  .review-form__submit {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .review-form__notice {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+  
+  .review-form__counter {
+    font-size: 0.65rem;
+  }
+  
+  .comment-toast {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+  }
+  
+  .comment-toast__icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .comment-toast__message {
+    font-size: 0.8rem;
+  }
+}

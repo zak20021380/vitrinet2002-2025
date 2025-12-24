@@ -4,7 +4,16 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
+const { csrfProtection, getCsrfTokenHandler } = require('../middlewares/csrfMiddleware');
 const productCommentController = require('../controllers/productCommentController');
+
+// ═══════════════════════════════════════════════════════════════
+// روت CSRF Token
+// ═══════════════════════════════════════════════════════════════
+
+// دریافت توکن CSRF برای فرم‌ها
+// GET /api/csrf-token
+router.get('/csrf-token', getCsrfTokenHandler);
 
 // ═══════════════════════════════════════════════════════════════
 // روت‌های عمومی
@@ -23,9 +32,11 @@ router.get(
 
 // ثبت نظر جدید (کاربر لاگین شده)
 // POST /api/comments
+// CSRF Protection: بررسی توکن امنیتی برای جلوگیری از حملات CSRF
 router.post(
   '/comments',
   authMiddleware('user'),
+  csrfProtection({ strictMode: false }), // در حالت غیر سخت‌گیرانه برای سازگاری با کلاینت‌های قدیمی
   productCommentController.submitComment
 );
 

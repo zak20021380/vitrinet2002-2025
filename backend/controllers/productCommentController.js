@@ -114,7 +114,7 @@ exports.submitComment = async (req, res) => {
     // ═══════════════════════════════════════════════════════════
     const processedContent = processMessage(content, {
       minLength: 3,
-      maxLength: 1000,
+      maxLength: 500, // Strict 500 character limit
       allowHtml: false,
       strictMode: true
     });
