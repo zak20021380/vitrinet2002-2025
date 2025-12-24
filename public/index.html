@@ -154,80 +154,56 @@
 
 
 
-  <section class="relative flex flex-col items-center justify-center pt-8 pb-16 px-4 overflow-hidden">
+  <section class="hero-section relative flex flex-col items-center justify-center pt-6 sm:pt-8 pb-12 sm:pb-16 px-3 sm:px-4 overflow-hidden">
     <!-- Decorative Background Glows -->
-    <div class="absolute top-1/4 -right-20 w-80 h-80 bg-emerald-100/40 blur-[100px] rounded-full pointer-events-none">
-    </div>
-    <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-sky-100/40 blur-[100px] rounded-full pointer-events-none">
-    </div>
+    <div class="hero-glow hero-glow--right"></div>
+    <div class="hero-glow hero-glow--left"></div>
 
-    <div class="hero-card relative w-full max-w-4xl mx-auto px-6 sm:px-12 py-10 sm:py-16 text-center animate-fadein">
+    <div class="hero-card relative w-full max-w-4xl mx-auto px-4 sm:px-12 py-8 sm:py-16 text-center animate-fadein">
       <!-- Subtle Border Glow -->
-      <div
-        class="absolute -inset-[1px] bg-gradient-to-br from-white/80 via-white/40 to-white/10 rounded-[2.5rem] pointer-events-none z-0">
-      </div>
+      <div class="hero-card__border"></div>
 
       <div class="relative z-10">
-        <div
-          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-xs sm:text-sm font-bold mb-6 shadow-sm border border-emerald-100/50">
+        <!-- بج لوکیشن -->
+        <div class="hero-location-badge">
           <i class="ri-map-pin-2-fill"></i>
           <span>بزرگترین ویترین آنلاین سنندج</span>
         </div>
 
-        <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-6 leading-[1.2] pb-1">
-          <span
-            class="bg-gradient-to-r from-[#0ea5e9] via-[#10b981] to-[#0ea5e9] bg-[length:200%_auto] animate-gradient-text text-transparent bg-clip-text">
-            ویترین اینترنتی مغازه های شهر
+        <!-- عنوان اصلی -->
+        <h1 class="hero-title">
+          <span class="hero-title__text">
+            ویترین اینترنتی مغازه‌های شهر
           </span>
         </h1>
 
-        <p class="mb-10 text-base sm:text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+        <!-- توضیحات -->
+        <p class="hero-description">
           بهترین فروشگاه‌ها، محصولات و برندهای اطرافت رو در ویترینت پیدا کن، مقایسه کن و هوشمندانه خرید کن.
         </p>
 
-        <!-- حرفه‌ای‌ترین فرم جستجو -->
-        <form class="hero-search-form w-full flex flex-col lg:flex-row items-stretch gap-4 max-w-3xl mx-auto group"
-          id="searchForm" autocomplete="off">
-          <!-- ورودی جستجو -->
-          <div class="flex-grow relative flex items-center group/input">
-            <div
-              class="absolute right-5 text-slate-400 group-focus-within/input:text-emerald-500 transition-colors duration-300">
-              <i class="ri-search-2-line text-xl"></i>
-            </div>
+        <!-- فرم جستجوی حرفه‌ای -->
+        <form class="hero-search-form" id="searchForm" autocomplete="off">
+          <!-- ردیف جستجو: اینپوت + دکمه -->
+          <div class="hero-search-row">
             <input type="text"
-              class="w-full h-14 sm:h-16 pr-14 pl-6 rounded-2xl sm:rounded-[1.25rem] border-0 bg-white text-slate-700 font-bold placeholder-slate-400 focus:outline-none transition-all text-right text-base sm:text-lg shadow-lg group-hover:shadow-emerald-500/5"
-              placeholder="جستجوی مغازه، محصول یا برند..." id="mainSearchInput" name="q" aria-label="جستجو" />
-          </div>
-
-          <!-- کنترل‌های جانبی: شهر و دکمه -->
-          <div class="flex items-stretch gap-3 h-14 sm:h-16">
-            <!-- دکمه انتخاب شهر -->
-            <button type="button" id="cityBtn"
-              class="flex items-center justify-between gap-3 px-6 rounded-2xl sm:rounded-[1.25rem] bg-white border border-slate-100 text-slate-600 shadow-lg hover:border-emerald-300 hover:text-emerald-600 transition-all duration-300 group/city whitespace-nowrap min-w-[140px]">
-              <div class="flex items-center gap-2">
-                <i class="ri-map-pin-range-line text-xl text-emerald-500"></i>
-                <span id="cityName" class="font-bold">سنندج</span>
-              </div>
-              <i
-                class="ri-arrow-down-s-line text-lg opacity-50 group-hover:opacity-100 group-hover:rotate-180 transition-all"></i>
-            </button>
-
-            <!-- دکمه جستجو -->
-            <button type="submit"
-              class="hero-submit-btn flex items-center justify-center gap-2 px-8 rounded-2xl sm:rounded-[1.25rem] text-white font-black text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 whitespace-nowrap overflow-hidden relative group/btn">
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-[#0ea5e9] to-[#10b981] group-hover/btn:scale-110 transition-transform duration-500">
-              </div>
-              <span class="relative z-10 flex items-center gap-2">
-                <i class="ri-flashlight-fill text-xl"></i>
-                جستجو
+              class="hero-search-input"
+              placeholder="جستجوی مغازه، محصول یا برند..."
+              id="mainSearchInput" name="q" aria-label="جستجو" />
+            <button type="submit" class="hero-submit-btn">
+              <span class="hero-submit-btn__bg"></span>
+              <span class="hero-submit-btn__content">
+                <i class="ri-search-2-line"></i>
               </span>
-              <!-- Shine Effect -->
-              <div
-                class="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 group-hover/btn:left-full transition-all duration-700 ease-in-out">
-              </div>
             </button>
           </div>
+
+          <!-- انتخاب شهر -->
+          <button type="button" id="cityBtn" class="hero-city-btn">
+            <i class="ri-map-pin-2-fill hero-city-btn__icon"></i>
+            <span id="cityName" class="hero-city-btn__name">سنندج</span>
+            <i class="ri-arrow-down-s-line hero-city-btn__arrow"></i>
+          </button>
         </form>
 
         <!-- نتایج جستجو -->

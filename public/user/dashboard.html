@@ -6898,6 +6898,147 @@
     .streak-toast.error {
       background: linear-gradient(135deg, #ef4444, #dc2626);
     }
+
+    /* === استایل‌های صفحه لاگین کیف پول === */
+    .wallet-login-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .wallet-login-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+
+    .wallet-login-icon svg {
+      width: 36px;
+      height: 36px;
+      color: #10b981;
+    }
+
+    .wallet-login-content {
+      margin-bottom: 1.25rem;
+    }
+
+    .wallet-login-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.5rem;
+    }
+
+    .wallet-login-desc {
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+      max-width: 280px;
+    }
+
+    .wallet-login-features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .wallet-login-feature {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .wallet-login-feature svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .wallet-login-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .wallet-login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .wallet-login-btn:active {
+      transform: translateY(0);
+    }
+
+    .wallet-login-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .wallet-login-prompt {
+        padding: 1.5rem 1rem;
+      }
+
+      .wallet-login-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+      }
+
+      .wallet-login-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .wallet-login-title {
+        font-size: 1.05rem;
+      }
+
+      .wallet-login-desc {
+        font-size: 0.82rem;
+      }
+
+      .wallet-login-features {
+        gap: 0.5rem;
+      }
+
+      .wallet-login-feature {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.7rem;
+      }
+
+      .wallet-login-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -7343,10 +7484,12 @@
     // Add scroll effect to header
     window.addEventListener('scroll', () => {
       const header = document.querySelector('.main-header');
-      if (window.scrollY > 20) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
+      if (header) {
+        if (window.scrollY > 20) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
       }
     });
 
@@ -9817,9 +9960,32 @@
         reward.style.display = '';
         reward.textContent = data.reward;
         
-        const progress = getExploreProgress();
-        const progressPercent = (progress.count / 3) * 100;
-        const isComplete = progress.count >= 3;
+        // نمایش loading اولیه
+        bodyContent.innerHTML = `
+          <div class="mission-modal-desc-card">
+            <p class="mission-modal-desc">${data.desc}</p>
+          </div>
+          <div class="explore-progress-section">
+            <p style="text-align:center;color:#888;">در حال بارگذاری...</p>
+          </div>
+        `;
+        
+        // دریافت پیشرفت از API
+        let progress = { count: 0, required: 3, completed: false };
+        const apiProgress = await fetchExploreProgressFromAPI();
+        if (apiProgress) {
+          progress = apiProgress;
+        } else {
+          // fallback به localStorage
+          const localProgress = getExploreProgress();
+          progress = { count: localProgress.count, required: 3, completed: localProgress.completed };
+        }
+        
+        const progressPercent = (progress.count / progress.required) * 100;
+        const isComplete = progress.completed || progress.count >= progress.required;
+        
+        // تبدیل اعداد به فارسی
+        const toPersian = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
         
         bodyContent.innerHTML = `
           <div class="mission-modal-desc-card">
@@ -9830,7 +9996,7 @@
           <div class="explore-progress-section">
             <div class="explore-progress-header">
               <p class="explore-progress-label">پیشرفت شما</p>
-              <span class="explore-progress-count">${progress.count}/۳</span>
+              <span class="explore-progress-count">${toPersian(progress.count)}/${toPersian(progress.required)}</span>
             </div>
             <div class="explore-progress-bar">
               <div class="explore-progress-fill" style="width: ${progressPercent}%"></div>
@@ -10359,8 +10525,47 @@
     const EXPLORE_STORAGE_KEY = 'vitrint_explore_mission';
     const EXPLORE_REQUIRED_VISITS = 3;
 
-    // دریافت پیشرفت ماموریت گردشگر
+    // دریافت پیشرفت ماموریت گردشگر از API
+    let cachedExploreProgress = null;
+    
+    async function fetchExploreProgressFromAPI() {
+      try {
+        const res = await fetch('/api/missions/browse-status', {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) {
+          // کاربر لاگین نیست - از localStorage استفاده کن
+          return null;
+        }
+        
+        const data = await res.json();
+        if (data.success) {
+          cachedExploreProgress = {
+            count: data.progress || 0,
+            required: data.required || 3,
+            status: data.status,
+            visitedShops: data.visitedStores?.map(v => v.storeId) || [],
+            completed: data.status === 'completed' || data.status === 'claimed',
+            rewarded: data.rewardPaid || false,
+            isActive: data.isActive
+          };
+          return cachedExploreProgress;
+        }
+      } catch (e) {
+        console.log('Could not fetch explore progress from API');
+      }
+      return null;
+    }
+    
+    // دریافت پیشرفت ماموریت گردشگر (ترکیبی از API و localStorage)
     function getExploreProgress() {
+      // اگر کش موجود است، برگردان
+      if (cachedExploreProgress) {
+        return cachedExploreProgress;
+      }
+      
+      // fallback به localStorage
       try {
         const today = new Date().toISOString().split('T')[0];
         const stored = localStorage.getItem(EXPLORE_STORAGE_KEY);
@@ -10487,6 +10692,7 @@
 
 
     async function updateDashboardFavCount() {
+      const favCountEl = document.getElementById('favCountDashboard');
       try {
         // درخواست با کوکی (credentials: 'include')
         const res = await fetch('/api/user/profile', {
@@ -10497,14 +10703,15 @@
           }
         });
         if (!res.ok) {
-          document.getElementById('favCountDashboard').textContent = '-';
+          if (favCountEl) favCountEl.textContent = '-';
           return;
         }
         const user = await res.json();
-        document.getElementById('favCountDashboard').textContent =
-          Array.isArray(user.favorites) ? user.favorites.length : '0';
+        if (favCountEl) {
+          favCountEl.textContent = Array.isArray(user.favorites) ? user.favorites.length : '0';
+        }
       } catch (e) {
-        document.getElementById('favCountDashboard').textContent = '-';
+        if (favCountEl) favCountEl.textContent = '-';
       }
     }
 
@@ -11845,6 +12052,9 @@
           return;
         }
 
+        // Create a set of active mission IDs from API
+        const activeMissionIds = new Set(data.data.map(m => m.missionId));
+
         // Update existing cards with API data
         data.data.forEach(mission => {
           const config = missionCardConfigs[mission.missionId];
@@ -11862,14 +12072,13 @@
             rewardEl.innerHTML = `${iconHtml} ${formattedAmount} تومان`;
           }
 
-          // Show/hide card based on isActive
-          card.style.display = mission.isActive !== false ? '' : 'none';
+          // Show card (it's active in API)
+          card.style.display = '';
         });
 
         // Hide cards that are not in the API response (disabled missions)
-        const activeMissionIds = data.data.map(m => m.missionId);
         Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
-          if (!activeMissionIds.includes(missionId)) {
+          if (!activeMissionIds.has(missionId)) {
             const card = document.getElementById(config.htmlId);
             if (card) {
               card.style.display = 'none';
@@ -12833,11 +13042,39 @@
       const card = document.getElementById('walletCard');
       if (card) {
         card.innerHTML = `
-          <div class="text-center py-6">
-            <div class="text-3xl mb-2">🔒</div>
-            <p class="text-emerald-700 font-bold mb-2">برای مشاهده کیف پول وارد شوید</p>
-            <a href="/login.html" class="inline-block px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold">
-              ورود به حساب
+          <div class="wallet-login-prompt">
+            <div class="wallet-login-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M5 20c0-3.5 3.5-6 7-6s7 2.5 7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M15 11l2 2 4-4" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="wallet-login-content">
+              <h4 class="wallet-login-title">ورود به حساب کاربری</h4>
+              <p class="wallet-login-desc">برای مشاهده موجودی کیف پول و دریافت پاداش‌ها، وارد حساب کاربری خود شوید</p>
+            </div>
+            <div class="wallet-login-features">
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>مدیریت اعتبار</span>
+              </div>
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <span>تاریخچه تراکنش</span>
+              </div>
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+                <span>پشتیبانی ۲۴/۷</span>
+              </div>
+            </div>
+            <a href="/login.html" class="wallet-login-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              <span>ورود به حساب</span>
             </a>
           </div>
         `;

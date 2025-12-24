@@ -47,6 +47,7 @@ const userWalletTransactionSchema = new mongoose.Schema({
       'streak_checkpoint', // پاداش چک‌پوینت
       'booking_complete',  // تکمیل رزرو
       'review_given',      // ثبت نظر
+      'browse_stores',     // گردش در بازار
       'referral',          // دعوت دوستان
       'first_booking',     // اولین رزرو
       'profile_complete',  // تکمیل پروفایل

@@ -2794,12 +2794,16 @@ fetch(API_URL, FETCH_OPTIONS)
     renderSliderCenters(centers);
   })
   .catch(err => {
-    document.getElementById('shopping-centers-slider').innerHTML = "<div style='color:#ff0000;'>خطا در دریافت مراکز خرید!</div>";
-    updateSliderNavVisibility('shopping-centers-slider');
+    const sliderEl = document.getElementById('shopping-centers-slider');
+    if (sliderEl) {
+      sliderEl.innerHTML = "<div style='color:#ff0000;'>خطا در دریافت مراکز خرید!</div>";
+      updateSliderNavVisibility('shopping-centers-slider');
+    }
   });
 
 // --- اسکرول drag/momentum ---
 const centersSlider = document.getElementById('shopping-centers-slider');
+if (centersSlider) {
 let centersDown = false, centersStartX, centersScrollLeft, centersLastX, centersVelocity = 0, centersMomentumID;
 function centersMomentum() {
   if (Math.abs(centersVelocity) > 0.4) {
@@ -2853,6 +2857,7 @@ centersSlider.addEventListener('touchend', () => {
   centersDown = false;
   if (Math.abs(centersVelocity) > 2) centersMomentum();
 }, {passive:true});
+} // end if (centersSlider)
 
 
 const shoesBagsSlider = document.getElementById('shoes-bags-slider');

@@ -2658,5 +2658,198 @@ function setDynamicSEO(shop) {
 </script>
 -->
 
+<!-- ===== سیستم ماموریت گردش در بازار ===== -->
+<style>
+.mission-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mission-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.mission-toast.completed {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+}
+.mission-toast-icon {
+  font-size: 20px;
+}
+.mission-toast-progress {
+  background: rgba(255,255,255,0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+</style>
+
+<div id="missionToast" class="mission-toast">
+  <span class="mission-toast-icon">🧭</span>
+  <span class="mission-toast-text">بازدید ثبت شد!</span>
+  <span class="mission-toast-progress">۱/۳</span>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  const MISSION_CONFIG = {
+    minTimeSeconds: 5,
+    missionId: 'user-review',
+    apiBase: ''
+  };
+  
+  let visitStartTime = Date.now();
+  let visitTracked = false;
+  let scrolledToBottom = false;
+  
+  // تابع نمایش Toast
+  function showMissionToast(message, progress, required, isCompleted = false) {
+    const toast = document.getElementById('missionToast');
+    if (!toast) return;
+    
+    const textEl = toast.querySelector('.mission-toast-text');
+    const progressEl = toast.querySelector('.mission-toast-progress');
+    const iconEl = toast.querySelector('.mission-toast-icon');
+    
+    if (textEl) textEl.textContent = message;
+    if (progressEl) progressEl.textContent = `${toPersianNum(progress)}/${toPersianNum(required)}`;
+    if (iconEl) iconEl.textContent = isCompleted ? '🎉' : '🧭';
+    
+    toast.classList.toggle('completed', isCompleted);
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+  
+  // تبدیل به اعداد فارسی
+  function toPersianNum(num) {
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return String(num).replace(/\d/g, d => persianDigits[d]);
+  }
+  
+  // دریافت CSRF Token
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+  }
+  
+  // ثبت بازدید
+  async function trackVisit() {
+    if (visitTracked) return;
+    if (!currentSellerId) return;
+    
+    const timeSpent = Math.floor((Date.now() - visitStartTime) / 1000);
+    
+    if (timeSpent < MISSION_CONFIG.minTimeSeconds) return;
+    
+    visitTracked = true;
+    
+    try {
+      const res = await fetch(`${MISSION_CONFIG.apiBase}/api/missions/track-visit`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({
+          storeId: currentSellerId,
+          timeSpent: timeSpent
+        })
+      });
+      
+      if (!res.ok) {
+        // کاربر لاگین نیست یا خطای دیگر - بی‌صدا رد شو
+        return;
+      }
+      
+      const data = await res.json();
+      
+      if (!data.success) return;
+      
+      // اگر تکراری یا قبلاً تکمیل شده، نمایش نده
+      if (data.duplicate || data.alreadyCompleted) return;
+      
+      // نمایش Toast
+      if (data.isCompleted) {
+        showMissionToast(
+          'تبریک! ماموریت تکمیل شد! 🎉',
+          data.progress,
+          data.required,
+          true
+        );
+      } else {
+        showMissionToast(
+          'بازدید ثبت شد!',
+          data.progress,
+          data.required,
+          false
+        );
+      }
+      
+    } catch (err) {
+      // خطا - بی‌صدا رد شو
+      console.log('Mission tracking skipped');
+    }
+  }
+  
+  // تایمر 5 ثانیه‌ای
+  setTimeout(() => {
+    trackVisit();
+  }, MISSION_CONFIG.minTimeSeconds * 1000);
+  
+  // اسکرول به پایین صفحه
+  function checkScrollToBottom() {
+    if (scrolledToBottom) return;
+    
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+    
+    // اگر به 80% صفحه رسید
+    if (scrollTop + clientHeight >= scrollHeight * 0.8) {
+      scrolledToBottom = true;
+      trackVisit();
+    }
+  }
+  
+  window.addEventListener('scroll', checkScrollToBottom, { passive: true });
+  
+  // قبل از ترک صفحه
+  window.addEventListener('beforeunload', () => {
+    const timeSpent = Math.floor((Date.now() - visitStartTime) / 1000);
+    if (timeSpent >= MISSION_CONFIG.minTimeSeconds && !visitTracked && currentSellerId) {
+      // استفاده از sendBeacon برای ارسال قبل از بستن
+      navigator.sendBeacon(
+        `${MISSION_CONFIG.apiBase}/api/missions/track-visit`,
+        JSON.stringify({
+          storeId: currentSellerId,
+          timeSpent: timeSpent
+        })
+      );
+    }
+  });
+  
+})();
+</script>
+
 </body>
 </html>
