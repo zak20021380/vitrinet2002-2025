@@ -609,14 +609,14 @@
     const heroWrapper = dom.heroWrapper;
     const priceCard = dom.meta.priceCard;
     const messageBtn = dom.messageSellerButton;
-    
+
     // Add/remove out-of-stock class to body for global styling
     document.body.classList.toggle('product-out-of-stock', !isInStock);
-    
+
     // Apply grayscale and overlay to gallery
     if (heroWrapper && !isInStock) {
       heroWrapper.classList.add('out-of-stock-gallery');
-      
+
       // Add out-of-stock badge if not exists
       if (!heroWrapper.querySelector('.out-of-stock-ribbon')) {
         const ribbon = document.createElement('div');
@@ -629,14 +629,14 @@
       const ribbon = heroWrapper.querySelector('.out-of-stock-ribbon');
       if (ribbon) ribbon.remove();
     }
-    
+
     // Apply strikethrough to price
     if (priceCard && !isInStock) {
       priceCard.classList.add('out-of-stock-price');
     } else if (priceCard) {
       priceCard.classList.remove('out-of-stock-price');
     }
-    
+
     // Disable CTA button
     if (messageBtn) {
       if (!isInStock) {
@@ -784,7 +784,7 @@
 
     const priceValue = normaliseNumber(product.price);
     const discountCeiling = normaliseNumber(product.discountCeiling);
-    
+
     if (priceValue !== null) {
       // If product has discount ceiling, show price range
       if (discountCeiling && discountCeiling > 0 && discountCeiling <= priceValue) {
@@ -824,11 +824,11 @@
     renderDescription(product.desc);
     renderSellerCard(seller, product);
     renderContactPanel(seller);
-    
+
     // Handle out-of-stock status
     const isInStock = product.inStock !== false;
     applyOutOfStockUI(isInStock);
-    
+
     updateMetaTags(product, seller, summary);
     updateStructuredData(product, seller, id);
     if (state.productId) {
@@ -884,9 +884,9 @@
         return true;
       });
     }
-    
+
     const resolved = rawImages.map(resolveMediaPath).filter(Boolean);
-    
+
     // Only use seller boardImage if it's a valid string
     if ((!resolved || !resolved.length) && seller && typeof seller.boardImage === 'string' && seller.boardImage.trim()) {
       const boardImg = seller.boardImage.trim();
@@ -1331,7 +1331,25 @@
       // Render to new dynamicTags container with styled badges
       if (dom.dynamicTags) {
         const badge = document.createElement('span');
-        badge.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 shadow-sm';
+
+        // Smart tag classification for premium styling
+        const tagLower = tag.toLowerCase();
+        let tagClass = 'product-tag product-tag--default';
+
+        // Detect "new/fresh" tags
+        if (tagLower.includes('جدید') || tagLower.includes('new') || tagLower.includes('تازه')) {
+          tagClass = 'product-tag product-tag--new';
+        }
+        // Detect "gold/special/premium" tags  
+        else if (tagLower.includes('طلا') || tagLower.includes('gold') || tagLower.includes('ویژه') || tagLower.includes('premium') || tagLower.includes('vip')) {
+          tagClass = 'product-tag product-tag--gold';
+        }
+        // Detect category/attribute-like tags
+        else if (tagLower.includes('دسته') || tagLower.includes('نوع') || tagLower.includes('رنگ') || tagLower.includes('سایز') || tagLower.includes('مدل')) {
+          tagClass = 'product-tag product-tag--attr';
+        }
+
+        badge.className = tagClass;
         badge.textContent = tag;
         dom.dynamicTags.appendChild(badge);
       }
@@ -1660,33 +1678,33 @@
     if (!path || typeof path !== 'string') return '';
     const trimmed = path.trim();
     if (!trimmed) return '';
-    
+
     // Reject anything that looks like raw data or JSON
     if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.includes('ObjectId') || trimmed.includes('password')) {
       console.warn('resolveMediaPath: Rejected invalid path:', trimmed.substring(0, 50));
       return '';
     }
-    
+
     // Handle data: URLs (Base64) - use directly, NEVER prepend anything
     if (trimmed.startsWith('data:image')) {
       return trimmed;
     }
-    
+
     // Handle blob: URLs and full URLs directly
     if (/^(https?:|blob:)/i.test(trimmed)) {
       return trimmed;
     }
-    
+
     // Handle absolute paths starting with /uploads/
     if (trimmed.startsWith('/uploads/')) {
       return `http://localhost:5000${trimmed}`;
     }
-    
+
     // Handle relative paths - prepend full server URL
     if (trimmed.startsWith('/')) {
       return `http://localhost:5000${trimmed}`;
     }
-    
+
     // Handle filenames - prepend full uploads URL
     return `http://localhost:5000/uploads/${trimmed}`;
   }
@@ -2057,7 +2075,7 @@
   // ═══════════════════════════════════════════════════════════════
   // توابع امنیتی سمت کلاینت
   // ═══════════════════════════════════════════════════════════════
-  
+
   // الگوهای خطرناک برای شناسایی
   const DANGEROUS_PATTERNS = [
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
@@ -2071,20 +2089,20 @@
   // پاکسازی متن از کاراکترهای خطرناک
   function sanitizeClientText(text) {
     if (!text || typeof text !== 'string') return '';
-    
+
     // حذف کاراکترهای کنترلی
     let sanitized = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-    
+
     // حذف null bytes
     sanitized = sanitized.replace(/\0/g, '');
-    
+
     return sanitized.trim();
   }
 
   // بررسی الگوهای خطرناک
   function containsDangerousContent(text) {
     if (!text) return false;
-    
+
     for (const pattern of DANGEROUS_PATTERNS) {
       if (pattern.test(text)) {
         pattern.lastIndex = 0;
@@ -2100,21 +2118,21 @@
     if (!text || typeof text !== 'string') {
       return { valid: false, error: 'متن پیام الزامی است.' };
     }
-    
+
     const trimmed = text.trim();
-    
+
     if (trimmed.length < minLength) {
       return { valid: false, error: 'پیام خیلی کوتاه است.' };
     }
-    
+
     if (trimmed.length > maxLength) {
       return { valid: false, error: `پیام نمی‌تواند بیشتر از ${maxLength} کاراکتر باشد.` };
     }
-    
+
     if (containsDangerousContent(trimmed)) {
       return { valid: false, error: 'محتوای پیام مجاز نیست.' };
     }
-    
+
     return { valid: true };
   }
 
@@ -2130,7 +2148,7 @@
     // پاکسازی و اعتبارسنجی متن
     const rawText = messageText.value;
     const sanitizedText = sanitizeClientText(rawText);
-    
+
     const validation = validateMessageText(sanitizedText);
     if (!validation.valid) {
       showError(validation.error);
@@ -2250,7 +2268,7 @@
     if (!textarea) return;
     // فقط برای مرورگرهایی که field-sizing رو ساپورت نمی‌کنند
     if (CSS.supports && CSS.supports('field-sizing', 'content')) return;
-    
+
     textarea.style.height = 'auto';
     const newHeight = Math.min(textarea.scrollHeight, 150);
     textarea.style.height = newHeight + 'px';
@@ -2260,7 +2278,7 @@
     updateCharCount();
     autoResizeTextarea(messageText);
   });
-  
+
   messageText.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.ctrlKey && !messageSendBtn.disabled) {
       sendMessage();
@@ -2630,20 +2648,20 @@
   function renderStars(container, rating, starClass = 'star-icon') {
     if (!container) return;
     const fullStars = Math.floor(rating);
-    
+
     container.innerHTML = '';
     for (let i = 0; i < 5; i++) {
       const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       star.setAttribute('viewBox', '0 0 24 24');
       star.setAttribute('fill', 'currentColor');
       star.classList.add(starClass);
-      
+
       if (i < fullStars) {
         star.classList.add(`${starClass}--filled`);
       } else {
         star.classList.add(`${starClass}--empty`);
       }
-      
+
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', STAR_PATH);
       star.appendChild(path);
@@ -2654,7 +2672,7 @@
   // Update summary bar UI
   function updateSummaryBar() {
     if (dom.barScore) {
-      const scoreText = state.avgRating > 0 
+      const scoreText = state.avgRating > 0
         ? persianNumberFormatter.format(state.avgRating.toFixed(1))
         : '۰';
       dom.barScore.textContent = scoreText;
@@ -2683,7 +2701,7 @@
       if (diffHours < 24) return `${persianNumberFormatter.format(diffHours)} ساعت پیش`;
       if (diffDays < 7) return `${persianNumberFormatter.format(diffDays)} روز پیش`;
       if (diffDays < 30) return `${persianNumberFormatter.format(Math.floor(diffDays / 7))} هفته پیش`;
-      
+
       return new Intl.DateTimeFormat('fa-IR', {
         year: 'numeric',
         month: 'short',
@@ -2733,9 +2751,9 @@
     card.innerHTML = `
       <header class="review-card__header">
         <div class="review-card__avatar">
-          ${userAvatar 
-            ? `<img src="${userAvatar}" alt="${escapeHtml(userName)}" loading="lazy">` 
-            : getUserInitials(userName)}
+          ${userAvatar
+        ? `<img src="${userAvatar}" alt="${escapeHtml(userName)}" loading="lazy">`
+        : getUserInitials(userName)}
         </div>
         <div class="review-card__info">
           <div class="review-card__top">
@@ -2794,7 +2812,7 @@
     if (!state.productId || state.isLoading) return;
 
     state.isLoading = true;
-    
+
     if (!append) {
       if (dom.modalLoading) dom.modalLoading.hidden = false;
       if (dom.modalList) dom.modalList.hidden = true;
@@ -2813,7 +2831,7 @@
       }
 
       const data = await response.json();
-      
+
       if (append) {
         // Append to existing reviews
         const newReviews = data.reviews || [];
@@ -2824,14 +2842,14 @@
       } else {
         state.reviews = data.reviews || [];
       }
-      
+
       state.totalCount = data.totalCount || data.total || 0;
       state.avgRating = data.avgRating || data.averageRating || 0;
       state.hasMore = data.hasMore || (state.page * state.limit < state.totalCount);
       state.dataLoaded = true;
 
       updateSummaryBar();
-      
+
       if (!append) {
         renderReviews();
       } else {
@@ -2848,7 +2866,7 @@
       state.avgRating = 0;
       state.dataLoaded = true;
       updateSummaryBar();
-      
+
       if (!append) {
         if (dom.modalLoading) dom.modalLoading.hidden = true;
         if (dom.modalEmpty) dom.modalEmpty.hidden = false;
@@ -2862,11 +2880,11 @@
   // Open modal
   function openModal() {
     if (!dom.modal) return;
-    
+
     state.isModalOpen = true;
     dom.modal.classList.add('is-open');
     document.body.classList.add('modal-open');
-    
+
     // Load reviews if not loaded yet
     if (!state.dataLoaded && state.productId) {
       fetchReviews();
@@ -2876,7 +2894,7 @@
   // Close modal
   function closeModal() {
     if (!dom.modal) return;
-    
+
     state.isModalOpen = false;
     dom.modal.classList.remove('is-open');
     document.body.classList.remove('modal-open');
@@ -2960,7 +2978,7 @@
   // Fetch only summary data (for bar display)
   async function fetchSummaryOnly() {
     if (!state.productId) return;
-    
+
     try {
       const response = await fetch(
         `/api/products/${encodeURIComponent(state.productId)}/reviews?page=1&limit=1`,
@@ -3010,32 +3028,32 @@
     if (!path || typeof path !== 'string') return '';
     const trimmed = path.trim();
     if (!trimmed) return '';
-    
+
     // Reject anything that looks like raw data or JSON
     if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.includes('ObjectId') || trimmed.includes('password')) {
       return '';
     }
-    
+
     // Handle data: URLs (Base64) - use directly, NEVER prepend anything
     if (trimmed.startsWith('data:image')) {
       return trimmed;
     }
-    
+
     // Handle blob: URLs and full URLs directly
     if (/^(https?:|blob:)/i.test(trimmed)) {
       return trimmed;
     }
-    
+
     // Handle absolute paths starting with /uploads/
     if (trimmed.startsWith('/uploads/')) {
       return `http://localhost:5000${trimmed}`;
     }
-    
+
     // Handle relative paths - prepend full server URL
     if (trimmed.startsWith('/')) {
       return `http://localhost:5000${trimmed}`;
     }
-    
+
     // Handle filenames - prepend full uploads URL
     return `http://localhost:5000/uploads/${trimmed}`;
   }
@@ -3061,7 +3079,7 @@
 
     const hasDiscount = product.discountActive && product.discountPrice && product.discountPrice < product.price;
     const displayPrice = hasDiscount ? product.discountPrice : product.price;
-    
+
     // Safely extract shop name - handle ObjectId vs populated object
     let shopName = '';
     if (product.shopName) {
@@ -3182,7 +3200,7 @@
       if (detail.item_id) {
         state.productId = detail.item_id;
         state.category = detail.category || '';
-        
+
         // Delay fetch to not block main content
         setTimeout(() => {
           fetchSimilarProducts(state.productId);
@@ -3195,7 +3213,7 @@
     const productId = urlParams.get('id');
     if (productId) {
       state.productId = productId;
-      
+
       // Wait for main content to load first
       setTimeout(() => {
         if (!state.loaded) {

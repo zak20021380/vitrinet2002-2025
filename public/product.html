@@ -427,33 +427,73 @@
       width: 100%;
     }
 
+    /* ========== Premium Product Tags System ========== */
     .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.4rem;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
-      padding: 0.35rem 0.9rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.78rem;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      letter-spacing: 0.02em;
+      box-shadow:
+        0 4px 12px rgba(16, 185, 129, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.03em;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .badge::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg,
+          transparent 35%,
+          rgba(255, 255, 255, 0.25) 45%,
+          rgba(255, 255, 255, 0.4) 50%,
+          rgba(255, 255, 255, 0.25) 55%,
+          transparent 65%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .badge:hover::before {
+      transform: translateX(100%);
+    }
+
+    .badge:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 20px rgba(16, 185, 129, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
     .badge--inline {
       margin-inline-start: 0.75rem;
       vertical-align: middle;
       font-size: 0.7rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 6px;
+      padding: 0.35rem 0.85rem;
+      border-radius: 50px;
       position: relative;
       top: -2px;
     }
 
     .badge--negotiable {
       background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      box-shadow:
+        0 4px 12px rgba(14, 165, 233, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .badge--negotiable:hover {
+      box-shadow:
+        0 8px 20px rgba(14, 165, 233, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
     .badge--negotiable::before {
@@ -470,17 +510,42 @@
       letter-spacing: -0.015em;
     }
 
+    /* Premium Subtitle/Attribute Tag */
     .subtitle {
-      display: inline-block;
-      margin: 0.5rem 0 0 0;
-      padding: 0.35rem 0.85rem;
-      background: rgba(100, 116, 139, 0.08);
-      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.6rem 0 0 0;
+      padding: 0.55rem 1.1rem;
+      background: linear-gradient(135deg,
+          rgba(99, 102, 241, 0.08) 0%,
+          rgba(139, 92, 246, 0.12) 100%);
+      color: #6366f1;
       font-size: 0.82rem;
-      font-weight: 500;
-      line-height: 1.5;
-      border-radius: 999px;
+      font-weight: 600;
+      line-height: 1.4;
+      border-radius: 50px;
       max-width: fit-content;
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .subtitle::before {
+      content: '✦';
+      font-size: 0.7em;
+      opacity: 0.7;
+    }
+
+    .subtitle:hover {
+      background: linear-gradient(135deg,
+          rgba(99, 102, 241, 0.12) 0%,
+          rgba(139, 92, 246, 0.18) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.25);
     }
 
     .subtitle:empty {
@@ -596,7 +661,7 @@
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       color: #ffffff;
       border: none;
-      box-shadow: 
+      box-shadow:
         0 8px 32px rgba(99, 102, 241, 0.35),
         0 4px 16px rgba(139, 92, 246, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -619,12 +684,10 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 70%
-      );
+      background: linear-gradient(45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.15) 50%,
+          transparent 70%);
       transform: translateX(-100%) rotate(45deg);
       transition: transform 0.6s ease;
     }
@@ -641,7 +704,7 @@
 
     .product-action--secondary:not(:disabled):hover {
       transform: translateY(-4px) scale(1.02);
-      box-shadow: 
+      box-shadow:
         0 16px 48px rgba(99, 102, 241, 0.45),
         0 8px 24px rgba(139, 92, 246, 0.35),
         inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -656,7 +719,7 @@
     }
 
     .product-action--secondary:not(:disabled):focus-visible {
-      box-shadow: 
+      box-shadow:
         0 0 0 4px rgba(99, 102, 241, 0.3),
         0 16px 48px rgba(99, 102, 241, 0.45);
     }
@@ -1063,7 +1126,7 @@
     /* ============================================
        Product Reviews - Compact Summary Bar + Modal
        ============================================ */
-    
+
     /* Summary Bar (Compact Trigger) */
     .reviews-bar {
       display: flex;
@@ -1521,7 +1584,9 @@
     }
 
     @keyframes reviewsModalSpin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .reviews-modal__loading-text {
@@ -1652,7 +1717,7 @@
       overflow: hidden auto;
       border-radius: 24px;
       background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      box-shadow: 
+      box-shadow:
         0 32px 64px rgba(99, 102, 241, 0.2),
         0 16px 32px rgba(15, 23, 42, 0.15),
         0 0 0 1px rgba(99, 102, 241, 0.1);
@@ -1669,6 +1734,7 @@
         opacity: 0;
         transform: translateY(24px) scale(0.96);
       }
+
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1750,7 +1816,7 @@
       line-height: 1.8;
     }
 
-    .overlay-body > p:first-child {
+    .overlay-body>p:first-child {
       font-size: 0.9rem;
       color: #64748b;
       margin: 0;
@@ -1768,7 +1834,7 @@
       font-weight: 700;
       font-size: 1.05rem;
       line-height: 1.9;
-      box-shadow: 
+      box-shadow:
         inset 0 2px 4px rgba(255, 255, 255, 0.8),
         0 4px 16px rgba(99, 102, 241, 0.1);
     }
@@ -1828,7 +1894,7 @@
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
-      box-shadow: 
+      box-shadow:
         0 8px 24px rgba(99, 102, 241, 0.35),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
       overflow: hidden;
@@ -1855,7 +1921,7 @@
     .overlay-button:focus-visible {
       transform: translateY(-3px) scale(1.02);
       background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      box-shadow: 
+      box-shadow:
         0 16px 40px rgba(99, 102, 241, 0.45),
         inset 0 1px 0 rgba(255, 255, 255, 0.25);
       outline: none;
@@ -1885,7 +1951,7 @@
 
     /* استایل‌های ویژه مدال آدرس */
     .address-modal-dialog {
-      background: 
+      background:
         radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
         linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
@@ -2918,6 +2984,7 @@
     }
 
     @media (max-width: 480px) {
+
       .header-inner,
       #headerInner {
         display: flex !important;
@@ -3000,13 +3067,13 @@
         width: 34px;
         height: 34px;
       }
-      
+
       /* Compact reward button on very small screens */
       .reward-header-btn {
         padding: 0.4rem 0.5rem !important;
         font-size: 9px !important;
       }
-      
+
       /* Compact location badge */
       #headerCity {
         font-size: 9px !important;
@@ -3014,6 +3081,7 @@
     }
 
     @media (max-width: 360px) {
+
       .header-inner,
       #headerInner {
         display: flex !important;
@@ -4212,17 +4280,17 @@
     .product-out-of-stock .hero-image {
       position: relative;
     }
-    
+
     .out-of-stock-gallery {
       position: relative;
     }
-    
+
     .out-of-stock-gallery .slider-viewport,
     .out-of-stock-gallery .slide img {
       filter: grayscale(60%) brightness(0.9);
       transition: filter 0.3s ease;
     }
-    
+
     .out-of-stock-ribbon {
       position: absolute;
       top: 20px;
@@ -4237,38 +4305,38 @@
       box-shadow: 0 4px 16px rgba(185, 28, 28, 0.35);
       text-align: center;
     }
-    
+
     .out-of-stock-ribbon span {
       display: block;
     }
-    
+
     .out-of-stock-price {
       position: relative;
     }
-    
+
     .out-of-stock-price .meta-value {
       text-decoration: line-through;
       opacity: 0.6;
       color: #94a3b8 !important;
     }
-    
+
     .out-of-stock-cta {
       background: linear-gradient(135deg, #94a3b8, #64748b) !important;
       cursor: not-allowed !important;
       opacity: 0.85;
       box-shadow: none !important;
     }
-    
+
     .out-of-stock-cta:hover {
       transform: none !important;
       box-shadow: none !important;
     }
-    
+
     .out-of-stock-cta i {
       margin-left: 8px;
       font-size: 18px;
     }
-    
+
     /* Mobile adjustments for out-of-stock ribbon */
     @media (max-width: 640px) {
       .out-of-stock-ribbon {
@@ -4278,6 +4346,7 @@
         font-size: 12px;
       }
     }
+
     /* ========== End Out of Stock Styles ========== */
 
     /* ========== Similar Products - Tailwind Utilities ========== */
@@ -4286,9 +4355,11 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
+
     /* Line clamp for title */
     .line-clamp-2 {
       display: -webkit-box;
@@ -4297,7 +4368,165 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
     /* ========== End Similar Products ========== */
+
+    /* ========== Premium Product Badges Row ========== */
+    .product-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+    }
+
+    /* Premium Dynamic Tags Container */
+    #dynamicTags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    /* Premium Product Tag Styles */
+    .product-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Animated shine effect */
+    .product-tag::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg,
+          transparent 35%,
+          rgba(255, 255, 255, 0.2) 45%,
+          rgba(255, 255, 255, 0.35) 50%,
+          rgba(255, 255, 255, 0.2) 55%,
+          transparent 65%);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+      pointer-events: none;
+    }
+
+    .product-tag:hover::after {
+      transform: translateX(100%);
+    }
+
+    .product-tag:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    /* ✦ New/Fresh Tag - Emerald Green */
+    .product-tag--new {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow:
+        0 4px 14px rgba(16, 185, 129, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .product-tag--new::before {
+      content: '✨';
+      font-size: 0.85em;
+    }
+
+    .product-tag--new:hover {
+      box-shadow:
+        0 8px 24px rgba(16, 185, 129, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    /* ✦ Gold/Special Tag - Amber Gold */
+    .product-tag--gold {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      box-shadow:
+        0 4px 14px rgba(245, 158, 11, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .product-tag--gold::before {
+      content: '👑';
+      font-size: 0.85em;
+    }
+
+    .product-tag--gold:hover {
+      box-shadow:
+        0 8px 24px rgba(245, 158, 11, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    /* ✦ Category/Attribute Tag - Soft Blue */
+    .product-tag--attr {
+      background: linear-gradient(135deg,
+          rgba(59, 130, 246, 0.12) 0%,
+          rgba(37, 99, 235, 0.18) 100%);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.1);
+    }
+
+    .product-tag--attr::before {
+      content: '◆';
+      font-size: 0.65em;
+      opacity: 0.7;
+    }
+
+    .product-tag--attr:hover {
+      background: linear-gradient(135deg,
+          rgba(59, 130, 246, 0.18) 0%,
+          rgba(37, 99, 235, 0.25) 100%);
+      border-color: rgba(59, 130, 246, 0.35);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.18);
+    }
+
+    /* ✦ Generic/Default Tag - Slate */
+    .product-tag--default {
+      background: linear-gradient(135deg,
+          rgba(71, 85, 105, 0.08) 0%,
+          rgba(51, 65, 85, 0.12) 100%);
+      color: #475569;
+      border: 1px solid rgba(71, 85, 105, 0.15);
+      box-shadow: 0 2px 8px rgba(71, 85, 105, 0.08);
+    }
+
+    .product-tag--default:hover {
+      background: linear-gradient(135deg,
+          rgba(71, 85, 105, 0.12) 0%,
+          rgba(51, 65, 85, 0.18) 100%);
+      border-color: rgba(71, 85, 105, 0.25);
+      box-shadow: 0 4px 14px rgba(71, 85, 105, 0.15);
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      .product-badges-row {
+        gap: 0.5rem;
+      }
+
+      .product-tag {
+        padding: 0.45rem 0.85rem;
+        font-size: 0.72rem;
+      }
+
+      .subtitle {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.78rem;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -4325,13 +4554,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
 
   <header id="mainHeader" class="w-full bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-    <div id="headerInner" class="w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-3 py-2 gap-2">
+    <div id="headerInner"
+      class="w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-3 py-2 gap-2">
 
       <!-- Right side: Logo + Menu toggle -->
       <div class="flex items-center gap-2 flex-nowrap flex-shrink-0">
         <a href="index.html" class="vitreenet-brand flex items-center gap-1 flex-nowrap" aria-label="ویترینت">
           <span class="vitreenet-brand__mark flex-shrink-0" aria-hidden="true">
-            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation" style="width:24px;height:24px;max-height:24px;">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation"
+              style="width:24px;height:24px;max-height:24px;">
               <defs>
                 <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stop-color="#0ea5e9" />
@@ -4346,38 +4577,49 @@
               <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
               <circle cx="24" cy="24" r="18" fill="url(#vtMarkInner)" />
               <path d="M15.5 16h4.7l4.3 10.6L28.8 16h4.7L26 33h-4.2L15.5 16Z" fill="#0f172a" fill-opacity="0.9" />
-              <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M18.2 17.6 24 31.1l5.8-13.5" fill="none" stroke="#22c55e" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
         </a>
 
-        <button type="button" class="nav-toggle inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 text-gray-700 flex-shrink-0"
+        <button type="button"
+          class="nav-toggle inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 text-gray-700 flex-shrink-0"
           aria-label="منو" aria-controls="primaryNav" aria-expanded="false">
           <i class="ri-menu-3-line nav-toggle-icon text-lg" aria-hidden="true"></i>
         </button>
       </div>
 
       <!-- Desktop nav (hidden on mobile) -->
-      <nav id="primaryNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-center" data-expanded="false">
-        <a href="index.html" class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">خانه</a>
-        <a href="categories.html" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">دسته‌بندی</a>
-        <a href="login.html" id="loginNavLink" class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50"><span class="login-link-label">ورود</span></a>
+      <nav id="primaryNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-center"
+        data-expanded="false">
+        <a href="index.html"
+          class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">خانه</a>
+        <a href="categories.html"
+          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">دسته‌بندی</a>
+        <a href="login.html" id="loginNavLink"
+          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50"><span
+            class="login-link-label">ورود</span></a>
       </nav>
 
       <!-- Left side: Location badge + Reward button -->
       <div class="flex items-center gap-2 flex-nowrap flex-shrink-0">
         <div class="flex items-center gap-1 px-2 py-1 rounded-full shadow-md flex-shrink-0"
           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-          <svg width="14" height="14" fill="none" viewBox="0 0 22 22" class="drop-shadow flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+          <svg width="14" height="14" fill="none" viewBox="0 0 22 22" class="drop-shadow flex-shrink-0"
+            xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
                 <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
               </linearGradient>
             </defs>
-            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="url(#city-icon)" />
+            <path
+              d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+              fill="url(#city-icon)" />
           </svg>
-          <span id="headerCity" class="font-bold text-white text-[10px] sm:text-xs drop-shadow-sm whitespace-nowrap" style="letter-spacing:.3px;">سنندج</span>
+          <span id="headerCity" class="font-bold text-white text-[10px] sm:text-xs drop-shadow-sm whitespace-nowrap"
+            style="letter-spacing:.3px;">سنندج</span>
         </div>
 
         <button type="button" id="rewardClaimBtn"
@@ -4385,10 +4627,13 @@
           aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
           <span class="reward-header-icon flex-shrink-0" aria-hidden="true">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
               <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M12 4c.8-1.3 2.5-2 3.8-1 .7.5 1.2 1.3 1.2 2.1 0 1.5-1.2 2.9-3 2.9h-2" stroke="currentColor"
+                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M12 4c-.8-1.3-2.5-2-3.8-1-.7.5-1.2 1.3-1.2 2.1 0 1.5 1.2 2.9 3 2.9h2" stroke="currentColor"
+                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
           <span>جایزه</span>
@@ -4440,8 +4685,11 @@
         </div>
 
         <div class="product-summary">
-          <h1 id="productTitle">در حال بارگذاری محصول...<span class="badge badge--inline" id="productBadge" hidden></span></h1>
-          <div id="dynamicTags" class="flex flex-wrap gap-2 mt-2 mb-3 justify-start" dir="rtl"></div>
+          <div class="product-badges-row">
+            <span class="badge" id="productBadge" hidden></span>
+            <div id="dynamicTags" class="flex flex-wrap gap-2" dir="rtl"></div>
+          </div>
+          <h1 id="productTitle">در حال بارگذاری محصول...</h1>
           <p class="subtitle" id="productSubtitle"></p>
           <div class="status-message" id="statusMessage" role="status" aria-live="polite">در حال بارگذاری اطلاعات
             محصول...</div>
@@ -4539,60 +4787,61 @@
             <!-- Unified 2x2 Grid - All buttons equal size -->
             <div class="grid grid-cols-2 gap-3">
               <!-- پیام به فروشنده - Deep Indigo (Trust/Communication) -->
-              <button type="button" id="messageSellerButton" disabled
-                class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="messageSellerButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-indigo-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-indigo-700 hover:shadow-[0_4px_16px_rgba(79,70,229,0.2)]
                        active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  <path d="M8 9h8M8 13h5"/>
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  <path d="M8 9h8M8 13h5" />
                 </svg>
                 <span>پیام به فروشنده</span>
               </button>
 
               <!-- آدرس مغازه - Emerald (Location/Safety) -->
-              <button type="button" id="sellerAddressButton" disabled
-                class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="sellerAddressButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-emerald-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-emerald-700 hover:shadow-[0_4px_16px_rgba(16,185,129,0.2)]
                        active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z"/>
-                  <circle cx="12" cy="10" r="2.6"/>
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" />
+                  <circle cx="12" cy="10" r="2.6" />
                 </svg>
                 <span>آدرس مغازه</span>
               </button>
 
               <!-- درخواست تخفیف - Amber (Opportunity/Energy) -->
-              <button type="button" id="discountButton" disabled
-                class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="discountButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-amber-500
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-amber-600 hover:shadow-[0_4px_16px_rgba(245,158,11,0.2)]
                        active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 15L15 9M9 9h.01M15 15h.01"/>
-                  <circle cx="12" cy="12" r="9"/>
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 15L15 9M9 9h.01M15 15h.01" />
+                  <circle cx="12" cy="12" r="9" />
                 </svg>
                 <span>درخواست تخفیف</span>
               </button>
 
               <!-- صفحه مغازه - Slate Ghost (Neutral/Discovery) -->
-              <a id="sellerLink" href="#" target="_blank" rel="noopener"
-                class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold
+              <a id="sellerLink" href="#" target="_blank" rel="noopener" class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold
                        text-slate-700 bg-slate-50 border border-slate-200
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-slate-100 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(100,116,139,0.12)]
                        active:scale-95 transition-all duration-200
                        aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:pointer-events-none"
                 aria-disabled="true" tabindex="-1">
-                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Z"/>
-                  <path d="M6.75 4.75h10.5L18 9.25H6l.75-4.5Z"/>
-                  <path d="M9.5 12.5v4.5m5-4.5v4.5"/>
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.5 9.25h15l-.84 9.05a2 2 0 0 1-1.99 1.7H7.33a2 2 0 0 1-1.99-1.7L4.5 9.25Z" />
+                  <path d="M6.75 4.75h10.5L18 9.25H6l.75-4.5Z" />
+                  <path d="M9.5 12.5v4.5m5-4.5v4.5" />
                 </svg>
                 <span>صفحه مغازه</span>
               </a>
@@ -4605,26 +4854,32 @@
             <div class="flex items-center justify-between px-4 mb-3">
               <h2 class="flex items-center gap-2 text-base font-extrabold text-gray-800 m-0">
                 <svg class="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2" />
                 </svg>
                 محصولات مشابه
               </h2>
-              <a href="#" class="flex items-center gap-1.5 text-sm font-semibold text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors" id="similarProductsViewAll">
+              <a href="#"
+                class="flex items-center gap-1.5 text-sm font-semibold text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+                id="similarProductsViewAll">
                 مشاهده همه
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 </svg>
               </a>
             </div>
             <!-- Scrolling Container - Isolated horizontal scroll -->
-            <div class="flex overflow-x-auto snap-x snap-mandatory px-4 gap-4 pb-2" id="similarProductsScroll" style="-webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;">
+            <div class="flex overflow-x-auto snap-x snap-mandatory px-4 gap-4 pb-2" id="similarProductsScroll"
+              style="-webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;">
               <!-- Cards will be injected here by JS -->
             </div>
             <style>
-              #similarProductsScroll::-webkit-scrollbar { display: none; }
+              #similarProductsScroll::-webkit-scrollbar {
+                display: none;
+              }
             </style>
           </section>
 
@@ -4639,19 +4894,24 @@
             <div class="reviews-bar__stars" id="reviewsBarStars">
               <!-- Modern Rounded Star Icons -->
               <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+                <path
+                  d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
               <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+                <path
+                  d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
               <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+                <path
+                  d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
               <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+                <path
+                  d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
               <svg class="star-icon star-icon--empty" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+                <path
+                  d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
             </div>
             <span class="reviews-bar__count" id="reviewsBarCount">(از ۰ نظر)</span>
@@ -4659,8 +4919,9 @@
         </div>
         <div class="reviews-bar__action">
           <span>مشاهده همه نظرات</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6" />
           </svg>
         </div>
       </div>
@@ -4672,21 +4933,23 @@
   <div class="reviews-modal" id="reviewsModal" role="dialog" aria-modal="true" aria-labelledby="reviewsModalTitle">
     <div class="reviews-modal__panel">
       <div class="reviews-modal__handle"></div>
-      
+
       <!-- Modal Header -->
       <header class="reviews-modal__header">
         <h2 class="reviews-modal__title" id="reviewsModalTitle">
           <span class="reviews-modal__title-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b">
-              <path d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z"/>
+              <path
+                d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
             </svg>
           </span>
           دیدگاه‌های کاربران
         </h2>
         <button type="button" class="reviews-modal__close" id="reviewsModalClose" aria-label="بستن">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </header>
@@ -4696,9 +4959,10 @@
         <!-- Logged Out State (Default) -->
         <div class="reviews-modal__login-box" id="reviewsModalLoggedOut">
           <div class="reviews-modal__login-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
           <p class="reviews-modal__login-text">
@@ -4708,9 +4972,10 @@
 
         <!-- Logged In State (Hidden) -->
         <button type="button" class="reviews-modal__write-btn" id="reviewsModalWriteBtn" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           <span>ثبت نظر جدید</span>
         </button>
@@ -4730,8 +4995,9 @@
         <!-- Empty State -->
         <div class="reviews-modal__empty" id="reviewsModalEmpty" hidden>
           <div class="reviews-modal__empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
           <p class="reviews-modal__empty-text">هنوز نظری برای این محصول ثبت نشده است</p>
@@ -4741,8 +5007,9 @@
         <!-- Load More -->
         <div class="reviews-modal__load-more" id="reviewsModalLoadMore" hidden>
           <button type="button" class="reviews-modal__load-more-btn" id="reviewsModalLoadMoreBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
             </svg>
             <span>نمایش بیشتر</span>
           </button>
@@ -4752,7 +5019,8 @@
   </div>
 
   <div class="overlay address-modal-overlay" id="addressModal" hidden>
-    <div class="overlay-dialog address-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="addressModalTitle">
+    <div class="overlay-dialog address-modal-dialog" role="dialog" aria-modal="true"
+      aria-labelledby="addressModalTitle">
       <button class="overlay-close" type="button" id="addressModalClose" aria-label="بستن پنجره"
         data-focus-default="true">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
