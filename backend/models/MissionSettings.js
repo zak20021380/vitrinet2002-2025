@@ -84,7 +84,7 @@ missionSettingSchema.statics.getDefaults = function() {
     { missionId: 'user-app-install', category: 'users', title: 'نصب اپلیکیشن', description: 'پاداش برای نصب اپلیکیشن موبایل', amount: 10000, isActive: true, icon: 'ri-smartphone-line', cardStyle: 'install-app', order: 2 },
     { missionId: 'user-profile-complete', category: 'users', title: 'تکمیل پروفایل', description: 'پاداش برای تکمیل اطلاعات پروفایل', amount: 3000, isActive: true, icon: 'ri-profile-line', cardStyle: 'profile', order: 3 },
     { missionId: 'user-referral', category: 'users', title: 'دعوت دوستان', description: 'پاداش برای هر دوست دعوت‌شده که ثبت‌نام کند', amount: 15000, isActive: true, icon: 'ri-user-shared-line', cardStyle: 'invite', order: 4 },
-    { missionId: 'user-first-purchase', category: 'users', title: 'اولین خرید', description: 'پاداش برای انجام اولین خرید', amount: 20000, isActive: true, icon: 'ri-shopping-bag-line', cardStyle: 'booking', order: 5 },
+    { missionId: 'user-book-appointment', category: 'users', title: 'رزرو نوبت', description: 'پاداش برای اولین رزرو نوبت آنلاین', amount: 5000, isActive: true, icon: 'ri-calendar-check-line', cardStyle: 'booking', order: 5 },
     { missionId: 'user-review', category: 'users', title: 'ثبت نظر', description: 'پاداش برای ثبت نظر روی محصولات', amount: 2000, isActive: true, icon: 'ri-chat-quote-line', cardStyle: 'explore', order: 6 },
     
     // Product seller missions

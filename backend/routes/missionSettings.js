@@ -20,4 +20,7 @@ router.post('/missions/track-visit', auth('user'), userMissionController.trackSt
 router.get('/missions/browse-status', auth('user'), userMissionController.getBrowseMissionStatus);
 router.post('/missions/browse-reset', auth('user'), userMissionController.resetBrowseMission);
 
+// Book appointment mission routes
+router.get('/missions/book-appointment-status', auth('user'), userMissionController.getBookAppointmentStatus);
+
 module.exports = router;

@@ -46,6 +46,7 @@ const userWalletTransactionSchema = new mongoose.Schema({
       'streak_weekly',     // پاداش هفتگی استریک
       'streak_checkpoint', // پاداش چک‌پوینت
       'booking_complete',  // تکمیل رزرو
+      'book_appointment',  // رزرو نوبت آنلاین
       'review_given',      // ثبت نظر
       'browse_stores',     // گردش در بازار
       'referral',          // دعوت دوستان

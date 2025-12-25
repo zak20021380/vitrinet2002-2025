@@ -281,6 +281,8 @@
       margin-top: 1rem;
       box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
       border: 1px solid rgba(15, 23, 42, 0.05);
+      /* Critical: Allow missions section to overflow for horizontal scroll */
+      overflow: visible;
     }
 
     .quick-access-title {
@@ -304,6 +306,8 @@
         padding: 0.875rem 1rem;
         margin-top: 0.875rem;
         border-radius: 1rem;
+        /* Ensure overflow is visible on mobile */
+        overflow: visible;
       }
 
       .quick-access-title {
@@ -313,12 +317,24 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       ماموریت‌های پولساز - Mission Cards
+       ماموریت‌های پولساز - Mission Cards (Mobile-First Horizontal Scroll)
        ═══════════════════════════════════════════════════════════════ */
     .missions-section {
+      /* Standalone container - not nested inside other containers */
       margin-top: 1rem;
       padding: 0;
+      width: 100%;
+      position: relative;
+      /* Allow horizontal scroll to work properly */
       overflow: visible;
+      /* Visual styling */
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(15, 23, 42, 0.05);
+      padding-top: 1rem;
+      padding-bottom: 0.5rem;
     }
 
     .missions-title {
@@ -338,38 +354,69 @@
       stroke: #f59e0b;
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       Horizontal Scroll Container - Professional Mobile Implementation
+       ═══════════════════════════════════════════════════════════════ */
     .missions-scroll {
+      /* Flexbox for horizontal layout */
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
       gap: 0.75rem;
+      
+      /* Critical overflow settings for mobile */
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 0.5rem 1rem 0.75rem;
+      -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
+      overscroll-behavior-x: contain; /* Prevent page scroll when at edges */
+      
+      /* Scroll snap for better UX */
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      /* Ensure minimum height to prevent layout shift */
-      min-height: 100px;
+      scroll-behavior: smooth;
+      
+      /* Padding for edge cards visibility */
+      padding: 0.5rem 1rem 1rem 1rem;
+      
+      /* Ensure container takes full width */
+      width: 100%;
+      box-sizing: border-box;
+      
+      /* Minimum height to prevent layout shift */
+      min-height: 110px;
+      
+      /* Hide scrollbar but keep functionality */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
     }
 
     .missions-scroll::-webkit-scrollbar {
-      display: none;
+      display: none; /* Chrome/Safari/Opera */
+      width: 0;
+      height: 0;
     }
 
     /* ═══════════════════════════════════════════════════════════════
        Skeleton Loading Cards
        ═══════════════════════════════════════════════════════════════ */
     .mission-card-skeleton {
-      flex: 0 0 auto;
-      scroll-snap-align: start;
+      /* Fixed dimensions - never shrink */
+      flex: 0 0 160px;
       min-width: 160px;
       width: 160px;
-      height: 90px;
+      height: 95px;
+      
+      /* Scroll snap alignment */
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+      
+      /* Visual styling */
       padding: 1rem;
       border-radius: 1rem;
       background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
       position: relative;
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .mission-card-skeleton::before {
@@ -408,17 +455,40 @@
       border-radius: 4px;
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       Mission Card - Base Styles
+       ═══════════════════════════════════════════════════════════════ */
     .mission-card {
-      flex: 0 0 auto;
-      scroll-snap-align: start;
+      /* Fixed dimensions - CRITICAL: flex-shrink: 0 prevents shrinking */
+      flex: 0 0 160px;
       min-width: 160px;
       width: 160px;
+      height: auto;
+      min-height: 95px;
+      
+      /* Scroll snap */
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+      
+      /* Visual styling */
       padding: 1rem;
       border-radius: 1rem;
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+      
+      /* Smooth interactions */
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Prevent text selection during scroll */
+      -webkit-user-select: none;
+      user-select: none;
+      
+      /* Touch optimization */
+      touch-action: pan-x;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .mission-card::before {
@@ -430,6 +500,7 @@
       bottom: 0;
       opacity: 0.1;
       background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
     }
 
     .mission-card:hover {
@@ -642,77 +713,171 @@
       stroke: #fff;
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       Mobile-First Responsive Styles
+       ═══════════════════════════════════════════════════════════════ */
+    
+    /* Mobile (default - up to 640px) */
     @media (max-width: 640px) {
       .missions-section {
         margin-top: 0.875rem;
-        margin-left: -1rem;
-        margin-right: -1rem;
-        padding-left: 0;
-        padding-right: 0;
+        /* Full width - extend beyond parent padding */
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        padding-top: 0.875rem;
+        padding-bottom: 0.375rem;
+        border-radius: 1rem;
       }
 
       .missions-title {
         font-size: 0.8rem;
         padding: 0 1rem;
+        margin-bottom: 0.625rem;
       }
 
       .missions-scroll {
-        padding: 0.5rem 1rem 0.75rem;
+        /* Full width scroll area */
+        width: 100%;
+        padding: 0.5rem 1rem 0.875rem 1rem;
         gap: 0.625rem;
-        overflow-x: auto;
+        
+        /* Ensure horizontal scroll works */
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
         scroll-snap-type: x mandatory;
-        min-height: 100px;
+        
+        /* Minimum height */
+        min-height: 105px;
       }
 
       .mission-card,
       .mission-card-skeleton {
-        min-width: 160px;
-        width: 160px;
-        padding: 1rem;
+        /* Fixed size cards - NEVER shrink */
+        flex: 0 0 155px !important;
+        min-width: 155px !important;
+        width: 155px !important;
+        max-width: 155px !important;
+        height: auto;
+        min-height: 90px;
+        padding: 0.875rem;
         scroll-snap-align: start;
+        /* Prevent any shrinking */
+        flex-shrink: 0 !important;
       }
 
       .mission-reward {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        gap: 0.3rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .mission-reward-icon svg {
+        width: 20px;
+        height: 20px;
       }
 
       .mission-title {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        line-height: 1.3;
+      }
+
+      .mission-arrow {
+        width: 22px;
+        height: 22px;
+        bottom: 0.625rem;
+        left: 0.625rem;
+      }
+
+      .mission-arrow svg {
+        width: 12px;
+        height: 12px;
       }
     }
 
-    /* تبلت و دسکتاپ - نمایش همه کارت‌ها در یک ردیف */
-    @media (min-width: 641px) {
+    /* Small phones (up to 375px) */
+    @media (max-width: 375px) {
       .missions-scroll {
-        padding: 0.5rem 0 0.75rem;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem 0.875rem 0.75rem;
+      }
+
+      .mission-card,
+      .mission-card-skeleton {
+        flex: 0 0 140px !important;
+        min-width: 140px !important;
+        width: 140px !important;
+        max-width: 140px !important;
+        padding: 0.75rem;
+      }
+
+      .mission-reward {
+        font-size: 0.875rem;
+      }
+
+      .mission-title {
+        font-size: 0.65rem;
+      }
+    }
+
+    /* Tablet (641px - 1023px) */
+    @media (min-width: 641px) and (max-width: 1023px) {
+      .missions-section {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+      }
+
+      .missions-scroll {
+        padding: 0.5rem 1rem 0.875rem 1rem;
         gap: 0.75rem;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
       }
 
       .mission-card,
       .mission-card-skeleton {
-        min-width: 160px;
-        width: 160px;
-        flex: 0 0 auto;
+        flex: 0 0 165px;
+        min-width: 165px;
+        width: 165px;
         padding: 1rem;
-        scroll-snap-align: start;
       }
     }
 
-    /* دسکتاپ بزرگ - کارت‌های بزرگتر */
+    /* Desktop (1024px and up) */
     @media (min-width: 1024px) {
+      .missions-section {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+      }
+
       .missions-scroll {
+        padding: 0.5rem 1rem 0.875rem 1rem;
         gap: 1rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
       }
 
       .mission-card,
       .mission-card-skeleton {
+        flex: 0 0 180px;
         min-width: 180px;
         width: 180px;
         padding: 1.125rem;
+      }
+
+      .mission-reward {
+        font-size: 1.1rem;
+      }
+
+      .mission-title {
+        font-size: 0.8rem;
       }
     }
 
@@ -724,11 +889,11 @@
       inset: 0;
       z-index: 2000;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: 0;
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(12px);
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
       opacity: 0;
       visibility: hidden;
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -740,24 +905,28 @@
     }
 
     .mission-modal {
-      width: 100%;
-      max-width: 420px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 85vh;
       background: #ffffff;
-      border-radius: 1.5rem 1.5rem 0 0;
+      border-radius: 1.5rem;
       overflow: hidden;
-      box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.2);
-      transform: translateY(100%);
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.95) translateY(20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .mission-modal-overlay.active .mission-modal {
-      transform: translateY(0);
+      transform: scale(1) translateY(0);
+      opacity: 1;
     }
 
     /* هدر مودال */
     .mission-modal-header {
       position: relative;
-      padding: 2rem 1.5rem 2.5rem;
+      padding: 1.5rem 1.25rem 2rem;
       text-align: center;
       overflow: hidden;
     }
@@ -827,16 +996,16 @@
     }
 
     .mission-modal-icon {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 1rem;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 0.75rem;
       background: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
-      border-radius: 18px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
+      font-size: 1.75rem;
       border: 1px solid rgba(255, 255, 255, 0.25);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
       position: relative;
@@ -844,8 +1013,8 @@
     }
 
     .mission-modal-icon svg {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       stroke: #ffffff;
       fill: none;
       stroke-width: 2;
@@ -857,19 +1026,19 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.875rem;
       background: rgba(255, 255, 255, 0.2);
       border-radius: 999px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
       border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
     .mission-modal-title {
       margin: 0;
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-weight: 800;
       color: #fff;
       letter-spacing: -0.02em;
@@ -879,8 +1048,7 @@
 
     /* بدنه مودال */
     .mission-modal-body {
-      padding: 1.75rem;
-      margin-top: -1rem;
+      padding: 1.25rem;
       position: relative;
     }
 
@@ -1066,14 +1234,14 @@
       display: flex;
       flex-direction: column;
       gap: 0;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
 
     /* هر مرحله */
     .install-step-premium {
       display: flex;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 0.75rem;
       position: relative;
     }
 
@@ -1086,11 +1254,11 @@
     }
 
     .install-step-icon {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       background: linear-gradient(145deg, #fdf2f8 0%, #fce7f3 100%);
       border: 2px solid rgba(236, 72, 153, 0.2);
-      border-radius: 14px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1098,8 +1266,8 @@
     }
 
     .install-step-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       stroke: #db2777;
     }
 
@@ -1115,9 +1283,9 @@
     /* خط اتصال بین مراحل */
     .install-step-line {
       width: 2px;
-      height: 24px;
+      height: 16px;
       background: linear-gradient(180deg, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0.1) 100%);
-      margin: 6px 0;
+      margin: 4px 0;
     }
 
     .install-step-premium.last .install-step-line {
@@ -1127,7 +1295,7 @@
     /* محتوای هر مرحله */
     .install-step-content-premium {
       flex: 1;
-      padding: 0.5rem 0 1.5rem;
+      padding: 0.25rem 0 1rem;
     }
 
     .install-step-premium.last .install-step-content-premium {
@@ -1138,14 +1306,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       background: linear-gradient(145deg, #ec4899 0%, #db2777 100%);
       color: #fff;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 800;
-      border-radius: 6px;
-      margin-bottom: 0.5rem;
+      border-radius: 5px;
+      margin-bottom: 0.35rem;
       box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
     }
 
@@ -1155,43 +1323,43 @@
     }
 
     .install-step-title-premium {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #1e293b;
-      margin: 0 0 0.35rem;
-      line-height: 1.4;
+      margin: 0 0 0.25rem;
+      line-height: 1.3;
     }
 
     .install-step-desc-premium {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #64748b;
       margin: 0;
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
     /* بنر نکته مهم */
     .install-tip-banner {
       display: flex;
       align-items: flex-start;
-      gap: 0.75rem;
+      gap: 0.625rem;
       background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
       border: 1.5px solid rgba(251, 191, 36, 0.4);
-      border-radius: 12px;
-      padding: 1rem 1.125rem;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
       margin-bottom: 0;
     }
 
     .install-tip-icon {
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       line-height: 1;
       flex-shrink: 0;
     }
 
     .install-tip-text {
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       color: #92400e;
       margin: 0;
-      line-height: 1.6;
+      line-height: 1.5;
     }
 
     .install-tip-text strong {
@@ -1500,27 +1668,27 @@
     .mission-modal-actions {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.625rem;
     }
 
     .mission-modal-btn {
       width: 100%;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
+      padding: 0.875rem 1.25rem;
+      border-radius: 10px;
       border: none;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.875rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .mission-modal-btn svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
 
     .mission-modal-btn.primary {
@@ -1592,14 +1760,14 @@
     /* دکمه بستن پایین */
     .mission-modal-dismiss {
       width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
-      border-radius: 10px;
+      margin-top: 0.375rem;
+      padding: 0.625rem;
+      border-radius: 8px;
       border: none;
       background: transparent;
       color: #94a3b8;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -1642,36 +1810,72 @@
       stroke: #22c55e;
     }
 
+    /* Tablet and Desktop */
     @media (min-width: 640px) {
-      .mission-modal-overlay {
-        align-items: center;
-        padding: 1rem;
-      }
-
       .mission-modal {
-        border-radius: 1.5rem;
+        max-width: 420px;
         max-height: 90vh;
       }
-    }
 
-    @media (max-width: 360px) {
       .mission-modal-header {
-        padding: 1.5rem 1.25rem 2rem;
+        padding: 2rem 1.5rem 2.5rem;
       }
 
       .mission-modal-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 1.75rem;
+        width: 72px;
+        height: 72px;
+      }
+
+      .mission-modal-icon svg {
+        width: 36px;
+        height: 36px;
+      }
+
+      .mission-modal-title {
+        font-size: 1.35rem;
       }
 
       .mission-modal-body {
-        padding: 1.5rem 1.25rem;
+        padding: 1.5rem;
+      }
+    }
+
+    /* Small phones */
+    @media (max-width: 360px) {
+      .mission-modal-overlay {
+        padding: 0.75rem;
+      }
+
+      .mission-modal {
+        max-height: 90vh;
+      }
+
+      .mission-modal-header {
+        padding: 1.25rem 1rem 1.5rem;
+      }
+
+      .mission-modal-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.5rem;
+      }
+
+      .mission-modal-icon svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      .mission-modal-title {
+        font-size: 1.1rem;
+      }
+
+      .mission-modal-body {
+        padding: 1rem;
       }
 
       .mission-modal-btn {
-        padding: 0.875rem 1.25rem;
-        font-size: 0.9rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
       }
     }
 
@@ -9532,24 +9736,24 @@
         <span class="quick-action-label">پروفایل</span>
       </button>
     </div>
+  </div>
 
-    <!-- ماموریت‌های پولساز -->
-    <div class="missions-section">
-      <div class="missions-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="6"></circle>
-          <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
-        </svg>
-        ماموریت‌های پولساز
-      </div>
-      <div class="missions-scroll">
-        <!-- Skeleton cards - will be replaced by JavaScript -->
-        <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
-        <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
-        <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
-        <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
-        <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
-      </div>
+  <!-- ماموریت‌های پولساز - Separate container for proper horizontal scroll -->
+  <div class="missions-section">
+    <div class="missions-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="6"></circle>
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+      </svg>
+      ماموریت‌های پولساز
+    </div>
+    <div class="missions-scroll" id="missionsScroll">
+      <!-- Skeleton cards - will be replaced by JavaScript -->
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
     </div>
   </div>
 
@@ -9807,6 +10011,18 @@
           text: 'مشاهده خدمات',
           icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
           action: 'browse'
+        },
+        secondaryBtn: null
+      },
+      bookAppointment: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+        reward: '۵,۰۰۰ تومان',
+        title: 'رزرو نوبت آنلاین',
+        desc: 'اولین نوبت خود را آنلاین رزرو کنید و ۵,۰۰۰ تومان اعتبار هدیه بگیرید! 📅',
+        primaryBtn: {
+          text: 'رزرو نوبت',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"/></svg>`,
+          action: 'bookAppointment'
         },
         secondaryBtn: null
       },
@@ -10146,6 +10362,10 @@
         case 'installApp':
           triggerPWAInstall();
           break;
+        case 'bookAppointment':
+          closeMissionModal();
+          window.location.href = '/service-directory.html';
+          break;
       }
     }
 
@@ -10298,6 +10518,10 @@
 
     function showBookingMission() {
       showMissionModal('booking');
+    }
+
+    function showBookAppointmentMission() {
+      showMissionModal('bookAppointment');
     }
 
     function showExploreMission() {
@@ -12018,12 +12242,12 @@
         onclick: 'showProfileSection()',
         order: 3
       },
-      'user-first-purchase': {
+      'user-book-appointment': {
         htmlId: 'missionBooking',
         style: 'booking',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
-        title: 'اولین خرید',
-        onclick: 'showBookingMission()',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+        title: 'رزرو نوبت',
+        onclick: 'showBookAppointmentMission()',
         order: 4
       },
       'user-review': {
@@ -12195,6 +12419,60 @@
         }
       }
     }
+
+    // Initialize horizontal scroll touch handling for missions
+    function initMissionsScrollTouch() {
+      const scrollContainer = document.querySelector('.missions-scroll');
+      if (!scrollContainer) return;
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      // Prevent vertical scroll interference on touch devices
+      scrollContainer.addEventListener('touchstart', (e) => {
+        // Allow horizontal scroll
+      }, { passive: true });
+
+      scrollContainer.addEventListener('touchmove', (e) => {
+        // Let the browser handle touch scrolling naturally
+      }, { passive: true });
+
+      // Mouse drag support for desktop testing
+      scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+      });
+
+      scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+      });
+
+      scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+      });
+
+      scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        scrollContainer.scrollLeft = scrollLeft - walk;
+      });
+
+      // Set initial cursor
+      scrollContainer.style.cursor = 'grab';
+    }
+
+    // Call after DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize touch scroll after a short delay to ensure DOM is ready
+      setTimeout(initMissionsScrollTouch, 500);
+    });
 
     // Store mission amounts for use in modals
     window.missionAmounts = {};

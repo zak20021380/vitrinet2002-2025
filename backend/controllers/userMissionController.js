@@ -249,3 +249,172 @@ exports.resetBrowseMission = async (req, res) => {
     });
   }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// ماموریت رزرو نوبت - Book Appointment Mission
+// ═══════════════════════════════════════════════════════════════
+
+const BOOK_APPOINTMENT_MISSION_ID = 'user-book-appointment';
+
+/**
+ * تکمیل ماموریت رزرو نوبت
+ * این تابع باید بعد از تکمیل موفق یک رزرو فراخوانی شود
+ * @param {string} userId - شناسه کاربر
+ * @param {string} bookingId - شناسه رزرو
+ * @returns {Object} نتیجه عملیات
+ */
+exports.completeBookAppointmentMission = async (userId, bookingId) => {
+  try {
+    // بررسی فعال بودن ماموریت
+    const missionSetting = await MissionSetting.findOne({
+      missionId: BOOK_APPOINTMENT_MISSION_ID,
+      isActive: true
+    });
+
+    if (!missionSetting) {
+      return {
+        success: false,
+        message: 'ماموریت رزرو نوبت فعال نیست'
+      };
+    }
+
+    // بررسی آیا قبلاً این ماموریت تکمیل شده
+    let progress = await UserMissionProgress.findOne({
+      user: userId,
+      missionId: BOOK_APPOINTMENT_MISSION_ID
+    });
+
+    if (progress && (progress.status === 'completed' || progress.status === 'claimed')) {
+      return {
+        success: true,
+        alreadyCompleted: true,
+        message: 'ماموریت رزرو نوبت قبلاً تکمیل شده است'
+      };
+    }
+
+    // ایجاد یا آپدیت پیشرفت
+    if (!progress) {
+      progress = new UserMissionProgress({
+        user: userId,
+        missionId: BOOK_APPOINTMENT_MISSION_ID,
+        status: 'completed',
+        currentCount: 1,
+        requiredCount: 1,
+        completedAt: new Date()
+      });
+    } else {
+      progress.status = 'completed';
+      progress.currentCount = 1;
+      progress.completedAt = new Date();
+    }
+
+    // پرداخت پاداش
+    const rewardAmount = missionSetting.amount || 5000;
+    progress.rewardAmount = rewardAmount;
+
+    // دریافت کیف پول
+    const wallet = await UserWallet.getOrCreate(userId);
+    const balanceBefore = wallet.balance;
+
+    // افزایش موجودی
+    wallet.balance += rewardAmount;
+    wallet.totalEarned += rewardAmount;
+    wallet.lastTransactionAt = new Date();
+    await wallet.save();
+
+    // ثبت تراکنش
+    await UserWalletTransaction.create({
+      user: userId,
+      type: 'bonus',
+      amount: rewardAmount,
+      balanceBefore: balanceBefore,
+      balanceAfter: wallet.balance,
+      category: 'book_appointment',
+      title: 'جایزه رزرو نوبت',
+      description: 'پاداش اولین رزرو نوبت آنلاین',
+      relatedId: bookingId ? mongoose.Types.ObjectId(bookingId) : null,
+      relatedType: 'booking',
+      metadata: {
+        missionId: BOOK_APPOINTMENT_MISSION_ID,
+        bookingId: bookingId
+      }
+    });
+
+    progress.rewardPaid = true;
+    progress.status = 'claimed';
+    await progress.save();
+
+    return {
+      success: true,
+      message: 'تبریک! ماموریت رزرو نوبت تکمیل شد!',
+      rewardAmount: rewardAmount,
+      newBalance: wallet.balance
+    };
+
+  } catch (error) {
+    console.error('completeBookAppointmentMission error:', error);
+    return {
+      success: false,
+      message: 'خطا در تکمیل ماموریت رزرو نوبت'
+    };
+  }
+};
+
+/**
+ * دریافت وضعیت ماموریت رزرو نوبت
+ * GET /api/missions/book-appointment-status
+ */
+exports.getBookAppointmentStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // بررسی فعال بودن ماموریت
+    const missionSetting = await MissionSetting.findOne({
+      missionId: BOOK_APPOINTMENT_MISSION_ID,
+      isActive: true
+    });
+
+    if (!missionSetting) {
+      return res.json({
+        success: true,
+        isActive: false,
+        message: 'ماموریت رزرو نوبت فعال نیست'
+      });
+    }
+
+    // دریافت پیشرفت
+    const progress = await UserMissionProgress.findOne({
+      user: userId,
+      missionId: BOOK_APPOINTMENT_MISSION_ID
+    });
+
+    if (!progress) {
+      return res.json({
+        success: true,
+        isActive: true,
+        status: 'not_started',
+        progress: 0,
+        required: 1,
+        rewardAmount: missionSetting.amount
+      });
+    }
+
+    res.json({
+      success: true,
+      isActive: true,
+      status: progress.status,
+      progress: progress.currentCount,
+      required: 1,
+      rewardAmount: missionSetting.amount,
+      completedAt: progress.completedAt,
+      rewardPaid: progress.rewardPaid
+    });
+
+  } catch (error) {
+    console.error('getBookAppointmentStatus error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت وضعیت ماموریت'
+    });
+  }
+};
