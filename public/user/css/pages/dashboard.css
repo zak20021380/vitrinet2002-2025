@@ -1,0 +1,1895 @@
+/* ═══════════════════════════════════════════════════════════════
+       استایل‌های استریک روزانه - طراحی حرفه‌ای و مینیمال
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* کانتینر کیف پول (بدون استریک) */
+    .streak-wallet-container {
+      display: block;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       پاپ‌آپ استریک روزانه - طراحی حرفه‌ای و مدرن
+       ═══════════════════════════════════════════════════════════════ */
+    .streak-popup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .streak-popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .streak-popup {
+      width: 100%;
+      max-width: 400px;
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2), 0 10px 25px rgba(15, 23, 42, 0.1);
+      transform: translateY(30px) scale(0.95);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .streak-popup-overlay.active .streak-popup {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* هدر پاپ‌آپ */
+    .streak-popup-header {
+      position: relative;
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      padding: 2rem 1.75rem 2.75rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .streak-popup-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(249, 115, 22, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .streak-popup-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 1;
+    }
+
+    .streak-popup-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .streak-popup-close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .streak-popup-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1.25rem;
+      background: linear-gradient(145deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.15) 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      box-shadow: 0 8px 32px rgba(249, 115, 22, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .streak-popup-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: #f97316;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .streak-popup-title {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .streak-popup-subtitle {
+      margin: 0.5rem 0 0;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* بدنه پاپ‌آپ */
+    .streak-popup-body {
+      padding: 0 1.75rem 1.75rem;
+      margin-top: -1.5rem;
+      position: relative;
+    }
+
+    /* کارت شمارنده استریک */
+    .streak-counter-card {
+      background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      text-align: center;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .streak-counter-number {
+      font-size: 4.5rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      color: #1e293b;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .streak-counter-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+    }
+
+    .streak-counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid rgba(249, 115, 22, 0.15);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #9a3412;
+    }
+
+    .streak-counter-badge svg {
+      width: 16px;
+      height: 16px;
+      stroke: #f97316;
+      fill: none;
+    }
+
+    /* آمار استریک */
+    .streak-popup-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem;
+      margin-top: 1.25rem;
+    }
+
+    .streak-popup-stat {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.125rem;
+      text-align: center;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      transition: all 0.25s ease;
+    }
+
+    .streak-popup-stat:hover {
+      border-color: rgba(15, 23, 42, 0.1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+
+    .streak-popup-stat-icon {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 0.5rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .streak-popup-stat-icon.trophy {
+      background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .streak-popup-stat-icon.trophy svg {
+      width: 18px;
+      height: 18px;
+      stroke: #d97706;
+      fill: none;
+    }
+
+    .streak-popup-stat-icon.calendar {
+      background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+    }
+
+    .streak-popup-stat-icon.calendar svg {
+      width: 18px;
+      height: 18px;
+      stroke: #2563eb;
+      fill: none;
+    }
+
+    .streak-popup-stat-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      color: #1e293b;
+    }
+
+    .streak-popup-stat-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: 0.2rem;
+    }
+
+    /* تاریخچه هفتگی */
+    .streak-popup-week {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      padding: 1.125rem;
+      background: #ffffff;
+      border-radius: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .streak-popup-day {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .streak-popup-day-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .streak-popup-day-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+    }
+
+    .streak-popup-day-dot svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.5;
+    }
+
+    .streak-popup-day-dot.hit {
+      background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .streak-popup-day-dot.hit svg {
+      stroke: #16a34a;
+    }
+
+    .streak-popup-day-dot.missed {
+      background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .streak-popup-day-dot.missed svg {
+      stroke: #dc2626;
+    }
+
+    .streak-popup-day-dot.pending {
+      background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+    }
+
+    .streak-popup-day-dot.pending svg {
+      stroke: #94a3b8;
+    }
+
+    .streak-popup-day-dot.today {
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(249, 115, 22, 0.4);
+    }
+
+    /* دکمه چک‌این */
+    .streak-popup-checkin-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .streak-popup-checkin-btn.active {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25);
+    }
+
+    .streak-popup-checkin-btn.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+    }
+
+    .streak-popup-checkin-btn.active:active {
+      transform: translateY(0);
+    }
+
+    .streak-popup-checkin-btn.done {
+      background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+      color: #15803d;
+      cursor: default;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .streak-popup-checkin-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* دکمه بستن پایین */
+    .streak-popup-dismiss {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 0.875rem;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .streak-popup-dismiss:hover {
+      color: #64748b;
+      background: rgba(15, 23, 42, 0.03);
+    }
+
+    /* انیمیشن موفقیت */
+    @keyframes streakSuccessPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .streak-popup.success-animation {
+      animation: streakSuccessPulse 0.5s ease;
+    }
+
+    /* کانفتی انیمیشن */
+    @keyframes confettiFall {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .streak-confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2001;
+      overflow: hidden;
+    }
+
+    .streak-confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ریسپانسیو پاپ‌آپ استریک
+       ═══════════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .streak-popup-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+
+      .streak-popup {
+        max-width: 100%;
+        border-radius: 1.25rem 1.25rem 0 0;
+        max-height: 92vh;
+        overflow-y: auto;
+      }
+
+      .streak-popup-overlay.active .streak-popup {
+        transform: translateY(0) scale(1);
+      }
+
+      .streak-popup-header {
+        padding: 1.5rem 1.25rem 2.25rem;
+      }
+
+      .streak-popup-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+      }
+
+      .streak-popup-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .streak-popup-title {
+        font-size: 1.2rem;
+      }
+
+      .streak-popup-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .streak-popup-body {
+        padding: 0 1.25rem 1.5rem;
+      }
+
+      .streak-counter-card {
+        padding: 1.25rem;
+      }
+
+      .streak-counter-number {
+        font-size: 3.5rem;
+      }
+
+      .streak-counter-label {
+        font-size: 0.9rem;
+      }
+
+      .streak-popup-stats {
+        gap: 0.5rem;
+      }
+
+      .streak-popup-stat {
+        padding: 0.875rem 0.75rem;
+      }
+
+      .streak-popup-stat-value {
+        font-size: 1rem;
+      }
+
+      .streak-popup-week {
+        padding: 0.875rem;
+        gap: 0.35rem;
+      }
+
+      .streak-popup-day-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+      }
+
+      .streak-popup-day-dot svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .streak-popup-day-name {
+        font-size: 0.65rem;
+      }
+
+      .streak-popup-checkin-btn {
+        padding: 0.9rem 1.25rem;
+        font-size: 0.9rem;
+      }
+
+      .streak-popup-stat-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .streak-popup-stat-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .streak-popup-header {
+        padding: 1.25rem 1rem 2rem;
+      }
+
+      .streak-popup-icon {
+        width: 52px;
+        height: 52px;
+      }
+
+      .streak-popup-icon svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .streak-popup-body {
+        padding: 0 1rem 1.25rem;
+      }
+
+      .streak-counter-number {
+        font-size: 3rem;
+      }
+
+      .streak-popup-day-dot {
+        width: 28px;
+        height: 28px;
+      }
+
+      .streak-popup-day-dot svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       بنر کوچک استریک - طراحی حرفه‌ای و مینیمال
+       ═══════════════════════════════════════════════════════════════ */
+    .streak-mini-banner {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .streak-mini-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+      border-radius: 0 1.25rem 1.25rem 0;
+    }
+
+    .streak-mini-banner:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(249, 115, 22, 0.12);
+      border-color: rgba(249, 115, 22, 0.15);
+    }
+
+    .streak-mini-banner.visible {
+      display: flex;
+    }
+
+    .streak-mini-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border: 1px solid rgba(249, 115, 22, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .streak-mini-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: #ea580c;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .streak-mini-banner:hover .streak-mini-icon {
+      background: linear-gradient(145deg, #ffedd5 0%, #fed7aa 100%);
+      transform: scale(1.05);
+    }
+
+    .streak-mini-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .streak-mini-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .streak-mini-subtitle {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
+      font-weight: 500;
+    }
+
+    .streak-mini-subtitle.checked {
+      color: #059669;
+    }
+
+    .streak-mini-count {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      padding: 0.625rem 1rem;
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      border-radius: 12px;
+      border: 1px solid rgba(249, 115, 22, 0.1);
+    }
+
+    .streak-mini-number {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ea580c;
+      line-height: 1;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .streak-mini-label {
+      font-size: 0.75rem;
+      color: #9a3412;
+      font-weight: 600;
+    }
+
+    .streak-mini-arrow {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .streak-mini-banner:hover .streak-mini-arrow {
+      color: #f97316;
+      transform: translateX(-4px);
+    }
+
+    @media (max-width: 480px) {
+      .streak-mini-banner {
+        padding: 0.875rem 1rem;
+        gap: 0.875rem;
+        border-radius: 1rem;
+      }
+
+      .streak-mini-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+      }
+
+      .streak-mini-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .streak-mini-title {
+        font-size: 0.875rem;
+      }
+
+      .streak-mini-subtitle {
+        font-size: 0.75rem;
+      }
+
+      .streak-mini-count {
+        padding: 0.5rem 0.75rem;
+      }
+
+      .streak-mini-number {
+        font-size: 1.25rem;
+      }
+
+      .streak-mini-label {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       کارت کیف پول - طراحی حرفه‌ای و مدرن V2
+       ═══════════════════════════════════════════════════════════════ */
+    .wallet-card {
+      position: relative;
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 1.75rem;
+      padding: 0;
+      border: 1px solid rgba(16, 185, 129, 0.08);
+      box-shadow: 
+        0 4px 6px -1px rgba(16, 185, 129, 0.06),
+        0 10px 15px -3px rgba(16, 185, 129, 0.08),
+        0 20px 25px -5px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .wallet-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #0ea5e9, #8b5cf6, #10b981);
+      background-size: 300% 100%;
+      animation: wallet-shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes wallet-shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .wallet-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 
+        0 8px 10px -3px rgba(16, 185, 129, 0.1),
+        0 20px 25px -5px rgba(16, 185, 129, 0.12),
+        0 35px 45px -10px rgba(15, 23, 42, 0.08);
+      border-color: rgba(16, 185, 129, 0.15);
+    }
+
+    /* هدر کیف پول با گرادیانت */
+    .wallet-header {
+      position: relative;
+      background: linear-gradient(135deg, #059669 0%, #10b981 40%, #34d399 100%);
+      padding: 1.75rem 1.5rem;
+      overflow: hidden;
+    }
+
+    .wallet-header::before {
+      content: '';
+      position: absolute;
+      top: -80%;
+      right: -40%;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+      pointer-events: none;
+      animation: float-bubble 8s ease-in-out infinite;
+    }
+
+    .wallet-header::after {
+      content: '';
+      position: absolute;
+      bottom: -60%;
+      left: -30%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+      animation: float-bubble 6s ease-in-out infinite reverse;
+    }
+
+    @keyframes float-bubble {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(15px, -15px) scale(1.05); }
+    }
+
+    /* پترن دکوراتیو هدر */
+    .wallet-header-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .wallet-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wallet-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .wallet-card:hover .wallet-icon {
+      transform: rotate(-5deg) scale(1.05);
+      box-shadow: 
+        0 12px 28px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .wallet-title-text h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+      letter-spacing: -0.01em;
+    }
+
+    .wallet-title-text p {
+      margin: 0.3rem 0 0;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    /* بخش موجودی اصلی */
+    .wallet-main {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+      position: relative;
+    }
+
+    .wallet-main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.15), transparent);
+    }
+
+    .wallet-balance-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.1);
+    }
+
+    .wallet-balance-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      border-radius: 50%;
+      animation: pulse-glow 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+      }
+      50% { 
+        opacity: 0.7; 
+        transform: scale(1.3);
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.7);
+      }
+    }
+
+    .wallet-balance {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .wallet-balance::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      border-radius: 999px;
+      opacity: 0.6;
+    }
+
+    .wallet-balance-unit {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #64748b, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* آمار کیف پول */
+    .wallet-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin: 0;
+      position: relative;
+    }
+
+    .wallet-stats::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.08), transparent);
+    }
+
+    .wallet-stats::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.06), transparent);
+    }
+
+    .wallet-stat {
+      padding: 1.5rem 1.25rem;
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+      text-align: center;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .wallet-stat::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(16, 185, 129, 0.02) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .wallet-stat:hover::before {
+      opacity: 1;
+    }
+
+    .wallet-stat:hover {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .wallet-stat-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 1rem;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .wallet-stat:hover .wallet-stat-icon {
+      transform: scale(1.08) translateY(-2px);
+    }
+
+    .wallet-stat.earned .wallet-stat-icon {
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(34, 197, 94, 0.08));
+      box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .wallet-stat.spent .wallet-stat-icon {
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.08));
+      box-shadow: 
+        0 4px 12px rgba(239, 68, 68, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .wallet-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+      transition: all 0.3s ease;
+    }
+
+    .wallet-stat:hover .wallet-stat-value {
+      transform: scale(1.02);
+    }
+
+    .wallet-stat.earned .wallet-stat-value {
+      background: linear-gradient(135deg, #059669, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .wallet-stat.spent .wallet-stat-value {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .wallet-stat-label {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    /* تراکنش‌های اخیر */
+    .wallet-transactions {
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 0 1rem;
+      margin: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+    }
+
+    .wallet-transactions::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .wallet-transactions::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .wallet-transactions::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 4px;
+    }
+
+    .wallet-transactions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem 0.75rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .wallet-transactions-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .wallet-transactions-title svg {
+      width: 16px;
+      height: 16px;
+      stroke: #64748b;
+    }
+
+    .wallet-transaction {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1rem;
+      background: #fafbfc;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #f1f5f9;
+      transition: all 0.2s ease;
+    }
+
+    .wallet-transaction:hover {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      transform: translateX(-2px);
+    }
+
+    .wallet-transaction:last-child {
+      margin-bottom: 0;
+    }
+
+    .wallet-transaction-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wallet-transaction-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .wallet-transaction.positive .wallet-transaction-icon {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+    }
+
+    .wallet-transaction.negative .wallet-transaction-icon {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    }
+
+    .wallet-transaction-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wallet-transaction-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.15rem;
+    }
+
+    .wallet-transaction-date {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .wallet-transaction-amount {
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .wallet-transaction-amount.positive {
+      color: #059669;
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .wallet-transaction-amount.negative {
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* پیام خالی بودن تراکنش‌ها */
+    .wallet-empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #94a3b8;
+    }
+
+    .wallet-empty-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 0.75rem;
+      background: #f8fafc;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .wallet-empty-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    /* دکمه مشاهده همه تراکنش‌ها */
+    .wallet-view-all {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-top: 1px solid #f1f5f9;
+      background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+      color: #10b981;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .wallet-view-all:hover {
+      background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%);
+      color: #059669;
+    }
+
+    .wallet-view-all svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .wallet-view-all:hover svg {
+      transform: translateX(-4px);
+    }
+
+    /* ===== Recent Transactions Section (Standalone) ===== */
+    .recent-transactions-section {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(10px);
+      border-radius: 1.25rem;
+      margin-top: 1rem;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+
+    .recent-transactions-section .wallet-transactions-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-top: none;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, transparent 100%);
+    }
+
+    .recent-transactions-section .wallet-transactions {
+      max-height: 200px;
+      padding: 0 1rem 0.5rem;
+    }
+
+    .recent-transactions-section .wallet-view-all {
+      border-radius: 0 0 1.25rem 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .recent-transactions-section {
+        margin-top: 0.875rem;
+        border-radius: 1rem;
+      }
+
+      .recent-transactions-section .wallet-transactions-header {
+        padding: 0.875rem 1rem 0.625rem;
+      }
+
+      .recent-transactions-section .wallet-transactions {
+        max-height: 180px;
+        padding: 0 0.875rem 0.5rem;
+      }
+
+      .recent-transactions-section .wallet-view-all {
+        padding: 0.875rem;
+        font-size: 0.8rem;
+        border-radius: 0 0 1rem 1rem;
+      }
+    }
+
+    /* مودال تراکنش‌ها */
+    .transactions-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .transactions-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .transactions-modal {
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      background: linear-gradient(145deg, #ffffff, #f8fafc);
+      border-radius: 1.5rem;
+      box-shadow: 0 24px 65px rgba(15, 23, 42, 0.2);
+      overflow: hidden;
+      transform: translateY(24px) scale(0.98);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .transactions-modal-overlay.active .transactions-modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .transactions-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+      border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+    }
+
+    .transactions-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .transactions-modal-title h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #065f46;
+    }
+
+    .transactions-modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.1);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ef4444;
+      transition: all 0.2s ease;
+    }
+
+    .transactions-modal-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: rotate(90deg);
+    }
+
+    .transactions-modal-body {
+      padding: 1rem 1.5rem;
+      max-height: calc(85vh - 80px);
+      overflow-y: auto;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      margin-bottom: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .transaction-item:hover {
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .transaction-icon-wrapper {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .transaction-icon-wrapper.earn {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
+    }
+
+    .transaction-icon-wrapper.spend {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    }
+
+    .transaction-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .transaction-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 0.25rem;
+    }
+
+    .transaction-date {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .transaction-amount {
+      font-size: 1rem;
+      font-weight: 800;
+      text-align: left;
+      direction: ltr;
+    }
+
+    .transaction-amount.positive {
+      color: #059669;
+    }
+
+    .transaction-amount.negative {
+      color: #dc2626;
+    }
+
+    /* رسپانسیو کیف پول */
+    @media (max-width: 640px) {
+      .wallet-card {
+        border-radius: 1.5rem;
+      }
+
+      .wallet-card::before {
+        height: 2px;
+      }
+
+      .wallet-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 1.5rem;
+      }
+
+      .wallet-header {
+        padding: 1.35rem 1.25rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 1.1rem;
+      }
+
+      .wallet-title-text p {
+        font-size: 0.78rem;
+      }
+
+      .wallet-main {
+        padding: 1.5rem 1rem;
+      }
+
+      .wallet-balance {
+        font-size: 2.5rem;
+      }
+
+      .wallet-balance::after {
+        width: 50px;
+        height: 2px;
+        bottom: -6px;
+      }
+
+      .wallet-balance-label {
+        font-size: 0.78rem;
+        padding: 0.35rem 0.85rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .wallet-balance-label::before {
+        width: 7px;
+        height: 7px;
+      }
+
+      .wallet-balance-unit {
+        font-size: 0.95rem;
+      }
+
+      .wallet-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .wallet-stat {
+        padding: 1.25rem 1rem;
+      }
+
+      .wallet-stat-icon {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
+      }
+
+      .wallet-stat-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .wallet-stat-value {
+        font-size: 1.25rem;
+      }
+
+      .wallet-stat-label {
+        font-size: 0.72rem;
+      }
+
+      .wallet-transactions-header {
+        padding: 0.875rem 1rem 0.5rem;
+      }
+
+      .wallet-transactions {
+        padding: 0 0.75rem;
+        max-height: 160px;
+      }
+
+      .wallet-transaction {
+        padding: 0.75rem;
+        border-radius: 10px;
+      }
+
+      .wallet-transaction-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .wallet-transaction-title {
+        font-size: 0.8rem;
+      }
+
+      .wallet-transaction-amount {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+      }
+
+      .wallet-view-all {
+        padding: 0.875rem;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .wallet-card {
+        border-radius: 1.25rem;
+      }
+
+      .wallet-header {
+        padding: 1.1rem 1rem;
+      }
+
+      .wallet-title {
+        gap: 0.75rem;
+      }
+
+      .wallet-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 1.35rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 1rem;
+      }
+
+      .wallet-main {
+        padding: 1.25rem 0.875rem;
+      }
+
+      .wallet-balance {
+        font-size: 2.15rem;
+      }
+
+      .wallet-stat {
+        padding: 1rem 0.75rem;
+      }
+
+      .wallet-stat-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0.6rem;
+      }
+
+      .wallet-stat-value {
+        font-size: 1.1rem;
+      }
+
+      .old-wallet-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+      }
+
+      .wallet-title-text h3 {
+        font-size: 0.95rem;
+      }
+
+      .wallet-title-text p {
+        font-size: 0.7rem;
+      }
+
+      .wallet-main {
+        padding: 1rem 0.75rem;
+      }
+
+      .wallet-balance {
+        font-size: 1.85rem;
+        gap: 0.35rem;
+      }
+
+      .wallet-balance-unit {
+        font-size: 0.85rem;
+      }
+
+      .wallet-stat {
+        padding: 0.875rem 0.5rem;
+      }
+
+      .wallet-stat-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .wallet-stat-value {
+        font-size: 1rem;
+      }
+    }
+
+    /* انیمیشن چک‌این */
+    @keyframes checkInPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .streak-checkin-btn.active:active {
+      animation: checkInPulse 0.3s ease;
+    }
+
+    /* انیمیشن موفقیت */
+    @keyframes successBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .streak-success-animation {
+      animation: successBounce 0.5s ease;
+    }
+
+    /* Toast notification */
+    .streak-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .streak-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .streak-toast.error {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    /* === استایل‌های صفحه لاگین کیف پول === */
+    .wallet-login-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .wallet-login-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+
+    .wallet-login-icon svg {
+      width: 36px;
+      height: 36px;
+      color: #10b981;
+    }
+
+    .wallet-login-content {
+      margin-bottom: 1.25rem;
+    }
+
+    .wallet-login-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.5rem;
+    }
+
+    .wallet-login-desc {
+      font-size: 0.88rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+      max-width: 280px;
+    }
+
+    .wallet-login-features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .wallet-login-feature {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .wallet-login-feature svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .wallet-login-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .wallet-login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .wallet-login-btn:active {
+      transform: translateY(0);
+    }
+
+    .wallet-login-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .wallet-login-prompt {
+        padding: 1.5rem 1rem;
+      }
+
+      .wallet-login-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+      }
+
+      .wallet-login-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .wallet-login-title {
+        font-size: 1.05rem;
+      }
+
+      .wallet-login-desc {
+        font-size: 0.82rem;
+      }
+
+      .wallet-login-features {
+        gap: 0.5rem;
+      }
+
+      .wallet-login-feature {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.7rem;
+      }
+
+      .wallet-login-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
