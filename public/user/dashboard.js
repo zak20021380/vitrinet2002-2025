@@ -1,0 +1,5762 @@
+// ==========================================
+    // Header Scroll Effect & Navigation
+    // ==========================================
+
+    // Add scroll effect to header
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('.main-header');
+      if (header) {
+        if (window.scrollY > 20) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+    });
+
+    // Handle navigation link clicks
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const section = link.getAttribute('data-section');
+          if (section) {
+            e.preventDefault();
+
+            // Remove active class from all links
+            navLinks.forEach(l => l.classList.remove('active'));
+
+            // Add active class to clicked link
+            link.classList.add('active');
+
+            // Trigger section change (if applicable)
+            const menuBtn = document.querySelector(`button[data-section="${section}"]`);
+            if (menuBtn) {
+              menuBtn.click();
+            }
+          }
+        });
+      });
+
+      initEditProfileModal();
+    });
+
+    // Bookings state
+    let currentBookingFilter = 'all';
+    let allBookings = [];
+
+    let pollHandle = null;
+    let bookingsData = [];
+    let bookingsLoaded = false;
+    const profileState = {
+      isAuthenticated: false,
+      user: {
+        firstName: '',
+        lastName: '',
+        city: '',
+        phone: ''
+      }
+    };
+
+    const formatInitials = (firstName = '', lastName = '') => {
+      const parts = [firstName.trim().charAt(0), lastName.trim().charAt(0)].filter(Boolean);
+      return parts.length ? parts.join(' ') : 'VN';
+    };
+
+    function populateEditProfileForm() {
+      const firstInput = document.getElementById('editFirstName');
+      const lastInput = document.getElementById('editLastName');
+      const initialsPreview = document.getElementById('editInitialsPreview');
+
+      if (firstInput) firstInput.value = profileState.user.firstName || '';
+      if (lastInput) lastInput.value = profileState.user.lastName || '';
+      if (initialsPreview) {
+        initialsPreview.textContent = formatInitials(profileState.user.firstName, profileState.user.lastName);
+      }
+    }
+
+    function applyProfileStateToUI() {
+      const { firstName, lastName, city, phone } = profileState.user;
+      const isAuthenticated = Boolean(profileState.isAuthenticated);
+      const fullNameRaw = `${firstName} ${lastName}`.trim();
+      const fullName = isAuthenticated ? (fullNameRaw || 'کاربر ویترینت') : '';
+      const initials = isAuthenticated ? formatInitials(firstName, lastName) : '';
+      const maskedPhone = isAuthenticated && phone
+        ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3)
+        : '';
+
+      const hello = document.querySelector('.profile-hello');
+      if (hello) hello.textContent = isAuthenticated && firstName ? `سلام ${firstName}` : '';
+
+      const nameEls = document.querySelectorAll('.profile-fullname');
+      nameEls.forEach(el => (el.textContent = fullName));
+
+      const badgeCity = document.querySelector('.profile-badge.profile-badge--outline');
+      if (badgeCity) badgeCity.textContent = isAuthenticated && city ? city : '';
+
+      const avatar = document.querySelector('.profile-avatar-large');
+      if (avatar) avatar.textContent = initials;
+
+      const sidebarNames = document.querySelectorAll('.sidebar-user-name');
+      sidebarNames.forEach(el => (el.textContent = fullName));
+
+      document.querySelectorAll('.sidebar-user-mobile')
+        .forEach(el => (el.textContent = maskedPhone));
+
+      const initialsPreview = document.getElementById('editInitialsPreview');
+      if (initialsPreview) initialsPreview.textContent = initials;
+
+      // Update Hero Header
+      const heroUserName = document.getElementById('heroUserName');
+      if (heroUserName) {
+        heroUserName.textContent = isAuthenticated && firstName 
+          ? `سلام ${firstName} جان` 
+          : 'سلام کاربر عزیز';
+      }
+
+      // Hero Avatar - Keep the modern placeholder SVG icon (don't replace with initials)
+      // The avatar now uses a professional user silhouette placeholder
+
+      // Update Hero Info Row - Location
+      const heroLocationText = document.getElementById('heroLocationText');
+      if (heroLocationText && city) {
+        heroLocationText.textContent = city;
+      }
+
+      // Update Hero Info Row - Status (VIP or regular)
+      const heroStatusText = document.getElementById('heroStatusText');
+      const heroStatusPill = document.getElementById('heroStatusPill');
+      if (heroStatusText && isAuthenticated) {
+        // You can customize this based on user's actual VIP status
+        heroStatusText.textContent = 'کاربر ویژه';
+      }
+    }
+
+    function openEditProfileModal() {
+      const modal = document.getElementById('editProfileModal');
+      const status = document.getElementById('editProfileStatus');
+      if (!modal) return;
+      populateEditProfileForm();
+      if (status) {
+        status.textContent = '';
+        status.classList.add('hidden');
+        status.classList.remove('text-red-500');
+        status.classList.add('text-emerald-600');
+      }
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    }
+
+    function closeEditProfileModal() {
+      const modal = document.getElementById('editProfileModal');
+      const status = document.getElementById('editProfileStatus');
+      if (!modal) return;
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('overflow-hidden');
+      if (status) status.classList.add('hidden');
+      setTimeout(() => modal.classList.add('hidden'), 220);
+    }
+
+    async function handleEditProfileSubmit(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const firstInput = document.getElementById('editFirstName');
+      const lastInput = document.getElementById('editLastName');
+      const status = document.getElementById('editProfileStatus');
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      const firstName = firstInput?.value.trim() || '';
+      const lastName = lastInput?.value.trim() || '';
+      const phone = (profileState.user.phone || '').toString().trim();
+      const name = `${firstName} ${lastName}`.trim();
+
+      if (!firstName || !lastName) {
+        if (status) {
+          status.textContent = 'نام و نام خانوادگی را کامل وارد کنید.';
+          status.classList.remove('hidden', 'text-emerald-600');
+          status.classList.add('text-red-500');
+        }
+        return;
+      }
+
+      if (!phone) {
+        if (status) {
+          status.textContent = 'شماره تماس کاربر یافت نشد. لطفاً دوباره تلاش کنید.';
+          status.classList.remove('hidden', 'text-emerald-600');
+          status.classList.add('text-red-500');
+        }
+        return;
+      }
+
+      if (status) {
+        status.textContent = 'در حال ذخیره...';
+        status.classList.remove('hidden', 'text-red-500');
+        status.classList.add('text-emerald-600');
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'در حال ذخیره...';
+      }
+
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            phone
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error('ثبت اطلاعات انجام نشد. دوباره تلاش کنید.');
+        }
+
+        profileState.user.firstName = firstName;
+        profileState.user.lastName = lastName;
+        applyProfileStateToUI();
+
+        if (status) {
+          status.textContent = 'اطلاعات با موفقیت ذخیره شد.';
+          status.classList.remove('text-red-500');
+          status.classList.add('text-emerald-600');
+        }
+
+        setTimeout(() => closeEditProfileModal(), 600);
+      } catch (error) {
+        console.error('edit profile error:', error);
+        if (status) {
+          status.textContent = error?.message || 'خطا در ذخیره اطلاعات.';
+          status.classList.remove('text-emerald-600');
+          status.classList.remove('hidden');
+          status.classList.add('text-red-500');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'ذخیره تغییرات';
+        }
+      }
+    }
+
+    function initEditProfileModal() {
+      const modal = document.getElementById('editProfileModal');
+      const form = document.getElementById('editProfileForm');
+      if (!modal || !form) return;
+
+      form.addEventListener('submit', handleEditProfileSubmit);
+
+      document.querySelectorAll('[data-dismiss="edit-modal"]').forEach(btn => {
+        btn.addEventListener('click', closeEditProfileModal);
+      });
+
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeEditProfileModal();
+        }
+      });
+    }
+
+    // داده‌ی دموی پروفایل
+    async function loadProfileSection() {
+      const formatDate = (value) => {
+        if (!value) return '---';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '---';
+        return date.toLocaleDateString('fa-IR', { day: 'numeric', month: 'short', year: 'numeric' });
+      };
+
+      let html = `
+      <div class="glass px-6 py-7 fadein">
+        <div class="text-center text-gray-400 py-12">در حال دریافت اطلاعات...</div>
+      </div>`;
+      document.getElementById('mainContent').innerHTML = html;
+
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include',          // کوکی JWT
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403)
+            throw new Error('برای دسترسی به این بخش ابتدا وارد شوید.');
+          throw new Error('دریافت اطلاعات با خطا مواجه شد!');
+        }
+
+        const user = await res.json();
+        const phone = user.phone || user.mobile || '';   // ✳️ فیکس: فیلد mobile هم پوشش داده شد
+        const masked =
+          phone ? phone.toString().slice(0, 4) + '***' + phone.toString().slice(-3) : '-';
+        const firstName = (user.firstname || user.firstName || 'کاربر').toString().trim() || 'کاربر';
+        const lastName = (user.lastname || user.lastName || '').toString().trim();
+        const fullName = `${firstName} ${lastName}`.trim() || 'کاربر ویترینت';
+        const initials = formatInitials(firstName, lastName);
+        const city = (user.city || user.cityName || 'سنندج').toString().trim() || 'سنندج';
+        const safeCity = city && city !== '---' ? city : 'سنندج';
+        const memberSince = formatDate(user.createdAt || user.created_at || user.signupDate);
+        const lastSeen = formatDate(user.lastLogin || user.last_seen || user.updatedAt || user.lastSeen);
+        const referralCode = user.referralCode || '---';
+        const birthDate = user.birthDate || user.birthday || user.dateOfBirth ? formatDate(user.birthDate || user.birthday || user.dateOfBirth) : '';
+        // ذخیره کد معرف برای استفاده در مودال ماموریت
+        if (typeof userReferralCode !== 'undefined') {
+          userReferralCode = referralCode !== '---' ? referralCode : null;
+        }
+        const filledFields = [firstName, lastName, safeCity, phone]
+          .filter(Boolean).length;
+        const completionProgress = Math.min(100, Math.round((filledFields / 4) * 100));
+        const completionLabel = completionProgress >= 80
+          ? 'پروفایل کامل'
+          : completionProgress >= 50
+            ? 'در حال تکمیل'
+            : 'نیاز به تکمیل';
+        const membershipLabel = user.role === 'seller'
+          ? 'فروشنده تاییدشده'
+          : 'کاربر تاییدشده';
+
+        profileState.isAuthenticated = true;
+        profileState.user = {
+          firstName,
+          lastName,
+          city: safeCity,
+          phone
+        };
+
+        html = `
+        <section class="profile-section fadein">
+          <div class="profile-card glass">
+            <div class="profile-hero">
+              <div class="profile-avatar-large">${initials}</div>
+              <div>
+                <p class="profile-hello">سلام ${firstName}</p>
+                <h2 class="profile-fullname">${fullName}</h2>
+                <div class="profile-badges">
+                  <span class="profile-badge">${membershipLabel}</span>
+                  <span class="profile-badge profile-badge--outline">${safeCity}</span>
+                </div>
+              </div>
+              <button type="button" class="profile-edit-btn" data-action="edit-profile">ویرایش اطلاعات</button>
+            </div>
+            <div class="profile-info-grid">
+              <div class="profile-info-card">
+                <div class="profile-info-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+                    <path d="M12 18h.01" />
+                    <path d="M9 6h6" />
+                    <path d="M9 10h6" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="profile-info-label">شماره تماس</p>
+                  <p class="profile-info-value" dir="ltr">${masked}</p>
+                </div>
+              </div>
+              <div class="profile-info-card">
+                <div class="profile-info-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
+                    <circle cx="12" cy="9" r="2.5" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="profile-info-label">شهر</p>
+                  <p class="profile-info-value">${safeCity}</p>
+                </div>
+              </div>
+              <div class="profile-info-card">
+                <div class="profile-info-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 2v2" />
+                    <path d="M16 2v2" />
+                    <rect x="4" y="4" width="16" height="18" rx="2" />
+                    <path d="M4 10h16" />
+                    <path d="M9 14h.01" />
+                    <path d="M9 18h.01" />
+                    <path d="M13 14h.01" />
+                    <path d="M13 18h.01" />
+                    <path d="M17 14h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="profile-info-label">عضویت از</p>
+                  <p class="profile-info-value">${memberSince}</p>
+                </div>
+              </div>
+              <div class="profile-info-card">
+                <div class="profile-info-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 6v6l4 2" />
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="profile-info-label">آخرین فعالیت</p>
+                  <p class="profile-info-value">${lastSeen}</p>
+                </div>
+              </div>
+              <div class="profile-info-card birthday-card" id="birthdayCard" onclick="openBirthdayModal()" data-has-birthday="${birthDate ? 'true' : 'false'}">
+                <div class="profile-info-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 2v2" />
+                    <path d="M16 2v2" />
+                    <rect x="4" y="4" width="16" height="18" rx="2" />
+                    <path d="M4 10h16" />
+                    <path d="M12 14l-2 2 2 2" />
+                    <circle cx="12" cy="16" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="profile-info-label">تاریخ تولد</p>
+                  <p class="profile-info-value ${birthDate ? '' : 'placeholder-value'}" id="birthdayValue">${birthDate || 'ثبت نشده'}</p>
+                </div>
+              </div>
+              <div class="profile-info-card referral-card">
+                <div class="profile-info-icon referral-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <div class="referral-content">
+                  <p class="profile-info-label">کد معرف شما</p>
+                  <div class="referral-code-wrapper">
+                    <p class="profile-info-value referral-code-value" dir="ltr">${referralCode}</p>
+                    <button type="button" class="referral-copy-btn" data-code="${referralCode}" title="کپی کد معرف">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Referral Benefits Section -->
+          <div class="referral-benefits-section">
+            <div class="referral-benefits-header">
+              <div class="referral-benefits-header-icon">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <div class="referral-benefits-header-content">
+                <h3>دوستانت رو دعوت کن، جایزه بگیر!</h3>
+                <p>با معرفی دوستان خود به ویترینت، هدایای ویژه دریافت کنید</p>
+              </div>
+            </div>
+            <div class="referral-benefits-body">
+              <div class="referral-benefits-grid">
+                <div class="referral-benefit-card user-type">
+                  <div class="referral-benefit-icon blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <h4 class="referral-benefit-title">دعوت کاربر جدید</h4>
+                  <p class="referral-benefit-desc">با ثبت‌نام هر کاربر جدید با کد معرف شما، اعتبار هدیه دریافت کنید</p>
+                  <span class="referral-benefit-badge blue">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    ۵,۰۰۰ تومان اعتبار
+                  </span>
+                </div>
+                <div class="referral-benefit-card seller-type">
+                  <div class="referral-benefit-icon purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                  </div>
+                  <h4 class="referral-benefit-title">دعوت فروشنده جدید</h4>
+                  <p class="referral-benefit-desc">با ثبت‌نام هر فروشنده جدید، جایزه ویژه و اعتبار بیشتر بگیرید</p>
+                  <span class="referral-benefit-badge purple">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    ۲۰,۰۰۰ تومان اعتبار
+                  </span>
+                </div>
+                <div class="referral-benefit-card">
+                  <div class="referral-benefit-icon green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </div>
+                  <h4 class="referral-benefit-title">ارتقای سطح کاربری</h4>
+                  <p class="referral-benefit-desc">با دعوت بیشتر، به سطوح بالاتر برسید و مزایای بیشتری کسب کنید</p>
+                  <span class="referral-benefit-badge green">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    دسترسی VIP
+                  </span>
+                </div>
+                <div class="referral-benefit-card">
+                  <div class="referral-benefit-icon amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="8" r="7"/>
+                      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                    </svg>
+                  </div>
+                  <h4 class="referral-benefit-title">قرعه‌کشی ماهانه</h4>
+                  <p class="referral-benefit-desc">هر دعوت موفق = یک شانس در قرعه‌کشی جوایز ویژه ماهانه</p>
+                  <span class="referral-benefit-badge amber">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    جوایز ارزنده
+                  </span>
+                </div>
+              </div>
+
+              <div class="referral-divider">
+                <div class="referral-divider-line"></div>
+                <span class="referral-divider-text">همین الان شروع کن</span>
+                <div class="referral-divider-line"></div>
+              </div>
+
+              <div class="referral-share-section">
+                <div class="referral-share-text">
+                  <p>کد معرف خود را با دوستانتان به اشتراک بگذارید</p>
+                  <span>کد شما: <strong dir="ltr" style="color:#0f766e;font-family:'Poppins',monospace;">${referralCode}</strong></span>
+                </div>
+                <button type="button" class="referral-share-btn" onclick="shareReferralCode('${referralCode}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
+                  کپی کد دعوت
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-secondary">
+            <div class="profile-subcard glass">
+              <h3>دسترسی سریع</h3>
+              <p class="text-sm text-gray-500">مسیرهای مهم داشبورد تنها با یک کلیک در دسترس شماست.</p>
+              <div class="profile-quick-actions">
+                <button type="button" class="profile-quick-action" data-target-section="bookings">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="4" />
+                    <path d="M16 2v4" />
+                    <path d="M8 2v4" />
+                    <path d="M3 10h18" />
+                  </svg>
+                  رزروهای من
+                </button>
+                <button type="button" class="profile-quick-action" data-target-section="favorites">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  علاقه‌مندی‌ها
+                </button>
+                <button type="button" class="profile-quick-action" data-target-section="dashboard">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 13h8V3H3z" />
+                    <path d="M13 21h8V11h-8z" />
+                    <path d="M13 3h8v4h-8z" />
+                    <path d="M3 17h8v4H3z" />
+                  </svg>
+                  بازگشت به داشبورد
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>`;
+      } catch (e) {
+        profileState.isAuthenticated = false;
+        profileState.user = {
+          firstName: '',
+          lastName: '',
+          city: '',
+          phone: ''
+        };
+        html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="text-center text-red-400 py-12">
+            برای دسترسی به این بخش ابتدا
+            <a href="/login.html"
+              class="inline-block px-3 py-1.5 mx-1 rounded-xl brand-btn text-white font-bold text-base transition hover:scale-105"
+              style="text-decoration:none;">وارد شوید</a>
+            .
+          </div>
+        </div>`;
+      }
+
+      document.getElementById('mainContent').innerHTML = html;
+      applyProfileStateToUI();
+      initProfileSectionInteractions();
+    }
+
+    function initProfileSectionInteractions() {
+      document.querySelectorAll('[data-target-section]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const { targetSection } = btn.dataset;
+          if (targetSection) {
+            showSection(targetSection);
+          }
+        });
+      });
+
+      const editBtn = document.querySelector('[data-action="edit-profile"]');
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          openEditProfileModal();
+        });
+      }
+
+      // کپی کد معرف
+      document.querySelectorAll('.referral-copy-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const code = btn.dataset.code;
+          if (!code || code === '---') {
+            showToast('کد معرف هنوز تولید نشده است', 'error');
+            return;
+          }
+          try {
+            await navigator.clipboard.writeText(code);
+            btn.classList.add('copied');
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            showToast('کد معرف کپی شد!', 'success');
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            }, 2000);
+          } catch (err) {
+            // Fallback برای مرورگرهای قدیمی
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('کد معرف کپی شد!', 'success');
+          }
+        });
+      });
+    }
+
+    // تابع اشتراک‌گذاری کد معرف
+    async function shareReferralCode(code) {
+      if (!code || code === '---') {
+        showToast('کد معرف هنوز تولید نشده است', 'error');
+        return;
+      }
+
+      const shareText = `🎁 با کد معرف من در ویترینت ثبت‌نام کن و جایزه بگیر!\n\nکد معرف: ${code}\n\n🔗 لینک ثبت‌نام:\nhttps://vitrinet.ir/register.html?ref=${code}`;
+      const shareData = {
+        title: 'دعوت به ویترینت',
+        text: shareText,
+        url: `https://vitrinet.ir/register.html?ref=${code}`
+      };
+
+      // اگر Web Share API پشتیبانی میشه
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          showToast('با موفقیت به اشتراک گذاشته شد!', 'success');
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            // اگر کاربر کنسل نکرده، کپی کن
+            fallbackCopyReferral(code, shareText);
+          }
+        }
+      } else {
+        // Fallback: کپی متن
+        fallbackCopyReferral(code, shareText);
+      }
+    }
+
+    function fallbackCopyReferral(code, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('متن دعوت کپی شد! حالا می‌تونی بفرستی برای دوستات', 'success');
+      }).catch(() => {
+        // Fallback برای مرورگرهای قدیمی
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('متن دعوت کپی شد!', 'success');
+      });
+    }
+
+    async function ensureUserPhone() {
+      if (window.currentUserPhone) return window.currentUserPhone;
+
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) return '';
+
+        const user = await res.json();
+        const phone = user.phone || user.mobile || '';
+        window.currentUserPhone = phone;
+        return phone;
+      } catch (_) {
+        return '';
+      }
+    }
+
+    async function fetchBookings(phone) {
+      const res = await fetch(`/api/bookings?phone=${encodeURIComponent(phone)}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        let message = 'خطا در دریافت رزروها';
+        try {
+          const data = await res.json();
+          if (data && data.message) message = data.message;
+        } catch (_) { }
+        throw new Error(message);
+      }
+
+      const data = await res.json();
+      return Array.isArray(data.items) ? data.items : [];
+    }
+
+    async function getBookings(force = false) {
+      if (!force && bookingsLoaded) {
+        return { data: bookingsData, hasPhone: true };
+      }
+
+      const phone = await ensureUserPhone();
+      if (!phone) {
+        bookingsData = [];
+        bookingsLoaded = false;
+        return { data: [], hasPhone: false };
+      }
+
+      try {
+        bookingsData = await fetchBookings(phone);
+        bookingsLoaded = true;
+        return { data: bookingsData, hasPhone: true };
+      } catch (err) {
+        bookingsData = [];
+        bookingsLoaded = false;
+        throw err;
+      }
+    }
+
+    function updateBookingsBadge() {
+      const dataset = (Array.isArray(allBookings) && allBookings.length)
+        ? allBookings
+        : (Array.isArray(bookingsData) ? bookingsData : []);
+
+      const pendingCount = dataset
+        .filter(b => (b.status || '').toLowerCase() === 'pending')
+        .length;
+
+      const badges = document.querySelectorAll('#bookings-badge');
+      if (!badges.length) return;
+
+      badges.forEach(badge => {
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount.toLocaleString('fa-IR');
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+
+    function updateBookingsBadgeDisplay() {
+      updateBookingsBadge();
+    }
+
+    async function refreshBookingsBadge(force = false) {
+      const badges = document.querySelectorAll('#bookings-badge');
+      if (!badges.length) return;
+
+      try {
+        const result = await getBookings(force);
+        if (!result.hasPhone) {
+          badges.forEach(b => {
+            b.textContent = '';
+            b.classList.add('hidden');
+          });
+          allBookings = [];
+          return;
+        }
+        allBookings = Array.isArray(result.data) ? result.data : [];
+        updateBookingsBadge();
+      } catch (err) {
+        console.error('refreshBookingsBadge error:', err);
+        badges.forEach(b => {
+          b.textContent = '';
+          b.classList.add('hidden');
+        });
+        allBookings = [];
+      }
+    }
+
+    // Load user's bookings
+    async function loadBookings() {
+      try {
+        const token = localStorage.getItem('token');
+
+        // Check if user is actually logged in
+        if (!token) {
+          console.log('No auth token found, skipping bookings');
+          bookingsLoaded = false;
+          allBookings = [];
+          bookingsData = [];
+          renderBookings([]);
+          updateBookingsBadge();
+          return;
+        }
+
+        const response = await fetch('/api/user/bookings', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const payload = await response.json();
+          const bookings = Array.isArray(payload)
+            ? payload
+            : (Array.isArray(payload?.items) ? payload.items : []);
+
+          allBookings = bookings;
+          bookingsData = bookings;
+          bookingsLoaded = true;
+          renderBookings(allBookings);
+          updateBookingsBadge();
+        } else if (response.status === 401) {
+          // User not authenticated - this is OK, just don't show bookings
+          console.log('User not authenticated for bookings');
+          allBookings = [];
+          bookingsData = [];
+          bookingsLoaded = false;
+          renderBookings([]);
+          updateBookingsBadge();
+        } else {
+          console.error('Failed to load bookings:', response.status);
+        }
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+      }
+    }
+
+    // Cancel a booking
+    async function cancelBooking(bookingId) {
+      // Confirm with user
+      if (!confirm('آیا مطمئن هستید که می‌خواهید این رزرو را لغو کنید؟')) {
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          alert('رزرو با موفقیت لغو شد');
+
+          // Reload bookings to show updated status
+          await loadBookings();
+        } else {
+          const error = await response.json();
+          alert(error.message || 'خطا در لغو رزرو');
+        }
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      }
+    }
+
+    async function loadBookingsSection() {
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = `
+    <!-- Bookings Section -->
+    <div id="bookings-section" class="section hidden">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">رزروهای من</h2>
+        
+        <!-- Status Filter Buttons -->
+        <div class="flex flex-wrap gap-3 mb-6">
+          <button data-status="all" class="filter-btn active px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 ease-out">
+            همه
+          </button>
+          <button data-status="pending" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-out">
+            در انتظار تایید
+          </button>
+          <button data-status="confirmed" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-out">
+            تایید شده
+          </button>
+          <button data-status="completed" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-out">
+            انجام شده
+          </button>
+          <button data-status="cancelled" class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-out">
+            لغو شده
+          </button>
+        </div>
+        
+        <!-- Bookings Container -->
+        <div id="bookings-container" class="space-y-4">
+          <div class="text-center text-gray-400 py-12">در حال دریافت رزروها...</div>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="no-bookings" class="text-center py-12 hidden">
+          <div class="text-6xl mb-4">📅</div>
+          <p class="text-gray-500 text-lg mb-2">شما هنوز رزروی ندارید</p>
+          <p class="text-gray-400 mb-6">برای رزرو خدمات، از صفحه دایرکتوری سرویس‌ها بازدید کنید</p>
+          <a href="http://localhost:5000/shops-by-category.html?cat=service" class="inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+            مشاهده خدمات
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+
+      const section = document.getElementById('bookings-section');
+      if (section) section.classList.remove('hidden');
+
+      // Add event listeners for filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const status = btn.dataset.status;
+          filterBookings(status, e);
+        });
+      });
+
+      const container = document.getElementById('bookings-container');
+      const emptyState = document.getElementById('no-bookings');
+      if (container) container.innerHTML = `<div class="text-center text-gray-400 py-12">در حال دریافت رزروها...</div>`;
+      if (emptyState) emptyState.classList.add('hidden');
+
+      try {
+        const result = await getBookings(true);
+        if (!result.hasPhone) {
+          if (container) {
+            container.innerHTML = `<div class="text-center text-red-400 py-12">برای مشاهده رزروها ابتدا وارد شوید یا شماره تماس خود را در پروفایل ثبت کنید.</div>`;
+          }
+          allBookings = [];
+          updateBookingsBadge();
+          return;
+        }
+
+        allBookings = Array.isArray(result.data) ? result.data : [];
+        bookingsData = allBookings;
+        updateBookingsBadge();
+        filterBookings('all');
+      } catch (err) {
+        console.error('loadBookingsSection error:', err);
+        if (container) {
+          container.innerHTML = `<div class="text-center text-red-400 py-12">خطا در دریافت رزروها. لطفاً بعداً دوباره تلاش کنید.</div>`;
+        }
+        allBookings = [];
+        updateBookingsBadge();
+      }
+    }
+
+    function filterBookings(status, evt) {
+      const normalized = (status || 'all').toLowerCase();
+      currentBookingFilter = normalized;
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-500', 'text-white');
+        btn.classList.add('border', 'border-gray-300');
+      });
+
+      const target = evt?.currentTarget || evt?.target || document.querySelector(`.filter-btn[data-status="${normalized}"]`);
+      if (target) {
+        target.classList.add('active', 'bg-blue-500', 'text-white');
+        target.classList.remove('border', 'border-gray-300');
+      }
+
+      if (!Array.isArray(allBookings) || allBookings.length === 0) {
+        renderBookings([]);
+        return;
+      }
+
+      const filtered = normalized === 'all'
+        ? allBookings
+        : allBookings.filter(item => (item.status || '').toLowerCase() === normalized);
+
+      if (!filtered.length) {
+        const container = document.getElementById('bookings-container');
+        const noBookings = document.getElementById('no-bookings');
+        if (container && noBookings) {
+          container.classList.remove('hidden');
+          container.innerHTML = `<div class="text-center text-gray-400 py-10 transition-opacity duration-300 ease-out">رزروی با این وضعیت پیدا نشد.</div>`;
+          noBookings.classList.add('hidden');
+        }
+        return;
+      }
+
+      renderBookings(filtered);
+    }
+
+    // تبدیل تاریخ میلادی به شمسی
+    function gregorianToJalali(gDate) {
+      try {
+        let date;
+        if (typeof gDate === 'string') {
+          // Handle different date formats
+          if (gDate.includes('/')) {
+            const parts = gDate.split('/');
+            if (parts.length === 3) {
+              date = new Date(parts[2], parts[1] - 1, parts[0]);
+            } else {
+              date = new Date(gDate);
+            }
+          } else {
+            date = new Date(gDate);
+          }
+        } else {
+          date = new Date(gDate);
+        }
+
+        if (isNaN(date.getTime())) {
+          return gDate; // Return original if invalid
+        }
+
+        const gy = date.getFullYear();
+        const gm = date.getMonth() + 1;
+        const gd = date.getDate();
+
+        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let jy = (gy <= 1600) ? 0 : 979;
+        gy > 1600 ? (jy += 1, gy -= 1601) : gy -= 621;
+        const gy2 = (gm > 2) ? (gy + 1) : gy;
+        let days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) + (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+        jy += 33 * (parseInt(days / 12053));
+        days %= 12053;
+        jy += 4 * (parseInt(days / 1461));
+        days %= 1461;
+        jy += parseInt((days - 1) / 365);
+        if (days > 365) days = (days - 1) % 365;
+
+        const jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+        const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+
+        const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        return `${jd} ${monthNames[jm - 1]} ${jy}`;
+      } catch (err) {
+        console.error('Error converting date:', err);
+        return gDate;
+      }
+    }
+
+    // Render bookings to the page
+    function renderBookings(bookings) {
+      const container = document.getElementById('bookings-container');
+      const noBookings = document.getElementById('no-bookings');
+
+      if (!container || !noBookings) {
+        return;
+      }
+
+      if (!bookings || bookings.length === 0) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        noBookings.classList.remove('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      noBookings.classList.add('hidden');
+
+      container.innerHTML = bookings.map(booking => {
+        const sellerLink = getSellerLink(booking);
+        const normalizedStatus = (booking.status || '').toLowerCase();
+        const persianDate = gregorianToJalali(booking.bookingDate);
+
+        return `
+    <div class="booking-card fadein ${getBookingStatusClass(booking.status)}">
+      <!-- Header Section -->
+      <div class="booking-card-header">
+        <div class="booking-service-icon-wrapper">
+          <div class="booking-service-icon">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="booking-header-content">
+          <div class="booking-service-name">
+            <span class="booking-service-label">نام خدمت</span>
+            <h3 class="booking-service-title">${escapeHtml(booking.service)}</h3>
+          </div>
+          <span class="${getStatusBadgeClass(booking.status)}">
+            ${getStatusLabel(booking.status)}
+          </span>
+        </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="booking-info-grid">
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">فروشگاه</span>
+            ${sellerLink ?
+            `<a href="${sellerLink}" class="booking-info-value booking-info-link" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(booking.sellerName || 'فروشگاه')}
+              </a>` :
+            `<span class="booking-info-value missing-seller-link cursor-pointer">
+                ${escapeHtml(booking.sellerName || 'فروشگاه')}
+              </span>`
+          }
+          </div>
+        </div>
+
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">تاریخ رزرو</span>
+            <span class="booking-info-value">${escapeHtml(persianDate)}</span>
+          </div>
+        </div>
+
+        <div class="booking-info-item">
+          <div class="booking-info-icon">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="booking-info-content">
+            <span class="booking-info-label">ساعت شروع</span>
+            <span class="booking-info-value">${escapeHtml(booking.startTime)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="booking-actions">
+        <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--primary show-booking-details">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>جزئیات رزرو</span>
+        </button>
+        ${(normalizedStatus === 'pending' || normalizedStatus === 'confirmed') ? `
+          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--danger cancel-booking">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>لغو رزرو</span>
+          </button>
+        ` : ''}
+        ${normalizedStatus === 'cancelled' ? `
+          <button type="button" data-booking-id="${booking._id}" class="booking-action-btn booking-action-btn--ghost delete-booking">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span>حذف دائمی</span>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+      }).join('');
+
+      // Add event listeners for booking action buttons
+      container.querySelectorAll('.show-booking-details').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bookingId = btn.dataset.bookingId;
+          showBookingDetails(bookingId);
+        });
+      });
+
+      container.querySelectorAll('.cancel-booking').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bookingId = btn.dataset.bookingId;
+          cancelBooking(bookingId);
+        });
+      });
+
+      container.querySelectorAll('.delete-booking').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bookingId = btn.dataset.bookingId;
+          deleteBooking(bookingId);
+        });
+      });
+
+      container.querySelectorAll('.missing-seller-link').forEach(span => {
+        span.addEventListener('click', () => {
+          alert('لینک فروشگاه موجود نیست');
+        });
+      });
+    }
+
+    function getBookingStatusClass(status) {
+      const classes = {
+        'pending': 'booking-card--pending',
+        'confirmed': 'booking-card--confirmed',
+        'completed': 'booking-card--completed',
+        'cancelled': 'booking-card--cancelled'
+      };
+      const key = (status || '').toLowerCase();
+      return classes[key] || 'booking-card--default';
+    }
+
+    function getStatusBadgeClass(status) {
+      const classes = {
+        'pending': 'status-badge status-badge--pending',
+        'confirmed': 'status-badge status-badge--confirmed',
+        'completed': 'status-badge status-badge--completed',
+        'cancelled': 'status-badge status-badge--cancelled'
+      };
+      const key = (status || '').toLowerCase();
+      return classes[key] || 'status-badge status-badge--default';
+    }
+
+    function getStatusLabel(status) {
+      const labels = {
+        'pending': 'در انتظار تایید',
+        'confirmed': 'تایید شده',
+        'completed': 'انجام شده',
+        'cancelled': 'لغو شده'
+      };
+      const key = (status || '').toLowerCase();
+      return labels[key] || (status || 'نامشخص');
+    }
+
+    function getSellerLink(booking) {
+      if (!booking) return '';
+
+      const slug = typeof booking.sellerUrl === 'string'
+        ? booking.sellerUrl.trim()
+        : '';
+      if (slug) {
+        return `/service-shops.html?shopurl=${encodeURIComponent(slug)}`;
+      }
+
+      let sellerId = booking.sellerId;
+      if (sellerId && typeof sellerId === 'object') {
+        if (sellerId._id || sellerId.id) {
+          sellerId = sellerId._id || sellerId.id;
+        } else if (typeof sellerId.toString === 'function') {
+          sellerId = sellerId.toString();
+        } else {
+          sellerId = '';
+        }
+      }
+      if (typeof sellerId === 'string' && sellerId.trim()) {
+        return `/service-shops.html?sellerId=${encodeURIComponent(sellerId.trim())}`;
+      }
+
+      return '';
+    }
+
+    async function cancelBooking(id) {
+      if (!id) return;
+
+      const confirmed = window.confirm('آیا از لغو این رزرو اطمینان دارید؟');
+      if (!confirmed) return;
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('برای لغو رزرو ابتدا وارد حساب کاربری خود شوید.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/bookings/${encodeURIComponent(id)}/cancel`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const message = errorData.message || 'لغو رزرو با خطا مواجه شد.';
+          alert(message);
+          return;
+        }
+
+        bookingsData = Array.isArray(bookingsData)
+          ? bookingsData.map(booking => booking._id === id ? { ...booking, status: 'cancelled' } : booking)
+          : [];
+        allBookings = bookingsData;
+
+        filterBookings(currentBookingFilter || 'all');
+        updateBookingsBadge();
+
+        alert('رزرو با موفقیت لغو شد.');
+      } catch (error) {
+        console.error('cancelBooking error:', error);
+        alert('لغو رزرو با خطای غیرمنتظره مواجه شد.');
+      }
+    }
+
+    async function deleteBooking(id) {
+      if (!id) return;
+
+      const confirmed = window.confirm('با حذف دائمی، امکان بازیابی این رزرو وجود نخواهد داشت. ادامه می‌دهید؟');
+      if (!confirmed) return;
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('برای حذف رزرو ابتدا وارد حساب کاربری خود شوید.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/bookings/${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const message = errorData.message || 'حذف رزرو با خطا مواجه شد.';
+          alert(message);
+          return;
+        }
+
+        bookingsData = Array.isArray(bookingsData)
+          ? bookingsData.filter(booking => booking._id !== id)
+          : [];
+        allBookings = bookingsData;
+
+        filterBookings(currentBookingFilter || 'all');
+        updateBookingsBadge();
+
+        alert('رزرو برای همیشه حذف شد.');
+      } catch (error) {
+        console.error('deleteBooking error:', error);
+        alert('حذف رزرو با خطای غیرمنتظره مواجه شد.');
+      }
+    }
+
+    // Show booking details modal
+    function showBookingDetails(bookingId) {
+      if (!bookingId) return;
+
+      // Find the booking in our data
+      const booking = allBookings.find(b => b._id === bookingId);
+      if (!booking) {
+        alert('اطلاعات رزرو یافت نشد');
+        return;
+      }
+
+      // Format created date in Persian if available
+      let createdDate = 'نامشخص';
+      if (booking.createdAt) {
+        try {
+          const date = new Date(booking.createdAt);
+          createdDate = date.toLocaleDateString('fa-IR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch (e) {
+          createdDate = booking.createdAt;
+        }
+      }
+
+      // Format booking date to Shamsi (Persian) calendar
+      let bookingDateShamsi = booking.bookingDate;
+      if (booking.bookingDate) {
+        try {
+          // Try to parse the date - it might be in format like "2024-01-15" or "15/01/2024"
+          let dateObj;
+          if (booking.bookingDate.includes('-')) {
+            // Format: YYYY-MM-DD
+            dateObj = new Date(booking.bookingDate);
+          } else if (booking.bookingDate.includes('/')) {
+            // Format: DD/MM/YYYY or MM/DD/YYYY
+            const parts = booking.bookingDate.split('/');
+            if (parts.length === 3) {
+              // Assume DD/MM/YYYY format
+              dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+          }
+
+          if (dateObj && !isNaN(dateObj.getTime())) {
+            bookingDateShamsi = dateObj.toLocaleDateString('fa-IR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+          }
+        } catch (e) {
+          // Keep original value if conversion fails
+          bookingDateShamsi = booking.bookingDate;
+        }
+      }
+
+      // Remove any existing modal
+      document.getElementById('bookingDetailsModal')?.remove();
+
+      const isMobileViewport = window.matchMedia('(max-width: 640px)').matches;
+      const modalMaxHeight = isMobileViewport ? '98vh' : '92vh';
+      const contentOffset = isMobileViewport ? 120 : 180;
+      const contentMaxHeight = `calc(${modalMaxHeight} - ${contentOffset}px)`;
+
+      // Create and insert modal
+      document.body.insertAdjacentHTML('beforeend', `
+          <div id="bookingDetailsModal" class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4" style="z-index:9999;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);animation:fadein .2s">
+            <div class="bg-gradient-to-br from-white to-gray-50 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-[650px] overflow-hidden shadow-2xl" style="z-index:10000;animation:slideUp .3s ease-out;max-height:${modalMaxHeight}">
+
+              <!-- Header with Gradient -->
+              <div class="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-5 flex justify-between items-center shadow-lg" style="z-index:100">
+                <div class="flex items-center gap-3">
+                  <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">جزئیات رزرو</h2>
+                </div>
+                <button class="close-booking-modal text-white/90 hover:text-white hover:bg-white/20 rounded-xl p-2.5 transition-all duration-200 backdrop-blur-sm">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Content with Card Design -->
+              <div class="p-5 sm:p-7 space-y-5 pb-28 sm:pb-7 overflow-y-auto" style="max-height:${contentMaxHeight}">
+
+                <!-- Service Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">خدمت درخواستی</div>
+                      <div class="text-gray-900 text-lg font-bold">${escapeHtml(booking.service)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Shop Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">فروشگاه</div>
+                      <div class="text-gray-800">
+                        ${(() => {
+          const sellerLink = getSellerLink(booking);
+          if (sellerLink) {
+            return `<a href="${sellerLink}"
+                                       class="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all group"
+                                       target="_blank" rel="noopener noreferrer">
+                                      ${escapeHtml(booking.sellerName || 'فروشگاه')}
+                                      <svg class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                      </svg>
+                                    </a>`;
+          }
+          return `<span class="font-semibold text-gray-900">${escapeHtml(booking.sellerName || 'فروشگاه')}</span>`;
+        })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Date & Time Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-gradient-to-br from-green-500 to-emerald-600 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">زمان رزرو</div>
+                      <div class="space-y-3">
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                          <div class="bg-white p-2 rounded-lg shadow-sm">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                          </div>
+                          <span class="text-gray-900 font-semibold">${escapeHtml(bookingDateShamsi)}</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                          <div class="bg-white p-2 rounded-lg shadow-sm">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                          </div>
+                          <span class="text-gray-900 font-semibold">${escapeHtml(booking.startTime)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-gradient-to-br from-orange-500 to-red-600 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">وضعیت رزرو</div>
+                      <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold shadow-sm ${getStatusBadgeClass(booking.status)}">
+                        ${getStatusLabel(booking.status)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Created Date Card -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-gradient-to-br from-gray-500 to-gray-700 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">تاریخ ثبت رزرو</div>
+                      <div class="text-gray-800 font-semibold">${escapeHtml(createdDate)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                ${booking.customerName || booking.customerPhone ? `
+                  <!-- Customer Info Card -->
+                  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-200">
+                    <div class="flex items-start gap-3">
+                      <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-md flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <div class="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3">اطلاعات مشتری</div>
+                        <div class="space-y-2.5">
+                          ${booking.customerName ? `
+                            <div class="flex items-center gap-2 bg-white rounded-lg p-3 shadow-sm">
+                              <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                              </svg>
+                              <span class="text-gray-600 text-sm font-medium">نام:</span>
+                              <span class="text-gray-900 font-semibold">${escapeHtml(booking.customerName)}</span>
+                            </div>
+                          ` : ''}
+                          ${booking.customerPhone ? `
+                            <div class="flex items-center gap-2 bg-white rounded-lg p-3 shadow-sm">
+                              <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                              </svg>
+                              <span class="text-gray-600 text-sm font-medium">تلفن:</span>
+                              <span class="text-gray-900 font-semibold font-mono">${escapeHtml(booking.customerPhone)}</span>
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+
+              </div>
+
+              <!-- Footer - Mobile Fixed with Gradient -->
+              <div class="fixed sm:sticky bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent px-6 pt-4 pb-5 border-t border-gray-200 sm:rounded-b-3xl backdrop-blur-sm" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.08);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)">
+                <button
+                  class="close-booking-modal w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-xl hover:from-gray-800 hover:to-black transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] duration-200">
+                  بستن
+                </button>
+              </div>
+
+            </div>
+          </div>
+        `);
+
+      // Add event listeners for modal close buttons
+      document.querySelectorAll('.close-booking-modal').forEach(btn => {
+        btn.addEventListener('click', closeBookingDetails);
+      });
+
+      // Also close when clicking the backdrop
+      const modal = document.getElementById('bookingDetailsModal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeBookingDetails();
+          }
+        });
+      }
+
+      // Close on ESC key
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          closeBookingDetails();
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+
+      // Store handler for cleanup
+      modal._escapeHandler = handleEscape;
+    }
+
+    // Close booking details modal
+    function closeBookingDetails() {
+      const modal = document.getElementById('bookingDetailsModal');
+      if (modal && modal._escapeHandler) {
+        document.removeEventListener('keydown', modal._escapeHandler);
+      }
+      modal?.remove();
+    }
+
+    // Helper to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text == null ? '' : String(text);
+      return div.innerHTML;
+    }
+
+    // داشبورد پیش‌فرض - Welcome is now in Hero Header
+    const dashboardSection = `
+
+  <!-- پاپ‌آپ استریک روزانه -->
+  <div class="streak-popup-overlay" id="streakPopupOverlay">
+    <div class="streak-popup" id="streakPopup">
+      <!-- هدر -->
+      <div class="streak-popup-header">
+        <button type="button" class="streak-popup-close" id="streakPopupClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="streak-popup-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+            <line x1="16" x2="16" y1="2" y2="6"></line>
+            <line x1="8" x2="8" y1="2" y2="6"></line>
+            <line x1="3" x2="21" y1="10" y2="10"></line>
+            <path d="m9 16 2 2 4-4"></path>
+          </svg>
+        </div>
+        <h2 class="streak-popup-title">ورود روزانه</h2>
+        <p class="streak-popup-subtitle">هر روز وارد شو، امتیاز بگیر</p>
+      </div>
+
+      <!-- بدنه -->
+      <div class="streak-popup-body">
+        <!-- کارت شمارنده -->
+        <div class="streak-counter-card">
+          <div class="streak-counter-number" id="streakNumber">0</div>
+          <div class="streak-counter-label">روز متوالی</div>
+          <span class="streak-counter-badge" id="streakLevel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+            <span id="streakLevelText">تازه‌کار</span>
+          </span>
+        </div>
+
+        <!-- آمار -->
+        <div class="streak-popup-stats">
+          <div class="streak-popup-stat">
+            <div class="streak-popup-stat-icon trophy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+              </svg>
+            </div>
+            <div class="streak-popup-stat-value" id="longestStreak">0</div>
+            <div class="streak-popup-stat-label">بیشترین رکورد</div>
+          </div>
+          <div class="streak-popup-stat">
+            <div class="streak-popup-stat-icon calendar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                <line x1="16" x2="16" y1="2" y2="6"></line>
+                <line x1="8" x2="8" y1="2" y2="6"></line>
+                <line x1="3" x2="21" y1="10" y2="10"></line>
+              </svg>
+            </div>
+            <div class="streak-popup-stat-value" id="totalLoginDays">0</div>
+            <div class="streak-popup-stat-label">کل ورودها</div>
+          </div>
+        </div>
+
+        <!-- تاریخچه هفتگی -->
+        <div class="streak-popup-week" id="streakWeek">
+          <!-- با جاوااسکریپت پر می‌شود -->
+        </div>
+
+        <!-- دکمه چک‌این -->
+        <button type="button" class="streak-popup-checkin-btn active" id="streakCheckinBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span id="streakCheckinText">ثبت ورود امروز</span>
+        </button>
+
+        <!-- دکمه بستن -->
+        <button type="button" class="streak-popup-dismiss" id="streakPopupDismiss">
+          بعداً یادآوری کن
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- بنر کوچک استریک -->
+  <div class="streak-mini-banner" id="streakMiniBanner">
+    <div class="streak-mini-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+        <line x1="16" x2="16" y1="2" y2="6"></line>
+        <line x1="8" x2="8" y1="2" y2="6"></line>
+        <line x1="3" x2="21" y1="10" y2="10"></line>
+        <path d="m9 16 2 2 4-4"></path>
+      </svg>
+    </div>
+    <div class="streak-mini-content">
+      <h4 class="streak-mini-title">ورود روزانه</h4>
+      <p class="streak-mini-subtitle" id="streakMiniSubtitle">برای دریافت پاداش کلیک کنید</p>
+    </div>
+    <div class="streak-mini-count">
+      <span class="streak-mini-number" id="streakMiniNumber">0</span>
+      <span class="streak-mini-label">روز</span>
+    </div>
+    <svg class="streak-mini-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </div>
+
+  <!-- مودال جزئیات ماموریت -->
+  <div class="mission-modal-overlay" id="missionModalOverlay">
+    <div class="mission-modal" id="missionModal">
+      <!-- هدر -->
+      <div class="mission-modal-header" id="missionModalHeader">
+        <button type="button" class="mission-modal-close" id="missionModalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="mission-modal-icon" id="missionModalIcon">🎁</div>
+        <div class="mission-modal-reward" id="missionModalReward">۵,۰۰۰ تومان</div>
+        <h2 class="mission-modal-title" id="missionModalTitle">دعوت از دوستان</h2>
+      </div>
+
+      <!-- بدنه -->
+      <div class="mission-modal-body">
+        <!-- محتوای داینامیک -->
+        <div id="missionModalBodyContent">
+          <!-- با جاوااسکریپت پر می‌شود -->
+        </div>
+
+        <div class="mission-modal-actions" id="missionModalActions">
+          <!-- دکمه‌ها با جاوااسکریپت پر می‌شوند -->
+        </div>
+
+        <button type="button" class="mission-modal-dismiss" id="missionModalDismiss">
+          بعداً
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- پیام موفقیت کپی -->
+  <div class="mission-copy-toast" id="missionCopyToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="missionCopyToastText">کپی شد!</span>
+  </div>
+
+  <!-- پیام پیشرفت ماموریت گردشگر -->
+  <div class="mission-progress-toast" id="exploreProgressToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+    </svg>
+    <span id="exploreProgressText">فروشگاه بازدید شد! (۱/۳)</span>
+  </div>
+
+  <!-- بخش کیف پول -->
+  <div class="streak-wallet-container fadein">
+    <!-- کارت کیف پول -->
+    <div class="wallet-card" id="walletCard">
+      <!-- هدر با گرادیانت -->
+      <div class="wallet-header">
+        <div class="wallet-header-pattern"></div>
+        <div class="wallet-title">
+          <div class="wallet-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"></path>
+            </svg>
+          </div>
+          <div class="wallet-title-text">
+            <h3>کیف پول من</h3>
+            <p>اعتبار و پاداش‌های شما</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- موجودی اصلی -->
+      <div class="wallet-main">
+        <div class="wallet-balance-label">موجودی فعلی</div>
+        <div class="wallet-balance">
+          <span id="walletBalance">0</span>
+          <span class="wallet-balance-unit">تومان</span>
+        </div>
+      </div>
+
+      <!-- آمار کسب و مصرف -->
+      <div class="wallet-stats">
+        <div class="wallet-stat earned">
+          <div class="wallet-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
+          <div class="wallet-stat-value" id="totalEarned">0</div>
+          <div class="wallet-stat-label">کل کسب شده</div>
+        </div>
+        <div class="wallet-stat spent">
+          <div class="wallet-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+              <polyline points="17 18 23 18 23 12"></polyline>
+            </svg>
+          </div>
+          <div class="wallet-stat-value" id="totalSpent">0</div>
+          <div class="wallet-stat-label">کل مصرف شده</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- دسترسی سریع - Quick Action Bar -->
+  <div class="quick-access-section fadein">
+    <div class="quick-access-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      دسترسی سریع
+    </div>
+    <div class="quick-action-bar">
+      <!-- رزرو خدمات -->
+      <a href="/service-directory.html" class="quick-action">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span class="quick-action-label">رزرو</span>
+      </a>
+
+      <!-- فروشگاه -->
+      <a href="/all-products.html" class="quick-action">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span class="quick-action-label">فروشگاه</span>
+      </a>
+
+      <!-- پیام‌ها -->
+      <button type="button" class="quick-action" data-section="messages">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="quick-action-label">پیام‌ها</span>
+      </button>
+
+      <!-- علاقه‌مندی‌ها -->
+      <button type="button" class="quick-action" data-section="favorites">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span class="quick-action-label">علاقه‌مندی</span>
+      </button>
+
+      <!-- رزروهای من -->
+      <button type="button" class="quick-action" data-section="bookings">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span class="quick-action-label">رزروها</span>
+      </button>
+
+      <!-- پروفایل -->
+      <button type="button" class="quick-action" data-section="profile">
+        <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span class="quick-action-label">پروفایل</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ماموریت‌های پولساز - Separate container for proper horizontal scroll -->
+  <div class="missions-section">
+    <div class="missions-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="6"></circle>
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+      </svg>
+      ماموریت‌های پولساز
+    </div>
+    <div class="missions-scroll" id="missionsScroll">
+      <!-- Skeleton cards - will be replaced by JavaScript -->
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+      <div class="mission-card-skeleton"><div class="skeleton-reward"></div><div class="skeleton-title"></div></div>
+    </div>
+  </div>
+
+  <!-- تراکنش‌های اخیر - Recent Transactions Section -->
+  <div class="recent-transactions-section fadein">
+    <div class="wallet-transactions-header">
+      <span class="wallet-transactions-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        تراکنش‌های اخیر
+      </span>
+    </div>
+    <div class="wallet-transactions" id="recentTransactions">
+      <!-- تراکنش‌های اخیر با جاوااسکریپت پر می‌شود -->
+    </div>
+    <!-- دکمه مشاهده همه -->
+    <button type="button" class="wallet-view-all" id="viewAllTransactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      مشاهده همه تراکنش‌ها
+    </button>
+  </div>
+
+  <!-- مودال تراکنش‌ها -->
+  <div class="transactions-modal-overlay" id="transactionsModal">
+    <div class="transactions-modal">
+      <div class="transactions-modal-header">
+        <div class="transactions-modal-title">
+          <span>💳</span>
+          <h3>تاریخچه تراکنش‌ها</h3>
+        </div>
+        <button type="button" class="transactions-modal-close" id="closeTransactionsModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="transactions-modal-body" id="allTransactionsList">
+        <!-- لیست کامل تراکنش‌ها -->
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال اقدامات بیشتر -->
+  <div id="moreActionsModal" class="more-actions-modal">
+    <div class="more-actions-content">
+      <div class="more-actions-header">
+        <h3 class="text-lg font-bold text-gray-800">اقدامات بیشتر</h3>
+        <button type="button" class="more-actions-close" id="closeMoreActions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="more-actions-grid">
+        <!-- رزروهای من -->
+        <button type="button" class="more-action-item" data-section="bookings">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>رزروهای من</span>
+        </button>
+
+        <!-- فروشگاه‌ها -->
+        <a href="/all-shops.html" class="more-action-item">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>فروشگاه‌ها</span>
+        </a>
+
+        <!-- جستجو -->
+        <a href="/search.html" class="more-action-item">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <span>جستجو</span>
+        </a>
+
+        <!-- تنظیمات -->
+        <button type="button" class="more-action-item" data-section="profile">
+          <svg class="more-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l-4.2 4.2M23 12h-6m-6 0H5m13.2 5.2l-4.2-4.2m0-6l-4.2-4.2"></path>
+          </svg>
+          <span>تنظیمات</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 fadein">
+    <div id="favBoxClick" class="glass p-6 flex flex-col items-center text-center min-h-[135px] justify-center cursor-pointer hover:shadow-lg transition">
+      <div class="text-[#0ea5e9] font-bold text-base mb-1">علاقه‌مندی‌های ثبت‌شده</div>
+      <div class="text-4xl font-black primary-text mb-1" id="favCountDashboard">-</div>
+    <a href="#" class="text-xs font-bold text-[#0ea5e9] hover:underline menu-btn mt-2" data-section="favorites">نمایش لیست</a>
+    </div>
+    <div id="recentFavsContainerWrapper" class="flex flex-col">
+      <div id="recentFavsContainer"></div>
+    </div>
+  </div>
+  `;
+
+
+
+
+
+    function setupQuickActions() {
+      // اقدامات سریع با data-section
+      document.querySelectorAll('.quick-action[data-section]').forEach(action => {
+        action.addEventListener('click', (event) => {
+          event.preventDefault();
+          const target = action.getAttribute('data-section');
+          if (target) {
+            showSection(target);
+          }
+        });
+      });
+
+      // دکمه "بیشتر..."
+      const moreBtn = document.getElementById('moreActionsBtn');
+      const modal = document.getElementById('moreActionsModal');
+      const closeBtn = document.getElementById('closeMoreActions');
+
+      if (moreBtn && modal) {
+        moreBtn.addEventListener('click', () => {
+          modal.classList.add('active');
+        });
+      }
+
+      if (closeBtn && modal) {
+        closeBtn.addEventListener('click', () => {
+          modal.classList.remove('active');
+        });
+      }
+
+      // بستن مودال با کلیک روی پس‌زمینه
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        });
+      }
+
+      // اقدامات بیشتر در مودال
+      document.querySelectorAll('.more-action-item[data-section]').forEach(item => {
+        item.addEventListener('click', (event) => {
+          event.preventDefault();
+          const target = item.getAttribute('data-section');
+          if (target) {
+            modal.classList.remove('active');
+            showSection(target);
+          }
+        });
+      });
+
+      // بستن مودال با کلید ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+          modal.classList.remove('active');
+        }
+      });
+    }
+
+    async function renderRecentFavorites() {
+      const container = document.getElementById('recentFavsContainer');
+      container.innerHTML = `
+      <div class="glass px-6 py-5 fadein">
+        <div class="flex items-center justify-between mb-4">
+          <span id="recentFavsTitle" class="text-lg font-bold primary-text cursor-pointer">علاقه‌مندی‌های اخیر شما</span>
+          <a href="#" id="recentFavsShowAll" class="text-[#0ea5e9] hover:underline font-bold text-sm menu-btn">مشاهده همه</a>
+        </div>
+        <div class="flex flex-wrap gap-3 scrollbar-hide overflow-x-auto" id="recentFavsList">
+          <div class="text-gray-400 text-center w-full py-3">در حال دریافت ...</div>
+        </div>
+      </div>
+    `;
+
+      try {
+        // درخواست با کوکی و بدون هدر Authorization
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include', // کوکی‌ها (توکن) ارسال می‌شود
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!res.ok) throw new Error();
+
+        const user = await res.json();
+        const favs = Array.isArray(user.favorites) ? user.favorites : [];
+
+        const favsList = container.querySelector("#recentFavsList");
+        if (favs.length === 0) {
+          favsList.innerHTML = `<div class="text-gray-400 text-center w-full py-3">هنوز علاقه‌مندی ثبت نکردی!</div>`;
+        } else {
+          favsList.innerHTML = favs.slice(-3).reverse().map(p => {
+            const shop = (p.sellerId && typeof p.sellerId === 'object') ? p.sellerId : {};
+            return `
+            <div class="min-w-[170px] max-w-xs bg-[#e0fdfa] rounded-xl p-3 flex flex-col items-center text-center">
+              <img src="${(p.images && p.images[0]) ? p.images[0] : '/assets/images/noimage.png'}" class="w-20 h-20 object-cover rounded-xl mb-2 shadow" alt="${p.title || ''}"/>
+              <span class="text-[#10b981] text-base font-bold mb-1">${p.title || '-'}</span>
+              <span class="text-xs text-gray-500 mb-1">${shop.storename ? `فروشگاه ${shop.storename}` : ''}</span>
+              <span class="text-xs text-gray-600 mb-1">قیمت: ${p.price ? p.price.toLocaleString('fa-IR') + ' تومان' : '-'}</span>
+              <a href="http://localhost:5000/product.html?id=${p._id}" class="mt-2 px-4 py-1.5 rounded-lg brand-btn text-xs font-bold inline-block" target="_blank" rel="noopener noreferrer">مشاهده محصول</a>
+            </div>
+          `;
+          }).join('');
+        }
+      } catch (e) {
+        const favsList = container.querySelector("#recentFavsList");
+        favsList.innerHTML = `<div class="text-red-400 text-center w-full py-3">دریافت لیست علاقه‌مندی‌ها ناموفق بود.</div>`;
+      }
+    }
+
+
+
+
+
+
+    // ═══════════════════════════════════════════════════════════════
+    // مودال جزئیات ماموریت‌ها
+    // ═══════════════════════════════════════════════════════════════
+    
+    // داده‌های ماموریت‌ها
+    const missionData = {
+      invite: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>`,
+        title: 'دعوت و کسب درآمد',
+        isInviteModal: true, // نشانگر مودال ویژه دعوت
+        primaryBtn: {
+          text: 'کپی کد معرف',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`,
+          action: 'copy'
+        }
+      },
+      booking: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
+        reward: '۲,۰۰۰ تومان',
+        title: 'اولین رزرو',
+        desc: 'اولین سرویست رو همین امروز رزرو کن و فوری کش‌بک بگیر!',
+        primaryBtn: {
+          text: 'مشاهده خدمات',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+          action: 'browse'
+        },
+        secondaryBtn: null
+      },
+      bookAppointment: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+        reward: '۵,۰۰۰ تومان',
+        title: 'رزرو نوبت آنلاین',
+        isBookingModal: true,
+        desc: 'اولین نوبت خود را آنلاین رزرو کنید و ۵,۰۰۰ تومان اعتبار هدیه بگیرید! 📅',
+        primaryBtn: {
+          text: 'رزرو نوبت و دریافت هدیه',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"/></svg>`,
+          action: 'bookAppointment'
+        },
+        secondaryBtn: {
+          text: 'بعداً',
+          action: 'close'
+        }
+      },
+      profile: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 8v13"/><path d="M3 13h18"/><circle cx="12" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`,
+        reward: '۵۰۰ تومان',
+        title: 'کادوی تولد تو',
+        desc: 'تاریخ تولدت رو ثبت کن تا روز تولدت سورپرایزت کنیم! 🎁\nهمین الان هم ۵۰۰ تومان جایزه بگیر.',
+        primaryBtn: {
+          text: 'ثبت تاریخ تولد',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+          action: 'edit'
+        },
+        secondaryBtn: null
+      },
+      explore: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
+        reward: '۵۰۰ تومان',
+        title: 'بگرد و جایزه بگیر!',
+        isExploreModal: true, // نشانگر مودال ویژه گردشگر
+        desc: 'از پروفایل ۳ فروشگاه مختلف بازدید کن تا ۵۰۰ تومان جایزه بگیری!',
+        primaryBtn: {
+          text: 'شروع گردش',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>`,
+          action: 'startExplore'
+        },
+        secondaryBtn: null
+      },
+      installApp: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
+        reward: '۱۰,۰۰۰ تومان',
+        title: 'نصب اپلیکیشن و دریافت جایزه',
+        isInstallAppModal: true, // نشانگر مودال ویژه نصب اپلیکیشن
+        desc: 'اپلیکیشن ویترینت رو نصب کن و بعد از اولین ورود، ۱۰ هزار تومان اعتبار هدیه بگیر!',
+        primaryBtn: {
+          text: 'دانلود مستقیم اپلیکیشن',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+          action: 'installApp'
+        },
+        secondaryBtn: null
+      }
+    };
+
+    let currentMissionType = null;
+    let userReferralCode = null;
+
+    // دریافت کد معرف کاربر
+    async function getUserReferralCode() {
+      // اگر قبلاً گرفته شده، برگردون
+      if (userReferralCode) return userReferralCode;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        
+        const res = await fetch('/api/user/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user || data;
+          if (user.referralCode && user.referralCode !== '---') {
+            userReferralCode = user.referralCode;
+            return userReferralCode;
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching referral code:', err);
+      }
+      return null;
+    }
+
+    // نمایش مودال ماموریت
+    async function showMissionModal(type) {
+      const data = missionData[type];
+      if (!data) return;
+
+      currentMissionType = type;
+
+      const overlay = document.getElementById('missionModalOverlay');
+      const header = document.getElementById('missionModalHeader');
+      const icon = document.getElementById('missionModalIcon');
+      const reward = document.getElementById('missionModalReward');
+      const title = document.getElementById('missionModalTitle');
+      const bodyContent = document.getElementById('missionModalBodyContent');
+      const actions = document.getElementById('missionModalActions');
+
+      // تنظیم کلاس رنگ
+      header.className = 'mission-modal-header ' + type;
+
+      // تنظیم محتوا
+      icon.innerHTML = data.icon;
+      title.textContent = data.title;
+
+      // اگر مودال دعوت است، محتوای ویژه نمایش بده
+      if (data.isInviteModal) {
+        reward.style.display = 'none';
+        
+        // دریافت کد معرف واقعی کاربر
+        const code = await getUserReferralCode() || '---';
+        
+        bodyContent.innerHTML = `
+          <!-- کارت‌های پاداش -->
+          <div class="invite-rewards-container">
+            <!-- کارت دعوت کاربر -->
+            <div class="invite-reward-card user">
+              <div class="invite-reward-icon user">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <line x1="19" y1="8" x2="19" y2="14"></line>
+                  <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+              </div>
+              <div class="invite-reward-content">
+                <p class="invite-reward-title">دعوت از دوستان</p>
+                <p class="invite-reward-subtitle">وقتی اولین رزروشون رو انجام بدن</p>
+              </div>
+              <div class="invite-reward-badge user">۵,۰۰۰ تومان</div>
+            </div>
+
+            <!-- کارت دعوت فروشنده -->
+            <div class="invite-reward-card vendor">
+              <div class="invite-reward-icon vendor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <div class="invite-reward-content">
+                <p class="invite-reward-title">دعوت از فروشنده</p>
+                <p class="invite-reward-subtitle">پاداش ویژه برای معرفی کسب‌وکار!</p>
+              </div>
+              <div class="invite-reward-badge vendor">۵۰,۰۰۰ تومان</div>
+            </div>
+          </div>
+
+          <!-- بخش کد معرف -->
+          <div class="invite-code-section">
+            <p class="invite-code-label">کد معرف شما</p>
+            <p class="invite-code-value" dir="ltr">${code}</p>
+          </div>
+        `;
+      } else if (data.isExploreModal) {
+        // مودال گردشگر بازار با نمایش پیشرفت
+        reward.style.display = '';
+        reward.textContent = data.reward;
+        
+        // نمایش loading اولیه
+        bodyContent.innerHTML = `
+          <div class="mission-modal-desc-card">
+            <p class="mission-modal-desc">${data.desc}</p>
+          </div>
+          <div class="explore-progress-section">
+            <p style="text-align:center;color:#888;">در حال بارگذاری...</p>
+          </div>
+        `;
+        
+        // دریافت پیشرفت از API
+        let progress = { count: 0, required: 3, completed: false };
+        const apiProgress = await fetchExploreProgressFromAPI();
+        if (apiProgress) {
+          progress = apiProgress;
+        } else {
+          // fallback به localStorage
+          const localProgress = getExploreProgress();
+          progress = { count: localProgress.count, required: 3, completed: localProgress.completed };
+        }
+        
+        const progressPercent = (progress.count / progress.required) * 100;
+        const isComplete = progress.completed || progress.count >= progress.required;
+        
+        // تبدیل اعداد به فارسی
+        const toPersian = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+        
+        bodyContent.innerHTML = `
+          <div class="mission-modal-desc-card">
+            <p class="mission-modal-desc">${data.desc}</p>
+          </div>
+          
+          <!-- بخش پیشرفت -->
+          <div class="explore-progress-section">
+            <div class="explore-progress-header">
+              <p class="explore-progress-label">پیشرفت شما</p>
+              <span class="explore-progress-count">${toPersian(progress.count)}/${toPersian(progress.required)}</span>
+            </div>
+            <div class="explore-progress-bar">
+              <div class="explore-progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+            ${isComplete ? '<p class="explore-progress-hint" style="color:#16a34a;">🎉 تبریک! ماموریت تکمیل شد!</p>' : '<p class="explore-progress-hint">از پروفایل فروشگاه‌ها بازدید کنید</p>'}
+          </div>
+        `;
+      } else if (data.isInstallAppModal) {
+        // مودال نصب اپلیکیشن با طراحی پریمیوم
+        reward.style.display = 'none';
+        
+        bodyContent.innerHTML = `
+          <!-- راهنمای گام به گام با خطوط اتصال -->
+          <div class="install-steps-premium">
+            <!-- مرحله ۱ -->
+            <div class="install-step-premium">
+              <div class="install-step-icon-wrap">
+                <div class="install-step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </div>
+                <div class="install-step-line"></div>
+              </div>
+              <div class="install-step-content-premium">
+                <span class="install-step-num">۱</span>
+                <p class="install-step-title-premium">دانلود فایل نصب</p>
+                <p class="install-step-desc-premium">از دکمه پایین صفحه فایل نصب را دانلود کنید</p>
+              </div>
+            </div>
+            
+            <!-- مرحله ۲ -->
+            <div class="install-step-premium">
+              <div class="install-step-icon-wrap">
+                <div class="install-step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
+                </div>
+                <div class="install-step-line"></div>
+              </div>
+              <div class="install-step-content-premium">
+                <span class="install-step-num">۲</span>
+                <p class="install-step-title-premium">صدور مجوز نصب</p>
+                <p class="install-step-desc-premium">در تنظیمات گوشی، اجازه نصب از منابع ناشناس را فعال کنید</p>
+              </div>
+            </div>
+            
+            <!-- مرحله ۳ -->
+            <div class="install-step-premium last">
+              <div class="install-step-icon-wrap">
+                <div class="install-step-icon gift">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 12 20 22 4 22 4 12"/>
+                    <rect x="2" y="7" width="20" height="5"/>
+                    <line x1="12" y1="22" x2="12" y2="7"/>
+                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="install-step-content-premium">
+                <span class="install-step-num highlight">۳</span>
+                <p class="install-step-title-premium">ورود و دریافت ۱۰,۰۰۰ تومان هدیه!</p>
+                <p class="install-step-desc-premium">وارد حساب کاربری شوید تا جایزه به کیف پولتان اضافه شود</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- بنر نکته مهم -->
+          <div class="install-tip-banner">
+            <span class="install-tip-icon">💡</span>
+            <p class="install-tip-text">
+              <strong>نکته:</strong> اعتبار هدیه بلافاصله پس از اولین ورود شما به اپلیکیشن اضافه می‌شود.
+            </p>
+          </div>
+        `;
+      } else if (data.isBookingModal) {
+        // مودال رزرو نوبت با طراحی پریمیوم
+        reward.style.display = 'none';
+        
+        bodyContent.innerHTML = `
+          <div class="booking-modal-content">
+            <!-- Hero Section with Illustration -->
+            <div class="booking-hero-section">
+              <div class="booking-illustration">
+                <div class="booking-illustration-bg"></div>
+                <div class="booking-illustration-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                    <path d="M9 16l2 2 4-4"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="booking-main-title">اولین نوبتت رو آنلاین بگیر!</h3>
+              <p class="booking-subtitle">همین الان اولین نوبت خودت رو رزرو کن و هدیه نقدی بگیر.</p>
+            </div>
+            
+            <!-- Reward Highlight Box -->
+            <div class="booking-reward-box">
+              <div class="booking-reward-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 12 20 22 4 22 4 12"/>
+                  <rect x="2" y="7" width="20" height="5"/>
+                  <line x1="12" y1="22" x2="12" y2="7"/>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+              </div>
+              <div class="booking-reward-content">
+                <p class="booking-reward-label">هدیه ویژه شما</p>
+                <p class="booking-reward-amount">۵,۰۰۰ تومان</p>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="booking-modal-actions">
+              <button type="button" class="booking-primary-btn" onclick="handleMissionAction('bookAppointment')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                  <path d="M9 16l2 2 4-4"/>
+                </svg>
+                رزرو نوبت و دریافت هدیه
+              </button>
+              <button type="button" class="booking-secondary-btn" onclick="closeMissionModal()">بعداً</button>
+            </div>
+          </div>
+        `;
+        
+        // Hide default actions for booking modal (we have custom buttons)
+        actions.innerHTML = '';
+      } else {
+        reward.style.display = '';
+        reward.textContent = data.reward;
+        bodyContent.innerHTML = `
+          <div class="mission-modal-desc-card">
+            <p class="mission-modal-desc">${data.desc}</p>
+          </div>
+        `;
+      }
+
+      // ساخت دکمه‌ها
+      let actionsHTML = '';
+      
+      if (data.primaryBtn) {
+        actionsHTML += `
+          <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
+            ${data.primaryBtn.icon}
+            ${data.primaryBtn.text}
+          </button>
+        `;
+      }
+
+      if (data.secondaryBtn) {
+        actionsHTML += `
+          <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
+            ${data.secondaryBtn.icon}
+            ${data.secondaryBtn.text}
+          </button>
+        `;
+      }
+
+      actions.innerHTML = actionsHTML;
+
+      // نمایش مودال
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Setup listeners بعد از نمایش مودال
+      setupMissionModalListeners();
+    }
+
+    // بستن مودال ماموریت
+    function closeMissionModal() {
+      const overlay = document.getElementById('missionModalOverlay');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      currentMissionType = null;
+    }
+
+    // هندل کردن اکشن‌های ماموریت
+    async function handleMissionAction(action) {
+      switch (action) {
+        case 'share':
+          await shareMissionLink();
+          break;
+        case 'copy':
+          await copyReferralCode();
+          break;
+        case 'browse':
+          closeMissionModal();
+          window.location.href = '/service-directory.html';
+          break;
+        case 'edit':
+          closeMissionModal();
+          showSection('profile');
+          break;
+        case 'startExplore':
+          closeMissionModal();
+          window.location.href = '/all-shops.html';
+          break;
+        case 'installApp':
+          triggerPWAInstall();
+          break;
+        case 'bookAppointment':
+          closeMissionModal();
+          window.location.href = '/service-directory.html';
+          break;
+      }
+    }
+
+    // نصب PWA
+    let deferredPrompt = null;
+    
+    // ذخیره رویداد beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+    
+    function triggerPWAInstall() {
+      if (deferredPrompt) {
+        // اگر prompt نصب موجود است، نمایش بده
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showCopyToast('🎉 در حال نصب...');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // اگر prompt موجود نیست، راهنمای دستی نمایش بده
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        
+        if (isIOS) {
+          showCopyToast('از منوی Share گزینه "Add to Home Screen" را انتخاب کنید');
+        } else if (isAndroid) {
+          showCopyToast('از منوی مرورگر گزینه "نصب برنامه" را انتخاب کنید');
+        } else {
+          showCopyToast('از منوی مرورگر گزینه "Install" را انتخاب کنید');
+        }
+      }
+    }
+
+    // اشتراک‌گذاری لینک
+    async function shareMissionLink() {
+      const code = await getUserReferralCode();
+      if (!code || code === '---') {
+        showCopyToast('کد معرف هنوز تولید نشده است');
+        return;
+      }
+      
+      const shareUrl = `${window.location.origin}/register.html?ref=${code}`;
+      const shareText = `با این لینک ثبت‌نام کن و ۳ هزار تومان هدیه بگیر! 🎁`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'دعوت به ویترینت',
+            text: shareText,
+            url: shareUrl
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            await copyToClipboard(shareUrl, 'لینک کپی شد!');
+          }
+        }
+      } else {
+        await copyToClipboard(shareUrl, 'لینک کپی شد!');
+      }
+    }
+
+    // کپی کد معرف
+    async function copyReferralCode() {
+      const code = await getUserReferralCode();
+      if (!code || code === '---') {
+        showCopyToast('کد معرف هنوز تولید نشده است');
+        return;
+      }
+      await copyToClipboard(code, 'کد معرف کپی شد!');
+    }
+
+    // کپی به کلیپ‌بورد
+    async function copyToClipboard(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopyToast(message);
+      } catch (err) {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showCopyToast(message);
+      }
+    }
+
+    // نمایش پیام کپی
+    function showCopyToast(message) {
+      const toast = document.getElementById('missionCopyToast');
+      const toastText = document.getElementById('missionCopyToastText');
+      toastText.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Event Listeners برای مودال - استفاده از Event Delegation
+    function setupMissionModalListeners() {
+      const closeBtn = document.getElementById('missionModalClose');
+      const dismissBtn = document.getElementById('missionModalDismiss');
+      const overlay = document.getElementById('missionModalOverlay');
+
+      // بستن با دکمه X
+      if (closeBtn) {
+        closeBtn.onclick = closeMissionModal;
+      }
+      
+      // بستن با دکمه بعداً
+      if (dismissBtn) {
+        dismissBtn.onclick = closeMissionModal;
+      }
+      
+      // بستن با کلیک روی overlay
+      if (overlay) {
+        overlay.onclick = (e) => {
+          if (e.target.id === 'missionModalOverlay') {
+            closeMissionModal();
+          }
+        };
+      }
+    }
+
+    // بستن با Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMissionModal();
+      }
+    });
+
+    // اجرای setup هنگام لود صفحه
+    document.addEventListener('DOMContentLoaded', setupMissionModalListeners);
+
+    // توابع کمکی برای کلیک روی کارت‌های ماموریت
+    function showReferralSection() {
+      showMissionModal('invite');
+    }
+
+    function showProfileSection() {
+      showMissionModal('profile');
+    }
+
+    function showBookingMission() {
+      showMissionModal('booking');
+    }
+
+    function showBookAppointmentMission() {
+      showMissionModal('bookAppointment');
+    }
+
+    function showExploreMission() {
+      showMissionModal('explore');
+    }
+
+    function showInstallAppMission() {
+      showMissionModal('installApp');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // مودال ثبت تاریخ تولد
+    // ═══════════════════════════════════════════════════════════════
+    
+    // پر کردن سلکت‌های روز و سال
+    function initBirthdaySelects() {
+      const daySelect = document.getElementById('birthdayDay');
+      const yearSelect = document.getElementById('birthdayYear');
+      
+      if (!daySelect || !yearSelect) {
+        console.warn('Birthday selects not found in DOM');
+        return;
+      }
+      
+      // پر کردن روزها (1-31)
+      for (let i = 1; i <= 31; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString().padStart(2, '0');
+        option.textContent = i.toLocaleString('fa-IR');
+        daySelect.appendChild(option);
+      }
+      
+      // پر کردن سال‌ها (1395 تا 1300 - نزولی)
+      for (let i = 1395; i >= 1300; i--) {
+        const option = document.createElement('option');
+        option.value = i.toString();
+        option.textContent = i.toLocaleString('fa-IR');
+        yearSelect.appendChild(option);
+      }
+    }
+
+    // باز کردن مودال تاریخ تولد
+    function openBirthdayModal() {
+      const overlay = document.getElementById('birthdayModalOverlay');
+      if (!overlay) {
+        console.warn('Birthday modal overlay not found');
+        return;
+      }
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // بستن مودال تاریخ تولد
+    function closeBirthdayModal() {
+      const overlay = document.getElementById('birthdayModalOverlay');
+      if (!overlay) return;
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // بررسی فعال بودن دکمه ثبت
+    function checkBirthdayFormValid() {
+      const day = document.getElementById('birthdayDay').value;
+      const month = document.getElementById('birthdayMonth').value;
+      const year = document.getElementById('birthdayYear').value;
+      const submitBtn = document.getElementById('birthdaySubmitBtn');
+      
+      submitBtn.disabled = !(day && month && year);
+    }
+
+    // ثبت تاریخ تولد
+    async function submitBirthday() {
+      const day = document.getElementById('birthdayDay').value;
+      const month = document.getElementById('birthdayMonth').value;
+      const year = document.getElementById('birthdayYear').value;
+      const submitBtn = document.getElementById('birthdaySubmitBtn');
+      
+      if (!day || !month || !year) return;
+      
+      const birthDate = `${year}/${month}/${day}`;
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"></path>
+        </svg>
+        <span>در حال ثبت...</span>
+      `;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('لطفاً ابتدا وارد شوید');
+        }
+        
+        const res = await fetch('/api/user/birthday', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ birthDate })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.message || 'خطا در ثبت تاریخ تولد');
+        }
+        
+        // بستن مودال
+        closeBirthdayModal();
+        
+        // آپدیت UI تاریخ تولد در پروفایل
+        const birthdayValue = document.getElementById('birthdayValue');
+        const birthdayCard = document.getElementById('birthdayCard');
+        if (birthdayValue) {
+          birthdayValue.textContent = birthDate;
+          birthdayValue.classList.remove('placeholder-value');
+        }
+        if (birthdayCard) {
+          birthdayCard.setAttribute('data-has-birthday', 'true');
+        }
+        
+        // آپدیت موجودی کیف پول اگر جایزه داده شده
+        if (data.rewardGiven) {
+          const walletBalanceEl = document.querySelector('.wallet-balance-value');
+          if (walletBalanceEl && data.formattedBalance) {
+            walletBalanceEl.textContent = data.formattedBalance;
+          }
+          
+          // نمایش toast موفقیت با جایزه
+          showBirthdaySuccessToast('تاریخ تولد ثبت شد! ۵۰۰ تومان جایزه گرفتی 🎉');
+        } else {
+          // نمایش toast موفقیت بدون جایزه
+          showBirthdaySuccessToast('تاریخ تولد به‌روزرسانی شد');
+        }
+        
+        // مخفی کردن badge جایزه برای دفعات بعدی
+        const rewardBadge = document.getElementById('birthdayRewardBadge');
+        if (rewardBadge && !data.rewardGiven) {
+          rewardBadge.style.display = 'none';
+        }
+        
+        // علامت‌گذاری ماموریت تولد به عنوان تکمیل شده
+        markMissionCompleted('user-profile-complete');
+        
+      } catch (error) {
+        console.error('Birthday submit error:', error);
+        alert(error.message || 'خطا در ثبت تاریخ تولد');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 12v10H4V12"/>
+            <path d="M2 7h20v5H2z"/>
+            <path d="M12 22V7"/>
+          </svg>
+          <span>ثبت و دریافت جایزه</span>
+        `;
+      }
+    }
+
+    // نمایش toast موفقیت تولد
+    function showBirthdaySuccessToast(message) {
+      const toast = document.getElementById('birthdaySuccessToast');
+      const text = document.getElementById('birthdaySuccessText');
+      if (toast && text) {
+        text.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+    }
+
+    // راه‌اندازی event listeners مودال تولد
+    function initBirthdayModal() {
+      initBirthdaySelects();
+      
+      // دکمه بستن
+      const closeBtn = document.getElementById('birthdayModalClose');
+      const dismissBtn = document.getElementById('birthdayModalDismiss');
+      const overlay = document.getElementById('birthdayModalOverlay');
+      const submitBtn = document.getElementById('birthdaySubmitBtn');
+      
+      if (closeBtn) closeBtn.addEventListener('click', closeBirthdayModal);
+      if (dismissBtn) dismissBtn.addEventListener('click', closeBirthdayModal);
+      
+      // کلیک روی overlay
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeBirthdayModal();
+        });
+      }
+      
+      // تغییر سلکت‌ها
+      const daySelect = document.getElementById('birthdayDay');
+      const monthSelect = document.getElementById('birthdayMonth');
+      const yearSelect = document.getElementById('birthdayYear');
+      
+      if (daySelect) daySelect.addEventListener('change', checkBirthdayFormValid);
+      if (monthSelect) monthSelect.addEventListener('change', checkBirthdayFormValid);
+      if (yearSelect) yearSelect.addEventListener('change', checkBirthdayFormValid);
+      
+      // دکمه ثبت
+      if (submitBtn) submitBtn.addEventListener('click', submitBirthday);
+    }
+
+    // راه‌اندازی در بارگذاری صفحه
+    document.addEventListener('DOMContentLoaded', initBirthdayModal);
+
+    // ═══════════════════════════════════════════════════════════════
+    // سیستم ردیابی ماموریت گردشگر بازار
+    // ═══════════════════════════════════════════════════════════════
+    
+    const EXPLORE_STORAGE_KEY = 'vitrint_explore_mission';
+    const EXPLORE_REQUIRED_VISITS = 3;
+
+    // دریافت پیشرفت ماموریت گردشگر از API
+    let cachedExploreProgress = null;
+    
+    async function fetchExploreProgressFromAPI() {
+      try {
+        const res = await fetch('/api/missions/browse-status', {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) {
+          // کاربر لاگین نیست - از localStorage استفاده کن
+          return null;
+        }
+        
+        const data = await res.json();
+        if (data.success) {
+          cachedExploreProgress = {
+            count: data.progress || 0,
+            required: data.required || 3,
+            status: data.status,
+            visitedShops: data.visitedStores?.map(v => v.storeId) || [],
+            completed: data.status === 'completed' || data.status === 'claimed',
+            rewarded: data.rewardPaid || false,
+            isActive: data.isActive
+          };
+          return cachedExploreProgress;
+        }
+      } catch (e) {
+        console.log('Could not fetch explore progress from API');
+      }
+      return null;
+    }
+    
+    // دریافت پیشرفت ماموریت گردشگر (ترکیبی از API و localStorage)
+    function getExploreProgress() {
+      // اگر کش موجود است، برگردان
+      if (cachedExploreProgress) {
+        return cachedExploreProgress;
+      }
+      
+      // fallback به localStorage
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const stored = localStorage.getItem(EXPLORE_STORAGE_KEY);
+        if (stored) {
+          const data = JSON.parse(stored);
+          // اگر تاریخ امروز نیست، ریست کن
+          if (data.date !== today) {
+            return { date: today, visitedShops: [], count: 0, completed: false, rewarded: false };
+          }
+          return data;
+        }
+      } catch (e) {
+        console.error('Error reading explore progress:', e);
+      }
+      return { date: new Date().toISOString().split('T')[0], visitedShops: [], count: 0, completed: false, rewarded: false };
+    }
+
+    // ذخیره پیشرفت ماموریت گردشگر
+    function saveExploreProgress(progress) {
+      try {
+        localStorage.setItem(EXPLORE_STORAGE_KEY, JSON.stringify(progress));
+      } catch (e) {
+        console.error('Error saving explore progress:', e);
+      }
+    }
+
+    // ثبت بازدید از فروشگاه
+    function trackShopVisit(shopId) {
+      if (!shopId) return;
+      
+      const progress = getExploreProgress();
+      
+      // اگر قبلاً تکمیل شده و پاداش گرفته، کاری نکن
+      if (progress.completed && progress.rewarded) return;
+      
+      // اگر این فروشگاه قبلاً بازدید شده، کاری نکن
+      if (progress.visitedShops.includes(shopId)) return;
+      
+      // اضافه کردن فروشگاه به لیست بازدید شده‌ها
+      progress.visitedShops.push(shopId);
+      progress.count = progress.visitedShops.length;
+      
+      // نمایش toast پیشرفت
+      showExploreProgressToast(progress.count);
+      
+      // بررسی تکمیل ماموریت
+      if (progress.count >= EXPLORE_REQUIRED_VISITS && !progress.completed) {
+        progress.completed = true;
+        // نمایش پیام تکمیل با تاخیر
+        setTimeout(() => {
+          showExploreCompleteToast();
+          // TODO: اینجا می‌تونید API call برای ثبت پاداش اضافه کنید
+          progress.rewarded = true;
+          saveExploreProgress(progress);
+        }, 1500);
+      }
+      
+      saveExploreProgress(progress);
+    }
+
+    // نمایش toast پیشرفت
+    function showExploreProgressToast(count) {
+      const toast = document.getElementById('exploreProgressToast');
+      const text = document.getElementById('exploreProgressText');
+      if (!toast || !text) return;
+      
+      const persianCount = count.toString().replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+      text.textContent = `فروشگاه بازدید شد! (${persianCount}/۳)`;
+      toast.classList.remove('complete');
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // نمایش toast تکمیل ماموریت
+    function showExploreCompleteToast() {
+      const toast = document.getElementById('exploreProgressToast');
+      const text = document.getElementById('exploreProgressText');
+      if (!toast || !text) return;
+      
+      text.textContent = '🎉 تبریک! ۵۰۰ تومان جایزه گرفتی!';
+      toast.classList.add('complete', 'show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show', 'complete');
+      }, 4000);
+    }
+
+    // تابع global برای استفاده در صفحات دیگر
+    window.trackShopVisit = trackShopVisit;
+
+    // هندل کردن SPA و رسپانسیو
+    function showSection(section) {
+      const mainContent = document.getElementById('mainContent');
+      // پاک کردن فعال بودن منوها
+      document.querySelectorAll('.menu-btn').forEach(btn => {
+        btn.classList.remove('tab-active', 'active');
+      });
+      // فعال کردن منوی فعلی
+      document.querySelectorAll(`.menu-btn[data-section="${section}"]`).forEach(btn => {
+        btn.classList.add('tab-active', 'active');
+      });
+      // محتوا
+      if (section === 'dashboard') {
+        mainContent.innerHTML = dashboardSection;
+        setupQuickActions();
+        renderRecentFavorites(); // اینجا رندر داینامیک رو صدا بزن
+        updateDashboardFavCount(); // اینم اضافه کن تا تعداد علاقه‌مندی درست بشه
+        initStreakAndWallet(); // بارگذاری استریک و کیف پول
+      }
+      else if (section === 'profile') loadProfileSection();
+      else if (section === 'favorites') loadFavoritesSection();
+      else if (section === 'favshops') loadFavShopsSection();
+      else if (section === 'bookings') loadBookingsSection();
+      else if (section === 'messages') loadMessagesSection();
+
+      if (section === 'messages') startMsgPolling(); else stopMsgPolling();
+
+      // اسکرول به بالا
+      mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+
+    async function updateDashboardFavCount() {
+      const favCountEl = document.getElementById('favCountDashboard');
+      try {
+        // درخواست با کوکی (credentials: 'include')
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!res.ok) {
+          if (favCountEl) favCountEl.textContent = '-';
+          return;
+        }
+        const user = await res.json();
+        if (favCountEl) {
+          favCountEl.textContent = Array.isArray(user.favorites) ? user.favorites.length : '0';
+        }
+      } catch (e) {
+        if (favCountEl) favCountEl.textContent = '-';
+      }
+    }
+
+
+    // منوهای دسکتاپ و موبایل
+
+    /* ——— هندل منوهای سایدبار (مستقیم) ——— */
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.menu-btn');
+      if (!btn) return;
+      e.preventDefault();
+      showSection(btn.dataset.section);
+      if (window.innerWidth < 1024) closeSidebar();
+    });
+
+
+
+
+    // سوییچ کردن با دکمه پروفایل (Hero Avatar)
+    const heroAvatarBtn = document.getElementById('heroAvatar');
+    if (heroAvatarBtn) {
+      heroAvatarBtn.onclick = function () {
+        showSection('profile');
+        // Don't open sidebar when clicking profile - just show profile section
+      };
+    }
+
+    // همبرگر موبایل
+    function openSidebar() {
+      markNotificationsViewed();
+      document.getElementById('mobileSidebar').classList.add('open');
+      document.getElementById('sidebarOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.getElementById('mobileSidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    const hamBtn = document.getElementById('hamBtn');
+    if (hamBtn) {
+      hamBtn.addEventListener('click', openSidebar);
+    }
+    document.getElementById('closeSidebar').onclick = closeSidebar;
+    document.getElementById('sidebarOverlay').onclick = closeSidebar;
+    document.addEventListener('keydown', function (e) {
+      if (e.key === "Escape") {
+        closeSidebar();
+      }
+    });
+
+
+
+
+
+    // به‌روزرسانی اطلاعات کاربر در سایدبار (موبایل + دسکتاپ)
+    async function updateSidebarUser() {
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include',          // ارسال توکن از طریق کوکی
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error();
+
+        const user = await res.json();
+
+        /* ↙️ آی‌دی کاربر را برای فیلتر چت‌ها نگه می‌داریم */
+        window.currentUserId = user._id;
+
+        const first = user.firstname || user.firstName || 'کاربر';
+        const last = user.lastname || user.lastName || 'ویترینت';
+        const phone = user.phone || user.mobile || '';
+        profileState.isAuthenticated = true;
+        profileState.user = {
+          ...profileState.user,
+          firstName: first,
+          lastName: last,
+          phone
+        };
+        applyProfileStateToUI();
+
+        window.currentUserPhone = phone;
+        refreshBookingsBadge();
+
+        // Check if birthday is set and mark mission as completed
+        const hasBirthday = user.birthDate || user.birthday || user.dateOfBirth;
+        if (hasBirthday) {
+          window.completedMissions.add('user-profile-complete');
+        }
+      } catch (_) {
+        profileState.isAuthenticated = false;
+        profileState.user = {
+          firstName: '',
+          lastName: '',
+          city: '',
+          phone: ''
+        };
+        applyProfileStateToUI();
+      }
+    }
+
+
+
+
+
+
+
+
+    async function loadFavoritesSection() {
+      let html = `<div class="glass px-6 py-7 fadein"><div class="text-center text-gray-400 py-12">در حال دریافت...</div></div>`;
+      document.getElementById('mainContent').innerHTML = html;
+
+      try {
+        // درخواست با کوکی (credentials: 'include')
+        const res = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include', // مهم!
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+
+        if (!res.ok) throw new Error('دریافت پروفایل کاربر ناموفق بود!');
+        const user = await res.json();
+        const favs = user.favorites;
+
+        if (!Array.isArray(favs) || favs.length === 0) {
+          html = `<div class="glass px-6 py-7 fadein text-center text-gray-400">هیچ محصولی در علاقه‌مندی‌ها نیست.</div>`;
+        } else {
+          html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="text-xl font-black primary-text mb-5">علاقه‌مندی‌های من</div>
+          <div class="flex flex-wrap gap-4">
+            ${favs.map(p => {
+            const shop = (p.sellerId && typeof p.sellerId === 'object') ? p.sellerId : {};
+            return `
+                <div class="min-w-[170px] max-w-xs bg-[#e0fdfa] rounded-xl p-3 flex flex-col items-center text-center">
+                  <img src="${(p.images && p.images[0]) ? p.images[0] : '/assets/images/noimage.png'}" class="w-24 h-24 object-cover rounded-xl mb-2 shadow" alt="${p.title || ''}"/>
+                  <span class="text-[#10b981] text-lg font-bold mb-1">${p.title || '-'}</span>
+                  <span class="text-xs text-gray-500 mb-1">${shop.storename ? `فروشگاه ${shop.storename}` : ''}</span>
+                  <span class="text-xs text-gray-600 mb-1">قیمت: ${p.price ? p.price.toLocaleString('fa-IR') + ' تومان' : '-'}</span>
+                  <a href="http://localhost:5000/product.html?id=${p._id}" class="mt-2 px-4 py-1.5 rounded-lg brand-btn text-xs font-bold inline-block" target="_blank" rel="noopener noreferrer">مشاهده محصول</a>
+                </div>
+              `;
+          }).join('')}
+          </div>
+        </div>
+        `;
+        }
+      } catch (e) {
+        html = `<div class="glass px-6 py-7 fadein text-center text-red-400">${e.message}</div>`;
+      }
+
+      document.getElementById('mainContent').innerHTML = html;
+    }
+
+    async function loadFavShopsSection() {
+      let html = `<div class="glass px-6 py-7 fadein"><div class="text-center text-gray-400 py-12">در حال دریافت...</div></div>`;
+      document.getElementById('mainContent').innerHTML = html;
+
+      try {
+        const res = await fetch('/api/favorite-shops', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+        if (!res.ok) throw new Error('دریافت لیست ناموفق بود!');
+        const shops = await res.json();
+
+        // حذف مقادیر null/undefined برای جلوگیری از خطاهای دسترسی به خصوصیت
+        const validShops = Array.isArray(shops) ? shops.filter(Boolean) : [];
+
+        const resolveShopImage = (shop) => {
+          const candidate = shop?.boardImage
+            || shop?.coverImage
+            || shop?.banner
+            || (Array.isArray(shop?.images) ? shop.images[0] : shop?.image);
+          const src = candidate || '/assets/images/shop-placeholder.svg';
+          if (/^https?:/i.test(src) || src.startsWith('data:') || src.startsWith('//')) return src;
+          if (src.startsWith('/')) return src;
+          return `/${src.replace(/^\/+/, '')}`;
+        };
+
+        const buildShopLink = (shop) => {
+          const slug = shop?.shopurl || shop?.shopUrl || shop?.slug;
+          if (slug) return `/shop.html?shopurl=${encodeURIComponent(slug)}`;
+          if (shop?._id) return `/shop.html?id=${encodeURIComponent(shop._id)}`;
+          return '';
+        };
+
+        if (validShops.length === 0) {
+          html = `<div class="glass px-6 py-7 fadein text-center text-gray-400">هیچ مغازه‌ای در لیست محبوب‌ها نیست.</div>`;
+        } else {
+          html = `
+        <div class="glass px-6 py-7 fadein">
+          <div class="text-xl font-black primary-text mb-5">مغازه‌های محبوب من</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${validShops.map(s => {
+            const shop = s || {};
+            const cover = resolveShopImage(shop);
+            const linkUrl = buildShopLink(shop);
+            const category = shop.category || shop.subcategory || 'دسته‌بندی ثبت نشده';
+            return `
+              <div class="relative overflow-hidden rounded-2xl bg-white border border-emerald-50 shadow-xl transition hover:-translate-y-1 hover:shadow-2xl flex flex-col">
+                <div class="relative h-32 w-full overflow-hidden">
+                  <img src="${cover}" alt="${shop.storename || 'فروشگاه'}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='/assets/images/shop-placeholder.svg'" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-black/10"></div>
+                  <span class="absolute top-3 left-3 bg-white/80 text-emerald-600 text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">محبوب</span>
+                </div>
+                <div class="p-4 flex flex-col gap-2 text-right">
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span class="text-lg font-black text-slate-800">${shop.storename || '-'}</span>
+                    <span class="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">${category}</span>
+                  </div>
+                  ${shop.city || shop.address ? `<p class="text-xs text-gray-500 flex items-center gap-1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-emerald-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z"/></svg>${[shop.city, shop.address].filter(Boolean).join('، ')}</p>` : ''}
+                  <div class="flex gap-2 pt-2">
+                    ${linkUrl ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 brand-btn rounded-xl px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 shadow-sm hover:shadow-lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 3h7v7m0-7L10 14"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h4m-4 4h2m5 10H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l4 4v12c0 1.1-.9 2-2 2Z"/></svg>ورود به صفحه مغازه</a>` : ''}
+                    ${shop._id ? `<button data-id="${shop._id}" class="removeFavShop px-4 py-2 rounded-xl border border-red-100 bg-red-50 text-red-600 text-sm font-bold transition hover:bg-red-100">حذف</button>` : ''}
+                  </div>
+                </div>
+              </div>
+              `;
+          }).join('')}
+          </div>
+        </div>`;
+        }
+      } catch (e) {
+        html = `<div class="glass px-6 py-7 fadein text-center text-red-400">${e.message}</div>`;
+      }
+
+      document.getElementById('mainContent').innerHTML = html;
+
+      document.querySelectorAll('.removeFavShop').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          btn.disabled = true;
+          try {
+            await fetch(`/api/favorite-shops/${id}`, { method: 'DELETE', credentials: 'include' });
+            loadFavShopsSection();
+          } catch { btn.disabled = false; }
+        });
+      });
+    }
+
+
+
+
+    /* ─────────  پیام‌های کاربر  ───────── */
+    /* ───────── بخش پیام‌های حرفه‌ای کاربر ───────── */
+    const API_BASE = '/api';           // طبق سرورت
+    let chatsList = [];               // لیست چت‌ها
+    const LAST_NOTIF_KEY = 'userDashboard.lastNotificationsViewedAt';
+
+    function getLastNotificationsViewedAt() {
+      try {
+        return Number(localStorage.getItem(LAST_NOTIF_KEY)) || 0;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    function setLastNotificationsViewedNow() {
+      try {
+        localStorage.setItem(LAST_NOTIF_KEY, String(Date.now()));
+      } catch (_) {
+        /* ignore storage errors */
+      }
+    }
+    let currentCid = null;             // آی‌دی چت انتخاب شده
+    let blockedSellers = [];            // فروشندگان مسدودشده
+
+    async function loadMessagesSection() {
+      const box = document.getElementById('mainContent');
+      box.innerHTML = `
+    <div id="messages-section" class="messages-container fadein">
+      <!-- هدر بخش پیام‌ها -->
+      <div class="messages-header">
+        <div class="messages-title">
+          <div class="messages-title-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h2>پیام‌های من</h2>
+            <span class="messages-count" id="messagesCount">در حال بارگذاری...</span>
+          </div>
+        </div>
+        <div class="messages-filters">
+          <button class="msg-filter-btn active" data-filter="all">همه</button>
+          <button class="msg-filter-btn" data-filter="seller">فروشندگان</button>
+          <button class="msg-filter-btn" data-filter="admin">مدیر سایت</button>
+          <button class="msg-filter-btn" data-filter="product">محصولات</button>
+        </div>
+      </div>
+
+      <!-- دکمه چت با مدیر -->
+      <div class="flex justify-end mb-4">
+        <button class="open-admin-msg brand-btn text-sm px-4 py-2 rounded-xl flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          چت با مدیر سایت
+        </button>
+      </div>
+
+      <!-- لیست چت‌ها -->
+      <div id="userChatsList" class="chats-list"></div>
+    </div>
+  `;
+
+      // Add event listener for admin message button
+      const adminMsgBtn = document.querySelector('.open-admin-msg');
+      if (adminMsgBtn) {
+        adminMsgBtn.addEventListener('click', openAdminMsgModal);
+      }
+
+      // Add filter button listeners
+      document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMsgFilter = btn.dataset.filter;
+          renderMessagesList();
+        });
+      });
+
+      // اگر currentUserId تنظیم نشده، اول پروفایل رو بگیر
+      if (!window.currentUserId) {
+        try {
+          const res = await fetch('/api/user/profile', { credentials: 'include' });
+          if (res.ok) {
+            const user = await res.json();
+            window.currentUserId = user._id;
+            console.log('✅ currentUserId تنظیم شد:', window.currentUserId);
+          }
+        } catch (e) {
+          console.error('خطا در دریافت پروفایل:', e);
+        }
+      }
+
+      await fetchBlockedSellers(); // فروشنده‌های مسدودشده را بگیر
+      await fetchUserChats();  // لیست چت‌ها رو بگیر
+      renderMessagesList();    // رندر کن
+      startMsgPolling();       // polling شروع کن
+    }
+
+    let currentMsgFilter = 'all';
+
+    /* گرفتن لیست چت‌ها */
+    /*  دریافت لیست چت‌های *خودِ کاربر*  */
+    /* گرفتن لیست چت‌ها (فقط لیست، بدون جزئیات پیام‌ها) */
+    async function fetchUserChats() {
+      try {
+        const res = await fetch(`${API_BASE}/chats/my`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          console.error('fetchUserChats: HTTP error', res.status);
+          chatsList = [];
+          return;
+        }
+
+        const data = await res.json();
+        console.log('📨 چت‌های دریافتی از سرور:', data);
+
+        // API /chats/my خودش فقط چت‌های کاربر لاگین شده رو برمی‌گردونه
+        // پس نیازی به فیلتر اضافی نیست
+        chatsList = Array.isArray(data) ? data : (data.chats || []);
+
+        // مرتب‌سازی بر اساس آخرین به‌روزرسانی
+        chatsList.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+
+        console.log('📋 لیست چت‌ها پس از مرتب‌سازی:', chatsList.length, 'چت');
+
+      } catch (e) {
+        console.error('fetchUserChats error:', e);
+        chatsList = [];
+      }
+    }
+
+    async function loadMessages() {
+      try {
+        await fetchUserChats();
+        updateBadge();
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    }
+
+
+    /* رندر لیست چت‌ها - نسخه جدید با استایل حرفه‌ای */
+    function renderMessagesList() {
+      const box = document.getElementById('userChatsList');
+      const countEl = document.getElementById('messagesCount');
+      console.log("لیست چت‌ها:", chatsList);
+
+      // فیلتر کردن چت‌ها بر اساس فیلتر انتخابی
+      let filteredChats = chatsList;
+      if (currentMsgFilter !== 'all') {
+        filteredChats = chatsList.filter(c => {
+          if (currentMsgFilter === 'seller') {
+            return c.type === 'user-seller' || (c.participantsModel && c.participantsModel.includes('Seller') && !c.participantsModel.includes('Admin'));
+          }
+          if (currentMsgFilter === 'admin') {
+            return c.type === 'admin-user' || c.type === 'user-admin' || c.type === 'admin' || (c.participantsModel && c.participantsModel.includes('Admin'));
+          }
+          if (currentMsgFilter === 'product') {
+            return c.type === 'product' || c.productId;
+          }
+          return true;
+        });
+      }
+
+      // بروزرسانی تعداد
+      if (countEl) {
+        const totalUnread = chatsList.reduce((sum, c) => {
+          return sum + (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
+        }, 0);
+        countEl.textContent = totalUnread > 0
+          ? `${chatsList.length} گفتگو • ${totalUnread} پیام خوانده نشده`
+          : `${chatsList.length} گفتگو`;
+      }
+
+      if (!filteredChats.length) {
+        box.innerHTML = `
+      <div class="messages-empty">
+        <div class="messages-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری!' : 'گفتگویی در این دسته وجود ندارد'}</h3>
+        <p>${currentMsgFilter === 'all' ? 'از دکمه «چت با مدیر سایت» استفاده کن یا از صفحه محصولات به فروشندگان پیام بده.' : 'فیلتر دیگری را امتحان کنید.'}</p>
+      </div>
+    `;
+        return;
+      }
+
+      // شناسه کاربر فعلی
+      const myId = window.currentUserId;
+
+      box.innerHTML = filteredChats.map(c => {
+        let whom = 'مخاطب';
+        let role = '';
+        let sellerId = null;
+        let storeName = '';
+        let shopUrl = '';
+        let isBlocked = false;
+
+        if (Array.isArray(c.participants)) {
+          // مقایسه با toString برای اطمینان از تطابق صحیح
+          const participant = c.participants.find(p => p && p._id && p._id.toString() !== myId?.toString());
+          if (participant) {
+            // اگر فروشنده باشه، role نداره پس از participantsModel استفاده میکنیم
+            const pIdx = c.participants.findIndex(pp => pp && pp._id && pp._id.toString() === participant._id.toString());
+            const pModel = c.participantsModel?.[pIdx];
+            role = participant.role || (pModel === 'Seller' ? 'seller' : (pModel === 'Admin' ? 'admin' : 'user'));
+            sellerId = participant._id;
+            storeName = participant.storename || '';
+            shopUrl = participant.shopurl || '';
+            whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'مشتری' : 'مخاطب'));
+          }
+        }
+
+        if (role === 'seller' && sellerId) {
+          // مقایسه با toString برای اطمینان از تطابق صحیح
+          const sellerIdStr = sellerId?.toString() || sellerId;
+          isBlocked = blockedSellers.some(bs => (bs?.toString() || bs) === sellerIdStr);
+        }
+
+        if (!role && Array.isArray(c.participantsModel)) {
+          if (c.participantsModel.includes('Admin')) {
+            role = 'admin';
+            whom = 'مدیر سایت';
+          } else if (c.participantsModel.includes('Seller')) {
+            role = 'seller';
+            whom = 'فروشنده';
+          }
+        }
+
+        // fallback از type
+        if (!role && c.type) {
+          if (c.type === 'user-seller' || c.type === 'seller-admin' || c.type === 'product') {
+            whom = 'فروشنده';
+            role = 'seller';
+            sellerId = c.sellerId;
+          } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
+            whom = 'مدیر سایت';
+            role = 'admin';
+          }
+        }
+
+        // تعیین آواتار
+        const avatarClass = role === 'seller' ? 'chat-avatar-seller' : (role === 'admin' ? 'chat-avatar-admin' : 'chat-avatar-user');
+        const avatarIcon = role === 'admin'
+          ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`
+          : (role === 'seller'
+            ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
+            : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`);
+
+        // نام نمایشی
+        let recipientName = whom;
+        let recipientLink = '';
+        if (role === 'seller' && sellerId) {
+          const linkUrl = shopUrl ? `/shop.html?shopurl=${shopUrl}` : `/shop.html?id=${sellerId}`;
+          recipientName = storeName || 'فروشنده';
+          recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${recipientName}</a>`;
+        }
+
+        // نوع چت badge
+        let typeBadge = '';
+        if (c.productId) {
+          typeBadge = '<span class="chat-type-badge product">محصول</span>';
+        } else if (role === 'admin') {
+          typeBadge = '<span class="chat-type-badge admin">پشتیبانی</span>';
+        } else if (role === 'seller') {
+          typeBadge = '<span class="chat-type-badge seller">فروشنده</span>';
+        }
+
+        // محصول مرتبط
+        let productBlock = '';
+        if (c.productId && c.productId.title) {
+          const productUrl = `/product.html?id=${c.productId._id}`;
+          productBlock = `
+        <div class="chat-product">
+          <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
+            <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
+                 class="chat-product-img" alt="${c.productId.title}">
+          </a>
+          <div class="chat-product-info">
+            <div class="chat-product-title">${c.productId.title}</div>
+            <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
+              مشاهده محصول
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      `;
+        }
+
+        // آخرین پیام
+        const last = c.messages?.[c.messages.length - 1] || {};
+        const txt = (last.text || 'بدون پیام').slice(0, 60) + (last.text?.length > 60 ? '…' : '');
+        const unread = (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
+
+        // زمان
+        const msgDate = last.date || last.createdAt || c.lastUpdated;
+        const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '—';
+
+        return `
+      <div class="chat-card-new ${unread > 0 ? 'has-unread' : ''} ${isBlocked ? 'is-blocked' : ''}"
+           data-chat-id="${c._id}">
+        
+        <!-- دکمه حذف - گوشه بالا چپ -->
+        <button class="chat-delete-btn" data-chat-id="${c._id}" title="حذف گفتگو">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        </button>
+
+        <!-- آواتار -->
+        <div class="chat-avatar">
+          <div class="chat-avatar-img ${avatarClass}">
+            ${avatarIcon}
+          </div>
+          ${unread > 0 ? `<span class="chat-avatar-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+        </div>
+
+        <!-- محتوا -->
+        <div class="chat-content">
+          <div class="chat-header">
+            <div class="chat-recipient">
+              <span class="chat-recipient-name">${recipientLink || recipientName}</span>
+              ${typeBadge}
+            </div>
+            <span class="chat-time">${timeDisplay}</span>
+          </div>
+
+          ${productBlock}
+
+          <p class="chat-preview ${unread > 0 ? 'unread' : ''}">${txt}</p>
+
+          ${(role === 'seller' && !isBlocked) || (role === 'seller' && isBlocked) ? `
+          <div class="chat-actions">
+            ${role === 'seller' && !isBlocked ? `
+              <button class="chat-action-btn block" data-seller-id="${sellerId}" title="مسدودسازی فروشنده">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                <span class="btn-text">مسدود</span>
+              </button>
+            ` : ''}
+            ${role === 'seller' && isBlocked ? `
+              <span class="chat-action-btn blocked" title="این فروشنده مسدود شده">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                <span class="btn-text">مسدود</span>
+              </span>
+            ` : ''}
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+      }).join('');
+
+      // Add event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.chat-card-new').forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.chat-action-btn')) return;
+            if (e.target.closest('.chat-delete-btn')) return;
+            if (e.target.closest('a')) return;
+            openChat(card.dataset.chatId);
+          });
+        });
+
+        document.querySelectorAll('.chat-delete-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteChat(btn.dataset.chatId);
+          });
+        });
+
+        document.querySelectorAll('.chat-action-btn.block').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            blockSeller(btn.dataset.sellerId);
+          });
+        });
+      }, 0);
+    }
+
+    // تابع کمکی برای نمایش زمان نسبی
+    function getRelativeTime(date) {
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+
+      if (diffSec < 60) return 'همین الان';
+      if (diffMin < 60) return `${diffMin} دقیقه پیش`;
+      if (diffHour < 24) return `${diffHour} ساعت پیش`;
+      if (diffDay < 7) return `${diffDay} روز پیش`;
+
+      return date.toLocaleDateString('fa-IR', { year: '2-digit', month: '2-digit', day: '2-digit' });
+    }
+
+
+
+
+    /* باز کردن مودال چت */
+    /* باز کردن مودال چت (با دریافت جزئیات کامل) */
+    async function openChat(cid) {
+      // اگر چت مجازی ادمین است، مودال ادمین رو باز کن
+      if (cid && cid.toString().startsWith('admin-user-')) {
+        await openAdminMsgModal();
+        return;
+      }
+
+      // بررسی اینکه آیا این چت از نوع admin-user است
+      const chat = chatsList.find(c => c._id === cid || c._id?.toString() === cid);
+      if (chat && (chat.isVirtualAdminChat || chat.type === 'admin-user' ||
+        (chat.participantsModel && chat.participantsModel.includes('Admin')))) {
+        await openAdminMsgModal();
+        return;
+      }
+
+      currentCid = cid;
+      await showChatModal();
+    }
+
+    /* ارسال پیام جدید به مدیر (ایجاد چت جدید اگر قبلا نداره) */
+    // باز کردن مودال گفتگوی کاربر با مدیر (نسخه ساده)
+    async function openAdminMsgModal() {
+      const uid = window.currentUserId;
+      if (!uid) return alert('شناسه کاربر پیدا نشد!');
+
+      // مودال گفتگو با مدیر را با API اختصاصی مدیر/کاربر باز کن
+      try {
+        await showAdminMsgModal(uid);
+      } catch (err) {
+        alert('خطا در باز کردن گفتگو با مدیر: ' + (err?.message || err));
+      }
+    }
+
+    function closeAdminMsg() {
+      document.getElementById('adminMsgModal')?.remove();
+    }
+
+    async function showAdminMsgModal(uid) {
+      document.getElementById('adminMsgModal')?.remove();
+      document.body.insertAdjacentHTML('beforeend', `
+      <div id="adminMsgModal" class="fixed inset-0 z-50 flex items-center justify-center" style="backdrop-filter:blur(4px);background:#0003;animation:fadein .25s">
+        <div class="bg-white rounded-2xl w-[98vw] max-w-md max-h-[93vh] flex flex-col shadow-xl border">
+          <div class="px-4 py-3 border-b flex justify-between items-center">
+            <span class="font-bold primary-text">گفتگو با مدیر سایت</span>
+            <button class="close-admin-msg text-2xl font-black text-gray-400 hover:text-red-500 rounded-full w-8 h-8 flex items-center justify-center">×</button>
+          </div>
+          <div id="adminMsgBody" class="flex-1 overflow-y-auto p-4 space-y-4 text-[15px] scrollbar-hide bg-[#f9fafb]"></div>
+          <div class="border-t p-3 flex gap-2 bg-white">
+            <textarea id="adminMsgInput" rows="2" class="flex-1 border rounded-xl p-2 resize-none focus:outline-none" placeholder="پیام خود را وارد کنید"></textarea>
+            <button class="send-admin-msg brand-btn px-5 py-2 rounded-xl font-bold shrink-0">ارسال</button>
+          </div>
+        </div>
+      </div>
+    `);
+
+      // Add event listeners for admin modal buttons
+      const closeBtn = document.querySelector('.close-admin-msg');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeAdminMsg);
+      }
+
+      const sendBtn = document.querySelector('.send-admin-msg');
+      if (sendBtn) {
+        sendBtn.addEventListener('click', sendAdminMsg);
+      }
+
+      // Also allow sending message with Enter key
+      const msgInput = document.getElementById('adminMsgInput');
+      if (msgInput) {
+        msgInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendAdminMsg();
+          }
+        });
+      }
+
+      renderAdminMsgs(uid);
+    }
+
+    async function renderAdminMsgs(uid) {
+      const box = document.getElementById('adminMsgBody');
+      if (!box) return;
+      box.innerHTML = '<div class="text-center text-gray-400 py-6">در حال دریافت...</div>';
+      try {
+        const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+        const res = await fetch(`${API_BASE}/messages/${uid}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          }
+        });
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
+          throw new Error('دریافت گفتگو ناموفق بود');
+        }
+        let data = await res.json();
+        if (!Array.isArray(data)) data = [];
+        data.sort((a, b) => new Date(a.timestamp || a.createdAt) - new Date(b.timestamp || b.createdAt));
+        box.innerHTML = data.map(m => {
+          const rawRole =
+            m.senderRole ||
+            m.senderId?.role ||
+            (typeof m.senderModel === 'string' ? m.senderModel.toLowerCase() : '') ||
+            (typeof m.from === 'string' ? m.from.toLowerCase() : '');
+          const role = (rawRole || '').toLowerCase();
+          const isMe = m.senderId?._id === window.currentUserId || role === 'user';
+          const label = isMe ? 'شما' : role === 'admin' ? 'مدیر سایت' : role === 'seller' ? 'فروشنده' : 'مشتری';
+          const cls = isMe ? 'bg-[#e0fdfa] self-end' : 'bg-[#f3f4f6]';
+          const time = new Date(m.timestamp || m.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+          const align = isMe ? 'items-end' : 'items-start';
+          const msgText = m.message || m.text || '';
+          return `
+          <div class="flex flex-col ${align}">
+            <div class="${cls} rounded-xl px-3 py-2 max-w-[78%]">
+              <span class="text-xs font-bold text-[#10b981]">${label}</span>
+              <div>${msgText}</div>
+              <div class="text-xs text-gray-400 mt-1 text-left">${time}</div>
+            </div>
+          </div>`;
+        }).join('');
+        box.scrollTop = box.scrollHeight;
+      } catch (err) {
+        box.innerHTML = '<div class="text-center text-red-500 py-6">امکان دریافت گفتگو وجود ندارد.</div>';
+      }
+    }
+
+    async function sendAdminMsg() {
+      const ta = document.getElementById('adminMsgInput');
+      const text = ta.value.trim();
+      if (!text) return;
+      try {
+        const token = document.cookie.split('; ').find(r => r.startsWith('user_token='))?.split('=')[1];
+        const res = await fetch(`${API_BASE}/messages/send`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          },
+          body: JSON.stringify({ message: text })
+        });
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) throw new Error('دسترسی غیرمجاز');
+          throw new Error('ارسال پیام ناموفق بود');
+        }
+        ta.value = '';
+        renderAdminMsgs(window.currentUserId);
+      } catch (err) {
+        alert('خطا در ارسال پیام: ' + err.message);
+      }
+    }
+
+
+
+
+
+    /* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+
+
+
+
+
+
+
+
+
+
+
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    /* ساختار مودال چت */
+    async function ensureShopUrl(sid, existing) {
+      if (existing) return existing;
+      if (!sid) return '';
+      try {
+        const res = await fetch(`${API_BASE}/shopAppearance/${sid}`);
+        if (!res.ok) return '';
+        const data = await res.json();
+        return data.customUrl || '';
+      } catch {
+        return '';
+      }
+    }
+
+    /* ساختار مودال چت - نسخه جدید با استایل حرفه‌ای */
+    async function showChatModal() {
+      console.log("در حال نمایش مودال چت...");
+
+      // دریافت جزئیات کامل چت از سرور
+      const chat = await fetchChatDetails(currentCid);
+      if (!chat) {
+        alert('دریافت گفتگو ناموفق بود!');
+        return;
+      }
+
+      // پس از دریافت، پیام‌های طرف مقابل را خوانده‌شده علامت بزن
+      chat.messages.forEach(m => {
+        if (m.from !== 'user') m.read = true;
+      });
+
+      // بروزرسانی لیست محلی
+      const idx = chatsList.findIndex(c => c._id === currentCid);
+      if (idx !== -1) chatsList[idx] = chat;
+      updateBadge();
+
+      // استخراج طرف مقابل
+      let whom = 'مخاطب';
+      let role = '';
+      let sellerId = null;
+      let storeName = '';
+      let shopUrl = '';
+
+      if (Array.isArray(chat.participants)) {
+        // مقایسه با toString برای اطمینان از تطابق صحیح
+        const participant = chat.participants.find(p => p && p._id && p._id.toString() !== window.currentUserId?.toString());
+        if (participant) {
+          // اگر فروشنده باشه، role نداره پس از participantsModel استفاده میکنیم
+          const pIdx = chat.participants.findIndex(pp => pp && pp._id && pp._id.toString() === participant._id.toString());
+          const pModel = chat.participantsModel?.[pIdx];
+          role = participant.role || (pModel === 'Seller' ? 'seller' : (pModel === 'Admin' ? 'admin' : 'user'));
+          sellerId = participant._id;
+          storeName = participant.storename || '';
+          shopUrl = participant.shopurl || '';
+          whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'مشتری' : 'مخاطب'));
+        }
+      }
+
+      if (!role && Array.isArray(chat.participantsModel)) {
+        if (chat.participantsModel.includes('Admin')) {
+          role = 'admin';
+          whom = 'مدیر سایت';
+        } else if (chat.participantsModel.includes('Seller')) {
+          role = 'seller';
+          whom = 'فروشنده';
+        }
+      }
+
+      // fallback از type
+      if (!role && chat.type) {
+        if (chat.type === 'user-seller' || chat.type === 'seller-admin' || chat.type === 'product') {
+          whom = 'فروشنده';
+          role = 'seller';
+          sellerId = chat.sellerId;
+        } else if (chat.type === 'user-admin' || chat.type === 'admin-user' || chat.type === 'admin') {
+          whom = 'مدیر سایت';
+          role = 'admin';
+        }
+      }
+
+      // لینک فروشگاه
+      let recipientLink = '';
+      if (role === 'seller' && sellerId) {
+        shopUrl = await ensureShopUrl(sellerId, shopUrl);
+        if (shopUrl) {
+          const linkUrl = `/shop.html?shopurl=${shopUrl}`;
+          const linkText = storeName ? `مشاهده مغازه ${storeName}` : 'مشاهده مغازه';
+          recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="chat-modal-recipient-link">${linkText} ←</a>`;
+        }
+      }
+
+      // محصول مرتبط
+      let productBlock = '';
+      if (chat.productId && chat.productId.title) {
+        const productUrl = `/product.html?id=${chat.productId._id}`;
+        productBlock = `
+      <div class="chat-modal-product">
+        <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
+          <img src="${chat.productId.images?.[0] || '/assets/images/noimage.png'}" 
+               class="chat-product-img" alt="${chat.productId.title}">
+        </a>
+        <div class="chat-product-info">
+          <div class="chat-product-title">${chat.productId.title}</div>
+          <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
+            مشاهده محصول
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+    `;
+      }
+
+      // مودال HTML با استایل جدید
+      document.body.classList.add('hide-mobile-nav');
+      document.body.insertAdjacentHTML('beforeend', `
+    <div id="chatModal" class="chat-modal-overlay">
+      <div class="chat-modal-card">
+        <!-- هدر -->
+        <div class="chat-modal-header">
+          <div class="chat-modal-recipient">
+            <span class="chat-modal-recipient-name">${storeName || whom}</span>
+            ${recipientLink}
+          </div>
+          <button class="chat-modal-close close-chat-modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- محصول مرتبط -->
+        ${productBlock}
+
+        <!-- بدنه چت -->
+        <div id="chatBody" class="chat-modal-body scrollbar-hide"></div>
+
+        <!-- فرم ارسال -->
+        <div class="chat-modal-footer">
+          <textarea id="msgBox" class="chat-input" rows="1" placeholder="پیام خود را بنویسید..."></textarea>
+          <button class="chat-send-btn send-msg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            ارسال
+          </button>
+        </div>
+      </div>
+    </div>
+  `);
+
+      // Event listeners
+      document.querySelector('.close-chat-modal')?.addEventListener('click', closeChat);
+      document.querySelector('.send-msg')?.addEventListener('click', sendMsg);
+
+      const msgBox = document.getElementById('msgBox');
+      if (msgBox) {
+        msgBox.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMsg();
+          }
+        });
+        // Auto-resize textarea
+        msgBox.addEventListener('input', () => {
+          msgBox.style.height = 'auto';
+          msgBox.style.height = Math.min(msgBox.scrollHeight, 100) + 'px';
+        });
+      }
+
+      renderChat();
+      setTimeout(() => msgBox?.focus(), 120);
+    }
+    // بستن مودال چت
+    function closeChat() {
+      document.getElementById('chatModal')?.remove();
+      document.body.classList.remove('hide-mobile-nav');
+      currentCid = null;
+    }
+
+    async function fetchBlockedSellers() {
+      try {
+        const res = await fetch(`${API_BASE}/blocked-sellers`, { credentials: 'include' });
+        const data = await res.json();
+        blockedSellers = Array.isArray(data) ? data : [];
+      } catch (e) {
+        blockedSellers = [];
+      }
+    }
+
+    async function blockSeller(sid) {
+      if (!confirm('آیا مطمئن هستید که می‌خواهید این فروشنده را مسدود کنید؟')) return;
+      try {
+        const res = await fetch(`${API_BASE}/blocked-sellers/${sid}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'خطا در مسدودسازی');
+        if (!blockedSellers.includes(sid)) blockedSellers.push(sid);
+        renderMessagesList();
+      } catch (err) {
+        alert('خطا در مسدودسازی: ' + err.message);
+      }
+    }
+
+    /* رندر مکالمه داخل مودال - نسخه جدید */
+    function renderChat() {
+      const chat = chatsList.find(c => c._id === currentCid);
+      const target = document.getElementById('chatBody');
+      if (!target) return;
+
+      function getSenderRoleText(msg, isMe) {
+        if (isMe) return 'شما';
+        const raw =
+          msg.senderRole ||
+          msg?.sender?.role ||
+          msg?.senderId?.role ||
+          (typeof msg.senderModel === 'string' ? msg.senderModel.toLowerCase() : '') ||
+          (typeof msg.from === 'string' ? msg.from.toLowerCase() : '');
+        const role = (raw || '').toLowerCase();
+        if (role === 'admin') return 'مدیر سایت';
+        if (role === 'seller') return 'فروشنده';
+        if (role === 'user') return 'مشتری';
+        return 'مخاطب';
+      }
+
+      if (!chat.messages || chat.messages.length === 0) {
+        target.innerHTML = `
+      <div class="flex flex-col items-center justify-center h-full text-center py-8">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" class="mb-3">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p class="text-gray-400 text-sm">هنوز پیامی ارسال نشده</p>
+        <p class="text-gray-300 text-xs mt-1">اولین پیام را ارسال کنید!</p>
+      </div>
+    `;
+        return;
+      }
+
+      target.innerHTML = (chat.messages || []).map(m => {
+        const roleHint = (m.senderRole || m?.senderId?.role || '').toLowerCase();
+        const isMe =
+          m.senderId?._id === window.currentUserId ||
+          m.senderId === window.currentUserId ||
+          roleHint === 'user' ||
+          m.from === 'user' ||
+          m.from === window.currentUserId;
+
+        const msgTime = new Date(m.date || m.createdAt);
+        const timeStr = msgTime.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+
+        return `
+      <div class="chat-message ${isMe ? 'sent' : 'received'}">
+        <span class="chat-message-sender">${getSenderRoleText(m, isMe)}</span>
+        <div class="chat-message-bubble">${m.text || ''}</div>
+        <span class="chat-message-time">${timeStr}</span>
+      </div>
+    `;
+      }).join('');
+
+      target.scrollTop = target.scrollHeight;
+    }
+
+
+
+    /* ارسال پیام */
+    /**
+     * ارسال پیام از طرف کاربر
+     */
+    async function sendMsg() {
+      const ta = document.getElementById('msgBox');
+      const text = ta.value.trim();
+      if (!text) {
+        alert('لطفاً متن پیام را وارد کنید');
+        return;
+      }
+
+      // توکنِ کاربر (مشتری) را از کوکی خارج می‌کنیم
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('user_token='))
+        ?.split('=')[1];
+
+      try {
+        // به مسیر مخصوص reply کاربر بفرستیم
+        const res = await fetch(`${API_BASE}/chats/${currentCid}/user-reply`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || 'خطا در ارسال پیام');
+
+        // پس از موفقیت، textarea را پاک و لیست چت را به‌روز می‌کنیم
+        ta.value = '';
+        chatsList = chatsList.map(c => c._id === currentCid ? data : c);
+        renderChat();
+        updateBadge();
+
+      } catch (err) {
+        console.error('❌ sendMsg error:', err);
+        alert('❌ خطا در ارسال پیام:\n' + err.message);
+      }
+    }
+
+
+
+
+
+    async function deleteChat(cid) {
+      if (!confirm('آیا از حذف این چت مطمئن هستید؟')) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/chats/${cid}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'حذف چت ناموفق بود!');
+        // حذف چت از لیست و رفرش
+        chatsList = chatsList.filter(c => c._id !== cid);
+        renderMessagesList();
+        updateBadge();
+        closeChat();
+      } catch (err) {
+        alert('خطا در حذف چت: ' + err.message);
+      }
+    }
+
+
+
+
+    /* badge پیام‌های خوانده نشده */
+    function getMessageTimestamp(message) {
+      if (!message) return 0;
+      const stamp = message.createdAt || message.sentAt || message.timestamp;
+      if (stamp) {
+        const date = new Date(stamp);
+        const time = date.getTime();
+        if (!Number.isNaN(time)) return time;
+      }
+      if (typeof message._id === 'string' && message._id.length >= 8) {
+        const hex = message._id.slice(0, 8);
+        const parsed = parseInt(hex, 16);
+        if (!Number.isNaN(parsed)) return parsed * 1000;
+      }
+      return 0;
+    }
+
+    function updateBadge() {
+      const lastViewed = getLastNotificationsViewedAt();
+      const total = chatsList.reduce((count, chat) => {
+        const messages = Array.isArray(chat.messages) ? chat.messages : [];
+        const unread = messages.filter(m => {
+          if (!m || m.from === 'user' || m.read) return false;
+          const ts = getMessageTimestamp(m);
+          if (ts === 0) return lastViewed === 0;
+          return ts > lastViewed;
+        });
+        return count + unread.length;
+      }, 0);
+
+      const msgBadge = document.getElementById('msgBadge');
+      if (msgBadge) {
+        msgBadge.textContent = total > 0 ? total : '';
+      }
+
+      const hamBadge = document.getElementById('hamBadge');
+      if (hamBadge) {
+        if (total > 0) {
+          hamBadge.textContent = total;
+          hamBadge.classList.remove('hidden');
+        } else {
+          hamBadge.textContent = '';
+          hamBadge.classList.add('hidden');
+        }
+      }
+    }
+
+    function markNotificationsViewed() {
+      setLastNotificationsViewedNow();
+      const msgBadge = document.getElementById('msgBadge');
+      if (msgBadge) {
+        msgBadge.textContent = '';
+      }
+      const hamBadge = document.getElementById('hamBadge');
+      if (hamBadge) {
+        hamBadge.textContent = '';
+        hamBadge.classList.add('hidden');
+      }
+    }
+
+
+    /* بروزرسانی خودکار لیست و چت */
+    /* بروزرسانی خودکار لیست و چت */
+    function startMsgPolling() {
+      if (pollHandle) clearInterval(pollHandle);
+      pollHandle = setInterval(async () => {
+        await fetchUserChats();
+        updateBadge();
+        if (currentCid) {
+          // اگر مودال باز است، جزئیات چت را دوباره fetch و رندر کن
+          const chat = await fetchChatDetails(currentCid);
+          if (chat) {
+            const idx = chatsList.findIndex(c => c._id === currentCid);
+            if (idx !== -1) chatsList[idx] = chat;
+            renderChat();
+          }
+        } else {
+          renderMessagesList();
+        }
+      }, 10000);
+    }
+    function stopMsgPolling() { if (pollHandle) { clearInterval(pollHandle); pollHandle = null; } }
+    /* ───────── پایان پیام‌های حرفه‌ای ───────── */
+
+
+
+
+
+
+
+
+    /* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+    /* دریافت جزئیات کامل یک چت (شامل تمام پیام‌ها) */
+    async function fetchChatDetails(cid) {
+      const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
+      try {
+        const res = await fetch(`${API_BASE}/chats/${cid}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          }
+        });
+        if (!res.ok) throw new Error('دریافت جزئیات چت ناموفق بود');
+        const data = await res.json();
+        return data;  // چت کامل با messages
+      } catch (e) {
+        console.error('❌ fetchChatDetails error:', e);
+        return null;
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Dynamic Missions Loading from Admin Settings
+    // ═══════════════════════════════════════════════════════════════
+    
+    // Mission card configurations with icons and styles
+    const missionCardConfigs = {
+      'user-referral': {
+        htmlId: 'missionInvite',
+        style: 'invite',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>`,
+        title: 'دعوت از دوستان',
+        onclick: 'showReferralSection()',
+        order: 1
+      },
+      'user-app-install': {
+        htmlId: 'missionInstallApp',
+        style: 'install-app',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
+        title: 'نصب اپلیکیشن',
+        onclick: 'showInstallAppMission()',
+        badge: 'ویژه',
+        order: 2
+      },
+      'user-profile-complete': {
+        htmlId: 'missionProfile',
+        style: 'profile',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 8v13"/><path d="M3 13h18"/><circle cx="12" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`,
+        title: 'ثبت تاریخ تولد',
+        onclick: 'showProfileSection()',
+        order: 3
+      },
+      'user-book-appointment': {
+        htmlId: 'missionBooking',
+        style: 'booking',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+        title: 'رزرو نوبت',
+        onclick: 'showBookAppointmentMission()',
+        order: 4
+      },
+      'user-review': {
+        htmlId: 'missionExplore',
+        style: 'explore',
+        icon: '🧭',
+        title: 'گردش در بازار',
+        onclick: 'showExploreMission()',
+        order: 5
+      }
+    };
+
+    // Generate skeleton cards HTML
+    function generateSkeletonCards(count = 5) {
+      let html = '';
+      for (let i = 0; i < count; i++) {
+        html += `
+          <div class="mission-card-skeleton">
+            <div class="skeleton-reward"></div>
+            <div class="skeleton-title"></div>
+          </div>
+        `;
+      }
+      return html;
+    }
+
+    // Generate mission card HTML
+    function generateMissionCardHTML(missionId, config, mission, isCompleted = false) {
+      const formattedAmount = mission ? new Intl.NumberFormat('fa-IR').format(mission.amount) : '---';
+      
+      // These missions should ALWAYS be active unless explicitly completed
+      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete'];
+      const isActive = alwaysActiveMissions.includes(missionId) ? true : (mission ? mission.isActive : true);
+      
+      let cardClasses = `mission-card ${config.style}`;
+      if (isCompleted) cardClasses += ' completed';
+      // Only add disabled class if NOT in alwaysActiveMissions and not active
+      if (!isActive && !isCompleted && !alwaysActiveMissions.includes(missionId)) cardClasses += ' disabled';
+      
+      const clickHandler = (!isCompleted && isActive) ? `onclick="${config.onclick}"` : '';
+      
+      // Completed badge HTML
+      const completedBadge = isCompleted ? `
+        <span class="mission-completed-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </span>
+      ` : '';
+      
+      // Special badge for install-app
+      const specialBadge = config.badge ? `<span class="mission-special-badge">${config.badge}</span>` : '';
+      
+      // Icon HTML (handle emoji vs SVG)
+      const iconHtml = config.icon.startsWith('<svg') 
+        ? `<span class="mission-reward-icon">${config.icon}</span>`
+        : `<span class="mission-reward-icon">${config.icon}</span>`;
+      
+      return `
+        <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
+          ${completedBadge}
+          ${specialBadge}
+          <div class="mission-reward">
+            ${iconHtml}
+            ${formattedAmount} تومان
+          </div>
+          <p class="mission-title">${config.title}</p>
+          <div class="mission-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+      `;
+    }
+
+    // Track completed missions (will be populated from user data)
+    window.completedMissions = new Set();
+
+    // Load missions from API and render ALL cards
+    async function loadUserMissions() {
+      const missionsScroll = document.querySelector('.missions-scroll');
+      if (!missionsScroll) return;
+
+      // Show skeleton loading immediately
+      missionsScroll.innerHTML = generateSkeletonCards(5);
+
+      try {
+        const res = await fetch('/api/missions/users', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) {
+          console.warn('Failed to load missions from API');
+          renderFallbackMissions(missionsScroll);
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data)) {
+          renderFallbackMissions(missionsScroll);
+          return;
+        }
+
+        // Create mission map from API data
+        const missionMap = {};
+        data.data.forEach(m => {
+          missionMap[m.missionId] = m;
+        });
+
+        // Build cards array with proper ordering
+        const cards = [];
+        
+        Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
+          // Default to active for user missions if not found in API
+          const mission = missionMap[missionId] || { amount: 0, isActive: true };
+          const isCompleted = window.completedMissions.has(missionId);
+          
+          cards.push({
+            missionId,
+            config,
+            mission,
+            isCompleted,
+            order: isCompleted ? 100 + config.order : config.order
+          });
+        });
+
+        // Sort: active first (by order), then completed (by order)
+        cards.sort((a, b) => a.order - b.order);
+
+        // Render all cards
+        missionsScroll.innerHTML = cards.map(c => 
+          generateMissionCardHTML(c.missionId, c.config, c.mission, c.isCompleted)
+        ).join('');
+
+        console.log('✅ User missions loaded - all 5 cards rendered');
+      } catch (err) {
+        console.warn('Error loading user missions:', err);
+        renderFallbackMissions(missionsScroll);
+      }
+    }
+
+    // Fallback rendering with static data
+    function renderFallbackMissions(container) {
+      const cards = Object.entries(missionCardConfigs)
+        .sort((a, b) => a[1].order - b[1].order)
+        .map(([missionId, config]) => {
+          const isCompleted = window.completedMissions.has(missionId);
+          return generateMissionCardHTML(missionId, config, { amount: 0, isActive: true }, isCompleted);
+        });
+      
+      container.innerHTML = cards.join('');
+    }
+
+    // Mark a mission as completed (call this when user completes a mission)
+    function markMissionCompleted(missionId) {
+      window.completedMissions.add(missionId);
+      const card = document.querySelector(`[data-mission-id="${missionId}"]`);
+      if (card) {
+        card.classList.add('completed');
+        card.removeAttribute('onclick');
+        card.style.order = '100';
+        
+        // Add completed badge if not exists
+        if (!card.querySelector('.mission-completed-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'mission-completed-badge';
+          badge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          `;
+          card.insertBefore(badge, card.firstChild);
+        }
+      }
+    }
+
+    // Initialize horizontal scroll touch handling for missions
+    function initMissionsScrollTouch() {
+      const scrollContainer = document.querySelector('.missions-scroll');
+      if (!scrollContainer) return;
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      // Prevent vertical scroll interference on touch devices
+      scrollContainer.addEventListener('touchstart', (e) => {
+        // Allow horizontal scroll
+      }, { passive: true });
+
+      scrollContainer.addEventListener('touchmove', (e) => {
+        // Let the browser handle touch scrolling naturally
+      }, { passive: true });
+
+      // Mouse drag support for desktop testing
+      scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+      });
+
+      scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+      });
+
+      scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+      });
+
+      scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        scrollContainer.scrollLeft = scrollLeft - walk;
+      });
+
+      // Set initial cursor
+      scrollContainer.style.cursor = 'grab';
+    }
+
+    // Call after DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize touch scroll after a short delay to ensure DOM is ready
+      setTimeout(initMissionsScrollTouch, 500);
+    });
+
+    // Store mission amounts for use in modals
+    window.missionAmounts = {};
+
+    // Update missionData with dynamic amounts
+    async function updateMissionDataAmounts() {
+      try {
+        const res = await fetch('/api/missions/users', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.data)) return;
+
+        data.data.forEach(mission => {
+          const formattedAmount = new Intl.NumberFormat('fa-IR').format(mission.amount);
+          window.missionAmounts[mission.missionId] = {
+            amount: mission.amount,
+            formatted: `${formattedAmount} تومان`,
+            isActive: mission.isActive
+          };
+        });
+      } catch (err) {
+        console.warn('Error updating mission amounts:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        showSection('dashboard');
+        // اول اطلاعات کاربر رو بگیر تا currentUserId تنظیم بشه
+        await updateSidebarUser();
+        // بعد پیام‌ها و رزروها رو لود کن
+        await loadMessages();
+        await loadBookings();
+        // Load dynamic missions from admin settings
+        await loadUserMissions();
+        await updateMissionDataAmounts();
+      } catch (error) {
+        console.error('Initialization error:', error);
+      }
+
+      // Hero Info Row - Update date dynamically
+      updateHeroInfoRow();
+    });
+
+    // Update Hero Info Row with current Persian date
+    function updateHeroInfoRow() {
+      const heroDateText = document.getElementById('heroDateText');
+      if (heroDateText) {
+        try {
+          const now = new Date();
+          const persianDate = now.toLocaleDateString('fa-IR', {
+            day: 'numeric',
+            month: 'long'
+          });
+          heroDateText.textContent = persianDate;
+        } catch (e) {
+          // Fallback if Persian locale not supported
+          heroDateText.textContent = '۲۷ آذر';
+        }
+      }
+    }
+
+
+
+
+
+
+
+
+
+    // --- داشبورد: کلیک باکس علاقه‌مندی و علاقه‌مندی‌های اخیر ---
+
+    // ============= Notification System =============
+    let notificationsData = [];
+    let unreadCount = 0;
+
+    // Toggle Notification Panel
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationPanel = document.getElementById('notificationPanel');
+    const closeNotificationPanel = document.getElementById('closeNotificationPanel');
+    const notificationBadge = document.getElementById('notificationBadge');
+    const notificationList = document.getElementById('notificationList');
+
+    if (notificationBtn) {
+      notificationBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleNotificationPanel();
+      });
+    }
+
+    if (closeNotificationPanel) {
+      closeNotificationPanel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideNotificationPanel();
+      });
+    }
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+      if (notificationPanel && !notificationPanel.contains(e.target) &&
+        !notificationBtn.contains(e.target)) {
+        hideNotificationPanel();
+      }
+    });
+
+    function toggleNotificationPanel() {
+      if (notificationPanel.classList.contains('active')) {
+        hideNotificationPanel();
+      } else {
+        showNotificationPanel();
+      }
+    }
+
+    function showNotificationPanel() {
+      notificationPanel.classList.add('active');
+      loadNotifications();
+    }
+
+    function hideNotificationPanel() {
+      notificationPanel.classList.remove('active');
+    }
+
+    // Fetch notifications from API
+    async function loadNotifications() {
+      const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
+
+      try {
+        notificationList.innerHTML = `
+        <div class="notification-loading">
+          <div class="loading-spinner"></div>
+          <p>در حال بارگذاری اعلان‌ها...</p>
+        </div>
+      `;
+
+        const response = await fetch(`${API_BASE}/notifications`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          }
+        });
+
+        // Gracefully handle unauthorized users so we don't spam the console
+        if (response.status === 401) {
+          notificationsData = [];
+          notificationList.innerHTML = `
+          <div class="notification-empty">
+            <svg class="notification-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <p class="notification-empty-text">برای مشاهده اعلان‌ها ابتدا وارد شوید</p>
+          </div>
+        `;
+          updateBadgeCount();
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications');
+        }
+
+        notificationsData = await response.json();
+        displayNotifications();
+        updateBadgeCount();
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+        notificationList.innerHTML = `
+        <div class="notification-empty">
+          <svg class="notification-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <p class="notification-empty-text">خطا در بارگذاری اعلان‌ها</p>
+        </div>
+      `;
+      }
+    }
+
+    // Display notifications in the panel
+    function displayNotifications() {
+      if (!notificationsData || notificationsData.length === 0) {
+        notificationList.innerHTML = `
+        <div class="notification-empty">
+          <svg class="notification-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <p class="notification-empty-text">اعلانی وجود ندارد</p>
+        </div>
+      `;
+        return;
+      }
+
+      const notificationsHTML = notificationsData.map(notification => {
+        const timeAgo = getTimeAgo(new Date(notification.createdAt));
+        const unreadClass = !notification.read ? 'unread' : '';
+
+        return `
+        <div class="notification-item ${unreadClass}" data-id="${notification._id}">
+          <div class="notification-content">
+            <div class="notification-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="notification-body">
+              <p class="notification-message">${notification.message}</p>
+              <div class="notification-time">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>${timeAgo}</span>
+              </div>
+              <div class="notification-actions">
+                ${!notification.read ? `
+                  <button class="notification-action-btn notification-mark-read-btn" onclick="markNotificationAsRead('${notification._id}')">
+                    خوانده شد
+                  </button>
+                ` : ''}
+                <button class="notification-action-btn notification-delete-btn" onclick="deleteNotification('${notification._id}')">
+                  حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      notificationList.innerHTML = notificationsHTML;
+    }
+
+    // Update badge count
+    function updateBadgeCount() {
+      unreadCount = notificationsData.filter(n => !n.read).length;
+
+      if (unreadCount > 0) {
+        // Hero header uses a dot indicator
+        if (notificationBadge) {
+          notificationBadge.style.display = 'block';
+        }
+      } else {
+        if (notificationBadge) {
+          notificationBadge.style.display = 'none';
+        }
+      }
+    }
+
+    // Mark notification as read
+    window.markNotificationAsRead = async function (notificationId) {
+      const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
+
+      try {
+        const response = await fetch(`${API_BASE}/notifications/${notificationId}/read`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to mark notification as read');
+        }
+
+        // Update local data
+        const notification = notificationsData.find(n => n._id === notificationId);
+        if (notification) {
+          notification.read = true;
+        }
+
+        displayNotifications();
+        updateBadgeCount();
+
+        // Show success message
+        showToast('اعلان به عنوان خوانده شده علامت‌گذاری شد', 'success');
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+        showToast('خطا در علامت‌گذاری اعلان', 'error');
+      }
+    };
+
+    // Delete notification
+    window.deleteNotification = async function (notificationId) {
+      const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
+
+      try {
+        const response = await fetch(`${API_BASE}/notifications/${notificationId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: 'Bearer ' + token })
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete notification');
+        }
+
+        // Remove from local data
+        notificationsData = notificationsData.filter(n => n._id !== notificationId);
+
+        displayNotifications();
+        updateBadgeCount();
+
+        // Show success message
+        showToast('اعلان با موفقیت حذف شد', 'success');
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+        showToast('خطا در حذف اعلان', 'error');
+      }
+    };
+
+    // Helper function to show toast messages
+    function showToast(message, type = 'info') {
+      // You can implement a toast notification here
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+
+    // Helper function to calculate time ago
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diffInSeconds = Math.floor((now - date) / 1000);
+
+      if (diffInSeconds < 60) {
+        return 'همین الان';
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} دقیقه پیش`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} ساعت پیش`;
+      } else if (diffInSeconds < 2592000) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} روز پیش`;
+      } else {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months} ماه پیش`;
+      }
+    }
+
+    // Load notifications on page load and periodically refresh
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initial load
+      loadNotifications();
+
+      // Refresh notifications every 30 seconds
+      setInterval(() => {
+        loadNotifications();
+      }, 30000);
+    });
+
+    // ============= End Notification System =============
+
+    // ============= Streak & Wallet System =============
+    
+    let streakData = null;
+    let walletData = null;
+
+    /**
+     * بارگذاری و نمایش استریک و کیف پول
+     */
+    async function initStreakAndWallet() {
+      await Promise.all([
+        loadStreakData(),
+        loadWalletData()
+      ]);
+      setupStreakWalletEvents();
+    }
+
+    /**
+     * دریافت اطلاعات استریک
+     */
+    async function loadStreakData() {
+      try {
+        const res = await fetch('/api/user/streak', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            renderStreakNotLoggedIn();
+            return;
+          }
+          throw new Error('خطا در دریافت استریک');
+        }
+
+        streakData = await res.json();
+        renderStreakCard();
+      } catch (error) {
+        console.error('loadStreakData error:', error);
+        renderStreakError();
+      }
+    }
+
+    /**
+     * دریافت اطلاعات کیف پول
+     */
+    async function loadWalletData() {
+      try {
+        const res = await fetch('/api/user/wallet/summary', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            renderWalletNotLoggedIn();
+            return;
+          }
+          throw new Error('خطا در دریافت کیف پول');
+        }
+
+        walletData = await res.json();
+        renderWalletCard();
+      } catch (error) {
+        console.error('loadWalletData error:', error);
+        renderWalletError();
+      }
+    }
+
+    /**
+     * رندر پاپ‌آپ استریک
+     */
+    function renderStreakCard() {
+      if (!streakData) return;
+
+      const streakNumber = document.getElementById('streakNumber');
+      const streakLevel = document.getElementById('streakLevel');
+      const longestStreak = document.getElementById('longestStreak');
+      const totalLoginDays = document.getElementById('totalLoginDays');
+      const streakWeek = document.getElementById('streakWeek');
+      const streakCheckinBtn = document.getElementById('streakCheckinBtn');
+      const streakCheckinText = document.getElementById('streakCheckinText');
+      const streakMiniNumber = document.getElementById('streakMiniNumber');
+      const streakMiniSubtitle = document.getElementById('streakMiniSubtitle');
+      const streakPopupDismiss = document.getElementById('streakPopupDismiss');
+
+      if (streakNumber) streakNumber.textContent = streakData.currentStreak || 0;
+      if (streakMiniNumber) streakMiniNumber.textContent = streakData.currentStreak || 0;
+      
+      const streakLevelText = document.getElementById('streakLevelText');
+      if (streakLevelText && streakData.level) {
+        streakLevelText.textContent = streakData.level.name || 'تازه‌کار';
+      }
+      if (longestStreak) longestStreak.textContent = streakData.longestStreak || 0;
+      if (totalLoginDays) totalLoginDays.textContent = streakData.totalLoginDays || 0;
+
+      // رندر تاریخچه هفتگی
+      if (streakWeek && streakData.weekHistory) {
+        const today = new Date().toISOString().split('T')[0];
+        streakWeek.innerHTML = streakData.weekHistory.map(day => {
+          const isToday = day.date === today;
+          let dotClass = 'pending';
+          let dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle></svg>`;
+          
+          if (day.status === 'hit') {
+            dotClass = 'hit';
+            dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          } else if (day.status === 'missed') {
+            dotClass = 'missed';
+            dotContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+          }
+          
+          return `
+            <div class="streak-popup-day">
+              <span class="streak-popup-day-name">${day.dayName || ''}</span>
+              <div class="streak-popup-day-dot ${dotClass} ${isToday ? 'today' : ''}">${dotContent}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // وضعیت دکمه چک‌این
+      if (streakCheckinBtn && streakCheckinText) {
+        if (streakData.checkedInToday) {
+          streakCheckinBtn.classList.remove('active');
+          streakCheckinBtn.classList.add('done');
+          streakCheckinText.textContent = 'امروز ثبت شده';
+          streakCheckinBtn.disabled = true;
+          if (streakMiniSubtitle) {
+            streakMiniSubtitle.textContent = 'امروز ثبت شده';
+            streakMiniSubtitle.classList.add('checked');
+          }
+          if (streakPopupDismiss) streakPopupDismiss.textContent = 'بستن';
+        } else {
+          streakCheckinBtn.classList.add('active');
+          streakCheckinBtn.classList.remove('done');
+          streakCheckinText.textContent = 'ثبت ورود امروز';
+          streakCheckinBtn.disabled = false;
+          if (streakMiniSubtitle) {
+            streakMiniSubtitle.textContent = 'برای دریافت امتیاز کلیک کنید';
+            streakMiniSubtitle.classList.remove('checked');
+          }
+          if (streakPopupDismiss) streakPopupDismiss.textContent = 'بعداً یادآوری کن';
+        }
+      }
+
+      // نمایش پاپ‌آپ اگر امروز چک‌این نشده و قبلاً بسته نشده
+      checkAndShowStreakPopup();
+    }
+
+    /**
+     * بررسی و نمایش پاپ‌آپ استریک
+     */
+    function checkAndShowStreakPopup() {
+      const today = new Date().toISOString().split('T')[0];
+      const dismissedDate = localStorage.getItem('streakPopupDismissed');
+      const miniBanner = document.getElementById('streakMiniBanner');
+      
+      // اگر امروز چک‌این شده، فقط بنر کوچک نشون بده
+      if (streakData && streakData.checkedInToday) {
+        hideStreakPopup();
+        if (miniBanner) miniBanner.classList.add('visible');
+        return;
+      }
+
+      // اگر امروز پاپ‌آپ بسته شده، بنر کوچک نشون بده
+      if (dismissedDate === today) {
+        if (miniBanner) miniBanner.classList.add('visible');
+        return;
+      }
+
+      // نمایش پاپ‌آپ
+      showStreakPopup();
+    }
+
+    /**
+     * نمایش پاپ‌آپ استریک
+     */
+    function showStreakPopup() {
+      const overlay = document.getElementById('streakPopupOverlay');
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (overlay) {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      if (miniBanner) miniBanner.classList.remove('visible');
+    }
+
+    /**
+     * بستن پاپ‌آپ استریک
+     */
+    function hideStreakPopup() {
+      const overlay = document.getElementById('streakPopupOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    /**
+     * بستن پاپ‌آپ و ذخیره در localStorage
+     */
+    function dismissStreakPopup() {
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('streakPopupDismissed', today);
+      hideStreakPopup();
+      
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (miniBanner) miniBanner.classList.add('visible');
+    }
+
+    /**
+     * نمایش کانفتی
+     */
+    function showConfetti() {
+      const container = document.createElement('div');
+      container.className = 'streak-confetti';
+      document.body.appendChild(container);
+
+      const colors = ['#f97316', '#22c55e', '#3b82f6', '#eab308', '#ec4899', '#8b5cf6'];
+      
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'streak-confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 0.5 + 's';
+        piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+        container.appendChild(piece);
+      }
+
+      setTimeout(() => container.remove(), 4000);
+    }
+
+    // Event listeners برای پاپ‌آپ استریک
+    document.addEventListener('DOMContentLoaded', function() {
+      // دکمه بستن پاپ‌آپ
+      const closeBtn = document.getElementById('streakPopupClose');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', dismissStreakPopup);
+      }
+
+      // دکمه بعداً یادآوری کن
+      const dismissBtn = document.getElementById('streakPopupDismiss');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', dismissStreakPopup);
+      }
+
+      // کلیک روی overlay برای بستن
+      const overlay = document.getElementById('streakPopupOverlay');
+      if (overlay) {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) {
+            dismissStreakPopup();
+          }
+        });
+      }
+
+      // کلیک روی بنر کوچک برای باز کردن پاپ‌آپ
+      const miniBanner = document.getElementById('streakMiniBanner');
+      if (miniBanner) {
+        miniBanner.addEventListener('click', function() {
+          localStorage.removeItem('streakPopupDismissed');
+          showStreakPopup();
+        });
+      }
+    });
+
+    /**
+     * رندر کارت کیف پول
+     */
+    function renderWalletCard() {
+      if (!walletData) return;
+
+      const walletBalance = document.getElementById('walletBalance');
+      const totalEarned = document.getElementById('totalEarned');
+      const totalSpent = document.getElementById('totalSpent');
+      const recentTransactions = document.getElementById('recentTransactions');
+
+      if (walletBalance) walletBalance.textContent = (walletData.balance || 0).toLocaleString('fa-IR');
+      if (totalEarned) totalEarned.textContent = (walletData.totalEarned || 0).toLocaleString('fa-IR');
+      if (totalSpent) totalSpent.textContent = (walletData.totalSpent || 0).toLocaleString('fa-IR');
+
+      // رندر تراکنش‌های اخیر
+      if (recentTransactions && walletData.recentTransactions) {
+        if (walletData.recentTransactions.length === 0) {
+          recentTransactions.innerHTML = `
+            <div class="text-center text-gray-400 py-4 text-sm">
+              هنوز تراکنشی ثبت نشده
+            </div>
+          `;
+        } else {
+          recentTransactions.innerHTML = walletData.recentTransactions.map(t => `
+            <div class="wallet-transaction">
+              <div class="wallet-transaction-info">
+                <span class="wallet-transaction-icon">${t.isPositive ? '📈' : '📉'}</span>
+                <span class="wallet-transaction-title">${t.title || 'تراکنش'}</span>
+              </div>
+              <span class="wallet-transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
+                ${t.formattedAmount || t.amount}
+              </span>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    /**
+     * ثبت ورود روزانه (چک‌این)
+     */
+    async function doCheckIn() {
+      const btn = document.getElementById('streakCheckinBtn');
+      const text = document.getElementById('streakCheckinText');
+      
+      if (!btn || btn.disabled) return;
+      
+      btn.disabled = true;
+      text.textContent = 'در حال ثبت...';
+
+      try {
+        const res = await fetch('/api/user/streak/checkin', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (data.alreadyCheckedIn) {
+            showStreakToast('امروز قبلاً ورود ثبت شده است', 'info');
+            btn.classList.remove('active');
+            btn.classList.add('done');
+            text.textContent = '✓ امروز ثبت شده';
+            return;
+          }
+          throw new Error(data.message || 'خطا در ثبت ورود');
+        }
+
+        // موفقیت
+        streakData = {
+          ...streakData,
+          currentStreak: data.currentStreak,
+          longestStreak: data.longestStreak,
+          totalLoginDays: data.totalLoginDays,
+          loyaltyPoints: data.loyaltyPoints,
+          level: data.level,
+          checkedInToday: true
+        };
+
+        // آپدیت کیف پول
+        if (walletData) {
+          walletData.balance = data.newBalance;
+        }
+
+        renderStreakCard();
+        renderWalletCard();
+
+        // نمایش پاداش
+        const rewardText = data.rewards && data.rewards.length > 0
+          ? `+${data.totalReward.toLocaleString('fa-IR')} تومان پاداش!`
+          : 'ورود ثبت شد!';
+        
+        showStreakToast(`🎉 ${rewardText}`, 'success');
+
+        // انیمیشن موفقیت و کانفتی
+        const streakPopup = document.getElementById('streakPopup');
+        if (streakPopup) {
+          streakPopup.classList.add('success-animation');
+          setTimeout(() => streakPopup.classList.remove('success-animation'), 500);
+        }
+        
+        // نمایش کانفتی
+        showConfetti();
+
+        // بستن پاپ‌آپ بعد از 2 ثانیه
+        setTimeout(() => {
+          hideStreakPopup();
+          const miniBanner = document.getElementById('streakMiniBanner');
+          if (miniBanner) miniBanner.classList.add('visible');
+        }, 2500);
+
+      } catch (error) {
+        console.error('doCheckIn error:', error);
+        showStreakToast(error.message || 'خطا در ثبت ورود', 'error');
+        btn.disabled = false;
+        text.textContent = 'ثبت ورود امروز';
+      }
+    }
+
+    /**
+     * نمایش همه تراکنش‌ها
+     */
+    async function showAllTransactions() {
+      const modal = document.getElementById('transactionsModal');
+      const list = document.getElementById('allTransactionsList');
+      
+      if (!modal || !list) return;
+
+      modal.classList.add('active');
+      list.innerHTML = `
+        <div class="text-center py-8">
+          <div class="loading-spinner mx-auto mb-3"></div>
+          <p class="text-gray-500">در حال بارگذاری...</p>
+        </div>
+      `;
+
+      try {
+        const res = await fetch('/api/user/wallet/transactions?limit=50', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) throw new Error('خطا در دریافت تراکنش‌ها');
+
+        const data = await res.json();
+        const transactions = data.transactions || [];
+
+        if (transactions.length === 0) {
+          list.innerHTML = `
+            <div class="text-center py-8">
+              <div class="text-4xl mb-3">💳</div>
+              <p class="text-gray-500">هنوز تراکنشی ثبت نشده</p>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = transactions.map(t => `
+          <div class="transaction-item">
+            <div class="transaction-icon-wrapper ${t.isPositive ? 'earn' : 'spend'}">
+              ${t.categoryIcon || (t.isPositive ? '📈' : '📉')}
+            </div>
+            <div class="transaction-details">
+              <p class="transaction-title">${t.title || 'تراکنش'}</p>
+              <span class="transaction-date">${formatDate(t.createdAt)} • ${t.categoryLabel || ''}</span>
+            </div>
+            <span class="transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
+              ${t.formattedAmount || t.amount}
+            </span>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('showAllTransactions error:', error);
+        list.innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            خطا در بارگذاری تراکنش‌ها
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * بستن مودال تراکنش‌ها
+     */
+    function closeTransactionsModal() {
+      const modal = document.getElementById('transactionsModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    /**
+     * تنظیم رویدادها
+     */
+    function setupStreakWalletEvents() {
+      const checkinBtn = document.getElementById('streakCheckinBtn');
+      if (checkinBtn) {
+        checkinBtn.addEventListener('click', doCheckIn);
+      }
+
+      const viewAllBtn = document.getElementById('viewAllTransactions');
+      if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', showAllTransactions);
+      }
+
+      const closeModalBtn = document.getElementById('closeTransactionsModal');
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeTransactionsModal);
+      }
+
+      const modal = document.getElementById('transactionsModal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeTransactionsModal();
+        });
+      }
+    }
+
+    /**
+     * نمایش toast
+     */
+    function showStreakToast(message, type = 'success') {
+      // حذف toast قبلی
+      const existing = document.querySelector('.streak-toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = `streak-toast ${type === 'error' ? 'error' : ''}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+      }, 3000);
+    }
+
+    /**
+     * فرمت تاریخ
+     */
+    function formatDate(dateStr) {
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('fa-IR', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    /**
+     * حالت خطا برای استریک
+     */
+    function renderStreakError() {
+      const card = document.getElementById('streakCard');
+      if (card) {
+        card.innerHTML = `
+          <div class="text-center py-6">
+            <div class="text-3xl mb-2">⚠️</div>
+            <p class="text-orange-700 font-bold">خطا در بارگذاری استریک</p>
+            <button onclick="loadStreakData()" class="mt-3 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold">
+              تلاش مجدد
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * حالت خطا برای کیف پول
+     */
+    function renderWalletError() {
+      const card = document.getElementById('walletCard');
+      if (card) {
+        card.innerHTML = `
+          <div class="text-center py-6">
+            <div class="text-3xl mb-2">⚠️</div>
+            <p class="text-emerald-700 font-bold">خطا در بارگذاری کیف پول</p>
+            <button onclick="loadWalletData()" class="mt-3 px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold">
+              تلاش مجدد
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * حالت لاگین نشده برای استریک
+     */
+    function renderStreakNotLoggedIn() {
+      const card = document.getElementById('streakCard');
+      if (card) {
+        card.innerHTML = `
+          <div class="text-center py-6">
+            <div class="text-3xl mb-2">🔒</div>
+            <p class="text-orange-700 font-bold mb-2">برای استفاده از استریک وارد شوید</p>
+            <a href="/login.html" class="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold">
+              ورود به حساب
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * حالت لاگین نشده برای کیف پول
+     */
+    function renderWalletNotLoggedIn() {
+      const card = document.getElementById('walletCard');
+      if (card) {
+        card.innerHTML = `
+          <div class="wallet-login-prompt">
+            <div class="wallet-login-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M5 20c0-3.5 3.5-6 7-6s7 2.5 7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M15 11l2 2 4-4" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="wallet-login-content">
+              <h4 class="wallet-login-title">ورود به حساب کاربری</h4>
+              <p class="wallet-login-desc">برای مشاهده موجودی کیف پول و دریافت پاداش‌ها، وارد حساب کاربری خود شوید</p>
+            </div>
+            <div class="wallet-login-features">
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>مدیریت اعتبار</span>
+              </div>
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <span>تاریخچه تراکنش</span>
+              </div>
+              <div class="wallet-login-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+                <span>پشتیبانی ۲۴/۷</span>
+              </div>
+            </div>
+            <a href="/login.html" class="wallet-login-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              <span>ورود به حساب</span>
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    // ============= End Streak & Wallet System =============
