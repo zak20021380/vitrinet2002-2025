@@ -575,14 +575,26 @@
       box-shadow: 0 8px 30px rgba(139, 92, 246, 0.45);
     }
 
-    /* کارت اولین رزرو - آبی */
+    /* کارت رزرو نوبت - بنفش/نیلی */
     .mission-card.booking {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%) !important;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
+      opacity: 1 !important;
+      filter: none !important;
     }
 
     .mission-card.booking:hover {
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.45);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    .mission-card.booking .mission-reward,
+    .mission-card.booking .mission-title {
+      color: #ffffff !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .mission-card.booking .mission-reward-icon svg {
+      stroke: #ffffff !important;
     }
 
     /* کارت تکمیل پروفایل - سبز */
@@ -595,14 +607,26 @@
       box-shadow: 0 8px 30px rgba(16, 185, 129, 0.45);
     }
 
-    /* کارت گردشگر بازار - فیروزه‌ای */
+    /* کارت گردش در بازار - آبی/فیروزه‌ای */
     .mission-card.explore {
-      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
-      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
+      background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 50%, #0891b2 100%) !important;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4) !important;
+      opacity: 1 !important;
+      filter: none !important;
     }
 
     .mission-card.explore:hover {
-      box-shadow: 0 8px 30px rgba(6, 182, 212, 0.45);
+      box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5) !important;
+    }
+
+    .mission-card.explore .mission-reward,
+    .mission-card.explore .mission-title {
+      color: #ffffff !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .mission-card.explore .mission-reward-icon {
+      color: #ffffff !important;
     }
 
     /* کارت نصب اپلیکیشن - صورتی/طلایی ویژه */
@@ -963,6 +987,229 @@
 
     .mission-modal-header.install-app {
       background: linear-gradient(145deg, #ec4899 0%, #db2777 50%, #be185d 100%);
+      padding-top: 2rem;
+    }
+
+    /* Hide the icon box for install-app modal */
+    .mission-modal-header.install-app .mission-modal-icon {
+      display: none !important;
+    }
+
+    /* Also hide the reward badge for install-app modal (already hidden via JS, but ensure CSS backup) */
+    .mission-modal-header.install-app .mission-modal-reward {
+      display: none !important;
+    }
+
+    /* Adjust title spacing when icon is hidden */
+    .mission-modal-header.install-app .mission-modal-title {
+      margin-top: 0.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       مودال رزرو نوبت - Book Appointment Modal (Premium Redesign)
+       ═══════════════════════════════════════════════════════════════ */
+    
+    .mission-modal-header.bookAppointment {
+      background: linear-gradient(145deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%);
+      padding: 2rem 1.5rem 1.5rem;
+    }
+
+    /* Hide the default icon box for booking modal */
+    .mission-modal-header.bookAppointment .mission-modal-icon {
+      display: none !important;
+    }
+
+    /* Hide the default reward badge for booking modal */
+    .mission-modal-header.bookAppointment .mission-modal-reward {
+      display: none !important;
+    }
+
+    /* Hide the default title for booking modal (we'll use custom) */
+    .mission-modal-header.bookAppointment .mission-modal-title {
+      display: none !important;
+    }
+
+    /* Custom booking modal body styles */
+    .booking-modal-content {
+      padding: 0;
+    }
+
+    .booking-hero-section {
+      text-align: center;
+      padding: 1.5rem 1.5rem 1rem;
+    }
+
+    .booking-illustration {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.25rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .booking-illustration-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+      border-radius: 50%;
+      animation: booking-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes booking-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 0.4; }
+    }
+
+    .booking-illustration-icon {
+      position: relative;
+      z-index: 1;
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+    }
+
+    .booking-illustration-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke: #ffffff;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .booking-main-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin: 0 0 0.5rem;
+      line-height: 1.4;
+    }
+
+    .booking-subtitle {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    /* Reward highlight box */
+    .booking-reward-box {
+      margin: 1.25rem 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border-radius: 1rem;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .booking-reward-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .booking-reward-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: #ffffff;
+      fill: none;
+    }
+
+    .booking-reward-content {
+      text-align: right;
+    }
+
+    .booking-reward-label {
+      font-size: 0.75rem;
+      color: #7c3aed;
+      margin: 0 0 0.15rem;
+      font-weight: 600;
+    }
+
+    .booking-reward-amount {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #5b21b6;
+      margin: 0;
+      direction: rtl;
+    }
+
+    /* Booking modal actions */
+    .booking-modal-actions {
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    .booking-primary-btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      border-radius: 1rem;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+      animation: booking-btn-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes booking-btn-glow {
+      0%, 100% { box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4); }
+      50% { box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6); }
+    }
+
+    .booking-primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+
+    .booking-primary-btn:active {
+      transform: scale(0.98);
+    }
+
+    .booking-primary-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: #ffffff;
+      fill: none;
+    }
+
+    .booking-secondary-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: color 0.2s ease;
+    }
+
+    .booking-secondary-btn:hover {
+      color: #64748b;
     }
 
     .mission-modal-close {
@@ -10018,13 +10265,17 @@
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
         reward: '۵,۰۰۰ تومان',
         title: 'رزرو نوبت آنلاین',
+        isBookingModal: true,
         desc: 'اولین نوبت خود را آنلاین رزرو کنید و ۵,۰۰۰ تومان اعتبار هدیه بگیرید! 📅',
         primaryBtn: {
-          text: 'رزرو نوبت',
+          text: 'رزرو نوبت و دریافت هدیه',
           icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"/></svg>`,
           action: 'bookAppointment'
         },
-        secondaryBtn: null
+        secondaryBtn: {
+          text: 'بعداً',
+          action: 'close'
+        }
       },
       profile: {
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 8v13"/><path d="M3 13h18"/><circle cx="12" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`,
@@ -10289,6 +10540,66 @@
             </p>
           </div>
         `;
+      } else if (data.isBookingModal) {
+        // مودال رزرو نوبت با طراحی پریمیوم
+        reward.style.display = 'none';
+        
+        bodyContent.innerHTML = `
+          <div class="booking-modal-content">
+            <!-- Hero Section with Illustration -->
+            <div class="booking-hero-section">
+              <div class="booking-illustration">
+                <div class="booking-illustration-bg"></div>
+                <div class="booking-illustration-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                    <path d="M9 16l2 2 4-4"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="booking-main-title">اولین نوبتت رو آنلاین بگیر!</h3>
+              <p class="booking-subtitle">همین الان اولین نوبت خودت رو رزرو کن و هدیه نقدی بگیر.</p>
+            </div>
+            
+            <!-- Reward Highlight Box -->
+            <div class="booking-reward-box">
+              <div class="booking-reward-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 12 20 22 4 22 4 12"/>
+                  <rect x="2" y="7" width="20" height="5"/>
+                  <line x1="12" y1="22" x2="12" y2="7"/>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+              </div>
+              <div class="booking-reward-content">
+                <p class="booking-reward-label">هدیه ویژه شما</p>
+                <p class="booking-reward-amount">۵,۰۰۰ تومان</p>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="booking-modal-actions">
+              <button type="button" class="booking-primary-btn" onclick="handleMissionAction('bookAppointment')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                  <path d="M9 16l2 2 4-4"/>
+                </svg>
+                رزرو نوبت و دریافت هدیه
+              </button>
+              <button type="button" class="booking-secondary-btn" onclick="closeMissionModal()">بعداً</button>
+            </div>
+          </div>
+        `;
+        
+        // Hide default actions for booking modal (we have custom buttons)
+        actions.innerHTML = '';
       } else {
         reward.style.display = '';
         reward.textContent = data.reward;
@@ -12277,11 +12588,15 @@
     // Generate mission card HTML
     function generateMissionCardHTML(missionId, config, mission, isCompleted = false) {
       const formattedAmount = mission ? new Intl.NumberFormat('fa-IR').format(mission.amount) : '---';
-      const isActive = mission ? mission.isActive : false;
+      
+      // These missions should ALWAYS be active unless explicitly completed
+      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete'];
+      const isActive = alwaysActiveMissions.includes(missionId) ? true : (mission ? mission.isActive : true);
       
       let cardClasses = `mission-card ${config.style}`;
       if (isCompleted) cardClasses += ' completed';
-      if (!isActive && !isCompleted) cardClasses += ' disabled';
+      // Only add disabled class if NOT in alwaysActiveMissions and not active
+      if (!isActive && !isCompleted && !alwaysActiveMissions.includes(missionId)) cardClasses += ' disabled';
       
       const clickHandler = (!isCompleted && isActive) ? `onclick="${config.onclick}"` : '';
       
@@ -12358,7 +12673,8 @@
         const cards = [];
         
         Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
-          const mission = missionMap[missionId] || { amount: 0, isActive: false };
+          // Default to active for user missions if not found in API
+          const mission = missionMap[missionId] || { amount: 0, isActive: true };
           const isCompleted = window.completedMissions.has(missionId);
           
           cards.push({
