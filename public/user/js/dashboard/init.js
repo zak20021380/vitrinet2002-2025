@@ -1768,25 +1768,29 @@
   </div>
 
   <!-- مودال جزئیات ماموریت -->
-  <div class="mission-modal-overlay" id="missionModalOverlay">
-    <div class="mission-modal" id="missionModal">
+  <div class="mission-modal-overlay" id="missionModalOverlay" aria-hidden="true">
+    <div class="mission-modal" id="missionModal" role="dialog" aria-modal="true" aria-labelledby="missionModalTitle">
       <!-- هدر -->
       <div class="mission-modal-header" id="missionModalHeader">
-        <button type="button" class="mission-modal-close" id="missionModalClose">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-        <div class="mission-modal-icon" id="missionModalIcon">🎁</div>
-        <div class="mission-modal-reward" id="missionModalReward">۵,۰۰۰ تومان</div>
-        <h2 class="mission-modal-title" id="missionModalTitle">دعوت از دوستان</h2>
+        <div class="mission-modal-header-row">
+          <div class="mission-modal-icon" id="missionModalIcon">🎁</div>
+          <button type="button" class="mission-modal-close" id="missionModalClose" aria-label="بستن">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="mission-modal-title-group">
+          <h2 class="mission-modal-title" id="missionModalTitle">دعوت از دوستان</h2>
+          <div class="mission-modal-reward" id="missionModalReward">۵,۰۰۰ تومان</div>
+        </div>
       </div>
 
       <!-- بدنه -->
       <div class="mission-modal-body">
         <!-- محتوای داینامیک -->
-        <div id="missionModalBodyContent">
+        <div id="missionModalBodyContent" class="mission-modal-content">
           <!-- با جاوااسکریپت پر می‌شود -->
         </div>
 
@@ -2511,6 +2515,7 @@
 
       // نمایش مودال
       overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
       
       // Setup listeners بعد از نمایش مودال
@@ -2521,6 +2526,7 @@
     function closeMissionModal() {
       const overlay = document.getElementById('missionModalOverlay');
       overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       currentMissionType = null;
     }
