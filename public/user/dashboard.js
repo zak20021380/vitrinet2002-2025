@@ -2342,6 +2342,15 @@
       const title = document.getElementById('missionModalTitle');
       const bodyContent = document.getElementById('missionModalBodyContent');
       const actions = document.getElementById('missionModalActions');
+      const dismissButton = document.getElementById('missionModalDismiss');
+
+      // Reset action area for idempotent rendering
+      actions.innerHTML = '';
+      const isBookingModal = Boolean(data.isBookingModal);
+      actions.classList.toggle('mission-modal-actions--booking', isBookingModal);
+      if (dismissButton) {
+        dismissButton.style.display = isBookingModal ? 'none' : '';
+      }
 
       // تنظیم کلاس رنگ
       header.className = 'mission-modal-header ' + type;
@@ -2561,58 +2570,60 @@
                 <p class="booking-reward-amount">۵,۰۰۰ تومان</p>
               </div>
             </div>
-            
-            <!-- Action Buttons -->
-            <div class="booking-modal-actions">
-              <button type="button" class="booking-primary-btn" onclick="handleMissionAction('bookAppointment')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                  <path d="M9 16l2 2 4-4"/>
-                </svg>
-                رزرو نوبت و دریافت هدیه
-              </button>
-              <button type="button" class="booking-secondary-btn" onclick="closeMissionModal()">بعداً</button>
-            </div>
           </div>
         `;
-        
-        // Hide default actions for booking modal (we have custom buttons)
-        actions.innerHTML = '';
+
+        actions.innerHTML = `
+          <button type="button" class="booking-primary-btn" onclick="handleMissionAction('bookAppointment')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <path d="M9 16l2 2 4-4"/>
+            </svg>
+            رزرو نوبت و دریافت هدیه
+          </button>
+          <button type="button" class="booking-secondary-btn" onclick="closeMissionModal()">بعداً</button>
+        `;
       } else {
         reward.style.display = '';
-        reward.textContent = data.reward;
+        reward.textContent = data.reward ?? '';
         bodyContent.innerHTML = `
           <div class="mission-modal-desc-card">
-            <p class="mission-modal-desc">${data.desc}</p>
+            <p class="mission-modal-desc">${data.desc ?? ''}</p>
           </div>
         `;
       }
 
-      // ساخت دکمه‌ها
-      let actionsHTML = '';
-      
-      if (data.primaryBtn) {
-        actionsHTML += `
-          <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
-            ${data.primaryBtn.icon}
-            ${data.primaryBtn.text}
-          </button>
-        `;
-      }
+      if (!data.isBookingModal) {
+        // ساخت دکمه‌ها
+        let actionsHTML = '';
+        const primaryIcon = data.primaryBtn?.icon ?? '';
+        const primaryText = data.primaryBtn?.text ?? '';
+        const secondaryIcon = data.secondaryBtn?.icon ?? '';
+        const secondaryText = data.secondaryBtn?.text ?? 'بعداً';
 
-      if (data.secondaryBtn) {
-        actionsHTML += `
-          <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
-            ${data.secondaryBtn.icon}
-            ${data.secondaryBtn.text}
-          </button>
-        `;
-      }
+        if (data.primaryBtn) {
+          actionsHTML += `
+            <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
+              ${primaryIcon}
+              ${primaryText}
+            </button>
+          `;
+        }
 
-      actions.innerHTML = actionsHTML;
+        if (data.secondaryBtn) {
+          actionsHTML += `
+            <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
+              ${secondaryIcon}
+              ${secondaryText}
+            </button>
+          `;
+        }
+
+        actions.innerHTML = actionsHTML;
+      }
 
       // نمایش مودال
       overlay.classList.add('active');
