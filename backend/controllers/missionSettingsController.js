@@ -121,16 +121,17 @@ exports.bulkUpdateMissions = async (req, res) => {
 };
 
 /**
- * Get active missions for users (Public API)
+ * Get all missions for users (Public API)
+ * Returns ALL missions regardless of status - frontend handles visual state
  */
 exports.getActiveMissionsForUsers = async (req, res) => {
   try {
     await MissionSetting.initializeDefaults();
     
+    // Return ALL user missions, let frontend handle display logic
     const missions = await MissionSetting.find({
-      category: 'users',
-      isActive: true
-    }).sort({ order: 1 }).select('missionId title description amount icon cardStyle');
+      category: 'users'
+    }).sort({ order: 1 }).select('missionId title description amount icon cardStyle isActive');
     
     res.json({
       success: true,
