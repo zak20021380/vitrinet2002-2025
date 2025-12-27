@@ -1629,6 +1629,17 @@
     }
   </style>
   <style>
+    /* Header Scroll Effect */
+    #mainHeader.scrolled {
+      background: rgba(255, 255, 255, 0.98) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    #mainHeader.scrolled .lg\\:block > div {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+    
     .btn-grad {
       background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
       color: #fff !important;
@@ -1704,6 +1715,15 @@
         font-size: 13px;
       }
     }
+    
+    /* Hide scrollbar for quick category pills */
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -1729,80 +1749,244 @@
 
 <body class="text-gray-800 overflow-x-hidden">
   <!-- هدر مدرن موبایل اپ استایل -->
-  <header class="w-full sticky top-0 z-50 font-['Vazirmatn']"
-    style="background: linear-gradient(180deg, #f8faf9 0%, #f2f6f5 100%);">
-    <!-- Top Navigation Bar -->
-    <div class="flex items-center justify-between px-4 py-4">
-      <!-- Right: Vitreenet Logo with Gradient -->
-      <div class="flex items-center">
-        <a href="index.html" class="font-[900] text-[1.85rem] tracking-tight"
-          style="font-family: 'Poppins', sans-serif; background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-          Vitreenet
-        </a>
-      </div>
-
-      <!-- Left: Hamburger Menu & Location Badge -->
-      <div class="flex items-center gap-3">
-        <!-- Location Badge (Pill Shape with Gradient) -->
-        <div
-          class="flex items-center gap-1.5 px-4 py-2.5 rounded-full cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105"
-          style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
-          <i class="fas fa-map-marker-alt text-white text-sm"></i>
-          <span class="text-white text-[0.85rem] font-extrabold leading-none">سنندج</span>
+  <header id="mainHeader" class="w-full sticky top-0 z-50 font-['Vazirmatn'] transition-all duration-300"
+    style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(16, 185, 129, 0.1);">
+    
+    <!-- Desktop Header -->
+    <div class="hidden lg:block">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between gap-8">
+          
+          <!-- Right Section: Logo + Location -->
+          <div class="flex items-center gap-4">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-3 group">
+              <div class="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105"
+                style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+                <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 8L8 16L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M15 16V8L19 16V8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-[900] text-[1.5rem] tracking-tight leading-none"
+                  style="font-family: 'Poppins', sans-serif; background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                  Vitreenet
+                </span>
+                <span class="text-xs font-bold text-gray-500">ویترینت</span>
+              </div>
+            </a>
+            
+            <!-- Location Badge -->
+            <div class="flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all duration-300 hover:shadow-md"
+              style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.2);">
+              <i class="fas fa-map-marker-alt text-sm" style="color: #10b981;"></i>
+              <span class="text-sm font-bold" style="color: #0f766e;">سنندج</span>
+              <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+            </div>
+          </div>
+          
+          <!-- Left Section: Navigation + Actions -->
+          <div class="flex items-center gap-2">
+            <!-- Navigation Links -->
+            <nav class="flex items-center gap-1">
+              <a href="index.html" class="px-4 py-2 rounded-xl text-gray-600 font-bold text-sm transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600">
+                خانه
+              </a>
+              <a href="all-products.html" class="px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200"
+                style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); color: #10b981;">
+                محصولات
+              </a>
+              <a href="categories.html" class="px-4 py-2 rounded-xl text-gray-600 font-bold text-sm transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600">
+                دسته‌بندی
+              </a>
+              <a href="all-shops.html" class="px-4 py-2 rounded-xl text-gray-600 font-bold text-sm transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600">
+                فروشگاه‌ها
+              </a>
+              <a href="all-shopping-centers.html" class="px-4 py-2 rounded-xl text-gray-600 font-bold text-sm transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-600">
+                مراکز خرید
+              </a>
+            </nav>
+            
+            <!-- Divider -->
+            <div class="w-px h-8 bg-gray-200 mx-2"></div>
+            
+            <!-- Action Buttons -->
+            <a href="login.html" class="px-4 py-2 rounded-xl text-gray-600 font-bold text-sm transition-all duration-200 hover:bg-sky-50 hover:text-sky-600 flex items-center gap-2">
+              <i class="fas fa-user"></i>
+              <span>ورود</span>
+            </a>
+            <a href="post.html" class="px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2"
+              style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+              <i class="fas fa-store"></i>
+              <span>ثبت فروشگاه</span>
+            </a>
+          </div>
         </div>
-
-        <!-- Premium Hamburger Menu Button -->
-        <button id="hamburgerMenuBtn"
-          class="hamburger-btn relative w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 focus:outline-none active:scale-90 hover:scale-105 overflow-hidden group"
-          style="background: linear-gradient(135deg, #ffffff 0%, #f8faf9 100%); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9); border: 1.5px solid rgba(16, 185, 129, 0.25);">
-          <!-- Animated gradient shine -->
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-100/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out">
-          </div>
-          <!-- Icon with gradient -->
-          <div class="relative z-10 w-5 h-5 flex flex-col justify-center items-center gap-[5px]">
-            <span class="block w-5 h-[2.5px] rounded-full transition-all duration-300"
-              style="background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);"></span>
-            <span class="block w-4 h-[2.5px] rounded-full transition-all duration-300"
-              style="background: linear-gradient(90deg, #0ea5e9 0%, #10b981 100%);"></span>
-            <span class="block w-5 h-[2.5px] rounded-full transition-all duration-300"
-              style="background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);"></span>
-          </div>
-        </button>
       </div>
     </div>
+    
+    <!-- Mobile Header -->
+    <div class="lg:hidden">
+      <!-- Top Navigation Bar -->
+      <div class="flex items-center justify-between px-4 py-3">
+        <!-- Right: Logo -->
+        <a href="index.html" class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 8L8 16L12 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 16V8L19 16V8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="font-[900] text-[1.4rem] tracking-tight"
+            style="font-family: 'Poppins', sans-serif; background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Vitreenet
+          </span>
+        </a>
 
-    <!-- Search Bar & Filter Section - More spacing for professional look -->
-    <div class="px-4 pt-2 pb-5 flex justify-center">
-      <div class="flex items-center justify-center gap-3 w-full max-w-2xl">
-        <!-- Premium Search Bar -->
-        <div class="flex-grow relative group max-w-md">
-          <!-- Glow effect on focus -->
-          <div
-            class="absolute -inset-1 bg-gradient-to-r from-emerald-400/20 to-cyan-400/20 rounded-3xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-300">
+        <!-- Left: Location + Hamburger -->
+        <div class="flex items-center gap-2">
+          <!-- Location Badge -->
+          <div class="flex items-center gap-1.5 px-3 py-2 rounded-full cursor-pointer"
+            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+            <i class="fas fa-map-marker-alt text-white text-xs"></i>
+            <span class="text-white text-xs font-bold">سنندج</span>
           </div>
-          <div class="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
-            <i class="fas fa-search text-lg transition-colors duration-300" style="color: #9ca3af;"></i>
-          </div>
-          <input type="text" id="searchInput" placeholder="جستجوی محصولات..."
-            class="relative w-full h-[54px] pl-14 pr-5 rounded-2xl border-0 bg-white text-gray-700 font-bold placeholder-gray-400 focus:outline-none transition-all text-right text-[0.95rem]"
-            style="box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1); border: 1.5px solid rgba(0, 0, 0, 0.04);">
+
+          <!-- Hamburger Menu Button -->
+          <button id="hamburgerMenuBtn"
+            class="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 focus:outline-none active:scale-95"
+            style="background: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); border: 1px solid rgba(16, 185, 129, 0.15);">
+            <div class="w-5 h-4 flex flex-col justify-between">
+              <span class="block w-5 h-[2px] rounded-full" style="background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);"></span>
+              <span class="block w-4 h-[2px] rounded-full mr-auto" style="background: linear-gradient(90deg, #0ea5e9 0%, #10b981 100%);"></span>
+              <span class="block w-5 h-[2px] rounded-full" style="background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);"></span>
+            </div>
+          </button>
         </div>
-
-        <!-- Premium Filter Button (Left of Search) -->
-        <button id="mobileFilterBtn" aria-controls="mobileFilters" aria-haspopup="dialog" aria-expanded="false"
-          class="filter-btn-premium flex-shrink-0 w-[54px] h-[54px] rounded-2xl bg-white flex items-center justify-center transition-all duration-300 hover:scale-105 focus:outline-none active:scale-95 relative overflow-hidden group"
-          style="box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1); border: 1.5px solid rgba(16, 185, 129, 0.2);">
-          <!-- Hover gradient background -->
-          <div
-            class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          </div>
-          <i class="fas fa-sliders-h text-xl relative z-10 transition-all duration-300"
-            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Hero Search Section -->
+  <section class="lg:hidden" style="background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, rgba(14, 165, 233, 0.06) 50%, transparent 100%);">
+    <div class="px-4 pt-5 pb-6">
+      <!-- Search Title -->
+      <div class="text-center mb-4">
+        <h2 class="text-lg font-[900] text-gray-800 mb-1">جستجو در محصولات</h2>
+        <p class="text-gray-500 font-semibold text-xs">محصول مورد نظر خود را پیدا کنید</p>
+      </div>
+      
+      <!-- Search Box with Filter -->
+      <div class="relative">
+        <div class="flex items-center gap-3">
+          <!-- Search Input -->
+          <div class="flex-1 relative group">
+            <div class="absolute -inset-1 bg-gradient-to-r from-emerald-400/20 to-cyan-400/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-300"></div>
+            <div class="relative flex items-center">
+              <input type="text" id="searchInputMobile" placeholder="نام محصول یا فروشگاه..."
+                class="w-full h-12 pl-12 pr-4 rounded-xl bg-white text-gray-700 font-semibold placeholder-gray-400 focus:outline-none transition-all text-right text-sm"
+                style="border: 2px solid rgba(16, 185, 129, 0.15); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08);">
+              <div class="absolute left-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center"
+                style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
+                <i class="fas fa-search text-white text-sm"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Filter Button -->
+          <button id="mobileFilterBtn" aria-controls="mobileFilters" aria-haspopup="dialog" aria-expanded="false"
+            class="w-12 h-12 rounded-xl bg-white flex items-center justify-center transition-all duration-300 active:scale-95 relative overflow-hidden"
+            style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.12); border: 2px solid rgba(16, 185, 129, 0.15);">
+            <i class="fas fa-sliders-h text-lg" style="color: #10b981;"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+              style="background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%); display: none;" id="filterBadge">0</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Category Pills -->
+      <div class="flex items-center gap-2 mt-4 overflow-x-auto pb-1 scrollbar-hide" style="-webkit-overflow-scrolling: touch;">
+        <span class="text-[11px] text-gray-400 font-bold whitespace-nowrap flex-shrink-0">پرطرفدار:</span>
+        <button class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+          style="background: rgba(16, 185, 129, 0.1); color: #0f766e; border: 1px solid rgba(16, 185, 129, 0.2);"
+          onclick="document.getElementById('searchInputMobile').value='پوشاک'; document.getElementById('searchInputMobile').dispatchEvent(new Event('input'));">
+          <i class="fas fa-tshirt ml-1 text-[10px]"></i>پوشاک
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+          style="background: rgba(14, 165, 233, 0.1); color: #0369a1; border: 1px solid rgba(14, 165, 233, 0.2);"
+          onclick="document.getElementById('searchInputMobile').value='دیجیتال'; document.getElementById('searchInputMobile').dispatchEvent(new Event('input'));">
+          <i class="fas fa-mobile-alt ml-1 text-[10px]"></i>دیجیتال
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+          style="background: rgba(16, 185, 129, 0.1); color: #0f766e; border: 1px solid rgba(16, 185, 129, 0.2);"
+          onclick="document.getElementById('searchInputMobile').value='زیبایی'; document.getElementById('searchInputMobile').dispatchEvent(new Event('input'));">
+          <i class="fas fa-spa ml-1 text-[10px]"></i>زیبایی
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+          style="background: rgba(14, 165, 233, 0.1); color: #0369a1; border: 1px solid rgba(14, 165, 233, 0.2);"
+          onclick="document.getElementById('searchInputMobile').value='خوراک'; document.getElementById('searchInputMobile').dispatchEvent(new Event('input'));">
+          <i class="fas fa-utensils ml-1 text-[10px]"></i>خوراک
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap flex-shrink-0 transition-all duration-200 active:scale-95"
+          style="background: rgba(16, 185, 129, 0.1); color: #0f766e; border: 1px solid rgba(16, 185, 129, 0.2);"
+          onclick="document.getElementById('searchInputMobile').value='لوازم خانگی'; document.getElementById('searchInputMobile').dispatchEvent(new Event('input'));">
+          <i class="fas fa-couch ml-1 text-[10px]"></i>لوازم خانگی
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Desktop Hero Search Section -->
+  <section class="hidden lg:block py-8 px-6" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(14, 165, 233, 0.05) 50%, rgba(16, 185, 129, 0.03) 100%);">
+    <div class="max-w-4xl mx-auto">
+      <!-- Search Title -->
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-[900] text-gray-800 mb-2">جستجو در محصولات</h2>
+        <p class="text-gray-500 font-semibold text-sm">محصول مورد نظر خود را از بین هزاران محصول پیدا کنید</p>
+      </div>
+      
+      <!-- Search Box -->
+      <div class="relative group max-w-2xl mx-auto">
+        <div class="absolute -inset-2 bg-gradient-to-r from-emerald-400/30 to-cyan-400/30 rounded-3xl blur-xl opacity-0 group-focus-within:opacity-100 transition-all duration-500"></div>
+        <div class="relative flex items-center">
+          <input type="text" id="searchInput" placeholder="نام محصول، دسته‌بندی یا فروشگاه را جستجو کنید..."
+            class="w-full h-14 pl-16 pr-6 rounded-2xl bg-white text-gray-700 font-semibold placeholder-gray-400 focus:outline-none transition-all text-right"
+            style="border: 2px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1); font-size: 1rem;">
+          <button class="absolute left-2 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+            <i class="fas fa-search text-white text-lg"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Search Tags -->
+      <div class="flex flex-wrap justify-center gap-2 mt-5">
+        <span class="text-xs text-gray-400 font-semibold ml-2">جستجوهای پرطرفدار:</span>
+        <button class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:scale-105"
+          style="background: rgba(16, 185, 129, 0.1); color: #0f766e; border: 1px solid rgba(16, 185, 129, 0.2);"
+          onclick="document.getElementById('searchInput').value='پوشاک'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+          پوشاک
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:scale-105"
+          style="background: rgba(14, 165, 233, 0.1); color: #0369a1; border: 1px solid rgba(14, 165, 233, 0.2);"
+          onclick="document.getElementById('searchInput').value='دیجیتال'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+          دیجیتال
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:scale-105"
+          style="background: rgba(16, 185, 129, 0.1); color: #0f766e; border: 1px solid rgba(16, 185, 129, 0.2);"
+          onclick="document.getElementById('searchInput').value='زیبایی'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+          زیبایی
+        </button>
+        <button class="px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:scale-105"
+          style="background: rgba(14, 165, 233, 0.1); color: #0369a1; border: 1px solid rgba(14, 165, 233, 0.2);"
+          onclick="document.getElementById('searchInput').value='لوازم خانگی'; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
+          لوازم خانگی
+        </button>
+      </div>
+    </div>
+  </section>
 
   <!-- Hamburger Menu Drawer -->
   <div id="hamburgerMenuOverlay"

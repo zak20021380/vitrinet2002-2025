@@ -2241,6 +2241,22 @@
       const title = document.getElementById('missionModalTitle');
       const bodyContent = document.getElementById('missionModalBodyContent');
       const actions = document.getElementById('missionModalActions');
+      const dismissButton = document.getElementById('missionModalDismiss');
+
+      // پاک کردن هدر سفارشی قبلی (اگر وجود داشته باشد)
+      const existingHero = header.querySelector('.install-app-hero');
+      if (existingHero) existingHero.remove();
+
+      // ریست کردن استایل‌های المنت‌های پیش‌فرض
+      icon.style.cssText = '';
+      reward.style.cssText = '';
+      title.style.cssText = '';
+
+      // مخفی کردن دکمه dismiss برای مدال رزرو نوبت (فقط یک دکمه اصلی نمایش داده می‌شود)
+      const isBookingModal = Boolean(data.isBookingModal);
+      if (dismissButton) {
+        dismissButton.style.display = isBookingModal ? 'none' : '';
+      }
 
       // تنظیم کلاس رنگ
       header.className = 'mission-modal-header ' + type;
@@ -2348,11 +2364,41 @@
           </div>
         `;
       } else if (data.isInstallAppModal) {
-        // مودال نصب اپلیکیشن با طراحی پریمیوم
-        reward.style.display = 'none';
+        // مودال نصب اپلیکیشن با طراحی پریمیوم V2
+        reward.style.cssText = 'display: none !important;';
+        icon.style.cssText = 'display: none !important;';
+        title.style.cssText = 'display: none !important;';
+        
+        // اضافه کردن هدر سفارشی
+        const heroHTML = `
+          <div class="install-app-hero">
+            <div class="install-app-phone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <path d="M12 18h.01"/>
+                <path d="M9 6h6"/>
+              </svg>
+            </div>
+            <div class="install-app-hero-content">
+              <h2 class="install-app-hero-title">نصب اپلیکیشن ویترینت</h2>
+              <p class="install-app-hero-subtitle">نصب کن و جایزه بگیر!</p>
+              <div class="install-app-reward-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 12 20 22 4 22 4 12"/>
+                  <rect x="2" y="7" width="20" height="5"/>
+                  <line x1="12" y1="22" x2="12" y2="7"/>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+                <span>۱۰,۰۰۰ تومان هدیه</span>
+              </div>
+            </div>
+          </div>
+        `;
+        header.insertAdjacentHTML('beforeend', heroHTML);
         
         bodyContent.innerHTML = `
-          <!-- راهنمای گام به گام با خطوط اتصال -->
+          <!-- راهنمای گام به گام با طراحی کارتی -->
           <div class="install-steps-premium">
             <!-- مرحله ۱ -->
             <div class="install-step-premium">
@@ -2364,7 +2410,6 @@
                     <line x1="12" y1="15" x2="12" y2="3"/>
                   </svg>
                 </div>
-                <div class="install-step-line"></div>
               </div>
               <div class="install-step-content-premium">
                 <span class="install-step-num">۱</span>
@@ -2382,7 +2427,6 @@
                     <path d="m9 12 2 2 4-4"/>
                   </svg>
                 </div>
-                <div class="install-step-line"></div>
               </div>
               <div class="install-step-content-premium">
                 <span class="install-step-num">۲</span>
@@ -2461,9 +2505,9 @@
               </div>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="booking-modal-actions">
-              <button type="button" class="booking-primary-btn" onclick="handleMissionAction('bookAppointment')">
+            <!-- دکمه‌های اکشن -->
+            <div class="booking-actions-wrapper">
+              <button type="button" class="booking-primary-btn booking-single-btn" onclick="handleMissionAction('bookAppointment')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                   <line x1="16" y1="2" x2="16" y2="6"/>
@@ -2473,12 +2517,14 @@
                 </svg>
                 رزرو نوبت و دریافت هدیه
               </button>
-              <button type="button" class="booking-secondary-btn" onclick="closeMissionModal()">بعداً</button>
+              <button type="button" class="booking-dismiss-btn" onclick="closeMissionModal()">
+                بعداً
+              </button>
             </div>
           </div>
         `;
         
-        // Hide default actions for booking modal (we have custom buttons)
+        // Hide default actions for booking modal (we have custom button in bodyContent)
         actions.innerHTML = '';
       } else {
         reward.style.display = '';
@@ -2490,28 +2536,30 @@
         `;
       }
 
-      // ساخت دکمه‌ها
-      let actionsHTML = '';
-      
-      if (data.primaryBtn) {
-        actionsHTML += `
-          <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
-            ${data.primaryBtn.icon}
-            ${data.primaryBtn.text}
-          </button>
-        `;
-      }
+      // ساخت دکمه‌ها (فقط برای مدال‌هایی که دکمه سفارشی ندارند)
+      if (!data.isBookingModal) {
+        let actionsHTML = '';
+        
+        if (data.primaryBtn) {
+          actionsHTML += `
+            <button type="button" class="mission-modal-btn primary ${type}" onclick="handleMissionAction('${data.primaryBtn.action}')">
+              ${data.primaryBtn.icon}
+              ${data.primaryBtn.text}
+            </button>
+          `;
+        }
 
-      if (data.secondaryBtn) {
-        actionsHTML += `
-          <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
-            ${data.secondaryBtn.icon}
-            ${data.secondaryBtn.text}
-          </button>
-        `;
-      }
+        if (data.secondaryBtn) {
+          actionsHTML += `
+            <button type="button" class="mission-modal-btn secondary ${type}" onclick="handleMissionAction('${data.secondaryBtn.action}')">
+              ${data.secondaryBtn.icon}
+              ${data.secondaryBtn.text}
+            </button>
+          `;
+        }
 
-      actions.innerHTML = actionsHTML;
+        actions.innerHTML = actionsHTML;
+      }
 
       // نمایش مودال
       overlay.classList.add('active');
@@ -3080,6 +3128,7 @@
         renderRecentFavorites(); // اینجا رندر داینامیک رو صدا بزن
         updateDashboardFavCount(); // اینم اضافه کن تا تعداد علاقه‌مندی درست بشه
         initStreakAndWallet(); // بارگذاری استریک و کیف پول
+        loadUserMissions(); // بارگذاری مجدد ماموریت‌ها
       }
       else if (section === 'profile') loadProfileSection();
       else if (section === 'favorites') loadFavoritesSection();
@@ -4409,7 +4458,6 @@
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
         title: 'نصب اپلیکیشن',
         onclick: 'showInstallAppMission()',
-        badge: 'ویژه',
         order: 2
       },
       'user-profile-complete': {

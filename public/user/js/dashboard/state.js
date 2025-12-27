@@ -50,10 +50,7 @@ const profileState = {
           icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"/></svg>`,
           action: 'bookAppointment'
         },
-        secondaryBtn: {
-          text: 'بعداً',
-          action: 'close'
-        }
+        secondaryBtn: null
       },
       profile: {
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M12 8v13"/><path d="M3 13h18"/><circle cx="12" cy="4" r="1" fill="currentColor" stroke="none"/></svg>`,
