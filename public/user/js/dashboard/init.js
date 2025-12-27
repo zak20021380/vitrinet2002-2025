@@ -2352,7 +2352,7 @@
             
             <!-- عنوان و توضیحات -->
             <h2 class="explore-premium-title">پاساژگردی آنلاین</h2>
-            <p class="explore-premium-desc">فقط ۱۵ ثانیه در بازارچه بچرخید و جایزه بگیرید!</p>
+            <p class="explore-premium-desc">فقط ۹۰ ثانیه در بازارچه بچرخید و جایزه بگیرید!</p>
             
             <!-- کپسول جایزه درخشان -->
             <div class="explore-reward-capsule">
@@ -2808,6 +2808,146 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // مودال ماموریت انجام شده - طراحی پریمیوم
+    // ═══════════════════════════════════════════════════════════════
+    function showCompletedMissionModal(missionType) {
+      const missionInfo = {
+        'user-review': {
+          title: 'پاساژگردی آنلاین',
+          reward: '۲۰۰',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+          message: 'شما امروز این ماموریت را با موفقیت انجام دادید!',
+          nextMessage: 'فردا دوباره می‌توانید این ماموریت را انجام دهید و جایزه بگیرید.'
+        },
+        'user-app-install': {
+          title: 'نصب اپلیکیشن',
+          reward: '۱۰,۰۰۰',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
+          message: 'شما این ماموریت را با موفقیت انجام دادید!',
+          nextMessage: 'از اپلیکیشن ویترینت لذت ببرید.'
+        },
+        'user-profile-complete': {
+          title: 'ثبت تاریخ تولد',
+          reward: '۵۰۰',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>`,
+          message: 'تاریخ تولد شما ثبت شده است!',
+          nextMessage: 'منتظر سورپرایز روز تولدتان باشید.'
+        },
+        'user-book-appointment': {
+          title: 'رزرو نوبت',
+          reward: '۵,۰۰۰',
+          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>`,
+          message: 'شما این ماموریت را با موفقیت انجام دادید!',
+          nextMessage: 'از خدمات رزرو شده لذت ببرید.'
+        }
+      };
+
+      const info = missionInfo[missionType] || {
+        title: 'ماموریت',
+        reward: '---',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+        message: 'این ماموریت قبلاً انجام شده است.',
+        nextMessage: ''
+      };
+
+      // ایجاد مودال
+      const existingModal = document.getElementById('completedMissionModal');
+      if (existingModal) existingModal.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'completedMissionModal';
+      modal.className = 'completed-mission-overlay';
+      modal.innerHTML = `
+        <div class="completed-mission-card">
+          <!-- دکمه بستن -->
+          <button class="completed-mission-close" onclick="closeCompletedMissionModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <!-- محتوای مودال -->
+          <div class="completed-mission-content">
+            <!-- آیکون موفقیت با انیمیشن -->
+            <div class="completed-mission-success-icon">
+              <div class="success-ring"></div>
+              <div class="success-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            
+            <!-- عنوان -->
+            <h2 class="completed-mission-title">ماموریت انجام شد!</h2>
+            
+            <!-- آیکون و نام ماموریت -->
+            <div class="completed-mission-info">
+              <span class="completed-mission-icon">${info.icon}</span>
+              <h3 class="completed-mission-name">${info.title}</h3>
+            </div>
+            
+            <!-- پیام -->
+            <p class="completed-mission-message">${info.message}</p>
+            
+            <!-- جایزه دریافت شده -->
+            <div class="completed-mission-reward-box">
+              <div class="reward-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="reward-text-wrap">
+                <span class="completed-reward-label">جایزه دریافت شده</span>
+                <span class="completed-reward-amount">${info.reward} تومان</span>
+              </div>
+            </div>
+            
+            <!-- پیام بعدی -->
+            ${info.nextMessage ? `<p class="completed-mission-next">${info.nextMessage}</p>` : ''}
+            
+            <!-- دکمه -->
+            <button class="completed-mission-btn" onclick="closeCompletedMissionModal()">
+              متوجه شدم
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      
+      // انیمیشن ورود
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+      });
+
+      // بستن با کلیک روی overlay
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeCompletedMissionModal();
+        }
+      });
+
+      // بستن با Escape
+      const escHandler = (e) => {
+        if (e.key === 'Escape') {
+          closeCompletedMissionModal();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+
+    function closeCompletedMissionModal() {
+      const modal = document.getElementById('completedMissionModal');
+      if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // اکسپورت توابع ماموریت به window برای دسترسی از onclick
     // ═══════════════════════════════════════════════════════════════
     window.showBookingMission = showBookingMission;
@@ -2816,6 +2956,8 @@
     window.showInstallAppMission = showInstallAppMission;
     window.closeMissionModal = closeMissionModal;
     window.handleMissionAction = handleMissionAction;
+    window.showCompletedMissionModal = showCompletedMissionModal;
+    window.closeCompletedMissionModal = closeCompletedMissionModal;
 
     // ═══════════════════════════════════════════════════════════════
     // مودال ثبت تاریخ تولد
@@ -4566,7 +4708,13 @@
       // Only add disabled class if NOT in alwaysActiveMissions and not active
       if (!isActive && !isCompleted && !alwaysActiveMissions.includes(missionId)) cardClasses += ' disabled';
       
-      const clickHandler = (!isCompleted && isActive) ? `onclick="${config.onclick}"` : '';
+      // اگر ماموریت تکمیل شده، مودال "انجام شده" نشون بده، در غیر این صورت مودال عادی
+      let clickHandler = '';
+      if (isCompleted) {
+        clickHandler = `onclick="showCompletedMissionModal('${missionId}')"`;
+      } else if (isActive) {
+        clickHandler = `onclick="${config.onclick}"`;
+      }
       
       // Completed badge HTML
       const completedBadge = isCompleted ? `
@@ -5391,17 +5539,24 @@
             </div>
           `;
         } else {
-          recentTransactions.innerHTML = walletData.recentTransactions.map(t => `
-            <div class="wallet-transaction">
-              <div class="wallet-transaction-info">
-                <span class="wallet-transaction-icon">${t.isPositive ? '📈' : '📉'}</span>
-                <span class="wallet-transaction-title">${t.title || 'تراکنش'}</span>
+          recentTransactions.innerHTML = walletData.recentTransactions.map(t => {
+            // آیکون SVG بر اساس نوع تراکنش
+            const icon = t.isPositive 
+              ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transaction-icon-svg positive"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>`
+              : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transaction-icon-svg negative"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`;
+            
+            return `
+              <div class="wallet-transaction">
+                <div class="wallet-transaction-info">
+                  <span class="wallet-transaction-icon">${icon}</span>
+                  <span class="wallet-transaction-title">${t.title || 'تراکنش'}</span>
+                </div>
+                <span class="wallet-transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
+                  ${t.formattedAmount || t.amount}
+                </span>
               </div>
-              <span class="wallet-transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
-                ${t.formattedAmount || t.amount}
-              </span>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         }
       }
     }
@@ -5527,20 +5682,27 @@
           return;
         }
 
-        list.innerHTML = transactions.map(t => `
-          <div class="transaction-item">
-            <div class="transaction-icon-wrapper ${t.isPositive ? 'earn' : 'spend'}">
-              ${t.categoryIcon || (t.isPositive ? '📈' : '📉')}
+        list.innerHTML = transactions.map(t => {
+          // آیکون SVG بر اساس نوع تراکنش
+          const icon = t.isPositive 
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`;
+          
+          return `
+            <div class="transaction-item">
+              <div class="transaction-icon-wrapper ${t.isPositive ? 'earn' : 'spend'}">
+                ${icon}
+              </div>
+              <div class="transaction-details">
+                <p class="transaction-title">${t.title || 'تراکنش'}</p>
+                <span class="transaction-date">${formatDate(t.createdAt)} • ${t.categoryLabel || ''}</span>
+              </div>
+              <span class="transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
+                ${t.formattedAmount || t.amount}
+              </span>
             </div>
-            <div class="transaction-details">
-              <p class="transaction-title">${t.title || 'تراکنش'}</p>
-              <span class="transaction-date">${formatDate(t.createdAt)} • ${t.categoryLabel || ''}</span>
-            </div>
-            <span class="transaction-amount ${t.isPositive ? 'positive' : 'negative'}">
-              ${t.formattedAmount || t.amount}
-            </span>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
       } catch (error) {
         console.error('showAllTransactions error:', error);

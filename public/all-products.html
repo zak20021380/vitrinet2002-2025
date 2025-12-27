@@ -3229,7 +3229,7 @@
   (function() {
     const MISSION_PENDING_KEY = 'vitrinet_mission_market_pending';
     const MISSION_DONE_KEY = 'vitrinet_mission_market_done';
-    const MISSION_DURATION = 15; // seconds
+    const MISSION_DURATION = 90; // seconds - 90 ثانیه پاساژگردی
     const MISSION_REWARD = 200; // Tomans
 
     // Check if mission is pending
@@ -3258,8 +3258,8 @@
         transform: translateX(-50%);
         background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
         color: white;
-        padding: 14px 24px;
-        border-radius: 16px;
+        padding: 16px 28px;
+        border-radius: 20px;
         font-family: 'Vazirmatn', sans-serif;
         font-weight: 700;
         font-size: 0.95rem;
@@ -3267,9 +3267,11 @@
         z-index: 9999;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         direction: rtl;
         animation: slideUp 0.4s ease-out;
+        min-width: 320px;
+        justify-content: center;
       `;
       
       // Add animation keyframes
@@ -3283,6 +3285,25 @@
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.1); }
         }
+        @keyframes timerPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .mission-timer-display {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(255,255,255,0.2);
+          padding: 4px 10px;
+          border-radius: 8px;
+          font-size: 1.1rem;
+          min-width: 60px;
+          justify-content: center;
+        }
+        .mission-timer-display.warning {
+          background: rgba(251, 191, 36, 0.3);
+          animation: timerPulse 0.5s ease-in-out infinite;
+        }
       `;
       document.head.appendChild(style);
 
@@ -3290,22 +3311,39 @@
       document.body.appendChild(toastEl);
     }
 
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (mins > 0) {
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+      return `${secs}`;
+    }
+
     function updateToastContent() {
       if (!toastEl) return;
+      const isWarning = timeLeft <= 10;
+      const timeDisplay = formatTime(timeLeft);
+      const timeUnit = timeLeft >= 60 ? 'دقیقه' : 'ثانیه';
+      
       toastEl.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
         </svg>
-        <span>در حال انجام ماموریت... <strong style="color:#fef08a;">${timeLeft}</strong> ثانیه محصولات را ببینید</span>
+        <span>در حال پاساژگردی...</span>
+        <span class="mission-timer-display ${isWarning ? 'warning' : ''}">
+          <strong style="color:#fef08a;">${timeDisplay}</strong>
+        </span>
       `;
     }
 
     function showSuccessToast() {
       if (!toastEl) return;
       toastEl.style.background = 'linear-gradient(135deg, #22c55e 0%, #10b981 100%)';
+      toastEl.style.minWidth = '340px';
       toastEl.innerHTML = `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: pulse 0.5s ease-in-out;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: pulse 0.5s ease-in-out;">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
           <polyline points="22 4 12 14.01 9 11.01"/>
         </svg>

@@ -1184,13 +1184,29 @@
       justify-content: center;
       font-size: 1rem;
       flex-shrink: 0;
-    }
-
-    .wallet-transaction.positive .wallet-transaction-icon {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
     }
 
-    .wallet-transaction.negative .wallet-transaction-icon {
+    .wallet-transaction-icon .transaction-icon-svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .wallet-transaction-icon .transaction-icon-svg.positive {
+      stroke: #10b981;
+    }
+
+    .wallet-transaction-icon .transaction-icon-svg.negative {
+      stroke: #ef4444;
+    }
+
+    .wallet-transaction.positive .wallet-transaction-icon,
+    .wallet-transaction-icon:has(.positive) {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+    }
+
+    .wallet-transaction.negative .wallet-transaction-icon,
+    .wallet-transaction-icon:has(.negative) {
       background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
     }
 
@@ -1454,12 +1470,25 @@
       flex-shrink: 0;
     }
 
+    .transaction-icon-wrapper svg {
+      width: 22px;
+      height: 22px;
+    }
+
     .transaction-icon-wrapper.earn {
       background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
     }
 
+    .transaction-icon-wrapper.earn svg {
+      stroke: #22c55e;
+    }
+
     .transaction-icon-wrapper.spend {
       background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    }
+
+    .transaction-icon-wrapper.spend svg {
+      stroke: #ef4444;
     }
 
     .transaction-details {

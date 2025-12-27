@@ -6433,3 +6433,378 @@
         height: 13px;
       }
     }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       مودال ماموریت انجام شده - طراحی مدرن و مینیمال
+       ═══════════════════════════════════════════════════════════════ */
+    
+    .completed-mission-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .completed-mission-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .completed-mission-card {
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      border-radius: 1.75rem;
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
+      position: relative;
+      overflow: hidden;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .completed-mission-overlay.active .completed-mission-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .completed-mission-close {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      border: none;
+      background: #f1f5f9;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .completed-mission-close:hover {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .completed-mission-close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .completed-mission-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2.5rem 1.75rem 1.75rem;
+    }
+
+    /* آیکون موفقیت مدرن */
+    .completed-mission-success-icon {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      margin-bottom: 1.5rem;
+    }
+
+    .success-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(16, 185, 129, 0.15);
+      animation: ring-expand 0.6s ease-out forwards;
+    }
+
+    @keyframes ring-expand {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-circle {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+      animation: success-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes success-pop {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-circle svg {
+      width: 32px;
+      height: 32px;
+      stroke: #ffffff;
+      stroke-width: 3;
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: checkmark-draw 0.5s ease-out 0.25s forwards;
+    }
+
+    @keyframes checkmark-draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* عنوان */
+    .completed-mission-title {
+      font-size: 1.375rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* آیکون و نام ماموریت */
+    .completed-mission-info {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      margin-bottom: 0.75rem;
+      padding: 0.625rem 1rem;
+      background: #f8fafc;
+      border-radius: 0.75rem;
+    }
+
+    .completed-mission-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 100%);
+      border-radius: 0.625rem;
+      flex-shrink: 0;
+    }
+
+    .completed-mission-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: #059669;
+    }
+
+    .completed-mission-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+      margin: 0;
+    }
+
+    /* پیام */
+    .completed-mission-message {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0 0 1.25rem;
+      line-height: 1.7;
+    }
+
+    /* باکس جایزه مدرن */
+    .completed-mission-reward-box {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 1rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      animation: reward-slide 0.4s ease-out 0.4s both;
+    }
+
+    @keyframes reward-slide {
+      0% { transform: translateY(15px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .reward-icon-wrap {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+      border: 2px solid rgba(16, 185, 129, 0.2);
+      border-radius: 0.875rem;
+      box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.15),
+        0 0 0 4px rgba(16, 185, 129, 0.05);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .completed-mission-reward-box:hover .reward-icon-wrap {
+      transform: scale(1.05);
+      box-shadow: 
+        0 6px 16px rgba(16, 185, 129, 0.2),
+        0 0 0 6px rgba(16, 185, 129, 0.08);
+    }
+
+    .reward-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+      stroke: #10b981;
+      stroke-width: 2.5;
+    }
+
+    .reward-text-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.125rem;
+    }
+
+    .completed-reward-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .completed-reward-amount {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #059669;
+      letter-spacing: -0.02em;
+      text-shadow: 0 1px 2px rgba(5, 150, 105, 0.1);
+    }
+
+    /* پیام بعدی */
+    .completed-mission-next {
+      font-size: 0.875rem;
+      color: #475569;
+      font-weight: 600;
+      margin: 0 0 1.25rem;
+      line-height: 1.7;
+      padding: 0.875rem 1.125rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* دکمه مدرن */
+    .completed-mission-btn {
+      width: 100%;
+      padding: 0.9375rem 1.5rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 0.875rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px -3px rgba(16, 185, 129, 0.4);
+      transition: all 0.25s ease;
+      animation: btn-fade 0.4s ease-out 0.5s both;
+    }
+
+    @keyframes btn-fade {
+      0% { transform: translateY(10px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .completed-mission-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.5);
+    }
+
+    .completed-mission-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 400px) {
+      .completed-mission-card {
+        border-radius: 1.5rem;
+      }
+
+      .completed-mission-content {
+        padding: 2rem 1.25rem 1.5rem;
+      }
+
+      .completed-mission-success-icon {
+        width: 64px;
+        height: 64px;
+      }
+
+      .success-circle {
+        width: 64px;
+        height: 64px;
+      }
+
+      .success-circle svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      .completed-mission-title {
+        font-size: 1.25rem;
+      }
+
+      .completed-mission-info {
+        padding: 0.5rem 0.875rem;
+      }
+
+      .completed-mission-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .completed-mission-icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .completed-mission-name {
+        font-size: 0.9rem;
+      }
+
+      .completed-mission-message {
+        font-size: 0.85rem;
+      }
+
+      .completed-mission-reward-box {
+        padding: 0.875rem 1rem;
+      }
+
+      .reward-icon-wrap {
+        width: 36px;
+        height: 36px;
+      }
+
+      .reward-icon-wrap svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .completed-reward-amount {
+        font-size: 1rem;
+      }
+
+      .completed-mission-btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+      }
+    }

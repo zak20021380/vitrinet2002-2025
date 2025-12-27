@@ -274,6 +274,57 @@ exports.setBirthDate = async (req, res) => {
 
 
 /**
+ * حذف تراکنش‌های قدیمی‌تر از X روز
+ * این تابع می‌تواند توسط یک cron job یا به صورت دستی فراخوانی شود
+ * @param {number} daysOld - تعداد روزهایی که تراکنش‌های قدیمی‌تر از آن حذف شوند (پیش‌فرض: 90 روز)
+ */
+exports.cleanupOldTransactions = async (daysOld = 90) => {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+
+    const result = await UserWalletTransaction.deleteMany({
+      createdAt: { $lt: cutoffDate }
+    });
+
+    console.log(`[Cleanup] حذف ${result.deletedCount} تراکنش قدیمی‌تر از ${daysOld} روز`);
+    return { deletedCount: result.deletedCount, cutoffDate };
+  } catch (error) {
+    console.error('cleanupOldTransactions error:', error);
+    throw error;
+  }
+};
+
+/**
+ * API برای حذف تراکنش‌های قدیمی (فقط ادمین)
+ * DELETE /api/admin/wallet/cleanup
+ */
+exports.adminCleanupTransactions = async (req, res) => {
+  try {
+    const daysOld = parseInt(req.query.days) || 90;
+    
+    // حداقل 30 روز
+    if (daysOld < 30) {
+      return res.status(400).json({ 
+        message: 'حداقل مدت زمان نگهداری تراکنش‌ها 30 روز است' 
+      });
+    }
+
+    const result = await exports.cleanupOldTransactions(daysOld);
+    
+    res.json({
+      success: true,
+      message: `${result.deletedCount} تراکنش قدیمی حذف شد`,
+      deletedCount: result.deletedCount,
+      cutoffDate: result.cutoffDate
+    });
+  } catch (error) {
+    console.error('adminCleanupTransactions error:', error);
+    res.status(500).json({ message: 'خطا در حذف تراکنش‌های قدیمی' });
+  }
+};
+
+/**
  * جایزه ماموریت گردش در بازار (مشاهده محصولات)
  * POST /api/user/wallet/mission-reward
  */
@@ -343,8 +394,8 @@ exports.claimBrowseMissionReward = async (req, res) => {
       balanceBefore: balanceBefore,
       balanceAfter: wallet.balance,
       category: 'browse_stores',
-      title: 'جایزه گردش در بازار',
-      description: 'مشاهده محصولات به مدت ۱۵ ثانیه'
+      title: 'جایزه پاساژگردی آنلاین',
+      description: 'مشاهده محصولات به مدت ۹۰ ثانیه'
     });
 
     res.json({
