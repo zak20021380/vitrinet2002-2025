@@ -2268,14 +2268,14 @@
         secondaryBtn: null
       },
       explore: {
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
-        reward: '۵۰۰ تومان',
-        title: 'بگرد و جایزه بگیر!',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+        reward: '۲۰۰ تومان',
+        title: 'پاساژگردی آنلاین',
         isExploreModal: true, // نشانگر مودال ویژه گردشگر
-        desc: 'از پروفایل ۳ فروشگاه مختلف بازدید کن تا ۵۰۰ تومان جایزه بگیری!',
+        desc: 'کافیه ۱۵ ثانیه توی بازارچه محصولات رو نگاه کنی تا ۲۰۰ تومان جایزه بگیری!',
         primaryBtn: {
-          text: 'شروع گردش',
-          icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>`,
+          text: 'بریم بازارگردی 🛍️',
+          icon: null,
           action: 'startExplore'
         },
         secondaryBtn: null
@@ -2416,54 +2416,88 @@
           </div>
         `;
       } else if (data.isExploreModal) {
-        // مودال گردشگر بازار با نمایش پیشرفت
-        reward.style.display = '';
-        reward.textContent = data.reward;
+        // مودال پاساژگردی آنلاین - طراحی پریمیوم V4
+        reward.style.cssText = 'display: none !important;';
+        icon.style.cssText = 'display: none !important;';
+        title.style.cssText = 'display: none !important;';
         
-        // نمایش loading اولیه
+        // تنظیم هدر به حالت مینیمال با گرادیانت
+        header.classList.add('explore-modal-header-premium');
+        
         bodyContent.innerHTML = `
-          <div class="mission-modal-desc-card">
-            <p class="mission-modal-desc">${data.desc}</p>
-          </div>
-          <div class="explore-progress-section">
-            <p style="text-align:center;color:#888;">در حال بارگذاری...</p>
+          <!-- طراحی پریمیوم مودال پاساژگردی V4 -->
+          <div class="explore-modal-premium">
+            <!-- شکل ارگانیک درخشان پس‌زمینه -->
+            <div class="explore-blob-bg">
+              <div class="explore-blob"></div>
+            </div>
+            
+            <!-- آیکون اصلی با سایه و عمق -->
+            <div class="explore-hero-icon">
+              <div class="explore-hero-glow"></div>
+              <div class="explore-hero-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+              </div>
+              <!-- بج تایمر با سایه -->
+              <div class="explore-timer-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </div>
+            
+            <!-- عنوان و توضیحات -->
+            <h2 class="explore-premium-title">پاساژگردی آنلاین</h2>
+            <p class="explore-premium-desc">فقط ۱۵ ثانیه در بازارچه بچرخید و جایزه بگیرید!</p>
+            
+            <!-- کپسول جایزه درخشان -->
+            <div class="explore-reward-capsule">
+              <div class="explore-reward-sparkle"></div>
+              <div class="explore-reward-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 12 20 22 4 22 4 12"/>
+                  <rect x="2" y="7" width="20" height="5"/>
+                  <line x1="12" y1="22" x2="12" y2="7"/>
+                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+                <span class="explore-sparkle-dot"></span>
+                <span class="explore-sparkle-dot"></span>
+                <span class="explore-sparkle-dot"></span>
+              </div>
+              <span class="explore-reward-amount">۲۰۰ تومان هدیه</span>
+            </div>
+            
+            <!-- دکمه اصلی پریمیوم -->
+            <button type="button" class="explore-premium-btn" onclick="handleMissionAction('startExplore')">
+              <span>شروع گردش در بازار</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5-7 7 7 7"/>
+              </svg>
+            </button>
+            
+            <!-- لینک بعداً -->
+            <button type="button" class="explore-premium-later" onclick="closeMissionModal()">
+              بعداً
+            </button>
           </div>
         `;
         
-        // دریافت پیشرفت از API
-        let progress = { count: 0, required: 3, completed: false };
-        const apiProgress = await fetchExploreProgressFromAPI();
-        if (apiProgress) {
-          progress = apiProgress;
-        } else {
-          // fallback به localStorage
-          const localProgress = getExploreProgress();
-          progress = { count: localProgress.count, required: 3, completed: localProgress.completed };
-        }
+        // مخفی کردن دکمه‌های پیش‌فرض
+        actions.style.display = 'none';
+        if (dismissButton) dismissButton.style.display = 'none';
         
-        const progressPercent = (progress.count / progress.required) * 100;
-        const isComplete = progress.completed || progress.count >= progress.required;
-        
-        // تبدیل اعداد به فارسی
-        const toPersian = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-        
-        bodyContent.innerHTML = `
-          <div class="mission-modal-desc-card">
-            <p class="mission-modal-desc">${data.desc}</p>
-          </div>
-          
-          <!-- بخش پیشرفت -->
-          <div class="explore-progress-section">
-            <div class="explore-progress-header">
-              <p class="explore-progress-label">پیشرفت شما</p>
-              <span class="explore-progress-count">${toPersian(progress.count)}/${toPersian(progress.required)}</span>
-            </div>
-            <div class="explore-progress-bar">
-              <div class="explore-progress-fill" style="width: ${progressPercent}%"></div>
-            </div>
-            ${isComplete ? '<p class="explore-progress-hint" style="color:#16a34a;">🎉 تبریک! ماموریت تکمیل شد!</p>' : '<p class="explore-progress-hint">از پروفایل فروشگاه‌ها بازدید کنید</p>'}
-          </div>
-        `;
+        // نمایش مودال و خروج زودهنگام
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setupMissionModalListeners();
+        return;
       } else if (data.isInstallAppModal) {
         // مودال نصب اپلیکیشن با طراحی پریمیوم V2
         reward.style.cssText = 'display: none !important;';
@@ -2702,7 +2736,9 @@
           break;
         case 'startExplore':
           closeMissionModal();
-          window.location.href = '/all-shops.html';
+          // Set pending flag for product feed browsing mission
+          localStorage.setItem('vitrinet_mission_market_pending', Date.now().toString());
+          window.location.href = '/all-products.html';
           break;
         case 'installApp':
           triggerPWAInstall();
@@ -2876,6 +2912,16 @@
     function showInstallAppMission() {
       showMissionModal('installApp');
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // اکسپورت توابع ماموریت به window برای دسترسی از onclick
+    // ═══════════════════════════════════════════════════════════════
+    window.showBookingMission = showBookingMission;
+    window.showBookAppointmentMission = showBookAppointmentMission;
+    window.showExploreMission = showExploreMission;
+    window.showInstallAppMission = showInstallAppMission;
+    window.closeMissionModal = closeMissionModal;
+    window.handleMissionAction = handleMissionAction;
 
     // ═══════════════════════════════════════════════════════════════
     // مودال ثبت تاریخ تولد
@@ -3364,6 +3410,13 @@
         const hasBirthday = user.birthDate || user.birthday || user.dateOfBirth;
         if (hasBirthday) {
           window.completedMissions.add('user-profile-complete');
+        }
+
+        // Check if browse products mission is completed today
+        const browseMissionDone = localStorage.getItem('vitrinet_mission_market_done');
+        const today = new Date().toDateString();
+        if (browseMissionDone === today) {
+          window.completedMissions.add('user-review');
         }
       } catch (_) {
         profileState.isAuthenticated = false;
@@ -4598,8 +4651,8 @@
       'user-review': {
         htmlId: 'missionExplore',
         style: 'explore',
-        icon: '🧭',
-        title: 'گردش در بازار',
+        icon: '🛍️',
+        title: 'پاساژگردی آنلاین',
         onclick: 'showExploreMission()',
         order: 5
       }

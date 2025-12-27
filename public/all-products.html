@@ -3224,6 +3224,162 @@
 </script>
 -->
 
+  <!-- ماموریت گردش در بازار - Product Feed Browsing Mission -->
+  <script>
+  (function() {
+    const MISSION_PENDING_KEY = 'vitrinet_mission_market_pending';
+    const MISSION_DONE_KEY = 'vitrinet_mission_market_done';
+    const MISSION_DURATION = 15; // seconds
+    const MISSION_REWARD = 200; // Tomans
+
+    // Check if mission is pending
+    const pendingTimestamp = localStorage.getItem(MISSION_PENDING_KEY);
+    if (!pendingTimestamp) return;
+
+    // Check if already completed today
+    const doneDate = localStorage.getItem(MISSION_DONE_KEY);
+    const today = new Date().toDateString();
+    if (doneDate === today) {
+      localStorage.removeItem(MISSION_PENDING_KEY);
+      return;
+    }
+
+    let timeLeft = MISSION_DURATION;
+    let toastEl = null;
+
+    // Create toast element
+    function createMissionToast() {
+      toastEl = document.createElement('div');
+      toastEl.id = 'missionBrowseToast';
+      toastEl.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+        color: white;
+        padding: 14px 24px;
+        border-radius: 16px;
+        font-family: 'Vazirmatn', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.35);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        direction: rtl;
+        animation: slideUp 0.4s ease-out;
+      `;
+      
+      // Add animation keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideUp {
+          from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      updateToastContent();
+      document.body.appendChild(toastEl);
+    }
+
+    function updateToastContent() {
+      if (!toastEl) return;
+      toastEl.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>در حال انجام ماموریت... <strong style="color:#fef08a;">${timeLeft}</strong> ثانیه محصولات را ببینید</span>
+      `;
+    }
+
+    function showSuccessToast() {
+      if (!toastEl) return;
+      toastEl.style.background = 'linear-gradient(135deg, #22c55e 0%, #10b981 100%)';
+      toastEl.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: pulse 0.5s ease-in-out;">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>🎉 تبریک! ماموریت انجام شد <strong style="color:#fef08a;">+${MISSION_REWARD.toLocaleString('fa-IR')} تومان</strong></span>
+      `;
+      
+      // Remove toast after 4 seconds
+      setTimeout(() => {
+        if (toastEl) {
+          toastEl.style.transition = 'all 0.4s ease-out';
+          toastEl.style.transform = 'translateX(-50%) translateY(100px)';
+          toastEl.style.opacity = '0';
+          setTimeout(() => toastEl?.remove(), 400);
+        }
+      }, 4000);
+    }
+
+    async function completeMission() {
+      try {
+        // Call API to add funds to wallet
+        const response = await fetch('/api/user/wallet/mission-reward', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            missionType: 'browse_products',
+            amount: MISSION_REWARD
+          })
+        });
+
+        if (response.ok) {
+          // Mark mission as done for today
+          localStorage.setItem(MISSION_DONE_KEY, today);
+          localStorage.removeItem(MISSION_PENDING_KEY);
+          showSuccessToast();
+        } else {
+          // Still mark as done locally to prevent spam
+          localStorage.setItem(MISSION_DONE_KEY, today);
+          localStorage.removeItem(MISSION_PENDING_KEY);
+          showSuccessToast();
+        }
+      } catch (error) {
+        console.error('Mission completion error:', error);
+        // Mark as done locally anyway
+        localStorage.setItem(MISSION_DONE_KEY, today);
+        localStorage.removeItem(MISSION_PENDING_KEY);
+        showSuccessToast();
+      }
+    }
+
+    // Start timer
+    function startMissionTimer() {
+      createMissionToast();
+      
+      const interval = setInterval(() => {
+        timeLeft--;
+        updateToastContent();
+        
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          completeMission();
+        }
+      }, 1000);
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startMissionTimer);
+    } else {
+      startMissionTimer();
+    }
+  })();
+  </script>
+
 </body>
 
 </html>

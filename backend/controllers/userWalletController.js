@@ -3,6 +3,7 @@ const UserWalletTransaction = require('../models/UserWalletTransaction');
 const User = require('../models/user');
 
 const BIRTHDAY_REWARD_AMOUNT = 500; // مبلغ جایزه ثبت تاریخ تولد (تومان)
+const BROWSE_PRODUCTS_REWARD_AMOUNT = 200; // مبلغ جایزه گردش در بازار (تومان)
 
 /**
  * دریافت اطلاعات کیف پول کاربر
@@ -268,5 +269,97 @@ exports.setBirthDate = async (req, res) => {
   } catch (error) {
     console.error('setBirthDate error:', error);
     res.status(500).json({ message: 'خطا در ثبت تاریخ تولد' });
+  }
+};
+
+
+/**
+ * جایزه ماموریت گردش در بازار (مشاهده محصولات)
+ * POST /api/user/wallet/mission-reward
+ */
+exports.claimBrowseMissionReward = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { missionType, amount } = req.body;
+
+    // فقط ماموریت browse_products پشتیبانی می‌شود
+    if (missionType !== 'browse_products') {
+      return res.status(400).json({ 
+        success: false,
+        message: 'نوع ماموریت نامعتبر است' 
+      });
+    }
+
+    // بررسی مبلغ (باید با مقدار تعریف شده مطابقت داشته باشد)
+    const rewardAmount = BROWSE_PRODUCTS_REWARD_AMOUNT;
+    if (amount && amount !== rewardAmount) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'مبلغ جایزه نامعتبر است' 
+      });
+    }
+
+    // دریافت کاربر
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'کاربر یافت نشد' 
+      });
+    }
+
+    // بررسی آیا امروز قبلاً جایزه گرفته
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const existingReward = await UserWalletTransaction.findOne({
+      user: userId,
+      category: 'browse_stores',
+      createdAt: { $gte: today }
+    });
+
+    if (existingReward) {
+      return res.status(409).json({ 
+        success: false,
+        message: 'شما امروز قبلاً این جایزه را دریافت کرده‌اید' 
+      });
+    }
+
+    // دریافت یا ایجاد کیف پول
+    const wallet = await UserWallet.getOrCreate(userId);
+    const balanceBefore = wallet.balance;
+    
+    // افزایش موجودی
+    wallet.balance += rewardAmount;
+    wallet.totalEarned += rewardAmount;
+    wallet.lastTransactionAt = new Date();
+    await wallet.save();
+
+    // ثبت تراکنش
+    await UserWalletTransaction.create({
+      user: userId,
+      type: 'bonus',
+      amount: rewardAmount,
+      balanceBefore: balanceBefore,
+      balanceAfter: wallet.balance,
+      category: 'browse_stores',
+      title: 'جایزه گردش در بازار',
+      description: 'مشاهده محصولات به مدت ۱۵ ثانیه'
+    });
+
+    res.json({
+      success: true,
+      message: 'جایزه با موفقیت به کیف پول اضافه شد!',
+      rewardAmount,
+      newBalance: wallet.balance,
+      formattedBalance: wallet.balance.toLocaleString('fa-IR')
+    });
+
+  } catch (error) {
+    console.error('claimBrowseMissionReward error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'خطا در ثبت جایزه' 
+    });
   }
 };

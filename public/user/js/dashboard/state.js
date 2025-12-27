@@ -66,10 +66,10 @@ const profileState = {
       },
       explore: {
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
-        reward: '۵۰۰ تومان',
-        title: 'بگرد و جایزه بگیر!',
+        reward: '۲۰۰ تومان',
+        title: 'گردش در بازار',
         isExploreModal: true, // نشانگر مودال ویژه گردشگر
-        desc: 'از پروفایل ۳ فروشگاه مختلف بازدید کن تا ۵۰۰ تومان جایزه بگیری!',
+        desc: '۱۵ ثانیه محصولات رو ببین و ۲۰۰ تومان جایزه بگیر!',
         primaryBtn: {
           text: 'شروع گردش',
           icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>`,

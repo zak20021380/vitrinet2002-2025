@@ -302,6 +302,7 @@ router.get('/streak/leaderboard', auth('user'), userStreakController.getLeaderbo
 router.get('/wallet', auth('user'), userWalletController.getWallet);
 router.get('/wallet/transactions', auth('user'), userWalletController.getTransactions);
 router.get('/wallet/summary', auth('user'), userWalletController.getWalletSummary);
+router.post('/wallet/mission-reward', auth('user'), userWalletController.claimBrowseMissionReward);
 
 // ───────────────────────────────
 // ثبت تاریخ تولد و دریافت جایزه
