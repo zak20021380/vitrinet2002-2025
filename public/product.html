@@ -4381,8 +4381,34 @@
       flex-wrap: wrap;
       gap: 0.65rem;
       align-items: center;
-      margin-bottom: 1rem;
-      padding: 0.25rem 0;
+      margin-bottom: 0;
+      padding: 0;
+    }
+
+    .product-tags-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .product-tags-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--surface-soft);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     /* Premium Dynamic Tags Container */
@@ -4519,6 +4545,10 @@
     @media (max-width: 480px) {
       .product-badges-row {
         gap: 0.5rem;
+      }
+
+      .product-tags-panel {
+        padding: 0.65rem 0.85rem;
       }
 
       .product-tag {
@@ -5026,11 +5056,14 @@
         </div>
 
         <div class="product-summary">
-          <div class="product-badges-row">
-            <span class="badge" id="productBadge" hidden></span>
-            <div id="dynamicTags" class="flex flex-wrap gap-2" dir="rtl"></div>
-          </div>
           <h1 id="productTitle">در حال بارگذاری محصول...</h1>
+          <div class="product-tags-panel" id="productTagsPanel" hidden>
+            <span class="product-tags-label">برچسب‌ها</span>
+            <div class="product-badges-row">
+              <span class="badge" id="productBadge" hidden></span>
+              <div id="dynamicTags" class="flex flex-wrap gap-2" dir="rtl"></div>
+            </div>
+          </div>
           <p class="subtitle" id="productSubtitle"></p>
           <div class="status-message" id="statusMessage" role="status" aria-live="polite">در حال بارگذاری اطلاعات
             محصول...</div>
