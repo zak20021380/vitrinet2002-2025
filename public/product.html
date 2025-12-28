@@ -427,6 +427,18 @@
       width: 100%;
     }
 
+    .product-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .product-title-row h1 {
+      flex: 1 1 240px;
+      min-width: 0;
+    }
+
     /* ========== Premium Product Tags System ========== */
     .badge {
       display: inline-flex;
@@ -4401,14 +4413,15 @@
     /* Modern Glass-morphism Tags with Smooth Animations */
     
     .mobile-tags-wrapper {
-      width: 100%;
-      margin: 1rem 0 1.25rem 0;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0;
       position: relative;
       background: linear-gradient(135deg, 
         rgba(255, 255, 255, 0.9) 0%, 
         rgba(248, 250, 252, 0.95) 100%);
       border-radius: 16px;
-      padding: 0.85rem 1rem;
+      padding: 0.7rem 0.9rem;
       border: 1px solid rgba(226, 232, 240, 0.8);
       box-shadow: 
         0 4px 20px rgba(15, 23, 42, 0.04),
@@ -4433,7 +4446,7 @@
       align-items: center;
       gap: 0.75rem;
       overflow-x: auto;
-      padding: 0.35rem 0.5rem;
+      padding: 0.15rem 0.35rem;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
@@ -4632,6 +4645,7 @@
     /* Mobile optimizations for tags */
     @media (max-width: 640px) {
       .mobile-tags-wrapper {
+        width: 100%;
         margin: 0.75rem 0 1rem 0;
         padding: 0.7rem 0.85rem;
         border-radius: 14px;
@@ -4667,6 +4681,7 @@
     
     @media (max-width: 380px) {
       .mobile-tags-wrapper {
+        width: 100%;
         padding: 0.6rem 0.7rem;
         border-radius: 12px;
       }
@@ -4679,6 +4694,24 @@
       .tags-icon-indicator {
         width: 26px;
         height: 26px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .mobile-tags-wrapper {
+        align-self: center;
+      }
+
+      .tags-scroll-container {
+        flex-wrap: wrap;
+        max-width: 420px;
+        overflow: visible;
+        padding: 0;
+        scroll-snap-type: none;
+      }
+
+      .tags-separator {
+        height: 28px;
       }
     }
 
@@ -5176,30 +5209,35 @@
         </div>
 
         <div class="product-summary">
-          <h1 id="productTitle">در حال بارگذاری محصول...</h1>
-          
-          <!-- Premium Tags Section -->
-          <div class="mobile-tags-wrapper" id="productTagsPanel" hidden>
-            <div class="tags-scroll-container" dir="rtl">
-              
-              <!-- آیکون تگ -->
-              <div class="tags-icon-indicator" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                  <circle cx="7" cy="7" r="1"></circle>
-                </svg>
-              </div>
-              
-              <!-- جداکننده -->
-              <div class="tags-separator" aria-hidden="true"></div>
+          <div class="product-title-row">
+            <h1 id="productTitle">در حال بارگذاری محصول...</h1>
 
-              <!-- بج اصلی محصول -->
-              <div class="main-badge-wrapper">
-                <span class="badge" id="productBadge" hidden></span>
-              </div>
+            <!-- Premium Tags Section -->
+            <div class="mobile-tags-wrapper" id="productTagsPanel" hidden>
+              <div class="tags-scroll-container" dir="rtl">
 
-              <!-- تگ‌های داینامیک -->
-              <div id="dynamicTags" class="flex items-center gap-2"></div>
+                <!-- آیکون تگ -->
+                <div class="tags-icon-indicator" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z">
+                    </path>
+                    <circle cx="7" cy="7" r="1"></circle>
+                  </svg>
+                </div>
+
+                <!-- جداکننده -->
+                <div class="tags-separator" aria-hidden="true"></div>
+
+                <!-- بج اصلی محصول -->
+                <div class="main-badge-wrapper">
+                  <span class="badge" id="productBadge" hidden></span>
+                </div>
+
+                <!-- تگ‌های داینامیک -->
+                <div id="dynamicTags" class="flex items-center gap-2"></div>
+              </div>
             </div>
           </div>
           <p class="subtitle" id="productSubtitle"></p>
