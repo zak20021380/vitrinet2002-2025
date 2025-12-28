@@ -99,6 +99,7 @@
   const dom = {
     status: document.getElementById('statusMessage'),
     badge: document.getElementById('productBadge'),
+    tagsPanel: document.getElementById('productTagsPanel'),
     title: document.getElementById('productTitle'),
     subtitle: document.getElementById('productSubtitle'),
     galleryPlaceholder: document.getElementById('galleryPlaceholder'),
@@ -769,6 +770,7 @@
     } else {
       dom.badge.hidden = true;
     }
+    updateTagsPanelVisibility();
 
     const sellerName = seller.storename || seller.ownerName || [seller.ownerFirstname, seller.ownerLastname].filter(Boolean).join(' ') || '';
     dom.meta.seller.textContent = sellerName || 'فروشنده نامشخص';
@@ -1324,6 +1326,7 @@
 
     const list = Array.isArray(tags) ? tags.map(tag => String(tag || '').trim()).filter(Boolean) : [];
     if (!list.length) {
+      updateTagsPanelVisibility();
       return;
     }
 
@@ -1369,6 +1372,15 @@
     if (dom.featuresPanel && dom.featureList) {
       dom.featuresPanel.hidden = false;
     }
+
+    updateTagsPanelVisibility();
+  }
+
+  function updateTagsPanelVisibility() {
+    if (!dom.tagsPanel) return;
+    const badgeVisible = dom.badge && !dom.badge.hidden;
+    const tagsVisible = dom.dynamicTags && dom.dynamicTags.children.length > 0;
+    dom.tagsPanel.hidden = !(badgeVisible || tagsVisible);
   }
 
   function renderDescription(desc) {
