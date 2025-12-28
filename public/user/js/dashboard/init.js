@@ -2628,7 +2628,10 @@
           break;
         case 'edit':
           closeMissionModal();
-          showSection('profile');
+          // باز کردن مستقیم مدال ثبت تاریخ تولد
+          setTimeout(() => {
+            openBirthdayModal();
+          }, 300);
           break;
         case 'startExplore':
           closeMissionModal();
@@ -2991,15 +2994,30 @@
     }
 
     // باز کردن مودال تاریخ تولد
+    // باز کردن مودال تاریخ تولد - Premium Version
     function openBirthdayModal() {
       const overlay = document.getElementById('birthdayModalOverlay');
       if (!overlay) {
         console.warn('Birthday modal overlay not found');
         return;
       }
+      
+      // Reset form
+      document.getElementById('birthdayDay').value = '';
+      document.getElementById('birthdayMonth').value = '';
+      document.getElementById('birthdayYear').value = '';
+      checkBirthdayFormValid();
+      
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+      
+      // Focus on first select
+      setTimeout(() => {
+        document.getElementById('birthdayDay').focus();
+      }, 300);
     }
+    // دسترسی global برای onclick در HTML
+    window.openBirthdayModal = openBirthdayModal;
 
     // بستن مودال تاریخ تولد
     function closeBirthdayModal() {
@@ -3016,10 +3034,11 @@
       const year = document.getElementById('birthdayYear').value;
       const submitBtn = document.getElementById('birthdaySubmitBtn');
       
-      submitBtn.disabled = !(day && month && year);
+      const isValid = day && month && year;
+      submitBtn.disabled = !isValid;
     }
 
-    // ثبت تاریخ تولد
+    // ثبت تاریخ تولد - Premium Version
     async function submitBirthday() {
       const day = document.getElementById('birthdayDay').value;
       const month = document.getElementById('birthdayMonth').value;
@@ -3031,6 +3050,7 @@
       const birthDate = `${year}/${month}/${day}`;
       
       submitBtn.disabled = true;
+      const originalHTML = submitBtn.innerHTML;
       submitBtn.innerHTML = `
         <svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
@@ -3060,7 +3080,7 @@
           throw new Error(data.message || 'خطا در ثبت تاریخ تولد');
         }
         
-        // بستن مودال
+        // بستن مودال با انیمیشن
         closeBirthdayModal();
         
         // آپدیت UI تاریخ تولد در پروفایل
@@ -3085,7 +3105,7 @@
           showBirthdaySuccessToast('تاریخ تولد ثبت شد! ۵۰۰ تومان جایزه گرفتی 🎉');
         } else {
           // نمایش toast موفقیت بدون جایزه
-          showBirthdaySuccessToast('تاریخ تولد به‌روزرسانی شد');
+          showBirthdaySuccessToast('تاریخ تولد به‌روزرسانی شد ✓');
         }
         
         // مخفی کردن badge جایزه برای دفعات بعدی
@@ -3099,30 +3119,30 @@
         
       } catch (error) {
         console.error('Birthday submit error:', error);
-        alert(error.message || 'خطا در ثبت تاریخ تولد');
+        showBirthdaySuccessToast(error.message || 'خطا در ثبت تاریخ تولد ❌', true);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 12v10H4V12"/>
-            <path d="M2 7h20v5H2z"/>
-            <path d="M12 22V7"/>
-          </svg>
-          <span>ثبت و دریافت جایزه</span>
-        `;
+        submitBtn.innerHTML = originalHTML;
       }
     }
 
-    // نمایش toast موفقیت تولد
-    function showBirthdaySuccessToast(message) {
+    // نمایش toast موفقیت تولد - Premium Version
+    function showBirthdaySuccessToast(message, isError = false) {
       const toast = document.getElementById('birthdaySuccessToast');
       const text = document.getElementById('birthdaySuccessText');
       if (toast && text) {
         text.textContent = message;
+        
+        if (isError) {
+          toast.style.background = 'linear-gradient(145deg, #ef4444, #dc2626)';
+        } else {
+          toast.style.background = 'linear-gradient(145deg, #10b981, #059669)';
+        }
+        
         toast.classList.add('show');
         setTimeout(() => {
           toast.classList.remove('show');
-        }, 3000);
+        }, 3500);
       }
     }
 
@@ -3629,75 +3649,70 @@
     async function loadMessagesSection() {
       const box = document.getElementById('mainContent');
       box.innerHTML = `
-    <div id="messages-section" class="messages-container fadein">
-      <!-- هدر بخش پیام‌ها -->
-      <div class="messages-header">
-        <div class="messages-title">
-          <div class="messages-title-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <div>
-            <h2>پیام‌های من</h2>
-            <span class="messages-count" id="messagesCount">در حال بارگذاری...</span>
-          </div>
-        </div>
-        <div class="messages-filters">
-          <button class="msg-filter-btn active" data-filter="all">همه</button>
-          <button class="msg-filter-btn" data-filter="seller">فروشندگان</button>
-          <button class="msg-filter-btn" data-filter="admin">مدیر سایت</button>
-          <button class="msg-filter-btn" data-filter="product">محصولات</button>
-        </div>
-      </div>
-
-      <!-- دکمه چت با مدیر -->
-      <div class="flex justify-end mb-4">
-        <button class="open-admin-msg brand-btn text-sm px-4 py-2 rounded-xl flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    <div id="messages-section" class="messages-section-v5 fadein">
+      <!-- Header V6 - Large Bold Elegant Title -->
+      <div class="msg-header-v5">
+        <h1 class="msg-header-title-v5">پیام‌ها</h1>
+        <button class="msg-search-btn-v5" aria-label="جستجو">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          چت با مدیر سایت
         </button>
       </div>
 
-      <!-- لیست چت‌ها -->
-      <div id="userChatsList" class="chats-list"></div>
+      <!-- Filter Tabs V6 - Modern Pill Chips -->
+      <div class="msg-filters-v5">
+        <button class="msg-filter-v5 active" data-filter="all">همه</button>
+        <button class="msg-filter-v5" data-filter="admin">پشتیبانی</button>
+        <button class="msg-filter-v5" data-filter="seller">فروشندگان</button>
+        <button class="msg-filter-v5" data-filter="product">محصولات</button>
+      </div>
+
+      <!-- Chat List V6 - Premium Surface -->
+      <div class="msg-list-v5" id="userChatsList">
+        <div class="msg-loading-v5">
+          <div class="msg-spinner-v5"></div>
+          <span>در حال بارگذاری...</span>
+        </div>
+      </div>
     </div>
   `;
 
-      // Add event listener for admin message button
-      const adminMsgBtn = document.querySelector('.open-admin-msg');
-      if (adminMsgBtn) {
-        adminMsgBtn.addEventListener('click', openAdminMsgModal);
-      }
-
-      // Add filter button listeners
-      document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+      // Event: Tab clicks
+      document.querySelectorAll('.msg-filter-v5').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.msg-filter-v5').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentMsgFilter = btn.dataset.filter;
           renderMessagesList();
         });
       });
 
-      // اگر currentUserId تنظیم نشده، اول پروفایل رو بگیر
+      // Event: Filter pills (legacy support)
+      document.querySelectorAll('.msg-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.msg-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMsgFilter = btn.dataset.filter;
+          renderMessagesList();
+        });
+      });
+
+      // Get user ID if not set
       if (!window.currentUserId) {
         try {
           const res = await fetch('/api/user/profile', { credentials: 'include' });
           if (res.ok) {
             const user = await res.json();
             window.currentUserId = user._id;
-            console.log('✅ currentUserId تنظیم شد:', window.currentUserId);
           }
         } catch (e) {
           console.error('خطا در دریافت پروفایل:', e);
         }
       }
 
-      await fetchBlockedSellers(); // فروشنده‌های مسدودشده را بگیر
-      await fetchUserChats();  // لیست چت‌ها رو بگیر
+      await fetchBlockedSellers();
+      await fetchUserChats();
       renderMessagesList();    // رندر کن
       startMsgPolling();       // polling شروع کن
     }
@@ -3746,21 +3761,25 @@
     }
 
 
-    /* رندر لیست چت‌ها - نسخه جدید با استایل حرفه‌ای */
+    /* رندر لیست چت‌ها - V3 با Product Context و Action Icons */
     function renderMessagesList() {
       const box = document.getElementById('userChatsList');
-      const countEl = document.getElementById('messagesCount');
       console.log("لیست چت‌ها:", chatsList);
 
-      // فیلتر کردن چت‌ها بر اساس فیلتر انتخابی
+      // فیلتر کردن چت‌ها بر اساس تب انتخابی
       let filteredChats = chatsList;
+      
+      // Add admin chat at top if filter is 'all' or 'admin'
+      const showAdminChat = currentMsgFilter === 'all' || currentMsgFilter === 'admin';
+      
       if (currentMsgFilter !== 'all') {
         filteredChats = chatsList.filter(c => {
+          if (currentMsgFilter === 'admin') {
+            return c.type === 'user-admin' || c.type === 'admin-user' || 
+                   (c.participantsModel && c.participantsModel.includes('Admin'));
+          }
           if (currentMsgFilter === 'seller') {
             return c.type === 'user-seller' || (c.participantsModel && c.participantsModel.includes('Seller') && !c.participantsModel.includes('Admin'));
-          }
-          if (currentMsgFilter === 'admin') {
-            return c.type === 'admin-user' || c.type === 'user-admin' || c.type === 'admin' || (c.participantsModel && c.participantsModel.includes('Admin'));
           }
           if (currentMsgFilter === 'product') {
             return c.type === 'product' || c.productId;
@@ -3769,219 +3788,230 @@
         });
       }
 
-      // بروزرسانی تعداد
-      if (countEl) {
-        const totalUnread = chatsList.reduce((sum, c) => {
-          return sum + (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
-        }, 0);
-        countEl.textContent = totalUnread > 0
-          ? `${chatsList.length} گفتگو • ${totalUnread} پیام خوانده نشده`
-          : `${chatsList.length} گفتگو`;
-      }
+      // Build admin pinned row HTML - VIP Premium Card Style
+      const adminPinnedRow = showAdminChat ? `
+        <div class="msg-row-v5 msg-row-admin" data-chat-id="admin-support" onclick="openAdminMsgModal()">
+          <div class="msg-avatar-v5 admin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span class="msg-verified-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+          </div>
+          <div class="msg-body-v5">
+            <div class="msg-row-top">
+              <span class="msg-name-v5">پشتیبانی ویترینت</span>
+            </div>
+            <div class="msg-row-bottom">
+              <span class="msg-preview-v5">سوالی دارید؟ با ما در ارتباط باشید</span>
+            </div>
+          </div>
+          <div class="msg-chevron-v5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </div>
+        </div>
+      ` : '';
 
-      if (!filteredChats.length) {
+      if (!filteredChats.length && !showAdminChat) {
         box.innerHTML = `
-      <div class="messages-empty">
-        <div class="messages-empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <div class="msg-empty-v5">
+        <div class="msg-empty-icon-v5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         </div>
-        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری!' : 'گفتگویی در این دسته وجود ندارد'}</h3>
-        <p>${currentMsgFilter === 'all' ? 'از دکمه «چت با مدیر سایت» استفاده کن یا از صفحه محصولات به فروشندگان پیام بده.' : 'فیلتر دیگری را امتحان کنید.'}</p>
+        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری' : 'گفتگویی یافت نشد'}</h3>
+        <p>${currentMsgFilter === 'all' ? 'از صفحه محصولات به فروشندگان پیام بده' : 'تب دیگری را امتحان کنید'}</p>
       </div>
     `;
         return;
       }
 
-      // شناسه کاربر فعلی
       const myId = window.currentUserId;
 
-      box.innerHTML = filteredChats.map(c => {
-        let whom = 'مخاطب';
+      const chatRowsHtml = filteredChats.map(c => {
         let role = '';
         let sellerId = null;
         let storeName = '';
-        let shopUrl = '';
         let isBlocked = false;
 
         if (Array.isArray(c.participants)) {
-          // مقایسه با toString برای اطمینان از تطابق صحیح
           const participant = c.participants.find(p => p && p._id && p._id.toString() !== myId?.toString());
           if (participant) {
-            // اگر فروشنده باشه، role نداره پس از participantsModel استفاده میکنیم
             const pIdx = c.participants.findIndex(pp => pp && pp._id && pp._id.toString() === participant._id.toString());
             const pModel = c.participantsModel?.[pIdx];
             role = participant.role || (pModel === 'Seller' ? 'seller' : (pModel === 'Admin' ? 'admin' : 'user'));
             sellerId = participant._id;
             storeName = participant.storename || '';
-            shopUrl = participant.shopurl || '';
-            whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'مشتری' : 'مخاطب'));
           }
         }
 
         if (role === 'seller' && sellerId) {
-          // مقایسه با toString برای اطمینان از تطابق صحیح
           const sellerIdStr = sellerId?.toString() || sellerId;
           isBlocked = blockedSellers.some(bs => (bs?.toString() || bs) === sellerIdStr);
         }
 
         if (!role && Array.isArray(c.participantsModel)) {
-          if (c.participantsModel.includes('Admin')) {
-            role = 'admin';
-            whom = 'مدیر سایت';
-          } else if (c.participantsModel.includes('Seller')) {
-            role = 'seller';
-            whom = 'فروشنده';
-          }
+          if (c.participantsModel.includes('Admin')) role = 'admin';
+          else if (c.participantsModel.includes('Seller')) role = 'seller';
         }
 
-        // fallback از type
         if (!role && c.type) {
-          if (c.type === 'user-seller' || c.type === 'seller-admin' || c.type === 'product') {
-            whom = 'فروشنده';
+          if (c.type === 'user-seller' || c.type === 'product') {
             role = 'seller';
             sellerId = c.sellerId;
-          } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
-            whom = 'مدیر سایت';
+          } else if (c.type === 'user-admin' || c.type === 'admin-user') {
             role = 'admin';
           }
         }
 
-        // تعیین آواتار
-        const avatarClass = role === 'seller' ? 'chat-avatar-seller' : (role === 'admin' ? 'chat-avatar-admin' : 'chat-avatar-user');
-        const avatarIcon = role === 'admin'
-          ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`
-          : (role === 'seller'
-            ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
-            : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`);
+        // Avatar - Colorful filled circles with gradients
+        const avatarClass = role === 'admin' ? 'admin' : (role === 'seller' ? 'seller' : 'user');
+        // Avatar colors based on chat index for variety
+        const avatarColors = ['', 'data-color="blue"', 'data-color="purple"', 'data-color="orange"', 'data-color="pink"'];
+        const colorAttr = role === 'seller' ? avatarColors[Math.floor(Math.random() * avatarColors.length)] : '';
+        // Use person icon for all avatars (filled style)
+        const avatarIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
-        // نام نمایشی
-        let recipientName = whom;
-        let recipientLink = '';
-        if (role === 'seller' && sellerId) {
-          const linkUrl = shopUrl ? `/shop.html?shopurl=${shopUrl}` : `/shop.html?id=${sellerId}`;
-          recipientName = storeName || 'فروشنده';
-          recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${recipientName}</a>`;
-        }
+        // Name
+        const displayName = role === 'seller' ? (storeName || 'فروشنده') : (role === 'admin' ? 'پشتیبانی' : 'مخاطب');
 
-        // نوع چت badge
-        let typeBadge = '';
-        if (c.productId) {
-          typeBadge = '<span class="chat-type-badge product">محصول</span>';
-        } else if (role === 'admin') {
-          typeBadge = '<span class="chat-type-badge admin">پشتیبانی</span>';
-        } else if (role === 'seller') {
-          typeBadge = '<span class="chat-type-badge seller">فروشنده</span>';
-        }
-
-        // محصول مرتبط
-        let productBlock = '';
+        // Product Context (Blue text) - Line 2
+        let productTag = '';
         if (c.productId && c.productId.title) {
-          const productUrl = `/product.html?id=${c.productId._id}`;
-          productBlock = `
-        <div class="chat-product">
-          <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
-            <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
-                 class="chat-product-img" alt="${c.productId.title}">
-          </a>
-          <div class="chat-product-info">
-            <div class="chat-product-title">${c.productId.title}</div>
-            <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
-              مشاهده محصول
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-      `;
+          productTag = `<div class="msg-product-line"><span class="msg-product-tag-v5">محصول: ${c.productId.title}</span></div>`;
         }
 
-        // آخرین پیام
+        // Last message
         const last = c.messages?.[c.messages.length - 1] || {};
-        const txt = (last.text || 'بدون پیام').slice(0, 60) + (last.text?.length > 60 ? '…' : '');
+        const preview = (last.text || 'بدون پیام').slice(0, 45) + (last.text?.length > 45 ? '…' : '');
         const unread = (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
 
-        // زمان
+        // Time
         const msgDate = last.date || last.createdAt || c.lastUpdated;
-        const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '—';
+        const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '';
 
         return `
-      <div class="chat-card-new ${unread > 0 ? 'has-unread' : ''} ${isBlocked ? 'is-blocked' : ''}"
-           data-chat-id="${c._id}">
-        
-        <!-- دکمه حذف - گوشه بالا چپ -->
-        <button class="chat-delete-btn" data-chat-id="${c._id}" title="حذف گفتگو">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+      <div class="msg-row-v5 ${unread > 0 ? 'unread' : ''} ${isBlocked ? 'blocked' : ''}" data-chat-id="${c._id}" data-seller-id="${sellerId || ''}">
+        <div class="msg-avatar-v5 ${avatarClass}" ${colorAttr}>
+          ${avatarIcon}
+        </div>
+        <div class="msg-body-v5" data-chat-id="${c._id}">
+          <div class="msg-row-top">
+            <span class="msg-name-v5">${displayName}</span>
+            <span class="msg-time-v5">${timeDisplay}</span>
+          </div>
+          ${productTag}
+          <div class="msg-row-bottom">
+            <span class="msg-preview-v5">${preview}</span>
+            ${unread > 0 ? `<span class="msg-unread-v5">${unread > 9 ? '9+' : unread}</span>` : ''}
+          </div>
+        </div>
+        <button class="msg-more-btn-v5" data-chat-id="${c._id}" data-seller-id="${sellerId || ''}" aria-label="گزینه‌ها">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="2"/>
+            <circle cx="12" cy="12" r="2"/>
+            <circle cx="12" cy="19" r="2"/>
+          </svg>
         </button>
-
-        <!-- آواتار -->
-        <div class="chat-avatar">
-          <div class="chat-avatar-img ${avatarClass}">
-            ${avatarIcon}
-          </div>
-          ${unread > 0 ? `<span class="chat-avatar-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
-        </div>
-
-        <!-- محتوا -->
-        <div class="chat-content">
-          <div class="chat-header">
-            <div class="chat-recipient">
-              <span class="chat-recipient-name">${recipientLink || recipientName}</span>
-              ${typeBadge}
-            </div>
-            <span class="chat-time">${timeDisplay}</span>
-          </div>
-
-          ${productBlock}
-
-          <p class="chat-preview ${unread > 0 ? 'unread' : ''}">${txt}</p>
-
-          ${(role === 'seller' && !isBlocked) || (role === 'seller' && isBlocked) ? `
-          <div class="chat-actions">
-            ${role === 'seller' && !isBlocked ? `
-              <button class="chat-action-btn block" data-seller-id="${sellerId}" title="مسدودسازی فروشنده">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                <span class="btn-text">مسدود</span>
-              </button>
-            ` : ''}
-            ${role === 'seller' && isBlocked ? `
-              <span class="chat-action-btn blocked" title="این فروشنده مسدود شده">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                <span class="btn-text">مسدود</span>
-              </span>
-            ` : ''}
-          </div>
-          ` : ''}
-        </div>
       </div>
+      <div class="msg-divider-v5"></div>
     `;
       }).join('');
 
-      // Add event listeners
+      box.innerHTML = adminPinnedRow + chatRowsHtml;
+
+      // Event listeners
       setTimeout(() => {
-        document.querySelectorAll('.chat-card-new').forEach(card => {
-          card.addEventListener('click', (e) => {
-            if (e.target.closest('.chat-action-btn')) return;
-            if (e.target.closest('.chat-delete-btn')) return;
-            if (e.target.closest('a')) return;
-            openChat(card.dataset.chatId);
+        // Click on body area to open chat
+        document.querySelectorAll('.msg-body-v5').forEach(item => {
+          item.addEventListener('click', () => {
+            openChat(item.dataset.chatId);
           });
         });
 
-        document.querySelectorAll('.chat-delete-btn').forEach(btn => {
+        // More button - show action sheet
+        document.querySelectorAll('.msg-more-btn-v5').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            deleteChat(btn.dataset.chatId);
+            showChatActionSheet(btn.dataset.chatId, btn.dataset.sellerId);
           });
         });
+      }, 50);
+    }
 
-        document.querySelectorAll('.chat-action-btn.block').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            blockSeller(btn.dataset.sellerId);
-          });
-        });
-      }, 0);
+    // Action sheet for chat options - Premium iOS Style
+    function showChatActionSheet(chatId, sellerId) {
+      // Remove existing action sheet
+      document.getElementById('chatActionSheet')?.remove();
+      
+      const isBlocked = sellerId && blockedSellers.some(bs => (bs?.toString() || bs) === sellerId);
+      
+      document.body.insertAdjacentHTML('beforeend', `
+        <div id="chatActionSheet" class="chat-action-sheet-overlay" onclick="closeChatActionSheet()">
+          <div class="chat-action-sheet" onclick="event.stopPropagation()">
+            <div class="chat-action-sheet-handle"></div>
+            
+            <div class="chat-action-sheet-header">
+              <h3 class="chat-action-sheet-title">مدیریت گفتگو</h3>
+              <p class="chat-action-sheet-subtitle">یک گزینه را انتخاب کنید</p>
+            </div>
+            
+            <button class="chat-action-item delete" onclick="deleteChat('${chatId}'); closeChatActionSheet();">
+              <div class="chat-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </div>
+              <div class="chat-action-text">
+                <span class="chat-action-label">حذف گفتگو</span>
+                <span class="chat-action-desc">این گفتگو برای همیشه حذف می‌شود</span>
+              </div>
+            </button>
+            
+            ${sellerId ? `
+            <button class="chat-action-item ${isBlocked ? 'unblock' : 'block'}" onclick="${isBlocked ? 'unblockSeller' : 'blockSeller'}('${sellerId}'); closeChatActionSheet();">
+              <div class="chat-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  ${isBlocked ? 
+                    '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>' :
+                    '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>'
+                  }
+                </svg>
+              </div>
+              <div class="chat-action-text">
+                <span class="chat-action-label">${isBlocked ? 'رفع مسدودی' : 'مسدود کردن'}</span>
+                <span class="chat-action-desc">${isBlocked ? 'این فروشنده می‌تواند پیام بفرستد' : 'دیگر پیامی دریافت نمی‌کنید'}</span>
+              </div>
+            </button>
+            ` : ''}
+            
+            <button class="chat-action-item cancel" onclick="closeChatActionSheet()">
+              <span>انصراف</span>
+            </button>
+          </div>
+        </div>
+      `);
+      
+      // Animate in
+      requestAnimationFrame(() => {
+        document.getElementById('chatActionSheet')?.classList.add('active');
+      });
+    }
+
+    function closeChatActionSheet() {
+      const sheet = document.getElementById('chatActionSheet');
+      if (sheet) {
+        sheet.classList.remove('active');
+        setTimeout(() => sheet.remove(), 200);
+      }
     }
 
     // تابع کمکی برای نمایش زمان نسبی
@@ -4674,7 +4704,7 @@
       'user-review': {
         htmlId: 'missionExplore',
         style: 'explore',
-        icon: '🛍️',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
         title: 'پاساژگردی آنلاین',
         onclick: 'showExploreMission()',
         order: 5
@@ -4850,7 +4880,7 @@
       }
     }
 
-    // Initialize horizontal scroll touch handling for missions
+    // Initialize horizontal scroll touch handling for missions - Ultra Smooth Version
     function initMissionsScrollTouch() {
       const scrollContainer = document.querySelector('.missions-scroll');
       if (!scrollContainer) return;
@@ -4858,41 +4888,189 @@
       let isDown = false;
       let startX;
       let scrollLeft;
+      let velocity = 0;
+      let lastX = 0;
+      let lastTime = Date.now();
+      let momentumID;
+      let rafID;
 
-      // Prevent vertical scroll interference on touch devices
+      // Create scroll wrapper for fade indicators
+      const wrapper = scrollContainer.parentElement;
+      if (wrapper && !wrapper.classList.contains('missions-scroll-wrapper')) {
+        const newWrapper = document.createElement('div');
+        newWrapper.className = 'missions-scroll-wrapper';
+        scrollContainer.parentNode.insertBefore(newWrapper, scrollContainer);
+        newWrapper.appendChild(scrollContainer);
+      }
+
+      // Create progress indicator
+      const progressContainer = document.createElement('div');
+      progressContainer.className = 'missions-scroll-progress';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'missions-scroll-progress-bar';
+      progressContainer.appendChild(progressBar);
+      
+      const missionsSection = scrollContainer.closest('.missions-section');
+      if (missionsSection) {
+        missionsSection.appendChild(progressContainer);
+      }
+
+      // Smooth update scroll indicators and progress using RAF
+      function updateScrollIndicators() {
+        if (rafID) cancelAnimationFrame(rafID);
+        
+        rafID = requestAnimationFrame(() => {
+          const scrollWrapper = scrollContainer.closest('.missions-scroll-wrapper');
+          if (!scrollWrapper) return;
+
+          const currentScrollLeft = scrollContainer.scrollLeft;
+          const scrollWidth = scrollContainer.scrollWidth;
+          const clientWidth = scrollContainer.clientWidth;
+          const maxScroll = scrollWidth - clientWidth;
+
+          // Update fade indicators
+          if (currentScrollLeft <= 5) {
+            scrollWrapper.classList.remove('scrolled-middle', 'scrolled-end');
+            scrollWrapper.classList.add('scrolled-start');
+          } else if (currentScrollLeft >= maxScroll - 5) {
+            scrollWrapper.classList.remove('scrolled-start', 'scrolled-middle');
+            scrollWrapper.classList.add('scrolled-end');
+          } else {
+            scrollWrapper.classList.remove('scrolled-start', 'scrolled-end');
+            scrollWrapper.classList.add('scrolled-middle');
+          }
+
+          // Update progress bar with smooth transition
+          const progress = maxScroll > 0 ? (currentScrollLeft / maxScroll) * 100 : 0;
+          progressBar.style.width = `${progress}%`;
+        });
+      }
+
+      // Ultra smooth momentum scrolling with easing
+      function beginMomentumTracking() {
+        cancelMomentumTracking();
+        momentumID = requestAnimationFrame(momentumLoop);
+      }
+
+      function cancelMomentumTracking() {
+        if (momentumID) {
+          cancelAnimationFrame(momentumID);
+          momentumID = null;
+        }
+      }
+
+      function momentumLoop() {
+        // Apply friction with smooth easing
+        if (Math.abs(velocity) > 0.3) {
+          scrollContainer.scrollLeft += velocity;
+          velocity *= 0.92; // Smoother friction coefficient
+          momentumID = requestAnimationFrame(momentumLoop);
+        } else {
+          velocity = 0;
+        }
+      }
+
+      // Touch events for mobile - Ultra Smooth
       scrollContainer.addEventListener('touchstart', (e) => {
-        // Allow horizontal scroll
+        cancelMomentumTracking();
+        lastX = e.touches[0].pageX;
+        lastTime = performance.now(); // More precise timing
+        velocity = 0;
       }, { passive: true });
 
       scrollContainer.addEventListener('touchmove', (e) => {
-        // Let the browser handle touch scrolling naturally
+        const currentX = e.touches[0].pageX;
+        const currentTime = performance.now();
+        const timeDiff = currentTime - lastTime;
+        
+        if (timeDiff > 0) {
+          // Calculate velocity with smoothing
+          const newVelocity = (lastX - currentX) / timeDiff * 12;
+          velocity = velocity * 0.3 + newVelocity * 0.7; // Smooth velocity
+        }
+        
+        lastX = currentX;
+        lastTime = currentTime;
       }, { passive: true });
 
-      // Mouse drag support for desktop testing
+      scrollContainer.addEventListener('touchend', () => {
+        // Only apply momentum if velocity is significant
+        if (Math.abs(velocity) > 0.5) {
+          beginMomentumTracking();
+        }
+      }, { passive: true });
+
+      // Mouse drag support for desktop - Ultra Smooth
       scrollContainer.addEventListener('mousedown', (e) => {
         isDown = true;
         scrollContainer.style.cursor = 'grabbing';
+        scrollContainer.style.userSelect = 'none';
         startX = e.pageX - scrollContainer.offsetLeft;
         scrollLeft = scrollContainer.scrollLeft;
+        cancelMomentumTracking();
+        lastX = e.pageX;
+        lastTime = performance.now();
+        velocity = 0;
       });
 
       scrollContainer.addEventListener('mouseleave', () => {
-        isDown = false;
-        scrollContainer.style.cursor = 'grab';
+        if (isDown) {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+          scrollContainer.style.userSelect = '';
+          if (Math.abs(velocity) > 0.5) {
+            beginMomentumTracking();
+          }
+        }
       });
 
       scrollContainer.addEventListener('mouseup', () => {
-        isDown = false;
-        scrollContainer.style.cursor = 'grab';
+        if (isDown) {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+          scrollContainer.style.userSelect = '';
+          if (Math.abs(velocity) > 0.5) {
+            beginMomentumTracking();
+          }
+        }
       });
 
       scrollContainer.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
+        
+        const currentX = e.pageX;
+        const currentTime = performance.now();
+        const timeDiff = currentTime - lastTime;
+        
         const x = e.pageX - scrollContainer.offsetLeft;
-        const walk = (x - startX) * 1.5;
+        const walk = (x - startX) * 1.2; // Slightly reduced multiplier for smoother feel
         scrollContainer.scrollLeft = scrollLeft - walk;
+        
+        if (timeDiff > 0) {
+          const newVelocity = (lastX - currentX) / timeDiff * 12;
+          velocity = velocity * 0.3 + newVelocity * 0.7;
+        }
+        
+        lastX = currentX;
+        lastTime = currentTime;
       });
+
+      // Update indicators on scroll with throttling
+      let scrollTimeout;
+      scrollContainer.addEventListener('scroll', () => {
+        if (!scrollTimeout) {
+          scrollTimeout = setTimeout(() => {
+            updateScrollIndicators();
+            scrollTimeout = null;
+          }, 16); // ~60fps
+        }
+      }, { passive: true });
+
+      // Initial update
+      setTimeout(() => {
+        updateScrollIndicators();
+      }, 100);
 
       // Set initial cursor
       scrollContainer.style.cursor = 'grab';

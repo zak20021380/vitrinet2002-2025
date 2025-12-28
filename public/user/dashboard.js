@@ -2732,7 +2732,10 @@
           break;
         case 'edit':
           closeMissionModal();
-          showSection('profile');
+          // باز کردن مستقیم مدال ثبت تاریخ تولد
+          setTimeout(() => {
+            openBirthdayModal();
+          }, 300);
           break;
         case 'startExplore':
           closeMissionModal();
@@ -3066,46 +3069,113 @@
     window.closeCompletedMissionModal = closeCompletedMissionModal;
 
     // ═══════════════════════════════════════════════════════════════
-    // مودال ثبت تاریخ تولد
+    // مودال ثبت تاریخ تولد - V3 Numeric Input Design
     // ═══════════════════════════════════════════════════════════════
     
-    // پر کردن سلکت‌های روز و سال
-    function initBirthdaySelects() {
-      const daySelect = document.getElementById('birthdayDay');
-      const yearSelect = document.getElementById('birthdayYear');
+    // Initialize birthday input fields with validation
+    function initBirthdayInputs() {
+      const dayInput = document.getElementById('birthdayDay');
+      const monthInput = document.getElementById('birthdayMonth');
+      const yearInput = document.getElementById('birthdayYear');
       
-      if (!daySelect || !yearSelect) {
-        console.warn('Birthday selects not found in DOM');
+      if (!dayInput || !monthInput || !yearInput) {
+        console.warn('Birthday inputs not found in DOM');
         return;
       }
       
-      // پر کردن روزها (1-31)
-      for (let i = 1; i <= 31; i++) {
-        const option = document.createElement('option');
-        option.value = i.toString().padStart(2, '0');
-        option.textContent = i.toLocaleString('fa-IR');
-        daySelect.appendChild(option);
-      }
+      // Add input event listeners for validation and auto-focus
+      dayInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
+        validateBirthdayInput(e.target, 1, 31);
+        checkBirthdayFormValid();
+        // Auto-focus to month when day is complete
+        if (e.target.value.length === 2) {
+          monthInput.focus();
+        }
+      });
       
-      // پر کردن سال‌ها (1395 تا 1300 - نزولی)
-      for (let i = 1395; i >= 1300; i--) {
-        const option = document.createElement('option');
-        option.value = i.toString();
-        option.textContent = i.toLocaleString('fa-IR');
-        yearSelect.appendChild(option);
+      monthInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 2);
+        validateBirthdayInput(e.target, 1, 12);
+        checkBirthdayFormValid();
+        // Auto-focus to year when month is complete
+        if (e.target.value.length === 2) {
+          yearInput.focus();
+        }
+      });
+      
+      yearInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4);
+        validateBirthdayInput(e.target, 1300, 1403);
+        checkBirthdayFormValid();
+      });
+      
+      // Add blur event for final validation
+      [dayInput, monthInput, yearInput].forEach(input => {
+        input.addEventListener('blur', () => {
+          if (input.value) {
+            // Pad with zeros if needed
+            if (input === dayInput || input === monthInput) {
+              input.value = input.value.padStart(2, '0');
+            }
+          }
+          checkBirthdayFormValid();
+        });
+      });
+    }
+    
+    // Validate birthday input and add visual feedback
+    function validateBirthdayInput(input, min, max) {
+      const value = parseInt(input.value, 10);
+      input.classList.remove('valid', 'error');
+      
+      if (input.value === '') return;
+      
+      if (!isNaN(value) && value >= min && value <= max) {
+        input.classList.add('valid');
+      } else if (input.value.length >= (max > 99 ? 4 : 2)) {
+        input.classList.add('error');
       }
     }
 
-    // باز کردن مودال تاریخ تولد
+    // باز کردن مودال تاریخ تولد - Premium Version
     function openBirthdayModal() {
       const overlay = document.getElementById('birthdayModalOverlay');
       if (!overlay) {
         console.warn('Birthday modal overlay not found');
         return;
       }
+      
+      // Reset form
+      const dayInput = document.getElementById('birthdayDay');
+      const monthInput = document.getElementById('birthdayMonth');
+      const yearInput = document.getElementById('birthdayYear');
+      
+      if (dayInput) {
+        dayInput.value = '';
+        dayInput.classList.remove('valid', 'error');
+      }
+      if (monthInput) {
+        monthInput.value = '';
+        monthInput.classList.remove('valid', 'error');
+      }
+      if (yearInput) {
+        yearInput.value = '';
+        yearInput.classList.remove('valid', 'error');
+      }
+      
+      checkBirthdayFormValid();
+      
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+      
+      // Focus on first input
+      setTimeout(() => {
+        if (dayInput) dayInput.focus();
+      }, 300);
     }
+    // دسترسی global برای onclick در HTML
+    window.openBirthdayModal = openBirthdayModal;
 
     // بستن مودال تاریخ تولد
     function closeBirthdayModal() {
@@ -3117,26 +3187,44 @@
 
     // بررسی فعال بودن دکمه ثبت
     function checkBirthdayFormValid() {
-      const day = document.getElementById('birthdayDay').value;
-      const month = document.getElementById('birthdayMonth').value;
-      const year = document.getElementById('birthdayYear').value;
+      const dayInput = document.getElementById('birthdayDay');
+      const monthInput = document.getElementById('birthdayMonth');
+      const yearInput = document.getElementById('birthdayYear');
       const submitBtn = document.getElementById('birthdaySubmitBtn');
       
-      submitBtn.disabled = !(day && month && year);
+      if (!dayInput || !monthInput || !yearInput || !submitBtn) return;
+      
+      const day = parseInt(dayInput.value, 10);
+      const month = parseInt(monthInput.value, 10);
+      const year = parseInt(yearInput.value, 10);
+      
+      const isDayValid = !isNaN(day) && day >= 1 && day <= 31;
+      const isMonthValid = !isNaN(month) && month >= 1 && month <= 12;
+      const isYearValid = !isNaN(year) && year >= 1300 && year <= 1403;
+      
+      const isValid = isDayValid && isMonthValid && isYearValid;
+      submitBtn.disabled = !isValid;
     }
 
-    // ثبت تاریخ تولد
+    // ثبت تاریخ تولد - Premium Version
     async function submitBirthday() {
-      const day = document.getElementById('birthdayDay').value;
-      const month = document.getElementById('birthdayMonth').value;
-      const year = document.getElementById('birthdayYear').value;
+      const dayInput = document.getElementById('birthdayDay');
+      const monthInput = document.getElementById('birthdayMonth');
+      const yearInput = document.getElementById('birthdayYear');
       const submitBtn = document.getElementById('birthdaySubmitBtn');
+      
+      if (!dayInput || !monthInput || !yearInput) return;
+      
+      const day = dayInput.value.padStart(2, '0');
+      const month = monthInput.value.padStart(2, '0');
+      const year = yearInput.value;
       
       if (!day || !month || !year) return;
       
       const birthDate = `${year}/${month}/${day}`;
       
       submitBtn.disabled = true;
+      const originalHTML = submitBtn.innerHTML;
       submitBtn.innerHTML = `
         <svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
@@ -3166,7 +3254,7 @@
           throw new Error(data.message || 'خطا در ثبت تاریخ تولد');
         }
         
-        // بستن مودال
+        // بستن مودال با انیمیشن
         closeBirthdayModal();
         
         // آپدیت UI تاریخ تولد در پروفایل
@@ -3191,7 +3279,7 @@
           showBirthdaySuccessToast('تاریخ تولد ثبت شد! ۵۰۰ تومان جایزه گرفتی 🎉');
         } else {
           // نمایش toast موفقیت بدون جایزه
-          showBirthdaySuccessToast('تاریخ تولد به‌روزرسانی شد');
+          showBirthdaySuccessToast('تاریخ تولد به‌روزرسانی شد ✓');
         }
         
         // مخفی کردن badge جایزه برای دفعات بعدی
@@ -3205,36 +3293,37 @@
         
       } catch (error) {
         console.error('Birthday submit error:', error);
-        alert(error.message || 'خطا در ثبت تاریخ تولد');
+        showBirthdaySuccessToast(error.message || 'خطا در ثبت تاریخ تولد ❌', true);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 12v10H4V12"/>
-            <path d="M2 7h20v5H2z"/>
-            <path d="M12 22V7"/>
-          </svg>
-          <span>ثبت و دریافت جایزه</span>
-        `;
+        submitBtn.innerHTML = originalHTML;
       }
     }
 
-    // نمایش toast موفقیت تولد
-    function showBirthdaySuccessToast(message) {
+    // نمایش toast موفقیت تولد - Premium Version
+    function showBirthdaySuccessToast(message, isError = false) {
       const toast = document.getElementById('birthdaySuccessToast');
       const text = document.getElementById('birthdaySuccessText');
       if (toast && text) {
         text.textContent = message;
+        
+        if (isError) {
+          toast.style.background = 'linear-gradient(145deg, #ef4444, #dc2626)';
+        } else {
+          toast.style.background = 'linear-gradient(145deg, #10b981, #059669)';
+        }
+        
         toast.classList.add('show');
         setTimeout(() => {
           toast.classList.remove('show');
-        }, 3000);
+        }, 3500);
       }
     }
 
-    // راه‌اندازی event listeners مودال تولد
+    // راه‌اندازی event listeners مودال تولد - V3 Numeric Input Design
     function initBirthdayModal() {
-      initBirthdaySelects();
+      // Initialize input fields with validation
+      initBirthdayInputs();
       
       // دکمه بستن
       const closeBtn = document.getElementById('birthdayModalClose');
@@ -3251,15 +3340,6 @@
           if (e.target === overlay) closeBirthdayModal();
         });
       }
-      
-      // تغییر سلکت‌ها
-      const daySelect = document.getElementById('birthdayDay');
-      const monthSelect = document.getElementById('birthdayMonth');
-      const yearSelect = document.getElementById('birthdayYear');
-      
-      if (daySelect) daySelect.addEventListener('change', checkBirthdayFormValid);
-      if (monthSelect) monthSelect.addEventListener('change', checkBirthdayFormValid);
-      if (yearSelect) yearSelect.addEventListener('change', checkBirthdayFormValid);
       
       // دکمه ثبت
       if (submitBtn) submitBtn.addEventListener('click', submitBirthday);
@@ -3746,77 +3826,62 @@
     async function loadMessagesSection() {
       const box = document.getElementById('mainContent');
       box.innerHTML = `
-    <div id="messages-section" class="messages-container fadein">
-      <!-- هدر بخش پیام‌ها -->
-      <div class="messages-header">
-        <div class="messages-title">
-          <div class="messages-title-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <div>
-            <h2>پیام‌های من</h2>
-            <span class="messages-count" id="messagesCount">در حال بارگذاری...</span>
-          </div>
-        </div>
-        <div class="messages-filters">
-          <button class="msg-filter-btn active" data-filter="all">همه</button>
-          <button class="msg-filter-btn" data-filter="seller">فروشندگان</button>
-          <button class="msg-filter-btn" data-filter="admin">مدیر سایت</button>
-          <button class="msg-filter-btn" data-filter="product">محصولات</button>
-        </div>
-      </div>
-
-      <!-- دکمه چت با مدیر -->
-      <div class="flex justify-end mb-4">
-        <button class="open-admin-msg brand-btn text-sm px-4 py-2 rounded-xl flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    <div id="messages-section" class="messages-section-v5 fadein">
+      <!-- Header V6 - Large Bold Elegant Title -->
+      <div class="msg-header-v5">
+        <h1 class="msg-header-title-v5">پیام‌ها</h1>
+        <button class="msg-search-btn-v5" aria-label="جستجو">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          چت با مدیر سایت
         </button>
       </div>
 
-      <!-- لیست چت‌ها -->
-      <div id="userChatsList" class="chats-list"></div>
+      <!-- Filter Tabs V6 - Modern Pill Chips -->
+      <div class="msg-filters-v5">
+        <button class="msg-filter-v5 active" data-filter="all">همه</button>
+        <button class="msg-filter-v5" data-filter="admin">پشتیبانی</button>
+        <button class="msg-filter-v5" data-filter="seller">فروشندگان</button>
+        <button class="msg-filter-v5" data-filter="product">محصولات</button>
+      </div>
+
+      <!-- Chat List V6 - Premium Surface -->
+      <div class="msg-list-v5" id="userChatsList">
+        <div class="msg-loading-v5">
+          <div class="msg-spinner-v5"></div>
+          <span>در حال بارگذاری...</span>
+        </div>
+      </div>
     </div>
   `;
 
-      // Add event listener for admin message button
-      const adminMsgBtn = document.querySelector('.open-admin-msg');
-      if (adminMsgBtn) {
-        adminMsgBtn.addEventListener('click', openAdminMsgModal);
-      }
-
-      // Add filter button listeners
-      document.querySelectorAll('.msg-filter-btn').forEach(btn => {
+      // Event: Tab clicks
+      document.querySelectorAll('.msg-filter-v5').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.msg-filter-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.msg-tab-v3').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentMsgFilter = btn.dataset.filter;
           renderMessagesList();
         });
       });
 
-      // اگر currentUserId تنظیم نشده، اول پروفایل رو بگیر
+      // Get user ID if not set
       if (!window.currentUserId) {
         try {
           const res = await fetch('/api/user/profile', { credentials: 'include' });
           if (res.ok) {
             const user = await res.json();
             window.currentUserId = user._id;
-            console.log('✅ currentUserId تنظیم شد:', window.currentUserId);
           }
         } catch (e) {
           console.error('خطا در دریافت پروفایل:', e);
         }
       }
 
-      await fetchBlockedSellers(); // فروشنده‌های مسدودشده را بگیر
-      await fetchUserChats();  // لیست چت‌ها رو بگیر
-      renderMessagesList();    // رندر کن
-      startMsgPolling();       // polling شروع کن
+      await fetchBlockedSellers();
+      await fetchUserChats();
+      renderMessagesList();
+      startMsgPolling();
     }
 
     let currentMsgFilter = 'all';
@@ -3865,21 +3930,17 @@
     }
 
 
-    /* رندر لیست چت‌ها - نسخه جدید با استایل حرفه‌ای */
+    /* رندر لیست چت‌ها - V3 با Product Context و Action Icons */
     function renderMessagesList() {
       const box = document.getElementById('userChatsList');
-      const countEl = document.getElementById('messagesCount');
       console.log("لیست چت‌ها:", chatsList);
 
-      // فیلتر کردن چت‌ها بر اساس فیلتر انتخابی
+      // فیلتر کردن چت‌ها بر اساس تب انتخابی
       let filteredChats = chatsList;
       if (currentMsgFilter !== 'all') {
         filteredChats = chatsList.filter(c => {
           if (currentMsgFilter === 'seller') {
             return c.type === 'user-seller' || (c.participantsModel && c.participantsModel.includes('Seller') && !c.participantsModel.includes('Admin'));
-          }
-          if (currentMsgFilter === 'admin') {
-            return c.type === 'admin-user' || c.type === 'user-admin' || c.type === 'admin' || (c.participantsModel && c.participantsModel.includes('Admin'));
           }
           if (currentMsgFilter === 'product') {
             return c.type === 'product' || c.productId;
@@ -3888,187 +3949,124 @@
         });
       }
 
-      // بروزرسانی تعداد
-      if (countEl) {
-        const totalUnread = chatsList.reduce((sum, c) => {
-          return sum + (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
-        }, 0);
-        countEl.textContent = totalUnread > 0
-          ? `${chatsList.length} گفتگو • ${totalUnread} پیام خوانده نشده`
-          : `${chatsList.length} گفتگو`;
-      }
-
       if (!filteredChats.length) {
         box.innerHTML = `
-      <div class="messages-empty">
-        <div class="messages-empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <div class="msg-empty-v3">
+        <div class="msg-empty-icon-v3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         </div>
-        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری!' : 'گفتگویی در این دسته وجود ندارد'}</h3>
-        <p>${currentMsgFilter === 'all' ? 'از دکمه «چت با مدیر سایت» استفاده کن یا از صفحه محصولات به فروشندگان پیام بده.' : 'فیلتر دیگری را امتحان کنید.'}</p>
+        <h3>${currentMsgFilter === 'all' ? 'هنوز گفتگویی نداری' : 'گفتگویی یافت نشد'}</h3>
+        <p>${currentMsgFilter === 'all' ? 'از صفحه محصولات به فروشندگان پیام بده' : 'تب دیگری را امتحان کنید'}</p>
       </div>
     `;
         return;
       }
 
-      // شناسه کاربر فعلی
       const myId = window.currentUserId;
 
       box.innerHTML = filteredChats.map(c => {
-        let whom = 'مخاطب';
         let role = '';
         let sellerId = null;
         let storeName = '';
-        let shopUrl = '';
         let isBlocked = false;
 
         if (Array.isArray(c.participants)) {
-          // مقایسه با toString برای اطمینان از تطابق صحیح
           const participant = c.participants.find(p => p && p._id && p._id.toString() !== myId?.toString());
           if (participant) {
-            // اگر فروشنده باشه، role نداره پس از participantsModel استفاده میکنیم
             const pIdx = c.participants.findIndex(pp => pp && pp._id && pp._id.toString() === participant._id.toString());
             const pModel = c.participantsModel?.[pIdx];
             role = participant.role || (pModel === 'Seller' ? 'seller' : (pModel === 'Admin' ? 'admin' : 'user'));
             sellerId = participant._id;
             storeName = participant.storename || '';
-            shopUrl = participant.shopurl || '';
-            whom = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'مدیر سایت' : (role === 'user' ? 'مشتری' : 'مخاطب'));
           }
         }
 
         if (role === 'seller' && sellerId) {
-          // مقایسه با toString برای اطمینان از تطابق صحیح
           const sellerIdStr = sellerId?.toString() || sellerId;
           isBlocked = blockedSellers.some(bs => (bs?.toString() || bs) === sellerIdStr);
         }
 
         if (!role && Array.isArray(c.participantsModel)) {
-          if (c.participantsModel.includes('Admin')) {
-            role = 'admin';
-            whom = 'مدیر سایت';
-          } else if (c.participantsModel.includes('Seller')) {
-            role = 'seller';
-            whom = 'فروشنده';
-          }
+          if (c.participantsModel.includes('Admin')) role = 'admin';
+          else if (c.participantsModel.includes('Seller')) role = 'seller';
         }
 
-        // fallback از type
         if (!role && c.type) {
-          if (c.type === 'user-seller' || c.type === 'seller-admin' || c.type === 'product') {
-            whom = 'فروشنده';
+          if (c.type === 'user-seller' || c.type === 'product') {
             role = 'seller';
             sellerId = c.sellerId;
-          } else if (c.type === 'user-admin' || c.type === 'admin-user' || c.type === 'admin') {
-            whom = 'مدیر سایت';
+          } else if (c.type === 'user-admin' || c.type === 'admin-user') {
             role = 'admin';
           }
         }
 
-        // تعیین آواتار
-        const avatarClass = role === 'seller' ? 'chat-avatar-seller' : (role === 'admin' ? 'chat-avatar-admin' : 'chat-avatar-user');
+        // Avatar
+        const avatarClass = role === 'admin' ? 'msg-av-admin' : (role === 'seller' ? 'msg-av-seller' : 'msg-av-user');
         const avatarIcon = role === 'admin'
-          ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>`
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
           : (role === 'seller'
-            ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
-            : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`);
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`);
 
-        // نام نمایشی
-        let recipientName = whom;
-        let recipientLink = '';
-        if (role === 'seller' && sellerId) {
-          const linkUrl = shopUrl ? `/shop.html?shopurl=${shopUrl}` : `/shop.html?id=${sellerId}`;
-          recipientName = storeName || 'فروشنده';
-          recipientLink = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${recipientName}</a>`;
-        }
+        // Name & Badge
+        const displayName = role === 'seller' ? (storeName || 'فروشنده') : (role === 'admin' ? 'پشتیبانی' : 'مخاطب');
+        const badgeClass = role === 'seller' ? 'msg-badge-seller' : (role === 'admin' ? 'msg-badge-admin' : '');
+        const badgeText = role === 'seller' ? 'فروشنده' : (role === 'admin' ? 'پشتیبانی' : '');
 
-        // نوع چت badge
-        let typeBadge = '';
-        if (c.productId) {
-          typeBadge = '<span class="chat-type-badge product">محصول</span>';
-        } else if (role === 'admin') {
-          typeBadge = '<span class="chat-type-badge admin">پشتیبانی</span>';
-        } else if (role === 'seller') {
-          typeBadge = '<span class="chat-type-badge seller">فروشنده</span>';
-        }
-
-        // محصول مرتبط
-        let productBlock = '';
+        // Product Context (Blue text)
+        let productContext = '';
         if (c.productId && c.productId.title) {
-          const productUrl = `/product.html?id=${c.productId._id}`;
-          productBlock = `
-        <div class="chat-product">
-          <a href="${productUrl}" target="_blank" rel="noopener noreferrer">
-            <img src="${c.productId.images?.[0] || '/assets/images/noimage.png'}" 
-                 class="chat-product-img" alt="${c.productId.title}">
-          </a>
-          <div class="chat-product-info">
-            <div class="chat-product-title">${c.productId.title}</div>
-            <a href="${productUrl}" target="_blank" rel="noopener noreferrer" class="chat-product-link">
-              مشاهده محصول
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-        </div>
-      `;
+          productContext = `<span class="msg-product-ctx">محصول: ${c.productId.title}</span>`;
         }
 
-        // آخرین پیام
+        // Last message
         const last = c.messages?.[c.messages.length - 1] || {};
-        const txt = (last.text || 'بدون پیام').slice(0, 60) + (last.text?.length > 60 ? '…' : '');
+        const preview = (last.text || 'بدون پیام').slice(0, 40) + (last.text?.length > 40 ? '…' : '');
         const unread = (c.messages || []).filter(m => !m.read && m.from !== 'user').length;
 
-        // زمان
+        // Time
         const msgDate = last.date || last.createdAt || c.lastUpdated;
-        const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '—';
+        const timeDisplay = msgDate ? getRelativeTime(new Date(msgDate)) : '';
+
+        // Action buttons (visible for sellers)
+        const showActions = role === 'seller';
 
         return `
-      <div class="chat-card-new ${unread > 0 ? 'has-unread' : ''} ${isBlocked ? 'is-blocked' : ''}"
-           data-chat-id="${c._id}">
-        
-        <!-- دکمه حذف - گوشه بالا چپ -->
-        <button class="chat-delete-btn" data-chat-id="${c._id}" title="حذف گفتگو">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-        </button>
-
-        <!-- آواتار -->
-        <div class="chat-avatar">
-          <div class="chat-avatar-img ${avatarClass}">
-            ${avatarIcon}
-          </div>
-          ${unread > 0 ? `<span class="chat-avatar-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+      <div class="msg-row-v3 ${unread > 0 ? 'msg-row--unread' : ''} ${isBlocked ? 'msg-row--blocked' : ''}" data-chat-id="${c._id}">
+        <!-- Avatar -->
+        <div class="msg-avatar-v3 ${avatarClass}">
+          ${avatarIcon}
         </div>
-
-        <!-- محتوا -->
-        <div class="chat-content">
-          <div class="chat-header">
-            <div class="chat-recipient">
-              <span class="chat-recipient-name">${recipientLink || recipientName}</span>
-              ${typeBadge}
-            </div>
-            <span class="chat-time">${timeDisplay}</span>
+        
+        <!-- Content -->
+        <div class="msg-content-v3" data-chat-id="${c._id}">
+          <div class="msg-line-top">
+            <span class="msg-sender-name">${displayName}</span>
+            ${badgeText ? `<span class="msg-sender-badge ${badgeClass}">${badgeText}</span>` : ''}
           </div>
-
-          ${productBlock}
-
-          <p class="chat-preview ${unread > 0 ? 'unread' : ''}">${txt}</p>
-
-          ${(role === 'seller' && !isBlocked) || (role === 'seller' && isBlocked) ? `
-          <div class="chat-actions">
-            ${role === 'seller' && !isBlocked ? `
-              <button class="chat-action-btn block" data-seller-id="${sellerId}" title="مسدودسازی فروشنده">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                <span class="btn-text">مسدود</span>
-              </button>
-            ` : ''}
-            ${role === 'seller' && isBlocked ? `
-              <span class="chat-action-btn blocked" title="این فروشنده مسدود شده">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                <span class="btn-text">مسدود</span>
-              </span>
-            ` : ''}
+          ${productContext ? `<div class="msg-line-product">${productContext}</div>` : ''}
+          <div class="msg-line-preview">${preview}</div>
+        </div>
+        
+        <!-- Right Side: Actions + Time + Unread -->
+        <div class="msg-meta-v3">
+          <span class="msg-timestamp">${timeDisplay}</span>
+          ${unread > 0 ? `<span class="msg-unread-dot">${unread > 9 ? '9+' : unread}</span>` : ''}
+          ${showActions ? `
+          <div class="msg-actions-v3">
+            <button class="msg-act-btn msg-act-delete" data-chat-id="${c._id}" title="حذف">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+              </svg>
+            </button>
+            <button class="msg-act-btn msg-act-block ${isBlocked ? 'is-blocked' : ''}" data-seller-id="${sellerId}" title="${isBlocked ? 'رفع مسدودی' : 'مسدود'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+              </svg>
+            </button>
           </div>
           ` : ''}
         </div>
@@ -4076,31 +4074,35 @@
     `;
       }).join('');
 
-      // Add event listeners
+      // Event listeners
       setTimeout(() => {
-        document.querySelectorAll('.chat-card-new').forEach(card => {
-          card.addEventListener('click', (e) => {
-            if (e.target.closest('.chat-action-btn')) return;
-            if (e.target.closest('.chat-delete-btn')) return;
-            if (e.target.closest('a')) return;
-            openChat(card.dataset.chatId);
+        // Click on content area to open chat
+        document.querySelectorAll('.msg-content-v3').forEach(item => {
+          item.addEventListener('click', () => {
+            openChat(item.dataset.chatId);
           });
         });
 
-        document.querySelectorAll('.chat-delete-btn').forEach(btn => {
+        // Delete button
+        document.querySelectorAll('.msg-act-delete').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteChat(btn.dataset.chatId);
           });
         });
 
-        document.querySelectorAll('.chat-action-btn.block').forEach(btn => {
+        // Block button
+        document.querySelectorAll('.msg-act-block').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            blockSeller(btn.dataset.sellerId);
+            if (btn.classList.contains('is-blocked')) {
+              unblockSeller(btn.dataset.sellerId);
+            } else {
+              blockSeller(btn.dataset.sellerId);
+            }
           });
         });
-      }, 0);
+      }, 50);
     }
 
     // تابع کمکی برای نمایش زمان نسبی
@@ -4793,7 +4795,7 @@
       'user-review': {
         htmlId: 'missionExplore',
         style: 'explore',
-        icon: '🛍️',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
         title: 'پاساژگردی آنلاین',
         onclick: 'showExploreMission()',
         order: 5
@@ -4824,16 +4826,20 @@
       
       let cardClasses = `mission-card ${config.style}`;
       if (isCompleted) cardClasses += ' completed';
-      // Only add disabled class if NOT in alwaysActiveMissions and not active
+      // Only add disabled class if NOT in alwaysActiveMissions and not active and not completed
       if (!isActive && !isCompleted && !alwaysActiveMissions.includes(missionId)) cardClasses += ' disabled';
       
-      // اگر ماموریت تکمیل شده، مودال "انجام شده" نشون بده، در غیر این صورت مودال عادی
+      // ماموریت‌های تکمیل شده همیشه قابل کلیک هستند (برای نمایش مودال انجام شده)
+      // ماموریت‌های فعال هم قابل کلیک هستند (برای نمایش مودال عادی)
       let clickHandler = '';
       if (isCompleted) {
+        // Completed missions always show the "completed" modal
         clickHandler = `onclick="showCompletedMissionModal('${missionId}')"`;
       } else if (isActive) {
+        // Active missions show the regular modal
         clickHandler = `onclick="${config.onclick}"`;
       }
+      // Disabled missions have no click handler
       
       // Completed badge HTML
       const completedBadge = isCompleted ? `
@@ -4971,7 +4977,7 @@
       }
     }
 
-    // Initialize horizontal scroll touch handling for missions
+    // Initialize horizontal scroll touch handling for missions - Ultra Smooth Version
     function initMissionsScrollTouch() {
       const scrollContainer = document.querySelector('.missions-scroll');
       if (!scrollContainer) return;
@@ -4979,41 +4985,189 @@
       let isDown = false;
       let startX;
       let scrollLeft;
+      let velocity = 0;
+      let lastX = 0;
+      let lastTime = Date.now();
+      let momentumID;
+      let rafID;
 
-      // Prevent vertical scroll interference on touch devices
+      // Create scroll wrapper for fade indicators
+      const wrapper = scrollContainer.parentElement;
+      if (wrapper && !wrapper.classList.contains('missions-scroll-wrapper')) {
+        const newWrapper = document.createElement('div');
+        newWrapper.className = 'missions-scroll-wrapper';
+        scrollContainer.parentNode.insertBefore(newWrapper, scrollContainer);
+        newWrapper.appendChild(scrollContainer);
+      }
+
+      // Create progress indicator
+      const progressContainer = document.createElement('div');
+      progressContainer.className = 'missions-scroll-progress';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'missions-scroll-progress-bar';
+      progressContainer.appendChild(progressBar);
+      
+      const missionsSection = scrollContainer.closest('.missions-section');
+      if (missionsSection) {
+        missionsSection.appendChild(progressContainer);
+      }
+
+      // Smooth update scroll indicators and progress using RAF
+      function updateScrollIndicators() {
+        if (rafID) cancelAnimationFrame(rafID);
+        
+        rafID = requestAnimationFrame(() => {
+          const scrollWrapper = scrollContainer.closest('.missions-scroll-wrapper');
+          if (!scrollWrapper) return;
+
+          const currentScrollLeft = scrollContainer.scrollLeft;
+          const scrollWidth = scrollContainer.scrollWidth;
+          const clientWidth = scrollContainer.clientWidth;
+          const maxScroll = scrollWidth - clientWidth;
+
+          // Update fade indicators
+          if (currentScrollLeft <= 5) {
+            scrollWrapper.classList.remove('scrolled-middle', 'scrolled-end');
+            scrollWrapper.classList.add('scrolled-start');
+          } else if (currentScrollLeft >= maxScroll - 5) {
+            scrollWrapper.classList.remove('scrolled-start', 'scrolled-middle');
+            scrollWrapper.classList.add('scrolled-end');
+          } else {
+            scrollWrapper.classList.remove('scrolled-start', 'scrolled-end');
+            scrollWrapper.classList.add('scrolled-middle');
+          }
+
+          // Update progress bar with smooth transition
+          const progress = maxScroll > 0 ? (currentScrollLeft / maxScroll) * 100 : 0;
+          progressBar.style.width = `${progress}%`;
+        });
+      }
+
+      // Ultra smooth momentum scrolling with easing
+      function beginMomentumTracking() {
+        cancelMomentumTracking();
+        momentumID = requestAnimationFrame(momentumLoop);
+      }
+
+      function cancelMomentumTracking() {
+        if (momentumID) {
+          cancelAnimationFrame(momentumID);
+          momentumID = null;
+        }
+      }
+
+      function momentumLoop() {
+        // Apply friction with smooth easing
+        if (Math.abs(velocity) > 0.3) {
+          scrollContainer.scrollLeft += velocity;
+          velocity *= 0.92; // Smoother friction coefficient
+          momentumID = requestAnimationFrame(momentumLoop);
+        } else {
+          velocity = 0;
+        }
+      }
+
+      // Touch events for mobile - Ultra Smooth
       scrollContainer.addEventListener('touchstart', (e) => {
-        // Allow horizontal scroll
+        cancelMomentumTracking();
+        lastX = e.touches[0].pageX;
+        lastTime = performance.now(); // More precise timing
+        velocity = 0;
       }, { passive: true });
 
       scrollContainer.addEventListener('touchmove', (e) => {
-        // Let the browser handle touch scrolling naturally
+        const currentX = e.touches[0].pageX;
+        const currentTime = performance.now();
+        const timeDiff = currentTime - lastTime;
+        
+        if (timeDiff > 0) {
+          // Calculate velocity with smoothing
+          const newVelocity = (lastX - currentX) / timeDiff * 12;
+          velocity = velocity * 0.3 + newVelocity * 0.7; // Smooth velocity
+        }
+        
+        lastX = currentX;
+        lastTime = currentTime;
       }, { passive: true });
 
-      // Mouse drag support for desktop testing
+      scrollContainer.addEventListener('touchend', () => {
+        // Only apply momentum if velocity is significant
+        if (Math.abs(velocity) > 0.5) {
+          beginMomentumTracking();
+        }
+      }, { passive: true });
+
+      // Mouse drag support for desktop - Ultra Smooth
       scrollContainer.addEventListener('mousedown', (e) => {
         isDown = true;
         scrollContainer.style.cursor = 'grabbing';
+        scrollContainer.style.userSelect = 'none';
         startX = e.pageX - scrollContainer.offsetLeft;
         scrollLeft = scrollContainer.scrollLeft;
+        cancelMomentumTracking();
+        lastX = e.pageX;
+        lastTime = performance.now();
+        velocity = 0;
       });
 
       scrollContainer.addEventListener('mouseleave', () => {
-        isDown = false;
-        scrollContainer.style.cursor = 'grab';
+        if (isDown) {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+          scrollContainer.style.userSelect = '';
+          if (Math.abs(velocity) > 0.5) {
+            beginMomentumTracking();
+          }
+        }
       });
 
       scrollContainer.addEventListener('mouseup', () => {
-        isDown = false;
-        scrollContainer.style.cursor = 'grab';
+        if (isDown) {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+          scrollContainer.style.userSelect = '';
+          if (Math.abs(velocity) > 0.5) {
+            beginMomentumTracking();
+          }
+        }
       });
 
       scrollContainer.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
+        
+        const currentX = e.pageX;
+        const currentTime = performance.now();
+        const timeDiff = currentTime - lastTime;
+        
         const x = e.pageX - scrollContainer.offsetLeft;
-        const walk = (x - startX) * 1.5;
+        const walk = (x - startX) * 1.2; // Slightly reduced multiplier for smoother feel
         scrollContainer.scrollLeft = scrollLeft - walk;
+        
+        if (timeDiff > 0) {
+          const newVelocity = (lastX - currentX) / timeDiff * 12;
+          velocity = velocity * 0.3 + newVelocity * 0.7;
+        }
+        
+        lastX = currentX;
+        lastTime = currentTime;
       });
+
+      // Update indicators on scroll with throttling
+      let scrollTimeout;
+      scrollContainer.addEventListener('scroll', () => {
+        if (!scrollTimeout) {
+          scrollTimeout = setTimeout(() => {
+            updateScrollIndicators();
+            scrollTimeout = null;
+          }, 16); // ~60fps
+        }
+      }, { passive: true });
+
+      // Initial update
+      setTimeout(() => {
+        updateScrollIndicators();
+      }, 100);
 
       // Set initial cursor
       scrollContainer.style.cursor = 'grab';

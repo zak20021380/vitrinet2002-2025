@@ -1174,8 +1174,11 @@ exports.getChatById = async (req, res) => {
 
     // ۳) اگر نقش کاربر admin نیست، باید عضو چت باشد
     if (req.user.role !== 'admin') {
-      const userId = req.user.id;
-      const isParticipant = chat.participants.some(p => p.toString() === userId);
+      const userId = (req.user.id || req.user._id)?.toString();
+      const isParticipant = chat.participants.some(p => {
+        const pId = (p._id || p).toString();
+        return pId === userId;
+      });
       if (!isParticipant) {
         console.warn('🚫 Unauthorized access attempt', { chatId: rawId, requester: userId });
         return res.status(403).json({ error: 'دسترسی غیرمجاز' });
@@ -1240,10 +1243,13 @@ exports.replyToChat = async (req, res) => {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
-  const senderId = req.user.id;
+  const senderId = (req.user.id || req.user._id)?.toString();
 
   // چک کنید که این فروشنده داخل چت شرکت‌کننده است
-  const isParticipant = chat.participants.some(p => p.toString() === senderId);
+  const isParticipant = chat.participants.some(p => {
+    const pId = (p._id || p).toString();
+    return pId === senderId;
+  });
   if (!isParticipant) {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
@@ -1314,13 +1320,20 @@ exports.adminReplyToChat = async (req, res) => {
     const chat = await Chat.findById(id);
     if (!chat) return res.status(404).json({ error: 'چت پیدا نشد.' });
 
-    const adminId = req.user.id;
-    if (!chat.participants.some(p => p.toString() === adminId)) {
+    const adminId = (req.user.id || req.user._id)?.toString();
+    const isParticipant = chat.participants.some(p => {
+      const pId = (p._id || p).toString();
+      return pId === adminId;
+    });
+    if (!isParticipant) {
       return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
     }
 
     if (!['user-admin', 'admin-user', 'seller-admin', 'admin'].includes(chat.type)) {
-      const idx = chat.participants.findIndex(p => p.toString() !== adminId);
+      const idx = chat.participants.findIndex(p => {
+        const pId = (p._id || p).toString();
+        return pId !== adminId;
+      });
       const otherModel = chat.participantsModel?.[idx];
       if (otherModel === 'User') chat.type = 'admin-user';
       else if (otherModel === 'Seller') chat.type = 'seller-admin';
@@ -1351,7 +1364,7 @@ exports.adminReplyToChat = async (req, res) => {
     exports.deleteChat = async (req, res) => {
       try {
         const { id } = req.params;
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const userId = (req.user.id || req.user._id)?.toString();
         
         // اول چت رو پیدا کن
         const chat = await Chat.findById(id);
@@ -1360,7 +1373,10 @@ exports.adminReplyToChat = async (req, res) => {
         }
         
         // بررسی کن که کاربر عضو این چت باشه (یا ادمین باشه)
-        const isParticipant = chat.participants.some(p => p.toString() === userId.toString());
+        const isParticipant = chat.participants.some(p => {
+          const pId = (p._id || p).toString();
+          return pId === userId;
+        });
         const isAdmin = req.user.role === 'admin';
         
         if (!isParticipant && !isAdmin) {
@@ -1471,7 +1487,7 @@ exports.getAllChats = async (req, res) => {
     exports.markMessagesReadBySeller = async (req, res) => {
       try {
         const chatId = req.params.id;
-        const sellerId = req.user.id;
+        const sellerId = (req.user.id || req.user._id)?.toString();
 
         // اعتبارسنجی ObjectId
         if (!mongoose.Types.ObjectId.isValid(chatId)) {
@@ -1485,7 +1501,10 @@ exports.getAllChats = async (req, res) => {
         }
 
         // بررسی اینکه فروشنده عضو این چت باشد
-        const isParticipant = chat.participants.some(p => p.toString() === sellerId);
+        const isParticipant = chat.participants.some(p => {
+          const pId = (p._id || p).toString();
+          return pId === sellerId;
+        });
         if (!isParticipant) {
           return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
         }
@@ -1896,12 +1915,6 @@ exports.getUnreadCount = async (req, res) => {
    * POST /api/chats/:id/user-reply
    * اضافه کردن پیام از طرف کاربر (مشتری)
    */
-// controllers/chatController.js
-// controllers/chatController.js
-// controllers/chatController.js
-
-// controllers/chatController.js
-
 exports.userReplyToChat = async (req, res) => {
   const { id }   = req.params;   // chatId
   const { text } = req.body;     // متن پیام
@@ -1912,41 +1925,50 @@ exports.userReplyToChat = async (req, res) => {
   }
 
   try {
-    // ۲. واکشی چت
+    // ۲. واکشی چت (بدون populate برای بررسی دسترسی)
     const chat = await Chat.findById(id);
     if (!chat) {
       return res.status(404).json({ error: 'چت پیدا نشد.' });
     }
 
     // ۳. بررسی دسترسی: فقط کاربری که عضو این چت است
-  if (!chat.participants.some(p => p.toString() === req.user.id)) {
-    return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
-  }
+    // participants ممکنه ObjectId یا populated object باشه
+    const userId = req.user.id?.toString() || req.user._id?.toString();
+    const isParticipant = chat.participants.some(p => {
+      const pId = (p._id || p).toString();
+      return pId === userId;
+    });
 
-  // اگر طرف مقابل ادمین است، بررسی مسدودی
-  if (chat.participantsModel?.includes('Admin')) {
-    const userDoc = await User.findById(req.user.id).select('blockedByAdmin');
-    if (userDoc && userDoc.blockedByAdmin) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+    if (!isParticipant) {
+      console.log('❌ User not in participants:', {
+        userId,
+        participants: chat.participants.map(p => (p._id || p).toString())
+      });
+      return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
     }
-  }
 
-  // اگر فروشنده این کاربر را مسدود کرده باشد
-  const idx = chat.participantsModel.findIndex(m => m === 'Seller');
-  if (idx !== -1) {
-    const sellerId = chat.participants[idx];
-    const sellerDoc = await Seller.findById(sellerId).select('blockedUsers');
-    if (sellerDoc && sellerDoc.blockedUsers?.some(u => u.toString() === req.user.id)) {
-      return res.status(403).json({ error: 'شما مسدود شده‌اید و نمی‌توانید پیام ارسال کنید' });
+    // اگر طرف مقابل ادمین است، بررسی مسدودی
+    if (chat.participantsModel?.includes('Admin')) {
+      const userDoc = await User.findById(userId).select('blockedByAdmin');
+      if (userDoc && userDoc.blockedByAdmin) {
+        return res
+          .status(403)
+          .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
+      }
     }
-  }
+
+    // اگر فروشنده این کاربر را مسدود کرده باشد
+    const idx = chat.participantsModel.findIndex(m => m === 'Seller');
+    if (idx !== -1) {
+      const sellerId = (chat.participants[idx]._id || chat.participants[idx]).toString();
+      const sellerDoc = await Seller.findById(sellerId).select('blockedUsers');
+      if (sellerDoc && sellerDoc.blockedUsers?.some(u => u.toString() === userId)) {
+        return res.status(403).json({ error: 'شما مسدود شده‌اید و نمی‌توانید پیام ارسال کنید' });
+      }
+    }
 
     // ۴. تعیین وضعیت خوانده‌شدن برای ادمین
-    // اگر چت با ادمین باشد (user-admin یا seller-admin)، readByAdmin=false
-    // در غیر این صورت (مثلاً user-seller)، readByAdmin=true
-      const readByAdmin = !['user-admin', 'admin-user', 'seller-admin', 'admin'].includes(chat.type);
+    const readByAdmin = !['user-admin', 'admin-user', 'seller-admin', 'admin'].includes(chat.type);
 
     // ۵. درج پیام
     chat.messages.push({
@@ -1964,7 +1986,10 @@ exports.userReplyToChat = async (req, res) => {
     // ۷. ذخیره در دیتابیس
     await chat.save();
 
-    // ۸. برگرداندن چت جدید
+    // ۸. برگرداندن چت جدید (با populate برای فرانت‌اند)
+    await chat.populate('participants', 'firstname lastname role storename shopurl');
+    await chat.populate('productId', 'title images');
+
     return res.json(chat);
   } catch (err) {
     console.error('❌ userReplyToChat error:', err);

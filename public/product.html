@@ -4527,6 +4527,342 @@
         font-size: 0.78rem;
       }
     }
+
+    /* ===== Ultra Modern Favorite Button - Glass Morphism Style ===== */
+    .premium-favorite-btn {
+      position: relative;
+      width: 100%;
+      margin-top: 0.75rem;
+      min-height: 60px;
+      padding: 0.85rem 1.75rem;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(255, 240, 245, 0.9) 50%,
+        rgba(255, 228, 237, 0.85) 100%);
+      color: #e11d48;
+      box-shadow: 
+        0 10px 40px rgba(225, 29, 72, 0.12),
+        0 4px 16px rgba(236, 72, 153, 0.08),
+        inset 0 2px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -2px 8px rgba(225, 29, 72, 0.05);
+      border: 2px solid rgba(225, 29, 72, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .premium-favorite-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, 
+        #e11d48 0%, 
+        #ec4899 40%,
+        #f472b6 70%,
+        #e11d48 100%);
+      background-size: 200% 200%;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      border-radius: inherit;
+    }
+
+    .premium-favorite-btn::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 17px;
+      background: transparent;
+      border: 1px dashed rgba(225, 29, 72, 0.2);
+      opacity: 0.6;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .favorite-btn-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      width: 100%;
+    }
+
+    .favorite-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(145deg, 
+        rgba(225, 29, 72, 0.1) 0%, 
+        rgba(236, 72, 153, 0.15) 100%);
+      border-radius: 50%;
+      border: 2px solid rgba(225, 29, 72, 0.2);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 
+        0 4px 12px rgba(225, 29, 72, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .favorite-icon-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px dashed rgba(225, 29, 72, 0.15);
+      animation: rotateDash 12s linear infinite;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    @keyframes rotateDash {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .favorite-icon {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.5;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.2));
+    }
+
+    .favorite-text {
+      letter-spacing: -0.2px;
+      font-weight: 800;
+      transition: all 0.3s ease;
+      text-shadow: 0 1px 2px rgba(225, 29, 72, 0.1);
+    }
+
+    .favorite-btn-shimmer {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.4) 45%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.4) 55%,
+        transparent 75%);
+      transform: translateX(-100%) rotate(45deg);
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    /* Floating Hearts Animation */
+    .favorite-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: inherit;
+    }
+
+    .premium-favorite-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(225, 29, 72, 0.3);
+      box-shadow: 
+        0 20px 50px rgba(225, 29, 72, 0.2),
+        0 10px 30px rgba(236, 72, 153, 0.15),
+        inset 0 2px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -2px 8px rgba(225, 29, 72, 0.08);
+    }
+
+    .premium-favorite-btn:hover::after {
+      opacity: 0;
+    }
+
+    .premium-favorite-btn:hover .favorite-icon-wrapper {
+      transform: scale(1.1);
+      background: linear-gradient(145deg, 
+        rgba(225, 29, 72, 0.15) 0%, 
+        rgba(236, 72, 153, 0.2) 100%);
+      box-shadow: 
+        0 6px 16px rgba(225, 29, 72, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .premium-favorite-btn:hover .favorite-icon-wrapper::before {
+      opacity: 1;
+    }
+
+    .premium-favorite-btn:hover .favorite-btn-shimmer {
+      transform: translateX(100%) rotate(45deg);
+    }
+
+    .premium-favorite-btn:hover .favorite-icon {
+      transform: scale(1.15);
+      animation: heartPulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes heartPulse {
+      0%, 100% { transform: scale(1.15); }
+      50% { transform: scale(1.25); }
+    }
+
+    .premium-favorite-btn:active {
+      transform: translateY(-2px) scale(0.98);
+      transition: all 0.15s ease;
+    }
+
+    .premium-favorite-btn:focus-visible {
+      outline: none;
+      box-shadow: 
+        0 0 0 4px rgba(225, 29, 72, 0.2),
+        0 0 0 8px rgba(225, 29, 72, 0.1),
+        0 20px 50px rgba(225, 29, 72, 0.2);
+    }
+
+    /* Liked State - Vibrant Gradient */
+    .premium-favorite-btn.is-liked {
+      background: linear-gradient(145deg, 
+        #e11d48 0%, 
+        #ec4899 40%,
+        #f472b6 70%,
+        #e11d48 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 
+        0 12px 40px rgba(225, 29, 72, 0.35),
+        0 6px 20px rgba(236, 72, 153, 0.25),
+        inset 0 2px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .premium-favorite-btn.is-liked::after {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .premium-favorite-btn.is-liked .favorite-icon-wrapper {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .premium-favorite-btn.is-liked .favorite-icon-wrapper::before {
+      border-color: rgba(255, 255, 255, 0.3);
+      opacity: 1;
+    }
+
+    .premium-favorite-btn.is-liked .favorite-icon {
+      fill: currentColor;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      animation: heartBeat 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .premium-favorite-btn.is-liked .favorite-text {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .premium-favorite-btn.is-liked:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 
+        0 24px 60px rgba(225, 29, 72, 0.4),
+        0 12px 30px rgba(236, 72, 153, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .premium-favorite-btn.is-liked:hover .favorite-icon {
+      animation: heartBounce 0.5s ease-in-out infinite;
+    }
+
+    @keyframes heartBounce {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.1) translateY(-2px); }
+    }
+
+    /* Loading State */
+    .premium-favorite-btn.is-loading {
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .premium-favorite-btn.is-loading .favorite-icon {
+      animation: spin 1s linear infinite;
+    }
+
+    .premium-favorite-btn.is-loading .favorite-icon-wrapper {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      15% { transform: scale(1.35); }
+      30% { transform: scale(1.1); }
+      45% { transform: scale(1.3); }
+      60% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 640px) {
+      .premium-favorite-btn {
+        min-height: 54px;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.92rem;
+        gap: 0.75rem;
+        border-radius: 16px;
+      }
+
+      .favorite-icon-wrapper {
+        width: 38px;
+        height: 38px;
+      }
+
+      .favorite-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      .favorite-text {
+        font-size: 0.88rem;
+      }
+
+      .premium-favorite-btn:hover {
+        transform: translateY(-3px) scale(1.01);
+      }
+
+      .premium-favorite-btn.is-liked:hover {
+        transform: translateY(-3px) scale(1.02);
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -4553,16 +4889,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
 
-  <header id="mainHeader" class="w-full bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+  <header id="mainHeader" class="w-full bg-white/90 backdrop-blur-lg sticky top-0 z-50 shadow-md border-b border-gray-100/50">
     <div id="headerInner"
-      class="w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-3 py-2 gap-2">
+      class="w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-4 py-3 gap-3">
 
       <!-- Right side: Logo + Menu toggle -->
-      <div class="flex items-center gap-2 flex-nowrap flex-shrink-0">
-        <a href="index.html" class="vitreenet-brand flex items-center gap-1 flex-nowrap" aria-label="ویترینت">
+      <div class="flex items-center gap-3 flex-nowrap flex-shrink-0">
+        <a href="index.html" class="vitreenet-brand flex items-center gap-2 flex-nowrap" aria-label="ویترینت">
           <span class="vitreenet-brand__mark flex-shrink-0" aria-hidden="true">
             <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation"
-              style="width:24px;height:24px;max-height:24px;">
+              style="width:32px;height:32px;max-height:32px;">
               <defs>
                 <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stop-color="#0ea5e9" />
@@ -4581,32 +4917,33 @@
                 stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
+          <span class="hidden sm:inline-block text-lg font-black bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">ویترینت</span>
         </a>
 
         <button type="button"
-          class="nav-toggle inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 text-gray-700 flex-shrink-0"
+          class="nav-toggle inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex-shrink-0 hover:bg-gray-200 transition-colors"
           aria-label="منو" aria-controls="primaryNav" aria-expanded="false">
-          <i class="ri-menu-3-line nav-toggle-icon text-lg" aria-hidden="true"></i>
+          <i class="ri-menu-3-line nav-toggle-icon text-xl" aria-hidden="true"></i>
         </button>
       </div>
 
       <!-- Desktop nav (hidden on mobile) -->
-      <nav id="primaryNav" class="hidden md:flex items-center gap-1 text-base flex-1 justify-center"
+      <nav id="primaryNav" class="hidden md:flex items-center gap-2 text-base flex-1 justify-center"
         data-expanded="false">
         <a href="index.html"
-          class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-4 py-2 rounded-lg transition-all hover:bg-emerald-50">خانه</a>
+          class="main-nav-link text-gray-700 hover:text-[#10b981] font-bold px-5 py-2.5 rounded-xl transition-all hover:bg-emerald-50">خانه</a>
         <a href="categories.html"
-          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50">دسته‌بندی</a>
+          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-5 py-2.5 rounded-xl transition-all hover:bg-sky-50">دسته‌بندی</a>
         <a href="login.html" id="loginNavLink"
-          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-4 py-2 rounded-lg transition-all hover:bg-sky-50"><span
+          class="main-nav-link text-gray-700 hover:text-[#0ea5e9] font-bold px-5 py-2.5 rounded-xl transition-all hover:bg-sky-50"><span
             class="login-link-label">ورود</span></a>
       </nav>
 
       <!-- Left side: Location badge + Reward button -->
-      <div class="flex items-center gap-2 flex-nowrap flex-shrink-0">
-        <div class="flex items-center gap-1 px-2 py-1 rounded-full shadow-md flex-shrink-0"
-          style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-          <svg width="14" height="14" fill="none" viewBox="0 0 22 22" class="drop-shadow flex-shrink-0"
+      <div class="flex items-center gap-2.5 flex-nowrap flex-shrink-0">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-lg flex-shrink-0"
+          style="background:linear-gradient(135deg,#10b981 0%,#0ea5e9 100%); border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px);">
+          <svg width="16" height="16" fill="none" viewBox="0 0 22 22" class="drop-shadow flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -4618,15 +4955,15 @@
               d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
               fill="url(#city-icon)" />
           </svg>
-          <span id="headerCity" class="font-bold text-white text-[10px] sm:text-xs drop-shadow-sm whitespace-nowrap"
+          <span id="headerCity" class="font-bold text-white text-xs sm:text-sm drop-shadow-sm whitespace-nowrap"
             style="letter-spacing:.3px;">سنندج</span>
         </div>
 
         <button type="button" id="rewardClaimBtn"
-          class="reward-header-btn inline-flex items-center gap-1 px-2 py-1 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-[10px] sm:text-xs flex-shrink-0"
+          class="reward-header-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap text-white text-xs sm:text-sm flex-shrink-0"
           aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
           <span class="reward-header-icon flex-shrink-0" aria-hidden="true">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 8h14v12H5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
                 stroke-linejoin="round" />
               <path d="M3 8h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -4640,7 +4977,7 @@
         </button>
 
         <a href="post.html" id="registerShopBtn"
-          class="btn-grad hidden md:inline-flex px-4 py-2 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm">
+          class="btn-grad hidden md:inline-flex px-5 py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm">
           ثبت فروشگاه
         </a>
       </div>
@@ -4783,11 +5120,11 @@
           </div>
 
           <!-- Premium Seller Actions - Modern Marketplace UI -->
-          <div class="bg-gray-50/50 rounded-3xl px-4 py-3" id="sellerActions">
-            <!-- Unified 2x2 Grid - All buttons equal size -->
+          <div class="bg-gray-50/50 rounded-3xl px-4 py-4" id="sellerActions">
+            <!-- Unified Grid - All buttons equal size -->
             <div class="grid grid-cols-2 gap-3">
               <!-- پیام به فروشنده - Deep Indigo (Trust/Communication) -->
-              <button type="button" id="messageSellerButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="messageSellerButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-indigo-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-indigo-700 hover:shadow-[0_4px_16px_rgba(79,70,229,0.2)]
@@ -4801,7 +5138,7 @@
               </button>
 
               <!-- آدرس مغازه - Emerald (Location/Safety) -->
-              <button type="button" id="sellerAddressButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="sellerAddressButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-emerald-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-emerald-700 hover:shadow-[0_4px_16px_rgba(16,185,129,0.2)]
@@ -4816,7 +5153,7 @@
               </button>
 
               <!-- درخواست تخفیف - Amber (Opportunity/Energy) -->
-              <button type="button" id="discountButton" disabled class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
+              <button type="button" id="discountButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-amber-500
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-amber-600 hover:shadow-[0_4px_16px_rgba(245,158,11,0.2)]
@@ -4830,7 +5167,7 @@
               </button>
 
               <!-- صفحه مغازه - Slate Ghost (Neutral/Discovery) -->
-              <a id="sellerLink" href="#" target="_blank" rel="noopener" class="w-full h-full min-h-[56px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold
+              <a id="sellerLink" href="#" target="_blank" rel="noopener" class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold
                        text-slate-700 bg-slate-50 border border-slate-200
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                        hover:bg-slate-100 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(100,116,139,0.12)]
@@ -4846,6 +5183,20 @@
                 <span>صفحه مغازه</span>
               </a>
             </div>
+
+            <!-- دکمه افزودن به علاقه‌مندی - Ultra Modern Glass Style -->
+            <button type="button" id="addToFavoritesBtn" class="premium-favorite-btn">
+              <div class="favorite-btn-content">
+                <div class="favorite-icon-wrapper">
+                  <svg id="favoriteIcon" class="favorite-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+                <span id="favoriteText" class="favorite-text">افزودن به علاقه‌مندی‌ها</span>
+              </div>
+              <div class="favorite-btn-shimmer"></div>
+              <div class="favorite-particles"></div>
+            </button>
           </div>
 
           <!-- Similar Products Section - Premium Mobile-First -->

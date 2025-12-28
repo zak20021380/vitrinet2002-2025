@@ -3225,3 +3225,238 @@
 
   init();
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// Add to Favorites Functionality - Premium UX
+// ═══════════════════════════════════════════════════════════════
+(function initFavorites() {
+  'use strict';
+
+  const favoriteBtn = document.getElementById('addToFavoritesBtn');
+  const favoriteIcon = document.getElementById('favoriteIcon');
+  const favoriteText = document.getElementById('favoriteText');
+
+  if (!favoriteBtn) return;
+
+  const state = {
+    productId: null,
+    isFavorite: false,
+    loading: false
+  };
+
+  // Get product ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  state.productId = urlParams.get('id');
+
+  if (!state.productId) {
+    favoriteBtn.style.display = 'none';
+    return;
+  }
+
+  // Check if user is logged in
+  function isLoggedIn() {
+    const token = localStorage.getItem('token');
+    return Boolean(token);
+  }
+
+  // Update UI based on favorite state
+  function updateUI() {
+    if (state.isFavorite) {
+      favoriteBtn.classList.add('is-liked');
+      favoriteText.textContent = 'در علاقه‌مندی‌ها ذخیره شد';
+    } else {
+      favoriteBtn.classList.remove('is-liked');
+      favoriteText.textContent = 'افزودن به علاقه‌مندی‌ها';
+    }
+
+    favoriteBtn.disabled = state.loading;
+    if (state.loading) {
+      favoriteBtn.classList.add('is-loading');
+    } else {
+      favoriteBtn.classList.remove('is-loading');
+    }
+  }
+
+  // Check if product is already in favorites
+  async function checkFavoriteStatus() {
+    if (!isLoggedIn()) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/user/favorites', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const favorites = data.favorites || [];
+      state.isFavorite = favorites.some(fav => 
+        (fav._id === state.productId) || (fav.id === state.productId)
+      );
+      updateUI();
+    } catch (err) {
+      console.warn('Could not check favorite status:', err);
+    }
+  }
+
+  // Add to favorites
+  async function addToFavorites() {
+    if (!isLoggedIn()) {
+      // Show login prompt
+      showToast('برای افزودن به علاقه‌مندی‌ها ابتدا وارد شوید', 'warning');
+      setTimeout(() => {
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+
+    state.loading = true;
+    updateUI();
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/user/favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+        body: JSON.stringify({ productId: state.productId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        state.isFavorite = true;
+        showToast('به علاقه‌مندی‌ها اضافه شد ❤️', 'success');
+        animateHeart();
+      } else if (response.status === 409) {
+        // Already in favorites
+        state.isFavorite = true;
+        showToast('این محصول قبلاً در علاقه‌مندی‌ها بود', 'info');
+      } else {
+        throw new Error(data.message || 'خطا در افزودن به علاقه‌مندی‌ها');
+      }
+    } catch (err) {
+      console.error('Add to favorites error:', err);
+      showToast(err.message || 'خطا در افزودن به علاقه‌مندی‌ها', 'error');
+    } finally {
+      state.loading = false;
+      updateUI();
+    }
+  }
+
+  // Remove from favorites
+  async function removeFromFavorites() {
+    state.loading = true;
+    updateUI();
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/user/favorites', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+        body: JSON.stringify({ productId: state.productId })
+      });
+
+      if (response.ok) {
+        state.isFavorite = false;
+        showToast('از علاقه‌مندی‌ها حذف شد', 'info');
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || 'خطا در حذف از علاقه‌مندی‌ها');
+      }
+    } catch (err) {
+      console.error('Remove from favorites error:', err);
+      showToast(err.message || 'خطا در حذف از علاقه‌مندی‌ها', 'error');
+    } finally {
+      state.loading = false;
+      updateUI();
+    }
+  }
+
+  // Toggle favorite
+  function toggleFavorite() {
+    if (state.loading) return;
+
+    if (state.isFavorite) {
+      removeFromFavorites();
+    } else {
+      addToFavorites();
+    }
+  }
+
+  // Animate heart icon
+  function animateHeart() {
+    const icon = favoriteBtn.querySelector('.favorite-icon');
+    if (icon) {
+      icon.style.animation = 'none';
+      void icon.offsetWidth; // Trigger reflow
+      icon.style.animation = 'heartBeat 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
+  }
+
+  // Show toast notification
+  function showToast(message, type = 'info') {
+    // Remove existing toast
+    const existingToast = document.getElementById('favoriteToast');
+    if (existingToast) existingToast.remove();
+
+    const colors = {
+      success: 'bg-emerald-500',
+      error: 'bg-red-500',
+      warning: 'bg-amber-500',
+      info: 'bg-blue-500'
+    };
+
+    const toast = document.createElement('div');
+    toast.id = 'favoriteToast';
+    toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 ${colors[type]} text-white px-5 py-3 rounded-2xl shadow-2xl z-[9999] text-sm font-bold flex items-center gap-2 animate-fade-in-up`;
+    toast.innerHTML = `
+      <span>${message}</span>
+    `;
+    toast.style.cssText = `
+      animation: fadeInUp 0.3s ease-out forwards;
+    `;
+
+    // Add animation keyframes if not exists
+    if (!document.getElementById('toastAnimations')) {
+      const style = document.createElement('style');
+      style.id = 'toastAnimations';
+      style.textContent = `
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        @keyframes fadeOutDown {
+          from { opacity: 1; transform: translate(-50%, 0); }
+          to { opacity: 0; transform: translate(-50%, 20px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.style.animation = 'fadeOutDown 0.3s ease-out forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Event listener
+  favoriteBtn.addEventListener('click', toggleFavorite);
+
+  // Check initial status
+  checkFavoriteStatus();
+})();
