@@ -154,6 +154,39 @@ router.get('/favorites', auth(), async (req, res) => {
   }
 });
 
+// ───────────────────────────────
+// DELETE /api/user/favorites
+// ───────────────────────────────
+router.delete('/favorites', auth(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { productId } = req.body;
+
+    if (!productId)
+      return res.status(400).json({ message: 'شناسه محصول ارسال نشده!' });
+
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: 'کاربر پیدا نشد!' });
+
+    const favorites = user.favorites || [];
+    const index = favorites.findIndex((favId) => favId.toString() === productId);
+
+    if (index === -1) {
+      return res.json({ message: 'محصولی در علاقه‌مندی‌ها نبود', removed: false });
+    }
+
+    favorites.splice(index, 1);
+    user.favorites = favorites;
+    await user.save();
+
+    res.json({ message: 'از علاقه‌مندی‌ها حذف شد', removed: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'خطا در حذف از علاقه‌مندی‌ها' });
+  }
+});
+
 // Get user's bookings
 router.get('/bookings', protect, async (req, res) => {
   console.log('📅 Bookings endpoint hit');

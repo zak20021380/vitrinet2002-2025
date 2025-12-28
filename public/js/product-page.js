@@ -3353,6 +3353,14 @@
 
   // Remove from favorites
   async function removeFromFavorites() {
+    if (!isLoggedIn()) {
+      showToast('برای حذف از علاقه‌مندی‌ها ابتدا وارد شوید', 'warning');
+      setTimeout(() => {
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+
     state.loading = true;
     updateUI();
 
