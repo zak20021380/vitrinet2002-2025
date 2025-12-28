@@ -1330,7 +1330,7 @@
       return;
     }
 
-    list.forEach(tag => {
+    list.forEach((tag, index) => {
       // Render to new dynamicTags container with styled badges
       if (dom.dynamicTags) {
         const badge = document.createElement('span');
@@ -1354,7 +1354,22 @@
 
         badge.className = tagClass;
         badge.textContent = tag;
+        
+        // Add staggered animation delay for smooth entrance
+        badge.style.animationDelay = `${index * 0.08}s`;
+        badge.style.opacity = '0';
+        badge.style.transform = 'translateY(8px) scale(0.95)';
+        
         dom.dynamicTags.appendChild(badge);
+        
+        // Trigger entrance animation
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            badge.style.transition = 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            badge.style.opacity = '1';
+            badge.style.transform = 'translateY(0) scale(1)';
+          }, index * 80);
+        });
       }
 
       if (dom.featureList) {
