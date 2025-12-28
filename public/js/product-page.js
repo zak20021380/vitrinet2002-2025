@@ -526,11 +526,75 @@
 
   function handleSellerLinkClick(event) {
     if (state.sellerLinkUrl) {
+      // اگر URL وجود دارد، اجازه بده لینک به صورت عادی کار کند
       return;
     }
+    // جلوگیری از رفتار پیش‌فرض لینک
     event.preventDefault();
+    event.stopPropagation();
+    
     const message = state.sellerLinkMessage || 'صفحه مغازه برای این فروشنده در دسترس نیست.';
+    
+    // نمایش پیام با چند روش مختلف برای اطمینان از دیده شدن
     announce(message);
+    
+    // همچنین یک toast ساده نمایش بده
+    showToast(message);
+  }
+
+  // تابع نمایش toast ساده
+  function showToast(message) {
+    // حذف toast قبلی اگر وجود دارد
+    const existingToast = document.querySelector('.product-toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'product-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 10000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: toastFadeIn 0.3s ease;
+      max-width: 90vw;
+      text-align: center;
+    `;
+    
+    // اضافه کردن animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes toastFadeIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      @keyframes toastFadeOut {
+        from { opacity: 1; transform: translateX(-50%) translateY(0); }
+        to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      }
+    `;
+    if (!document.querySelector('#toast-styles')) {
+      style.id = 'toast-styles';
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // حذف toast بعد از 3 ثانیه
+    setTimeout(() => {
+      toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
 
   function setStatus(message) {
@@ -638,18 +702,33 @@
       priceCard.classList.remove('out-of-stock-price');
     }
 
-    // Disable CTA button
+    // Disable CTA button - حفظ استایل یکپارچه با سایر دکمه‌ها
     if (messageBtn) {
       if (!isInStock) {
+        // ذخیره محتوای اصلی
+        if (!messageBtn.dataset.originalHtml) {
+          messageBtn.dataset.originalHtml = messageBtn.innerHTML;
+        }
         messageBtn.disabled = true;
         messageBtn.classList.add('is-disabled', 'out-of-stock-cta');
-        messageBtn.dataset.originalText = messageBtn.textContent;
-        messageBtn.innerHTML = '<i class="ri-close-circle-line"></i> این کالا در حال حاضر موجود نیست';
+        // استفاده از استایل خاکستری مشابه حالت disabled اما با پیام کوتاه‌تر
+        messageBtn.innerHTML = `
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span class="text-xs leading-tight text-center">ناموجود</span>
+        `;
+        // تغییر رنگ پس‌زمینه به خاکستری
+        messageBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        messageBtn.classList.add('bg-slate-400', 'hover:bg-slate-400', 'cursor-not-allowed');
       } else {
         messageBtn.disabled = false;
-        messageBtn.classList.remove('is-disabled', 'out-of-stock-cta');
-        if (messageBtn.dataset.originalText) {
-          messageBtn.textContent = messageBtn.dataset.originalText;
+        messageBtn.classList.remove('is-disabled', 'out-of-stock-cta', 'bg-slate-400', 'hover:bg-slate-400', 'cursor-not-allowed');
+        messageBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        if (messageBtn.dataset.originalHtml) {
+          messageBtn.innerHTML = messageBtn.dataset.originalHtml;
         }
       }
     }
@@ -754,6 +833,14 @@
           _id: rawSeller._id || rawSeller.id || ''
         };
       }
+    }
+
+    // اگر seller خالی بود، سعی کن از فیلدهای مستقیم product استفاده کنی
+    if (!seller.shopurl && (product.shopurl || product.shopUrl)) {
+      seller.shopurl = product.shopurl || product.shopUrl || '';
+    }
+    if (!seller.storename && product.shopName) {
+      seller.storename = product.shopName;
     }
 
 
@@ -1463,12 +1550,14 @@
         dom.messageSellerButton.classList.remove('is-disabled');
       }
       if (dom.sellerLink) {
-        dom.sellerLink.classList.remove('is-disabled');
-        dom.sellerLink.removeAttribute('aria-disabled');
-        dom.sellerLink.removeAttribute('tabindex');
+        dom.sellerLink.classList.add('is-disabled');
+        dom.sellerLink.setAttribute('aria-disabled', 'true');
         dom.sellerLink.href = '#';
         dom.sellerLink.setAttribute('aria-label', 'صفحه مغازه برای این فروشنده در دسترس نیست.');
         dom.sellerLink.dataset.hasShop = 'false';
+        // تغییر استایل به حالت غیرفعال
+        dom.sellerLink.classList.remove('bg-sky-500', 'hover:bg-sky-600', 'text-white');
+        dom.sellerLink.classList.add('bg-slate-300', 'hover:bg-slate-300', 'text-slate-500', 'cursor-not-allowed');
       }
       state.addressInfo = {
         address: fallbackAddress,
@@ -1526,7 +1615,14 @@
       };
     }
 
-    const shopUrl = seller && typeof seller.shopurl === 'string' ? seller.shopurl.trim() : '';
+    // استخراج shopurl از منابع مختلف: seller، productDesc، یا shopSlug که قبلاً محاسبه شده
+    const shopUrl = (seller && typeof seller.shopurl === 'string' && seller.shopurl.trim()) 
+      || (seller && typeof seller.shopUrl === 'string' && seller.shopUrl.trim())
+      || (productDesc && typeof productDesc.shopurl === 'string' && productDesc.shopurl.trim())
+      || (productDesc && typeof productDesc.shopUrl === 'string' && productDesc.shopUrl.trim())
+      || (productDesc && productDesc.seller && typeof productDesc.seller.shopurl === 'string' && productDesc.seller.shopurl.trim())
+      || shopSlug
+      || '';
     if (shopUrl) {
       state.sellerLinkUrl = `/shop.html?shopurl=${encodeURIComponent(shopUrl)}`;
       state.sellerLinkMessage = '';
@@ -1540,16 +1636,17 @@
       if (state.sellerLinkUrl) {
         dom.sellerLink.href = state.sellerLinkUrl;
         dom.sellerLink.setAttribute('aria-label', `مشاهده صفحه مغازه ${sellerName} در ویترینت`);
-        dom.sellerLink.classList.remove('is-disabled');
+        dom.sellerLink.classList.remove('is-disabled', 'bg-slate-300', 'hover:bg-slate-300', 'text-slate-500', 'cursor-not-allowed');
+        dom.sellerLink.classList.add('bg-sky-500', 'hover:bg-sky-600', 'text-white');
         dom.sellerLink.removeAttribute('aria-disabled');
         dom.sellerLink.removeAttribute('tabindex');
         dom.sellerLink.dataset.hasShop = 'true';
       } else {
         dom.sellerLink.href = '#';
         dom.sellerLink.setAttribute('aria-label', `صفحه مغازه ${sellerName} در ویترینت ثبت نشده است.`);
-        dom.sellerLink.classList.remove('is-disabled');
-        dom.sellerLink.removeAttribute('aria-disabled');
-        dom.sellerLink.removeAttribute('tabindex');
+        dom.sellerLink.classList.add('is-disabled', 'bg-slate-300', 'hover:bg-slate-300', 'text-slate-500', 'cursor-not-allowed');
+        dom.sellerLink.classList.remove('bg-sky-500', 'hover:bg-sky-600', 'text-white');
+        dom.sellerLink.setAttribute('aria-disabled', 'true');
         dom.sellerLink.dataset.hasShop = 'false';
       }
     }
@@ -1722,12 +1819,17 @@
       return trimmed;
     }
 
-    // Handle absolute paths starting with /uploads/
-    if (trimmed.startsWith('/uploads/')) {
+    // Handle absolute paths starting with /uploads/ or /products/
+    if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/products/')) {
       return `http://localhost:5000${trimmed}`;
     }
 
-    // Handle relative paths - prepend full server URL
+    // Handle paths that already have uploads/ prefix (without leading slash)
+    if (trimmed.startsWith('uploads/')) {
+      return `http://localhost:5000/${trimmed}`;
+    }
+
+    // Handle relative paths starting with /
     if (trimmed.startsWith('/')) {
       return `http://localhost:5000${trimmed}`;
     }
@@ -3071,12 +3173,17 @@
       return trimmed;
     }
 
-    // Handle absolute paths starting with /uploads/
-    if (trimmed.startsWith('/uploads/')) {
+    // Handle absolute paths starting with /uploads/ or /products/
+    if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/products/')) {
       return `http://localhost:5000${trimmed}`;
     }
 
-    // Handle relative paths - prepend full server URL
+    // Handle paths that already have uploads/ prefix (without leading slash)
+    if (trimmed.startsWith('uploads/')) {
+      return `http://localhost:5000/${trimmed}`;
+    }
+
+    // Handle relative paths starting with /
     if (trimmed.startsWith('/')) {
       return `http://localhost:5000${trimmed}`;
     }

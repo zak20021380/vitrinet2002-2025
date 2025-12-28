@@ -1,0 +1,342 @@
+/* ========================================
+   Premium Mobile Menu Styles
+   Modern, Professional UI/UX Design
+   ======================================== */
+
+/* Custom Scrollbar for Menu */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth backdrop blur animation */
+#mobileMenuBackdrop {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#mobileMenuBackdrop.active {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.5)) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Panel slide animation enhancement */
+#mobileMenuPanel {
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Hamburger button hover effects */
+#mobileMenuToggle:hover {
+  transform: translateY(-1px);
+}
+
+#mobileMenuToggle:active {
+  transform: scale(0.95);
+}
+
+/* Menu line animations for X transformation */
+#menuLine1.menu-open {
+  transform: rotate(45deg) translateY(7px);
+  background: linear-gradient(90deg, #10b981, #14b8a6) !important;
+}
+
+#menuLine2.menu-open {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+#menuLine3.menu-open {
+  transform: rotate(-45deg) translateY(-7px);
+  background: linear-gradient(90deg, #10b981, #14b8a6) !important;
+}
+
+/* Navigation link hover effects */
+.menu-nav-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #10b981, #14b8a6);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  border-radius: 0 999px 999px 0;
+}
+
+.menu-nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+/* Icon animation on hover */
+.menu-icon-wrapper {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-nav-link:hover .menu-icon-wrapper {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* Arrow slide animation */
+.menu-arrow {
+  transition: transform 0.3s ease;
+}
+
+.menu-nav-link:hover .menu-arrow {
+  transform: translateX(-8px);
+}
+
+/* Quick access cards pulse effect */
+.quick-access-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-access-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.quick-access-card:active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* CTA button shine effect */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.7s ease;
+}
+
+.cta-shine:hover::before {
+  left: 100%;
+}
+
+/* Fade in animation for menu items */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item-animate {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.menu-item-animate:nth-child(1) { animation-delay: 0.05s; }
+.menu-item-animate:nth-child(2) { animation-delay: 0.1s; }
+.menu-item-animate:nth-child(3) { animation-delay: 0.15s; }
+.menu-item-animate:nth-child(4) { animation-delay: 0.2s; }
+
+/* ========================================
+   Mobile Responsive Optimizations
+   ======================================== */
+
+/* Extra Small Devices (< 380px) */
+@media (max-width: 380px) {
+  #mobileMenuPanel {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+  
+  .menu-nav-link {
+    padding: 0.875rem 1rem !important;
+    gap: 0.75rem !important;
+  }
+  
+  .menu-icon-wrapper {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+  }
+  
+  .menu-icon-wrapper svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  .menu-arrow {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  .quick-access-card {
+    padding: 0.75rem !important;
+  }
+  
+  .quick-access-card svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  .quick-access-card span {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Small Devices (380px - 480px) */
+@media (min-width: 380px) and (max-width: 480px) {
+  #mobileMenuPanel {
+    max-width: 340px !important;
+  }
+  
+  .menu-nav-link {
+    padding: 1rem 1.125rem !important;
+  }
+}
+
+/* Medium Devices (480px - 640px) */
+@media (min-width: 480px) and (max-width: 640px) {
+  #mobileMenuPanel {
+    max-width: 360px !important;
+  }
+}
+
+/* Large Mobile & Tablet (> 640px) */
+@media (min-width: 640px) {
+  #mobileMenuPanel {
+    max-width: 380px !important;
+  }
+}
+
+/* Landscape Mode Optimization */
+@media (max-height: 600px) and (orientation: landscape) {
+  #mobileMenuPanel nav {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .menu-nav-link {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  #mobileMenuPanel > div:first-child {
+    padding: 0.875rem 1rem !important;
+  }
+  
+  #mobileMenuPanel > div:last-child {
+    padding: 0.875rem 1rem !important;
+  }
+  
+  .quick-access-card {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .menu-nav-link {
+    min-height: 3.5rem;
+  }
+  
+  .menu-icon-wrapper {
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+  
+  #mobileMenuClose {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+  
+  .quick-access-card {
+    min-height: 5rem;
+  }
+}
+
+/* Accessibility improvements */
+#mobileMenuToggle:focus-visible,
+#mobileMenuClose:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.5);
+  outline-offset: 2px;
+}
+
+.menu-nav-link:focus-visible {
+  outline: 2px solid rgba(16, 185, 129, 0.5);
+  outline-offset: 2px;
+  border-radius: 1rem;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe Area Insets for Notched Devices */
+@supports (padding: max(0px)) {
+  #mobileMenuPanel {
+    padding-top: max(1.25rem, env(safe-area-inset-top));
+  }
+  
+  #mobileMenuPanel > div:last-child {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent text selection during interactions */
+#mobileMenuPanel {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#mobileMenuPanel a,
+#mobileMenuPanel button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scroll for menu content */
+#mobileMenuPanel nav {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Performance optimization */
+#mobileMenuPanel {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+#mobileMenuBackdrop {
+  will-change: opacity, backdrop-filter;
+}
+

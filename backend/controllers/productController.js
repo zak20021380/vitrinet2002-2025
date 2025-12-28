@@ -7,7 +7,11 @@ const jwt = require('jsonwebtoken');
 function makeFullUrl(req, path = '') {
   if (!path) return '';
   if (/^(https?:|data:)/i.test(path)) return path;            // لینک کامل یا data:
-  return `${req.protocol}://${req.headers.host}/${path.replace(/^\/+/, '')}`;
+  
+  // حذف اسلش‌های اضافی از ابتدا
+  const cleanPath = path.replace(/^\/+/, '');
+  
+  return `${req.protocol}://${req.headers.host}/${cleanPath}`;
 }
 
 const BSON_MAX_BYTES = 16 * 1024 * 1024; // 16MB – محدودیت پیشفرض MongoDB
@@ -166,10 +170,16 @@ function buildProductResponse(req, doc, options = {}) {
   const liked = options.likeActor
     ? Array.isArray(p.likedBy) && p.likedBy.includes(options.likeActor)
     : null;
+  
+  // استخراج shopurl از seller برای دسترسی آسان‌تر در frontend
+  const sellerShopUrl = p.sellerId?.shopurl || p.sellerId?.shopUrl || '';
+  
   return {
     ...p,
     image: makeFullUrl(req, mainImg),
     shopName: p.sellerId?.storename || '',
+    shopurl: sellerShopUrl, // اضافه کردن shopurl در سطح بالای پاسخ
+    shopUrl: sellerShopUrl, // برای سازگاری با هر دو نام‌گذاری
     likesCount: Number.isFinite(Number(p.likesCount)) ? Number(p.likesCount) : 0,
     ...(liked !== null ? { liked } : {}),
     seller: p.sellerId || {},
