@@ -127,8 +127,6 @@
       category: document.getElementById('productCategory'),
       priceCard: document.getElementById('priceCard'),
       price: document.getElementById('productPrice'),
-      locationCard: document.getElementById('locationCard'),
-      location: document.getElementById('productLocation'),
       updatedCard: document.getElementById('updatedCard'),
       updated: document.getElementById('productUpdated')
     },
@@ -890,15 +888,6 @@
       dom.meta.price.textContent = '';
     }
     state.priceValue = priceValue !== null ? priceValue : undefined;
-
-    const location = seller.address || seller.city || '';
-    if (location && dom.meta.locationCard) {
-      dom.meta.location.textContent = location;
-      dom.meta.locationCard.hidden = false;
-    } else if (dom.meta.locationCard) {
-      dom.meta.locationCard.hidden = true;
-      dom.meta.location.textContent = '';
-    }
 
     if (product.updatedAt && dom.meta.updatedCard) {
       dom.meta.updated.textContent = formatDate(product.updatedAt);

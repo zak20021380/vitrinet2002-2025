@@ -216,7 +216,7 @@ body {
   z-index: 0;
 }
 
-/* بج لوکیشن */
+/* بج لوکیشن - قدیمی (نگه‌داری برای سازگاری) */
 .hero-location-badge {
   display: inline-flex;
   align-items: center;
@@ -234,6 +234,28 @@ body {
 
 .hero-location-badge i {
   font-size: 1rem;
+}
+
+/* بج لوکیشن - طراحی جدید حرفه‌ای */
+.hero-location-badge-new {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  cursor: default;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* عنوان اصلی */
@@ -366,7 +388,7 @@ body {
   transform: scale(0.95);
 }
 
-/* دکمه شهر */
+/* دکمه شهر - قدیمی (نگه‌داری برای سازگاری) */
 .hero-city-btn {
   display: inline-flex;
   align-items: center;
@@ -410,6 +432,81 @@ body {
   transform: rotate(180deg);
 }
 
+/* دکمه شهر - طراحی جدید حرفه‌ای و Responsive */
+.hero-city-btn-new {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.hero-city-btn-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.hero-city-btn-new:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .hero-city-btn-new {
+    border-radius: 14px;
+  }
+  
+  .hero-city-btn-new .relative.flex.items-center {
+    padding: 10px 14px !important;
+    gap: 8px !important;
+  }
+  
+  .hero-city-btn-new .w-8.h-8 {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  .hero-city-btn-new .text-sm {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-city-btn-new {
+    border-radius: 12px;
+  }
+  
+  .hero-city-btn-new .relative.flex.items-center {
+    padding: 8px 12px !important;
+    gap: 6px !important;
+  }
+  
+  .hero-city-btn-new .w-8.h-8 {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 8px !important;
+  }
+  
+  .hero-city-btn-new .text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  .hero-city-btn-new .text-\[10px\] {
+    font-size: 8px !important;
+  }
+}
+
 /* === MOBILE (max-width: 640px) === */
 @media (max-width: 640px) {
   .hero-section {
@@ -443,6 +540,25 @@ body {
 
   .hero-location-badge i {
     font-size: 0.85rem;
+  }
+
+  /* Location Badge New - Mobile Responsive */
+  .hero-location-badge-new {
+    margin-bottom: 16px;
+    transform: scale(0.95);
+  }
+  
+  .hero-location-badge-new .relative.flex.items-center {
+    padding: 8px 14px !important;
+    gap: 6px !important;
+  }
+  
+  .hero-location-badge-new span {
+    font-size: 0.75rem !important;
+  }
+  
+  .hero-location-badge-new i {
+    font-size: 0.85rem !important;
   }
 
   .hero-title {
@@ -529,6 +645,44 @@ body {
     height: 32px;
     padding: 0 10px;
   }
+  
+  /* Location Badge New - Extra Small Mobile */
+  .hero-location-badge-new {
+    margin-bottom: 12px;
+    transform: scale(0.9);
+  }
+  
+  .hero-location-badge-new .relative.flex.items-center {
+    padding: 6px 10px !important;
+    gap: 5px !important;
+  }
+  
+  .hero-location-badge-new span {
+    font-size: 0.7rem !important;
+  }
+  
+  .hero-location-badge-new i {
+    font-size: 0.8rem !important;
+  }
+  
+  /* City Button New - Extra Small Mobile */
+  .hero-city-btn-new .relative.flex.items-center {
+    padding: 6px 10px !important;
+    gap: 5px !important;
+  }
+  
+  .hero-city-btn-new .w-8.h-8 {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  
+  .hero-city-btn-new .text-sm {
+    font-size: 0.7rem !important;
+  }
+  
+  .hero-city-btn-new .text-\[10px\] {
+    font-size: 7px !important;
+  }
 }
 
 /* === TABLET & DESKTOP (min-width: 641px) === */
@@ -544,6 +698,21 @@ body {
 
   .hero-search-input {
     height: 56px;
+  }
+  
+  /* Location Badge New - Tablet & Desktop */
+  .hero-location-badge-new {
+    margin-bottom: 28px;
+  }
+  
+  .hero-location-badge-new .relative.flex.items-center {
+    padding: 10px 18px !important;
+  }
+  
+  /* City Button New - Tablet & Desktop */
+  .hero-city-btn-new:hover {
+    transform: translateY(-3px);
+  }
     font-size: 1rem;
     padding: 0 22px;
   }
@@ -824,24 +993,21 @@ body {
   transition: color 0.2s ease;
 }
 
-#loginMobileLink.logged-in {
-  background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
-  color: #fff;
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+/* استایل پنل من در موبایل - فقط وقتی لاگین کرده و فعال نیست */
+#loginMobileLink.logged-in:not(.active) {
+  color: #047857;
+}
+
+#loginMobileLink.logged-in:not(.active) .nav-icon {
+  color: #047857;
+}
+
+#loginMobileLink.logged-in:not(.active) .nav-label {
+  color: #047857;
 }
 
 .nav-item-account {
   transition: background 0.25s ease, box-shadow 0.25s ease, color 0.2s ease;
-}
-
-#loginMobileLink.logged-in .nav-icon {
-  color: #fff;
-  fill: currentColor;
-}
-
-#loginMobileLink.logged-in .nav-label {
-  color: #fff;
 }
 
 /* ظاهر پاپ‌آپ */

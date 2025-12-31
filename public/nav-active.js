@@ -193,14 +193,14 @@
         'verify.html',
         '/verify-user.html',
         'verify-user.html',
-        '/user',
-        'user/',
+        '/user/dashboard.html',
+        'user/dashboard.html',
         '/user-panel.html',
         'user-panel.html',
-        '/seller',
-        'seller/',
-        '/seller-paneel.html',
-        'seller-paneel.html'
+        '/seller/dashboard.html',
+        'seller/dashboard.html',
+        '/service-seller-panel/s-seller-panel.html',
+        'service-seller-panel/s-seller-panel.html'
       ]
     }
   ];
@@ -288,12 +288,22 @@
 
         .mobile-nav .nav-item.active {
           color: #047857;
-          background: rgba(16, 185, 129, 0.15);
-          box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
-          transform: translateY(-3px);
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(14, 165, 233, 0.12) 100%);
+          box-shadow: 
+            inset 0 0 0 1.5px rgba(16, 185, 129, 0.3),
+            0 4px 12px rgba(16, 185, 129, 0.15);
+          transform: translateY(-4px);
+          border-radius: 20px;
         }
 
         .mobile-nav .nav-item.active svg {
+          color: #047857;
+          filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
+          transform: scale(1.1);
+        }
+
+        .mobile-nav .nav-item.active .nav-label {
+          font-weight: 700;
           color: #047857;
         }
       }
@@ -343,20 +353,64 @@
     return normalisePath(pathname);
   }
 
+  function getCurrentSearch() {
+    return window.location.search || '';
+  }
+
+  function isServiceCategoryPage() {
+    const pathname = getCurrentPath();
+    const search = getCurrentSearch();
+    const params = new URLSearchParams(search);
+    const cat = params.get('cat');
+    
+    // Check if we're on shops-by-category.html with cat=service
+    const isShopsByCategoryPage = pathname.includes('shops-by-category.html');
+    const isServiceCategory = cat === 'service';
+    
+    return isShopsByCategoryPage && isServiceCategory;
+  }
+
   function matchesCurrent(config, currentPath) {
     if (!Array.isArray(config.matches)) return false;
+    
+    // Special handling for service category page
+    // If we're on shops-by-category.html?cat=service, only mobileNavServices should match
+    if (isServiceCategoryPage()) {
+      if (config.id === 'mobileNavServices') return true;
+      if (config.id === 'mobileNavCategories') return false;
+    }
+    
     return config.matches.some(match => {
       if (!match) return false;
-      if (match === '/') {
-        return currentPath === '/' || currentPath.endsWith('/index.html');
+      
+      // Normalize the match pattern
+      const normalizedMatch = match.startsWith('/') ? match : `/${match}`;
+      const normalizedCurrent = currentPath.startsWith('/') ? currentPath : `/${currentPath}`;
+      
+      // Exact match check
+      if (normalizedCurrent === normalizedMatch) return true;
+      
+      // Handle root/index page
+      if (match === '/' || match === '/index.html' || match === 'index.html') {
+        return normalizedCurrent === '/' || 
+               normalizedCurrent === '/index.html' || 
+               normalizedCurrent.endsWith('/index.html');
       }
+      
+      // For file paths (ending with .html), require exact match
+      if (match.endsWith('.html')) {
+        return normalizedCurrent === normalizedMatch || 
+               normalizedCurrent.endsWith(normalizedMatch);
+      }
+      
+      // For directory-style paths, check if current path starts with it
+      // but only if the match doesn't end with .html
       if (match.endsWith('/')) {
-        return currentPath.startsWith(match.slice(0, -1));
+        return normalizedCurrent.startsWith(normalizedMatch.slice(0, -1) + '/') ||
+               normalizedCurrent.startsWith(normalizedMatch);
       }
-      if (match.startsWith('/')) {
-        return currentPath === match || currentPath.endsWith(match);
-      }
-      return currentPath.endsWith(`/${match}`) || currentPath === `/${match}` || currentPath === match;
+      
+      return false;
     });
   }
 
@@ -365,10 +419,49 @@
     const currentPath = getCurrentPath();
     const items = nav.querySelectorAll('.nav-item');
 
+    // First pass: find all matching items
+    const matchingItems = [];
     items.forEach((item) => {
       const config = NAV_ITEMS.find(entry => entry.id === item.id);
-      const isActive = config ? matchesCurrent(config, currentPath) : false;
-      if (isActive) {
+      if (config && matchesCurrent(config, currentPath)) {
+        matchingItems.push({ item, config });
+      }
+    });
+
+    // Determine which item should be active (most specific match wins)
+    // Priority: exact match > longer path match > first match
+    let activeItem = null;
+    if (matchingItems.length === 1) {
+      activeItem = matchingItems[0].item;
+    } else if (matchingItems.length > 1) {
+      // Find the most specific match
+      // Home page should only be active on exact index.html match
+      const isHomePage = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html');
+      
+      if (isHomePage) {
+        // On home page, only home nav should be active
+        const homeItem = matchingItems.find(m => m.config.id === 'mobileNavHome');
+        activeItem = homeItem ? homeItem.item : matchingItems[0].item;
+      } else {
+        // For other pages, prefer non-home items and find most specific match
+        const nonHomeItems = matchingItems.filter(m => m.config.id !== 'mobileNavHome');
+        if (nonHomeItems.length > 0) {
+          // Sort by specificity (longer match paths are more specific)
+          nonHomeItems.sort((a, b) => {
+            const aMaxLen = Math.max(...(a.config.matches || []).filter(m => currentPath.includes(m.replace(/^\//, ''))).map(m => m.length));
+            const bMaxLen = Math.max(...(b.config.matches || []).filter(m => currentPath.includes(m.replace(/^\//, ''))).map(m => m.length));
+            return bMaxLen - aMaxLen;
+          });
+          activeItem = nonHomeItems[0].item;
+        } else {
+          activeItem = matchingItems[0].item;
+        }
+      }
+    }
+
+    // Apply active state
+    items.forEach((item) => {
+      if (item === activeItem) {
         item.classList.add('active');
         item.setAttribute('aria-current', 'page');
       } else {
