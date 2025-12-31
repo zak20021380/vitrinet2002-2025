@@ -15,8 +15,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>محصول | ویترینت</title>
-  <meta name="description" content="جزئیات، مشخصات و خرید آنلاین این محصول در ویترینت.">
-  <meta name="keywords" content="ویترینت, خرید آنلاین, فروشگاه, محصول">
+  <meta name="description" content="مشاهده جزئیات محصول در ویترینت و برقراری ارتباط مستقیم با فروشنده.">
+  <meta name="keywords" content="ویترینت, محصول, فروشنده">
   <link rel="canonical" href="https://www.vitrinnet.com/product">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="style-index.css" />
   <link rel="stylesheet" href="/css/product-comments.css" />
+  <link rel="stylesheet" href="/css/premium-mobile-menu.css" />
   <link rel="icon" type="image/svg+xml" href="/assets/images/logo.svg">
   <script id="productJsonLd" type="application/ld+json">{}</script>
   <style>
@@ -431,6 +432,7 @@
     .badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.4rem;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
@@ -496,7 +498,7 @@
     }
 
     .badge--negotiable::before {
-      content: '٪';
+      content: '🤝';
       margin-left: 4px;
       font-size: 0.85em;
     }
@@ -533,7 +535,7 @@
     }
 
     .subtitle::before {
-      content: '★';
+      content: '✦';
       font-size: 0.7em;
       opacity: 0.7;
     }
@@ -654,7 +656,7 @@
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
     }
 
-    /* ???? ?????? ???? ????? - ?نمایش بیشتر?? ?? ???????? ????-??? */
+    /* دکمه مشاهده آدرس مغازه - استایل حرفه‌ای با گرادیانت بنفش-آبی */
     .product-action--secondary {
       position: relative;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
@@ -729,7 +731,7 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
-    /* ???? ?????? ???? ????? - ???????? ???-??? */
+    /* دکمه مشاهده صفحه مغازه - گرادیانت سبز-آبی */
     .product-action--primary {
       background: linear-gradient(135deg, #059669, #0891b2);
       color: #fff;
@@ -749,7 +751,7 @@
       opacity: 1;
     }
 
-    /* ???? ??نمایش بیشتر - ?????? ???? ? ???? */
+    /* دکمه درخواست تخفیف - استایل ویژه و جذاب */
     .product-action--discount {
       background: linear-gradient(135deg, #f59e0b, #ea580c);
       color: #fff;
@@ -841,7 +843,7 @@
       font-family: 'Vazirmatn', sans-serif;
       font-weight: 800;
       font-size: 0.95rem;
-      box-shadow: 0 16px 40px rgba(236, 72, 153, 0.12);
+      box-shadow: 0 16px 40px rgba(244, 63, 94, 0.2), 0 10px 24px rgba(251, 113, 133, 0.18);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       overflow: hidden;
@@ -1551,6 +1553,7 @@
       font-size: 0.88rem;
       color: #64748b;
       line-height: 1.7;
+      word-break: break-word;
     }
 
     /* Empty State */
@@ -1889,7 +1892,7 @@
     }
 
     #addressModalCity::before {
-      content: '📍';
+      content: '🏙️';
       font-size: 1.1rem;
     }
 
@@ -1925,7 +1928,7 @@
     }
 
     .overlay-button::before {
-      content: 'کپی';
+      content: '📋';
       font-size: 1rem;
       margin-inline-end: 0.25rem;
     }
@@ -1970,10 +1973,10 @@
     }
 
     .overlay-button.is-error::before {
-      content: '✕';
+      content: '✗';
     }
 
-    /* ?????????? ???? ???? ???? */
+    /* استایل‌های ویژه مدال آدرس */
     .address-modal-dialog {
       background:
         radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
@@ -2415,12 +2418,16 @@
         gap: 1rem;
       }
 
-      #desktopNav {
+      #primaryNav {
         justify-content: flex-start;
         gap: 0.6rem;
       }
 
-.like-card {
+      #primaryNav a {
+        padding: 0.4rem 0.75rem;
+      }
+
+      .like-card {
         justify-content: center;
         text-align: center;
       }
@@ -2489,7 +2496,7 @@
         align-items: flex-end;
       }
 
-.prize-code-btn,
+      .prize-code-btn,
       .cta-link {
         justify-self: stretch;
         width: auto;
@@ -2499,7 +2506,7 @@
         padding: 0.5rem 0.75rem;
       }
 
-.cta-link {
+      .cta-link {
         padding: 0.6rem 1rem;
         gap: 0.4rem;
       }
@@ -2554,27 +2561,13 @@
         grid-template-areas: 'brand nav cta';
       }
 
-      #desktopNav {
-        display: flex;
-        flex: unset;
-        order: unset;
-        background: transparent;
-        border: none;
-        padding: 0;
-        box-shadow: none;
-        max-height: none;
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
-      }
-
-.cta-link {
+      .cta-link {
         order: unset;
         width: auto;
         justify-self: end;
       }
 
-.product-hero {
+      .product-hero {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         align-items: start;
       }
@@ -2712,7 +2705,7 @@
         height: 18px;
       }
 
-      /* ???? ???? ?? ??????? - ????????? */
+      /* دکمه پیام به فروشنده - برجسته‌تر */
       .product-action--message {
         order: -1;
       }
@@ -2820,7 +2813,7 @@
         font-size: 0.92rem;
       }
 
-      /* Badge ?? ?????? - ??? ????? */
+      /* Badge در موبایل - زیر عنوان */
       h1 {
         display: flex;
         flex-wrap: wrap;
@@ -2957,7 +2950,12 @@
         font-size: 0.9rem;
       }
 
-.nav-toggle-icon {
+      .nav-toggle {
+        width: 36px;
+        height: 36px;
+      }
+
+      .nav-toggle-icon {
         width: 20px;
         height: 20px;
       }
@@ -3428,7 +3426,7 @@
     }
 
     /* ===== Message to Seller Button & Modal ===== */
-    /* ???? ???? ?? ??????? - ???????? ????-????? */
+    /* دکمه پیام به فروشنده - گرادیانت بنفش-صورتی */
     .product-action--message {
       background: linear-gradient(135deg, #7c3aed, #db2777);
       color: #fff;
@@ -3645,7 +3643,7 @@
       color: var(--text-muted);
     }
 
-    /* ???? ?????????? ?? field-sizing ?? ?نمایش بیشتر??? */
+    /* برای مرورگرهایی که field-sizing رو ساپورت نمی‌کنند */
     @supports not (field-sizing: content) {
       .message-textarea {
         min-height: 52px;
@@ -3982,10 +3980,10 @@
 
     /* Mobile Responsive - Message Modal */
     /* ================================================= */
-    /* نظرات کاربران?? ???? ???? ?? ??????? */
+    /* استایل‌های ریسپانسیو مدال پیام به فروشنده */
     /* ================================================= */
 
-    /* ???? ?????? - ???? ?? ??? ???? */
+    /* تمام سایزها - مدال در وسط صفحه */
     #messageModal.overlay {
       display: flex !important;
       align-items: center !important;
@@ -4112,7 +4110,7 @@
       }
     }
 
-    /* ??????? ???? ?????????? ???? (??? ????? SE ?? ????????) */
+    /* تنظیمات برای موبایل‌های کوچک (مثل آیفون SE یا قدیمی‌تر) */
     @media (max-width: 480px) {
       #messageModal.overlay {
         padding: 0.75rem;
@@ -4176,7 +4174,7 @@
       }
     }
 
-    /* ??????? ???? ?????????? ???? ???? (ثبت نظر جدید?) */
+    /* تنظیمات برای موبایل‌های خیلی کوچک (زیر ۳۶۰ پیکسل) */
     @media (max-width: 360px) {
       #messageModal.overlay {
         padding: 0.5rem;
@@ -4341,7 +4339,7 @@
       border-color: rgba(203, 213, 225, 0.9);
     }
 
-    /* ??نمایش بیشتر? ???? */
+    /* کانتینر اسکرول افقی */
     .tags-scroll-container {
       display: flex;
       align-items: center;
@@ -4354,12 +4352,12 @@
       scroll-snap-type: x mandatory;
     }
 
-    /* ???? ???? ?????????? */
+    /* مخفی کردن اسکرول‌بار */
     .tags-scroll-container::-webkit-scrollbar {
       display: none;
     }
 
-    /* ?????? ???? ????? */
+    /* استایل پایه تگ‌ها */
     .tags-scroll-container .product-tag {
       flex: 0 0 auto;
       margin: 0;
@@ -4396,7 +4394,7 @@
       transform: translateX(100%);
     }
     
-    /* ?????? ?? ???? */
+    /* استایل بج اصلی */
     .main-badge-wrapper {
       flex: 0 0 auto;
       z-index: 2;
@@ -4410,7 +4408,7 @@
       letter-spacing: 0.02em;
     }
     
-    /* ????? ?? */
+    /* آیکون تگ */
     .tags-icon-indicator {
       flex: 0 0 auto;
       display: flex;
@@ -4438,7 +4436,7 @@
       transform: scale(1.05);
     }
     
-    /* ?????ثبت نظر جدید? ? ????? */
+    /* جداکننده بین آیکون و تگ‌ها */
     .tags-separator {
       width: 1px;
       height: 24px;
@@ -4448,7 +4446,7 @@
         transparent 100%);
       flex: 0 0 auto;
     }
-    /* ? New/Fresh Tag - Emerald Green Gradient */
+    /* ✦ New/Fresh Tag - Emerald Green Gradient */
     .product-tag--new {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
@@ -4459,7 +4457,7 @@
     }
 
     .product-tag--new::after {
-      content: '?';
+      content: '✨';
       font-size: 0.9em;
       margin-right: 0.25rem;
     }
@@ -4471,7 +4469,7 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
-    /* ? Gold/Special Tag - Amber Gold Gradient */
+    /* ✦ Gold/Special Tag - Amber Gold Gradient */
     .product-tag--gold {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #ffffff;
@@ -4482,7 +4480,7 @@
     }
 
     .product-tag--gold::after {
-      content: '??';
+      content: '👑';
       font-size: 0.9em;
       margin-right: 0.25rem;
     }
@@ -4494,7 +4492,7 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
-    /* ? Category/Attribute Tag - Soft Blue Glass */
+    /* ✦ Category/Attribute Tag - Soft Blue Glass */
     .product-tag--attr {
       background: linear-gradient(135deg,
         rgba(59, 130, 246, 0.12) 0%,
@@ -4505,7 +4503,7 @@
     }
 
     .product-tag--attr::after {
-      content: '?';
+      content: '◆';
       font-size: 0.6em;
       opacity: 0.7;
       margin-right: 0.2rem;
@@ -4520,7 +4518,7 @@
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.18);
     }
 
-    /* ? Generic/Default Tag - Elegant Slate */
+    /* ✦ Generic/Default Tag - Elegant Slate */
     .product-tag--default {
       background: linear-gradient(135deg,
         rgba(255, 255, 255, 0.95) 0%,
@@ -4934,13 +4932,13 @@
   </style>
   <script src="/nav-active.js" defer></script>
 
-  <!-- TODO: ????نمایش بیشتر?? ?? نمایش بیشتر? ?نمایش بیشتر | TODO: Enable PostHog analytics when going live -->
+  <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
   <!--
 <script>
   (function () {
     var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
     if (!config.enabled) {
-      return; // ???? ???? | Not enabled yet
+      return; // فعال نیست | Not enabled yet
     }
     try {
       (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
@@ -4957,26 +4955,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
 
-  <header id="mainHeader" class="w-full sticky top-0 z-50 transition-all duration-300">
+  <header id="mainHeader" class="w-full sticky top-0 z-[100] transition-all duration-300">
     <!-- Glass morphism background -->
-    <div class="absolute inset-0 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-[0_4px_30px_rgba(0,0,0,0.05)]"></div>
+    <div class="absolute inset-0 bg-white/85 backdrop-blur-2xl border-b border-gray-200/60 shadow-[0_4px_32px_rgba(0,0,0,0.06)]"></div>
     
-    <div id="headerInner" class="relative w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-4 sm:px-6 py-3 gap-4">
+    <div id="headerInner" class="relative w-full max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 gap-2 sm:gap-4">
 
       <!-- Right side: Logo -->
-      <div class="flex items-center gap-3 flex-nowrap flex-shrink-0">
-        <a href="index.html" class="group flex items-center gap-2.5 flex-nowrap" aria-label="ویترینت">
-          <!-- Modern Logo Mark -->
-          <span class="relative flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 group-hover:scale-105 transition-all duration-300">
-            <svg viewBox="0 0 24 24" class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 6h3l3 12 3-12h3"/>
-            </svg>
-            <!-- Shine effect -->
-            <div class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/30 to-transparent"></div>
-          </span>
-          <span class="hidden sm:block text-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">ویترینت</span>
-        </a>
-      </div>
+      <a href="index.html" class="group flex items-center gap-2 sm:gap-2.5 flex-shrink-0" aria-label="ویترینت">
+        <span class="relative flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/50 group-hover:scale-105 transition-all duration-300">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 6h3l3 12 3-12h3"/>
+          </svg>
+          <div class="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-white/25 to-transparent"></div>
+        </span>
+        <span class="hidden sm:block text-lg sm:text-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">ویترینت</span>
+      </a>
 
       <!-- Center: Desktop Navigation -->
       <nav id="desktopNav" class="hidden lg:flex items-center gap-1 flex-1 justify-center">
@@ -4985,7 +4979,7 @@
           <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
         </a>
         <a href="categories.html" class="relative px-4 py-2 text-gray-600 font-semibold text-sm rounded-xl hover:text-cyan-600 hover:bg-cyan-50/80 transition-all duration-200 group">
-          <span>دسته‌بندی‌ها</span>
+          <span>دسته‌بندی</span>
           <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full group-hover:w-1/2 transition-all duration-300"></span>
         </a>
         <a href="all-products.html" class="relative px-4 py-2 text-gray-600 font-semibold text-sm rounded-xl hover:text-violet-600 hover:bg-violet-50/80 transition-all duration-200 group">
@@ -5000,29 +4994,55 @@
 
       <!-- Left side: Actions -->
       <div class="flex items-center gap-2 sm:gap-3 flex-nowrap flex-shrink-0">
-        <!-- Location Badge - Modern Pill -->
-        <div class="hidden xs:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 hover:scale-[1.02] transition-all duration-200 cursor-pointer">
-          <svg class="w-4 h-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/>
-            <circle cx="12" cy="9" r="2.5"/>
+        <!-- Premium City Badge - Sanandaj (Interactive) -->
+        <button type="button" id="cityBadge" class="group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:shadow-2xl hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden border border-white/20" aria-label="تغییر شهر">
+          <!-- Animated shimmer effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          
+          <!-- Glowing pulse animation -->
+          <div class="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          <!-- Decorative particles -->
+          <div class="absolute top-1 right-1 w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
+          <div class="absolute bottom-1 left-1 w-1 h-1 bg-white/60 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+          
+          <!-- Location icon with animation -->
+          <div class="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white drop-shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z" opacity="0.9"/>
+              <circle cx="12" cy="9" r="2.5" fill="white"/>
+            </svg>
+            <!-- Ping animation -->
+            <span class="absolute inset-0 rounded-full bg-white/40 animate-ping opacity-75"></span>
+          </div>
+          
+          <!-- City name with gradient text -->
+          <div class="relative flex flex-col items-start">
+            <span class="font-black text-white text-[11px] sm:text-sm whitespace-nowrap drop-shadow-lg tracking-wide group-hover:tracking-wider transition-all duration-300">سنندج</span>
+            <span class="hidden sm:block text-[8px] text-white/90 font-semibold -mt-0.5 drop-shadow-md">کردستان</span>
+          </div>
+          
+          <!-- Chevron icon for interaction hint -->
+          <svg class="hidden sm:block w-3 h-3 text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
           </svg>
-          <span id="headerCity" class="font-bold text-white text-xs sm:text-sm whitespace-nowrap">شهر شما</span>
-        </div>
+          
+          <!-- Decorative corner accent -->
+          <div class="absolute top-0 right-0 w-10 h-10 bg-gradient-to-br from-white/25 to-transparent rounded-bl-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+          
+          <!-- Bottom glow -->
+          <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-white/50 to-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </button>
 
-        <!-- Reward Button - Gradient with glow -->
+        <!-- Reward Button -->
         <button type="button" id="rewardClaimBtn"
-          class="group relative inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl font-bold text-white text-xs sm:text-sm bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] transition-all duration-200 overflow-hidden"
+          class="group relative inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl font-bold text-white text-[10px] sm:text-xs bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-md shadow-orange-500/25 hover:shadow-orange-500/45 hover:scale-[1.02] transition-all duration-200 overflow-hidden"
           aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
-          <!-- Animated shine -->
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-          <svg class="relative w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 12v10H4V12"/>
-            <path d="M2 7h20v5H2z"/>
-            <path d="M12 22V7"/>
-            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
-            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+          <svg class="relative w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
           </svg>
-          <span class="relative">جایزه</span>
+          <span class="relative hidden xs:inline">جایزه</span>
         </button>
 
         <!-- Register Shop Button - Desktop only -->
@@ -5031,18 +5051,25 @@
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          <span>ثبت مغازه</span>
+          <span>ثبت فروشگاه</span>
         </a>
 
-        <!-- Mobile Menu Toggle - Animated Hamburger -->
+        <!-- Mobile Menu Toggle - Premium Animated Hamburger -->
         <button type="button" id="mobileMenuToggle"
-          class="lg:hidden relative inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gray-100/90 text-gray-600 hover:bg-gray-200 hover:text-gray-800 active:scale-95 transition-all duration-200"
+          class="lg:hidden relative inline-flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-white via-gray-50 to-white border border-gray-200/60 shadow-lg shadow-gray-900/5 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-300/40 active:scale-95 transition-all duration-300 group overflow-hidden"
           aria-label="باز کردن منو" aria-expanded="false" aria-controls="mobileMenu">
-          <div class="flex flex-col items-center justify-center gap-1 w-5">
-            <span id="menuLine1" class="block w-5 h-0.5 bg-current rounded-full transition-all duration-300 origin-center"></span>
-            <span id="menuLine2" class="block w-5 h-0.5 bg-current rounded-full transition-all duration-300"></span>
-            <span id="menuLine3" class="block w-5 h-0.5 bg-current rounded-full transition-all duration-300 origin-center"></span>
+          <!-- Animated gradient background on hover -->
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/0 via-teal-50/0 to-cyan-50/0 group-hover:from-emerald-50/80 group-hover:via-teal-50/60 group-hover:to-cyan-50/80 transition-all duration-500 rounded-2xl"></div>
+          
+          <!-- Hamburger icon -->
+          <div class="relative flex flex-col items-center justify-center gap-[5px] w-6 h-6">
+            <span id="menuLine1" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 origin-center shadow-sm"></span>
+            <span id="menuLine2" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 shadow-sm"></span>
+            <span id="menuLine3" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 origin-center shadow-sm"></span>
           </div>
+          
+          <!-- Ripple effect on click -->
+          <span class="absolute inset-0 rounded-2xl opacity-0 group-active:opacity-100 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 transition-opacity duration-150"></span>
         </button>
       </div>
     </div>
@@ -5050,71 +5077,160 @@
 
   <!-- Mobile Navigation - Full Screen Overlay -->
   <div id="mobileMenu" class="lg:hidden fixed inset-0 z-[99] pointer-events-none" aria-hidden="true">
-    <div id="mobileMenuBackdrop" class="absolute inset-0 bg-black/0 backdrop-blur-none transition-all duration-300"></div>
-    <div id="mobileMenuPanel" class="absolute top-0 right-0 h-full w-[85vw] max-w-[320px] bg-white shadow-[-8px_0_32px_rgba(0,0,0,0.15)] transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col">
-      <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-l from-gray-50/80 to-white">
-        <div class="flex items-center gap-3">
-          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-md">
-            <svg viewBox="0 0 24 24" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6h3l3 12 3-12h3"/></svg>
+    <div id="mobileMenuBackdrop" class="absolute inset-0 bg-gradient-to-br from-gray-900/0 via-slate-900/0 to-gray-900/0 backdrop-blur-none transition-all duration-500"></div>
+    
+    <!-- Menu Panel -->
+    <div id="mobileMenuPanel" class="absolute top-0 right-0 h-full w-[90vw] max-w-[380px] bg-gradient-to-br from-white via-gray-50/95 to-white shadow-[-12px_0_48px_rgba(0,0,0,0.12)] border-l border-gray-200/50 transform translate-x-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col backdrop-blur-xl">
+      
+      <!-- Header with Logo and Close Button -->
+      <div class="relative flex items-center justify-between p-5 border-b border-gray-200/60 bg-gradient-to-r from-white via-emerald-50/30 to-teal-50/30 backdrop-blur-sm">
+        <!-- Decorative gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none"></div>
+        
+        <!-- Logo -->
+        <div class="relative flex items-center gap-3 z-10">
+          <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-2 ring-white/50">
+            <svg viewBox="0 0 24 24" class="w-6 h-6 text-white drop-shadow-md" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 6h3l3 12 3-12h3"/>
+            </svg>
           </span>
-          <span class="text-lg font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">ویترینت</span>
-        </div>
-        <button id="mobileMenuClose" class="w-9 h-9 rounded-xl bg-gray-100 hover:bg-red-50 flex items-center justify-center text-gray-500 hover:text-red-500 active:scale-95 transition-all duration-200" aria-label="بستن منو">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
-        <a href="index.html" class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl text-gray-700 font-semibold hover:bg-emerald-50 hover:text-emerald-600 active:scale-[0.98] transition-all duration-200">
-          <span class="w-10 h-10 rounded-xl bg-emerald-100 group-hover:bg-emerald-200 flex items-center justify-center text-emerald-600 transition-colors">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </span>
-          <span>خانه</span>
-          <svg class="w-4 h-4 mr-auto text-gray-400 group-hover:text-emerald-500 group-hover:-translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </a>
-        <a href="categories.html" class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl text-gray-700 font-semibold hover:bg-cyan-50 hover:text-cyan-600 active:scale-[0.98] transition-all duration-200">
-          <span class="w-10 h-10 rounded-xl bg-cyan-100 group-hover:bg-cyan-200 flex items-center justify-center text-cyan-600 transition-colors">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-          </span>
-          <span>دسته‌بندی‌ها</span>
-          <svg class="w-4 h-4 mr-auto text-gray-400 group-hover:text-cyan-500 group-hover:-translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </a>
-        <a href="all-products.html" class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl text-gray-700 font-semibold hover:bg-violet-50 hover:text-violet-600 active:scale-[0.98] transition-all duration-200">
-          <span class="w-10 h-10 rounded-xl bg-violet-100 group-hover:bg-violet-200 flex items-center justify-center text-violet-600 transition-colors">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          </span>
-          <span>محصولات</span>
-          <svg class="w-4 h-4 mr-auto text-gray-400 group-hover:text-violet-500 group-hover:-translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </a>
-        <a href="login.html" class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl text-gray-700 font-semibold hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98] transition-all duration-200">
-          <span class="w-10 h-10 rounded-xl bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center text-blue-600 transition-colors">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          </span>
-          <span>ورود / ثبت‌نام</span>
-          <svg class="w-4 h-4 mr-auto text-gray-400 group-hover:text-blue-500 group-hover:-translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </a>
-        <div class="my-3 border-t border-gray-100"></div>
-        <div class="px-2">
-          <p class="text-xs font-semibold text-gray-400 mb-2 px-2">میانبرها</p>
-          <div class="grid grid-cols-2 gap-2">
-            <a href="all-offers.html" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 15L15 9M9 9h.01M15 15h.01"/><circle cx="12" cy="12" r="9"/></svg>
-              <span class="text-xs font-semibold">تخفیف‌ها</span>
-            </a>
-            <a href="all-shops.html" class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-600 transition-colors">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
-              <span class="text-xs font-semibold">فروشگاه‌ها</span>
-            </a>
+          <div class="flex flex-col">
+            <span class="text-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">ویترینت</span>
+            <span class="text-[10px] font-bold text-teal-600/70 leading-tight">فروشگاه آنلاین</span>
           </div>
         </div>
+        
+        <!-- Close Button -->
+        <button id="mobileMenuClose" class="relative w-11 h-11 rounded-2xl bg-white hover:bg-red-50 border border-gray-200/60 hover:border-red-200 flex items-center justify-center text-gray-600 hover:text-red-500 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-red-500/10 group z-10" aria-label="بستن منو">
+          <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto p-5 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <!-- Home -->
+        <a href="index.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold hover:text-emerald-600 active:scale-[0.97] transition-all duration-300 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-emerald-50/0 to-teal-50/0 group-hover:from-emerald-50 group-hover:to-teal-50/60 transition-all duration-300 rounded-2xl"></div>
+          <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 group-hover:from-emerald-500 group-hover:to-teal-500 flex items-center justify-center text-emerald-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-emerald-500/30">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
+          <span class="relative text-base">خانه</span>
+          <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400 group-hover:text-emerald-500 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+        
+        <!-- Categories -->
+        <a href="categories.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold hover:text-cyan-600 active:scale-[0.97] transition-all duration-300 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-cyan-50/0 to-blue-50/0 group-hover:from-cyan-50 group-hover:to-blue-50/60 transition-all duration-300 rounded-2xl"></div>
+          <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-100 to-cyan-50 group-hover:from-cyan-500 group-hover:to-blue-500 flex items-center justify-center text-cyan-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-cyan-500/30">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </span>
+          <span class="relative text-base">دسته‌بندی</span>
+          <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400 group-hover:text-cyan-500 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+        
+        <!-- Products -->
+        <a href="all-products.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold hover:text-violet-600 active:scale-[0.97] transition-all duration-300 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-violet-50/0 to-purple-50/0 group-hover:from-violet-50 group-hover:to-purple-50/60 transition-all duration-300 rounded-2xl"></div>
+          <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 group-hover:from-violet-500 group-hover:to-purple-500 flex items-center justify-center text-violet-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-violet-500/30">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+          </span>
+          <span class="relative text-base">محصولات</span>
+          <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400 group-hover:text-violet-500 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+        
+        <!-- Login -->
+        <a href="login.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold hover:text-blue-600 active:scale-[0.97] transition-all duration-300 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50 group-hover:to-indigo-50/60 transition-all duration-300 rounded-2xl"></div>
+          <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 group-hover:from-blue-500 group-hover:to-indigo-500 flex items-center justify-center text-blue-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-blue-500/30">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+          </span>
+          <span class="relative text-base">ورود / ثبت‌نام</span>
+          <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400 group-hover:text-blue-500 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+        
       </nav>
-      <div class="p-4 border-t border-gray-100 bg-gradient-to-t from-gray-50/80 to-white space-y-3">
-        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-100">
-          <svg class="w-4 h-4 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          <span class="text-sm font-semibold text-teal-700">شهر شما: <span class="text-teal-600">—</span></span>
+      
+      <!-- Footer with Location and CTA -->
+      <div class="relative p-5 border-t border-gray-200/60 bg-gradient-to-t from-white via-gray-50/50 to-transparent backdrop-blur-sm space-y-4">
+        <!-- Decorative gradient -->
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none"></div>
+        
+        <!-- Premium Location Card -->
+        <div class="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 shadow-xl shadow-slate-900/20 border border-slate-700/50">
+          <!-- Animated gradient overlay -->
+          <div class="absolute inset-0 bg-gradient-to-r from-teal-500/20 via-cyan-500/10 to-emerald-500/20 opacity-60"></div>
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-400/20 via-transparent to-transparent"></div>
+          
+          <!-- Decorative circles -->
+          <div class="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-teal-500/30 to-cyan-500/20 rounded-full blur-2xl"></div>
+          <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 rounded-full blur-xl"></div>
+          
+          <div class="relative flex items-center gap-4">
+            <!-- Location Icon Container -->
+            <div class="relative flex-shrink-0">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 via-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/40 ring-2 ring-white/20">
+                <svg class="w-7 h-7 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+              </div>
+              <!-- Pulse animation -->
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 animate-ping opacity-20"></div>
+            </div>
+            
+            <!-- Location Info -->
+            <div class="flex flex-col gap-1 min-w-0">
+              <span class="text-xs font-semibold text-teal-300/80 tracking-wide">موقعیت شما</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xl font-black text-white tracking-tight">سنندج</span>
+                <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-teal-500/30 to-cyan-500/30 text-[10px] font-bold text-teal-300 border border-teal-400/30">کردستان</span>
+              </div>
+            </div>
+            
+            <!-- Arrow indicator -->
+            <div class="mr-auto flex-shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
+                <svg class="w-4 h-4 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <a href="post.html" class="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-2xl font-bold text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 active:scale-[0.98] transition-all duration-200">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          <span>ثبت رایگان مغازه</span>
+        
+        <!-- Register Shop CTA -->
+        <a href="post.html" class="cta-shine relative flex items-center justify-center gap-3 w-full px-5 py-4 rounded-2xl font-black text-base text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 active:scale-[0.97] transition-all duration-300 overflow-hidden group">
+          <svg class="relative w-6 h-6 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span class="relative drop-shadow-sm">ثبت فروشگاه رایگان</span>
         </a>
       </div>
     </div>
@@ -5132,6 +5248,7 @@
       const menuLine2 = document.getElementById('menuLine2');
       const menuLine3 = document.getElementById('menuLine3');
       let isOpen = false;
+      
       function openMenu() {
         if (isOpen) return;
         isOpen = true;
@@ -5139,30 +5256,39 @@
         mobileMenu.setAttribute('aria-hidden', 'false');
         mobileMenu.classList.remove('pointer-events-none');
         mobileMenu.classList.add('pointer-events-auto');
-        menuBackdrop.classList.remove('bg-black/0', 'backdrop-blur-none');
-        menuBackdrop.classList.add('bg-black/50', 'backdrop-blur-sm');
+        menuBackdrop.classList.remove('bg-gradient-to-br', 'from-gray-900/0', 'via-slate-900/0', 'to-gray-900/0', 'backdrop-blur-none');
+        menuBackdrop.classList.add('bg-gradient-to-br', 'from-gray-900/60', 'via-slate-900/50', 'to-gray-900/60', 'backdrop-blur-sm');
         menuPanel.classList.remove('translate-x-full');
         menuPanel.classList.add('translate-x-0');
-        menuLine1.classList.add('rotate-45', 'translate-y-[6px]');
+        menuLine1.classList.add('rotate-45', 'translate-y-[7px]');
         menuLine2.classList.add('opacity-0', 'scale-0');
-        menuLine3.classList.add('-rotate-45', '-translate-y-[6px]');
+        menuLine3.classList.add('-rotate-45', '-translate-y-[7px]');
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('mobile-menu-open');
       }
+      
       function closeMenu() {
         if (!isOpen) return;
         isOpen = false;
         menuToggle.setAttribute('aria-expanded', 'false');
         mobileMenu.setAttribute('aria-hidden', 'true');
-        menuBackdrop.classList.add('bg-black/0', 'backdrop-blur-none');
-        menuBackdrop.classList.remove('bg-black/50', 'backdrop-blur-sm');
+        menuBackdrop.classList.add('from-gray-900/0', 'via-slate-900/0', 'to-gray-900/0', 'backdrop-blur-none');
+        menuBackdrop.classList.remove('from-gray-900/60', 'via-slate-900/50', 'to-gray-900/60', 'backdrop-blur-sm');
         menuPanel.classList.add('translate-x-full');
         menuPanel.classList.remove('translate-x-0');
-        menuLine1.classList.remove('rotate-45', 'translate-y-[6px]');
+        menuLine1.classList.remove('rotate-45', 'translate-y-[7px]');
         menuLine2.classList.remove('opacity-0', 'scale-0');
-        menuLine3.classList.remove('-rotate-45', '-translate-y-[6px]');
+        menuLine3.classList.remove('-rotate-45', '-translate-y-[7px]');
         document.body.style.overflow = '';
-        setTimeout(() => { if (!isOpen) { mobileMenu.classList.add('pointer-events-none'); mobileMenu.classList.remove('pointer-events-auto'); } }, 300);
+        document.body.classList.remove('mobile-menu-open');
+        setTimeout(() => { 
+          if (!isOpen) { 
+            mobileMenu.classList.add('pointer-events-none'); 
+            mobileMenu.classList.remove('pointer-events-auto'); 
+          } 
+        }, 500);
       }
+      
       menuToggle?.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
       menuClose?.addEventListener('click', closeMenu);
       menuBackdrop?.addEventListener('click', closeMenu);
@@ -5172,7 +5298,7 @@
     })();
   </script>
 
-  <main>
+  <main></main>
     <div class="layout-width">
       <section class="product-hero" aria-labelledby="productTitle">
         <div class="gallery" aria-live="polite">
@@ -5183,14 +5309,14 @@
             <div class="slider" id="gallerySlider">
               <div class="slider-counter" id="sliderCounter" hidden></div>
               <button class="slider-control slider-control--prev" type="button" id="sliderPrev"
-                aria-label="تصویر قبلی">
+                aria-label="نمایش تصویر قبلی">
                 <span aria-hidden="true">&#x2039;</span>
               </button>
               <div class="slider-viewport" id="sliderViewport" tabindex="0" role="group"
-                aria-roledescription="پیمایش اسلاید" aria-label="گالری تصاویر محصول">
+                aria-roledescription="اسلایدر تصاویر" aria-label="گالری تصاویر محصول">
                 <ul class="slider-track" id="sliderTrack"></ul>
               </div>
-              <button class="slider-zoom" type="button" id="sliderZoom" aria-label="بزرگنمایی تصویر" hidden
+              <button class="slider-zoom" type="button" id="sliderZoom" aria-label="نمایش تصویر در اندازه بزرگ" hidden
                 disabled>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                   <path d="M11 5a6 6 0 1 0 4.472 10.03l3.749 3.75" stroke="currentColor" stroke-width="1.8"
@@ -5200,23 +5326,23 @@
                 </svg>
               </button>
               <button class="slider-control slider-control--next" type="button" id="sliderNext"
-                aria-label="تصویر بعدی">
+                aria-label="نمایش تصویر بعدی">
                 <span aria-hidden="true">&#x203A;</span>
               </button>
-              <div class="slider-indicators" id="sliderIndicators" role="group" aria-label="نشانگر اسلاید"></div>
+              <div class="slider-indicators" id="sliderIndicators" role="group" aria-label="انتخاب تصویر"></div>
             </div>
           </figure>
-          <div class="thumbnails" id="thumbnails" role="group" aria-label="تصاویر بندانگشتی" hidden></div>
+          <div class="thumbnails" id="thumbnails" role="group" aria-label="تصاویر محصول" hidden></div>
         </div>
 
         <div class="product-summary">
-          <h1 id="productTitle">در حال بارگذاری عنوان محصول...</h1>
+          <h1 id="productTitle">در حال بارگذاری محصول...</h1>
           
           <!-- Premium Tags Section -->
           <div class="mobile-tags-wrapper" id="productTagsPanel" hidden>
             <div class="tags-scroll-container" dir="rtl">
               
-              <!-- ????? ?? -->
+              <!-- آیکون تگ -->
               <div class="tags-icon-indicator" aria-hidden="true">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
@@ -5224,20 +5350,20 @@
                 </svg>
               </div>
               
-              <!-- ???????? -->
+              <!-- جداکننده -->
               <div class="tags-separator" aria-hidden="true"></div>
 
-              <!-- ?? ???? ????? -->
+              <!-- بج اصلی محصول -->
               <div class="main-badge-wrapper">
                 <span class="badge" id="productBadge" hidden></span>
               </div>
 
-              <!-- ?نمایش بیشتر??? -->
+              <!-- تگ‌های داینامیک -->
               <div id="dynamicTags" class="flex items-center gap-2"></div>
             </div>
           </div>
           <p class="subtitle" id="productSubtitle"></p>
-          <div class="status-message" id="statusMessage" role="status" aria-live="polite">در حال آماده‌سازی اطلاعات
+          <div class="status-message" id="statusMessage" role="status" aria-live="polite">در حال بارگذاری اطلاعات
             محصول...</div>
 
           <div class="meta-grid">
@@ -5277,24 +5403,11 @@
                 </svg>
               </span>
               <div class="meta-card__content">
-                <span class="meta-label">قیمت محصول</span>
+                <span class="meta-label">قیمت اعلام شده</span>
                 <span class="meta-value" id="productPrice"></span>
               </div>
             </div>
-            <div class="meta-card" id="locationCard" hidden>
-              <span class="meta-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 4.5a5.25 5.25 0 0 0-5.25 5.25c0 3.7 3.75 8.38 4.97 9.81.15.18.41.18.56 0 1.22-1.43 4.97-6.11 4.97-9.81A5.25 5.25 0 0 0 12 4.5Z"
-                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                  <circle cx="12" cy="9.75" r="1.75" stroke="currentColor" stroke-width="1.6" />
-                </svg>
-              </span>
-              <div class="meta-card__content">
-                <span class="meta-label">موقعیت فروشنده</span>
-                <span class="meta-value" id="productLocation"></span>
-              </div>
-            </div>
+
             <div class="meta-card" id="updatedCard" hidden>
               <span class="meta-card__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -5311,14 +5424,14 @@
           </div>
 
           <div class="modern-like-wrapper">
-            <button id="likeButton" class="modern-like-btn" type="button" aria-label="افزودن به علاقه‌مندی">
+            <button id="likeButton" class="modern-like-btn" type="button" aria-label="پسندیدن">
               <div class="heart-icon-box">
                 <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3.2 6.1a4.2 4.2 0 0 1 5.9 0L12 9l2.9-2.9a4.2 4.2 0 1 1 5.9 5.9L12 20.7l-8.8-8.7a4.2 4.2 0 0 1 0-5.9z" />
                 </svg>
               </div>
-              <span class="like-text" id="likeButtonLabel">علاقه‌مندم</span>
+              <span class="like-text" id="likeButtonLabel">پسندیدن</span>
               <span class="like-counter" id="likeCount">۰</span>
             </button>
             <span id="likeStatus" hidden></span>
@@ -5329,7 +5442,7 @@
           <div class="bg-gray-50/50 rounded-3xl px-4 py-4" id="sellerActions">
             <!-- Unified Grid - All buttons equal size -->
             <div class="grid grid-cols-2 gap-3">
-              <!-- ???? ?? ??????? - Deep Indigo (Trust/Communication) -->
+              <!-- پیام به فروشنده - Deep Indigo (Trust/Communication) -->
               <button type="button" id="messageSellerButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-indigo-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
@@ -5343,7 +5456,7 @@
                 <span>پیام به فروشنده</span>
               </button>
 
-              <!-- ???? ????? - Emerald (Location/Safety) -->
+              <!-- آدرس مغازه - Emerald (Location/Safety) -->
               <button type="button" id="sellerAddressButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-emerald-600
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
@@ -5355,10 +5468,10 @@
                     d="M12 3.5c-3.5 0-6.5 2.7-6.5 6.4 0 4.1 4.9 9.61 6.16 11.01.19.21.49.21.68 0C13.6 19.51 18.5 14 18.5 9.9c0-3.7-3-6.4-6.5-6.4Z" />
                   <circle cx="12" cy="10" r="2.6" />
                 </svg>
-                <span>آدرس فروشنده</span>
+                <span>آدرس مغازه</span>
               </button>
 
-              <!-- ??نمایش بیشتر - Amber (Opportunity/Energy) -->
+              <!-- درخواست تخفیف - Amber (Opportunity/Energy) -->
               <button type="button" id="discountButton" disabled class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold text-white
                        bg-amber-500
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
@@ -5372,7 +5485,7 @@
                 <span>درخواست تخفیف</span>
               </button>
 
-              <!-- ???? ????? - Slate Ghost (Neutral/Discovery) -->
+              <!-- صفحه مغازه - Slate Ghost (Neutral/Discovery) -->
               <a id="sellerLink" href="#" target="_blank" rel="noopener" class="w-full h-full min-h-[60px] flex items-center justify-center gap-2.5 px-3 py-4 rounded-2xl text-sm font-bold
                        text-slate-700 bg-slate-50 border border-slate-200
                        shadow-[0_2px_10px_rgba(0,0,0,0.04)]
@@ -5390,7 +5503,7 @@
               </a>
             </div>
 
-            <!-- ???? ?????? ?? ?????????? - Ultra Modern Glass Style -->
+            <!-- دکمه افزودن به علاقه‌مندی - Ultra Modern Glass Style -->
             <button type="button" id="addToFavoritesBtn" class="premium-favorite-btn">
               <div class="favorite-btn-content">
                 <div class="favorite-icon-wrapper">
@@ -5444,7 +5557,7 @@
       </section>
 
       <!-- Product Reviews - Compact Summary Bar -->
-      <div class="reviews-bar" id="reviewsBar" role="button" tabindex="0" aria-label="امتیازدهی و نظرات">
+      <div class="reviews-bar" id="reviewsBar" role="button" tabindex="0" aria-label="مشاهده نظرات کاربران">
         <div class="reviews-bar__info">
           <div class="reviews-bar__score" id="reviewsBarScore">۰</div>
           <div class="reviews-bar__details">
@@ -5471,11 +5584,11 @@
                   d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
               </svg>
             </div>
-            <span class="reviews-bar__count" id="reviewsBarCount">(۰ از ۰ نظر)</span>
+            <span class="reviews-bar__count" id="reviewsBarCount">(از ۰ نظر)</span>
           </div>
         </div>
         <div class="reviews-bar__action">
-          <span>مشاهده جزئیات نظرات</span>
+          <span>مشاهده همه نظرات</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6" />
@@ -5500,7 +5613,7 @@
                 d="M12 2C12.3 2 12.6 2.2 12.7 2.5L14.7 8.1L20.6 8.6C20.9 8.6 21.2 8.8 21.3 9.1C21.4 9.4 21.3 9.7 21.1 9.9L16.5 13.8L18 19.5C18.1 19.8 18 20.1 17.7 20.3C17.5 20.5 17.2 20.5 16.9 20.4L12 17.3L7.1 20.4C6.8 20.5 6.5 20.5 6.3 20.3C6 20.1 5.9 19.8 6 19.5L7.5 13.8L2.9 9.9C2.7 9.7 2.6 9.4 2.7 9.1C2.8 8.8 3.1 8.6 3.4 8.6L9.3 8.1L11.3 2.5C11.4 2.2 11.7 2 12 2Z" />
             </svg>
           </span>
-          نظرات کاربران
+          دیدگاه‌های کاربران
         </h2>
         <button type="button" class="reviews-modal__close" id="reviewsModalClose" aria-label="بستن">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -5523,7 +5636,7 @@
             </svg>
           </div>
           <p class="reviews-modal__login-text">
-            برای ثبت نظر ابتدا <a href="/login.html" class="reviews-modal__login-link">وارد حساب کاربری</a> خود شوید.
+            برای ثبت نظر، لطفاً <a href="/login.html" class="reviews-modal__login-link">وارد حساب کاربری</a> خود شوید.
           </p>
         </div>
 
@@ -5557,7 +5670,7 @@
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </div>
-          <p class="reviews-modal__empty-text">هنوز هیچ نظری برای این محصول ثبت نشده</p>
+          <p class="reviews-modal__empty-text">هنوز نظری برای این محصول ثبت نشده است</p>
           <p class="reviews-modal__empty-hint">اولین نفری باشید که نظر خود را ثبت می‌کند!</p>
         </div>
 
@@ -5578,21 +5691,21 @@
   <div class="overlay address-modal-overlay" id="addressModal" hidden>
     <div class="overlay-dialog address-modal-dialog" role="dialog" aria-modal="true"
       aria-labelledby="addressModalTitle">
-      <button class="overlay-close" type="button" id="addressModalClose" aria-label="???? ?????"
+      <button class="overlay-close" type="button" id="addressModalClose" aria-label="بستن پنجره"
         data-focus-default="true">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
           <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
       </button>
-      <h2 class="overlay-title" id="addressModalTitle">???? ?????</h2>
+      <h2 class="overlay-title" id="addressModalTitle">آدرس مغازه</h2>
       <div class="overlay-body">
-        <p>???? ???? ??????? ???? ?نمایش بیشتر:</p>
+        <p>آدرس دقیق فروشنده برای مراجعه حضوری:</p>
         <p class="overlay-highlight" id="addressModalAddress">-</p>
         <p id="addressModalCity" hidden></p>
       </div>
       <div class="overlay-actions">
-        <button class="overlay-button overlay-button--copy" type="button" id="addressModalCopy">??? ????</button>
+        <button class="overlay-button overlay-button--copy" type="button" id="addressModalCopy">کپی آدرس</button>
       </div>
     </div>
   </div>
@@ -5607,15 +5720,15 @@
           <path d="M22 4 12 14.01l-3-3" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
-      <h2 class="success-popup-title" id="successPopupTitle">?ثبت نظر جدید? ??!</h2>
-      <p class="success-popup-message">???? ??? ?? ?????? ?? ??نمایش بیشتر ??. ??????? ?? ???? ???? ??? ?? ????? ???.
+      <h2 class="success-popup-title" id="successPopupTitle">پیام شما ارسال شد!</h2>
+      <p class="success-popup-message">پیام شما با موفقیت به فروشنده ارسال شد. فروشنده به زودی پاسخ شما را خواهد داد.
       </p>
       <button class="success-popup-button" type="button" id="successPopupClose">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
-        <span>????? ???</span>
+        <span>متوجه شدم</span>
       </button>
     </div>
   </div>
@@ -5625,7 +5738,7 @@
     <div class="overlay-dialog message-modal-dialog" role="dialog" aria-modal="true"
       aria-labelledby="messageModalTitle">
       <header class="message-modal-header">
-        <button class="message-modal-close" type="button" id="messageModalClose" aria-label="???? ?????">
+        <button class="message-modal-close" type="button" id="messageModalClose" aria-label="بستن پنجره">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" />
@@ -5636,40 +5749,40 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          ???? ?? ???????
+          پیام به فروشنده
         </h2>
-        <p class="message-modal-subtitle" id="messageModalSubtitle">?ثبت نظر جدید???? ?? ??نمایش بیشتر ??????</p>
+        <p class="message-modal-subtitle" id="messageModalSubtitle">پیام شما مستقیماً به فروشنده ارسال می‌شود</p>
       </header>
 
       <div class="message-modal-body">
         <!-- Product Info -->
         <div class="message-product-info">
-          <img class="message-product-image" id="messageProductImage" src="" alt="نمایش بیشتر">
+          <img class="message-product-image" id="messageProductImage" src="" alt="تصویر محصول">
           <div class="message-product-details">
             <h3 class="message-product-title" id="messageProductTitle">-</h3>
-            <p class="message-product-seller" id="messageProductSeller">???????: -</p>
+            <p class="message-product-seller" id="messageProductSeller">فروشنده: -</p>
           </div>
         </div>
 
         <!-- Login Prompt (shown when not logged in) -->
         <div class="message-login-prompt" id="messageLoginPrompt" hidden>
-          <p>???? ????? ???? ?? ???نمایش بیشتر ???? ???? ???ثبت نظر جدید.</p>
+          <p>برای ارسال پیام به فروشنده، ابتدا وارد حساب کاربری خود شوید.</p>
           <a href="/login.html" class="message-login-btn">
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            ???? ?? ????
+            ورود به حساب
           </a>
         </div>
 
         <!-- Message Form (shown when logged in) -->
         <div id="messageFormContainer">
           <div class="message-form-group">
-            <label class="message-form-label" for="messageText">??? ???? ???</label>
+            <label class="message-form-label" for="messageText">متن پیام شما</label>
             <textarea class="message-textarea" id="messageText"
-              placeholder="???? ?? ???? ??? ?? ???ثبت نظر جدید? ???????..." maxlength="1000" rows="4"></textarea>
-            <span class="message-char-count" id="messageCharCount">? / ????</span>
+              placeholder="سوال یا پیام خود را درباره این محصول بنویسید..." maxlength="1000" rows="4"></textarea>
+            <span class="message-char-count" id="messageCharCount">۰ / ۱۰۰۰</span>
           </div>
 
           <!-- Status Messages -->
@@ -5680,7 +5793,7 @@
               <path d="M22 4 12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
             </svg>
-            <span>???? ??? ?? ?نمایش بیشتر ??!</span>
+            <span>پیام شما با موفقیت ارسال شد!</span>
           </div>
 
           <div class="message-status message-status--error" id="messageError" hidden>
@@ -5688,7 +5801,7 @@
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
               <path d="m15 9-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
-            <span id="messageErrorText">??? ?? ????? ????</span>
+            <span id="messageErrorText">خطا در ارسال پیام</span>
           </div>
         </div>
       </div>
@@ -5699,16 +5812,16 @@
             <path d="m12 5 5 5m-5-5-5 5m5-5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
               stroke-linejoin="round" />
           </svg>
-          <span>???? ????? ???? ???? ???? ???? ?????? ????.</span>
+          <span>برای ارسال پیام باید وارد حساب کاربری شوید.</span>
         </p>
         <div class="message-footer-actions">
-          <button class="message-btn message-btn--cancel" type="button" id="messageCancelBtn">??????</button>
+          <button class="message-btn message-btn--cancel" type="button" id="messageCancelBtn">انصراف</button>
           <button class="message-btn message-btn--send" type="button" id="messageSendBtn" disabled>
             <svg viewBox="0 0 24 24" fill="none" id="messageSendIcon">
               <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span id="messageSendText">????? ????</span>
+            <span id="messageSendText">ارسال پیام</span>
           </button>
         </div>
       </footer>
@@ -5720,7 +5833,7 @@
     <div class="overlay-dialog message-modal-dialog" role="dialog" aria-modal="true"
       aria-labelledby="discountModalTitle">
       <header class="message-modal-header">
-        <button class="message-modal-close" type="button" id="discountModalClose" aria-label="???? ?????">
+        <button class="message-modal-close" type="button" id="discountModalClose" aria-label="بستن پنجره">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" />
@@ -5731,43 +5844,43 @@
             <path d="M9 15L15 9M9 9H9.01M15 15H15.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          ??نمایش بیشتر
+          درخواست تخفیف
         </h2>
-        <p class="message-modal-subtitle" id="discountModalSubtitle">??نمایش بیشتر ??? ?? ???? ??نمایش بیشتر ????</p>
+        <p class="message-modal-subtitle" id="discountModalSubtitle">پیشنهاد قیمتی خود را برای فروشنده ارسال کنید</p>
       </header>
 
       <div class="message-modal-body">
         <!-- Product Info -->
         <div class="message-product-info">
-          <img class="message-product-image" id="discountProductImage" src="" alt="نمایش بیشتر">
+          <img class="message-product-image" id="discountProductImage" src="" alt="تصویر محصول">
           <div class="message-product-details">
             <h3 class="message-product-title" id="discountProductTitle">-</h3>
-            <p class="message-product-seller" id="discountProductSeller">???????: -</p>
+            <p class="message-product-seller" id="discountProductSeller">فروشنده: -</p>
           </div>
         </div>
 
         <!-- Login Prompt (shown when not logged in) -->
         <div class="message-login-prompt" id="discountLoginPrompt" hidden>
-          <p>???? ??نمایش بیشتر? ????? ???? ???? ???ثبت نظر جدید.</p>
+          <p>برای درخواست تخفیف، ابتدا وارد حساب کاربری خود شوید.</p>
           <a href="/login.html" class="message-login-btn">
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            ???? ?? ????
+            ورود به حساب
           </a>
         </div>
 
         <!-- Discount Form (shown when logged in) -->
         <div id="discountFormContainer">
           <div class="message-form-group">
-            <label class="message-form-label" for="discountPrice">???? ???????? (?????) ?? ???? ?????</label>
-            <input type="text" class="message-textarea" id="discountPrice" placeholder="?????: ???,??? ?????"
+            <label class="message-form-label" for="discountPrice">قیمت پیشنهادی (تومان) یا درصد تخفیف</label>
+            <input type="text" class="message-textarea" id="discountPrice" placeholder="مثلاً: ۴۵۰,۰۰۰ تومان"
               style="min-height: auto; height: 50px;">
           </div>
           <div class="message-form-group">
-            <label class="message-form-label" for="discountText">??????? (???????)</label>
-            <textarea class="message-textarea" id="discountText" placeholder="??? ?نمایش بیشتر ???????..."
+            <label class="message-form-label" for="discountText">توضیحات (اختیاری)</label>
+            <textarea class="message-textarea" id="discountText" placeholder="اگر توضیحی دارید بنویسید..."
               maxlength="500" rows="3"></textarea>
           </div>
 
@@ -5779,7 +5892,7 @@
               <path d="M22 4 12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" />
             </svg>
-            <span>??????? ??? ?? ?نمایش بیشتر ??!</span>
+            <span>درخواست شما با موفقیت ارسال شد!</span>
           </div>
 
           <div class="message-status message-status--error" id="discountError" hidden>
@@ -5787,7 +5900,7 @@
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
               <path d="m15 9-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
-            <span id="discountErrorText">??? ?? نمایش بیشتر??</span>
+            <span id="discountErrorText">خطا در ارسال درخواست</span>
           </div>
         </div>
       </div>
@@ -5798,17 +5911,17 @@
             <path d="m12 5 5 5m-5-5-5 5m5-5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
               stroke-linejoin="round" />
           </svg>
-          <span>???? ??????? ???? ???? ???? ?????? ????.</span>
+          <span>برای درخواست باید وارد حساب کاربری شوید.</span>
         </p>
         <div class="message-footer-actions">
-          <button class="message-btn message-btn--cancel" type="button" id="discountCancelBtn">??????</button>
+          <button class="message-btn message-btn--cancel" type="button" id="discountCancelBtn">انصراف</button>
           <button class="message-btn message-btn--send" type="button" id="discountSendBtn" disabled
             style="background: linear-gradient(135deg, #f59e0b, #ea580c); box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);">
             <svg viewBox="0 0 24 24" fill="none" id="discountSendIcon">
               <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span id="discountSendText">نمایش بیشتر??</span>
+            <span id="discountSendText">ارسال درخواست</span>
           </button>
         </div>
       </footer>
@@ -5817,22 +5930,22 @@
 
   <div class="overlay" id="galleryLightbox" hidden>
     <div class="lightbox-dialog" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
-      <button class="overlay-close" type="button" id="lightboxClose" aria-label="???? ?????" data-focus-default="true">
+      <button class="overlay-close" type="button" id="lightboxClose" aria-label="بستن گالری" data-focus-default="true">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
           <path d="m7 7 10 10m0-10-10 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
             stroke-linejoin="round" />
         </svg>
       </button>
-      <p class="lightbox-title" id="lightboxTitle">????? ???? ?نمایش بیشتر</p>
+      <p class="lightbox-title" id="lightboxTitle">نمایش بزرگ تصاویر محصول</p>
       <div class="lightbox-body">
-        <button class="lightbox-nav lightbox-nav--prev" type="button" id="lightboxPrev" aria-label="????? ????">
+        <button class="lightbox-nav lightbox-nav--prev" type="button" id="lightboxPrev" aria-label="تصویر قبلی">
           <span aria-hidden="true">&#x2039;</span>
         </button>
         <figure class="lightbox-figure">
-          <img id="lightboxImage" alt="???? ???? ?? نمایش بیشتر">
+          <img id="lightboxImage" alt="نمای بزرگ از تصویر محصول">
           <figcaption id="lightboxCaption"></figcaption>
         </figure>
-        <button class="lightbox-nav lightbox-nav--next" type="button" id="lightboxNext" aria-label="????? ????">
+        <button class="lightbox-nav lightbox-nav--next" type="button" id="lightboxNext" aria-label="تصویر بعدی">
           <span aria-hidden="true">&#x203A;</span>
         </button>
       </div>
@@ -5843,15 +5956,15 @@
   <footer>
     <div class="layout-width footer-inner">
       <div class="footer-brand">
-        <img src="/assets/images/logo.svg" alt="نمایش بیشتر??">
+        <img src="/assets/images/logo.svg" alt="لوگوی ویترینت">
         <span>Vitrinnet</span>
       </div>
-      <div class="footer-links" aria-label="???نمایش بیشتر??">
-        <a href="/rules.html">?????? ? ??????</a>
-        <a href="/contact.html">???? ????????</a>
-        <a href="/about.html">?نمایش بیشتر??</a>
+      <div class="footer-links" aria-label="پیوندهای کاربردی">
+        <a href="/rules.html">قوانین و مقررات</a>
+        <a href="/contact.html">مرکز پشتیبانی</a>
+        <a href="/about.html">درباره ویترینت</a>
       </div>
-      <p class="footer-copy">© ??????? ???? — ??? ???? ????? ???.</p>
+      <p class="footer-copy">© ویترینت ۱۴۰۳ — همه حقوق محفوظ است.</p>
     </div>
   </footer>
 
@@ -5864,24 +5977,24 @@
       <button class="prize-modal-close" id="prizeModalClose" type="button" aria-label="بستن">×</button>
 
       <div class="prize-modal-header">
-        <h2 class="prize-modal-title">?? نمایش بیشتر??</h2>
+        <h2 class="prize-modal-title">کد جایزه ویترینت</h2>
       </div>
 
       <div class="prize-modal-body">
         <div class="prize-code-display" id="prizeCodeDisplay">
-          <div class="prize-loading">?? ??? ????????...</div>
+          <div class="prize-loading">در حال بارگذاری...</div>
         </div>
         <p class="prize-modal-desc">
-          ??? ?? ?? ??????? ????. ???? ???نمایش بیشتر ?نمایش بیشتر?? ???? ?? ?? ??نمایش بیشتر? ????. ?? ????? ?? ??
-          ????? ?? ??? ????!
+          این کد را یادداشت کنید. برای جمع‌آوری کدهای بیشتر، محصولات دیگر را در ویترینت مشاهده کنید. هر محصول یک کد
+          منحصر به فرد دارد!
         </p>
         <div class="prize-instructions">
-          <h3 class="prize-instructions-title">?? ??????? ???? ?? ????????:</h3>
+          <h3 class="prize-instructions-title">📋 راهنمای شرکت در قرعه‌کشی:</h3>
           <ul class="prize-instructions-list">
-            <li>?? ????? ?? ?? ? ???? ????</li>
-            <li>?? ?نمایش بیشتر?? ?نمایش بیشتر ???ثبت نظر جدید</li>
-            <li>???? ??? ?? ? ???? ?? ????????? ?? <a href="/index.html" class="prize-instructions-link">???? ????
-                ???????</a> ????? ? ?? ??? ?نمایش بیشتر ?? ?? ???? ????</li>
+            <li>هر محصول یک کد ۶ رقمی دارد</li>
+            <li>با مشاهده محصولات مختلف، کدهای بیشتری جمع کنید</li>
+            <li>برای ثبت کد و شرکت در قرعه‌کشی، به <a href="/index.html" class="prize-instructions-link">صفحه اصلی
+                ویترینت</a> بروید و در بخش دریافت جایزه کد را وارد کنید</li>
           </ul>
         </div>
       </div>
@@ -5892,32 +6005,32 @@
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
             <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <span>نمایش بیشتر ???????</span>
+          <span>کمپین جوایز ویترینت</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TODO: ?نمایش بیشتر???? PostHog ?? ?? ????????? | TODO: Enable PostHog events after activation -->
+  <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
   <!--
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const safeCapture = window.safePosthogCapture || function () {};
-    // نمایش بیشتر ????? ?? ???????? ???? | Pull product id from page dataset
+    // تعیین شناسه محصول از داده‌های صفحه | Pull product id from page dataset
     // const productId = document.body.getAttribute('data-product-id') || 'PRODUCT_ID';
     // safeCapture('product_viewed', { product_id: productId });
-    // ?نمایش بیشتر ?? ??? | Add to cart action
+    // افزودن محصول به سبد | Add to cart action
     // document.querySelectorAll('[data-track="add-to-cart"]').forEach(function (button) {
     //   button.addEventListener('click', function () {
     //     safeCapture('add_to_cart', { product_id: productId });
     //   });
     // });
-    // ???? ????? ???? | Checkout started
+    // شروع تسویه حساب | Checkout started
     // const checkoutForm = document.querySelector('[data-track="checkout-start"]');
     // checkoutForm?.addEventListener('submit', function () {
     //   safeCapture('checkout_started', { product_id: productId });
     // });
-    // ????? ???? ?? ?نمایش بیشتر | Purchase completed with order details
+    // تکمیل خرید با جزئیات سفارش | Purchase completed with order details
     // const purchaseButton = document.querySelector('[data-track="purchase-complete"]');
     // purchaseButton?.addEventListener('click', function () {
     //   safeCapture('purchase_completed', {
@@ -5931,6 +6044,52 @@
 </script>
 -->
 
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav lg:hidden" id="mobileBottomNav" aria-label="ناوبری موبایل">
+    <ul>
+      <li>
+        <a href="/index.html" class="nav-item" data-page="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>خانه</span>
+        </a>
+      </li>
+      <li>
+        <a href="/categories.html" class="nav-item" data-page="categories">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>دسته‌بندی</span>
+        </a>
+      </li>
+      <li>
+        <a href="/service-shops.html" class="nav-item" data-page="services">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>خدمات</span>
+        </a>
+      </li>
+      <li>
+        <a href="/user/dashboard.html" class="nav-item" data-page="panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>پنل من</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
 </body>
+
+</html>
 
 </html>
