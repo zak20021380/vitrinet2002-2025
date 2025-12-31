@@ -3,6 +3,79 @@
    Modern, Professional UI/UX Design
    ======================================== */
 
+/* ========================================
+   CRITICAL: Close Button & Interaction Fix
+   ======================================== */
+
+/* Force close button to be clickable */
+#mobileMenuClose {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 999999 !important;
+  position: relative !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(239, 68, 68, 0.3) !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+#mobileMenuClose:hover {
+  background-color: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #ef4444 !important;
+}
+
+#mobileMenuClose:active,
+#mobileMenuClose:focus {
+  transform: scale(0.92) !important;
+  background-color: #fee2e2 !important;
+  outline: none !important;
+}
+
+#mobileMenuClose svg {
+  pointer-events: none !important;
+}
+
+/* Force panel to be interactive */
+#mobileMenuPanel {
+  pointer-events: auto !important;
+  z-index: 100000 !important;
+}
+
+/* Force backdrop to be clickable */
+#mobileMenuBackdrop {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 99999 !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* When menu container has pointer-events-auto class */
+#mobileMenu.pointer-events-auto {
+  pointer-events: auto !important;
+}
+
+#mobileMenu.pointer-events-auto #mobileMenuPanel,
+#mobileMenu.pointer-events-auto #mobileMenuBackdrop,
+#mobileMenu.pointer-events-auto #mobileMenuClose {
+  pointer-events: auto !important;
+}
+
+/* Header container fix */
+#mobileMenuPanel > div:first-child {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
+}
+
+/* All interactive elements in panel */
+#mobileMenuPanel button,
+#mobileMenuPanel a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
 /* Custom Scrollbar for Menu */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
