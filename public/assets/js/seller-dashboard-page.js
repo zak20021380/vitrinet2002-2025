@@ -702,7 +702,23 @@ handleSidebarOnResize();
 // ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
 function showSection(section) {
   if (section === 'msg') {
-    window.location.href = 'dashboard-messages.html';
+    const perf = document.getElementById('performance-container');
+    if (perf) perf.style.display = 'none';
+    document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar-menu-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll("section[id^='section-']").forEach(sec => {
+      sec.style.display = 'none';
+    });
+    const btnActive = document.getElementById('menu-msg');
+    if (btnActive) btnActive.classList.add('active');
+    const mobileActive = document.querySelector('.sidebar-menu-item[data-section="msg"]');
+    if (mobileActive) mobileActive.classList.add('active');
+    if (typeof loadDashboardMessages === 'function') {
+      loadDashboardMessages();
+    }
+    if (typeof updateBadge === 'function') {
+      updateBadge(0);
+    }
     return;
   }
   // اگر بخش انتخابی "content" (یعنی مدیریت ظاهر فروشگاه) نیست،
@@ -1664,8 +1680,10 @@ async function loadDailyVisits () {
 
 // ─── تابع بارگذاری بخش پیام‌ها ─────────────────────────────────
 let messagesLoaded = false;
+let messagesChatHandled = false;
 async function loadDashboardMessages() {
   const main = document.getElementById('main-content');
+  const chatIdFromUrl = new URLSearchParams(window.location.search).get('chat');
 
   main.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری پیام‌ها …</div>';
   try {
@@ -1684,6 +1702,10 @@ async function loadDashboardMessages() {
       s.onload = () => {
         typeof window.initMessaging === 'function' && window.initMessaging();
         typeof window.fetchChats === 'function' && window.fetchChats();
+        if (chatIdFromUrl && !messagesChatHandled && typeof window.openChatById === 'function') {
+          messagesChatHandled = true;
+          window.openChatById(chatIdFromUrl);
+        }
       };
       document.body.appendChild(s);
       messagesLoaded = true;
@@ -1691,6 +1713,10 @@ async function loadDashboardMessages() {
       // اگر اسکریپت قبلاً لود شده، فقط دوباره مقداردهی کن
       typeof window.initMessaging === 'function' && window.initMessaging();
       typeof window.fetchChats === 'function' && window.fetchChats();
+      if (chatIdFromUrl && !messagesChatHandled && typeof window.openChatById === 'function') {
+        messagesChatHandled = true;
+        window.openChatById(chatIdFromUrl);
+      }
     }
   } catch (err) {
     console.error(err);
@@ -1877,10 +1903,6 @@ async function loadPerformanceStatus() {
   });
   btn.dataset.listener = '1';
 })();
-
-
-
-
 
 
 
