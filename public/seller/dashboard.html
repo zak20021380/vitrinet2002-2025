@@ -2550,31 +2550,48 @@
     flex: 1 1 220px;
     min-width: 220px;
     max-width: 320px;
-    background: #fff;
-    border-radius: 1.2rem;
-    box-shadow: 0 2px 18px rgba(14, 165, 233, 0.1);
-    padding: 23px 17px 18px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 244, 0.92));
+    border-radius: 1.4rem;
+    border: 1px solid rgba(14, 165, 233, 0.08);
+    box-shadow:
+      0 10px 30px rgba(15, 23, 42, 0.08),
+      0 2px 8px rgba(16, 185, 129, 0.08);
+    padding: 24px 20px 20px;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 9px;
     position: relative;
     margin-bottom: 14px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .panel-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 60%);
+    opacity: 0.9;
+    z-index: -1;
   }
 
   .panel-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
+    transform: translateY(-6px);
+    box-shadow:
+      0 16px 38px rgba(15, 23, 42, 0.12),
+      0 6px 18px rgba(14, 165, 233, 0.18);
   }
 
   .panel-title {
     font-weight: bold;
     font-size: 15px;
-    color: #10b981;
+    color: #0f766e;
     margin-bottom: 7px;
     display: flex;
     align-items: center;
     gap: 6px;
+    letter-spacing: 0.2px;
   }
 
   .notif-item {
@@ -2583,17 +2600,18 @@
     gap: 7px;
     font-size: 13px;
     margin-bottom: 4px;
-    color: #ea580c;
+    color: #c2410c;
   }
 
   .msg-item {
     font-size: 13px;
-    color: #0ea5e9;
-    background: #e0fdfa;
-    padding: 6px 12px;
-    border-radius: 8px;
+    color: #0284c7;
+    background: rgba(224, 253, 250, 0.75);
+    padding: 8px 12px;
+    border-radius: 10px;
     margin-bottom: 6px;
     white-space: pre-line;
+    border: 1px dashed rgba(14, 165, 233, 0.18);
   }
 
   .shopinfo-list {
@@ -2606,6 +2624,21 @@
 
   .shopinfo-list li {
     margin-bottom: 7px;
+  }
+
+  @media (max-width: 640px) {
+    .panel-group {
+      gap: 16px;
+      margin-top: 20px;
+      padding-inline: 6px;
+    }
+
+    .panel-card {
+      min-width: 100%;
+      max-width: 100%;
+      padding: 20px 16px 18px;
+      border-radius: 1.2rem;
+    }
   }
 
 
