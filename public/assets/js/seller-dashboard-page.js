@@ -261,9 +261,10 @@ async function markAllRead() {
       await loadDashboardMessages();
     }
 
-    // بستن سایدبار در همه حالات
+    // بستن سایدبار در موبایل
     const sidebar = document.getElementById('sidebar');
-    if (sidebar && sidebar.classList.contains('expanded')) {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
       toggleSidebar();
     }
   });
@@ -432,9 +433,10 @@ function startMessagePolling() {
     }
     button.addEventListener('click', () => {
       showSection(section);
-      // بستن سایدبار در همه حالات
+      // بستن سایدبار در موبایل
       const sidebar = document.getElementById('sidebar');
-      if (sidebar && sidebar.classList.contains('expanded')) {
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
         toggleSidebar();
       }
     });
@@ -516,9 +518,10 @@ if (shopPreviewButton) {
     url.searchParams.set('shopurl', window.seller.shopurl);
     window.open(url.href, '_blank');
     
-    // بستن سایدبار در همه حالات
+    // بستن سایدبار در موبایل
     const sidebar = document.getElementById('sidebar');
-    if (sidebar && sidebar.classList.contains('expanded')) {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
       toggleSidebar();
     }
   });
@@ -648,8 +651,9 @@ handleSidebarOnResize();
   const mobileUpgradeBtn = document.getElementById('mobileUpgradeBtn');
   if (mobileUpgradeBtn) {
     mobileUpgradeBtn.addEventListener('click', () => {
+      // فقط click روی menu-upgrade صدا زده میشه
+      // چون menu-upgrade خودش toggleSidebar رو صدا میزنه، نیازی به صدا زدن مجدد نیست
       document.getElementById('menu-upgrade')?.click();
-      toggleSidebar();
     });
   }
 
@@ -1493,9 +1497,10 @@ function setMainImageIndex(idx) {
     menuContentBtn.addEventListener("click", function() {
       showSection('content');
       loadDashboardContent();
-      // بستن سایدبار در همه حالات
+      // بستن سایدبار در موبایل
       const sidebar = document.getElementById('sidebar');
-      if (sidebar && sidebar.classList.contains('expanded')) {
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
         toggleSidebar();
       }
     });
@@ -1546,9 +1551,10 @@ function setMainImageIndex(idx) {
   if (menuNotifBtn && !menuNotifBtn.dataset.listener) {
     menuNotifBtn.addEventListener("click", function() {
       window.loadDashboardLogo();
-      // بستن سایدبار در همه حالات
+      // بستن سایدبار در موبایل
       const sidebar = document.getElementById('sidebar');
-      if (sidebar && sidebar.classList.contains('expanded')) {
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
         toggleSidebar();
       }
     });
@@ -1631,9 +1637,10 @@ function setMainImageIndex(idx) {
       /* لودِ محتواى ارتقا */
       loadDashboardUpgrade();
 
-      /* بستن سایدبار در همه حالات */
+      /* بستن سایدبار در موبایل */
       const sidebar = document.getElementById('sidebar');
-      if (sidebar && sidebar.classList.contains('expanded')) {
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
         toggleSidebar();
       }
     });
@@ -1739,9 +1746,10 @@ btn.addEventListener('click', () => {
   loadDashboardMessages();
   // علامت‌گذاری همه‌ی پیام‌های خوانده‌نشده
 updateBadge(0);
-  // بستن سایدبار در همه حالات
+  // بستن سایدبار در موبایل
   const sidebar = document.getElementById('sidebar');
-  if (sidebar && sidebar.classList.contains('expanded')) {
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
     toggleSidebar();
   }
 });
@@ -1895,9 +1903,10 @@ async function loadPerformanceStatus() {
     document.querySelectorAll("section[id^='section-']").forEach(sec => sec.style.display = 'none');
     document.getElementById('main-content').innerHTML = '';
     loadPerformanceStatus();
-    // بستن سایدبار در همه حالات
+    // بستن سایدبار در موبایل
     const sidebar = document.getElementById('sidebar');
-    if (sidebar && sidebar.classList.contains('expanded')) {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
       toggleSidebar();
     }
   });
