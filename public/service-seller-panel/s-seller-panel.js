@@ -4292,7 +4292,7 @@ const Notifications = {
             SellerDashboard.openChatModal(chatId);
           } else {
             // اگر تابع موجود نبود، به صفحه پیام‌ها برو
-            window.location.href = `/seller/dashboard-messages.html?chat=${chatId}`;
+            window.location.href = `/seller/dashboard.html?section=msg&chat=${chatId}`;
           }
         }
       } else if (e.target.closest('.notif-mark-read-single')) {

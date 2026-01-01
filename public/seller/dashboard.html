@@ -9206,11 +9206,20 @@
     }
 
     function navigateToMessages() {
-      window.location.href = 'dashboard-messages.html';
+      if (typeof window.loadDashboardMessages === 'function') {
+        window.loadDashboardMessages();
+      }
     }
 
     function showSection(sectionName) {
       if (sectionName === 'msg') {
+        if (performanceContainer) {
+          performanceContainer.style.display = 'none';
+        }
+        sections.forEach((section) => {
+          section.style.display = 'none';
+        });
+        updateActiveButton(sectionName);
         navigateToMessages();
         return;
       }
@@ -9333,7 +9342,15 @@
       });
     }
 
-    showSection('visit');
+    const params = new URLSearchParams(window.location.search);
+    const initialSection = params.get('section');
+    if (initialSection === 'performance') {
+      showPerformance();
+    } else if (initialSection) {
+      showSection(initialSection);
+    } else {
+      showSection('visit');
+    }
   })();
 </script>
 
