@@ -39,13 +39,11 @@
 
 /* Force panel to be interactive */
 #mobileMenuPanel {
-  pointer-events: auto !important;
   z-index: 100000 !important;
 }
 
-/* Force backdrop to be clickable */
+/* Force backdrop to be clickable - only when menu is open */
 #mobileMenuBackdrop {
-  pointer-events: auto !important;
   cursor: pointer !important;
   z-index: 99999 !important;
   -webkit-tap-highlight-color: transparent !important;
@@ -405,7 +403,7 @@
 /* Performance optimization */
 #mobileMenuPanel {
   will-change: transform;
-  transform: translateZ(0);
+  /* transform: translateZ(0); Removed to prevent conflict with Tailwind translate classes */
   backface-visibility: hidden;
 }
 

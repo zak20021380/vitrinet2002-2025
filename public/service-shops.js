@@ -4704,3 +4704,45 @@ function render(items) {
       closeContactPopup();
     }
   });
+
+
+// ============================================
+// Soft-UI Filter Chips Toggle Handler
+// ============================================
+(() => {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Handle Soft-UI chip toggle
+    const handleSoftUIChipClick = (event) => {
+      const chip = event.target.closest('.softui-chip');
+      if (!chip) return;
+      
+      // Find all chips in the same container
+      const container = chip.parentElement;
+      if (!container) return;
+      
+      const chips = container.querySelectorAll('.softui-chip');
+      
+      // Toggle active state
+      chips.forEach(c => {
+        c.classList.remove('softui-chip--active');
+        c.classList.add('softui-chip--inactive');
+      });
+      
+      chip.classList.remove('softui-chip--inactive');
+      chip.classList.add('softui-chip--active');
+    };
+    
+    // Attach event listeners to all Soft-UI chip containers
+    document.querySelectorAll('.softui-filters, .softui-chip').forEach(el => {
+      el.addEventListener('click', handleSoftUIChipClick);
+    });
+    
+    // Also handle chips that are direct children of other containers
+    document.addEventListener('click', (event) => {
+      const chip = event.target.closest('.softui-chip');
+      if (chip && !chip.closest('.softui-filters')) {
+        handleSoftUIChipClick(event);
+      }
+    });
+  });
+})();

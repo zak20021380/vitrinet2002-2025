@@ -121,6 +121,135 @@
       }
     }
 
+    /* بخش ورود فروشندگان قبلی */
+    .existing-seller-section {
+      margin-top: 0.75rem;
+      padding-top: 0;
+    }
+
+    .existing-seller-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .existing-seller-divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d1d5db, transparent);
+    }
+
+    .existing-seller-divider-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #9ca3af;
+      padding: 0 0.25rem;
+    }
+
+    .existing-seller-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%);
+      border: 1.5px solid rgba(14, 165, 233, 0.18);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .existing-seller-card:hover {
+      border-color: rgba(14, 165, 233, 0.35);
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
+    }
+
+    .existing-seller-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      flex-shrink: 0;
+    }
+
+    .existing-seller-icon svg {
+      width: 22px;
+      height: 22px;
+      color: white;
+    }
+
+    .existing-seller-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .existing-seller-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 0.15rem;
+    }
+
+    .existing-seller-desc {
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .existing-seller-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 0.65rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 3px 10px rgba(14, 165, 233, 0.28);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .existing-seller-btn:hover {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      box-shadow: 0 5px 14px rgba(14, 165, 233, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .existing-seller-btn:active {
+      transform: translateY(0);
+    }
+
+    .existing-seller-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.25s ease;
+    }
+
+    .existing-seller-btn:hover svg {
+      transform: translateX(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .existing-seller-card {
+        flex-wrap: wrap;
+      }
+      
+      .existing-seller-btn {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.7rem 1rem;
+      }
+    }
+
     #category.open {
       position: absolute;
       z-index: 50;
@@ -376,10 +505,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-bold mb-1 flex items-center gap-1">
-            رمز عبور <span class="text-red-500">*</span>
-            <span class="ml-2 text-xs text-gray-500 font-normal">(حداقل ۸ کاراکتر، شامل عدد، حرف انگلیسی و نماد)</span>
-          </label>
+          <label class="block text-sm font-bold mb-1">رمز عبور <span class="text-red-500">*</span></label>
           <div class="relative">
             <input required type="password" id="pass1" minlength="8"
               class="w-full p-3 pl-12 border rounded-xl focus:ring-2 focus:ring-green-200"
@@ -395,6 +521,7 @@
               </svg>
             </button>
           </div>
+          <p class="text-xs text-gray-500 mt-2">رمز باید حداقل ۸ کاراکتر و ترکیبی از اعداد، حروف انگلیسی و نمادهایی مثل <span dir="ltr" class="inline-block">! @ # $ % ^ & *</span> باشد.</p>
         </div>
 
         <div>
@@ -432,11 +559,38 @@
           class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">
           ثبت فروشگاه
         </button>
-
-        <div id="pass-guide" class="text-xs text-gray-500 mt-1 text-center">
-          رمز باید حداقل ۸ کاراکتر و ترکیبی از اعداد، حروف انگلیسی و نمادهایی مثل ! @ # $ % ^ & * باشد.
-        </div>
       </form>
+
+      <!-- بخش ورود فروشندگان قبلی -->
+      <div class="existing-seller-section">
+        <div class="existing-seller-divider">
+          <span class="existing-seller-divider-line"></span>
+          <span class="existing-seller-divider-text">یا</span>
+          <span class="existing-seller-divider-line"></span>
+        </div>
+        
+        <div class="existing-seller-card">
+          <div class="existing-seller-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 7L12 10L9 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="existing-seller-content">
+            <h3 class="existing-seller-title">قبلاً ثبت‌نام کرده‌اید؟</h3>
+            <p class="existing-seller-desc">اگر فروشگاه شما از قبل در ویترینت ثبت شده، وارد پنل فروشندگی شوید.</p>
+          </div>
+          <a href="seller/login.html" class="existing-seller-btn">
+            <span>ورود به پنل فروشندگی</span>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
 
     </section>
 

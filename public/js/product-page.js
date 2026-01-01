@@ -133,7 +133,14 @@
     sellerActions: document.getElementById('sellerActions'),
     sellerAddressButton: document.getElementById('sellerAddressButton'),
     messageSellerButton: document.getElementById('messageSellerButton'),
+    discountButton: document.getElementById('discountButton'),
     sellerLink: document.getElementById('sellerLink'),
+    messageModal: document.getElementById('messageModal'),
+    messageModalClose: document.getElementById('messageModalClose'),
+    messageCancelBtn: document.getElementById('messageCancelBtn'),
+    discountModal: document.getElementById('discountModal'),
+    discountModalClose: document.getElementById('discountModalClose'),
+    discountCancelBtn: document.getElementById('discountCancelBtn'),
     addressModal: document.getElementById('addressModal'),
     addressModalTitle: document.getElementById('addressModalTitle'),
     addressModalAddress: document.getElementById('addressModalAddress'),
@@ -150,7 +157,8 @@
     likeCount: document.getElementById('likeCount'),
     likeButtonLabel: document.getElementById('likeButtonLabel'),
     likeStatus: document.getElementById('likeStatus'),
-    likeMeterFill: document.getElementById('likeMeterFill')
+    likeMeterFill: document.getElementById('likeMeterFill'),
+    addToFavoritesBtn: document.getElementById('addToFavoritesBtn')
   };
 
   const state = {
@@ -292,6 +300,20 @@
     dom.sellerAddressButton.addEventListener('click', openAddressModal);
   }
 
+  if (dom.messageSellerButton) {
+    dom.messageSellerButton.addEventListener('click', openMessageModal);
+  }
+
+  if (dom.discountButton) {
+    dom.discountButton.addEventListener('click', openDiscountModal);
+  }
+
+  if (dom.messageModalClose) dom.messageModalClose.addEventListener('click', () => closeOverlay(dom.messageModal));
+  if (dom.messageCancelBtn) dom.messageCancelBtn.addEventListener('click', () => closeOverlay(dom.messageModal));
+
+  if (dom.discountModalClose) dom.discountModalClose.addEventListener('click', () => closeOverlay(dom.discountModal));
+  if (dom.discountCancelBtn) dom.discountCancelBtn.addEventListener('click', () => closeOverlay(dom.discountModal));
+
   if (dom.sellerLink) {
     dom.sellerLink.addEventListener('click', handleSellerLinkClick);
   }
@@ -299,6 +321,9 @@
   if (dom.likeButton) {
     dom.likeButton.addEventListener('click', handleLikeToggle);
   }
+
+  // Note: addToFavoritesBtn has its own separate handler in initFavorites() IIFE
+  // Do NOT add handleLikeToggle here to avoid duplicate click handling
 
   const canonical = document.querySelector('link[rel="canonical"]');
   if (canonical) {
@@ -530,12 +555,12 @@
     // جلوگیری از رفتار پیش‌فرض لینک
     event.preventDefault();
     event.stopPropagation();
-    
+
     const message = state.sellerLinkMessage || 'صفحه مغازه برای این فروشنده در دسترس نیست.';
-    
+
     // نمایش پیام با چند روش مختلف برای اطمینان از دیده شدن
     announce(message);
-    
+
     // همچنین یک toast ساده نمایش بده
     showToast(message);
   }
@@ -547,7 +572,7 @@
     if (existingToast) {
       existingToast.remove();
     }
-    
+
     const toast = document.createElement('div');
     toast.className = 'product-toast';
     toast.textContent = message;
@@ -568,7 +593,7 @@
       max-width: 90vw;
       text-align: center;
     `;
-    
+
     // اضافه کردن animation
     const style = document.createElement('style');
     style.textContent = `
@@ -585,9 +610,9 @@
       style.id = 'toast-styles';
       document.head.appendChild(style);
     }
-    
+
     document.body.appendChild(toast);
-    
+
     // حذف toast بعد از 3 ثانیه
     setTimeout(() => {
       toast.style.animation = 'toastFadeOut 0.3s ease forwards';
@@ -659,6 +684,9 @@
       dom.likeMeterFill.style.width = `${progress}%`;
     }
 
+    // Note: addToFavoritesBtn has its own independent state managed by initFavorites() IIFE
+    // Like and Favorite are separate features - do NOT sync their states
+
     if (dom.likeStatus) {
       dom.likeStatus.textContent = likeState.liked
         ? 'بازخورد شما ثبت شد'
@@ -701,35 +729,40 @@
     }
 
     // Disable CTA button - حفظ استایل یکپارچه با سایر دکمه‌ها
-    if (messageBtn) {
-      if (!isInStock) {
-        // ذخیره محتوای اصلی
-        if (!messageBtn.dataset.originalHtml) {
-          messageBtn.dataset.originalHtml = messageBtn.innerHTML;
-        }
-        messageBtn.disabled = true;
-        messageBtn.classList.add('is-disabled', 'out-of-stock-cta');
-        // استفاده از استایل خاکستری مشابه حالت disabled اما با پیام کوتاه‌تر
-        messageBtn.innerHTML = `
-          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          <span class="text-xs leading-tight text-center">ناموجود</span>
-        `;
-        // تغییر رنگ پس‌زمینه به خاکستری
-        messageBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-        messageBtn.classList.add('bg-slate-400', 'hover:bg-slate-400', 'cursor-not-allowed');
-      } else {
-        messageBtn.disabled = false;
-        messageBtn.classList.remove('is-disabled', 'out-of-stock-cta', 'bg-slate-400', 'hover:bg-slate-400', 'cursor-not-allowed');
-        messageBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-        if (messageBtn.dataset.originalHtml) {
-          messageBtn.innerHTML = messageBtn.dataset.originalHtml;
-        }
+    // Enable CTA button - Always active regardless of stock
+    // Enable ALL action buttons - Always active regardless of stock
+    const buttonsToEnable = [
+      dom.messageSellerButton,
+      dom.sellerAddressButton,
+      dom.discountButton,
+      dom.sellerLink,
+      dom.addToFavoritesBtn
+    ];
+
+    buttonsToEnable.forEach(btn => {
+      if (!btn) return;
+
+      // Basic property reset
+      if (btn.tagName === 'BUTTON') {
+        btn.disabled = false;
       }
-    }
+
+      // Visual reset
+      btn.classList.remove('is-disabled', 'out-of-stock-cta', 'bg-slate-400', 'hover:bg-slate-400', 'cursor-not-allowed', 'opacity-50', 'pointer-events-none');
+      btn.style.pointerEvents = 'auto'; // Force interactivity
+
+      // Specific restoration logic
+      if (btn === dom.messageSellerButton) {
+        btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        if (btn.dataset.originalHtml) {
+          btn.innerHTML = btn.dataset.originalHtml;
+        }
+      } else if (btn === dom.sellerAddressButton) {
+        btn.classList.remove('grayscale');
+      } else if (btn === dom.discountButton) {
+        btn.classList.remove('grayscale');
+      }
+    });
   }
 
   async function loadLikeStatus(productId) {
@@ -793,6 +826,64 @@
     void dom.likeButton.offsetWidth;
     dom.likeButton.classList.add('pop');
     window.setTimeout(() => dom.likeButton && dom.likeButton.classList.remove('pop'), 650);
+  }
+
+  function openMessageModal() {
+    if (!dom.messageModal) return;
+
+    // Update product info in modal
+    const img = document.getElementById('messageProductImage');
+    const title = document.getElementById('messageProductTitle');
+    const seller = document.getElementById('messageProductSeller');
+
+    if (img && state.images[0]) img.src = state.images[0];
+    if (title) title.textContent = state.title;
+    if (seller) seller.textContent = `فروشنده: ${state.sellerName}`;
+
+    // Check login
+    const token = localStorage.getItem('token');
+    const isLoggedIn = !!token;
+
+    const loginPrompt = document.getElementById('messageLoginPrompt');
+    const formContainer = document.getElementById('messageFormContainer');
+    const footerHint = document.getElementById('messageFooterHint');
+    const sendBtn = document.getElementById('messageSendBtn');
+
+    if (loginPrompt) loginPrompt.hidden = isLoggedIn;
+    if (formContainer) formContainer.hidden = !isLoggedIn;
+    if (footerHint) footerHint.hidden = isLoggedIn;
+    if (sendBtn) sendBtn.disabled = !isLoggedIn;
+
+    openOverlay(dom.messageModal);
+  }
+
+  function openDiscountModal() {
+    if (!dom.discountModal) return;
+
+    // Update product info in modal
+    const img = document.getElementById('discountProductImage');
+    const title = document.getElementById('discountProductTitle');
+    const seller = document.getElementById('discountProductSeller');
+
+    if (img && state.images[0]) img.src = state.images[0];
+    if (title) title.textContent = state.title;
+    if (seller) seller.textContent = `فروشنده: ${state.sellerName}`;
+
+    // Check login
+    const token = localStorage.getItem('token');
+    const isLoggedIn = !!token;
+
+    const loginPrompt = document.getElementById('discountLoginPrompt');
+    const formContainer = document.getElementById('discountFormContainer');
+    const footerHint = document.getElementById('discountFooterHint');
+    const sendBtn = document.getElementById('discountSendBtn');
+
+    if (loginPrompt) loginPrompt.hidden = isLoggedIn;
+    if (formContainer) formContainer.hidden = !isLoggedIn;
+    if (footerHint) footerHint.hidden = isLoggedIn;
+    if (sendBtn) sendBtn.disabled = !isLoggedIn;
+
+    openOverlay(dom.discountModal);
   }
 
   function renderProduct(product, id) {
@@ -1430,14 +1521,14 @@
 
         badge.className = tagClass;
         badge.textContent = tag;
-        
+
         // Add staggered animation delay for smooth entrance
         badge.style.animationDelay = `${index * 0.08}s`;
         badge.style.opacity = '0';
         badge.style.transform = 'translateY(8px) scale(0.95)';
-        
+
         dom.dynamicTags.appendChild(badge);
-        
+
         // Trigger entrance animation
         requestAnimationFrame(() => {
           setTimeout(() => {
@@ -1538,6 +1629,10 @@
         dom.messageSellerButton.disabled = false;
         dom.messageSellerButton.classList.remove('is-disabled');
       }
+      if (dom.discountButton) {
+        dom.discountButton.disabled = true; // Disable discount if no seller
+        dom.discountButton.classList.add('is-disabled', 'cursor-not-allowed', 'opacity-50');
+      }
       if (dom.sellerLink) {
         dom.sellerLink.classList.add('is-disabled');
         dom.sellerLink.setAttribute('aria-disabled', 'true');
@@ -1576,6 +1671,11 @@
       dom.messageSellerButton.classList.remove('is-disabled');
     }
 
+    if (dom.discountButton) {
+      dom.discountButton.disabled = false;
+      dom.discountButton.classList.remove('is-disabled', 'cursor-not-allowed', 'opacity-50');
+    }
+
     if (addressText) {
       if (dom.sellerAddressButton) {
         const mapQuery = [addressText, cityText].filter(Boolean).join('، ');
@@ -1605,7 +1705,7 @@
     }
 
     // استخراج shopurl از منابع مختلف: seller، productDesc، یا shopSlug که قبلاً محاسبه شده
-    const shopUrl = (seller && typeof seller.shopurl === 'string' && seller.shopurl.trim()) 
+    const shopUrl = (seller && typeof seller.shopurl === 'string' && seller.shopurl.trim())
       || (seller && typeof seller.shopUrl === 'string' && seller.shopUrl.trim())
       || (productDesc && typeof productDesc.shopurl === 'string' && productDesc.shopurl.trim())
       || (productDesc && typeof productDesc.shopUrl === 'string' && productDesc.shopUrl.trim())
@@ -3417,7 +3517,7 @@
 
       const data = await response.json();
       const favorites = data.favorites || [];
-      state.isFavorite = favorites.some(fav => 
+      state.isFavorite = favorites.some(fav =>
         (fav._id === state.productId) || (fav.id === state.productId)
       );
       updateUI();

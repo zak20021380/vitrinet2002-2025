@@ -1,0 +1,1156 @@
+/* ============================================
+   Service Shops - Modern Soft-UI Pastel Design
+   Mobile-First Premium Interface
+   ============================================ */
+
+/* === Color Palette Variables === */
+:root {
+  /* Primary Mint Green Palette */
+  --softui-mint-50: #f0fdf9;
+  --softui-mint-100: #ccfbef;
+  --softui-mint-200: #99f6e0;
+  --softui-mint-300: #5eead4;
+  --softui-mint-400: #2dd4bf;
+  --softui-mint-500: #14b8a6;
+  --softui-mint-600: #0d9488;
+  
+  /* Deep Forest Green (for text contrast) */
+  --softui-forest-700: #115e59;
+  --softui-forest-800: #134e4a;
+  --softui-forest-900: #0f3d3a;
+  
+  /* Slate Grey Palette */
+  --softui-slate-50: #f8fafc;
+  --softui-slate-100: #f1f5f9;
+  --softui-slate-200: #e2e8f0;
+  --softui-slate-300: #cbd5e1;
+  --softui-slate-400: #94a3b8;
+  --softui-slate-500: #64748b;
+  --softui-slate-600: #475569;
+  --softui-slate-700: #334155;
+  
+  /* Ice Blue Palette */
+  --softui-ice-50: #f0f9ff;
+  --softui-ice-100: #e0f2fe;
+  --softui-ice-200: #bae6fd;
+  --softui-ice-300: #7dd3fc;
+  
+  /* Soft White */
+  --softui-white: #ffffff;
+  --softui-white-translucent: rgba(255, 255, 255, 0.92);
+  
+  /* Shadows */
+  --softui-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --softui-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --softui-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --softui-shadow-lg: 0 8px 32px rgba(15, 23, 42, 0.1);
+  
+  /* Border Radius */
+  --softui-radius-sm: 8px;
+  --softui-radius-md: 12px;
+  --softui-radius-lg: 16px;
+  --softui-radius-xl: 20px;
+  --softui-radius-full: 9999px;
+}
+
+/* === Page Background === */
+.softui-page {
+  background: linear-gradient(180deg, var(--softui-slate-50) 0%, var(--softui-white) 100%);
+  min-height: 100vh;
+}
+
+/* ============================================
+   HEADER & STATS SECTION
+   ============================================ */
+
+.softui-header {
+  padding: 20px 16px 16px;
+  background: var(--softui-white);
+}
+
+.softui-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.softui-header-title h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--softui-slate-700);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Active Count Pill Badge */
+.softui-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--softui-forest-700);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--softui-radius-full);
+  white-space: nowrap;
+}
+
+.softui-header-subtitle {
+  font-size: 14px;
+  color: var(--softui-slate-500);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================
+   SEARCH & SORT BAR
+   ============================================ */
+
+.softui-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.softui-search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.softui-search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 44px;
+  background: var(--softui-slate-100);
+  border: none;
+  border-radius: var(--softui-radius-lg);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--softui-slate-700);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.softui-search-input::placeholder {
+  color: var(--softui-slate-400);
+}
+
+.softui-search-input:focus {
+  background: var(--softui-white);
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.15), var(--softui-shadow-md);
+}
+
+.softui-search-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--softui-slate-400);
+  pointer-events: none;
+}
+
+/* Sort Dropdown - Minimalist */
+.softui-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--softui-white);
+  border: none;
+  border-radius: var(--softui-radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--softui-slate-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--softui-shadow-xs);
+}
+
+.softui-sort-btn:hover {
+  background: var(--softui-slate-50);
+}
+
+.softui-sort-btn:active {
+  transform: scale(0.98);
+}
+
+.softui-sort-btn svg {
+  width: 16px;
+  height: 16px;
+  color: var(--softui-slate-500);
+}
+
+/* ============================================
+   FILTER CHIPS (Stadium Shape)
+   ============================================ */
+
+.softui-filters {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.softui-filters::-webkit-scrollbar {
+  display: none;
+}
+
+/* Base Chip Style */
+.softui-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--softui-radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  flex-shrink: 0;
+}
+
+/* Inactive Chip */
+.softui-chip--inactive {
+  background: var(--softui-ice-100);
+  color: var(--softui-slate-500);
+  box-shadow: none;
+}
+
+.softui-chip--inactive:hover {
+  background: var(--softui-ice-200);
+  color: var(--softui-slate-600);
+}
+
+.softui-chip--inactive:active {
+  transform: scale(0.97);
+}
+
+/* Active Chip - Mint Pastel */
+.softui-chip--active {
+  background: rgba(20, 184, 166, 0.15);
+  color: var(--softui-forest-700);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.12);
+}
+
+.softui-chip--active:hover {
+  background: rgba(20, 184, 166, 0.2);
+}
+
+.softui-chip--active:active {
+  transform: scale(0.97);
+}
+
+/* Chip Icon */
+.softui-chip svg,
+.softui-chip i {
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+}
+
+/* ============================================
+   SERVICE CARDS - Premium Soft-UI
+   ============================================ */
+
+.softui-services-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px 24px;
+}
+
+.softui-service-card {
+  background: var(--softui-white);
+  border-radius: var(--softui-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--softui-shadow-sm);
+  transition: all 0.25s ease;
+}
+
+.softui-service-card:hover {
+  box-shadow: var(--softui-shadow-md);
+  transform: translateY(-2px);
+}
+
+.softui-service-card:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* Card Image */
+.softui-card-image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.softui-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.softui-service-card:hover .softui-card-image img {
+  transform: scale(1.03);
+}
+
+/* Card Badge (on image) */
+.softui-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--softui-white-translucent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--softui-radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--softui-forest-700);
+}
+
+.softui-card-badge svg {
+  width: 14px;
+  height: 14px;
+  color: var(--softui-mint-500);
+}
+
+/* Card Content */
+.softui-card-content {
+  padding: 16px;
+}
+
+.softui-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--softui-slate-700);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.softui-card-description {
+  font-size: 13px;
+  color: var(--softui-slate-500);
+  margin: 0 0 12px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Card Footer */
+.softui-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.softui-card-price {
+  display: flex;
+  flex-direction: column;
+}
+
+.softui-price-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--softui-forest-700);
+  line-height: 1.2;
+}
+
+.softui-price-unit {
+  font-size: 11px;
+  color: var(--softui-slate-400);
+  font-weight: 500;
+}
+
+/* Book Button */
+.softui-book-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 20px;
+  background: linear-gradient(135deg, var(--softui-mint-400) 0%, var(--softui-mint-500) 100%);
+  color: var(--softui-white);
+  border: none;
+  border-radius: var(--softui-radius-full);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.25);
+}
+
+.softui-book-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.35);
+}
+
+.softui-book-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.softui-book-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   ACTION BUTTONS GRID (2x2)
+   ============================================ */
+
+.softui-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: var(--softui-slate-50);
+}
+
+.softui-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: var(--softui-radius-lg);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+/* Message Seller - Purple */
+.softui-action-btn--message {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: var(--softui-white);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+}
+
+.softui-action-btn--message:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Shop Address - Green */
+.softui-action-btn--address {
+  background: linear-gradient(135deg, var(--softui-mint-500) 0%, #059669 100%);
+  color: var(--softui-white);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.softui-action-btn--address:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Shop Page - Blue */
+.softui-action-btn--shop {
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  color: var(--softui-white);
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+}
+
+.softui-action-btn--shop:hover {
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Request Discount - Orange */
+.softui-action-btn--discount {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  color: var(--softui-white);
+  box-shadow: 0 4px 16px rgba(251, 146, 60, 0.3);
+}
+
+.softui-action-btn--discount:hover {
+  box-shadow: 0 6px 20px rgba(251, 146, 60, 0.4);
+  transform: translateY(-1px);
+}
+
+.softui-action-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.softui-action-btn svg,
+.softui-action-btn i {
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.softui-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.softui-empty-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  color: var(--softui-slate-300);
+}
+
+.softui-empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--softui-slate-600);
+  margin: 0 0 8px;
+}
+
+.softui-empty-text {
+  font-size: 14px;
+  color: var(--softui-slate-400);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+/* ============================================
+   LOADING SKELETON
+   ============================================ */
+
+.softui-skeleton {
+  background: linear-gradient(90deg, 
+    var(--softui-slate-100) 0%, 
+    var(--softui-slate-200) 50%, 
+    var(--softui-slate-100) 100%);
+  background-size: 200% 100%;
+  animation: softui-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--softui-radius-md);
+}
+
+@keyframes softui-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.softui-skeleton-card {
+  height: 280px;
+  border-radius: var(--softui-radius-xl);
+}
+
+.softui-skeleton-chip {
+  width: 80px;
+  height: 40px;
+  border-radius: var(--softui-radius-full);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (min-width: 640px) {
+  .softui-services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 0 20px 32px;
+  }
+  
+  .softui-filters {
+    padding: 0 20px 20px;
+    gap: 12px;
+  }
+  
+  .softui-chip {
+    height: 44px;
+    padding: 0 22px;
+    font-size: 14px;
+  }
+  
+  .softui-header {
+    padding: 24px 20px 20px;
+  }
+  
+  .softui-header-title h1 {
+    font-size: 26px;
+  }
+  
+  .softui-search-bar {
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+  
+  .softui-actions-grid {
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .softui-action-btn {
+    height: 60px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .softui-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .softui-header,
+  .softui-search-bar,
+  .softui-filters {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .softui-actions-grid {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .softui-service-card,
+  .softui-chip,
+  .softui-book-btn,
+  .softui-action-btn,
+  .softui-search-input {
+    transition: none;
+  }
+  
+  .softui-skeleton {
+    animation: none;
+  }
+  
+  .softui-service-card:hover .softui-card-image img {
+    transform: none;
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT (Optional)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  .softui-page.auto-dark {
+    --softui-white: #1e293b;
+    --softui-white-translucent: rgba(30, 41, 59, 0.92);
+    --softui-slate-50: #0f172a;
+    --softui-slate-100: #1e293b;
+    --softui-slate-200: #334155;
+    --softui-slate-300: #475569;
+    --softui-slate-400: #64748b;
+    --softui-slate-500: #94a3b8;
+    --softui-slate-600: #cbd5e1;
+    --softui-slate-700: #e2e8f0;
+    --softui-ice-100: rgba(56, 189, 248, 0.1);
+    --softui-ice-200: rgba(56, 189, 248, 0.15);
+  }
+}
+
+
+/* ============================================
+   REVIEW FILTER CHIPS OVERRIDE
+   (Compatibility with existing review-filter-chip class)
+   ============================================ */
+
+.review-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--softui-radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  flex-shrink: 0;
+  background: var(--softui-ice-100);
+  color: var(--softui-slate-500);
+}
+
+.review-filter-chip:hover {
+  background: var(--softui-ice-200);
+  color: var(--softui-slate-600);
+}
+
+.review-filter-chip:active {
+  transform: scale(0.97);
+}
+
+.review-filter-chip.active {
+  background: rgba(20, 184, 166, 0.15);
+  color: var(--softui-forest-700);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.12);
+}
+
+.review-filter-chip.active:hover {
+  background: rgba(20, 184, 166, 0.2);
+}
+
+/* ============================================
+   MOBILE BOTTOM NAVIGATION SOFT-UI
+   ============================================ */
+
+.softui-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 64px;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  background: var(--softui-white);
+  border-top: 1px solid var(--softui-slate-100);
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+}
+
+.softui-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: var(--softui-radius-lg);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--softui-slate-400);
+}
+
+.softui-nav-item:hover {
+  background: var(--softui-slate-50);
+  color: var(--softui-slate-600);
+}
+
+.softui-nav-item.active {
+  color: var(--softui-mint-600);
+}
+
+.softui-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  background: var(--softui-mint-500);
+  border-radius: var(--softui-radius-full);
+}
+
+.softui-nav-item svg,
+.softui-nav-item i {
+  width: 22px;
+  height: 22px;
+  font-size: 20px;
+}
+
+.softui-nav-item span {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ============================================
+   TOAST NOTIFICATION - SOFT-UI
+   ============================================ */
+
+.softui-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--softui-slate-700);
+  color: var(--softui-white);
+  border-radius: var(--softui-radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--softui-shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.softui-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.softui-toast--success {
+  background: linear-gradient(135deg, var(--softui-mint-500) 0%, var(--softui-mint-600) 100%);
+}
+
+.softui-toast--error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.softui-toast svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   MODAL SOFT-UI ENHANCEMENTS
+   ============================================ */
+
+.softui-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.softui-modal-backdrop.show {
+  opacity: 1;
+}
+
+.softui-modal-card {
+  position: relative;
+  width: 92%;
+  max-width: 420px;
+  background: var(--softui-white);
+  border-radius: var(--softui-radius-xl);
+  box-shadow: var(--softui-shadow-lg);
+  overflow: hidden;
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+  transition: all 0.25s ease;
+}
+
+.softui-modal-card.show {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.softui-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--softui-slate-100);
+}
+
+.softui-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--softui-radius-md);
+  background: linear-gradient(135deg, var(--softui-mint-400) 0%, var(--softui-mint-500) 100%);
+  color: var(--softui-white);
+}
+
+.softui-modal-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.softui-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--softui-slate-700);
+  margin: 0;
+}
+
+.softui-modal-subtitle {
+  font-size: 13px;
+  color: var(--softui-slate-500);
+  margin: 4px 0 0;
+}
+
+.softui-modal-body {
+  padding: 20px;
+}
+
+.softui-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--softui-slate-50);
+}
+
+.softui-modal-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: var(--softui-radius-full);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.softui-modal-btn--primary {
+  background: linear-gradient(135deg, var(--softui-mint-400) 0%, var(--softui-mint-500) 100%);
+  color: var(--softui-white);
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.25);
+}
+
+.softui-modal-btn--primary:hover {
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.35);
+  transform: translateY(-1px);
+}
+
+.softui-modal-btn--secondary {
+  background: var(--softui-white);
+  color: var(--softui-slate-600);
+  border: 1px solid var(--softui-slate-200);
+}
+
+.softui-modal-btn--secondary:hover {
+  background: var(--softui-slate-50);
+  border-color: var(--softui-slate-300);
+}
+
+/* ============================================
+   INPUT FIELDS - SOFT-UI
+   ============================================ */
+
+.softui-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: var(--softui-slate-100);
+  border: 2px solid transparent;
+  border-radius: var(--softui-radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--softui-slate-700);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.softui-input::placeholder {
+  color: var(--softui-slate-400);
+}
+
+.softui-input:focus {
+  background: var(--softui-white);
+  border-color: var(--softui-mint-400);
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+}
+
+.softui-input:disabled {
+  background: var(--softui-slate-50);
+  color: var(--softui-slate-400);
+  cursor: not-allowed;
+}
+
+.softui-textarea {
+  min-height: 120px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.softui-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--softui-slate-600);
+}
+
+/* ============================================
+   RATING STARS - SOFT-UI
+   ============================================ */
+
+.softui-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.softui-star {
+  width: 28px;
+  height: 28px;
+  color: var(--softui-slate-200);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.softui-star:hover {
+  transform: scale(1.15);
+}
+
+.softui-star.filled {
+  color: #facc15;
+}
+
+.softui-star.half {
+  background: linear-gradient(90deg, #facc15 50%, var(--softui-slate-200) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================
+   BADGE STYLES - SOFT-UI
+   ============================================ */
+
+.softui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--softui-radius-full);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.softui-badge--success {
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--softui-forest-700);
+}
+
+.softui-badge--warning {
+  background: rgba(251, 146, 60, 0.12);
+  color: #c2410c;
+}
+
+.softui-badge--info {
+  background: rgba(56, 189, 248, 0.12);
+  color: #0369a1;
+}
+
+.softui-badge--error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+/* ============================================
+   DIVIDER - SOFT-UI
+   ============================================ */
+
+.softui-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--softui-slate-200) 20%, 
+    var(--softui-slate-200) 80%, 
+    transparent 100%);
+  margin: 16px 0;
+}
+
+/* ============================================
+   PRICE TAG - SOFT-UI
+   ============================================ */
+
+.softui-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.softui-price-amount {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--softui-forest-700);
+}
+
+.softui-price-currency {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--softui-slate-400);
+}
+
+.softui-price-old {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--softui-slate-400);
+  text-decoration: line-through;
+}
+
+/* ============================================
+   AVATAR - SOFT-UI
+   ============================================ */
+
+.softui-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--softui-radius-full);
+  background: linear-gradient(135deg, var(--softui-mint-100) 0%, var(--softui-ice-100) 100%);
+  color: var(--softui-mint-600);
+  font-size: 18px;
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.softui-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.softui-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.softui-avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}

@@ -4987,6 +4987,13 @@
         transform: translateY(-3px) scale(1.02);
       }
     }
+
+    /* Hide header and mobile nav when mobile menu is open */
+    body.mobile-menu-open #mainHeader,
+    body.mobile-menu-open .mobile-nav {
+      display: none !important;
+      visibility: hidden !important;
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -5214,13 +5221,19 @@
 
         <!-- Close Button -->
         <button id="mobileMenuClose" type="button"
-          class="relative w-11 h-11 rounded-2xl bg-white hover:bg-red-50 border border-gray-200/60 hover:border-red-200 flex items-center justify-center text-gray-600 hover:text-red-500 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-red-500/10 group z-50 pointer-events-auto cursor-pointer"
+          class="relative w-11 h-11 rounded-2xl bg-white hover:bg-rose-50 border border-gray-200/60 hover:border-rose-200 flex items-center justify-center text-gray-500 hover:text-rose-600 active:scale-90 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-rose-500/20 group z-50 pointer-events-auto cursor-pointer overflow-hidden leading-none"
           aria-label="بستن منو">
-          <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-90 pointer-events-none"
+          <!-- Animated Background -->
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-rose-400/0 via-red-400/0 to-orange-400/0 group-hover:from-rose-500/5 group-hover:via-red-500/10 group-hover:to-orange-500/5 transition-all duration-300">
+          </div>
+
+          <svg
+            class="relative w-5 h-5 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:rotate-90 group-hover:scale-110"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-            stroke-linejoin="round"></svg>
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
+            stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
