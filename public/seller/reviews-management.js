@@ -5,6 +5,16 @@
 (function initReviewsManagement() {
   'use strict';
 
+  const API = window.VITRINET_API || {
+    buildUrl: (path) => path,
+    ensureCredentials(init = {}) {
+      if (init.credentials === undefined) {
+        return { ...init, credentials: 'include' };
+      }
+      return init;
+    }
+  };
+
   // ═══════════════════════════════════════════════════════════════
   // State
   // ═══════════════════════════════════════════════════════════════
@@ -60,11 +70,16 @@
    */
   async function apiRequest(url, options = {}) {
     const defaultOptions = {
-      credentials: 'include', // مهم: برای ارسال کوکی‌ها
       headers: getAuthHeaders()
     };
     
-    const response = await fetch(url, { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } });
+    const finalOptions = API.ensureCredentials({
+      ...defaultOptions,
+      ...options,
+      headers: { ...defaultOptions.headers, ...options.headers }
+    });
+
+    const response = await fetch(API.buildUrl(url), finalOptions);
     
     if (!response.ok) {
       if (response.status === 401) {

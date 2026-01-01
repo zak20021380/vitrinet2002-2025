@@ -76,6 +76,13 @@ form.addEventListener('submit', async e => {
     if (!res.ok) {
       errorBox.textContent = data.message || 'ورود ناموفق بود.';
     } else {
+      if (data?.token) {
+        localStorage.setItem('seller_token', data.token);
+        localStorage.setItem('token', data.token);
+      }
+      if (data?.seller) {
+        localStorage.setItem('seller', JSON.stringify(data.seller));
+      }
       // موفقیت: تصمیم‌گیری برای پنل مناسب
       const SERVICE_CATEGORY = 'خدمات';
 
