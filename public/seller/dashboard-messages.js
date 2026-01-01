@@ -342,11 +342,64 @@ function detectNewMessages(chats) {
 
 async function fetchChats() {
   if (firstLoad && chatsBox) {
-    chatsBox.innerHTML = '<div class="text-gray-400 text-center py-8">در حال بارگذاری …</div>';
+    chatsBox.innerHTML = `
+      <div class="flex flex-col gap-4">
+        <div class="animate-pulse bg-white border rounded-xl p-4 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            <div class="flex flex-col gap-2">
+              <div class="h-4 w-32 bg-gray-200 rounded"></div>
+              <div class="h-3 w-20 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="h-5 w-5 bg-gray-200 rounded-full"></div>
+        </div>
+        <div class="animate-pulse bg-white border rounded-xl p-4 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            <div class="flex flex-col gap-2">
+              <div class="h-4 w-28 bg-gray-200 rounded"></div>
+              <div class="h-3 w-24 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="h-5 w-5 bg-gray-200 rounded-full"></div>
+        </div>
+        <div class="animate-pulse bg-white border rounded-xl p-4 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            <div class="flex flex-col gap-2">
+              <div class="h-4 w-36 bg-gray-200 rounded"></div>
+              <div class="h-3 w-16 bg-gray-100 rounded"></div>
+            </div>
+          </div>
+          <div class="h-5 w-5 bg-gray-200 rounded-full"></div>
+        </div>
+      </div>
+    `;
   }
   try {
   const res = await fetch(apiUrl('/api/chats'), withCreds());
-    if (res.status === 401) throw new Error('لطفاً ابتدا وارد شوید.');
+    if (res.status === 401) {
+      chatsBox.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-6V4m0 0L8 8m4-4l4 4"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-700 mb-2">نیاز به ورود مجدد</h3>
+          <p class="text-gray-500 mb-4">لطفاً ابتدا وارد حساب کاربری خود شوید.</p>
+          <a href="dashboard.html" class="inline-flex items-center gap-2 bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            </svg>
+            بازگشت به داشبورد
+          </a>
+        </div>
+      `;
+      firstLoad = false;
+      return;
+    }
     if (!res.ok) throw new Error('خطا در واکشی چت‌ها');
 
     const chats = await res.json();
@@ -375,7 +428,23 @@ async function fetchChats() {
 
     // ساخت پیام مناسب وقتی چتی نیست
     if (!chats.length) {
-      chatsBox.innerHTML = '<div class="text-center text-gray-400 py-8">هنوز هیچ پیامی دریافت نکرده‌ای!</div>';
+      chatsBox.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-[#e0fdfa] to-[#d4fbe8] rounded-full flex items-center justify-center">
+            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-700 mb-2">هنوز پیامی نداری!</h3>
+          <p class="text-gray-500 mb-4">وقتی مشتری‌ها درباره محصولاتت سوال بپرسن، پیام‌هاشون اینجا نشون داده میشه.</p>
+          <a href="dashboard.html" class="inline-flex items-center gap-2 text-[#0ea5e9] hover:text-[#0284c7] font-bold transition-all">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            بازگشت به داشبورد
+          </a>
+        </div>
+      `;
       removeErrorBar();
       firstLoad = false;
       return;
@@ -397,7 +466,27 @@ async function fetchChats() {
     }
   } catch (err) {
     console.error('fetchChats:', err);
-    showErrorBar(err.message || 'خطای شبکه هنگام واکشی چت‌ها');
+    if (firstLoad && chatsBox) {
+      chatsBox.innerHTML = `
+        <div class="text-center py-12">
+          <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-700 mb-2">خطا در بارگذاری</h3>
+          <p class="text-gray-500 mb-4">${err.message || 'خطای شبکه هنگام واکشی چت‌ها'}</p>
+          <button onclick="location.reload()" class="inline-flex items-center gap-2 bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            تلاش مجدد
+          </button>
+        </div>
+      `;
+    } else {
+      showErrorBar(err.message || 'خطای شبکه هنگام واکشی چت‌ها');
+    }
     firstLoad = false;
   }
 }

@@ -701,6 +701,10 @@ handleSidebarOnResize();
 
 // ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
 function showSection(section) {
+  if (section === 'msg') {
+    window.location.href = 'dashboard-messages.html';
+    return;
+  }
   // اگر بخش انتخابی "content" (یعنی مدیریت ظاهر فروشگاه) نیست،
   // محتوای main-content رو پاک کن که چیزی زیر بخش جدید نمونه
   if (section !== "content" && document.getElementById('main-content')) {
