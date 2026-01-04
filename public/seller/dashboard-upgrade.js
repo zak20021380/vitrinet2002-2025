@@ -891,19 +891,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ───── مدیریت مدال تبلیغ ویژه با انتخاب نوع تبلیغ ─────
 
 window.openAdModal = function(adType) {
+  // Use the new premium Special Ad Modal
+  if (typeof window.openSpecialAdModal === 'function') {
+    window.openSpecialAdModal(adType);
+    return;
+  }
+  
+  // Fallback to old modal if new one not loaded
   const backdrop = document.getElementById('adModalBackdrop');
   if (!backdrop) return;
 
   // ثبت نوع تبلیغ (planSlug) در window
   window.__selectedAdType = adType;
 
-  document.getElementById('adForm').reset();
-  document.getElementById('adTargetType').value = "product";
+  document.getElementById('adForm')?.reset();
+  const targetType = document.getElementById('adTargetType');
+  if (targetType) targetType.value = "product";
   const productWrap = document.getElementById('adProductSelectWrap');
   if (productWrap) productWrap.style.display = "block";
-  document.getElementById('adProductSelect').innerHTML = `<option value="">در حال بارگذاری…</option>`;
-  document.getElementById('adTitle').value = "";
-  document.getElementById('adText').value = "";
+  const productSelect = document.getElementById('adProductSelect');
+  if (productSelect) productSelect.innerHTML = `<option value="">در حال بارگذاری…</option>`;
+  const adTitle = document.getElementById('adTitle');
+  if (adTitle) adTitle.value = "";
+  const adText = document.getElementById('adText');
+  if (adText) adText.value = "";
 
   // نمایش مدال با کلاس‌های جدید
   backdrop.classList.remove('hidden');
@@ -915,20 +926,29 @@ window.openAdModal = function(adType) {
   fetchMyProducts();
 
   // کنترل تغییر نوع تبلیغ
-  document.getElementById('adTargetType').onchange = function() {
-    const productWrap = document.getElementById('adProductSelectWrap');
-    if (this.value === 'product') {
-      if (productWrap) productWrap.style.display = "block";
-      fetchMyProducts();
-    } else {
-      if (productWrap) productWrap.style.display = "none";
-    }
-  };
+  const targetTypeEl = document.getElementById('adTargetType');
+  if (targetTypeEl) {
+    targetTypeEl.onchange = function() {
+      const productWrap = document.getElementById('adProductSelectWrap');
+      if (this.value === 'product') {
+        if (productWrap) productWrap.style.display = "block";
+        fetchMyProducts();
+      } else {
+        if (productWrap) productWrap.style.display = "none";
+      }
+    };
+  }
 };
 
 
 // بستن مدال
 window.closeAdModal = function() {
+  // Close new modal if exists
+  if (typeof window.SpecialAdModal?.close === 'function') {
+    window.SpecialAdModal.close();
+  }
+  
+  // Also close old modal for backward compatibility
   const backdrop = document.getElementById('adModalBackdrop');
   if (backdrop) {
     backdrop.classList.add('hidden');
@@ -937,14 +957,18 @@ window.closeAdModal = function() {
   document.body.classList.remove('overflow-hidden', 'no-scroll');
 };
 
-// بستن با کلیک روی بک‌دراپ
-document.getElementById('adModalBackdrop').onclick = function(e) {
-  if (e.target === this) closeAdModal();
-};
+// بستن با کلیک روی بک‌دراپ (only if old modal exists)
+const oldAdBackdrop = document.getElementById('adModalBackdrop');
+if (oldAdBackdrop) {
+  oldAdBackdrop.onclick = function(e) {
+    if (e.target === this) closeAdModal();
+  };
+}
 
 // گرفتن لیست محصولات فروشنده و نمایش در فرم تبلیغ
 async function fetchMyProducts() {
   const select = document.getElementById('adProductSelect');
+  if (!select) return;
   try {
     const sellerId = await getSellerId();
     if (!sellerId) throw new Error('seller-id-missing');

@@ -81,6 +81,240 @@
 }
 
 /* ─────────────────────────────────────────────────────
+   Hero Header V2 - Premium Visibility Growth Design
+   Mobile-First, Thumb-Friendly, Single Focus Point
+   ───────────────────────────────────────────────────── */
+.upgrade-hero--v2 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem 2rem;
+  background: linear-gradient(165deg, 
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(14, 165, 233, 0.06) 50%,
+    rgba(20, 184, 166, 0.04) 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ─────────────────────────────────────────────────────
+   Hero Header PREMIUM - Professional Modern Design
+   ───────────────────────────────────────────────────── */
+.upgrade-hero--premium {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.25rem 1.5rem;
+  background: linear-gradient(180deg, 
+    rgba(16, 185, 129, 0.08) 0%,
+    rgba(14, 165, 233, 0.04) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+/* Background Glow */
+.upgrade-hero__glow {
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* Icon Wrapper with Ring */
+.upgrade-hero__icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upgrade-hero__icon-ring {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 2px dashed rgba(16, 185, 129, 0.2);
+  animation: ringRotate 20s linear infinite;
+}
+
+@keyframes ringRotate {
+  to { transform: rotate(360deg); }
+}
+
+.upgrade-hero__icon-container {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(16, 185, 129, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+.upgrade-hero__icon-container::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.4), rgba(14, 165, 233, 0.3));
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.upgrade-hero__icon-svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Text Content */
+.upgrade-hero__text {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.upgrade-hero__title-premium {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #047857 0%, #10b981 40%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.upgrade-hero__desc-premium {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats Row */
+.upgrade-hero__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  width: 100%;
+  max-width: 320px;
+}
+
+.upgrade-hero__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.upgrade-hero__stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #10b981;
+  letter-spacing: -0.02em;
+}
+
+.upgrade-hero__stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.upgrade-hero__stat-divider {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .upgrade-hero--premium {
+    padding: 2.5rem 2rem 2rem;
+    gap: 1.5rem;
+  }
+  
+  .upgrade-hero__icon-container {
+    width: 76px;
+    height: 76px;
+    border-radius: 22px;
+  }
+  
+  .upgrade-hero__icon-ring {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .upgrade-hero__icon-svg {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .upgrade-hero__title-premium {
+    font-size: 1.75rem;
+  }
+  
+  .upgrade-hero__desc-premium {
+    font-size: 0.95rem;
+  }
+  
+  .upgrade-hero__stats {
+    max-width: 360px;
+    padding: 0.85rem 1.25rem;
+  }
+  
+  .upgrade-hero__stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .upgrade-hero__stat-label {
+    font-size: 0.72rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .upgrade-hero__icon-ring {
+    animation: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
    Tab Navigation
    ───────────────────────────────────────────────────── */
 .upgrade-tabs {
@@ -2515,4 +2749,104 @@
     width: 16px;
     height: 16px;
   }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   Light Background Compatibility Fix
+   Ensures plan card text is visible on light backgrounds
+   (e.g., seller dashboard with light theme)
+   ───────────────────────────────────────────────────── */
+
+/* Plan card text colors for light backgrounds */
+.upgrade-plan-card .upgrade-plan-title,
+.upgrade-plan-card--v2 .upgrade-plan-title {
+  color: #0f172a;
+}
+
+.upgrade-plan-card .upgrade-plan-desc,
+.upgrade-plan-card--v2 .upgrade-plan-desc {
+  color: #475569;
+}
+
+.upgrade-plan-card .upgrade-plan-feature,
+.upgrade-plan-card--v2 .upgrade-plan-feature {
+  color: #334155;
+}
+
+.upgrade-plan-card .upgrade-plan-feature > span:last-child,
+.upgrade-plan-card--v2 .upgrade-plan-feature > span:last-child {
+  color: #334155;
+}
+
+.upgrade-plan-card .upgrade-plan-duration,
+.upgrade-plan-card--v2 .upgrade-plan-duration {
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.upgrade-plan-card .upgrade-plan-price__unit,
+.upgrade-plan-card--v2 .upgrade-plan-price__unit {
+  color: #64748b;
+}
+
+/* Ensure features list border is visible on light backgrounds */
+.upgrade-plan-card .upgrade-plan-features,
+.upgrade-plan-card--v2 .upgrade-plan-features {
+  border-top-color: rgba(15, 23, 42, 0.08);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+/* Ad card text colors for light backgrounds */
+.upgrade-ad-card .upgrade-ad-title {
+  color: #0f172a;
+}
+
+.upgrade-ad-card .upgrade-ad-unit {
+  color: #64748b;
+}
+
+.upgrade-ad-card .upgrade-ad-feature {
+  color: #475569;
+}
+
+/* My plans section text colors */
+.upgrade-myplan-card .upgrade-myplan-title {
+  color: #0f172a;
+}
+
+.upgrade-myplan-card .upgrade-myplan-price__unit {
+  color: #64748b;
+}
+
+.upgrade-myplan-card .upgrade-myplan-date__label {
+  color: #64748b;
+}
+
+.upgrade-myplan-card .upgrade-myplan-date__value {
+  color: #0f172a;
+}
+
+.upgrade-myplan-card .upgrade-myplan-desc {
+  color: #475569;
+}
+
+/* Hero section text for light backgrounds */
+.upgrade-hero .upgrade-hero__subtitle {
+  color: #475569;
+}
+
+/* Tab text colors */
+.upgrade-tab {
+  color: #64748b;
+}
+
+.upgrade-tab:hover {
+  color: #0f172a;
+}
+
+/* Loading spinner text */
+.upgrade-loading span {
+  color: #475569;
 }

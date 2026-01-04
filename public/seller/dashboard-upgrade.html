@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../service-seller-panel/styles/01-foundations-and-layout.css" />
   <link rel="stylesheet" href="../service-seller-panel/styles/24-upgrade-section.css" />
+  <link rel="stylesheet" href="../service-seller-panel/styles/25-special-ad-modal.css" />
   <script src="/nav-active.js" defer></script>
   <style>
     /* Override: Remove extra bottom padding for standalone upgrade page (no bottom nav) */
@@ -21,15 +22,57 @@
 </head>
 <body>
   <main class="upgrade-section">
-    <!-- Hero Header -->
-    <header class="upgrade-hero">
-      <div class="upgrade-hero__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5.5 7.5-1L12 2z"/>
-        </svg>
+    <!-- Hero Header - Premium Modern Design -->
+    <header class="upgrade-hero upgrade-hero--premium">
+      <!-- Background Glow Effects -->
+      <div class="upgrade-hero__glow"></div>
+      
+      <!-- Icon Container -->
+      <div class="upgrade-hero__icon-wrapper">
+        <div class="upgrade-hero__icon-ring"></div>
+        <div class="upgrade-hero__icon-container">
+          <svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
+            <!-- Rocket / Growth Symbol -->
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="url(#iconGradBg)" opacity="0.12"/>
+            <path d="M13 7h-2v5H6v2h5v5h2v-5h5v-2h-5V7z" fill="url(#iconGrad)"/>
+            <path d="M12 4l1.5 3h-3L12 4z" fill="url(#iconGrad)" opacity="0.7"/>
+            <defs>
+              <linearGradient id="iconGrad" x1="6" y1="19" x2="18" y2="5">
+                <stop offset="0%" stop-color="#10b981"/>
+                <stop offset="100%" stop-color="#0ea5e9"/>
+              </linearGradient>
+              <linearGradient id="iconGradBg" x1="2" y1="22" x2="22" y2="2">
+                <stop offset="0%" stop-color="#10b981"/>
+                <stop offset="100%" stop-color="#0ea5e9"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
       </div>
-      <h1 class="upgrade-hero__title">ارتقا و تبلیغات</h1>
-      <p class="upgrade-hero__subtitle">همین الان با خرید اشتراک یا تبلیغات ویژه، رشد فروشگاهت رو چند برابر کن!</p>
+      
+      <!-- Content -->
+      <div class="upgrade-hero__text">
+        <h1 class="upgrade-hero__title-premium">ارتقا و دیده‌شدن</h1>
+        <p class="upgrade-hero__desc-premium">فروشگاهت رو به هزاران مشتری جدید معرفی کن</p>
+      </div>
+      
+      <!-- Stats Row -->
+      <div class="upgrade-hero__stats">
+        <div class="upgrade-hero__stat">
+          <span class="upgrade-hero__stat-value">+۳۰۰٪</span>
+          <span class="upgrade-hero__stat-label">بازدید</span>
+        </div>
+        <div class="upgrade-hero__stat-divider"></div>
+        <div class="upgrade-hero__stat">
+          <span class="upgrade-hero__stat-value">+۱۵۰٪</span>
+          <span class="upgrade-hero__stat-label">فروش</span>
+        </div>
+        <div class="upgrade-hero__stat-divider"></div>
+        <div class="upgrade-hero__stat">
+          <span class="upgrade-hero__stat-value">۲۴/۷</span>
+          <span class="upgrade-hero__stat-label">نمایش</span>
+        </div>
+      </div>
     </header>
 
     <!-- Tab Navigation -->
@@ -450,46 +493,197 @@
     </div>
   </div>
 
-  <!-- Ad Modal -->
-  <div id="adModalBackdrop" class="upgrade-modal-backdrop" role="dialog" aria-modal="true">
-    <div class="upgrade-ad-modal">
-      <button onclick="closeAdModal()" class="upgrade-modal__close" aria-label="بستن">×</button>
-      <header class="upgrade-ad-modal__header">
-        <h2 class="upgrade-ad-modal__title">ثبت تبلیغ ویژه</h2>
-        <p class="upgrade-ad-modal__subtitle">اطلاعات تبلیغ خود را وارد کنید</p>
+  <!-- Special Ad Modal - Premium Design -->
+  <div id="specialAdBackdrop" class="special-ad-backdrop" role="dialog" aria-modal="true" aria-labelledby="special-ad-title">
+    <div class="special-ad-modal">
+      <!-- Drag Handle (Mobile) -->
+      <div class="special-ad-modal__handle"></div>
+
+      <!-- Header -->
+      <header class="special-ad-header">
+        <button type="button" class="special-ad-header__close" id="specialAdCloseBtn" aria-label="بستن">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <h2 id="special-ad-title" class="special-ad-header__title">ثبت تبلیغ ویژه</h2>
+        <p class="special-ad-header__subtitle">کسب‌وکارتان را در صدر نتایج نشان دهید</p>
       </header>
-      <form id="adForm" class="upgrade-ad-form" onsubmit="return submitAdForm(event)">
-        <div class="upgrade-ad-form__group">
-          <label class="upgrade-ad-form__label">نوع تبلیغ</label>
-          <select id="adTargetType" class="upgrade-ad-form__select">
-            <option value="product">تبلیغ محصول</option>
-            <option value="shop">تبلیغ فروشگاه</option>
-          </select>
-        </div>
-        <div id="adProductSelectWrap" class="upgrade-ad-form__group">
-          <label class="upgrade-ad-form__label">انتخاب محصول</label>
-          <select id="adProductSelect" class="upgrade-ad-form__select">
-            <option value="">یک مورد را انتخاب کنید...</option>
-          </select>
-        </div>
-        <div class="upgrade-ad-form__group">
-          <label class="upgrade-ad-form__label">عنوان تبلیغ (حداکثر 25 کاراکتر)</label>
-          <input type="text" id="adTitle" class="upgrade-ad-form__input" required maxlength="25" placeholder="عنوان تبلیغ"/>
-        </div>
-        <div class="upgrade-ad-form__group">
-          <label class="upgrade-ad-form__label">متن تبلیغ (تا 30 کاراکتر)</label>
-          <textarea id="adText" class="upgrade-ad-form__textarea" maxlength="30" placeholder="متن تبلیغ"></textarea>
-        </div>
-        <div class="upgrade-ad-form__group">
-          <label class="upgrade-ad-form__label">آپلود تصویر تبلیغ (اجباری)</label>
-          <input type="file" id="adImage" class="upgrade-ad-form__file" accept="image/*"/>
-        </div>
-        <button type="submit" class="upgrade-ad-form__submit">ثبت تبلیغ</button>
-      </form>
+
+      <!-- Body - Scrollable Content -->
+      <div class="special-ad-body">
+        <form id="specialAdForm" class="special-ad-form">
+          
+          <!-- Step 1: Ad Type Selection -->
+          <section class="special-ad-step">
+            <div class="special-ad-step__header">
+              <span class="special-ad-step__number">۱</span>
+              <h3 class="special-ad-step__title">نوع تبلیغ</h3>
+            </div>
+            
+            <div class="special-ad-type-grid">
+              <!-- Product Ad -->
+              <label class="special-ad-type-card is-selected" data-type="product">
+                <input type="radio" name="adType" value="product" checked>
+                <div class="special-ad-type-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                    <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>
+                  </svg>
+                </div>
+                <p class="special-ad-type-card__label">تبلیغ محصول</p>
+              </label>
+              
+              <!-- Shop Ad -->
+              <label class="special-ad-type-card" data-type="shop">
+                <input type="radio" name="adType" value="shop">
+                <div class="special-ad-type-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path d="M9 22V12h6v10"/>
+                  </svg>
+                </div>
+                <p class="special-ad-type-card__label">تبلیغ کل مغازه</p>
+              </label>
+            </div>
+
+            <!-- Product Picker (shown when product type selected) -->
+            <div id="specialAdProductPicker" class="special-ad-product-picker">
+              <label class="special-ad-product-picker__label">انتخاب محصول</label>
+              <select id="specialAdProductSelect" class="special-ad-product-picker__select" required>
+                <option value="">یک مورد را انتخاب کنید...</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- Step 2: Content & Visuals -->
+          <section class="special-ad-step">
+            <div class="special-ad-step__header">
+              <span class="special-ad-step__number">۲</span>
+              <h3 class="special-ad-step__title">محتوا و تصویر</h3>
+            </div>
+
+            <!-- Ad Title -->
+            <div class="special-ad-form-group">
+              <label class="special-ad-label">
+                <span>عنوان تبلیغ</span>
+                <span class="special-ad-label__hint">حداکثر ۲۵ کاراکتر</span>
+              </label>
+              <input 
+                type="text" 
+                id="specialAdTitle" 
+                class="special-ad-input" 
+                placeholder="مثال: تخفیف ویژه عید"
+                maxlength="25"
+                required
+              >
+              <div id="specialAdTitleCounter" class="special-ad-char-counter">۰ / ۲۵</div>
+            </div>
+
+            <!-- Ad Text -->
+            <div class="special-ad-form-group">
+              <label class="special-ad-label">
+                <span>متن جذاب</span>
+                <span class="special-ad-label__hint">حداکثر ۳۰ کاراکتر</span>
+              </label>
+              <textarea 
+                id="specialAdText" 
+                class="special-ad-textarea" 
+                placeholder="مثال: ۳۰٪ تخفیف تا پایان هفته!"
+                maxlength="30"
+              ></textarea>
+              <div id="specialAdTextCounter" class="special-ad-char-counter">۰ / ۳۰</div>
+            </div>
+
+            <!-- Image Section -->
+            <div class="special-ad-image-section">
+              <label class="special-ad-label">
+                <span>تصویر تبلیغ</span>
+              </label>
+              <div id="specialAdImagePreview" class="special-ad-image-preview">
+                <img id="specialAdPreviewImg" class="special-ad-image-preview__img" src="" alt="پیش‌نمایش تصویر" style="display: none;">
+                <div id="specialAdImagePlaceholder" class="special-ad-image-preview__placeholder">
+                  <svg class="special-ad-image-preview__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                  </svg>
+                  <p class="special-ad-image-preview__placeholder-text">تصویر محصول نمایش داده می‌شود</p>
+                </div>
+                <button type="button" id="specialAdEditImageBtn" class="special-ad-image-edit-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span>ویرایش تصویر</span>
+                </button>
+              </div>
+              <input type="file" id="specialAdImageInput" class="special-ad-file-input" accept="image/*">
+              <span class="special-ad-image-label">عکس انتخابی (پیش‌فرض: عکس محصول)</span>
+            </div>
+          </section>
+
+          <!-- Step 3: Payment & Credit -->
+          <section class="special-ad-step">
+            <div class="special-ad-step__header">
+              <span class="special-ad-step__number">۳</span>
+              <h3 class="special-ad-step__title">پرداخت و اعتبار</h3>
+            </div>
+
+            <!-- Wallet Info -->
+            <div class="special-ad-wallet-info">
+              <span class="special-ad-wallet-info__label">اعتبار فعلی شما:</span>
+              <span id="specialAdWalletBalance" class="special-ad-wallet-info__value">۰ تومان</span>
+            </div>
+
+            <!-- Credit Toggle -->
+            <div id="specialAdCreditToggle" class="special-ad-credit-toggle">
+              <div class="special-ad-credit-toggle__content">
+                <p class="special-ad-credit-toggle__label">استفاده از اعتبار (تا ۵۰٪ تخفیف)</p>
+                <p id="specialAdCreditHint" class="special-ad-credit-toggle__hint">اعتبار شما برای کسر از هزینه استفاده می‌شود</p>
+              </div>
+              <label class="special-ad-switch">
+                <input type="checkbox" id="specialAdCreditSwitch">
+                <span class="special-ad-switch__slider"></span>
+              </label>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="special-ad-price-breakdown">
+              <div class="special-ad-price-row">
+                <span class="special-ad-price-row__label">هزینه کل:</span>
+                <span id="specialAdTotalPrice" class="special-ad-price-row__value">۷۹,۰۰۰ تومان</span>
+              </div>
+              <div id="specialAdCreditRow" class="special-ad-price-row" style="display: none;">
+                <span class="special-ad-price-row__label">کسر از اعتبار:</span>
+                <span id="specialAdCreditAmount" class="special-ad-price-row__value is-discount">-۰ تومان</span>
+              </div>
+              <div class="special-ad-price-row special-ad-price-row--total">
+                <span class="special-ad-price-row__label">مبلغ نهایی قابل پرداخت:</span>
+                <span id="specialAdFinalPrice" class="special-ad-price-row__value">۷۹,۰۰۰ تومان</span>
+              </div>
+            </div>
+          </section>
+
+        </form>
+      </div>
+
+      <!-- Footer - CTA -->
+      <footer class="special-ad-footer">
+        <button type="submit" form="specialAdForm" id="specialAdSubmitBtn" class="special-ad-submit-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"/>
+            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="special-ad-submit-btn__text">ثبت و پرداخت نهایی</span>
+          <span class="special-ad-submit-btn__loading"></span>
+        </button>
+      </footer>
     </div>
   </div>
 
   <script src="api-client.js"></script>
+  <script src="special-ad-modal.js"></script>
   <script src="dashboard-upgrade.js"></script>
 </body>
 </html>
