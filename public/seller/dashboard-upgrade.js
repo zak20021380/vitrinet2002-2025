@@ -508,6 +508,149 @@ function applyPlanCardDescriptor(plan) {
   }
 }
 
+/*──────────────── Hero Content Data for Dynamic Switching ────────────────*/
+const HERO_CONTENT = {
+  sub: {
+    title: 'اشتراک فروشگاه',
+    desc: 'فروشگاهت رو فعال کن و به هزاران مشتری معرفی شو',
+    stats: [
+      { value: '+۳۰۰٪', label: 'بازدید' },
+      { value: '+۱۵۰٪', label: 'فروش' },
+      { value: '۲۴/۷', label: 'نمایش' }
+    ],
+    icon: `<svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
+      <defs>
+        <linearGradient id="heroGrad" x1="6" y1="20" x2="18" y2="4">
+          <stop offset="0%" stop-color="#10b981"/>
+          <stop offset="100%" stop-color="#0ea5e9"/>
+        </linearGradient>
+        <linearGradient id="heroGradBg" x1="2" y1="22" x2="22" y2="2">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.08"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 7l2-4h12l2 4" stroke="url(#heroGrad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M4 7v13a1 1 0 001 1h14a1 1 0 001-1V7" stroke="url(#heroGrad)" stroke-width="1.8" fill="none"/>
+      <path d="M4 7c0 1.5 1.5 3 3 3s3-1.5 3-3c0 1.5 1.5 3 3 3s3-1.5 3-3c0 1.5 1.5 3 3 3" stroke="url(#heroGrad)" stroke-width="1.6" fill="none"/>
+      <rect x="9" y="14" width="6" height="7" rx="0.5" stroke="url(#heroGrad)" stroke-width="1.4" fill="url(#heroGradBg)"/>
+      <circle cx="17" cy="12" r="1.5" stroke="url(#heroGrad)" stroke-width="1.4" fill="none"/>
+      <path d="M17 13.5v2.5M16.5 15h1" stroke="url(#heroGrad)" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>`
+  },
+  ads: {
+    title: 'تبلیغات ویژه',
+    desc: 'محصولاتت رو در صدر نتایج نمایش بده و فروش رو چند برابر کن',
+    stats: [
+      { value: '+۵۰۰٪', label: 'نمایش' },
+      { value: '+۲۵۰٪', label: 'کلیک' },
+      { value: 'فوری', label: 'فعال‌سازی' }
+    ],
+    icon: `<svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
+      <defs>
+        <linearGradient id="heroGrad" x1="6" y1="20" x2="18" y2="4">
+          <stop offset="0%" stop-color="#f59e0b"/>
+          <stop offset="100%" stop-color="#ef4444"/>
+        </linearGradient>
+        <linearGradient id="beamGrad" x1="12" y1="6" x2="12" y2="20" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05"/>
+        </linearGradient>
+      </defs>
+      <path d="M9 8L6 20h12l-3-12H9z" fill="url(#beamGrad)"/>
+      <rect x="8" y="3" width="8" height="4" rx="1" stroke="url(#heroGrad)" stroke-width="1.8" fill="none"/>
+      <circle cx="12" cy="5" r="1.2" fill="url(#heroGrad)"/>
+      <path d="M12 1v2" stroke="url(#heroGrad)" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M8 20v1.5a.5.5 0 00.5.5h7a.5.5 0 00.5-.5V20" stroke="url(#heroGrad)" stroke-width="1.4" fill="none"/>
+      <path d="M10 16h4M11 18h2" stroke="url(#heroGrad)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+    </svg>`
+  },
+  myplans: {
+    title: 'پلن‌های من',
+    desc: 'وضعیت اشتراک و تبلیغات فعال خودت رو مدیریت کن',
+    stats: [
+      { value: '—', label: 'اشتراک فعال' },
+      { value: '—', label: 'تبلیغ فعال' },
+      { value: '—', label: 'روز باقیمانده' }
+    ],
+    icon: `<svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
+      <defs>
+        <linearGradient id="heroGrad" x1="6" y1="20" x2="18" y2="4">
+          <stop offset="0%" stop-color="#8b5cf6"/>
+          <stop offset="100%" stop-color="#6366f1"/>
+        </linearGradient>
+        <linearGradient id="heroGradBg" x1="4" y1="22" x2="20" y2="2">
+          <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#6366f1" stop-opacity="0.06"/>
+        </linearGradient>
+      </defs>
+      <rect x="4" y="3" width="16" height="18" rx="2" stroke="url(#heroGrad)" stroke-width="1.8" fill="url(#heroGradBg)"/>
+      <path d="M4 9h16" stroke="url(#heroGrad)" stroke-width="1.4"/>
+      <path d="M8 6h2M14 6h2" stroke="url(#heroGrad)" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M8 13h8M8 16h5" stroke="url(#heroGrad)" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="3" stroke="url(#heroGrad)" stroke-width="1.4" fill="none"/>
+      <path d="M15 16l1 1 2-2" stroke="url(#heroGrad)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`
+  }
+};
+
+function updateHeroContent(tab) {
+  const content = HERO_CONTENT[tab];
+  if (!content) return;
+
+  const heroIcon = document.getElementById('heroIconContainer');
+  const heroTitle = document.getElementById('heroTitle');
+  const heroDesc = document.getElementById('heroDesc');
+  const heroStat1Value = document.getElementById('heroStat1Value');
+  const heroStat1Label = document.getElementById('heroStat1Label');
+  const heroStat2Value = document.getElementById('heroStat2Value');
+  const heroStat2Label = document.getElementById('heroStat2Label');
+  const heroStat3Value = document.getElementById('heroStat3Value');
+  const heroStat3Label = document.getElementById('heroStat3Label');
+  const heroGlow = document.getElementById('heroGlow');
+
+  // Add transition class for smooth animation
+  const hero = document.getElementById('upgradeHero');
+  if (hero) {
+    hero.classList.add('hero-transitioning');
+    setTimeout(() => hero.classList.remove('hero-transitioning'), 350);
+  }
+
+  // Update icon with fade effect
+  if (heroIcon) {
+    heroIcon.style.opacity = '0';
+    heroIcon.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+      heroIcon.innerHTML = content.icon;
+      heroIcon.style.opacity = '1';
+      heroIcon.style.transform = 'scale(1)';
+    }, 150);
+  }
+
+  // Update text content
+  if (heroTitle) heroTitle.textContent = content.title;
+  if (heroDesc) heroDesc.textContent = content.desc;
+
+  // Update stats
+  if (content.stats && content.stats.length >= 3) {
+    if (heroStat1Value) heroStat1Value.textContent = content.stats[0].value;
+    if (heroStat1Label) heroStat1Label.textContent = content.stats[0].label;
+    if (heroStat2Value) heroStat2Value.textContent = content.stats[1].value;
+    if (heroStat2Label) heroStat2Label.textContent = content.stats[1].label;
+    if (heroStat3Value) heroStat3Value.textContent = content.stats[2].value;
+    if (heroStat3Label) heroStat3Label.textContent = content.stats[2].label;
+  }
+
+  // Update glow color based on tab
+  if (heroGlow) {
+    const glowColors = {
+      sub: 'rgba(16, 185, 129, 0.2)',
+      ads: 'rgba(245, 158, 11, 0.2)',
+      myplans: 'rgba(139, 92, 246, 0.2)'
+    };
+    heroGlow.style.background = `radial-gradient(ellipse, ${glowColors[tab] || glowColors.sub} 0%, transparent 70%)`;
+  }
+}
+
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
   // پشتیبانی از هر دو نسخه قدیم و جدید
@@ -560,6 +703,9 @@ function toggleTabs(tab) {
     activeContent.hidden = false;
     activeContent.classList.remove('hidden');
   }
+
+  // Update hero content dynamically
+  updateHeroContent(tab);
   
   switch (tab) {
     case 'sub':

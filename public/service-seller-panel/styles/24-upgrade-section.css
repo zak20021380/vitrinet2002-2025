@@ -29,6 +29,45 @@
   overflow: hidden;
 }
 
+/* Hero Dynamic Content Transitions */
+.upgrade-hero__icon-container {
+  transition: opacity 0.15s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.upgrade-hero__title-premium,
+.upgrade-hero__desc-premium {
+  transition: opacity 0.2s ease;
+}
+
+.upgrade-hero__stat-value,
+.upgrade-hero__stat-label {
+  transition: opacity 0.15s ease, transform 0.2s ease;
+}
+
+.upgrade-hero__glow {
+  transition: background 0.4s ease;
+}
+
+.hero-transitioning .upgrade-hero__title-premium,
+.hero-transitioning .upgrade-hero__desc-premium {
+  animation: heroTextFade 0.35s ease;
+}
+
+.hero-transitioning .upgrade-hero__stat-value,
+.hero-transitioning .upgrade-hero__stat-label {
+  animation: heroStatFade 0.3s ease;
+}
+
+@keyframes heroTextFade {
+  0% { opacity: 0.5; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroStatFade {
+  0% { opacity: 0.6; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 .upgrade-hero::before {
   content: '';
   position: absolute;
