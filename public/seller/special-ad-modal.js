@@ -294,14 +294,17 @@
     // Case 4: Server filename/path - prepend base URL
     // Guard: Make sure it doesn't contain base64 indicators
     if (typeof imageValue === 'string' && imageValue.trim().length > 0) {
-      if (imageValue.includes('base64') || imageValue.includes('data:')) {
+      const trimmedValue = imageValue.trim();
+      if (trimmedValue.includes('base64') || trimmedValue.includes('data:')) {
         console.error('[SpecialAdModal] Invalid image path contains base64 data. Blocking to prevent 431 error.');
         return null;
       }
       
       const baseUrl = API_BASE.replace('/api', '');
-      // Handle paths that may or may not start with /
-      const cleanPath = imageValue.startsWith('/') ? imageValue : `/uploads/${imageValue}`;
+      // Handle paths that may or may not start with / (avoid double /uploads/)
+      const cleanPath = /^\/?uploads\//i.test(trimmedValue)
+        ? (trimmedValue.startsWith('/') ? trimmedValue : `/${trimmedValue}`)
+        : (trimmedValue.startsWith('/') ? trimmedValue : `/uploads/${trimmedValue}`);
       const fullUrl = `${baseUrl}${cleanPath}`;
       console.log('[SpecialAdModal] resolveImageSrc: Server path → full URL:', fullUrl);
       return fullUrl;
@@ -682,7 +685,7 @@
   };
 
   const handleProductChange = (e) => {
-    const selectedOption = e.target.selectedOptions[0];
+    const selectedOption = e.target.selectedOptions?.[0] || e.target.options?.[e.target.selectedIndex];
     state.selectedProductId = e.target.value;
     
     // Get the raw image value from the product
