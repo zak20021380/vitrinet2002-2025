@@ -110,18 +110,23 @@ function getAdStatusLabel(status) {
 }
 
 function showToast(message, isError = false) {
-  let toast = document.getElementById('toast');
+  let toast = document.getElementById('toast') || document.getElementById('planSuccessMsg');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast';
-    toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 bg-white font-bold shadow-lg rounded-xl px-5 py-3 z-50 hidden';
+    toast.className = 'upgrade-toast';
     document.body.appendChild(toast);
   }
   toast.textContent = message;
   toast.classList.remove('hidden');
+  toast.classList.add('is-visible');
+  toast.classList.toggle('upgrade-toast--error', isError);
   toast.classList.toggle('text-red-600', isError);
   toast.classList.toggle('text-green-600', !isError);
-  setTimeout(() => toast.classList.add('hidden'), 3000);
+  setTimeout(() => {
+    toast.classList.add('hidden');
+    toast.classList.remove('is-visible');
+  }, 3000);
 }
 
 function showSuccessPopup(options = {}) {
@@ -395,13 +400,13 @@ function refreshPlanCardRegistry() {
     if (!root) return;
     planCardRegistry[slug] = {
       root,
-      title: root.querySelector(`[data-plan-title="${slug}"]`) || root.querySelector('.plan-card__title'),
-      price: document.getElementById(`price-${slug}`) || root.querySelector(`[data-plan-price="${slug}"]`),
-      duration: root.querySelector(`[data-plan-duration="${slug}"]`),
-      description: root.querySelector(`[data-plan-description="${slug}"]`),
-      features: root.querySelector(`[data-plan-features="${slug}"]`),
-      badge: root.querySelector(`[data-plan-badge="${slug}"]`),
-      cta: root.querySelector(`[data-plan-select="${slug}"]`)
+      title: root.querySelector(`[data-plan-title="${slug}"]`) || root.querySelector('.upgrade-plan-title, .plan-card__title'),
+      price: document.getElementById(`price-${slug}`) || root.querySelector(`[data-plan-price="${slug}"]`) || root.querySelector('.upgrade-plan-price__amount'),
+      duration: root.querySelector(`[data-plan-duration="${slug}"]`) || root.querySelector('.upgrade-plan-duration'),
+      description: root.querySelector(`[data-plan-description="${slug}"]`) || root.querySelector('.upgrade-plan-desc'),
+      features: root.querySelector(`[data-plan-features="${slug}"]`) || root.querySelector('.upgrade-plan-features'),
+      badge: root.querySelector(`[data-plan-badge="${slug}"]`) || root.querySelector('.upgrade-plan-badge'),
+      cta: root.querySelector(`[data-plan-select="${slug}"]`) || root.querySelector('.upgrade-plan-cta')
     };
   });
 }
@@ -425,7 +430,25 @@ function applyPlanCardDescriptor(plan) {
 
   if (refs.duration) {
     const duration = plan.durationDays ?? defaults.durationDays;
-    refs.duration.textContent = duration ? `اعتبار: ${toFaDigits(duration)} روز` : 'اعتبار: —';
+    const durationText = duration ? `اعتبار: ${toFaDigits(duration)} روز` : 'اعتبار: —';
+    // پشتیبانی از نسخه جدید با span داخلی
+    const spanEl = refs.duration.querySelector('span');
+    if (spanEl) {
+      spanEl.textContent = durationText;
+    } else if (refs.duration.querySelector('svg')) {
+      // نسخه قدیم با آیکون SVG
+      const textNode = refs.duration.childNodes[refs.duration.childNodes.length - 1];
+      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+        textNode.textContent = durationText;
+      } else {
+        // اگر text node نبود، یک span اضافه کن
+        const newSpan = document.createElement('span');
+        newSpan.textContent = durationText;
+        refs.duration.appendChild(newSpan);
+      }
+    } else {
+      refs.duration.textContent = durationText;
+    }
   }
 
   if (refs.description) {
@@ -433,25 +456,31 @@ function applyPlanCardDescriptor(plan) {
       ? plan.description
       : (defaults.description || '');
     refs.description.textContent = description || '';
+    // اطمینان از نمایش توضیحات
+    refs.description.style.display = '';
+    refs.description.classList.remove('hidden');
   }
 
   if (refs.features) {
     refs.features.innerHTML = '';
-    const list = Array.isArray(plan.features)
+    const list = (Array.isArray(plan.features) && plan.features.length > 0)
       ? plan.features
-      : Array.isArray(defaults.features)
-        ? defaults.features
-        : [];
+      : (Array.isArray(defaults.features) ? defaults.features : []);
     if (!list.length) {
       const li = document.createElement('li');
+      li.className = 'upgrade-plan-feature';
       li.textContent = 'جزئیاتی برای این پلن ثبت نشده است.';
       refs.features.appendChild(li);
     } else {
       list.forEach(item => {
         const li = document.createElement('li');
+        li.className = 'upgrade-plan-feature';
         const icon = document.createElement('span');
-        icon.className = 'plan-feature-icon';
-        icon.textContent = '✔';
+        icon.className = 'upgrade-plan-feature__icon';
+        // استفاده از آیکون SVG حرفه‌ای
+        icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
         const span = document.createElement('span');
         span.textContent = item;
         li.appendChild(icon);
@@ -459,6 +488,9 @@ function applyPlanCardDescriptor(plan) {
         refs.features.appendChild(li);
       });
     }
+    // اطمینان از نمایش لیست ویژگی‌ها
+    refs.features.style.display = '';
+    refs.features.classList.remove('hidden');
   }
 
   if (refs.badge) {
@@ -469,6 +501,7 @@ function applyPlanCardDescriptor(plan) {
       refs.badge.textContent = label;
       applyBadgeStyle(refs.badge, variant);
       refs.badge.classList.remove('hidden');
+      refs.badge.style.display = '';
     } else {
       refs.badge.classList.add('hidden');
     }
@@ -477,18 +510,20 @@ function applyPlanCardDescriptor(plan) {
 
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
-  const tabSub     = document.getElementById('tab-sub');
-  const tabAds     = document.getElementById('tab-ads');
-  const tabMyPlans = document.getElementById('tab-myplans');
+  // پشتیبانی از هر دو نسخه قدیم و جدید
+  const tabButtons = document.querySelectorAll('.upgrade-tab, #tab-sub, #tab-ads, #tab-myplans');
   const contentSub = document.getElementById('content-sub');
   const contentAds = document.getElementById('content-ads');
   const contentMy  = document.getElementById('content-myplans');
 
-  if (!tabSub || !tabAds || !tabMyPlans || !contentSub || !contentAds || !contentMy) return;
+  if (!contentSub || !contentAds || !contentMy) return;
 
-  tabSub.addEventListener('click',   () => toggleTabs('sub'));
-  tabAds.addEventListener('click',   () => toggleTabs('ads'));
-  tabMyPlans.addEventListener('click',() => toggleTabs('myplans'));
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab || btn.id?.replace('tab-', '');
+      if (tab) toggleTabs(tab);
+    });
+  });
 
   // پیش‌فرض نمایش اشتراک فروشگاه
   refreshPlanCardRegistry();
@@ -499,29 +534,41 @@ function initUpgradeDashboard () {
 }
 
 function toggleTabs(tab) {
-  const tabs = [
-    { btn: 'tab-sub', content: 'content-sub' },
-    { btn: 'tab-ads', content: 'content-ads' },
-    { btn: 'tab-myplans', content: 'content-myplans' }
-  ];
-  tabs.forEach(t => {
-    document.getElementById(t.btn)?.classList.remove('tab-active');
-    document.getElementById(t.content)?.classList.add('hidden');
+  // پشتیبانی از هر دو نسخه قدیم و جدید
+  const tabButtons = document.querySelectorAll('.upgrade-tab, .tab-btn');
+  const tabContents = document.querySelectorAll('.upgrade-content, #content-sub, #content-ads, #content-myplans');
+  
+  tabButtons.forEach(btn => {
+    btn.classList.remove('tab-active', 'is-active');
+    btn.setAttribute('aria-selected', 'false');
   });
+  
+  tabContents.forEach(content => {
+    content.hidden = true;
+    content.classList.add('hidden');
+  });
+  
+  const activeBtn = document.querySelector(`[data-tab="${tab}"], #tab-${tab}`);
+  const activeContent = document.getElementById(`content-${tab}`);
+  
+  if (activeBtn) {
+    activeBtn.classList.add('tab-active', 'is-active');
+    activeBtn.setAttribute('aria-selected', 'true');
+  }
+  
+  if (activeContent) {
+    activeContent.hidden = false;
+    activeContent.classList.remove('hidden');
+  }
+  
   switch (tab) {
     case 'sub':
-      document.getElementById('tab-sub').classList.add('tab-active');
-      document.getElementById('content-sub').classList.remove('hidden');
       fetchPlanPrices();
       break;
     case 'ads':
-      document.getElementById('tab-ads').classList.add('tab-active');
-      document.getElementById('content-ads').classList.remove('hidden');
+      fetchAdPrices();
       break;
     case 'myplans':
-      document.getElementById('tab-myplans').classList.add('tab-active');
-      document.getElementById('content-myplans').classList.remove('hidden');
-      // فراخوانی پلن‌های من
       fetchMyPlans();
       break;
   }
@@ -563,11 +610,9 @@ async function fetchPlanPrices (force = false) {
           price: plan.price ?? (defaults.price ?? null),
           durationDays: plan.durationDays ?? defaults.durationDays ?? null,
           description: plan.description !== undefined ? plan.description : (defaults.description || ''),
-          features: Array.isArray(plan.features)
+          features: (Array.isArray(plan.features) && plan.features.length > 0)
             ? plan.features
-            : Array.isArray(defaults.features)
-              ? defaults.features
-              : []
+            : (Array.isArray(defaults.features) ? defaults.features : [])
         };
         const badgeLabel = (plan.badgeLabel ?? plan.badge?.label ?? defaults.badge?.label ?? '').toString().trim();
         const badgeVariant = normalizeBadgeVariant(plan.badgeVariant ?? plan.badge?.variant ?? defaults.badge?.variant);
@@ -675,26 +720,6 @@ function getEffectivePlanPrice(plan, adPriceMap) {
   return plan?.price || 0;
 }
 
-let offerTimer;
-function startOfferCountdown(seconds = 45) {
-  const el = document.getElementById('limitedOffer');
-  if (!el) return;
-  clearInterval(offerTimer);
-  let remain = seconds;
-  const tick = () => {
-    const m = String(Math.floor(remain / 60)).padStart(2, '0');
-    const s = String(remain % 60).padStart(2, '0');
-    el.textContent = `پیشنهاد محدود - ${m}:${s}`;
-    remain--;
-    if (remain < 0) {
-      clearInterval(offerTimer);
-      el.textContent = '';
-    }
-  };
-  tick();
-  offerTimer = setInterval(tick, 1000);
-}
-
 /*──────────────── ۴) انتخاب پلن ────────────────*/
 // --- جایگزین تابع قبلی selectPlan کن ---
 // زکی – نسخه نهایی با پاپ‌آپ تأیید پرداخت پلن اشتراک و تبلیغ
@@ -715,11 +740,9 @@ window.selectPlan = async function (slug) {
   const planData = subscriptionPlanStore[slug] || {};
 
   const title = planData.title !== undefined ? planData.title : (defaults.title || slug);
-  const featureList = Array.isArray(planData.features)
+  const featureList = (Array.isArray(planData.features) && planData.features.length > 0)
     ? planData.features
-    : Array.isArray(defaults.features)
-      ? defaults.features
-      : [];
+    : (Array.isArray(defaults.features) ? defaults.features : []);
   const description = planData.description !== undefined ? planData.description : (defaults.description || '');
   const badgeInfo = planData.badge ? {
     label: planData.badge.label || '',
@@ -756,7 +779,6 @@ window.selectPlan = async function (slug) {
   const oldPriceEl = modal.querySelector('#old-price');
   const badge = modal.querySelector('#planBadge');
   const saveBadge = modal.querySelector('#saveBadge');
-  const premiumToggle = modal.querySelector('#premiumToggle');
 
   let priceNum = planData.price != null ? Number(planData.price) : Number(defaults.price ?? 0);
   if (!priceNum) {
@@ -803,37 +825,30 @@ window.selectPlan = async function (slug) {
     }
   }
 
-  if (premiumToggle) {
-    premiumToggle.checked = false;
-    premiumToggle.dispatchEvent(new Event('change'));
-  }
-
   modal.classList.remove('hidden');
+  modal.classList.add('is-open');
   modal.scrollTop = 0;
-  document.body.classList.add('overflow-hidden');
-  startOfferCountdown();
+  document.body.classList.add('overflow-hidden', 'no-scroll');
 
   const closeModal = () => {
     modal.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-    clearInterval(offerTimer);
+    modal.classList.remove('is-open');
+    document.body.classList.remove('overflow-hidden', 'no-scroll');
   };
   modal.querySelector('#closePaymentModalBtn').onclick = closeModal;
   modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
   modal.querySelector('#goToPaymentBtn').onclick = async function() {
     closeModal();
-    const premium = premiumToggle && premiumToggle.checked;
     try {
       const res = await fetch(`${API_BASE}/seller/upgrade`, withCreds({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSlug: slug, premium })
+        body: JSON.stringify({ planSlug: slug })
       }));
       const data = await res.json();
       if (res.ok && data.success) {
-        const msg = premium ? 'حساب شما با موفقیت پرمیوم شد.' : 'اشتراک شما با موفقیت فعال شد.';
-        showToast(msg);
+        showToast('اشتراک شما با موفقیت فعال شد.');
         updatePremiumBadge(data.seller?.isPremium);
       } else {
         showToast(data.message || 'خطا در پرداخت', true);
@@ -884,27 +899,29 @@ window.openAdModal = function(adType) {
 
   document.getElementById('adForm').reset();
   document.getElementById('adTargetType').value = "product";
-  document.getElementById('adProductSelectWrap').style.display = "block";
+  const productWrap = document.getElementById('adProductSelectWrap');
+  if (productWrap) productWrap.style.display = "block";
   document.getElementById('adProductSelect').innerHTML = `<option value="">در حال بارگذاری…</option>`;
   document.getElementById('adTitle').value = "";
   document.getElementById('adText').value = "";
 
-  // نمایش مدال
+  // نمایش مدال با کلاس‌های جدید
   backdrop.classList.remove('hidden');
+  backdrop.classList.add('is-open');
   backdrop.scrollTop = 0;
-  document.body.classList.add('overflow-hidden');
-  setTimeout(() => { backdrop.classList.add('!opacity-100'); }, 10);
+  document.body.classList.add('overflow-hidden', 'no-scroll');
 
   // مقدار اولیه: نمایش محصولات
   fetchMyProducts();
 
   // کنترل تغییر نوع تبلیغ
   document.getElementById('adTargetType').onchange = function() {
+    const productWrap = document.getElementById('adProductSelectWrap');
     if (this.value === 'product') {
-      document.getElementById('adProductSelectWrap').style.display = "block";
+      if (productWrap) productWrap.style.display = "block";
       fetchMyProducts();
     } else {
-      document.getElementById('adProductSelectWrap').style.display = "none";
+      if (productWrap) productWrap.style.display = "none";
     }
   };
 };
@@ -915,9 +932,9 @@ window.closeAdModal = function() {
   const backdrop = document.getElementById('adModalBackdrop');
   if (backdrop) {
     backdrop.classList.add('hidden');
-    backdrop.classList.remove('!opacity-100');
+    backdrop.classList.remove('is-open', '!opacity-100');
   }
-  document.body.classList.remove('overflow-hidden');
+  document.body.classList.remove('overflow-hidden', 'no-scroll');
 };
 
 // بستن با کلیک روی بک‌دراپ
@@ -1104,7 +1121,7 @@ window.submitAdForm = async function(e) {
 
 async function fetchMyPlans() {
   const box = document.getElementById('myPlansBox');
-  box.innerHTML = `<div class="text-center text-gray-400 py-8">در حال بارگذاری پلن‌ها…</div>`;
+  box.innerHTML = `<div class="upgrade-loading"><div class="upgrade-loading__spinner"></div><span>در حال بارگذاری پلن‌ها…</span></div>`;
   const UPLOADS_BASE = `${API_BASE.replace('/api','')}/uploads/`;
 
   // تشخیص نوع تبلیغ براساس slug
@@ -1331,7 +1348,7 @@ async function fetchMyPlans() {
     const adPriceMap = (await adPriceMapPromise) || {};
 
     if (!res.ok || !json.plans || !json.plans.length) {
-      box.innerHTML = `<div class="text-center text-gray-400 py-8">پلن فعالی یافت نشد!</div>`;
+      box.innerHTML = `<div class="upgrade-empty"><div class="upgrade-empty__icon">📋</div><h3 class="upgrade-empty__title">پلن فعالی یافت نشد</h3><p class="upgrade-empty__desc">هنوز هیچ پلن اشتراک یا تبلیغاتی خریداری نکرده‌اید.</p></div>`;
       return;
     }
 
@@ -1614,7 +1631,7 @@ async function fetchMyPlans() {
       </div>
     `;
   } catch (err) {
-    box.innerHTML = `<div class="text-center text-red-400 py-8">خطا در دریافت پلن‌ها!</div>`;
+    box.innerHTML = `<div class="upgrade-empty"><div class="upgrade-empty__icon">⚠️</div><h3 class="upgrade-empty__title">خطا در دریافت پلن‌ها</h3><p class="upgrade-empty__desc">لطفاً دوباره تلاش کنید.</p></div>`;
   }
 }
 
@@ -1632,19 +1649,3 @@ function toJalaliDate(isoStr) {
     return isoStr.split('T')[0];
   }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  const premiumPrice = 30000;
-  const toggle = document.getElementById("premiumToggle");
-  const display = document.getElementById("upgrade-price");
-
-  if (toggle && display) {
-    toggle.addEventListener("change", () => {
-      const base = parseInt(display.dataset.base || '0', 10);
-      const final = base + (toggle.checked ? premiumPrice : 0);
-      display.textContent = toFaPrice(final) + ' تومان';
-    });
-  }
-});
-
-

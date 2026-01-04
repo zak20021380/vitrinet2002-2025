@@ -1,1002 +1,495 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>ارتقا و تبلیغات | ویترینت</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 65%, #d4fbe8 100%);
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-    .tab-active {
-      background: #10b981 !important;
-      color: #fff !important;
-      box-shadow: 0 4px 24px #10b98122;
-    }
-    .plan-card {
-      position: relative;
-      background: #fff;
-      border: 2px solid #e0e8e7;
-      border-radius: 1.5rem;
-      padding: 2.5rem 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 0.85rem;
-      min-height: 300px;
-      box-shadow: 0 10px 30px rgba(15,118,110,0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .plan-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 38px rgba(15,118,110,0.16);
-    }
-    .plan-card__icon {
-      margin-bottom: 0.4rem;
-    }
-    .plan-card__title {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .plan-card__price {
-      display: flex;
-      align-items: baseline;
-      gap: 0.35rem;
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #0ea5e9;
-    }
-    .plan-card__price-unit {
-      font-size: 0.9rem;
-      color: #475569;
-    }
-    .plan-card__duration {
-      font-size: 0.85rem;
-      color: #94a3b8;
-    }
-    .plan-card__description {
-      margin: 0;
-      font-size: 0.92rem;
-      color: #334155;
-      min-height: 48px;
-    }
-    .plan-card__features {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-      width: 100%;
-    }
-    .plan-card__features li {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      text-align: right;
-      font-size: 0.9rem;
-      color: #1f2937;
-    }
-    .plan-feature-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      margin-left: 0.5rem;
-      border-radius: 999px;
-      background: rgba(16,185,129,0.12);
-      color: #0f766e;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .plan-card__cta {
-      margin-top: auto;
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border-radius: 1rem;
-      font-weight: 800;
-      color: #fff;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
-    }
-    .plan-card__cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(14,165,233,0.25);
-    }
-    .badge {
-      background: linear-gradient(90deg, #f59e0b 70%, #10b981 100%);
-      color: #fff;
-      border-radius: 1em;
-      padding: 2px 16px;
-      font-size: 13px;
-      font-weight: bold;
-      position: absolute;
-      top: -16px;
-      left: 14px;
-      box-shadow: 0 2px 8px #10b98133;
-      letter-spacing: 0.5px;
-      z-index: 10;
-      animation: badgeFade 0.7s;
-    }
-    @keyframes badgeFade {
-      from {opacity: 0; transform: scale(0.8);}
-      to {opacity: 1; transform: scale(1);}
-    }
-    .success-popup-card {
-      animation: successPop 0.45s cubic-bezier(.2,.8,.4,1);
-    }
-    .success-popup-icon {
-      animation: successPulse 1.8s ease-in-out infinite;
-    }
-    @keyframes successPop {
-      0%   { opacity: 0; transform: translateY(24px) scale(0.92); }
-      60%  { opacity: 1; transform: translateY(-4px) scale(1.02); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes successPulse {
-      0%, 100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
-      50%      { transform: scale(1); box-shadow: 0 10px 30px -12px rgba(14, 165, 233, 0.45); }
-    }
-    /* تبلیغ ویژه */
-    .ad-highlight {
-      background: linear-gradient(90deg, #a7f3d0 65%, #dbeafe 100%);
-    }
-    /* پلن فعال */
-    .active-plan {
-      border: 2px solid #10b981 !important;
-      box-shadow: 0 0 0 4px #10b98111 !important;
-    }
-
-
-
-
-
-
-
-    .btn-grad {
-  background: linear-gradient(90deg, #10b981 10%, #0ea5e9 90%);
-  color: #fff !important;
-  border: none;
-  box-shadow: 0 6px 32px #10b98144, 0 1.5px 2.5px #0ea5e940;
-  transition: 
-    background 0.26s cubic-bezier(.25,1,.5,1), 
-    transform 0.12s, 
-    box-shadow 0.16s;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-.btn-grad::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, #0ea5e9 0%, #10b981 100%);
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.23s cubic-bezier(.25,1,.5,1);
-}
-.btn-grad:hover,
-.btn-grad:focus {
-  background: linear-gradient(90deg, #0ea5e9 0%, #10b981 100%);
-  box-shadow: 0 10px 40px #0ea5e940, 0 3px 8px #10b98133;
-  transform: scale(1.04) translateY(-1px);
-}
-.btn-grad:hover::before,
-.btn-grad:focus::before {
-  opacity: 1;
-}
-
-    /* استایل مدال اشتراک */
-    #upgradeModal .modal-box {
-      position: relative;
-      background: rgba(31,41,55,0.75);
-      backdrop-filter: blur(18px);
-      border-radius: 1.5rem;
-      overflow: hidden;
-    }
-    #upgradeModal .modal-box::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 2px;
-      background: linear-gradient(135deg, rgba(16,185,129,0.6), rgba(14,165,233,0.6));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      animation: ringGlow 4s ease-in-out infinite alternate;
-    }
-    @keyframes ringGlow {
-      from { filter: drop-shadow(0 0 6px rgba(16,185,129,0.5)); }
-      to   { filter: drop-shadow(0 0 8px rgba(14,165,233,0.5)); }
-    }
-    #upgradeModal ul li {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(16,185,129,0.15);
-      color: #d1fae5;
-      padding: 0.35rem 0.6rem;
-      border-radius: 0.75rem;
-      font-size: 0.8rem;
-    }
-    #goToPaymentBtn.pay-btn {
-      animation: payPulse 2s infinite;
-    }
-    @keyframes payPulse {
-      0%,100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    #planBadge {
-      background: linear-gradient(90deg,#f59e0b,#f43f5e);
-    }
-    #saveBadge {
-      background: linear-gradient(90deg,#ec4899,#f59e0b);
-    }
-
-    /* کارت نمایش پلن‌های من - طراحی جدید */
-    #content-sub .plan-card,
-    #content-ads .plan-card,
-    #content-myplans .plan-card,
-    #content-myplans .my-plan-card {
-      width: 100%;
-      max-width: 100%;
-      flex: none;
-      min-width: 0;
-      box-sizing: border-box;
-    }
-    #content-myplans .plan-card-surface {
-      position: relative;
-      background: linear-gradient(140deg, rgba(236,253,245,0.95), rgba(219,234,254,0.9));
-      border-radius: 1.5rem;
-      border: 1px solid rgba(14,165,233,0.16);
-      box-shadow: 0 20px 40px rgba(13,148,136,0.12);
-      color: #0f172a;
-      padding: 1.5rem;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-      animation: myCardIn 0.45s ease;
-    }
-    #content-myplans .plan-card--ad {
-      background: linear-gradient(140deg, rgba(255,248,237,0.95), rgba(255,237,213,0.9));
-      border: 1px solid rgba(249,115,22,0.22);
-      box-shadow: 0 24px 52px rgba(249,115,22,0.16);
-    }
-    .plan-expiry-warning {
-      position: relative;
-      margin-top: 0.75rem;
-      padding: 1.1rem 1.25rem;
-      border-radius: 1.25rem;
-      background: linear-gradient(135deg, rgba(254,226,226,0.92), rgba(255,251,235,0.94));
-      border: 1px solid rgba(248,113,113,0.45);
-      box-shadow: 0 20px 46px rgba(248,113,113,0.18);
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-    .plan-expiry-warning__header {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      font-weight: 800;
-      font-size: 0.95rem;
-      color: #b91c1c;
-    }
-    .plan-expiry-warning__icon {
-      font-size: 1.35rem;
-      line-height: 1;
-    }
-    .plan-expiry-warning__body {
-      margin: 0;
-      font-size: 0.92rem;
-      line-height: 1.9;
-      color: #7f1d1d;
-    }
-    .plan-expiry-warning__cta {
-      margin: 0;
-      font-size: 0.85rem;
-      line-height: 1.8;
-      font-weight: 600;
-      color: #991b1b;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .plan-expiry-warning__actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-    }
-    .plan-expiry-warning__btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.65rem 1.15rem;
-      border-radius: 999px;
-      background: linear-gradient(120deg, #dc2626, #fb7185);
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.85rem;
-      text-decoration: none;
-      box-shadow: 0 16px 36px rgba(220,38,38,0.28);
-      transition: transform 0.18s ease, box-shadow 0.2s ease;
-    }
-    .plan-expiry-warning__btn svg {
-      width: 1rem;
-      height: 1rem;
-    }
-    .plan-expiry-warning__btn:hover,
-    .plan-expiry-warning__btn:focus {
-      transform: translateY(-1px);
-      box-shadow: 0 22px 40px rgba(220,38,38,0.32);
-    }
-    .plan-expiry-warning__deadline {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #7f1d1d;
-    }
-    #content-myplans .plan-card--ad::before {
-      background: linear-gradient(120deg, rgba(249,115,22,0.35), rgba(249,168,37,0.35));
-    }
-    #content-myplans .plan-card-surface::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: linear-gradient(120deg, rgba(14,165,233,0.4), rgba(16,185,129,0.4));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      opacity: 0.6;
-    }
-    #content-myplans .plan-card-surface:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 28px 60px rgba(14,165,233,0.18);
-    }
-    #content-myplans .my-plan-card__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    #content-myplans .plan-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      background: rgba(16,185,129,0.12);
-      color: #047857;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-    #content-myplans .plan-pill svg {
-      width: 18px;
-      height: 18px;
-    }
-    #content-myplans .plan-pill--ad {
-      background: rgba(249,115,22,0.12);
-      color: #c2410c;
-    }
-    #content-myplans .plan-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      background: var(--badge-bg, rgba(14,165,233,0.18));
-      color: var(--badge-text, #0f172a);
-      box-shadow: 0 14px 30px rgba(14,165,233,0.18);
-      white-space: nowrap;
-    }
-    #content-myplans .plan-status-badge::before {
-      content: "";
-      width: 0.55rem;
-      height: 0.55rem;
-      border-radius: 9999px;
-      background: rgba(255,255,255,0.85);
-      box-shadow: 0 0 0 4px rgba(255,255,255,0.25);
-    }
-    #content-myplans .my-plan-card__title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0;
-    }
-    #content-myplans .my-plan-card__price {
-      display: flex;
-      align-items: baseline;
-      gap: 0.45rem;
-      font-weight: 900;
-      color: #047857;
-      font-size: 1.8rem;
-    }
-    #content-myplans .my-plan-card__price .price-unit {
-      font-size: 0.85rem;
-      color: #64748b;
-      font-weight: 600;
-    }
-    #content-myplans .my-plan-card__dates {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 0.75rem;
-    }
-    #content-myplans .info-row {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      padding: 0.6rem 0.85rem;
-      border-radius: 1.1rem;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(148,163,184,0.2);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-    #content-myplans .info-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 9999px;
-      background: rgba(16,185,129,0.15);
-      color: #047857;
-      flex-shrink: 0;
-    }
-    #content-myplans .info-row--end .info-icon {
-      background: rgba(14,165,233,0.15);
-      color: #0ea5e9;
-    }
-    #content-myplans .info-label {
-      font-size: 0.7rem;
-      color: #64748b;
-      margin-bottom: 0.1rem;
-    }
-    #content-myplans .info-value {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #1f2937;
-    }
-    #content-myplans .my-plan-card__progress {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-    #content-myplans .plan-progress-track {
-      width: 100%;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(14,165,233,0.12);
-      overflow: hidden;
-    }
-    #content-myplans .plan-progress-bar {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      width: var(--progress, 0%);
-      background: linear-gradient(90deg, #0ea5e9, #10b981);
-      transition: width 0.35s ease;
-    }
-    #content-myplans .progress-meta {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #0f172a;
-    }
-    #content-myplans .progress-meta svg {
-      width: 16px;
-      height: 16px;
-      color: #0ea5e9;
-    }
-    #content-myplans .progress-meta strong {
-      color: #0ea5e9;
-      font-weight: 800;
-    }
-    #content-myplans .my-plan-card__description {
-      font-size: 0.78rem;
-      line-height: 1.9;
-      color: #475569;
-      background: rgba(255,255,255,0.92);
-      border: 1px dashed rgba(148,163,184,0.35);
-      border-radius: 1.25rem;
-      padding: 0.75rem 0.95rem;
-    }
-    #content-myplans .plan-card--ad .my-plan-card__price {
-      color: #c2410c;
-    }
-    #content-myplans .plan-card__media-wrapper {
-      border-radius: 1.25rem;
-      overflow: hidden;
-      border: 1px solid rgba(249,115,22,0.25);
-      box-shadow: 0 16px 36px rgba(249,115,22,0.18);
-    }
-    #content-myplans .plan-card__media-wrapper img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-    #content-myplans .plan-card__hint {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.55rem;
-      font-size: 0.75rem;
-      color: #c2410c;
-      background: rgba(249,115,22,0.1);
-      border-radius: 1rem;
-      padding: 0.65rem 0.85rem;
-    }
-    #content-myplans .plan-card__hint svg {
-      width: 16px;
-      height: 16px;
-      margin-top: 2px;
-      color: #f97316;
-      flex-shrink: 0;
-    }
-    #content-myplans .plan-card__actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    #content-myplans .plan-card__actions a {
-      border-radius: 0.9rem !important;
-      padding: 0.75rem 1rem;
-      font-weight: 700;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-      box-shadow: 0 14px 28px rgba(15,118,110,0.08);
-    }
-    #content-myplans .plan-card__actions a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 34px rgba(14,165,233,0.2);
-    }
-    @keyframes myCardIn {
-      from {opacity:0; transform: translateY(10px);}
-      to {opacity:1; transform: translateY(0);}
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding-bottom: 5rem;
-      }
-      .tab-actions {
-        flex-wrap: wrap;
-        width: 100%;
-        gap: 0.5rem;
-      }
-      .tab-actions .tab-btn {
-        flex: 1 1 calc(50% - 0.5rem);
-        min-width: 140px;
-        font-size: 0.85rem;
-        padding-inline: 0.75rem;
-        padding-block: 0.65rem;
-      }
-      .tab-actions .tab-btn:last-child {
-        flex-basis: 100%;
-      }
-      .plan-card {
-        padding: 1.25rem 1.15rem;
-        border-radius: 1.25rem;
-      }
-      .plan-card__features {
-        align-items: center;
-      }
-      .plan-card__features li {
-        justify-content: center;
-      }
-      #content-myplans .plan-card-surface {
-        padding: 1.25rem 1.15rem;
-        border-radius: 1.25rem;
-        gap: 0.95rem;
-      }
-      #content-myplans .plan-pill {
-        font-size: 0.75rem;
-        padding: 0.4rem 0.85rem;
-      }
-      #content-myplans .plan-status-badge {
-        font-size: 0.72rem;
-        padding: 0.35rem 0.85rem;
-      }
-      #content-myplans .my-plan-card__price {
-        font-size: 1.45rem;
-      }
-      #content-myplans .my-plan-card__dates {
-        grid-template-columns: 1fr;
-      }
-      #content-myplans .plan-card__actions {
-        flex-direction: column;
-      }
-      .plan-card svg {
-        width: 36px;
-        height: 36px;
-      }
-      .plan-card h2 {
-        font-size: 1.05rem;
-      }
-      .plan-card ul {
-        font-size: 0.85rem;
-      }
-      .plan-card button,
-      #content-ads .plan-card button {
-        font-size: 0.9rem !important;
-        padding-block: 0.85rem;
-      }
-      .badge {
-        left: 50%;
-        transform: translateX(-50%);
-        top: -12px;
-        font-size: 0.75rem;
-        padding-inline: 0.75rem;
-        padding-block: 0.25rem;
-      }
-      #content-ads .grid,
-      #content-sub .grid {
-        gap: 1.25rem;
-      }
-      #upgradeModal .modal-box {
-        margin-inline: auto;
-        padding: 1.75rem 1.4rem;
-      }
-      #upgradeModal h3 {
-        font-size: 1.15rem;
-      }
-      #upgradeModal #upgrade-price {
-        font-size: 2.25rem;
-      }
-      #adModalBackdrop .relative {
-        border-radius: 1.5rem;
-        padding: 1.75rem 1.35rem;
-      }
-      #adModalBackdrop h2 {
-        font-size: 1.35rem;
-      }
-      #adModalBackdrop form {
-        gap: 0.9rem;
-      }
-    }
-    @media (max-width: 420px) {
-      .tab-actions .tab-btn {
-        flex: 1 1 100%;
-      }
-      .plan-card {
-        min-height: auto !important;
-      }
-      #content-myplans .plan-card-surface {
-        padding: 1.15rem 1rem;
-      }
-      #content-myplans .plan-card__actions a {
-        width: 100%;
-      }
-      .plan-card ul {
-        line-height: 1.7;
-      }
-    }
-
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../service-seller-panel/styles/01-foundations-and-layout.css" />
+  <link rel="stylesheet" href="../service-seller-panel/styles/24-upgrade-section.css" />
   <script src="/nav-active.js" defer></script>
-
-<!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
-<!--
-<script>
-  (function () {
-    var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
-    if (!config.enabled) {
-      return; // فعال نیست | Not enabled yet
+  <style>
+    /* Override: Remove extra bottom padding for standalone upgrade page (no bottom nav) */
+    body {
+      padding-bottom: 0 !important;
+      min-height: 100vh;
     }
-    try {
-      (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
-      window.posthog.init(config.apiKey, { api_host: config.apiHost, capture_pageview: true, advanced_disable_decide: true });
-    } catch (error) {
-      console.warn('PostHog init failed (preview mode):', error);
+    .upgrade-section {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
     }
-  })();
-</script>
--->
-
+  </style>
 </head>
-<body class="min-h-screen px-2 pt-6 pb-8">
-  <!-- Responsive padding & spacing for main container -->
-  <div class="max-w-3xl mx-auto bg-white/90 shadow-2xl rounded-3xl p-4 sm:p-6 md:p-10 mb-6 sm:mb-7 mt-2 sm:mt-3 animate-fadeIn">
-    <!-- Responsive heading sizing -->
-    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#10b981] text-center mb-1 flex items-center justify-center gap-2">
-      <svg width="30" height="30" fill="none" viewBox="0 0 24 24">
-        <path d="M12 2l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5.5 7.5-1L12 2z" stroke="#f59e0b" stroke-width="2"/>
-      </svg>
-      ارتقا و تبلیغات
-      <span id="premiumBadge" class="hidden bg-[#f59e0b] text-white text-xs px-2 py-0.5 rounded-full">پرمیوم</span>
-    </h1>
-    <div class="text-gray-500 text-center text-base mb-5">همین الان با خرید اشتراک یا تبلیغات ویژه، رشد فروشگاهت رو چند برابر کن!</div>
-    <!-- تب‌های انتخاب بخش -->
-    <div class="flex md:flex-nowrap tab-actions gap-2 justify-center mb-8">
-      <button id="tab-sub" class="tab-btn bg-[#f1faf7] text-[#10b981] px-4 py-2 text-sm sm:text-base rounded-xl font-bold shadow hover:bg-[#10b98111] focus:outline-none transition tab-active">
-        اشتراک فروشگاه
-      </button>
-      <button id="tab-ads" class="tab-btn bg-[#f1faf7] text-[#f59e0b] px-4 py-2 text-sm sm:text-base rounded-xl font-bold shadow hover:bg-[#f59e0b11] focus:outline-none transition">
-        تبلیغات ویژه
-      </button>
+<body>
+  <main class="upgrade-section">
+    <!-- Hero Header -->
+    <header class="upgrade-hero">
+      <div class="upgrade-hero__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5.5 7.5-1L12 2z"/>
+        </svg>
+      </div>
+      <h1 class="upgrade-hero__title">ارتقا و تبلیغات</h1>
+      <p class="upgrade-hero__subtitle">همین الان با خرید اشتراک یا تبلیغات ویژه، رشد فروشگاهت رو چند برابر کن!</p>
+    </header>
 
-      <button id="tab-myplans" class="tab-btn bg-[#f1faf7] text-[#6366f1] px-4 py-2 text-sm sm:text-base rounded-xl font-bold shadow hover:bg-[#6366f111] focus:outline-none transition">
-        پلن‌های من
+    <!-- Tab Navigation -->
+    <nav class="upgrade-tabs" role="tablist">
+      <button class="upgrade-tab is-active" role="tab" data-tab="sub" aria-selected="true">
+        <span class="upgrade-tab__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <path d="M9 22V12h6v10"/>
+          </svg>
+        </span>
+        <span>اشتراک فروشگاه</span>
       </button>
+      <button class="upgrade-tab" role="tab" data-tab="ads" aria-selected="false">
+        <span class="upgrade-tab__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </span>
+        <span>تبلیغات ویژه</span>
+      </button>
+      <button class="upgrade-tab" role="tab" data-tab="myplans" aria-selected="false">
+        <span class="upgrade-tab__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6"/>
+            <path d="M16 13H8"/>
+            <path d="M16 17H8"/>
+            <path d="M10 9H8"/>
+          </svg>
+        </span>
+        <span>پلن‌های من</span>
+      </button>
+    </nav>
 
-    </div>
-    <!-- محتوای بخش اشتراک -->
-    <div id="content-sub" class="">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <!-- پلن یک ماهه -->
-        <div class="plan-card plan-card--sub" data-plan-card="1month">
-          <div class="badge" data-plan-badge="1month">پیشنهاد اقتصادی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/>
-            <path d="M12 6v6l3 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="1month">اشتراک ۱ ماهه</h2>
-          <div class="plan-card__price">
-            <span id="price-1month" data-plan-price="1month">۴۹,۰۰۰</span>
-            <span class="plan-card__price-unit">تومان</span>
+    <!-- Subscription Plans Section -->
+    <section id="content-sub" class="upgrade-content" role="tabpanel">
+      <div class="upgrade-plans-grid">
+        <!-- 1 Month Plan -->
+        <article class="upgrade-plan-card upgrade-plan-card--v2" data-plan-card="1month">
+          <span class="upgrade-plan-badge" data-plan-badge="1month">پیشنهاد اقتصادی</span>
+          <header class="upgrade-plan-header">
+            <div class="upgrade-plan-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 8v4l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 3v1M12 20v1M3 12h1M20 12h1" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-plan-title" data-plan-title="1month">اشتراک ۱ ماهه</h2>
+            <div class="upgrade-plan-duration" data-plan-duration="1month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+              <span>اعتبار: ۳۰ روز</span>
+            </div>
+          </header>
+          <div class="upgrade-plan-pricing">
+            <div class="upgrade-plan-price">
+              <span class="upgrade-plan-price__amount" data-plan-price="1month">۴۹,۰۰۰</span>
+              <span class="upgrade-plan-price__unit">تومان</span>
+            </div>
           </div>
-          <div class="plan-card__duration" data-plan-duration="1month">اعتبار: ۳۰ روز</div>
-          <p class="plan-card__description" data-plan-description="1month">شروع سریع با یک ماه حضور فعال در ویترینت.</p>
-          <ul class="plan-card__features" data-plan-features="1month">
-            <li><span class="plan-feature-icon">✔</span><span>نمایش فروشگاه در نتایج جستجو</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی استاندارد تیم ویترینت</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>امکان فعالسازی VitriPlus</span></li>
+          <p class="upgrade-plan-desc" data-plan-description="1month">شروع سریع فروشگاه در ویترینت طی یک ماه کامل حضور.</p>
+          <ul class="upgrade-plan-features" data-plan-features="1month">
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>نمایش فروشگاه در نتایج جستجو و دسته‌بندی‌ها</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>پشتیبانی استاندارد تیم ویترینت</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>امکان فعالسازی سرویس‌های پرمیوم (Plus)</span>
+            </li>
           </ul>
-          <button class="plan-card__cta bg-[#10b981] hover:bg-[#0ea5e9]" data-plan-select="1month" onclick="selectPlan('1month')">خرید این پلن</button>
-        </div>
-        <!-- پلن سه ماهه -->
-        <div class="plan-card plan-card--sub" data-plan-card="3month">
-          <div class="badge" data-plan-badge="3month" style="background:linear-gradient(90deg,#f59e0b 65%,#10b981 100%)">پیشنهاد محبوب</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
-            <path d="M12 8v8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="3month">اشتراک ۳ ماهه</h2>
-          <div class="plan-card__price">
-            <span id="price-3month" data-plan-price="3month">۱۲۹,۰۰۰</span>
-            <span class="plan-card__price-unit">تومان</span>
+          <button class="upgrade-plan-cta" data-plan-select="1month" onclick="selectPlan('1month')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3h18v18H3zM9 9h6v6H9z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>خرید این پلن</span>
+          </button>
+        </article>
+
+        <!-- 3 Month Plan - Popular -->
+        <article class="upgrade-plan-card upgrade-plan-card--v2 upgrade-plan-card--popular" data-plan-card="3month">
+          <span class="upgrade-plan-badge upgrade-plan-badge--popular" data-plan-badge="3month">پیشنهاد محبوب</span>
+          <div class="upgrade-plan-ribbon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
           </div>
-          <div class="plan-card__duration" data-plan-duration="3month">اعتبار: ۹۵ روز</div>
-          <p class="plan-card__description" data-plan-description="3month">پوشش یک فصل کامل با تمرکز بر رشد پایدار.</p>
-          <ul class="plan-card__features" data-plan-features="3month">
-            <li><span class="plan-feature-icon">✔</span><span>همه امکانات پلن یک‌ماهه</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>اولویت نمایش در لیست فروشگاه‌ها</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی سریع‌تر</span></li>
-          </ul>
-          <button class="plan-card__cta bg-[#f59e0b] hover:bg-[#0ea5e9]" data-plan-select="3month" onclick="selectPlan('3month')">خرید این پلن</button>
-        </div>
-        <!-- پلن یک‌ساله -->
-        <div class="plan-card plan-card--sub" data-plan-card="12month">
-          <div class="badge" data-plan-badge="12month" style="background:linear-gradient(90deg,#10b981 65%,#0ea5e9 100%)">بیشترین صرفه‌جویی</div>
-          <svg width="42" height="42" fill="none" viewBox="0 0 24 24" class="plan-card__icon">
-            <circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/>
-            <path d="M12 4v14" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="plan-card__title" data-plan-title="12month">اشتراک ۱ ساله</h2>
-          <div class="plan-card__price">
-            <span id="price-12month" data-plan-price="12month">۳۸۹,۰۰۰</span>
-            <span class="plan-card__price-unit">تومان</span>
+          <header class="upgrade-plan-header">
+            <div class="upgrade-plan-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-plan-title" data-plan-title="3month">اشتراک ۳ ماهه</h2>
+            <div class="upgrade-plan-duration" data-plan-duration="3month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+              <span>اعتبار: ۹۰ روز</span>
+            </div>
+          </header>
+          <div class="upgrade-plan-pricing">
+            <div class="upgrade-plan-price">
+              <span class="upgrade-plan-price__amount" data-plan-price="3month">۱۲۹,۰۰۰</span>
+              <span class="upgrade-plan-price__unit">تومان</span>
+            </div>
           </div>
-          <div class="plan-card__duration" data-plan-duration="12month">اعتبار: ۳۶۵ روز</div>
-          <p class="plan-card__description" data-plan-description="12month">راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای.</p>
-          <ul class="plan-card__features" data-plan-features="12month">
-            <li><span class="plan-feature-icon">✔</span><span>همه امکانات پلن‌های قبلی</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>نمایش ویژه و پروموشن‌های اختصاصی</span></li>
-            <li><span class="plan-feature-icon">✔</span><span>پشتیبانی VIP و گزارش‌های تحلیلی</span></li>
+          <p class="upgrade-plan-desc" data-plan-description="3month">پوشش یک فصل کامل با تمرکز بر رشد پایدار.</p>
+          <ul class="upgrade-plan-features" data-plan-features="3month">
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>همه امکانات پلن یک‌ماهه</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>اولویت نمایش در لیست فروشگاه‌ها</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>پشتیبانی سریع‌تر</span>
+            </li>
           </ul>
-          <button class="plan-card__cta bg-[#0ea5e9] hover:bg-[#10b981]" data-plan-select="12month" onclick="selectPlan('12month')">خرید این پلن</button>
+          <button class="upgrade-plan-cta" data-plan-select="3month" onclick="selectPlan('3month')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>خرید این پلن</span>
+          </button>
+        </article>
+
+        <!-- 12 Month Plan - Best Value -->
+        <article class="upgrade-plan-card upgrade-plan-card--v2 upgrade-plan-card--best" data-plan-card="12month">
+          <span class="upgrade-plan-badge upgrade-plan-badge--best" data-plan-badge="12month">بیشترین صرفه‌جویی</span>
+          <header class="upgrade-plan-header">
+            <div class="upgrade-plan-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 15l-2 5 2-2 2 2-2-5z" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.5 11.5l2 2M8.5 11.5l-2 2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-plan-title" data-plan-title="12month">اشتراک ۱ ساله</h2>
+            <div class="upgrade-plan-duration" data-plan-duration="12month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+              <span>اعتبار: ۳۶۵ روز</span>
+            </div>
+          </header>
+          <div class="upgrade-plan-pricing">
+            <div class="upgrade-plan-price">
+              <span class="upgrade-plan-price__amount" data-plan-price="12month">۳۸۹,۰۰۰</span>
+              <span class="upgrade-plan-price__unit">تومان</span>
+            </div>
+          </div>
+          <p class="upgrade-plan-desc" data-plan-description="12month">راهکار یک‌ساله برای فروشگاه‌های حرفه‌ای.</p>
+          <ul class="upgrade-plan-features" data-plan-features="12month">
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>همه امکانات پلن‌های قبلی</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>نمایش ویژه و پروموشن‌های اختصاصی</span>
+            </li>
+            <li class="upgrade-plan-feature">
+              <span class="upgrade-plan-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span>پشتیبانی VIP و گزارش‌های تحلیلی</span>
+            </li>
+          </ul>
+          <button class="upgrade-plan-cta" data-plan-select="12month" onclick="selectPlan('12month')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>خرید این پلن</span>
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <!-- Ads Section -->
+    <section id="content-ads" class="upgrade-content" role="tabpanel" hidden>
+      <div class="upgrade-ads-grid">
+        <!-- Search Ad -->
+        <article class="upgrade-ad-card upgrade-ad-card--search">
+          <span class="upgrade-ad-badge">جدید</span>
+          <header class="upgrade-ad-header">
+            <div class="upgrade-ad-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="3"/>
+                <path d="M8 8h8M8 12h8M8 16h8"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-ad-title">تبلیغ در جستجو</h2>
+          </header>
+          <div class="upgrade-ad-pricing">
+            <span class="upgrade-ad-price" id="price-ad_search">۷۹,۰۰۰</span>
+            <span class="upgrade-ad-unit">تومان / ۱ روز</span>
+          </div>
+          <ul class="upgrade-ad-features">
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </span>
+              <span>نمایش بنر در باکس جستجوی صفحه اول</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="21" r="1"/>
+                  <circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                </svg>
+              </span>
+              <span>لینک به محصول یا فروشگاه</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </span>
+              <span>اعتبار: ۱ روز</span>
+            </li>
+          </ul>
+          <button class="upgrade-ad-cta" onclick="openAdModal('ad_search')">درخواست تبلیغ</button>
+        </article>
+
+        <!-- Home Page Ad -->
+        <article class="upgrade-ad-card upgrade-ad-card--home">
+          <span class="upgrade-ad-badge">محبوب</span>
+          <header class="upgrade-ad-header">
+            <div class="upgrade-ad-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="6" width="18" height="13" rx="3"/>
+                <path d="M8 13h8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-ad-title">تبلیغ در صفحه اول</h2>
+          </header>
+          <div class="upgrade-ad-pricing">
+            <span class="upgrade-ad-price" id="price-ad_home">۹۹,۰۰۰</span>
+            <span class="upgrade-ad-unit">تومان / ۱ روز</span>
+          </div>
+          <ul class="upgrade-ad-features">
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+              </span>
+              <span>نمایش مغازه یا محصول در ردیف اول</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="7"/>
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                </svg>
+              </span>
+              <span>استایل ویژه و دیده شدن بیشتر</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </span>
+              <span>اعتبار: ۱ روز</span>
+            </li>
+          </ul>
+          <button class="upgrade-ad-cta" onclick="openAdModal('ad_home')">درخواست تبلیغ</button>
+        </article>
+
+        <!-- Products Ad -->
+        <article class="upgrade-ad-card upgrade-ad-card--products">
+          <span class="upgrade-ad-badge">ویژه</span>
+          <header class="upgrade-ad-header">
+            <div class="upgrade-ad-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 class="upgrade-ad-title">تبلیغ بین محصولات</h2>
+          </header>
+          <div class="upgrade-ad-pricing">
+            <span class="upgrade-ad-price" id="price-ad_products">۸۹,۰۰۰</span>
+            <span class="upgrade-ad-unit">تومان / ۱ روز</span>
+          </div>
+          <ul class="upgrade-ad-features">
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 010 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 010 7.07"/>
+                </svg>
+              </span>
+              <span>نمایش محصول در لیست محصولات عمومی</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </span>
+              <span>برچسب تبلیغ و جایگاه تضمینی</span>
+            </li>
+            <li class="upgrade-ad-feature">
+              <span class="upgrade-ad-feature__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </span>
+              <span>اعتبار: ۱ روز</span>
+            </li>
+          </ul>
+          <button class="upgrade-ad-cta" onclick="openAdModal('ad_products')">درخواست تبلیغ</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- My Plans Section -->
+    <section id="content-myplans" class="upgrade-content" role="tabpanel" hidden>
+      <div id="myPlansBox" class="upgrade-myplans">
+        <div class="upgrade-loading">
+          <div class="upgrade-loading__spinner"></div>
+          <span>در حال بارگذاری پلن‌ها…</span>
         </div>
       </div>
-    </div>
-    <!-- محتوای بخش تبلیغات ویژه -->
-    <div id="content-ads" class="hidden">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <!-- تبلیغ سرچ -->
-        <div class="plan-card ad-highlight relative border-2 border-[#a7f3d0] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
-          <div class="badge" style="background:linear-gradient(90deg,#f59e0b 70%,#10b981 100%)">جدید</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <rect x="4" y="4" width="16" height="16" rx="3" stroke="#10b981" stroke-width="2"/>
-            <path d="M8 8h8M8 12h8M8 16h8" stroke="#0ea5e9" stroke-width="2"/>
-          </svg>
-          <h2 class="font-extrabold text-lg text-[#10b981] mb-2">تبلیغ در جستجو</h2>
-<div class="text-lg font-bold text-[#f59e0b] mb-1">
-  <span id="price-ad_search">۷۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>✨ نمایش بنر در باکس جستجوی صفحه اول</li>
-            <li>🛒 لینک به محصول یا فروشگاه</li>
-            <li>⏱ اعتبار: ۱ روز</li>
-          </ul>
-        <button class="w-full py-2 text-sm sm:text-lg bg-[#10b981] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_search')">درخواست تبلیغ</button>
+    </section>
 
-        </div>
-        <!-- تبلیغ صفحه اول مغازه‌ها -->
-        <div class="plan-card ad-highlight relative border-2 border-[#93c5fd] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
-          <div class="badge" style="background:linear-gradient(90deg,#0ea5e9 70%,#10b981 100%)">محبوب</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <rect x="3" y="6" width="18" height="13" rx="3" stroke="#0ea5e9" stroke-width="2"/>
-            <path d="M8 13h8" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h2 class="font-extrabold text-lg text-[#0ea5e9] mb-2">تبلیغ در صفحه اول</h2>
-<div class="text-lg font-bold text-[#10b981] mb-1">
-  <span id="price-ad_home">۹۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>👑 نمایش مغازه یا محصول در ردیف اول</li>
-            <li>🏆 استایل ویژه و دیده شدن بیشتر</li>
-            <li>⏱ اعتبار: ۱ روز</li>
-          </ul>
-      <button class="w-full py-2 text-sm sm:text-lg bg-[#0ea5e9] hover:bg-[#10b981] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_home')">درخواست تبلیغ</button>
+    <!-- Success Message -->
+    <div id="planSuccessMsg" class="upgrade-toast" role="alert"></div>
+  </main>
 
-        </div>
-        <!-- تبلیغ بین محصولات -->
-        <div class="plan-card ad-highlight relative border-2 border-[#fbbf24] rounded-2xl px-6 py-7 flex flex-col items-center shadow-xl text-center min-h-[250px] sm:min-h-[290px]">
-          <div class="badge" style="background:linear-gradient(90deg,#f59e0b 70%,#fbbf24 100%)">ویژه</div>
-          <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mb-2">
-            <circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/>
-            <path d="M12 8v8M8 12h8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+  <!-- Upgrade Modal -->
+  <div id="upgradeModal" class="upgrade-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+    <div class="upgrade-modal">
+      <button id="closePaymentModalBtn" class="upgrade-modal__close" aria-label="بستن">×</button>
+      <header class="upgrade-modal__header">
+        <div class="upgrade-modal__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 4h18l-1 10a9 9 0 01-16 0L3 4z"/>
+            <path d="M7 4l1-2h8l1 2"/>
           </svg>
-          <h2 class="font-extrabold text-lg text-[#f59e0b] mb-2">تبلیغ بین محصولات</h2>
-<div class="text-lg font-bold text-[#f59e0b] mb-1">
-  <span id="price-ad_products">۸۹,۰۰۰</span>
-  <span class="text-sm font-normal">تومان / ۱ روز</span>
-</div>
-          <ul class="text-gray-700 text-sm text-right mb-4 px-0.5">
-            <li>📣 نمایش محصول در لیست محصولات عمومی</li>
-            <li>✨ برچسب تبلیغ و جایگاه تضمینی</li>
-            <li>⏱ اعتبار: ۱ روز</li>
-          </ul>
-        <button class="w-full py-2 text-sm sm:text-lg bg-[#f59e0b] hover:bg-[#0ea5e9] text-white font-bold rounded-xl transition shadow"
-        onclick="openAdModal('ad_products')">درخواست تبلیغ</button>
-
         </div>
+        <h3 id="upgrade-title" class="upgrade-modal__title"></h3>
+        <p class="upgrade-modal__subtitle">یک قدم تا رشد فروشگاهت باقی مونده!</p>
+      </header>
+      <ul id="featureList" class="upgrade-modal__features"></ul>
+      <div class="upgrade-modal__pricing">
+        <div id="old-price" class="upgrade-modal__old-price" hidden></div>
+        <div id="upgrade-price" class="upgrade-modal__price" data-base="86000">۸۶,۰۰۰ تومان</div>
+        <span id="saveBadge" class="upgrade-modal__save-badge" hidden>صرفه‌جویی</span>
       </div>
+      <button id="goToPaymentBtn" class="upgrade-modal__cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        <span>ادامه و پرداخت</span>
+      </button>
     </div>
-
-
-    <div id="content-myplans" class="hidden">
-  <div id="myPlansBox" class="space-y-5">
-    <div class="text-center text-gray-400 py-8">در حال بارگذاری پلن‌ها…</div>
   </div>
-</div>
 
-    <!-- پیام انتخاب پلن -->
-    <div id="planSuccessMsg" class="hidden text-green-600 text-center mt-7 font-bold bg-[#e0fdfa] rounded-2xl py-3 px-5 shadow-lg"></div>
-  </div>
-  <!-- مدال تایید خرید پلن اشتراک -->
-  <!-- Upgrade modal responsive & scrollable -->
-  <div id="upgradeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden overflow-y-auto p-2 sm:p-0">
-    <div class="modal-box w-full max-w-xs sm:max-w-sm md:max-w-md p-5 sm:p-7 text-center relative animate-fadein">
-      <span id="planBadge" class="hidden absolute -top-4 -right-4 text-[11px] font-extrabold text-white px-3 py-1 rounded-full shadow-lg animate-bounce">پیشنهاد طلایی</span>
-      <button id="closePaymentModalBtn" class="absolute left-2 top-2 text-gray-400 text-xl font-bold px-2 hover:text-red-500 transition">&#10006;</button>
-      <h3 class="flex items-center justify-center gap-2 font-extrabold text-xl mb-1 text-amber-300">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" class="w-7 h-7"><path d="M3 4h18l-1 10a9 9 0 01-16 0L3 4z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M7 4l1-2h8l1 2" stroke="currentColor" stroke-width="2"/></svg>
-        <span id="upgrade-title"></span>
-      </h3>
-      <p class="text-xs text-emerald-200 mb-4">یک قدم تا رشد فروشگاهت باقی مونده!</p>
-      <ul id="featureList" class="mb-4 text-right space-y-2"></ul>
-      <div id="priceBox" class="mb-4 relative">
-        <span id="old-price" class="text-gray-400 line-through text-sm mr-2 hidden"></span>
-        <span id="upgrade-price" class="text-3xl font-black text-green-400" data-base="86000">۸۶,۰۰۰ تومان</span>
-        <span id="saveBadge" class="hidden absolute -top-2 -right-2 text-[10px] font-bold text-white px-2 py-0.5 rounded-full shadow-lg animate-pulse">صرفه‌جویی</span>
-      </div>
-      <label class="flex items-center justify-center gap-2 mt-2 text-sm text-gray-300">
-        <input type="checkbox" id="premiumToggle" class="accent-emerald-500 w-4 h-4">
-        فعالسازی امکانات ویژه (ویتری‌پلاس) <span class="text-xs">+۳۰,۰۰۰ تومان</span>
-      </label>
-      <button id="goToPaymentBtn" class="pay-btn btn-grad w-full mt-6 py-3 rounded-2xl text-white font-extrabold shadow-lg flex items-center justify-center gap-2">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        ادامه و پرداخت
-      </button>
-      <div class="text-[11px] text-gray-300 mt-2">رضایت بیش از ۵۰۰ فروشنده</div>
-      <div id="limitedOffer" class="mt-1 text-xs text-pink-300 animate-pulse"></div>
+  <!-- Ad Modal -->
+  <div id="adModalBackdrop" class="upgrade-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="upgrade-ad-modal">
+      <button onclick="closeAdModal()" class="upgrade-modal__close" aria-label="بستن">×</button>
+      <header class="upgrade-ad-modal__header">
+        <h2 class="upgrade-ad-modal__title">ثبت تبلیغ ویژه</h2>
+        <p class="upgrade-ad-modal__subtitle">اطلاعات تبلیغ خود را وارد کنید</p>
+      </header>
+      <form id="adForm" class="upgrade-ad-form" onsubmit="return submitAdForm(event)">
+        <div class="upgrade-ad-form__group">
+          <label class="upgrade-ad-form__label">نوع تبلیغ</label>
+          <select id="adTargetType" class="upgrade-ad-form__select">
+            <option value="product">تبلیغ محصول</option>
+            <option value="shop">تبلیغ فروشگاه</option>
+          </select>
+        </div>
+        <div id="adProductSelectWrap" class="upgrade-ad-form__group">
+          <label class="upgrade-ad-form__label">انتخاب محصول</label>
+          <select id="adProductSelect" class="upgrade-ad-form__select">
+            <option value="">یک مورد را انتخاب کنید...</option>
+          </select>
+        </div>
+        <div class="upgrade-ad-form__group">
+          <label class="upgrade-ad-form__label">عنوان تبلیغ (حداکثر 25 کاراکتر)</label>
+          <input type="text" id="adTitle" class="upgrade-ad-form__input" required maxlength="25" placeholder="عنوان تبلیغ"/>
+        </div>
+        <div class="upgrade-ad-form__group">
+          <label class="upgrade-ad-form__label">متن تبلیغ (تا 30 کاراکتر)</label>
+          <textarea id="adText" class="upgrade-ad-form__textarea" maxlength="30" placeholder="متن تبلیغ"></textarea>
+        </div>
+        <div class="upgrade-ad-form__group">
+          <label class="upgrade-ad-form__label">آپلود تصویر تبلیغ (اجباری)</label>
+          <input type="file" id="adImage" class="upgrade-ad-form__file" accept="image/*"/>
+        </div>
+        <button type="submit" class="upgrade-ad-form__submit">ثبت تبلیغ</button>
+      </form>
     </div>
   </div>
 
   <script src="api-client.js"></script>
   <script src="dashboard-upgrade.js"></script>
-
-  <!-- Toast container -->
-  <div id="toast" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-white text-green-600 font-bold shadow-lg rounded-xl px-5 py-3 z-50"></div>
-
-
-
-
-<!-- مدال ثبت تبلیغ ویژه -->
-<!-- Responsive ad modal -->
-<div id="adModalBackdrop"
-     class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center overflow-y-auto p-2 sm:p-4 md:p-8 transition-all duration-300 hidden">
-  <div class="relative w-full max-w-md sm:max-w-lg bg-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 animate-fadein
-              flex flex-col gap-5 sm:gap-6">
-    <!-- دکمه بستن -->
-    <button onclick="closeAdModal()"
-            class="absolute left-5 top-5 text-gray-400 hover:text-red-500 text-2xl font-bold z-10 transition">
-      &times;
-    </button>
-    <!-- عنوان -->
-    <div class="mb-2 text-center">
-      <h2 class="text-xl sm:text-2xl font-black text-[#10b981] mb-1">ثبت تبلیغ ویژه</h2>
-      <div class="text-xs text-gray-400">اطلاعات تبلیغ خود را وارد کنید</div>
-    </div>
-    <!-- فرم ثبت تبلیغ -->
-<form id="adForm" class="flex flex-col gap-4" onsubmit="return submitAdForm(event)">
-  <!-- انتخاب نوع تبلیغ -->
-  <label class="text-right font-bold text-gray-700 text-sm">نوع تبلیغ</label>
-  <select id="adTargetType"
-          class="border border-gray-200 rounded-xl px-4 py-2 focus:border-[#10b981] text-right text-sm font-semibold bg-gray-50 outline-none transition">
-    <option value="product">تبلیغ محصول</option>
-    <option value="shop">تبلیغ فروشگاه</option>
-  </select>
-  <!-- انتخاب محصول (فقط اگر تبلیغ محصول باشد) -->
-  <div id="adProductSelectWrap">
-    <label class="text-right font-bold text-gray-700 text-sm mt-2">انتخاب محصول</label>
-    <select id="adProductSelect"
-            class="border border-gray-200 rounded-xl px-4 py-2 focus:border-[#10b981] text-right text-sm font-semibold bg-gray-50 outline-none transition">
-      <option value="">یک مورد را انتخاب کنید...</option>
-      <!-- آیتم‌ها با JS اضافه می‌شوند -->
-    </select>
-  </div>
-  <!-- عنوان تبلیغ -->
-  <input type="text" id="adTitle"
-         placeholder="عنوان تبلیغ (حداکثر 25 کاراکتر)" required maxlength="25"
-         class="border border-gray-200 rounded-xl px-4 py-2 focus:border-[#10b981] text-right text-sm outline-none transition"/>
-  <!-- متن تبلیغ -->
-  <textarea id="adText"
-            placeholder="متن تبلیغ ( تا 30 کاراکتر)" maxlength="30"
-            class="border border-gray-200 rounded-xl px-4 py-2 focus:border-[#10b981] text-right text-sm outline-none transition resize-none"></textarea>
-  <!-- آپلود عکس بنر -->
-  <div>
-    <label class="text-right font-bold text-gray-700 text-sm block mb-2">آپلود تصویر تبلیغ <span class="text-xs text-gray-400">(اجباری)</span></label>
-    <input type="file" id="adImage"
-           accept="image/*"
-           class="border border-gray-200 rounded-xl px-3 py-2 bg-gray-50 text-sm w-full transition"/>
-  </div>
-  <!-- دکمه ثبت -->
-  <button type="submit"
-          class="btn-grad py-3 rounded-xl font-extrabold text-base shadow hover:scale-105 transition-all duration-150 mt-2">
-    ثبت تبلیغ
-  </button>
-</form>
-
-  </div>
-</div>
-
-
-
-<!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
-<!--
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const safeCapture = window.safePosthogCapture || function () {};
-    // مشاهده صفحه ارتقای پلن فروشنده | Seller upgrade viewed
-    // safeCapture('seller_upgrade_viewed', { plan: 'premium' });
-  });
-</script>
--->
-
 </body>
 </html>
