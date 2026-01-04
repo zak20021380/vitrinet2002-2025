@@ -716,7 +716,7 @@ function openProductPreviewModal(product) {
   const linkEl = document.getElementById('productPreviewLink');
   
   if (imgEl) {
-    imgEl.src = product.img || '/assets/images/placeholder.png';
+    imgEl.src = product.img || '/assets/images/placeholder-product.svg';
     imgEl.alt = product.title || 'تصویر محصول';
   }
   if (titleEl) titleEl.textContent = product.title || 'بدون عنوان';

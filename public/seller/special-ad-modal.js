@@ -47,7 +47,10 @@
     totalPrice: 79000,
     creditAmount: 0,
     finalPrice: 79000,
-    isLoading: false
+    isLoading: false,
+    // Image state machine: 'empty' | 'loading' | 'preview' | 'error'
+    imageState: 'empty',
+    imageErrorReason: null
   };
 
   // ─────────────────────────────────────────────────────
@@ -298,115 +301,216 @@
     return null;
   };
 
-  const updateImagePreview = (imageValue) => {
-    // Hide error state
-    if (elements.imageError) {
-      elements.imageError.hidden = true;
+  /**
+   * Image State Machine
+   * States: 'empty' | 'loading' | 'preview' | 'error'
+   * 
+   * Transitions:
+   * - empty → loading (when product selected or image fetch starts)
+   * - loading → preview (when image loads successfully)
+   * - loading → empty (when image URL is missing/invalid - not an error)
+   * - loading → error (when actual fetch fails: network/403/404/timeout)
+   * - preview → loading (when product changes or retry)
+   * - error → loading (when retry clicked)
+   * - any → empty (when image removed or product cleared)
+   */
+  const setImageState = (newState, errorReason = null) => {
+    // Prevent redundant state changes
+    if (state.imageState === newState && state.imageErrorReason === errorReason) {
+      return;
     }
     
-    // Resolve the image source properly
-    const resolvedSrc = resolveImageSrc(imageValue);
+    const prevState = state.imageState;
+    state.imageState = newState;
+    state.imageErrorReason = errorReason;
     
-    if (resolvedSrc) {
-      // Show image with resolved source
-      elements.previewImg.src = resolvedSrc;
-      elements.previewImg.style.display = 'block';
-      elements.previewImg.style.opacity = '1';
-      
-      // Hide placeholder
-      if (elements.imagePlaceholder) {
-        elements.imagePlaceholder.style.display = 'none';
-      }
-      
-      // Add has-image class
-      elements.imagePreview.classList.add('has-image');
-      
-      // Show overlay change button
-      if (elements.changeImageOverlay) {
-        elements.changeImageOverlay.style.display = 'flex';
-      }
-      
-      // Show badge
-      if (elements.imageBadge) {
-        elements.imageBadge.style.display = 'block';
-      }
-      
-      // Update action buttons
-      if (elements.changeImageText) {
-        elements.changeImageText.textContent = 'تغییر تصویر';
-      }
-      if (elements.removeImageBtn) {
-        elements.removeImageBtn.hidden = false;
-      }
-      
-      // Update status
-      if (elements.imageStatus) {
-        if (state.customImage) {
-          elements.imageStatus.textContent = 'تصویر سفارشی انتخاب شد';
-          elements.imageStatus.classList.add('is-custom');
-        } else {
-          elements.imageStatus.textContent = 'تصویر محصول انتخابی';
+    console.log(`[SpecialAdModal] Image state: ${prevState} → ${newState}${errorReason ? ` (${errorReason})` : ''}`);
+    
+    // Update UI based on state
+    renderImageState();
+  };
+
+  /**
+   * Render UI based on current image state
+   * Ensures mutually exclusive visual states
+   */
+  const renderImageState = () => {
+    // Guard: ensure elements are initialized
+    if (!elements.imagePreview || !elements.previewImg) {
+      console.warn('[SpecialAdModal] renderImageState called before elements initialized');
+      return;
+    }
+    
+    const { imageState, imageErrorReason } = state;
+    
+    // Reset all states first
+    elements.imagePreview.classList.remove('has-image', 'has-error', 'is-loading');
+    if (elements.imageError) elements.imageError.hidden = true;
+    if (elements.imageBadge) elements.imageBadge.style.display = 'none';
+    if (elements.changeImageOverlay) elements.changeImageOverlay.style.display = 'none';
+    
+    switch (imageState) {
+      case 'empty':
+        // Show placeholder, hide image
+        elements.previewImg.style.display = 'none';
+        elements.previewImg.style.opacity = '0';
+        if (elements.imagePlaceholder) {
+          elements.imagePlaceholder.style.display = 'flex';
+          // Reset placeholder text
+          const placeholderText = elements.imagePlaceholder.querySelector('.special-ad-image-preview__placeholder-text');
+          if (placeholderText) placeholderText.textContent = 'برای انتخاب تصویر ضربه بزنید';
+        }
+        if (elements.changeImageText) elements.changeImageText.textContent = 'انتخاب تصویر';
+        if (elements.removeImageBtn) elements.removeImageBtn.hidden = true;
+        if (elements.imageStatus) {
+          elements.imageStatus.textContent = 'پیش‌فرض: تصویر محصول انتخابی';
           elements.imageStatus.classList.remove('is-custom');
         }
-      }
-    } else {
-      // Cleanup any existing object URL
-      revokeCurrentObjectUrl();
-      
-      // Hide image
-      elements.previewImg.style.display = 'none';
-      elements.previewImg.style.opacity = '0';
-      elements.previewImg.src = '';
-      
-      // Show placeholder
-      if (elements.imagePlaceholder) {
-        elements.imagePlaceholder.style.display = 'flex';
-      }
-      
-      // Remove has-image class
-      elements.imagePreview.classList.remove('has-image');
-      
-      // Hide overlay change button
-      if (elements.changeImageOverlay) {
-        elements.changeImageOverlay.style.display = 'none';
-      }
-      
-      // Hide badge
-      if (elements.imageBadge) {
-        elements.imageBadge.style.display = 'none';
-      }
-      
-      // Update action buttons
-      if (elements.changeImageText) {
-        elements.changeImageText.textContent = 'انتخاب تصویر';
-      }
-      if (elements.removeImageBtn) {
-        elements.removeImageBtn.hidden = true;
-      }
-      
-      // Update status
-      if (elements.imageStatus) {
-        elements.imageStatus.textContent = 'پیش‌فرض: تصویر محصول انتخابی';
-        elements.imageStatus.classList.remove('is-custom');
-      }
+        break;
+        
+      case 'loading':
+        // Show loading indicator in placeholder
+        if (elements.imagePlaceholder) {
+          elements.imagePlaceholder.style.display = 'flex';
+          const placeholderText = elements.imagePlaceholder.querySelector('.special-ad-image-preview__placeholder-text');
+          if (placeholderText) placeholderText.textContent = 'در حال بارگذاری...';
+        }
+        elements.imagePreview.classList.add('is-loading');
+        elements.previewImg.style.display = 'none';
+        elements.previewImg.style.opacity = '0';
+        if (elements.changeImageText) elements.changeImageText.textContent = 'انتخاب تصویر';
+        if (elements.removeImageBtn) elements.removeImageBtn.hidden = true;
+        if (elements.imageStatus) {
+          elements.imageStatus.textContent = 'در حال بارگذاری تصویر...';
+          elements.imageStatus.classList.remove('is-custom');
+        }
+        break;
+        
+      case 'preview':
+        // Show image, hide placeholder
+        elements.previewImg.style.display = 'block';
+        elements.previewImg.style.opacity = '1';
+        if (elements.imagePlaceholder) elements.imagePlaceholder.style.display = 'none';
+        elements.imagePreview.classList.add('has-image');
+        if (elements.changeImageOverlay) elements.changeImageOverlay.style.display = 'flex';
+        if (elements.imageBadge) elements.imageBadge.style.display = 'block';
+        if (elements.changeImageText) elements.changeImageText.textContent = 'تغییر تصویر';
+        if (elements.removeImageBtn) elements.removeImageBtn.hidden = false;
+        if (elements.imageStatus) {
+          if (state.customImage) {
+            elements.imageStatus.textContent = 'تصویر سفارشی انتخاب شد';
+            elements.imageStatus.classList.add('is-custom');
+          } else {
+            elements.imageStatus.textContent = 'تصویر محصول انتخابی';
+            elements.imageStatus.classList.remove('is-custom');
+          }
+        }
+        break;
+        
+      case 'error':
+        // Show error state
+        elements.imagePreview.classList.add('has-error');
+        elements.previewImg.style.display = 'none';
+        elements.previewImg.style.opacity = '0';
+        if (elements.imagePlaceholder) elements.imagePlaceholder.style.display = 'none';
+        if (elements.imageError) {
+          elements.imageError.hidden = false;
+          // Update error message if we have a reason
+          const errorSpan = elements.imageError.querySelector('span:not(.special-ad-image-retry-btn)');
+          if (errorSpan && imageErrorReason) {
+            errorSpan.textContent = imageErrorReason;
+          } else if (errorSpan) {
+            errorSpan.textContent = 'خطا در بارگذاری تصویر';
+          }
+        }
+        if (elements.changeImageText) elements.changeImageText.textContent = 'انتخاب تصویر';
+        if (elements.removeImageBtn) elements.removeImageBtn.hidden = true;
+        if (elements.imageStatus) {
+          elements.imageStatus.textContent = imageErrorReason || 'خطا در بارگذاری';
+          elements.imageStatus.classList.remove('is-custom');
+        }
+        break;
     }
   };
 
-  const showImageError = () => {
-    if (elements.imageError) {
-      elements.imageError.hidden = false;
+  /**
+   * Load and display image with proper state management
+   * @param {string|File|Blob|null} imageValue - The image to load
+   * @param {boolean} isProductImage - Whether this is from product selection
+   */
+  const loadImage = (imageValue, isProductImage = false) => {
+    // If no image value, go to empty state (not error)
+    if (!imageValue) {
+      revokeCurrentObjectUrl();
+      elements.previewImg.src = '';
+      setImageState('empty');
+      return;
     }
-    if (elements.imageBadge) {
-      elements.imageBadge.style.display = 'none';
+    
+    // Resolve the image source
+    const resolvedSrc = resolveImageSrc(imageValue);
+    
+    if (!resolvedSrc) {
+      // Invalid/missing URL - show empty state, not error
+      revokeCurrentObjectUrl();
+      elements.previewImg.src = '';
+      setImageState('empty');
+      return;
     }
-    elements.imagePreview.classList.add('has-error');
+    
+    // For File/Blob or dataURL, we can show preview immediately (no network fetch)
+    if (isFileOrBlob(imageValue) || isDataUrl(imageValue)) {
+      elements.previewImg.src = resolvedSrc;
+      setImageState('preview');
+      return;
+    }
+    
+    // For network URLs, show loading state and wait for load/error
+    setImageState('loading');
+    
+    // Create a new image to test loading
+    const testImg = new Image();
+    
+    testImg.onload = () => {
+      // Success! Update the actual preview image and show preview state
+      elements.previewImg.src = resolvedSrc;
+      setImageState('preview');
+    };
+    
+    testImg.onerror = (e) => {
+      // Actual network error - show error state with reason
+      console.error('[SpecialAdModal] Image load failed:', resolvedSrc, e);
+      revokeCurrentObjectUrl();
+      elements.previewImg.src = '';
+      
+      // Determine error reason
+      let errorReason = 'خطا در بارگذاری تصویر';
+      // We can't easily detect 403/404 from img.onerror, but we can provide a generic message
+      if (!navigator.onLine) {
+        errorReason = 'اتصال اینترنت برقرار نیست';
+      }
+      
+      setImageState('error', errorReason);
+    };
+    
+    // Start loading
+    testImg.src = resolvedSrc;
+  };
+
+  // Legacy function for backward compatibility
+  const updateImagePreview = (imageValue) => {
+    loadImage(imageValue, !state.customImage);
+  };
+
+  const showImageError = (reason = null) => {
+    setImageState('error', reason || 'خطا در بارگذاری تصویر');
   };
 
   const hideImageError = () => {
-    if (elements.imageError) {
-      elements.imageError.hidden = true;
+    // Only hide error if we're in error state
+    if (state.imageState === 'error') {
+      setImageState('empty');
     }
-    elements.imagePreview.classList.remove('has-error');
   };
 
   const updateWalletDisplay = () => {
@@ -500,11 +604,14 @@
       updateTypeCards();
       updateProductPicker();
       
-      // Clear product selection when switching to shop
+      // Clear product selection and image when switching to shop
       if (state.adType === 'shop') {
         state.selectedProductId = null;
         state.selectedProductImage = null;
-        updateImagePreview(null);
+        // Only reset to empty if no custom image
+        if (!state.customImage) {
+          setImageState('empty');
+        }
       }
     }
   };
@@ -527,12 +634,21 @@
       }
     }
     
+    // Clear any previous error state immediately when product changes
+    // This is critical - we must reset state before attempting to load new image
+    if (state.imageState === 'error') {
+      setImageState('empty');
+    }
+    
     // Update image preview with product image (if no custom image)
-    // Pass the raw path - resolveImageSrc will handle URL construction
-    if (!state.customImage && state.selectedProductImage) {
-      updateImagePreview(state.selectedProductImage);
-    } else if (!state.customImage) {
-      updateImagePreview(null);
+    // Pass the raw path - loadImage will handle URL construction and state transitions
+    if (!state.customImage) {
+      if (state.selectedProductImage) {
+        loadImage(state.selectedProductImage, true);
+      } else {
+        // No product image available - show empty state (not error)
+        setImageState('empty');
+      }
     }
   };
 
@@ -558,10 +674,9 @@
     
     // Store the File object (will be sent via FormData)
     state.customImage = file;
-    hideImageError();
     
-    // Use the File object directly - resolveImageSrc will create objectURL
-    updateImagePreview(file);
+    // Use the File object directly - loadImage will create objectURL and manage state
+    loadImage(file, false);
   };
 
   const handleRemoveImage = () => {
@@ -571,12 +686,11 @@
     // Cleanup object URL if exists
     revokeCurrentObjectUrl();
     
-    // If product is selected, show product image, otherwise show empty state
-    // Pass the raw server path - resolveImageSrc will handle URL construction
+    // If product is selected, load product image, otherwise show empty state
     if (state.selectedProductImage) {
-      updateImagePreview(state.selectedProductImage);
+      loadImage(state.selectedProductImage, true);
     } else {
-      updateImagePreview(null);
+      setImageState('empty');
     }
   };
 
@@ -585,8 +699,18 @@
   };
 
   const handleRetryImage = () => {
-    hideImageError();
-    elements.imageInput.click();
+    // Set to loading state first
+    setImageState('loading');
+    
+    // Try to reload the current image source
+    if (state.customImage) {
+      loadImage(state.customImage, false);
+    } else if (state.selectedProductImage) {
+      loadImage(state.selectedProductImage, true);
+    } else {
+      // No image to retry - open file picker
+      elements.imageInput.click();
+    }
   };
 
   const handleCreditToggle = (e) => {
@@ -700,6 +824,16 @@
       attachEventListeners();
     }
     
+    // Reset image state to empty when opening modal
+    state.imageState = 'empty';
+    state.imageErrorReason = null;
+    state.selectedProductId = null;
+    state.selectedProductImage = null;
+    state.customImage = null;
+    revokeCurrentObjectUrl();
+    elements.previewImg.src = '';
+    renderImageState();
+    
     // Fetch data
     await Promise.all([
       fetchAdPrices(),
@@ -748,7 +882,9 @@
       totalPrice: AD_PLAN_PRICES[state.planSlug],
       creditAmount: 0,
       finalPrice: AD_PLAN_PRICES[state.planSlug],
-      isLoading: false
+      isLoading: false,
+      imageState: 'empty',
+      imageErrorReason: null
     };
     
     elements.form.reset();
@@ -756,8 +892,7 @@
     elements.imageInput.value = '';
     updateTypeCards();
     updateProductPicker();
-    updateImagePreview(null);
-    hideImageError();
+    setImageState('empty');
     updatePriceBreakdown();
     updateCharCounter(elements.titleInput, elements.titleCounter, 25);
     updateCharCounter(elements.textInput, elements.textCounter, 30);
@@ -885,10 +1020,37 @@
     // File input change
     elements.imageInput?.addEventListener('change', handleImageChange);
     
-    // Handle image load error
+    // Handle image load error - only if we're in loading state
+    // This prevents stale errors from showing when state has already changed
     elements.previewImg?.addEventListener('error', () => {
-      if (elements.previewImg.src && elements.previewImg.src !== window.location.href) {
-        showImageError();
+      // Ignore errors when src is empty or same as current page
+      const src = elements.previewImg.src;
+      if (!src || src === '' || src === window.location.href || src === 'about:blank') {
+        return;
+      }
+      
+      // Only show error if we're currently in loading state
+      // This prevents race conditions where error fires after state has changed
+      if (state.imageState === 'loading') {
+        console.warn('[SpecialAdModal] Image error event fired while in loading state:', src);
+        // The loadImage function handles errors via testImg, so this is a fallback
+        // Don't call showImageError here as loadImage manages state
+      }
+    });
+    
+    // Handle successful image load
+    elements.previewImg?.addEventListener('load', () => {
+      // Ignore load events when src is empty
+      const src = elements.previewImg.src;
+      if (!src || src === '' || src === window.location.href || src === 'about:blank') {
+        return;
+      }
+      
+      // If we're in loading state and image loaded, transition to preview
+      // This is a safety net - loadImage should handle this via testImg
+      if (state.imageState === 'loading') {
+        console.log('[SpecialAdModal] Image load event fired - transitioning to preview');
+        setImageState('preview');
       }
     });
     
@@ -908,10 +1070,24 @@
       document.addEventListener('DOMContentLoaded', () => {
         initElements();
         attachEventListeners();
+        // Ensure initial state is empty (not error)
+        if (elements.imagePreview) {
+          elements.imagePreview.classList.remove('has-error', 'has-image', 'is-loading');
+        }
+        if (elements.imageError) {
+          elements.imageError.hidden = true;
+        }
       });
     } else {
       initElements();
       attachEventListeners();
+      // Ensure initial state is empty (not error)
+      if (elements.imagePreview) {
+        elements.imagePreview.classList.remove('has-error', 'has-image', 'is-loading');
+      }
+      if (elements.imageError) {
+        elements.imageError.hidden = true;
+      }
     }
   };
 

@@ -11032,7 +11032,7 @@
     
     <header class="quick-edit-modal__header">
       <div class="quick-edit-modal__title-wrap">
-        <img class="quick-edit-modal__product-img" id="quickEditProductImg" src="/assets/images/placeholder.png" alt="">
+        <img class="quick-edit-modal__product-img" id="quickEditProductImg" src="/assets/images/placeholder-product.svg" alt="">
         <h3 class="quick-edit-modal__title" id="quickEditProductName">نام محصول</h3>
       </div>
       <button class="quick-edit-modal__close" id="closeQuickEditModal" aria-label="بستن">
@@ -12070,7 +12070,7 @@
         }).map(p => ({
           id: p._id || p.id,
           name: p.name || p.title || 'بدون نام',
-          image: p.images?.[0] || p.image || '/assets/images/placeholder.png',
+          image: p.images?.[0] || p.image || '/assets/images/placeholder-product.svg',
           updatedAt: p.updatedAt || p.createdAt,
           daysAgo: getDaysAgo(p.updatedAt || p.createdAt),
           price: p.price || 0,
@@ -12185,7 +12185,7 @@
         
         return `
         <div class="stale-product-item ${statusClass}" data-id="${p.id}">
-          <img class="stale-product-item__image" src="${p.image}" alt="${p.name}" onerror="this.src='/assets/images/placeholder.png'">
+          <img class="stale-product-item__image" src="${p.image}" alt="${p.name}" onerror="this.src='/assets/images/placeholder-product.svg'">
           <div class="stale-product-item__content">
             <h4 class="stale-product-item__name">${p.name}</h4>
             <div class="stale-product-item__meta">
@@ -12256,7 +12256,7 @@
       // Populate form
       if (quickEditProductImg) {
         quickEditProductImg.src = product.image;
-        quickEditProductImg.onerror = () => { quickEditProductImg.src = '/assets/images/placeholder.png'; };
+        quickEditProductImg.onerror = () => { quickEditProductImg.src = '/assets/images/placeholder-product.svg'; };
       }
       if (quickEditProductName) quickEditProductName.textContent = product.name;
       if (quickEditPrice) quickEditPrice.value = product.price ? formatPrice(product.price) : '';

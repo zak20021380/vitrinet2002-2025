@@ -2205,7 +2205,7 @@
 
     // Get product image
     const sliderImage = document.querySelector('.slide.is-active img, .slide img');
-    messageState.productImage = sliderImage?.src || '/assets/images/placeholder.png';
+    messageState.productImage = sliderImage?.src || '/assets/images/placeholder-product.svg';
 
     // Update modal content
     messageProductTitle.textContent = messageState.productTitle || 'محصول';
@@ -2622,7 +2622,7 @@
 
     // Get product image
     const sliderImage = document.querySelector('.slide.is-active img, .slide img');
-    discountState.productImage = sliderImage?.src || '/assets/images/placeholder.png';
+    discountState.productImage = sliderImage?.src || '/assets/images/placeholder-product.svg';
 
     // Update modal content
     if (discountProductTitle) discountProductTitle.textContent = discountState.productTitle || 'محصول';
