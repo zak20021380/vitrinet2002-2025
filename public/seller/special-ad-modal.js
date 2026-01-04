@@ -263,12 +263,18 @@
    * @returns {string|null} - The resolved image URL for preview
    */
   const resolveImageSrc = (imageValue) => {
-    if (!imageValue) return null;
+    console.log('[SpecialAdModal] resolveImageSrc input:', imageValue, typeof imageValue);
+    
+    if (!imageValue) {
+      console.log('[SpecialAdModal] resolveImageSrc: null/undefined input');
+      return null;
+    }
 
     // Case 1: File or Blob - create object URL
     if (isFileOrBlob(imageValue)) {
       revokeCurrentObjectUrl();
       currentObjectUrl = URL.createObjectURL(imageValue);
+      console.log('[SpecialAdModal] resolveImageSrc: File/Blob → objectURL:', currentObjectUrl);
       return currentObjectUrl;
     }
 
@@ -281,12 +287,13 @@
 
     // Case 3: Full HTTP(S) URL - use directly
     if (isHttpUrl(imageValue)) {
+      console.log('[SpecialAdModal] resolveImageSrc: HTTP URL, using directly:', imageValue);
       return imageValue;
     }
 
     // Case 4: Server filename/path - prepend base URL
     // Guard: Make sure it doesn't contain base64 indicators
-    if (typeof imageValue === 'string' && imageValue.length > 0) {
+    if (typeof imageValue === 'string' && imageValue.trim().length > 0) {
       if (imageValue.includes('base64') || imageValue.includes('data:')) {
         console.error('[SpecialAdModal] Invalid image path contains base64 data. Blocking to prevent 431 error.');
         return null;
@@ -295,9 +302,12 @@
       const baseUrl = API_BASE.replace('/api', '');
       // Handle paths that may or may not start with /
       const cleanPath = imageValue.startsWith('/') ? imageValue : `/uploads/${imageValue}`;
-      return `${baseUrl}${cleanPath}`;
+      const fullUrl = `${baseUrl}${cleanPath}`;
+      console.log('[SpecialAdModal] resolveImageSrc: Server path → full URL:', fullUrl);
+      return fullUrl;
     }
 
+    console.log('[SpecialAdModal] resolveImageSrc: Could not resolve, returning null');
     return null;
   };
 
@@ -439,8 +449,11 @@
    * @param {boolean} isProductImage - Whether this is from product selection
    */
   const loadImage = (imageValue, isProductImage = false) => {
+    console.log('[SpecialAdModal] loadImage called:', { imageValue, isProductImage });
+    
     // If no image value, go to empty state (not error)
     if (!imageValue) {
+      console.log('[SpecialAdModal] No image value, setting empty state');
       revokeCurrentObjectUrl();
       elements.previewImg.src = '';
       setImageState('empty');
@@ -449,9 +462,11 @@
     
     // Resolve the image source
     const resolvedSrc = resolveImageSrc(imageValue);
+    console.log('[SpecialAdModal] Resolved image src:', resolvedSrc);
     
     if (!resolvedSrc) {
       // Invalid/missing URL - show empty state, not error
+      console.log('[SpecialAdModal] Could not resolve image src, setting empty state');
       revokeCurrentObjectUrl();
       elements.previewImg.src = '';
       setImageState('empty');
@@ -460,18 +475,21 @@
     
     // For File/Blob or dataURL, we can show preview immediately (no network fetch)
     if (isFileOrBlob(imageValue) || isDataUrl(imageValue)) {
+      console.log('[SpecialAdModal] File/Blob/dataURL - showing preview immediately');
       elements.previewImg.src = resolvedSrc;
       setImageState('preview');
       return;
     }
     
     // For network URLs, show loading state and wait for load/error
+    console.log('[SpecialAdModal] Network URL - setting loading state and fetching');
     setImageState('loading');
     
     // Create a new image to test loading
     const testImg = new Image();
     
     testImg.onload = () => {
+      console.log('[SpecialAdModal] Image loaded successfully:', resolvedSrc);
       // Success! Update the actual preview image and show preview state
       elements.previewImg.src = resolvedSrc;
       setImageState('preview');
@@ -568,18 +586,65 @@
     
     const products = await fetchProducts();
     
-    if (!products.length) {
+    console.log('[SpecialAdModal] Fetched products:', products);
+    
+    // Handle different API response formats
+    let productList = [];
+    if (Array.isArray(products)) {
+      productList = products;
+    } else if (products && Array.isArray(products.products)) {
+      productList = products.products;
+    } else if (products && Array.isArray(products.data)) {
+      productList = products.data;
+    }
+    
+    if (!productList.length) {
       elements.productSelect.innerHTML = '<option value="">محصولی برای انتخاب نیست</option>';
       return;
     }
     
     elements.productSelect.innerHTML = '<option value="">یک مورد را انتخاب کنید...</option>';
     
-    products.forEach(product => {
+    productList.forEach(product => {
       const option = document.createElement('option');
-      option.value = product._id;
-      option.textContent = product.title;
-      option.dataset.image = product.image || product.images?.[0] || '';
+      option.value = product._id || product.id;
+      option.textContent = product.title || product.name || 'بدون نام';
+      
+      // Extract image from various possible formats
+      let productImage = '';
+      
+      // Try different image field names and formats
+      const possibleImageFields = ['image', 'images', 'img', 'photo', 'thumbnail', 'mainImage'];
+      
+      for (const field of possibleImageFields) {
+        const value = product[field];
+        if (value) {
+          if (typeof value === 'string' && value.trim()) {
+            productImage = value.trim();
+            break;
+          } else if (Array.isArray(value) && value.length > 0) {
+            // Get first non-empty string from array
+            const firstValid = value.find(v => typeof v === 'string' && v.trim());
+            if (firstValid) {
+              productImage = firstValid.trim();
+              break;
+            }
+            // Maybe it's an array of objects with url property
+            const firstObj = value.find(v => v && (v.url || v.src || v.path));
+            if (firstObj) {
+              productImage = (firstObj.url || firstObj.src || firstObj.path || '').trim();
+              break;
+            }
+          } else if (typeof value === 'object' && value !== null) {
+            // Object with url/src/path property
+            productImage = (value.url || value.src || value.path || '').trim();
+            if (productImage) break;
+          }
+        }
+      }
+      
+      option.dataset.image = productImage;
+      console.log(`[SpecialAdModal] Product "${option.textContent}" (${option.value}) image:`, productImage || '(none)');
       elements.productSelect.appendChild(option);
     });
   };
@@ -623,14 +688,23 @@
     // Get the raw image value from the product
     const rawImage = selectedOption?.dataset.image || null;
     
+    console.log('[SpecialAdModal] Product changed:', {
+      productId: state.selectedProductId,
+      rawImage: rawImage,
+      optionText: selectedOption?.textContent
+    });
+    
     // Validate and store the product image path
     // Only store if it's a valid server path (not a dataURL or base64)
-    if (rawImage && !isDataUrl(rawImage) && !rawImage.includes('base64')) {
+    if (rawImage && rawImage.trim() !== '' && !isDataUrl(rawImage) && !rawImage.includes('base64')) {
       state.selectedProductImage = rawImage;
+      console.log('[SpecialAdModal] Valid product image stored:', state.selectedProductImage);
     } else {
       state.selectedProductImage = null;
       if (rawImage && (isDataUrl(rawImage) || rawImage.includes('base64'))) {
         console.warn('[SpecialAdModal] Product image appears to be a dataURL/base64. This should be a server path.');
+      } else {
+        console.log('[SpecialAdModal] No valid product image found');
       }
     }
     
@@ -644,9 +718,11 @@
     // Pass the raw path - loadImage will handle URL construction and state transitions
     if (!state.customImage) {
       if (state.selectedProductImage) {
+        console.log('[SpecialAdModal] Loading product image:', state.selectedProductImage);
         loadImage(state.selectedProductImage, true);
       } else {
         // No product image available - show empty state (not error)
+        console.log('[SpecialAdModal] No product image, showing empty state');
         setImageState('empty');
       }
     }
