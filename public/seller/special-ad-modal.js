@@ -633,14 +633,14 @@
               break;
             }
             // Maybe it's an array of objects with url property
-            const firstObj = value.find(v => v && (v.url || v.src || v.path));
+            const firstObj = value.find(v => v && (v.url || v.src || v.path || v.image || v.file || v.filename));
             if (firstObj) {
-              productImage = (firstObj.url || firstObj.src || firstObj.path || '').trim();
+              productImage = (firstObj.url || firstObj.src || firstObj.path || firstObj.image || firstObj.file || firstObj.filename || '').trim();
               break;
             }
           } else if (typeof value === 'object' && value !== null) {
             // Object with url/src/path property
-            productImage = (value.url || value.src || value.path || '').trim();
+            productImage = (value.url || value.src || value.path || value.image || value.file || value.filename || '').trim();
             if (productImage) break;
           }
         }
