@@ -70,8 +70,18 @@
       imagePreview: document.getElementById('specialAdImagePreview'),
       previewImg: document.getElementById('specialAdPreviewImg'),
       imagePlaceholder: document.getElementById('specialAdImagePlaceholder'),
-      editImageBtn: document.getElementById('specialAdEditImageBtn'),
       imageInput: document.getElementById('specialAdImageInput'),
+      // New image action elements
+      changeImageBtn: document.getElementById('specialAdChangeImageBtn'),
+      changeImageText: document.getElementById('specialAdChangeImageText'),
+      removeImageBtn: document.getElementById('specialAdRemoveImageBtn'),
+      changeImageOverlay: document.getElementById('specialAdChangeImageOverlay'),
+      imageBadge: document.getElementById('specialAdImageBadge'),
+      imageError: document.getElementById('specialAdImageError'),
+      retryBtn: document.getElementById('specialAdRetryBtn'),
+      imageStatus: document.getElementById('specialAdImageStatus'),
+      // Legacy support
+      editImageBtn: document.getElementById('specialAdEditImageBtn'),
       walletBalance: document.getElementById('specialAdWalletBalance'),
       creditToggle: document.getElementById('specialAdCreditToggle'),
       creditSwitch: document.getElementById('specialAdCreditSwitch'),
@@ -116,15 +126,23 @@
 
   const fetchWalletBalance = async () => {
     try {
-      const profile = await fetchSellerProfile();
-      const sellerId = profile?.seller?.id || profile?.seller?._id;
-      if (!sellerId) return 0;
-
-      const res = await fetch(`${API_BASE}/seller/wallet?sellerId=${sellerId}`, withCreds());
-      if (!res.ok) return 0;
+      // Use the correct wallet endpoint that uses auth token (not sellerId query param)
+      // The /api/wallet endpoint uses authMiddleware('seller') which extracts seller from token
+      const res = await fetch(`${API_BASE}/wallet`, withCreds());
+      
+      if (res.status === 401) {
+        console.warn('[SpecialAdModal] Wallet fetch unauthorized - user may need to re-login');
+        return 0;
+      }
+      
+      if (!res.ok) {
+        console.warn('[SpecialAdModal] Wallet fetch failed:', res.status);
+        return 0;
+      }
       
       const data = await res.json();
-      return data.balance || data.wallet?.balance || 0;
+      // The wallet endpoint returns { data: { balance, ... } }
+      return data?.data?.balance || data?.balance || data?.wallet?.balance || 0;
     } catch (err) {
       console.error('fetchWalletBalance error:', err);
       return 0;
@@ -197,17 +215,198 @@
     });
   };
 
-  const updateImagePreview = (imageUrl) => {
-    if (imageUrl) {
-      elements.previewImg.src = imageUrl;
-      elements.previewImg.style.display = 'block';
-      elements.imagePlaceholder.style.display = 'none';
-      elements.imagePreview.classList.add('has-image');
-    } else {
-      elements.previewImg.style.display = 'none';
-      elements.imagePlaceholder.style.display = 'flex';
-      elements.imagePreview.classList.remove('has-image');
+  // Track object URLs for cleanup
+  let currentObjectUrl = null;
+
+  /**
+   * Safely revoke any existing object URL to prevent memory leaks
+   */
+  const revokeCurrentObjectUrl = () => {
+    if (currentObjectUrl) {
+      URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
     }
+  };
+
+  /**
+   * Check if a string is a base64 dataURL
+   */
+  const isDataUrl = (str) => {
+    return typeof str === 'string' && str.startsWith('data:');
+  };
+
+  /**
+   * Check if a string is a valid HTTP(S) URL
+   */
+  const isHttpUrl = (str) => {
+    return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://'));
+  };
+
+  /**
+   * Check if a value is a File or Blob
+   */
+  const isFileOrBlob = (value) => {
+    return value instanceof File || value instanceof Blob;
+  };
+
+  /**
+   * Resolve image source for preview:
+   * - dataURL → use directly (never fetch)
+   * - File/Blob → create objectURL
+   * - http(s) URL → use directly
+   * - server filename → prepend /uploads/
+   * 
+   * @param {string|File|Blob|null} imageValue - The image value to resolve
+   * @returns {string|null} - The resolved image URL for preview
+   */
+  const resolveImageSrc = (imageValue) => {
+    if (!imageValue) return null;
+
+    // Case 1: File or Blob - create object URL
+    if (isFileOrBlob(imageValue)) {
+      revokeCurrentObjectUrl();
+      currentObjectUrl = URL.createObjectURL(imageValue);
+      return currentObjectUrl;
+    }
+
+    // Case 2: Already a dataURL - use directly (NEVER fetch)
+    if (isDataUrl(imageValue)) {
+      // Dev warning: dataURLs should not be stored/sent as paths
+      console.warn('[SpecialAdModal] Using dataURL for preview. Ensure this is not sent to server as a path.');
+      return imageValue;
+    }
+
+    // Case 3: Full HTTP(S) URL - use directly
+    if (isHttpUrl(imageValue)) {
+      return imageValue;
+    }
+
+    // Case 4: Server filename/path - prepend base URL
+    // Guard: Make sure it doesn't contain base64 indicators
+    if (typeof imageValue === 'string' && imageValue.length > 0) {
+      if (imageValue.includes('base64') || imageValue.includes('data:')) {
+        console.error('[SpecialAdModal] Invalid image path contains base64 data. Blocking to prevent 431 error.');
+        return null;
+      }
+      
+      const baseUrl = API_BASE.replace('/api', '');
+      // Handle paths that may or may not start with /
+      const cleanPath = imageValue.startsWith('/') ? imageValue : `/uploads/${imageValue}`;
+      return `${baseUrl}${cleanPath}`;
+    }
+
+    return null;
+  };
+
+  const updateImagePreview = (imageValue) => {
+    // Hide error state
+    if (elements.imageError) {
+      elements.imageError.hidden = true;
+    }
+    
+    // Resolve the image source properly
+    const resolvedSrc = resolveImageSrc(imageValue);
+    
+    if (resolvedSrc) {
+      // Show image with resolved source
+      elements.previewImg.src = resolvedSrc;
+      elements.previewImg.style.display = 'block';
+      elements.previewImg.style.opacity = '1';
+      
+      // Hide placeholder
+      if (elements.imagePlaceholder) {
+        elements.imagePlaceholder.style.display = 'none';
+      }
+      
+      // Add has-image class
+      elements.imagePreview.classList.add('has-image');
+      
+      // Show overlay change button
+      if (elements.changeImageOverlay) {
+        elements.changeImageOverlay.style.display = 'flex';
+      }
+      
+      // Show badge
+      if (elements.imageBadge) {
+        elements.imageBadge.style.display = 'block';
+      }
+      
+      // Update action buttons
+      if (elements.changeImageText) {
+        elements.changeImageText.textContent = 'تغییر تصویر';
+      }
+      if (elements.removeImageBtn) {
+        elements.removeImageBtn.hidden = false;
+      }
+      
+      // Update status
+      if (elements.imageStatus) {
+        if (state.customImage) {
+          elements.imageStatus.textContent = 'تصویر سفارشی انتخاب شد';
+          elements.imageStatus.classList.add('is-custom');
+        } else {
+          elements.imageStatus.textContent = 'تصویر محصول انتخابی';
+          elements.imageStatus.classList.remove('is-custom');
+        }
+      }
+    } else {
+      // Cleanup any existing object URL
+      revokeCurrentObjectUrl();
+      
+      // Hide image
+      elements.previewImg.style.display = 'none';
+      elements.previewImg.style.opacity = '0';
+      elements.previewImg.src = '';
+      
+      // Show placeholder
+      if (elements.imagePlaceholder) {
+        elements.imagePlaceholder.style.display = 'flex';
+      }
+      
+      // Remove has-image class
+      elements.imagePreview.classList.remove('has-image');
+      
+      // Hide overlay change button
+      if (elements.changeImageOverlay) {
+        elements.changeImageOverlay.style.display = 'none';
+      }
+      
+      // Hide badge
+      if (elements.imageBadge) {
+        elements.imageBadge.style.display = 'none';
+      }
+      
+      // Update action buttons
+      if (elements.changeImageText) {
+        elements.changeImageText.textContent = 'انتخاب تصویر';
+      }
+      if (elements.removeImageBtn) {
+        elements.removeImageBtn.hidden = true;
+      }
+      
+      // Update status
+      if (elements.imageStatus) {
+        elements.imageStatus.textContent = 'پیش‌فرض: تصویر محصول انتخابی';
+        elements.imageStatus.classList.remove('is-custom');
+      }
+    }
+  };
+
+  const showImageError = () => {
+    if (elements.imageError) {
+      elements.imageError.hidden = false;
+    }
+    if (elements.imageBadge) {
+      elements.imageBadge.style.display = 'none';
+    }
+    elements.imagePreview.classList.add('has-error');
+  };
+
+  const hideImageError = () => {
+    if (elements.imageError) {
+      elements.imageError.hidden = true;
+    }
+    elements.imagePreview.classList.remove('has-error');
   };
 
   const updateWalletDisplay = () => {
@@ -313,15 +512,27 @@
   const handleProductChange = (e) => {
     const selectedOption = e.target.selectedOptions[0];
     state.selectedProductId = e.target.value;
-    state.selectedProductImage = selectedOption?.dataset.image || null;
+    
+    // Get the raw image value from the product
+    const rawImage = selectedOption?.dataset.image || null;
+    
+    // Validate and store the product image path
+    // Only store if it's a valid server path (not a dataURL or base64)
+    if (rawImage && !isDataUrl(rawImage) && !rawImage.includes('base64')) {
+      state.selectedProductImage = rawImage;
+    } else {
+      state.selectedProductImage = null;
+      if (rawImage && (isDataUrl(rawImage) || rawImage.includes('base64'))) {
+        console.warn('[SpecialAdModal] Product image appears to be a dataURL/base64. This should be a server path.');
+      }
+    }
     
     // Update image preview with product image (if no custom image)
+    // Pass the raw path - resolveImageSrc will handle URL construction
     if (!state.customImage && state.selectedProductImage) {
-      const baseUrl = API_BASE.replace('/api', '');
-      const imageUrl = state.selectedProductImage.startsWith('http') 
-        ? state.selectedProductImage 
-        : `${baseUrl}/uploads/${state.selectedProductImage}`;
-      updateImagePreview(imageUrl);
+      updateImagePreview(state.selectedProductImage);
+    } else if (!state.customImage) {
+      updateImagePreview(null);
     }
   };
 
@@ -333,13 +544,49 @@
     const file = e.target.files[0];
     if (!file) return;
     
-    state.customImage = file;
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showToast('لطفاً یک فایل تصویری انتخاب کنید', true);
+      return;
+    }
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      updateImagePreview(event.target.result);
-    };
-    reader.readAsDataURL(file);
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('حجم تصویر نباید بیشتر از ۵ مگابایت باشد', true);
+      return;
+    }
+    
+    // Store the File object (will be sent via FormData)
+    state.customImage = file;
+    hideImageError();
+    
+    // Use the File object directly - resolveImageSrc will create objectURL
+    updateImagePreview(file);
+  };
+
+  const handleRemoveImage = () => {
+    state.customImage = null;
+    elements.imageInput.value = '';
+    
+    // Cleanup object URL if exists
+    revokeCurrentObjectUrl();
+    
+    // If product is selected, show product image, otherwise show empty state
+    // Pass the raw server path - resolveImageSrc will handle URL construction
+    if (state.selectedProductImage) {
+      updateImagePreview(state.selectedProductImage);
+    } else {
+      updateImagePreview(null);
+    }
+  };
+
+  const handlePlaceholderClick = () => {
+    elements.imageInput.click();
+  };
+
+  const handleRetryImage = () => {
+    hideImageError();
+    elements.imageInput.click();
   };
 
   const handleCreditToggle = (e) => {
@@ -479,11 +726,17 @@
   const closeModal = () => {
     if (!elements.backdrop) return;
     
+    // Cleanup object URL when closing
+    revokeCurrentObjectUrl();
+    
     elements.backdrop.classList.remove('is-open');
     document.body.classList.remove('overflow-hidden', 'no-scroll');
   };
 
   const resetForm = () => {
+    // Cleanup object URL before reset
+    revokeCurrentObjectUrl();
+    
     state = {
       adType: 'product',
       selectedProductId: null,
@@ -500,9 +753,11 @@
     
     elements.form.reset();
     elements.creditSwitch.checked = false;
+    elements.imageInput.value = '';
     updateTypeCards();
     updateProductPicker();
     updateImagePreview(null);
+    hideImageError();
     updatePriceBreakdown();
     updateCharCounter(elements.titleInput, elements.titleCounter, 25);
     updateCharCounter(elements.textInput, elements.textCounter, 30);
@@ -602,9 +857,40 @@
       updateCharCounter(elements.textInput, elements.textCounter, 30);
     });
     
-    // Image edit
+    // Image actions - New mobile-first approach
+    // Primary change button (full-width)
+    elements.changeImageBtn?.addEventListener('click', handleImageEdit);
+    
+    // Overlay change button (on image)
+    elements.changeImageOverlay?.addEventListener('click', handleImageEdit);
+    
+    // Remove image button
+    elements.removeImageBtn?.addEventListener('click', handleRemoveImage);
+    
+    // Clickable placeholder
+    elements.imagePlaceholder?.addEventListener('click', handlePlaceholderClick);
+    elements.imagePlaceholder?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handlePlaceholderClick();
+      }
+    });
+    
+    // Retry button for error state
+    elements.retryBtn?.addEventListener('click', handleRetryImage);
+    
+    // Legacy support for old edit button
     elements.editImageBtn?.addEventListener('click', handleImageEdit);
+    
+    // File input change
     elements.imageInput?.addEventListener('change', handleImageChange);
+    
+    // Handle image load error
+    elements.previewImg?.addEventListener('error', () => {
+      if (elements.previewImg.src && elements.previewImg.src !== window.location.href) {
+        showImageError();
+      }
+    });
     
     // Credit toggle
     elements.creditSwitch?.addEventListener('change', handleCreditToggle);

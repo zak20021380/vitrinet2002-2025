@@ -13081,26 +13081,74 @@
             <textarea id="specialAdText" class="special-ad-textarea" placeholder="مثال: ۳۰٪ تخفیف تا پایان هفته!" maxlength="30"></textarea>
             <div id="specialAdTextCounter" class="special-ad-char-counter">۰ / ۳۰</div>
           </div>
+          <!-- Image Section - Premium Mobile-First Design -->
           <div class="special-ad-image-section">
             <label class="special-ad-label"><span>تصویر تبلیغ</span></label>
+            
+            <!-- Preview Frame -->
             <div id="specialAdImagePreview" class="special-ad-image-preview">
-              <img id="specialAdPreviewImg" class="special-ad-image-preview__img" src="" alt="پیش‌نمایش تصویر" style="display: none;">
-              <div id="specialAdImagePlaceholder" class="special-ad-image-preview__placeholder">
-                <svg class="special-ad-image-preview__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-                </svg>
-                <p class="special-ad-image-preview__placeholder-text">تصویر محصول نمایش داده می‌شود</p>
+              <!-- Actual Image -->
+              <img id="specialAdPreviewImg" class="special-ad-image-preview__img" src="" alt="پیش‌نمایش تصویر">
+              
+              <!-- Empty State Placeholder (clickable) -->
+              <div id="specialAdImagePlaceholder" class="special-ad-image-preview__placeholder" role="button" tabindex="0">
+                <div class="special-ad-image-preview__placeholder-icon-wrap">
+                  <svg class="special-ad-image-preview__placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                    <path d="M12 8v4m0 0v4m0-4h4m-4 0H8" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <p class="special-ad-image-preview__placeholder-text">برای انتخاب تصویر ضربه بزنید</p>
+                <span class="special-ad-image-preview__placeholder-hint">یا تصویر محصول انتخابی نمایش داده می‌شود</span>
               </div>
-              <button type="button" id="specialAdEditImageBtn" class="special-ad-image-edit-btn">
+              
+              <!-- Overlay Change Button (shown when image exists) -->
+              <button type="button" id="specialAdChangeImageOverlay" class="special-ad-image-overlay-btn" title="تغییر تصویر">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
                 </svg>
-                <span>ویرایش تصویر</span>
+                <span>تغییر</span>
+              </button>
+              
+              <!-- Success Badge -->
+              <span id="specialAdImageBadge" class="special-ad-image-preview__badge">تصویر انتخاب شد</span>
+              
+              <!-- Error State -->
+              <div id="specialAdImageError" class="special-ad-image-error" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 8v4m0 4h.01"/>
+                </svg>
+                <span>خطا در بارگذاری تصویر</span>
+                <button type="button" id="specialAdRetryBtn" class="special-ad-image-retry-btn">تلاش مجدد</button>
+              </div>
+            </div>
+            
+            <!-- Hidden File Input -->
+            <input type="file" id="specialAdImageInput" class="special-ad-file-input" accept="image/*">
+            
+            <!-- Action Buttons (Full-width, thumb-friendly) -->
+            <div class="special-ad-image-actions">
+              <button type="button" id="specialAdChangeImageBtn" class="special-ad-image-action-btn special-ad-image-action-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                </svg>
+                <span id="specialAdChangeImageText">انتخاب تصویر</span>
+              </button>
+              <button type="button" id="specialAdRemoveImageBtn" class="special-ad-image-action-btn special-ad-image-action-btn--secondary" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>حذف تصویر</span>
               </button>
             </div>
-            <input type="file" id="specialAdImageInput" class="special-ad-file-input" accept="image/*">
-            <span class="special-ad-image-label">عکس انتخابی (پیش‌فرض: عکس محصول)</span>
+            
+            <!-- Status Label -->
+            <span id="specialAdImageStatus" class="special-ad-image-status">پیش‌فرض: تصویر محصول انتخابی</span>
           </div>
         </section>
         <section class="special-ad-step">

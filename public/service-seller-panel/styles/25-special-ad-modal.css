@@ -598,7 +598,7 @@
 .special-ad-char-counter.is-error { color: #ef4444; }
 
 /* ─────────────────────────────────────────────────────
-   Image Section - Frosted Glass Upload Area
+   Image Section - Premium Professional Design
    ───────────────────────────────────────────────────── */
 .special-ad-image-section {
   margin-top: 20px;
@@ -607,135 +607,188 @@
 .special-ad-image-preview {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--sam-radius-lg);
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.35s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   
-  /* Frosted Glass Effect */
-  background: var(--sam-glass-bg);
-  backdrop-filter: blur(var(--sam-glass-blur));
-  -webkit-backdrop-filter: blur(var(--sam-glass-blur));
-  border: 2px dashed rgba(59, 130, 246, 0.3);
+  /* Clean White Background */
+  background: #f8fafc;
+  
+  /* Subtle Border */
+  border: 2px solid #e2e8f0;
+  
+  /* Soft Shadow */
   box-shadow: 
-    inset 0 4px 16px rgba(0, 0, 0, 0.03),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .special-ad-image-preview:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  background: rgba(255, 255, 255, 0.8);
+  border-color: #cbd5e1;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .special-ad-image-preview.has-image {
-  border-style: solid;
-  border-color: var(--sam-mint);
+  border-color: #10b981;
   box-shadow: 
-    var(--sam-shadow-glow-mint),
-    var(--sam-shadow-elevated);
+    0 8px 32px rgba(16, 185, 129, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Live Preview Badge */
+/* Remove old ::before pseudo element */
 .special-ad-image-preview::before {
-  content: 'پیش‌نمایش زنده';
+  display: none;
+}
+
+/* Image Container */
+.special-ad-image-preview__container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Actual Image */
+.special-ad-image-preview__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.special-ad-image-preview.has-image .special-ad-image-preview__img {
+  opacity: 1;
+}
+
+/* Placeholder State */
+.special-ad-image-preview__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+  transition: opacity 0.3s ease;
+}
+
+.special-ad-image-preview.has-image .special-ad-image-preview__placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Placeholder Icon Wrapper */
+.special-ad-image-preview__placeholder-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.special-ad-image-preview__placeholder-icon {
+  width: 40px;
+  height: 40px;
+  color: #94a3b8;
+}
+
+.special-ad-image-preview__placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 6px;
+}
+
+.special-ad-image-preview__placeholder-hint {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* Live Preview Badge - Top Right */
+.special-ad-image-preview__badge {
   position: absolute;
   top: 12px;
   right: 12px;
   padding: 6px 14px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, var(--sam-teal) 0%, var(--sam-blue) 100%);
+  border-radius: 100px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   z-index: 10;
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   opacity: 0;
   transform: translateY(-8px) scale(0.9);
-  transition: all 0.35s ease;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.special-ad-image-preview.has-image::before {
+.special-ad-image-preview.has-image .special-ad-image-preview__badge {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.special-ad-image-preview__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.special-ad-image-preview__placeholder {
-  text-align: center;
-  color: var(--sam-text-muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-}
-
-/* 3D Upload Icon */
-.special-ad-image-preview__placeholder-icon {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 14px;
-  color: var(--sam-blue);
-  opacity: 0.5;
-  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.2));
-}
-
-.special-ad-image-preview__placeholder-text {
-  font-size: 0.88rem;
-  font-weight: 600;
-  margin: 0;
-  line-height: var(--sam-line-height);
-}
-
-/* Edit Image Button */
+/* Edit Button - Floating Circle */
 .special-ad-image-edit-btn {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  padding: 12px 18px;
-  border-radius: var(--sam-radius-sm);
+  bottom: 12px;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   border: none;
-  background: var(--sam-bg-pure);
-  color: var(--sam-text-secondary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  font-family: inherit;
+  background: #ffffff;
+  color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: var(--sam-shadow-elevated);
-  transition: all 0.3s ease;
+  justify-content: center;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
 }
 
 .special-ad-image-edit-btn:hover {
-  background: linear-gradient(135deg, var(--sam-teal) 0%, var(--sam-blue) 100%);
+  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
   color: #fff;
-  transform: translateY(-2px);
+  transform: scale(1.08);
   box-shadow: 
-    0 8px 24px rgba(20, 184, 166, 0.35),
-    0 4px 12px rgba(59, 130, 246, 0.2);
+    0 8px 24px rgba(16, 185, 129, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.special-ad-image-edit-btn:active {
+  transform: scale(0.98);
 }
 
 .special-ad-image-edit-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
+/* Image Label */
 .special-ad-image-label {
   display: block;
-  margin-top: 10px;
-  font-size: 0.75rem;
+  margin-top: 12px;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: var(--sam-text-muted);
+  color: #94a3b8;
   text-align: center;
 }
 
@@ -904,138 +957,172 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   PRICE BREAKDOWN - HIGH-CONTRAST FLOATING CARD
+   PRICE BREAKDOWN - PREMIUM FINTECH PAYMENT CARD
+   Elegant, Eye-catching, Professional Design
    ───────────────────────────────────────────────────── */
 .special-ad-price-breakdown {
   position: relative;
-  padding: 24px;
-  border-radius: var(--sam-radius-lg);
+  padding: 0;
+  border-radius: 24px;
   overflow: hidden;
   
-  /* High-Contrast Background - Electric Blue/Success Green Tint */
-  background: linear-gradient(145deg, 
-    rgba(59, 130, 246, 0.05) 0%,
-    rgba(16, 185, 129, 0.04) 50%,
-    rgba(20, 184, 166, 0.05) 100%
-  );
+  /* Clean White Background */
+  background: #ffffff;
   
-  /* Glass Border */
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  /* Elegant Border */
+  border: 1px solid rgba(16, 185, 129, 0.15);
   
-  /* Floating Shadow */
+  /* Premium Shadow */
   box-shadow: 
-    0 8px 32px rgba(59, 130, 246, 0.08),
-    0 4px 16px rgba(16, 185, 129, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+    0 8px 32px rgba(16, 185, 129, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Decorative Gradient Orbs */
-.special-ad-price-breakdown::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
+/* Remove decorative elements */
+.special-ad-price-breakdown::before,
 .special-ad-price-breakdown::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  left: -30px;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
+  display: none;
 }
 
+/* Price Rows - Clean Layout */
 .special-ad-price-row {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 18px 24px;
   z-index: 1;
 }
 
 .special-ad-price-row:not(:last-child) {
-  border-bottom: 1px dashed rgba(16, 185, 129, 0.15);
+  border-bottom: 1px solid #f1f5f9;
 }
 
+/* Labels - Neutral Gray */
 .special-ad-price-row__label {
-  font-size: 0.9rem;
-  color: var(--sam-text-secondary);
+  font-size: 0.92rem;
+  color: #64748b;
   font-weight: 600;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
 }
 
+/* Values - Dark, Clear */
 .special-ad-price-row__value {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--sam-text-primary);
+  color: #1e293b;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-/* Discount Amount - Emerald with Savings Badge */
+/* Discount Amount - Emerald Green */
 .special-ad-price-row__value.is-discount {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--sam-mint);
-  font-weight: 800;
+  gap: 10px;
+  color: #10b981;
+  font-weight: 700;
 }
 
-/* Savings Badge */
+/* Savings Badge - Minimal */
 .special-ad-price-row__value.is-discount::after {
-  content: '۵۰٪-';
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--sam-mint) 0%, var(--sam-teal) 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  content: 'تخفیف';
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: #ecfdf5;
+  color: #059669;
 }
 
-/* Final Price Row - THE HERO */
+/* ═══════════════════════════════════════════════════════
+   FINAL PRICE ROW - HERO PAYMENT SECTION
+   ═══════════════════════════════════════════════════════ */
 .special-ad-price-row--total {
-  padding-top: 18px;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 24px 28px !important;
+  margin: 0;
   border-bottom: none !important;
-  background: linear-gradient(90deg, 
-    rgba(16, 185, 129, 0.06) 0%, 
-    transparent 50%,
-    rgba(59, 130, 246, 0.06) 100%
+  
+  /* Elegant Gradient Background */
+  background: linear-gradient(165deg, 
+    #f0fdf4 0%,
+    #ecfdf5 50%,
+    #f0fdfa 100%
   );
-  margin: 10px -24px -24px;
-  padding: 20px 24px;
-  border-radius: 0 0 var(--sam-radius-lg) var(--sam-radius-lg);
+  
+  /* Top Border */
+  border-top: 1px solid #d1fae5 !important;
+  
+  /* Inner glow effect */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
+/* Final Label - Elegant Badge Style */
 .special-ad-price-row--total .special-ad-price-row__label {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--sam-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 20px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 100px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  letter-spacing: 0.01em;
 }
 
-/* THE LARGEST ELEMENT - Final Price */
+/* Remove any pseudo elements from label */
+.special-ad-price-row--total .special-ad-price-row__label::before,
+.special-ad-price-row--total .special-ad-price-row__label::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* ★ THE HERO - Final Price Amount ★ */
 .special-ad-price-row--total .special-ad-price-row__value {
-  font-size: 1.65rem;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  font-size: 2.2rem;
   font-weight: 900;
-  background: linear-gradient(135deg, 
-    var(--sam-teal) 0%, 
-    var(--sam-mint) 50%,
-    var(--sam-teal-dark) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #10b981;
   letter-spacing: -0.02em;
-  filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
+  line-height: 1.1;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  padding: 0;
+  direction: rtl;
+}
+
+/* No CSS-generated currency - it comes from HTML */
+.special-ad-price-row--total .special-ad-price-row__value::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Final Price Amount Number */
+.final-price-amount {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #10b981;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Final Price Currency Unit */
+.final-price-currency {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-right: 4px;
 }
 
 
@@ -1263,16 +1350,29 @@
   }
 
   .special-ad-price-breakdown {
-    padding: 28px;
+    border-radius: 28px;
+  }
+
+  .special-ad-price-row {
+    padding: 20px 28px;
   }
 
   .special-ad-price-row--total {
-    margin: 10px -28px -28px;
-    padding: 22px 28px;
+    padding: 28px 28px 32px !important;
   }
 
-  .special-ad-price-row--total .special-ad-price-row__value {
-    font-size: 1.85rem;
+  .special-ad-price-row--total .special-ad-price-row__label {
+    font-size: 0.85rem;
+    padding: 10px 24px;
+    margin-bottom: 18px;
+  }
+
+  .final-price-amount {
+    font-size: 2.8rem;
+  }
+
+  .final-price-currency {
+    font-size: 1.1rem;
   }
 
   .special-ad-submit-btn {
@@ -1322,4 +1422,456 @@
 .no-scroll {
   position: fixed;
   width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IMAGE UPLOAD MODULE - PREMIUM MOBILE-FIRST REDESIGN
+   Clear states, thumb-friendly actions, proper visual hierarchy
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────
+   Image Preview Container - Enhanced
+   ───────────────────────────────────────────────────── */
+.special-ad-image-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  
+  /* Clean Background */
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  
+  /* Dashed Border for Empty State */
+  border: 2px dashed #cbd5e1;
+  
+  /* Soft Shadow */
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.special-ad-image-preview:hover {
+  border-color: #94a3b8;
+  background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.special-ad-image-preview:focus-within {
+  border-color: #10b981;
+  box-shadow: 
+    0 0 0 4px rgba(16, 185, 129, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* Has Image State */
+.special-ad-image-preview.has-image {
+  border: 2px solid #10b981;
+  border-style: solid;
+  cursor: default;
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Error State */
+.special-ad-image-preview.has-error {
+  border-color: #ef4444;
+  background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+/* ─────────────────────────────────────────────────────
+   Image Element - Proper Display
+   ───────────────────────────────────────────────────── */
+.special-ad-image-preview__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 18px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+}
+
+.special-ad-image-preview.has-image .special-ad-image-preview__img {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────
+   Placeholder - Clickable Empty State
+   ───────────────────────────────────────────────────── */
+.special-ad-image-preview__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.special-ad-image-preview__placeholder:hover {
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.special-ad-image-preview__placeholder:focus {
+  outline: none;
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.special-ad-image-preview.has-image .special-ad-image-preview__placeholder {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Placeholder Icon Wrapper */
+.special-ad-image-preview__placeholder-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.special-ad-image-preview__placeholder:hover .special-ad-image-preview__placeholder-icon-wrap {
+  transform: scale(1.05);
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.special-ad-image-preview__placeholder-icon {
+  width: 36px;
+  height: 36px;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+.special-ad-image-preview__placeholder:hover .special-ad-image-preview__placeholder-icon {
+  color: #10b981;
+}
+
+.special-ad-image-preview__placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0 0 6px;
+}
+
+.special-ad-image-preview__placeholder-hint {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* ─────────────────────────────────────────────────────
+   Overlay Change Button - Bottom Right Corner
+   ───────────────────────────────────────────────────── */
+.special-ad-image-overlay-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 100px;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.special-ad-image-preview.has-image .special-ad-image-overlay-btn {
+  display: flex;
+}
+
+.special-ad-image-overlay-btn:hover {
+  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.special-ad-image-overlay-btn:active {
+  transform: scale(0.98);
+}
+
+.special-ad-image-overlay-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ─────────────────────────────────────────────────────
+   Success Badge - Top Right
+   ───────────────────────────────────────────────────── */
+.special-ad-image-preview__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: none;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+  animation: badgePopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.special-ad-image-preview.has-image .special-ad-image-preview__badge {
+  display: block;
+}
+
+@keyframes badgePopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Error State
+   ───────────────────────────────────────────────────── */
+.special-ad-image-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: rgba(254, 242, 242, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 15;
+  text-align: center;
+}
+
+.special-ad-image-error svg {
+  width: 40px;
+  height: 40px;
+  color: #ef4444;
+}
+
+.special-ad-image-error span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.special-ad-image-retry-btn {
+  padding: 10px 20px;
+  border-radius: 100px;
+  border: none;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.special-ad-image-retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────
+   Action Buttons - Full Width, Thumb-Friendly
+   ───────────────────────────────────────────────────── */
+.special-ad-image-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.special-ad-image-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 52px; /* Thumb-friendly touch target */
+}
+
+.special-ad-image-action-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Primary Action - تغییر تصویر */
+.special-ad-image-action-btn--primary {
+  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+  color: #fff;
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.special-ad-image-action-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 28px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.special-ad-image-action-btn--primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Action - حذف تصویر */
+.special-ad-image-action-btn--secondary {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.special-ad-image-action-btn--secondary:hover {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+/* When image exists, show both buttons side by side */
+.special-ad-image-preview.has-image ~ .special-ad-image-actions .special-ad-image-action-btn--primary {
+  flex: 2;
+}
+
+.special-ad-image-preview.has-image ~ .special-ad-image-actions .special-ad-image-action-btn--secondary {
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────────────────
+   Status Label
+   ───────────────────────────────────────────────────── */
+.special-ad-image-status {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.special-ad-image-status.is-custom {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────
+   Hide Old Edit Button (Legacy Support)
+   ───────────────────────────────────────────────────── */
+.special-ad-image-edit-btn {
+  display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────
+   Responsive Adjustments
+   ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .special-ad-image-preview {
+    aspect-ratio: 4 / 3;
+  }
+  
+  .special-ad-image-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .special-ad-image-action-btn {
+    min-height: 56px; /* Larger touch target on mobile */
+  }
+  
+  .special-ad-image-preview.has-image ~ .special-ad-image-actions .special-ad-image-action-btn--primary,
+  .special-ad-image-preview.has-image ~ .special-ad-image-actions .special-ad-image-action-btn--secondary {
+    flex: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  .special-ad-image-preview__placeholder-icon-wrap {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .special-ad-image-preview__placeholder-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .special-ad-image-preview__placeholder-text {
+    font-size: 1rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Reduced Motion Support
+   ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .special-ad-image-preview,
+  .special-ad-image-preview__img,
+  .special-ad-image-preview__placeholder,
+  .special-ad-image-preview__placeholder-icon-wrap,
+  .special-ad-image-overlay-btn,
+  .special-ad-image-preview__badge,
+  .special-ad-image-action-btn,
+  .special-ad-image-retry-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .special-ad-image-preview__badge {
+    opacity: 1;
+    transform: none;
+  }
 }
