@@ -118,7 +118,6 @@
       changeImageBtn: document.getElementById('specialAdChangeImageBtn'),
       changeImageText: document.getElementById('specialAdChangeImageText'),
       removeImageBtn: document.getElementById('specialAdRemoveImageBtn'),
-      changeImageOverlay: document.getElementById('specialAdChangeImageOverlay'),
       imagePrevBtn: document.getElementById('specialAdImagePrev'),
       imageNextBtn: document.getElementById('specialAdImageNext'),
       imageIndicator: document.getElementById('specialAdImageIndicator'),
@@ -446,7 +445,6 @@
     // Hide all overlays first
     if (elements.imageError) elements.imageError.hidden = true;
     if (elements.imageBadge) elements.imageBadge.style.display = 'none';
-    if (elements.changeImageOverlay) elements.changeImageOverlay.style.display = 'none';
     
     switch (imageState) {
       case 'empty':
@@ -486,7 +484,6 @@
         elements.previewImg.style.display = 'block';
         elements.previewImg.style.opacity = '1';
         if (elements.imagePlaceholder) elements.imagePlaceholder.style.display = 'none';
-        if (elements.changeImageOverlay) elements.changeImageOverlay.style.display = 'flex';
         if (elements.imageBadge) elements.imageBadge.style.display = 'block';
         if (elements.changeImageText) elements.changeImageText.textContent = 'تغییر تصویر';
         if (elements.removeImageBtn) elements.removeImageBtn.hidden = !state.customImage;
@@ -1830,7 +1827,6 @@
     
     // Image actions
     elements.changeImageBtn?.addEventListener('click', handleImageEdit);
-    elements.changeImageOverlay?.addEventListener('click', handleImageEdit);
     elements.removeImageBtn?.addEventListener('click', handleRemoveImage);
     elements.imagePlaceholder?.addEventListener('click', handlePlaceholderClick);
     elements.retryBtn?.addEventListener('click', handleRetryImage);
