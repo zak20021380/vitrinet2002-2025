@@ -280,14 +280,25 @@ function sanitizeArray(arr) {
  * @param {object} details - جزئیات
  */
 function securityLog(event, details) {
-  const logEntry = {
-    timestamp: new Date().toISOString(),
-    event,
-    ...details
-  };
+  const NODE_ENV = process.env.NODE_ENV || 'development';
   
-  // در محیط production می‌توان به سرویس لاگ ارسال کرد
-  console.log('🔒 Security Log:', JSON.stringify(logEntry));
+  // Only log security events in development, and sanitize sensitive data
+  if (NODE_ENV === 'development') {
+    const safeDetails = { ...details };
+    // Remove potentially sensitive fields
+    delete safeDetails.token;
+    delete safeDetails.password;
+    delete safeDetails.authorization;
+    delete safeDetails.cookie;
+    
+    console.warn(`🔒 [SECURITY] ${event}`, {
+      timestamp: new Date().toISOString(),
+      event,
+      ip: safeDetails.ip || undefined,
+      endpoint: safeDetails.endpoint || undefined
+    });
+  }
+  // In production, security events should go to a secure logging service
 }
 
 module.exports = {

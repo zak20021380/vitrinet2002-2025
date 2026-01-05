@@ -229,9 +229,7 @@ async function buildAdOrderResponse(doc, { cache } = {}) {
 // ثبت سفارش تبلیغ ویژه
 exports.createAdOrder = async (req, res) => {
   try {
-    console.log("🔎 req.user:", req.user);
-    console.log("🔎 req.fields:", req.fields);
-    console.log("🔎 req.files:", req.files);
+    // Ad order request received
 
     const sellerId = req.user.id || req.user.sellerId;
 
@@ -301,13 +299,11 @@ exports.createAdOrder = async (req, res) => {
       const newPath = path.join(__dirname, '..', 'uploads', fileName);
       fs.copyFileSync(image.path, newPath);
       bannerImage = fileName;
-      console.log('✅ عکس تبلیغ ذخیره شد:', bannerImage);
     } else if (selectedImageUrl) {
       // Use the selected product image URL (store just the path)
       // Extract filename from URL if it's a full URL
       const urlPath = selectedImageUrl.replace(/^https?:\/\/[^\/]+/, '');
       bannerImage = urlPath.replace(/^\/uploads\//, '').replace(/^\//, '');
-      console.log('✅ تصویر محصول انتخاب شد:', bannerImage);
     }
 
     const adOrder = new AdOrder({

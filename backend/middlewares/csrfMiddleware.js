@@ -4,6 +4,10 @@
 
 const crypto = require('crypto');
 
+// Environment check
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const isDev = NODE_ENV === 'development';
+
 // Secret key for HMAC signing (should be in env vars in production)
 const CSRF_SECRET = process.env.CSRF_SECRET || 'vitrinet_csrf_secret_key_2024';
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -98,7 +102,8 @@ function csrfProtection(options = {}) {
     // In strict mode, both tokens must exist and match
     if (strictMode) {
       if (!headerToken) {
-        console.warn('🔐 [CSRF] Missing header token:', req.method, req.originalUrl);
+        // Only log in development
+        if (isDev) console.warn('🔐 [CSRF] Missing header token:', req.method, req.originalUrl);
         return res.status(403).json({
           success: false,
           message: 'توکن امنیتی یافت نشد. لطفاً صفحه را رفرش کنید.',
@@ -113,24 +118,14 @@ function csrfProtection(options = {}) {
       
       if (!validation.valid) {
         if (strictMode) {
-          console.warn('🔐 [CSRF] Invalid token:', validation.reason, req.originalUrl);
+          if (isDev) console.warn('🔐 [CSRF] Invalid token:', validation.reason, req.originalUrl);
           return res.status(403).json({
             success: false,
             message: 'توکن امنیتی نامعتبر است. لطفاً صفحه را رفرش کنید.',
             code: 'CSRF_TOKEN_INVALID'
           });
-        } else {
-          // Non-strict: log but allow
-          console.warn('🔐 [CSRF] Token validation failed (non-strict):', {
-            reason: validation.reason,
-            method: req.method,
-            url: req.originalUrl,
-            ip: req.ip
-          });
         }
-      } else {
-        // Token is valid!
-        console.log('✅ [CSRF] Token validated:', req.method, req.originalUrl);
+        // Non-strict mode: silently continue
       }
     }
 
@@ -146,7 +141,7 @@ function csrfProtection(options = {}) {
           : (referer ? new URL(referer).host : null);
         
         if (sourceHost && sourceHost !== host) {
-          console.warn('🔐 [CSRF] Origin mismatch:', { sourceHost, host });
+          if (isDev) console.warn('🔐 [CSRF] Origin mismatch:', { sourceHost, host });
           if (strictMode) {
             return res.status(403).json({
               success: false,

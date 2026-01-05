@@ -154,8 +154,7 @@ exports.register = async (req, res) => {
       // حتی اگر ظاهر ساخته نشد، فروشنده ثبت میشه
     }
 
-    // --- در حالت واقعی باید این OTP پیامک شود ---
-    console.log(`کد تایید ارسال شده به کاربر: ${otp}`);
+    // OTP sent to user via SMS (not logged for security)
 
     res.status(201).json({
       success: true,
@@ -397,7 +396,7 @@ exports.registerUser = async (req, res) => {
       });
 
       if (oldBookings.length > 0) {
-        console.log(`Found ${oldBookings.length} old bookings for phone ${phone}`);
+        // Link old bookings to new user
 
         // Update all old bookings with the new userId
         await Booking.updateMany(
@@ -423,12 +422,9 @@ exports.registerUser = async (req, res) => {
         }
 
         await user.save();
-
-        console.log(`✅ Linked ${oldBookings.length} bookings to new user ${user._id}`);
       }
     } catch (linkErr) {
-      // Non-critical error - just log it
-      console.error('Failed to link old bookings:', linkErr);
+      // Non-critical error - silently continue
     }
 
     return res.status(201).json({
@@ -504,8 +500,7 @@ exports.loginUser = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('✅ Login successful for user:', user.phone);
-    console.log('Token created:', token.substring(0, 20) + '...');
+    // Token created successfully - no sensitive data logged
 
     /* ۶) ست‌کردن کوکی Http‑Only برای کاربر
           در محیط توسعه (HTTP) →  secure=false , sameSite='lax'
@@ -607,7 +602,6 @@ exports.getCurrentSeller = async (req, res) => {
       seller.isPremium = false;
       seller.premiumUntil = null;
       await seller.save();
-      console.log(`⚠️ Premium expired for seller ${seller._id}`);
     }
 
     // ۴) تبدیل به آبجکت و اضافه کردن id برای فرانت

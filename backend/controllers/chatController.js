@@ -324,7 +324,6 @@ exports.createChat = async (req, res) => {
     }
 
     const senderObjectId = new mongoose.Types.ObjectId(senderId);
-    console.log('Creating chat - Sender:', senderId, 'Role:', senderRole);
 
     // جلوگیری از ارسال پیام در صورت مسدودی توسط ادمین
     if (['user', 'seller'].includes(senderRole) && recipientRole === 'admin') {
@@ -349,10 +348,8 @@ exports.createChat = async (req, res) => {
       if (Array.isArray(productSellerId)) {
         if (productSellerId.length === 0) return res.status(400).json({ error: 'هیچ فروشنده‌ای برای محصول یافت نشد.' });
         productSellerId = productSellerId[0];
-        console.log('Multiple sellers for product; selecting the first one:', productSellerId);
       }
       sid = new mongoose.Types.ObjectId(productSellerId);
-      console.log('Found seller ID from product:', sid);
     }
 
     if (!sellerId && shopurl) {
@@ -367,10 +364,8 @@ exports.createChat = async (req, res) => {
       if (Array.isArray(bodySellerId)) {
         if (bodySellerId.length === 0) return res.status(400).json({ error: 'شناسه فروشنده نامعتبر.' });
         bodySellerId = bodySellerId[0];
-        console.log('Multiple seller IDs in body; selecting the first one:', bodySellerId);
       } else if (typeof bodySellerId === 'string' && bodySellerId.includes(',')) {
         bodySellerId = bodySellerId.split(',')[0].trim();
-        console.log('Seller ID string with commas; selecting the first one:', bodySellerId);
       }
       sid = new mongoose.Types.ObjectId(bodySellerId);
 
@@ -418,7 +413,6 @@ exports.createChat = async (req, res) => {
 
     const participants      = temp.map(t => t.id);
     const participantsModel = temp.map(t => getModelFromRole(t.role));
-    console.log('Participants:', participants);
 
     if (senderRole === 'seller') {
       const uIdx = participantsModel.findIndex(m => m === 'User');
@@ -443,8 +437,6 @@ exports.createChat = async (req, res) => {
     } else {
       chatType = 'user-seller';
     }
-    console.log('Final chatType:', chatType);
-    console.log('Participants model:', participantsModel);
 
     // استفاده از $all و $size برای مقایسه دقیق آرایه participants
     const sortedParticipants = sortIdArray(participants);
@@ -537,7 +529,6 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
 
       chat.lastUpdated = Date.now();
       await chat.save();
-      if (text) console.log('Chat message added:', chat);
 
       // ایجاد اعلان برای فروشنده اگر پیام از طرف مشتری باشد
       if (text && senderRole === 'user' && sid && (chatType === 'product' || chatType === 'user-seller')) {
@@ -566,7 +557,6 @@ chatType === 'seller-admin' || chatType === 'admin') ? false : true,
     } catch (err) {
       if (err.code === 11000) {
         // اگر ارور duplicate بود، چت موجود را واکشی کن
-        console.log('Duplicate key detected; fetching existing chat');
         chat = await Chat.findOne(finder);
         if (chat && text) {
           chat.messages.push({
@@ -689,7 +679,6 @@ exports.createAdminUserChat = async (req, res) => {
       return res.status(201).json(chat);
     } catch (err) {
       if (err.code === 11000) {
-        console.log('Duplicate key detected; fetching existing chat');
         chat = await Chat.findOne(finder);
         if (chat) {
           chat.messages.push({
@@ -746,11 +735,9 @@ exports.ensureChat = async (req, res) => {
         return res.status(404).json({ error: 'ادمین یافت نشد' });
       recipientId = adminDoc._id.toString();
     }
-    console.log('Ensuring chat between:', { recipientId, recipientRole, productId });
 
     const myId = req.user.id;
     const myRole = req.user.role;
-    console.log('My ID:', myId, 'My Role:', myRole);
 
     if (!recipientId || !recipientRole) {
       return res.status(400).json({ error: 'recipientId و recipientRole الزامی است.' });
@@ -773,8 +760,6 @@ exports.ensureChat = async (req, res) => {
 
     const participants = sorted.map(i => new mongoose.Types.ObjectId(i.id));
     const participantsModel = sorted.map(i => getModelFromRole(i.role));
-    console.log('Participants:', participants);
-    console.log('Participants Model:', participantsModel);
 
     let chatType;
     if (productId) {
@@ -786,7 +771,6 @@ exports.ensureChat = async (req, res) => {
       else if (roles.has('seller') && roles.has('admin')) chatType = 'seller-admin';
       else chatType = 'general';
     }
-    console.log('Chat Type:', chatType);
 
     // استفاده از $all و $size برای مقایسه دقیق آرایه participants
     const sortedParticipants = sortIdArray(participants);
@@ -823,10 +807,8 @@ exports.ensureChat = async (req, res) => {
             : null,
           messages: []
         });
-        console.log('New chat created:', chat);
       } catch (err) {
         if (err.code === 11000) {
-          console.log('Duplicate key detected; fetching existing chat');
           chat = await Chat.findOne(finder);
         } else {
           throw err;
@@ -855,11 +837,10 @@ exports.ensureChat = async (req, res) => {
           ? participants[sorted.findIndex(i => i.role === 'seller')] || null
           : null;
         await chat.save();
-        console.log('Chat updated to match roles');
       }
       return res.json(chat);
     } else {
-      console.error('Unable to create or retrieve chat with finder:', finder);
+      console.error('Unable to create or retrieve chat');
       return res.status(500).json({ error: 'خطا در ایجاد چت.' });
     }
 
@@ -1150,25 +1131,15 @@ exports.sendMessage = async (req, res) => {
 
 exports.getChatById = async (req, res) => {
   try {
-    // 🔍 لاگ ورودی‌
-    console.log('🔍 getChatById', {
-      url: req.originalUrl,
-      paramId: req.params.id,
-      userRole: req.user?.role,
-      userId:  req.user?.id
-    });
-
     // ۱) حذف فضاهای اضافی و اعتبارسنجی ObjectId
     const rawId = (req.params.id || '').trim();
     if (!mongoose.Types.ObjectId.isValid(rawId)) {
-      console.warn('🚫 Invalid chat id ->', rawId);
       return res.status(400).json({ error: 'شناسه چت نامعتبر است' });
     }
 
     // ۲) واکشی چت بدون populate برای اعتبارسنجی
     let chat = await Chat.findById(rawId);
     if (!chat) {
-      console.warn('❓ Chat not found ->', rawId);
       return res.status(404).json({ error: 'چت پیدا نشد' });
     }
 
@@ -1180,7 +1151,6 @@ exports.getChatById = async (req, res) => {
         return pId === userId;
       });
       if (!isParticipant) {
-        console.warn('🚫 Unauthorized access attempt', { chatId: rawId, requester: userId });
         return res.status(403).json({ error: 'دسترسی غیرمجاز' });
       }
     }
@@ -1703,8 +1673,6 @@ exports.blockTarget = async (req, res) => {
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
 
-    console.log('🛑 blockTarget payload', { targetId, targetRole });
-
     const model = targetRole === 'user' ? User : Seller;
     const target = await model.findById(targetId);
     if (!target)
@@ -1729,8 +1697,6 @@ exports.blockTarget = async (req, res) => {
       }
     }
 
-    console.log(`🔒 Blocked ${targetRole}: ${targetId}`);
-
     return res.json({ success: true, message: 'کاربر با موفقیت مسدود شد.' });
   } catch (err) {
     console.error('❌ blockTarget error:', err);
@@ -1749,8 +1715,6 @@ exports.unblockTarget = async (req, res) => {
 
     if (!targetId || !targetRole)
       return res.status(400).json({ error: 'اطلاعات ناقص ارسال شده است.' });
-
-    console.log('🟢 unblockTarget payload', { targetId, targetRole });
 
     const model = targetRole === 'user' ? User : Seller;
     const target = await model.findById(targetId);
@@ -1775,8 +1739,6 @@ exports.unblockTarget = async (req, res) => {
         await removePhoneFromBanList(phone);
       }
     }
-
-    console.log(`🔓 Unblocked ${targetRole}: ${targetId}`);
 
     return res.json({ success: true, message: 'کاربر با موفقیت آزاد شد.' });
   } catch (err) {
@@ -1940,10 +1902,6 @@ exports.userReplyToChat = async (req, res) => {
     });
 
     if (!isParticipant) {
-      console.log('❌ User not in participants:', {
-        userId,
-        participants: chat.participants.map(p => (p._id || p).toString())
-      });
       return res.status(403).json({ error: 'دسترسی غیرمجاز به این چت.' });
     }
 

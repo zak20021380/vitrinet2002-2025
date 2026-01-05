@@ -393,7 +393,7 @@ router.post(
       if (!message || !message.trim()) {
         return res.status(400).json({ error: 'متن پیام لازم است.' });
       }
-      console.log(`پیام از فروشنده ${sellerId}: ${message}`);
+      // Message from seller received (content not logged for security)
       return res.json({ message: 'پیام شما با موفقیت ارسال شد.' });
     } catch (err) {
       console.error('❌ خطا در ارسال پیام به مدیر:', err);

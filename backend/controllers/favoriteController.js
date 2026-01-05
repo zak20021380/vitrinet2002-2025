@@ -33,8 +33,6 @@ exports.getFavorites = async (req, res) => {
         }
       });
 
-    console.log(favs);  // بررسی داده‌ها در کنسول
-
     res.json(favs);
   } catch (err) {
     res.status(500).json({ ok: false, message: "Server error" });

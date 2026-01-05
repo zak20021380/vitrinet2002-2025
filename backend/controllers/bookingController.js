@@ -35,16 +35,7 @@ exports.createBooking = async (req, res) => {
     } = req.body || {};
     const customerPhone = normalizeDigits(rawPhone || '');
 
-    // log incoming payload for debugging
-    console.log('createBooking payload:', {
-      serviceId,
-      sellerId,
-      service,
-      customerName,
-      customerPhone,
-      date,
-      time
-    });
+    // Booking request received
 
     // require serviceId or (sellerId and service)
     if (

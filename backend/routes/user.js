@@ -189,8 +189,6 @@ router.delete('/favorites', auth(), async (req, res) => {
 
 // Get user's bookings
 router.get('/bookings', protect, async (req, res) => {
-  console.log('📅 Bookings endpoint hit');
-  console.log('User from token:', req.user);
   try {
     const Booking = require('../models/booking');
 
