@@ -513,6 +513,194 @@
     var(--sam-shadow-ambient);
 }
 
+.special-ad-product-picker {
+  position: relative;
+}
+
+.special-ad-product-picker__select--native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  inset: 0 auto auto 0;
+}
+
+.special-ad-product-dropdown {
+  position: relative;
+}
+
+.special-ad-product-dropdown__button {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: var(--sam-radius-md);
+  border: 1.5px solid var(--sam-border-light);
+  background: var(--sam-bg-pure);
+  color: var(--sam-text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: right;
+  box-shadow: var(--sam-shadow-ambient);
+}
+
+.special-ad-product-dropdown__button.is-placeholder {
+  color: var(--sam-text-muted);
+  font-weight: 500;
+}
+
+.special-ad-product-dropdown__button:focus-visible {
+  outline: none;
+  border-color: var(--sam-mint);
+  box-shadow:
+    0 0 0 4px var(--sam-mint-soft),
+    var(--sam-shadow-ambient);
+}
+
+.special-ad-product-dropdown__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.special-ad-product-dropdown__value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sam-text-primary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.special-ad-product-dropdown__meta {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--sam-text-muted);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.special-ad-product-dropdown__chevron {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sam-text-muted);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.special-ad-product-dropdown.is-open .special-ad-product-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+.special-ad-product-dropdown__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  left: 0;
+  background: var(--sam-bg-pure);
+  border-radius: var(--sam-radius-md);
+  box-shadow: var(--sam-shadow-elevated);
+  border: 1px solid var(--sam-border-light);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
+  z-index: 20;
+}
+
+.special-ad-product-dropdown.is-open .special-ad-product-dropdown__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  max-height: 360px;
+  pointer-events: auto;
+}
+
+.special-ad-product-dropdown__list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.special-ad-product-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  border-radius: 14px;
+  text-align: right;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 56px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.special-ad-product-option:not(:last-child) {
+  border-bottom: 1px solid var(--sam-border-light);
+}
+
+.special-ad-product-option__primary {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--sam-text-primary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.special-ad-product-option__secondary {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--sam-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.special-ad-product-option:hover,
+.special-ad-product-option:focus-visible,
+.special-ad-product-option.is-selected {
+  background: var(--sam-mint-soft);
+}
+
+.special-ad-product-option:active {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.special-ad-product-option.is-selected .special-ad-product-option__primary {
+  color: var(--sam-teal-dark);
+}
+
+.special-ad-product-option.is-disabled {
+  cursor: not-allowed;
+  color: var(--sam-text-muted);
+  background: transparent;
+  opacity: 0.7;
+}
+
+.special-ad-product-option.is-disabled .special-ad-product-option__primary,
+.special-ad-product-option.is-disabled .special-ad-product-option__secondary {
+  color: var(--sam-text-muted);
+}
+
 /* ─────────────────────────────────────────────────────
    Content & Visuals - Premium Inputs
    ───────────────────────────────────────────────────── */

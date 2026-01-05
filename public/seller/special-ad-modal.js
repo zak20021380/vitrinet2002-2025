@@ -84,6 +84,16 @@
   // DOM Elements
   // ─────────────────────────────────────────────────────
   let elements = {};
+  let productDropdown = {
+    wrapper: null,
+    button: null,
+    panel: null,
+    list: null,
+    value: null,
+    meta: null,
+    isOpen: false,
+    hasDocumentListener: false
+  };
 
   const initElements = () => {
     elements = {
@@ -132,6 +142,85 @@
     };
   };
 
+  const initProductDropdown = () => {
+    if (!elements.productPicker || !elements.productSelect) return;
+    if (elements.productPicker.querySelector('.special-ad-product-dropdown')) {
+      productDropdown.wrapper = elements.productPicker.querySelector('.special-ad-product-dropdown');
+      productDropdown.button = productDropdown.wrapper.querySelector('.special-ad-product-dropdown__button');
+      productDropdown.panel = productDropdown.wrapper.querySelector('.special-ad-product-dropdown__panel');
+      productDropdown.list = productDropdown.wrapper.querySelector('.special-ad-product-dropdown__list');
+      productDropdown.value = productDropdown.wrapper.querySelector('.special-ad-product-dropdown__value');
+      productDropdown.meta = productDropdown.wrapper.querySelector('.special-ad-product-dropdown__meta');
+      return;
+    }
+
+    elements.productSelect.classList.add('special-ad-product-picker__select--native');
+    elements.productSelect.setAttribute('aria-hidden', 'true');
+    elements.productSelect.tabIndex = -1;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'special-ad-product-dropdown';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'special-ad-product-dropdown__button is-placeholder';
+    button.setAttribute('aria-haspopup', 'listbox');
+    button.setAttribute('aria-expanded', 'false');
+
+    const textWrap = document.createElement('span');
+    textWrap.className = 'special-ad-product-dropdown__text';
+
+    const value = document.createElement('span');
+    value.className = 'special-ad-product-dropdown__value';
+    value.textContent = 'یک مورد را انتخاب کنید...';
+
+    const meta = document.createElement('span');
+    meta.className = 'special-ad-product-dropdown__meta';
+    meta.hidden = true;
+
+    textWrap.appendChild(value);
+    textWrap.appendChild(meta);
+
+    const chevron = document.createElement('span');
+    chevron.className = 'special-ad-product-dropdown__chevron';
+    chevron.innerHTML = `
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    button.appendChild(textWrap);
+    button.appendChild(chevron);
+
+    const panel = document.createElement('div');
+    panel.className = 'special-ad-product-dropdown__panel';
+    panel.setAttribute('role', 'listbox');
+    panel.setAttribute('aria-label', 'انتخاب محصول');
+
+    const list = document.createElement('div');
+    list.className = 'special-ad-product-dropdown__list';
+
+    panel.appendChild(list);
+    wrapper.appendChild(button);
+    wrapper.appendChild(panel);
+    elements.productPicker.appendChild(wrapper);
+
+    productDropdown = {
+      wrapper,
+      button,
+      panel,
+      list,
+      value,
+      meta,
+      isOpen: false,
+      hasDocumentListener: productDropdown.hasDocumentListener
+    };
+
+    bindProductDropdownEvents();
+    buildProductDropdownOptions();
+    updateProductDropdownButton();
+  };
+
   // ─────────────────────────────────────────────────────
   // Utility Functions
   // ─────────────────────────────────────────────────────
@@ -142,6 +231,204 @@
 
   const toFaPrice = (num) => {
     return toFaDigits((+num || 0).toLocaleString('en-US'));
+  };
+
+  const getProductSecondaryText = (product = {}) => {
+    const priceValue = product.price ?? product.unitPrice ?? product.salePrice ?? product.discountedPrice ?? product.finalPrice;
+    if (priceValue !== undefined && priceValue !== null && priceValue !== '') {
+      return `${toFaPrice(priceValue)} تومان`;
+    }
+    const category = product.category?.title || product.category?.name || product.categoryTitle || product.categoryName;
+    return category || '';
+  };
+
+  const setProductDropdownOpen = (isOpen) => {
+    if (!productDropdown.wrapper) return;
+    productDropdown.isOpen = isOpen;
+    productDropdown.wrapper.classList.toggle('is-open', isOpen);
+    productDropdown.button?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (isOpen) {
+      focusSelectedDropdownOption();
+    }
+  };
+
+  const focusSelectedDropdownOption = () => {
+    if (!productDropdown.list) return;
+    const selected = productDropdown.list.querySelector('.special-ad-product-option.is-selected:not(.is-disabled)');
+    const firstEnabled = productDropdown.list.querySelector('.special-ad-product-option:not(.is-disabled)');
+    const target = selected || firstEnabled;
+    target?.focus();
+  };
+
+  const updateProductDropdownButton = () => {
+    if (!productDropdown.button || !productDropdown.value || !elements.productSelect) return;
+    const selectedOption = elements.productSelect.options[elements.productSelect.selectedIndex];
+    if (!selectedOption) return;
+    const label = selectedOption.textContent?.trim() || 'یک مورد را انتخاب کنید...';
+    const secondary = selectedOption.dataset.secondary || '';
+    const isPlaceholder = !selectedOption.value || selectedOption.disabled || selectedOption.dataset.placeholder === 'true';
+
+    productDropdown.button.classList.toggle('is-placeholder', isPlaceholder);
+    productDropdown.value.textContent = label;
+
+    if (productDropdown.meta) {
+      if (secondary) {
+        productDropdown.meta.textContent = secondary;
+        productDropdown.meta.hidden = false;
+      } else {
+        productDropdown.meta.textContent = '';
+        productDropdown.meta.hidden = true;
+      }
+    }
+  };
+
+  const updateProductDropdownSelection = () => {
+    if (!productDropdown.list || !elements.productSelect) return;
+    const selectedValue = elements.productSelect.value;
+    const options = productDropdown.list.querySelectorAll('.special-ad-product-option');
+    options.forEach(option => {
+      const isSelected = option.dataset.value === selectedValue;
+      option.classList.toggle('is-selected', isSelected);
+      option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    });
+    updateProductDropdownButton();
+  };
+
+  const buildProductDropdownOptions = () => {
+    if (!productDropdown.list || !elements.productSelect) return;
+    productDropdown.list.innerHTML = '';
+    const options = Array.from(elements.productSelect.options);
+    options.forEach((option, index) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'special-ad-product-option';
+      item.setAttribute('role', 'option');
+      item.dataset.value = option.value;
+      item.dataset.index = String(index);
+
+      if (option.disabled || option.dataset.placeholder === 'true' || option.value === '') {
+        item.classList.add('is-disabled');
+      }
+
+      const primary = document.createElement('span');
+      primary.className = 'special-ad-product-option__primary';
+      primary.textContent = option.textContent || '';
+
+      item.appendChild(primary);
+
+      if (option.dataset.secondary) {
+        const secondary = document.createElement('span');
+        secondary.className = 'special-ad-product-option__secondary';
+        secondary.textContent = option.dataset.secondary;
+        item.appendChild(secondary);
+      }
+
+      if (option.selected) {
+        item.classList.add('is-selected');
+        item.setAttribute('aria-selected', 'true');
+      } else {
+        item.setAttribute('aria-selected', 'false');
+      }
+
+      productDropdown.list.appendChild(item);
+    });
+
+    updateProductDropdownSelection();
+  };
+
+  const handleDropdownButtonClick = () => {
+    setProductDropdownOpen(!productDropdown.isOpen);
+  };
+
+  const handleDropdownOptionClick = (event) => {
+    const option = event.target.closest('.special-ad-product-option');
+    if (!option || option.classList.contains('is-disabled')) return;
+    const value = option.dataset.value;
+    if (!elements.productSelect) return;
+    elements.productSelect.value = value;
+    elements.productSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    setProductDropdownOpen(false);
+    productDropdown.button?.focus();
+  };
+
+  const getEnabledDropdownOptions = () => {
+    return Array.from(productDropdown.list?.querySelectorAll('.special-ad-product-option:not(.is-disabled)') || []);
+  };
+
+  const focusDropdownOptionByOffset = (offset) => {
+    const enabledOptions = getEnabledDropdownOptions();
+    if (!enabledOptions.length) return;
+    const activeIndex = enabledOptions.findIndex(option => option === document.activeElement);
+    const fallbackIndex = enabledOptions.findIndex(option => option.classList.contains('is-selected'));
+    const currentIndex = activeIndex >= 0 ? activeIndex : Math.max(fallbackIndex, 0);
+    const nextIndex = (currentIndex + offset + enabledOptions.length) % enabledOptions.length;
+    enabledOptions[nextIndex]?.focus();
+  };
+
+  const handleDropdownButtonKeydown = (event) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setProductDropdownOpen(true);
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setProductDropdownOpen(!productDropdown.isOpen);
+    }
+    if (event.key === 'Escape') {
+      setProductDropdownOpen(false);
+    }
+  };
+
+  const handleDropdownListKeydown = (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusDropdownOptionByOffset(1);
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusDropdownOptionByOffset(-1);
+    }
+    if (event.key === 'Home') {
+      event.preventDefault();
+      getEnabledDropdownOptions()[0]?.focus();
+    }
+    if (event.key === 'End') {
+      event.preventDefault();
+      const options = getEnabledDropdownOptions();
+      options[options.length - 1]?.focus();
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const option = document.activeElement?.closest('.special-ad-product-option');
+      if (option && !option.classList.contains('is-disabled')) {
+        option.click();
+      }
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setProductDropdownOpen(false);
+      productDropdown.button?.focus();
+    }
+  };
+
+  const handleDropdownOutsideClick = (event) => {
+    if (!productDropdown.wrapper || !productDropdown.isOpen) return;
+    if (!productDropdown.wrapper.contains(event.target)) {
+      setProductDropdownOpen(false);
+    }
+  };
+
+  const bindProductDropdownEvents = () => {
+    if (!productDropdown.button || !productDropdown.list || !productDropdown.wrapper) return;
+    productDropdown.button.addEventListener('click', handleDropdownButtonClick);
+    productDropdown.button.addEventListener('keydown', handleDropdownButtonKeydown);
+    productDropdown.list.addEventListener('click', handleDropdownOptionClick);
+    productDropdown.list.addEventListener('keydown', handleDropdownListKeydown);
+
+    if (!productDropdown.hasDocumentListener) {
+      document.addEventListener('click', handleDropdownOutsideClick);
+      productDropdown.hasDocumentListener = true;
+    }
   };
 
   // ─────────────────────────────────────────────────────
@@ -835,7 +1122,14 @@
 
   const populateProducts = async () => {
     if (!elements.productSelect) return;
-    elements.productSelect.innerHTML = '<option value="">در حال بارگذاری...</option>';
+    elements.productSelect.innerHTML = '';
+    const loadingOption = document.createElement('option');
+    loadingOption.value = '';
+    loadingOption.textContent = 'در حال بارگذاری...';
+    loadingOption.disabled = true;
+    loadingOption.selected = true;
+    elements.productSelect.appendChild(loadingOption);
+    buildProductDropdownOptions();
     
     const response = await fetchProducts();
     
@@ -852,16 +1146,31 @@
     if (isDev) console.log('[AdImage] Products loaded:', productList.length);
     
     if (!productList.length) {
-      elements.productSelect.innerHTML = '<option value="">محصولی برای انتخاب نیست</option>';
+      elements.productSelect.innerHTML = '';
+      const emptyOption = document.createElement('option');
+      emptyOption.value = '';
+      emptyOption.textContent = 'محصولی برای انتخاب نیست';
+      emptyOption.disabled = true;
+      emptyOption.selected = true;
+      elements.productSelect.appendChild(emptyOption);
+      buildProductDropdownOptions();
       return;
     }
     
-    elements.productSelect.innerHTML = '<option value="">یک مورد را انتخاب کنید...</option>';
+    elements.productSelect.innerHTML = '';
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = 'یک مورد را انتخاب کنید...';
+    placeholderOption.selected = true;
+    placeholderOption.disabled = true;
+    placeholderOption.dataset.placeholder = 'true';
+    elements.productSelect.appendChild(placeholderOption);
     
     productList.forEach(product => {
       const option = document.createElement('option');
       option.value = product._id || product.id;
       option.textContent = product.title || product.name || 'بدون نام';
+      option.dataset.secondary = getProductSecondaryText(product);
       
       // Extract image using helper
       const productImage = extractProductImage(product);
@@ -869,6 +1178,8 @@
       
       elements.productSelect.appendChild(option);
     });
+
+    buildProductDropdownOptions();
   };
 
   const setLoading = (loading) => {
@@ -908,6 +1219,8 @@
     const selectedOption = select.options[select.selectedIndex];
     const productId = select.value;
     const productImage = selectedOption?.dataset?.image || null;
+
+    updateProductDropdownSelection();
     
     if (isDev) console.log(`[AdImage] Product changed: ${productId}, hasImage: ${!!productImage}`);
     
@@ -1052,6 +1365,7 @@
     
     if (!elements.backdrop) {
       initElements();
+      initProductDropdown();
       attachEventListeners();
     }
     
@@ -1088,6 +1402,7 @@
   const closeModal = () => {
     if (!elements.backdrop) return;
     revokeCurrentObjectUrl();
+    setProductDropdownOpen(false);
     elements.backdrop.classList.remove('is-open');
     document.body.classList.remove('overflow-hidden', 'no-scroll');
   };
@@ -1225,6 +1540,7 @@
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         initElements();
+        initProductDropdown();
         attachEventListeners();
         // Ensure clean initial state
         if (elements.imagePreview) {
@@ -1234,6 +1550,7 @@
       });
     } else {
       initElements();
+      initProductDropdown();
       attachEventListeners();
       if (elements.imagePreview) {
         elements.imagePreview.classList.remove('has-error', 'has-image', 'is-loading');
