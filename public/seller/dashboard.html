@@ -13170,14 +13170,78 @@
               <span class="special-ad-switch__slider"></span>
             </label>
           </div>
+
+          <!-- Credit Allocation Control (Progressive Disclosure) -->
+          <div id="specialAdCreditAllocation" class="special-ad-credit-allocation" hidden>
+            <!-- Max Credit Info -->
+            <div class="special-ad-credit-allocation__header">
+              <span class="special-ad-credit-allocation__max-label">حداکثر می‌توانید تا</span>
+              <span id="specialAdMaxCredit" class="special-ad-credit-allocation__max-value">۰ تومان</span>
+              <span class="special-ad-credit-allocation__max-label">با اعتبار پرداخت کنید</span>
+            </div>
+            
+            <!-- Slider + Input -->
+            <div class="special-ad-credit-allocation__control">
+              <input 
+                type="range" 
+                id="specialAdCreditSlider" 
+                class="special-ad-credit-slider"
+                min="0" 
+                max="0" 
+                step="1000"
+                value="0"
+              >
+              <div class="special-ad-credit-input-wrap">
+                <input 
+                  type="text" 
+                  id="specialAdCreditInput" 
+                  class="special-ad-credit-input"
+                  inputmode="numeric"
+                  placeholder="۰"
+                  value="۰"
+                >
+                <span class="special-ad-credit-input__unit">تومان</span>
+              </div>
+            </div>
+            
+            <!-- Quick Preset Chips -->
+            <div class="special-ad-credit-chips">
+              <button type="button" class="special-ad-credit-chip" data-percent="25">۲۵٪</button>
+              <button type="button" class="special-ad-credit-chip" data-percent="50">۵۰٪</button>
+              <button type="button" class="special-ad-credit-chip" data-percent="100">حداکثر</button>
+            </div>
+            
+            <!-- Inline Hint (shown when clamped) -->
+            <p id="specialAdCreditClampHint" class="special-ad-credit-clamp-hint" hidden>
+              مقدار به حداکثر مجاز تنظیم شد
+            </p>
+          </div>
+
           <div class="special-ad-price-breakdown">
             <div class="special-ad-price-row">
               <span class="special-ad-price-row__label">هزینه کل:</span>
               <span id="specialAdTotalPrice" class="special-ad-price-row__value">۷۹,۰۰۰ تومان</span>
             </div>
-            <div id="specialAdCreditRow" class="special-ad-price-row" style="display: none;">
-              <span class="special-ad-price-row__label">کسر از اعتبار:</span>
+            <div id="specialAdCreditRow" class="special-ad-price-row special-ad-price-row--credit" style="display: none;">
+              <span class="special-ad-price-row__label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="special-ad-price-row__icon">
+                  <path d="M21 4H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2z"/>
+                  <path d="M1 10h22"/>
+                </svg>
+                پرداخت با اعتبار
+              </span>
               <span id="specialAdCreditAmount" class="special-ad-price-row__value is-discount">-۰ تومان</span>
+            </div>
+            <div id="specialAdCashRow" class="special-ad-price-row special-ad-price-row--cash" style="display: none;">
+              <span class="special-ad-price-row__label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="special-ad-price-row__icon">
+                  <rect x="1" y="4" width="22" height="16" rx="2"/>
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M1 10h2M21 10h2M1 14h2M21 14h2"/>
+                </svg>
+                پرداخت نقدی
+              </span>
+              <span id="specialAdCashAmount" class="special-ad-price-row__value">۷۹,۰۰۰ تومان</span>
             </div>
             <div class="special-ad-price-row special-ad-price-row--total">
               <span class="special-ad-price-row__label">مبلغ نهایی قابل پرداخت:</span>

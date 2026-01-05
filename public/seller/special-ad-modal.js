@@ -51,6 +51,11 @@
   };
 
   // ─────────────────────────────────────────────────────
+  // Debug Mode (only log in development)
+  // ─────────────────────────────────────────────────────
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  // ─────────────────────────────────────────────────────
   // State
   // ─────────────────────────────────────────────────────
   let state = {
@@ -63,6 +68,7 @@
     planSlug: 'ad_search',
     totalPrice: 79000,
     creditAmount: 0,
+    maxCredit: 0, // Maximum credit allowed (min of wallet balance and 50% of total)
     finalPrice: 79000,
     isLoading: false,
     // Image state machine: 'empty' | 'loading' | 'preview' | 'error'
@@ -108,9 +114,19 @@
       creditToggle: document.getElementById('specialAdCreditToggle'),
       creditSwitch: document.getElementById('specialAdCreditSwitch'),
       creditHint: document.getElementById('specialAdCreditHint'),
+      // Credit Allocation Controls
+      creditAllocation: document.getElementById('specialAdCreditAllocation'),
+      maxCreditDisplay: document.getElementById('specialAdMaxCredit'),
+      creditSlider: document.getElementById('specialAdCreditSlider'),
+      creditInput: document.getElementById('specialAdCreditInput'),
+      creditChips: document.querySelectorAll('.special-ad-credit-chip'),
+      creditClampHint: document.getElementById('specialAdCreditClampHint'),
+      // Price Breakdown
       creditRow: document.getElementById('specialAdCreditRow'),
+      cashRow: document.getElementById('specialAdCashRow'),
       totalPrice: document.getElementById('specialAdTotalPrice'),
       creditAmount: document.getElementById('specialAdCreditAmount'),
+      cashAmount: document.getElementById('specialAdCashAmount'),
       finalPrice: document.getElementById('specialAdFinalPrice'),
       submitBtn: document.getElementById('specialAdSubmitBtn')
     };
@@ -340,7 +356,7 @@
   const setAdImageState = (newState, errorReason = null) => {
     if (state.imageState === newState && state.imageErrorReason === errorReason) return;
     
-    console.log(`[AdImage] State: ${state.imageState} → ${newState}${errorReason ? ` (${errorReason})` : ''}`);
+    if (isDev) console.log(`[AdImage] State: ${state.imageState} → ${newState}${errorReason ? ` (${errorReason})` : ''}`);
     state.imageState = newState;
     state.imageErrorReason = errorReason;
     renderAdImageUI();
@@ -434,10 +450,9 @@
    * Main entry point for setting image
    */
   const setAdImageSource = async (imageSource, isCustom = false) => {
-    console.log('[AdImage] setAdImageSource:', { imageSource, isCustom });
-    
     // Handle File/Blob (custom upload)
     if (imageSource instanceof File || imageSource instanceof Blob) {
+      if (isDev) console.log(`[AdImage] Custom image: ${imageSource.type}, ${imageSource.size} bytes`);
       revokeCurrentObjectUrl();
       currentObjectUrl = URL.createObjectURL(imageSource);
       state.currentImageUrl = currentObjectUrl;
@@ -457,7 +472,11 @@
     
     // Build absolute URL
     const absoluteUrl = buildImageUrl(imageSource);
-    console.log('[AdImage] Built URL:', absoluteUrl);
+    if (isDev) {
+      const urlType = absoluteUrl?.startsWith('data:') ? 'data-url' : 
+                      absoluteUrl?.startsWith('http') ? 'http' : 'relative';
+      console.log(`[AdImage] Loading ${urlType} image`);
+    }
     
     if (!absoluteUrl) {
       state.currentImageUrl = null;
@@ -480,7 +499,7 @@
       state.currentImageUrl = absoluteUrl;
       if (!isCustom) state.customImage = null;
       setAdImageState('preview');
-      console.log('[AdImage] Image loaded successfully');
+      if (isDev) console.log('[AdImage] Image loaded successfully');
     } catch (err) {
       console.error('[AdImage] Preload failed:', err.message);
       state.currentImageUrl = null;
@@ -497,14 +516,14 @@
    * Handle product selection - auto-load product image
    */
   const onProductSelected = (productId, productImagePath) => {
-    console.log('[AdImage] Product selected:', { productId, productImagePath });
+    if (isDev) console.log(`[AdImage] Product selected: ${productId}, hasImage: ${!!productImagePath}`);
     
     state.selectedProductId = productId;
     state.selectedProductImage = productImagePath;
     
     // If user has custom image, don't override
     if (state.customImage) {
-      console.log('[AdImage] Custom image exists, keeping it');
+      if (isDev) console.log('[AdImage] Custom image exists, keeping it');
       return;
     }
     
@@ -520,7 +539,7 @@
    * Retry loading current image
    */
   const retryImageLoad = () => {
-    console.log('[AdImage] Retry requested');
+    if (isDev) console.log('[AdImage] Retry requested');
     
     if (state.customImage) {
       setAdImageSource(state.customImage, true);
@@ -536,7 +555,7 @@
    * Remove custom image and revert to product image
    */
   const removeCustomImage = () => {
-    console.log('[AdImage] Remove custom image');
+    if (isDev) console.log('[AdImage] Remove custom image');
     
     state.customImage = null;
     revokeCurrentObjectUrl();
@@ -554,6 +573,203 @@
   // END IMAGE MODULE
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CREDIT ALLOCATION MODULE - Enhanced Payment Control
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Convert Persian digits to English for calculations
+   */
+  const toEnDigits = (str) => {
+    if (!str) return '';
+    return String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  };
+
+  /**
+   * Calculate maximum allowed credit
+   * Returns min(walletBalance, 50% of totalPrice)
+   */
+  const calculateMaxCredit = () => {
+    const maxByPercent = Math.floor(state.totalPrice * 0.5);
+    return Math.min(state.walletBalance, maxByPercent);
+  };
+
+  /**
+   * Update slider visual progress
+   */
+  const updateSliderProgress = () => {
+    if (!elements.creditSlider) return;
+    const max = parseInt(elements.creditSlider.max) || 1;
+    const value = parseInt(elements.creditSlider.value) || 0;
+    const progress = (value / max) * 100;
+    elements.creditSlider.style.setProperty('--slider-progress', `${progress}%`);
+  };
+
+  /**
+   * Set credit amount with validation and clamping
+   */
+  const setCreditAmount = (amount, showClampHint = false) => {
+    // Clamp to valid range
+    const clamped = Math.max(0, Math.min(amount, state.maxCredit));
+    const wasClamped = amount > state.maxCredit && showClampHint;
+    
+    state.creditAmount = clamped;
+    
+    // Update slider
+    if (elements.creditSlider) {
+      elements.creditSlider.value = clamped;
+      updateSliderProgress();
+    }
+    
+    // Update input
+    if (elements.creditInput) {
+      elements.creditInput.value = toFaDigits(clamped.toLocaleString('en-US'));
+    }
+    
+    // Show/hide clamp hint
+    if (elements.creditClampHint) {
+      elements.creditClampHint.hidden = !wasClamped;
+      if (wasClamped) {
+        setTimeout(() => {
+          if (elements.creditClampHint) elements.creditClampHint.hidden = true;
+        }, 3000);
+      }
+    }
+    
+    // Update chip active states
+    updateChipStates();
+    
+    // Update price breakdown
+    updatePriceDisplay();
+  };
+
+  /**
+   * Update chip active states based on current credit amount
+   */
+  const updateChipStates = () => {
+    if (!elements.creditChips) return;
+    
+    elements.creditChips.forEach(chip => {
+      const percent = parseInt(chip.dataset.percent) || 0;
+      const chipValue = percent === 100 
+        ? state.maxCredit 
+        : Math.floor(state.maxCredit * (percent / 100));
+      
+      chip.classList.toggle('is-active', state.creditAmount === chipValue && chipValue > 0);
+    });
+  };
+
+  /**
+   * Update price display (breakdown section)
+   */
+  const updatePriceDisplay = () => {
+    state.finalPrice = state.totalPrice - state.creditAmount;
+    const cashAmount = state.finalPrice;
+    
+    // Total price
+    if (elements.totalPrice) {
+      elements.totalPrice.textContent = `${toFaPrice(state.totalPrice)} تومان`;
+    }
+    
+    // Credit row
+    if (state.creditAmount > 0) {
+      if (elements.creditRow) elements.creditRow.style.display = 'flex';
+      if (elements.creditAmount) {
+        elements.creditAmount.textContent = `-${toFaPrice(state.creditAmount)} تومان`;
+      }
+      elements.creditToggle?.classList.add('is-active');
+    } else {
+      if (elements.creditRow) elements.creditRow.style.display = 'none';
+      elements.creditToggle?.classList.remove('is-active');
+    }
+    
+    // Cash row (shown when using credit)
+    if (elements.cashRow) {
+      elements.cashRow.style.display = state.creditAmount > 0 ? 'flex' : 'none';
+    }
+    if (elements.cashAmount) {
+      elements.cashAmount.textContent = `${toFaPrice(cashAmount)} تومان`;
+    }
+    
+    // Final price
+    if (elements.finalPrice) {
+      elements.finalPrice.textContent = `${toFaPrice(state.finalPrice)} تومان`;
+    }
+  };
+
+  /**
+   * Show/hide credit allocation control with animation
+   */
+  const toggleCreditAllocation = (show) => {
+    if (!elements.creditAllocation) return;
+    
+    if (show) {
+      // Calculate and set max credit
+      state.maxCredit = calculateMaxCredit();
+      
+      // Update max display
+      if (elements.maxCreditDisplay) {
+        elements.maxCreditDisplay.textContent = `${toFaPrice(state.maxCredit)} تومان`;
+      }
+      
+      // Configure slider
+      if (elements.creditSlider) {
+        elements.creditSlider.max = state.maxCredit;
+        elements.creditSlider.value = state.creditAmount;
+        updateSliderProgress();
+      }
+      
+      // Update input
+      if (elements.creditInput) {
+        elements.creditInput.value = toFaDigits(state.creditAmount.toLocaleString('en-US'));
+      }
+      
+      // Show with animation
+      elements.creditAllocation.hidden = false;
+      
+      // Set initial credit to max if first time enabling
+      if (state.creditAmount === 0 && state.maxCredit > 0) {
+        setCreditAmount(state.maxCredit);
+      }
+    } else {
+      elements.creditAllocation.hidden = true;
+      state.creditAmount = 0;
+      updatePriceDisplay();
+    }
+  };
+
+  /**
+   * Handle slider input
+   */
+  const handleCreditSliderInput = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setCreditAmount(value);
+  };
+
+  /**
+   * Handle text input change
+   */
+  const handleCreditInputChange = (e) => {
+    const rawValue = toEnDigits(e.target.value).replace(/[^\d]/g, '');
+    const value = parseInt(rawValue) || 0;
+    setCreditAmount(value, true);
+  };
+
+  /**
+   * Handle chip click
+   */
+  const handleCreditChipClick = (e) => {
+    const chip = e.target.closest('.special-ad-credit-chip');
+    if (!chip) return;
+    
+    const percent = parseInt(chip.dataset.percent) || 0;
+    const value = percent === 100 
+      ? state.maxCredit 
+      : Math.floor(state.maxCredit * (percent / 100));
+    
+    setCreditAmount(value);
+  };
+
   const updateWalletDisplay = () => {
     if (!elements.walletBalance) return;
     elements.walletBalance.textContent = `${toFaPrice(state.walletBalance)} تومان`;
@@ -568,10 +784,11 @@
         elements.creditSwitch.checked = false;
       }
       if (elements.creditHint) {
-        elements.creditHint.textContent = 'حداقل ۱۰۰ تومان اعتبار برای استفاده نیاز است';
+        elements.creditHint.textContent = 'اعتبار کافی ندارید';
         elements.creditHint.classList.add('is-error');
       }
       state.useCredit = false;
+      toggleCreditAllocation(false);
     } else {
       elements.creditToggle?.classList.remove('is-disabled');
       if (elements.creditSwitch) elements.creditSwitch.disabled = false;
@@ -585,27 +802,34 @@
   const updatePriceBreakdown = () => {
     state.totalPrice = AD_PLAN_PRICES[state.planSlug] || 79000;
     
-    if (state.useCredit && state.walletBalance >= 100) {
-      const maxCredit = Math.floor(state.totalPrice * 0.5);
-      state.creditAmount = Math.min(state.walletBalance, maxCredit);
-    } else {
+    // Recalculate max credit when price changes
+    const newMaxCredit = calculateMaxCredit();
+    
+    // If max credit changed and we're using credit, adjust
+    if (state.useCredit && state.maxCredit !== newMaxCredit) {
+      state.maxCredit = newMaxCredit;
+      
+      // Update max display
+      if (elements.maxCreditDisplay) {
+        elements.maxCreditDisplay.textContent = `${toFaPrice(state.maxCredit)} تومان`;
+      }
+      
+      // Update slider max
+      if (elements.creditSlider) {
+        elements.creditSlider.max = state.maxCredit;
+      }
+      
+      // Clamp current credit amount if needed
+      if (state.creditAmount > state.maxCredit) {
+        setCreditAmount(state.maxCredit);
+      }
+    }
+    
+    if (!state.useCredit) {
       state.creditAmount = 0;
     }
     
-    state.finalPrice = state.totalPrice - state.creditAmount;
-    
-    if (elements.totalPrice) elements.totalPrice.textContent = `${toFaPrice(state.totalPrice)} تومان`;
-    
-    if (state.creditAmount > 0) {
-      if (elements.creditRow) elements.creditRow.style.display = 'flex';
-      if (elements.creditAmount) elements.creditAmount.textContent = `-${toFaPrice(state.creditAmount)} تومان`;
-      elements.creditToggle?.classList.add('is-active');
-    } else {
-      if (elements.creditRow) elements.creditRow.style.display = 'none';
-      elements.creditToggle?.classList.remove('is-active');
-    }
-    
-    if (elements.finalPrice) elements.finalPrice.textContent = `${toFaPrice(state.finalPrice)} تومان`;
+    updatePriceDisplay();
   };
 
 
@@ -625,7 +849,7 @@
       productList = response.data;
     }
     
-    console.log('[AdImage] Products loaded:', productList.length);
+    if (isDev) console.log('[AdImage] Products loaded:', productList.length);
     
     if (!productList.length) {
       elements.productSelect.innerHTML = '<option value="">محصولی برای انتخاب نیست</option>';
@@ -643,7 +867,6 @@
       const productImage = extractProductImage(product);
       option.dataset.image = productImage || '';
       
-      console.log(`[AdImage] Product: "${option.textContent}" → image: ${productImage || '(none)'}`);
       elements.productSelect.appendChild(option);
     });
   };
@@ -686,7 +909,7 @@
     const productId = select.value;
     const productImage = selectedOption?.dataset?.image || null;
     
-    console.log('[AdImage] handleProductChange:', { productId, productImage });
+    if (isDev) console.log(`[AdImage] Product changed: ${productId}, hasImage: ${!!productImage}`);
     
     // Use the image module
     onProductSelected(productId, productImage);
@@ -728,6 +951,7 @@
 
   const handleCreditToggle = (e) => {
     state.useCredit = e.target.checked;
+    toggleCreditAllocation(state.useCredit);
     updatePriceBreakdown();
   };
 
@@ -877,6 +1101,7 @@
     state.customImage = null;
     state.useCredit = false;
     state.creditAmount = 0;
+    state.maxCredit = 0;
     state.finalPrice = AD_PLAN_PRICES[state.planSlug];
     state.isLoading = false;
     state.imageState = 'empty';
@@ -886,6 +1111,9 @@
     elements.form?.reset();
     if (elements.creditSwitch) elements.creditSwitch.checked = false;
     if (elements.imageInput) elements.imageInput.value = '';
+    
+    // Reset credit allocation UI
+    toggleCreditAllocation(false);
     
     updateTypeCards();
     updateProductPicker();
@@ -976,7 +1204,17 @@
     elements.editImageBtn?.addEventListener('click', handleImageEdit);
     elements.imageInput?.addEventListener('change', handleImageChange);
     
+    // Credit allocation controls
     elements.creditSwitch?.addEventListener('change', handleCreditToggle);
+    elements.creditSlider?.addEventListener('input', handleCreditSliderInput);
+    elements.creditInput?.addEventListener('change', handleCreditInputChange);
+    elements.creditInput?.addEventListener('blur', handleCreditInputChange);
+    
+    // Credit chips
+    elements.creditChips?.forEach(chip => {
+      chip.addEventListener('click', handleCreditChipClick);
+    });
+    
     elements.form?.addEventListener('submit', handleSubmit);
   };
 
