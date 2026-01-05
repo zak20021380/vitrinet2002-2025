@@ -55,6 +55,404 @@
   // ─────────────────────────────────────────────────────
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // VALIDATION & SANITIZATION MODULE
+  // Strict form validation with Persian error messages
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Validation rules
+  const VALIDATION_RULES = {
+    title: {
+      required: true,
+      minLength: 3,
+      maxLength: 25,
+      fieldName: 'عنوان تبلیغ'
+    },
+    text: {
+      required: true,
+      minLength: 10,
+      maxLength: 30,
+      fieldName: 'متن جذاب'
+    },
+    product: {
+      requiredWhen: () => state.adType === 'product',
+      fieldName: 'محصول'
+    },
+    image: {
+      required: true,
+      fieldName: 'تصویر تبلیغ'
+    }
+  };
+
+  // Validation error messages (Persian)
+  const VALIDATION_MESSAGES = {
+    required: (fieldName) => `${fieldName} الزامی است`,
+    minLength: (fieldName, min) => `${fieldName} باید حداقل ${toFaDigits(min)} کاراکتر باشد`,
+    maxLength: (fieldName, max) => `${fieldName} نباید بیشتر از ${toFaDigits(max)} کاراکتر باشد`,
+    productRequired: 'لطفاً یک محصول انتخاب کنید',
+    imageRequired: 'لطفاً یک تصویر انتخاب کنید',
+    invalidChars: (fieldName) => `${fieldName} شامل کاراکترهای غیرمجاز است`
+  };
+
+  // Track validation state
+  let validationErrors = {};
+
+  /**
+   * Sanitize text input - strip HTML/script tags, enforce max length
+   * @param {string} input - Raw input string
+   * @param {number} maxLength - Maximum allowed length
+   * @returns {string} - Sanitized string
+   */
+  const sanitizeText = (input, maxLength = 100) => {
+    if (!input || typeof input !== 'string') return '';
+    
+    // Remove HTML tags
+    let sanitized = input.replace(/<[^>]*>/g, '');
+    
+    // Remove script-like patterns
+    sanitized = sanitized.replace(/javascript:/gi, '');
+    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+    sanitized = sanitized.replace(/data:/gi, '');
+    
+    // Remove potentially dangerous characters
+    sanitized = sanitized.replace(/[<>'"&\\]/g, '');
+    
+    // Normalize whitespace
+    sanitized = sanitized.replace(/\s+/g, ' ').trim();
+    
+    // Enforce max length
+    if (sanitized.length > maxLength) {
+      sanitized = sanitized.substring(0, maxLength);
+    }
+    
+    return sanitized;
+  };
+
+  /**
+   * Validate a single field
+   * @param {string} fieldId - Field identifier
+   * @param {*} value - Field value
+   * @returns {string|null} - Error message or null if valid
+   */
+  const validateField = (fieldId, value) => {
+    const rules = VALIDATION_RULES[fieldId];
+    if (!rules) return null;
+
+    // Check conditional requirement
+    if (rules.requiredWhen && !rules.requiredWhen()) {
+      return null;
+    }
+
+    // Required check
+    if (rules.required || (rules.requiredWhen && rules.requiredWhen())) {
+      if (fieldId === 'image') {
+        // Image validation - check if we have an image
+        const hasImage = state.imageState === 'preview' && state.currentImageUrl;
+        if (!hasImage) {
+          return VALIDATION_MESSAGES.imageRequired;
+        }
+      } else if (fieldId === 'product') {
+        if (!state.selectedProductId) {
+          return VALIDATION_MESSAGES.productRequired;
+        }
+      } else if (!value || (typeof value === 'string' && !value.trim())) {
+        return VALIDATION_MESSAGES.required(rules.fieldName);
+      }
+    }
+
+    // String validations
+    if (typeof value === 'string' && value.trim()) {
+      const trimmed = value.trim();
+      
+      // Min length
+      if (rules.minLength && trimmed.length < rules.minLength) {
+        return VALIDATION_MESSAGES.minLength(rules.fieldName, rules.minLength);
+      }
+      
+      // Max length
+      if (rules.maxLength && trimmed.length > rules.maxLength) {
+        return VALIDATION_MESSAGES.maxLength(rules.fieldName, rules.maxLength);
+      }
+    }
+
+    return null;
+  };
+
+  /**
+   * Validate entire form
+   * @returns {Object} - { isValid: boolean, errors: Object, firstInvalidField: string|null }
+   */
+  const validateForm = () => {
+    const errors = {};
+    let firstInvalidField = null;
+
+    // Validate title
+    const titleValue = elements.titleInput?.value || '';
+    const titleError = validateField('title', titleValue);
+    if (titleError) {
+      errors.title = titleError;
+      if (!firstInvalidField) firstInvalidField = 'title';
+    }
+
+    // Validate text
+    const textValue = elements.textInput?.value || '';
+    const textError = validateField('text', textValue);
+    if (textError) {
+      errors.text = textError;
+      if (!firstInvalidField) firstInvalidField = 'text';
+    }
+
+    // Validate product (only if product type selected)
+    if (state.adType === 'product') {
+      const productError = validateField('product', state.selectedProductId);
+      if (productError) {
+        errors.product = productError;
+        if (!firstInvalidField) firstInvalidField = 'product';
+      }
+    }
+
+    // Validate image
+    const imageError = validateField('image', null);
+    if (imageError) {
+      errors.image = imageError;
+      if (!firstInvalidField) firstInvalidField = 'image';
+    }
+
+    validationErrors = errors;
+    const isValid = Object.keys(errors).length === 0;
+
+    if (isDev) {
+      console.log('[Validation]', isValid ? 'VALID' : 'INVALID', errors);
+    }
+
+    return { isValid, errors, firstInvalidField };
+  };
+
+  /**
+   * Show validation error on a field
+   * @param {string} fieldId - Field identifier
+   * @param {string} message - Error message
+   */
+  const showFieldError = (fieldId, message) => {
+    let inputElement, errorElement, formGroup;
+
+    switch (fieldId) {
+      case 'title':
+        inputElement = elements.titleInput;
+        formGroup = inputElement?.closest('.special-ad-form-group');
+        break;
+      case 'text':
+        inputElement = elements.textInput;
+        formGroup = inputElement?.closest('.special-ad-form-group');
+        break;
+      case 'product':
+        inputElement = elements.dropdown;
+        formGroup = elements.productPicker;
+        break;
+      case 'image':
+        inputElement = elements.imagePreview;
+        formGroup = inputElement?.closest('.special-ad-image-section');
+        break;
+    }
+
+    if (inputElement) {
+      inputElement.classList.add('is-invalid');
+      inputElement.setAttribute('aria-invalid', 'true');
+    }
+
+    if (formGroup) {
+      formGroup.classList.add('has-error');
+      
+      // Find or create error message element
+      let errorEl = formGroup.querySelector('.special-ad-field-error');
+      if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.className = 'special-ad-field-error';
+        errorEl.setAttribute('role', 'alert');
+        formGroup.appendChild(errorEl);
+      }
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+  };
+
+  /**
+   * Clear validation error from a field
+   * @param {string} fieldId - Field identifier
+   */
+  const clearFieldError = (fieldId) => {
+    let inputElement, formGroup;
+
+    switch (fieldId) {
+      case 'title':
+        inputElement = elements.titleInput;
+        formGroup = inputElement?.closest('.special-ad-form-group');
+        break;
+      case 'text':
+        inputElement = elements.textInput;
+        formGroup = inputElement?.closest('.special-ad-form-group');
+        break;
+      case 'product':
+        inputElement = elements.dropdown;
+        formGroup = elements.productPicker;
+        break;
+      case 'image':
+        inputElement = elements.imagePreview;
+        formGroup = inputElement?.closest('.special-ad-image-section');
+        break;
+    }
+
+    if (inputElement) {
+      inputElement.classList.remove('is-invalid');
+      inputElement.removeAttribute('aria-invalid');
+    }
+
+    if (formGroup) {
+      formGroup.classList.remove('has-error');
+      const errorEl = formGroup.querySelector('.special-ad-field-error');
+      if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+      }
+    }
+
+    // Remove from validation errors
+    delete validationErrors[fieldId];
+  };
+
+  /**
+   * Clear all validation errors
+   */
+  const clearAllErrors = () => {
+    ['title', 'text', 'product', 'image'].forEach(clearFieldError);
+    validationErrors = {};
+    hideTopAlert();
+  };
+
+  /**
+   * Show top alert banner
+   * @param {string} message - Alert message
+   */
+  const showTopAlert = (message) => {
+    let alertEl = document.getElementById('specialAdTopAlert');
+    
+    if (!alertEl) {
+      alertEl = document.createElement('div');
+      alertEl.id = 'specialAdTopAlert';
+      alertEl.className = 'special-ad-top-alert';
+      alertEl.setAttribute('role', 'alert');
+      alertEl.innerHTML = `
+        <svg class="special-ad-top-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4m0 4h.01"/>
+        </svg>
+        <span class="special-ad-top-alert__text"></span>
+        <button type="button" class="special-ad-top-alert__close" aria-label="بستن">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      `;
+      
+      // Insert after header
+      const header = elements.backdrop?.querySelector('.special-ad-header');
+      if (header) {
+        header.after(alertEl);
+      }
+      
+      // Close button handler
+      alertEl.querySelector('.special-ad-top-alert__close')?.addEventListener('click', hideTopAlert);
+    }
+    
+    alertEl.querySelector('.special-ad-top-alert__text').textContent = message;
+    alertEl.classList.add('is-visible');
+    alertEl.hidden = false;
+  };
+
+  /**
+   * Hide top alert banner
+   */
+  const hideTopAlert = () => {
+    const alertEl = document.getElementById('specialAdTopAlert');
+    if (alertEl) {
+      alertEl.classList.remove('is-visible');
+      alertEl.hidden = true;
+    }
+  };
+
+  /**
+   * Scroll to first invalid field
+   * @param {string} fieldId - Field identifier
+   */
+  const scrollToField = (fieldId) => {
+    let targetElement;
+
+    switch (fieldId) {
+      case 'title':
+        targetElement = elements.titleInput;
+        break;
+      case 'text':
+        targetElement = elements.textInput;
+        break;
+      case 'product':
+        targetElement = elements.dropdown;
+        break;
+      case 'image':
+        targetElement = elements.imagePreview;
+        break;
+    }
+
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Focus the element if it's focusable
+      if (targetElement.focus && fieldId !== 'image') {
+        setTimeout(() => targetElement.focus(), 300);
+      }
+    }
+  };
+
+  /**
+   * Display all validation errors
+   * @param {Object} errors - Validation errors object
+   * @param {string} firstInvalidField - First invalid field ID
+   */
+  const displayValidationErrors = (errors, firstInvalidField) => {
+    // Show top alert
+    showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
+
+    // Show individual field errors
+    Object.entries(errors).forEach(([fieldId, message]) => {
+      showFieldError(fieldId, message);
+    });
+
+    // Scroll to first invalid field
+    if (firstInvalidField) {
+      scrollToField(firstInvalidField);
+    }
+  };
+
+  /**
+   * Real-time validation on input
+   * @param {string} fieldId - Field identifier
+   * @param {*} value - Current value
+   */
+  const validateFieldRealtime = (fieldId, value) => {
+    // Only validate if field was previously invalid or has enough content
+    if (validationErrors[fieldId]) {
+      const error = validateField(fieldId, value);
+      if (error) {
+        showFieldError(fieldId, error);
+      } else {
+        clearFieldError(fieldId);
+      }
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // END VALIDATION MODULE
+  // ═══════════════════════════════════════════════════════════════════════════
+
   // ─────────────────────────────────────────────────────
   // State
   // ─────────────────────────────────────────────────────
@@ -429,6 +827,12 @@
     if (isDev) console.log(`[AdImage] State: ${state.imageState} → ${newState}${errorReason ? ` (${errorReason})` : ''}`);
     state.imageState = newState;
     state.imageErrorReason = errorReason;
+    
+    // Clear image validation error when image is successfully loaded
+    if (newState === 'preview' && state.currentImageUrl) {
+      clearFieldError('image');
+    }
+    
     renderAdImageUI();
   };
 
@@ -684,6 +1088,11 @@
     state.selectedProductId = productId;
     state.selectedProductImage = productImagePath;
     const requestId = ++state.productImageRequestId;
+    
+    // Clear product validation error when product is selected
+    if (productId) {
+      clearFieldError('product');
+    }
     
     // If user has custom image, don't override
     if (state.customImage) {
@@ -1567,14 +1976,34 @@
     e.preventDefault();
     if (state.isLoading) return;
     
-    if (state.adType === 'product' && !state.selectedProductId) {
-      showToast('لطفاً یک محصول انتخاب کنید', true);
+    // Clear previous errors
+    clearAllErrors();
+    
+    // Run validation
+    const { isValid, errors, firstInvalidField } = validateForm();
+    
+    if (!isValid) {
+      // Display all errors
+      displayValidationErrors(errors, firstInvalidField);
       return;
     }
     
-    const title = elements.titleInput?.value?.trim();
-    if (!title) {
-      showToast('عنوان تبلیغ الزامی است', true);
+    // Sanitize inputs before submission
+    const sanitizedTitle = sanitizeText(elements.titleInput?.value || '', 25);
+    const sanitizedText = sanitizeText(elements.textInput?.value || '', 30);
+    
+    // Double-check sanitized values meet requirements
+    if (sanitizedTitle.length < 3) {
+      showFieldError('title', VALIDATION_MESSAGES.minLength('عنوان تبلیغ', 3));
+      showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
+      scrollToField('title');
+      return;
+    }
+    
+    if (sanitizedText.length < 10) {
+      showFieldError('text', VALIDATION_MESSAGES.minLength('متن جذاب', 10));
+      showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
+      scrollToField('text');
       return;
     }
     
@@ -1593,8 +2022,8 @@
       const formData = new FormData();
       formData.append('sellerId', sellerId);
       formData.append('planSlug', state.planSlug);
-      formData.append('title', title);
-      formData.append('text', elements.textInput?.value?.trim() || '');
+      formData.append('title', sanitizedTitle);
+      formData.append('text', sanitizedText);
       formData.append('useCredit', state.useCredit);
       formData.append('creditAmount', state.creditAmount);
       
@@ -1604,6 +2033,9 @@
       
       if (state.customImage) {
         formData.append('image', state.customImage);
+      } else if (state.currentImageUrl && !state.currentImageUrl.startsWith('blob:')) {
+        // Send the selected product image URL
+        formData.append('selectedImageUrl', state.currentImageUrl);
       }
       
       const res = await fetch(`${API_BASE}/adOrder`, withCreds({
@@ -1614,7 +2046,15 @@
       const result = await res.json();
       
       if (!res.ok || !result.success) {
-        showToast(result.message || 'ثبت تبلیغ ناموفق بود', true);
+        // Handle validation errors from backend
+        if (result.validationErrors) {
+          Object.entries(result.validationErrors).forEach(([field, message]) => {
+            showFieldError(field, message);
+          });
+          showTopAlert(result.message || 'لطفاً خطاهای فرم را برطرف کنید');
+        } else {
+          showToast(result.message || 'ثبت تبلیغ ناموفق بود', true);
+        }
         setLoading(false);
         return;
       }
@@ -1622,7 +2062,7 @@
       closeModal();
       showSuccessPopup({
         title: 'تبلیغ شما با موفقیت ثبت شد',
-        message: `تبلیغ «${title}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
+        message: `تبلیغ «${sanitizedTitle}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
         details: [
           `پلن انتخابی: ${AD_PLAN_TITLES[state.planSlug]}`,
           state.creditAmount > 0 ? `کسر از اعتبار: ${toFaPrice(state.creditAmount)} تومان` : '',
@@ -1715,6 +2155,9 @@
 
   const resetForm = () => {
     revokeCurrentObjectUrl();
+    
+    // Clear all validation errors
+    clearAllErrors();
     
     state.adType = 'product';
     state.selectedProductId = null;
@@ -1825,12 +2268,32 @@
     // Custom dropdown listeners
     attachDropdownListeners();
     
+    // Title input with real-time validation
     elements.titleInput?.addEventListener('input', () => {
       updateCharCounter(elements.titleInput, elements.titleCounter, 25);
+      // Real-time validation if field was previously invalid
+      validateFieldRealtime('title', elements.titleInput.value);
     });
     
+    elements.titleInput?.addEventListener('blur', () => {
+      // Validate on blur if field has content
+      if (elements.titleInput.value.trim()) {
+        validateFieldRealtime('title', elements.titleInput.value);
+      }
+    });
+    
+    // Text input with real-time validation
     elements.textInput?.addEventListener('input', () => {
       updateCharCounter(elements.textInput, elements.textCounter, 30);
+      // Real-time validation if field was previously invalid
+      validateFieldRealtime('text', elements.textInput.value);
+    });
+    
+    elements.textInput?.addEventListener('blur', () => {
+      // Validate on blur if field has content
+      if (elements.textInput.value.trim()) {
+        validateFieldRealtime('text', elements.textInput.value);
+      }
     });
     
     // Image actions

@@ -19,6 +19,91 @@ const PUBLIC_POPULATE_SPEC = [
   { path: 'productId', select: 'title price slug' }
 ];
 
+// ═══════════════════════════════════════════════════════════════════════════
+// VALIDATION & SANITIZATION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Sanitize text input - strip HTML/script tags, enforce max length
+ * @param {string} input - Raw input string
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {string} - Sanitized string
+ */
+function sanitizeText(input, maxLength = 100) {
+  if (!input || typeof input !== 'string') return '';
+  
+  // Remove HTML tags
+  let sanitized = input.replace(/<[^>]*>/g, '');
+  
+  // Remove script-like patterns
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  sanitized = sanitized.replace(/data:/gi, '');
+  
+  // Remove potentially dangerous characters
+  sanitized = sanitized.replace(/[<>'"&\\]/g, '');
+  
+  // Normalize whitespace
+  sanitized = sanitized.replace(/\s+/g, ' ').trim();
+  
+  // Enforce max length
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength);
+  }
+  
+  return sanitized;
+}
+
+/**
+ * Validate ad order input fields
+ * @param {Object} fields - Input fields
+ * @param {string} adType - 'product' or 'shop'
+ * @param {boolean} hasImage - Whether an image was provided
+ * @param {string} selectedImageUrl - URL of selected product image
+ * @returns {Object} - { isValid: boolean, errors: Object, sanitized: Object }
+ */
+function validateAdOrderInput(fields, adType, hasImage, selectedImageUrl) {
+  const errors = {};
+  const sanitized = {};
+  
+  // Validate and sanitize title (required, 3-25 chars)
+  const title = sanitizeText(fields.title || fields.adTitle || '', 25);
+  if (!title) {
+    errors.title = 'عنوان تبلیغ الزامی است';
+  } else if (title.length < 3) {
+    errors.title = 'عنوان تبلیغ باید حداقل ۳ کاراکتر باشد';
+  } else if (title.length > 25) {
+    errors.title = 'عنوان تبلیغ نباید بیشتر از ۲۵ کاراکتر باشد';
+  }
+  sanitized.title = title;
+  
+  // Validate and sanitize text (required, 10-30 chars)
+  const text = sanitizeText(fields.text || fields.adText || '', 30);
+  if (!text) {
+    errors.text = 'متن جذاب الزامی است';
+  } else if (text.length < 10) {
+    errors.text = 'متن جذاب باید حداقل ۱۰ کاراکتر باشد';
+  } else if (text.length > 30) {
+    errors.text = 'متن جذاب نباید بیشتر از ۳۰ کاراکتر باشد';
+  }
+  sanitized.text = text;
+  
+  // Validate product selection (required if adType is 'product')
+  if (adType === 'product' && !fields.productId) {
+    errors.product = 'لطفاً یک محصول انتخاب کنید';
+  }
+  sanitized.productId = fields.productId || null;
+  
+  // Validate image (required - either uploaded or selected from product)
+  if (!hasImage && !selectedImageUrl) {
+    errors.image = 'لطفاً یک تصویر انتخاب کنید';
+  }
+  
+  const isValid = Object.keys(errors).length === 0;
+  
+  return { isValid, errors, sanitized };
+}
+
 function normaliseNote(note) {
   if (note === undefined) return undefined;
   if (note === null) return undefined;
@@ -156,6 +241,7 @@ exports.createAdOrder = async (req, res) => {
     const adTitle    = req.fields.title || req.fields.adTitle;
     const adText     = req.fields.text  || req.fields.adText;
     const image      = req.files?.image;
+    const selectedImageUrl = req.fields.selectedImageUrl;
 
     // چک مقادیر اولیه
     if (!sellerId || !planSlug) {
@@ -172,6 +258,33 @@ exports.createAdOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: 'پلن تبلیغ پیدا نشد.' });
     }
 
+    // Determine ad type based on whether product is selected
+    const adType = productId ? 'product' : 'shop';
+    const hasImage = image && image.size > 0;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SERVER-SIDE VALIDATION
+    // ═══════════════════════════════════════════════════════════════════════════
+    const validation = validateAdOrderInput(
+      { title: adTitle, text: adText, productId },
+      adType,
+      hasImage,
+      selectedImageUrl
+    );
+
+    if (!validation.isValid) {
+      console.log('❌ Validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        message: 'لطفاً فیلدهای مشخص‌شده را تکمیل کنید',
+        validationErrors: validation.errors
+      });
+    }
+
+    // Use sanitized values
+    const sanitizedTitle = validation.sanitized.title;
+    const sanitizedText = validation.sanitized.text;
+
     let product = null;
     if (productId) {
       product = await Product.findById(productId);
@@ -182,13 +295,19 @@ exports.createAdOrder = async (req, res) => {
 
     // --- ذخیره عکس در uploads ---
     let bannerImage = undefined;
-    if (image && image.size > 0) {
+    if (hasImage) {
       const ext = path.extname(image.name);
       const fileName = Date.now() + '-' + Math.floor(Math.random() * 10000) + ext;
       const newPath = path.join(__dirname, '..', 'uploads', fileName);
       fs.copyFileSync(image.path, newPath);
       bannerImage = fileName;
       console.log('✅ عکس تبلیغ ذخیره شد:', bannerImage);
+    } else if (selectedImageUrl) {
+      // Use the selected product image URL (store just the path)
+      // Extract filename from URL if it's a full URL
+      const urlPath = selectedImageUrl.replace(/^https?:\/\/[^\/]+/, '');
+      bannerImage = urlPath.replace(/^\/uploads\//, '').replace(/^\//, '');
+      console.log('✅ تصویر محصول انتخاب شد:', bannerImage);
     }
 
     const adOrder = new AdOrder({
@@ -199,8 +318,8 @@ exports.createAdOrder = async (req, res) => {
       productId: productId || undefined,
       shopTitle: seller.storename,
       bannerImage: bannerImage,
-      adTitle: adTitle ? adTitle.trim() : undefined,
-      adText: adText ? adText.trim() : undefined,
+      adTitle: sanitizedTitle || undefined,
+      adText: sanitizedText || undefined,
       status: 'pending',
       createdAt: new Date(),
     });
