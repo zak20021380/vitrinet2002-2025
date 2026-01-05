@@ -126,6 +126,7 @@
       imageError: document.getElementById('specialAdImageError'),
       retryBtn: document.getElementById('specialAdRetryBtn'),
       imageStatus: document.getElementById('specialAdImageStatus'),
+      imageFinalHint: document.getElementById('specialAdImageFinalHint'),
       editImageBtn: document.getElementById('specialAdEditImageBtn'),
       walletBalance: document.getElementById('specialAdWalletBalance'),
       creditToggle: document.getElementById('specialAdCreditToggle'),
@@ -528,6 +529,13 @@
     const shouldShow = !state.customImage && state.productImageGallery.length > 1 && state.imageState === 'preview';
     elements.imagePreview.classList.toggle('has-gallery', shouldShow);
     updateGalleryIndicator();
+    updateImageFinalHint();
+  };
+
+  const updateImageFinalHint = () => {
+    if (!elements.imageFinalHint) return;
+    const shouldShow = state.productImageGallery.length > 1 && !state.customImage && state.imageState === 'preview';
+    elements.imageFinalHint.hidden = !shouldShow;
   };
 
   const showRetryHint = (message) => {
