@@ -2997,20 +2997,59 @@
 
 /* ─────────────────────────────────────────────────────
    Shake Animation for Invalid Fields
+   Premium subtle shake with highlight pulse
    ───────────────────────────────────────────────────── */
 .special-ad-input.is-invalid,
 .special-ad-textarea.is-invalid,
 .sam-dropdown.is-invalid .sam-dropdown__trigger,
 .special-ad-image-preview.is-invalid {
-  animation: fieldShake 0.4s ease;
+  animation: fieldShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 @keyframes fieldShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+  0%, 100% { 
+    transform: translateX(0); 
+  }
+  10% { 
+    transform: translateX(-4px); 
+  }
+  20% { 
+    transform: translateX(4px); 
+  }
+  30% { 
+    transform: translateX(-4px); 
+  }
+  40% { 
+    transform: translateX(4px); 
+  }
+  50% { 
+    transform: translateX(-2px); 
+  }
+  60% { 
+    transform: translateX(2px); 
+  }
+  70%, 100% { 
+    transform: translateX(0); 
+  }
+}
+
+/* Highlight pulse for form groups with errors */
+.special-ad-form-group.has-error,
+.special-ad-product-picker.has-error,
+.special-ad-image-section.has-error {
+  animation: errorHighlight 0.6s ease-out;
+}
+
+@keyframes errorHighlight {
+  0% {
+    background-color: transparent;
+  }
+  30% {
+    background-color: rgba(239, 68, 68, 0.08);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -3030,13 +3069,23 @@
   }
   
   .special-ad-field-error {
-    padding: 6px 10px;
-    font-size: 0.75rem;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    border-radius: 8px;
   }
   
   .special-ad-field-error::before {
     width: 14px;
     height: 14px;
+  }
+  
+  /* Ensure error messages don't get hidden behind CTA */
+  .special-ad-form-group.has-error,
+  .special-ad-product-picker.has-error,
+  .special-ad-image-section.has-error {
+    padding-bottom: 8px;
+    margin-bottom: 16px;
   }
 }
 
@@ -3049,7 +3098,10 @@
   .special-ad-input.is-invalid,
   .special-ad-textarea.is-invalid,
   .sam-dropdown.is-invalid .sam-dropdown__trigger,
-  .special-ad-image-preview.is-invalid {
+  .special-ad-image-preview.is-invalid,
+  .special-ad-form-group.has-error,
+  .special-ad-product-picker.has-error,
+  .special-ad-image-section.has-error {
     animation: none !important;
   }
 }

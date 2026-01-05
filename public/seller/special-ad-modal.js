@@ -96,14 +96,23 @@
     }
   };
 
-  // Validation error messages (Persian)
+  // Validation error messages (Persian) - Specific and clear
   const VALIDATION_MESSAGES = {
-    required: (fieldName) => `${fieldName} الزامی است`,
-    minLength: (fieldName, min) => `${fieldName} باید حداقل ${toFaDigits(min)} کاراکتر باشد`,
-    maxLength: (fieldName, max) => `${fieldName} نباید بیشتر از ${toFaDigits(max)} کاراکتر باشد`,
-    productRequired: 'لطفاً یک محصول انتخاب کنید',
-    imageRequired: 'لطفاً یک تصویر انتخاب کنید',
-    invalidChars: (fieldName) => `${fieldName} شامل کاراکترهای غیرمجاز است`
+    // Title-specific messages
+    titleRequired: 'عنوان تبلیغ الزامی است.',
+    titleLength: 'عنوان تبلیغ باید بین ۳ تا ۲۵ کاراکتر باشد.',
+    // Text-specific messages
+    textRequired: 'متن جذاب الزامی است.',
+    textLength: 'متن جذاب باید بین ۱۰ تا ۳۰ کاراکتر باشد.',
+    // Product message
+    productRequired: 'لطفاً یک محصول انتخاب کنید.',
+    // Image message
+    imageRequired: 'لطفاً یک تصویر انتخاب کنید یا از تصاویر محصول یکی را برگزینید.',
+    // Generic fallbacks
+    required: (fieldName) => `${fieldName} الزامی است.`,
+    minLength: (fieldName, min) => `${fieldName} باید حداقل ${toFaDigits(min)} کاراکتر باشد.`,
+    maxLength: (fieldName, max) => `${fieldName} نباید بیشتر از ${toFaDigits(max)} کاراکتر باشد.`,
+    invalidChars: (fieldName) => `${fieldName} شامل کاراکترهای غیرمجاز است.`
   };
 
   // Track validation state
@@ -155,35 +164,43 @@
       return null;
     }
 
-    // Required check
-    if (rules.required || (rules.requiredWhen && rules.requiredWhen())) {
-      if (fieldId === 'image') {
-        // Image validation - check if we have an image
+    // Field-specific validation with clear messages
+    switch (fieldId) {
+      case 'title': {
+        const trimmed = (value || '').trim();
+        if (!trimmed) {
+          return VALIDATION_MESSAGES.titleRequired;
+        }
+        if (trimmed.length < rules.minLength || trimmed.length > rules.maxLength) {
+          return VALIDATION_MESSAGES.titleLength;
+        }
+        break;
+      }
+      
+      case 'text': {
+        const trimmed = (value || '').trim();
+        if (!trimmed) {
+          return VALIDATION_MESSAGES.textRequired;
+        }
+        if (trimmed.length < rules.minLength || trimmed.length > rules.maxLength) {
+          return VALIDATION_MESSAGES.textLength;
+        }
+        break;
+      }
+      
+      case 'product': {
+        if (rules.requiredWhen && rules.requiredWhen() && !state.selectedProductId) {
+          return VALIDATION_MESSAGES.productRequired;
+        }
+        break;
+      }
+      
+      case 'image': {
         const hasImage = state.imageState === 'preview' && state.currentImageUrl;
         if (!hasImage) {
           return VALIDATION_MESSAGES.imageRequired;
         }
-      } else if (fieldId === 'product') {
-        if (!state.selectedProductId) {
-          return VALIDATION_MESSAGES.productRequired;
-        }
-      } else if (!value || (typeof value === 'string' && !value.trim())) {
-        return VALIDATION_MESSAGES.required(rules.fieldName);
-      }
-    }
-
-    // String validations
-    if (typeof value === 'string' && value.trim()) {
-      const trimmed = value.trim();
-      
-      // Min length
-      if (rules.minLength && trimmed.length < rules.minLength) {
-        return VALIDATION_MESSAGES.minLength(rules.fieldName, rules.minLength);
-      }
-      
-      // Max length
-      if (rules.maxLength && trimmed.length > rules.maxLength) {
-        return VALIDATION_MESSAGES.maxLength(rules.fieldName, rules.maxLength);
+        break;
       }
     }
 
@@ -241,7 +258,7 @@
   };
 
   /**
-   * Show validation error on a field
+   * Show validation error on a field with shake animation
    * @param {string} fieldId - Field identifier
    * @param {string} message - Error message
    */
@@ -272,6 +289,12 @@
     if (inputElement) {
       inputElement.classList.add('is-invalid');
       inputElement.setAttribute('aria-invalid', 'true');
+      
+      // Trigger shake animation by removing and re-adding class
+      inputElement.classList.remove('is-invalid');
+      // Force reflow to restart animation
+      void inputElement.offsetWidth;
+      inputElement.classList.add('is-invalid');
     }
 
     if (formGroup) {
@@ -283,11 +306,12 @@
         errorEl = document.createElement('div');
         errorEl.className = 'special-ad-field-error';
         errorEl.setAttribute('role', 'alert');
+        errorEl.setAttribute('aria-live', 'polite');
         formGroup.appendChild(errorEl);
       }
       errorEl.textContent = message;
       errorEl.hidden = false;
-      errorEl.style.display = 'flex'; // Ensure it's visible
+      errorEl.style.display = 'flex';
     }
   };
 
@@ -357,8 +381,9 @@
     if (!alertEl) {
       alertEl = document.createElement('div');
       alertEl.id = 'specialAdTopAlert';
-      alertEl.className = 'special-ad-top-alert is-visible';
+      alertEl.className = 'special-ad-top-alert';
       alertEl.setAttribute('role', 'alert');
+      alertEl.setAttribute('aria-live', 'polite');
       alertEl.innerHTML = `
         <svg class="special-ad-top-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
@@ -391,7 +416,14 @@
     alertEl.querySelector('.special-ad-top-alert__text').textContent = message;
     alertEl.classList.add('is-visible');
     alertEl.hidden = false;
-    alertEl.style.display = 'flex'; // Ensure it's visible
+    alertEl.style.display = 'flex';
+    
+    // Ensure alert is visible by scrolling modal body to top briefly
+    const modalBody = elements.backdrop?.querySelector('.special-ad-body');
+    if (modalBody && modalBody.scrollTop > 50) {
+      // Don't scroll to top - let scrollToField handle positioning
+      // Just ensure the alert animates in nicely
+    }
   };
 
   /**
@@ -407,42 +439,65 @@
   };
 
   /**
-   * Scroll to first invalid field
+   * Scroll to first invalid field with mobile-friendly positioning
+   * Ensures field is visible above the CTA button and keyboard
    * @param {string} fieldId - Field identifier
+   * @param {boolean} shouldFocus - Whether to focus the element after scrolling
    */
-  const scrollToField = (fieldId) => {
-    let targetElement;
+  const scrollToField = (fieldId, shouldFocus = true) => {
+    let targetElement, formGroup;
 
     switch (fieldId) {
       case 'title':
         targetElement = elements.titleInput;
+        formGroup = targetElement?.closest('.special-ad-form-group');
         break;
       case 'text':
         targetElement = elements.textInput;
+        formGroup = targetElement?.closest('.special-ad-form-group');
         break;
       case 'product':
-        targetElement = elements.dropdown;
+        targetElement = elements.dropdownTrigger || elements.dropdown;
+        formGroup = elements.productPicker;
         break;
       case 'image':
         targetElement = elements.imagePreview;
+        formGroup = targetElement?.closest('.special-ad-image-section');
         break;
     }
 
-    if (targetElement) {
-      // Scroll within the modal body
-      const modalBody = elements.backdrop?.querySelector('.special-ad-body');
-      if (modalBody) {
-        const targetRect = targetElement.getBoundingClientRect();
-        const bodyRect = modalBody.getBoundingClientRect();
-        const scrollTop = modalBody.scrollTop + (targetRect.top - bodyRect.top) - 100;
-        modalBody.scrollTo({ top: scrollTop, behavior: 'smooth' });
-      } else {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    const scrollTarget = formGroup || targetElement;
+    if (!scrollTarget) return;
+
+    const modalBody = elements.backdrop?.querySelector('.special-ad-body');
+    if (modalBody) {
+      // Calculate scroll position to show field at top with padding
+      // Account for footer CTA height (~80px) and some breathing room
+      const targetRect = scrollTarget.getBoundingClientRect();
+      const bodyRect = modalBody.getBoundingClientRect();
+      const footerHeight = 100; // CTA button area
+      const topPadding = 20; // Space from top
       
-      // Focus the element if it's focusable
-      if (targetElement.focus && fieldId !== 'image') {
-        setTimeout(() => targetElement.focus(), 300);
+      // Calculate ideal scroll position
+      const scrollTop = modalBody.scrollTop + (targetRect.top - bodyRect.top) - topPadding;
+      
+      // Smooth scroll to position
+      modalBody.scrollTo({ 
+        top: Math.max(0, scrollTop), 
+        behavior: 'smooth' 
+      });
+      
+      // Focus the element after scroll completes (for keyboard accessibility)
+      if (shouldFocus && targetElement && targetElement.focus && fieldId !== 'image') {
+        setTimeout(() => {
+          targetElement.focus({ preventScroll: true });
+        }, 350);
+      }
+    } else {
+      // Fallback for non-modal context
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (shouldFocus && targetElement && targetElement.focus && fieldId !== 'image') {
+        setTimeout(() => targetElement.focus(), 350);
       }
     }
   };
@@ -455,17 +510,18 @@
   const displayValidationErrors = (errors, firstInvalidField) => {
     if (isDev) console.log('[Validation] displayValidationErrors:', errors, firstInvalidField);
     
-    // Show top alert
-    showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
+    // Show compact top summary alert
+    showTopAlert('لطفاً موارد زیر را اصلاح کنید');
 
-    // Show individual field errors
+    // Show individual field errors with shake animation
     Object.entries(errors).forEach(([fieldId, message]) => {
       showFieldError(fieldId, message);
     });
 
-    // Scroll to first invalid field
+    // Scroll to first invalid field and focus it
     if (firstInvalidField) {
-      setTimeout(() => scrollToField(firstInvalidField), 100);
+      // Small delay to ensure DOM updates are complete
+      setTimeout(() => scrollToField(firstInvalidField, true), 150);
     }
   };
 
@@ -2020,16 +2076,16 @@
     
     // Double-check sanitized values meet requirements
     if (sanitizedTitle.length < 3) {
-      showFieldError('title', VALIDATION_MESSAGES.minLength('عنوان تبلیغ', 3));
-      showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
-      scrollToField('title');
+      showFieldError('title', VALIDATION_MESSAGES.titleLength);
+      showTopAlert('لطفاً موارد زیر را اصلاح کنید');
+      scrollToField('title', true);
       return;
     }
     
     if (sanitizedText.length < 10) {
-      showFieldError('text', VALIDATION_MESSAGES.minLength('متن جذاب', 10));
-      showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
-      scrollToField('text');
+      showFieldError('text', VALIDATION_MESSAGES.textLength);
+      showTopAlert('لطفاً موارد زیر را اصلاح کنید');
+      scrollToField('text', true);
       return;
     }
     
