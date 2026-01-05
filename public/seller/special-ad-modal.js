@@ -78,6 +78,11 @@
     currentImageUrl: null,
     // Preload abort controller
     imageLoadAbortController: null,
+    // Product image gallery
+    productImageGallery: [],
+    productImageIndex: 0,
+    productImageRequestId: 0,
+    imageRetryHintTimer: null,
     // Products list for dropdown filtering
     productsList: []
   };
@@ -114,6 +119,10 @@
       changeImageText: document.getElementById('specialAdChangeImageText'),
       removeImageBtn: document.getElementById('specialAdRemoveImageBtn'),
       changeImageOverlay: document.getElementById('specialAdChangeImageOverlay'),
+      imagePrevBtn: document.getElementById('specialAdImagePrev'),
+      imageNextBtn: document.getElementById('specialAdImageNext'),
+      imageIndicator: document.getElementById('specialAdImageIndicator'),
+      imageRetryHint: document.getElementById('specialAdImageRetryHint'),
       imageBadge: document.getElementById('specialAdImageBadge'),
       imageError: document.getElementById('specialAdImageError'),
       retryBtn: document.getElementById('specialAdRetryBtn'),
@@ -189,6 +198,20 @@
       return await res.json();
     } catch (err) {
       console.error('fetchProducts error:', err);
+      return [];
+    }
+  };
+
+  const fetchProductGallery = async (productId) => {
+    if (!productId) return [];
+    try {
+      const res = await fetch(`${API_BASE}/products/${productId}`, withCreds());
+      if (!res.ok) return [];
+      const data = await res.json();
+      const payload = data?.data || data;
+      return extractProductGallery(payload);
+    } catch (err) {
+      console.error('fetchProductGallery error:', err);
       return [];
     }
   };
@@ -284,6 +307,44 @@
     }
     
     return null;
+  };
+
+  /**
+   * Extract product image gallery URLs
+   */
+  const extractProductGallery = (product) => {
+    if (!product) return [];
+    const gallery = [];
+    const possibleFields = ['images', 'gallery', 'photos', 'image', 'img', 'photo', 'thumbnail', 'mainImage', 'primaryImageUrl'];
+
+    possibleFields.forEach(field => {
+      const value = product[field];
+      if (!value) return;
+
+      if (typeof value === 'string' && value.trim()) {
+        gallery.push(value.trim());
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach(entry => {
+          if (typeof entry === 'string' && entry.trim()) {
+            gallery.push(entry.trim());
+          } else if (entry && typeof entry === 'object') {
+            const url = entry.url || entry.src || entry.path || entry.image || entry.filename;
+            if (url && typeof url === 'string') gallery.push(url.trim());
+          }
+        });
+        return;
+      }
+
+      if (typeof value === 'object') {
+        const url = value.url || value.src || value.path;
+        if (url && typeof url === 'string') gallery.push(url.trim());
+      }
+    });
+
+    return gallery.filter(Boolean);
   };
 
   /**
@@ -452,6 +513,39 @@
         }
         break;
     }
+
+    updateGalleryControls();
+  };
+
+  const updateGalleryIndicator = () => {
+    if (!elements.imageIndicator) return;
+    if (state.productImageGallery.length > 1) {
+      elements.imageIndicator.textContent = `${toFaDigits(state.productImageIndex + 1)}/${toFaDigits(state.productImageGallery.length)}`;
+    } else {
+      elements.imageIndicator.textContent = '';
+    }
+  };
+
+  const updateGalleryControls = () => {
+    if (!elements.imagePreview) return;
+    const shouldShow = !state.customImage && state.productImageGallery.length > 1 && state.imageState === 'preview';
+    elements.imagePreview.classList.toggle('has-gallery', shouldShow);
+    updateGalleryIndicator();
+  };
+
+  const showRetryHint = (message) => {
+    if (!elements.imageRetryHint) return;
+    if (state.imageRetryHintTimer) {
+      clearTimeout(state.imageRetryHintTimer);
+      state.imageRetryHintTimer = null;
+    }
+    elements.imageRetryHint.textContent = message;
+    elements.imageRetryHint.hidden = false;
+    elements.imageRetryHint.classList.add('is-visible');
+    state.imageRetryHintTimer = setTimeout(() => {
+      elements.imageRetryHint.classList.remove('is-visible');
+      elements.imageRetryHint.hidden = true;
+    }, 3200);
   };
 
   /**
@@ -521,25 +615,99 @@
     }
   };
 
+  const setProductGallery = (images, { shouldLoad = true } = {}) => {
+    state.productImageGallery = Array.isArray(images) ? images.filter(Boolean) : [];
+    state.productImageIndex = 0;
+    updateGalleryIndicator();
+    if (!state.customImage && shouldLoad) {
+      loadGalleryImage(0);
+    } else {
+      updateGalleryControls();
+    }
+  };
+
+  const loadGalleryImage = async (index, attempts = 0) => {
+    const gallery = state.productImageGallery;
+    if (!gallery.length) {
+      state.selectedProductImage = null;
+      setAdImageState('empty');
+      return;
+    }
+
+    const normalizedIndex = ((index % gallery.length) + gallery.length) % gallery.length;
+    state.productImageIndex = normalizedIndex;
+    state.selectedProductImage = gallery[normalizedIndex];
+    updateGalleryIndicator();
+
+    const absoluteUrl = buildImageUrl(state.selectedProductImage);
+    if (!absoluteUrl) {
+      if (attempts < gallery.length - 1) {
+        showRetryHint('بارگذاری تصویر ناموفق بود؛ تصویر بعدی نمایش داده شد');
+        return loadGalleryImage(normalizedIndex + 1, attempts + 1);
+      }
+      setAdImageState('error', 'خطا در نمایش تصویر');
+      return;
+    }
+
+    setAdImageState('loading');
+
+    try {
+      await preloadImage(absoluteUrl);
+      state.currentImageUrl = absoluteUrl;
+      state.customImage = null;
+      setAdImageState('preview');
+      if (isDev) console.log('[AdImage] Gallery image loaded successfully');
+    } catch (err) {
+      console.error('[AdImage] Gallery preload failed:', err.message);
+      if (attempts < gallery.length - 1) {
+        showRetryHint('تصویر بارگذاری نشد؛ به تصویر بعدی می‌رویم');
+        return loadGalleryImage(normalizedIndex + 1, attempts + 1);
+      }
+      let errorReason = 'خطا در بارگذاری تصویر';
+      if (!navigator.onLine) errorReason = 'اتصال اینترنت برقرار نیست';
+      else if (err.message.includes('timeout')) errorReason = 'زمان بارگذاری به پایان رسید';
+      setAdImageState('error', errorReason);
+    }
+  };
+
   /**
    * Handle product selection - auto-load product image
    */
-  const onProductSelected = (productId, productImagePath) => {
+  const onProductSelected = async (productId, productImagePath) => {
     if (isDev) console.log(`[AdImage] Product selected: ${productId}, hasImage: ${!!productImagePath}`);
     
     state.selectedProductId = productId;
     state.selectedProductImage = productImagePath;
+    const requestId = ++state.productImageRequestId;
     
     // If user has custom image, don't override
     if (state.customImage) {
       if (isDev) console.log('[AdImage] Custom image exists, keeping it');
+      if (!productId) {
+        setProductGallery([]);
+      }
       return;
     }
     
-    // Load product image
-    if (productImagePath) {
-      setAdImageSource(productImagePath, false);
+    if (!productId) {
+      setProductGallery([]);
+      setAdImageState('empty');
+      return;
+    }
+
+    const fallbackGallery = productImagePath ? [productImagePath] : [];
+    if (fallbackGallery.length) {
+      setProductGallery(fallbackGallery);
     } else {
+      setAdImageState('loading');
+    }
+
+    const galleryImages = await fetchProductGallery(productId);
+    if (requestId !== state.productImageRequestId) return;
+
+    if (galleryImages.length) {
+      setProductGallery(galleryImages);
+    } else if (!fallbackGallery.length) {
       setAdImageState('empty');
     }
   };
@@ -552,6 +720,8 @@
     
     if (state.customImage) {
       setAdImageSource(state.customImage, true);
+    } else if (state.productImageGallery.length) {
+      loadGalleryImage(state.productImageIndex);
     } else if (state.selectedProductImage) {
       setAdImageSource(state.selectedProductImage, false);
     } else {
@@ -571,7 +741,9 @@
     elements.imageInput.value = '';
     
     // Revert to product image if available
-    if (state.selectedProductImage) {
+    if (state.productImageGallery.length) {
+      loadGalleryImage(state.productImageIndex);
+    } else if (state.selectedProductImage) {
       setAdImageSource(state.selectedProductImage, false);
     } else {
       setAdImageState('empty');
@@ -1285,6 +1457,8 @@
       if (state.adType === 'shop') {
         state.selectedProductId = null;
         state.selectedProductImage = null;
+        state.productImageGallery = [];
+        state.productImageIndex = 0;
         if (!state.customImage) {
           setAdImageState('empty');
         }
@@ -1336,6 +1510,46 @@
 
   const handleRetryImage = () => {
     retryImageLoad();
+  };
+
+  const handleGalleryPrev = () => {
+    if (state.customImage || state.productImageGallery.length < 2) return;
+    loadGalleryImage(state.productImageIndex - 1);
+  };
+
+  const handleGalleryNext = () => {
+    if (state.customImage || state.productImageGallery.length < 2) return;
+    loadGalleryImage(state.productImageIndex + 1);
+  };
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchActive = false;
+
+  const handleImageTouchStart = (e) => {
+    if (state.customImage || state.productImageGallery.length < 2) return;
+    const touch = e.touches?.[0];
+    if (!touch) return;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchActive = true;
+  };
+
+  const handleImageTouchEnd = (e) => {
+    if (!touchActive) return;
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    touchActive = false;
+
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        handleGalleryNext();
+      } else {
+        handleGalleryPrev();
+      }
+    }
   };
 
   const handleCreditToggle = (e) => {
@@ -1448,10 +1662,23 @@
     state.selectedProductId = null;
     state.selectedProductImage = null;
     state.customImage = null;
+    state.productImageGallery = [];
+    state.productImageIndex = 0;
+    state.productImageRequestId = 0;
+    state.productImageRequestId = 0;
     state.imageState = 'empty';
     state.imageErrorReason = null;
     state.currentImageUrl = null;
     revokeCurrentObjectUrl();
+
+    if (state.imageRetryHintTimer) {
+      clearTimeout(state.imageRetryHintTimer);
+      state.imageRetryHintTimer = null;
+    }
+    if (elements.imageRetryHint) {
+      elements.imageRetryHint.hidden = true;
+      elements.imageRetryHint.classList.remove('is-visible');
+    }
     
     // Render empty state
     renderAdImageUI();
@@ -1488,6 +1715,8 @@
     state.selectedProductId = null;
     state.selectedProductImage = null;
     state.customImage = null;
+    state.productImageGallery = [];
+    state.productImageIndex = 0;
     state.useCredit = false;
     state.creditAmount = 0;
     state.maxCredit = 0;
@@ -1496,6 +1725,15 @@
     state.imageState = 'empty';
     state.imageErrorReason = null;
     state.currentImageUrl = null;
+
+    if (state.imageRetryHintTimer) {
+      clearTimeout(state.imageRetryHintTimer);
+      state.imageRetryHintTimer = null;
+    }
+    if (elements.imageRetryHint) {
+      elements.imageRetryHint.hidden = true;
+      elements.imageRetryHint.classList.remove('is-visible');
+    }
     
     elements.form?.reset();
     if (elements.creditSwitch) elements.creditSwitch.checked = false;
@@ -1598,6 +1836,10 @@
     elements.retryBtn?.addEventListener('click', handleRetryImage);
     elements.editImageBtn?.addEventListener('click', handleImageEdit);
     elements.imageInput?.addEventListener('change', handleImageChange);
+    elements.imagePrevBtn?.addEventListener('click', handleGalleryPrev);
+    elements.imageNextBtn?.addEventListener('click', handleGalleryNext);
+    elements.imagePreview?.addEventListener('touchstart', handleImageTouchStart, { passive: true });
+    elements.imagePreview?.addEventListener('touchend', handleImageTouchEnd);
     
     // Credit allocation controls
     elements.creditSwitch?.addEventListener('change', handleCreditToggle);
