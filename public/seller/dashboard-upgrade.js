@@ -877,6 +877,9 @@ window.selectPlan = async function (slug) {
     return;
   }
 
+  // Check if this is a subscription plan (cash-only)
+  const isSubscriptionPlan = SUBSCRIPTION_PLAN_SLUGS.includes(slug);
+
   const defaults = PLAN_DEFAULTS[slug] || {};
   const fallbackBadge = defaults.badge ? {
     label: defaults.badge.label || '',
@@ -898,6 +901,11 @@ window.selectPlan = async function (slug) {
 
   const modal = document.getElementById('upgradeModal');
   if (!modal) return;
+  
+  // Store the plan type in modal dataset for reference
+  modal.dataset.planSlug = slug;
+  modal.dataset.isSubscription = isSubscriptionPlan ? 'true' : 'false';
+  
   modal.querySelector('#upgrade-title').textContent = title;
   const featuresUl = modal.querySelector('#featureList');
   if (featuresUl) {
@@ -969,6 +977,68 @@ window.selectPlan = async function (slug) {
     } else {
       badge.classList.add('hidden');
     }
+  }
+
+  // Handle subscription-specific UI (cash-only)
+  const creditToggle = modal.querySelector('#upgradeCreditToggle');
+  const creditAllocation = modal.querySelector('#upgradeCreditAllocation');
+  const creditSwitch = modal.querySelector('#upgradeCreditSwitch');
+  const creditRow = modal.querySelector('#upgradeCreditRow');
+  const cashRow = modal.querySelector('#upgradeCashRow');
+  const orderTotal = modal.querySelector('#upgradeOrderTotal');
+  const cashAmount = modal.querySelector('#upgradeCashAmount');
+  
+  if (isSubscriptionPlan) {
+    // Subscription: CASH-ONLY mode
+    // Hide credit toggle and allocation
+    if (creditToggle) creditToggle.style.display = 'none';
+    if (creditAllocation) creditAllocation.hidden = true;
+    if (creditSwitch) creditSwitch.checked = false;
+    
+    // Hide credit row, show only cash payment
+    if (creditRow) creditRow.style.display = 'none';
+    if (cashRow) cashRow.style.display = 'flex';
+    
+    // Set amounts
+    if (orderTotal) orderTotal.textContent = `${toFaPrice(priceNum)} تومان`;
+    if (cashAmount) cashAmount.textContent = `${toFaPrice(priceNum)} تومان`;
+    
+    // Add cash-only notice
+    let cashOnlyNotice = modal.querySelector('#subscriptionCashOnlyNotice');
+    if (!cashOnlyNotice) {
+      cashOnlyNotice = document.createElement('div');
+      cashOnlyNotice.id = 'subscriptionCashOnlyNotice';
+      cashOnlyNotice.className = 'subscription-cash-only-notice';
+      cashOnlyNotice.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; flex-shrink: 0;">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        <span>پرداخت اشتراک فقط به‌صورت نقدی امکان‌پذیر است.</span>
+      `;
+      const checkoutSection = modal.querySelector('.upgrade-checkout');
+      if (checkoutSection) {
+        checkoutSection.insertBefore(cashOnlyNotice, checkoutSection.firstChild);
+      }
+    }
+    cashOnlyNotice.style.display = 'flex';
+  } else {
+    // Other plans: credit is allowed
+    if (creditToggle) creditToggle.style.display = '';
+    
+    // Hide cash-only notice if it exists
+    const cashOnlyNotice = modal.querySelector('#subscriptionCashOnlyNotice');
+    if (cashOnlyNotice) cashOnlyNotice.style.display = 'none';
+    
+    // Reset credit state
+    if (creditSwitch) creditSwitch.checked = false;
+    if (creditAllocation) creditAllocation.hidden = true;
+    if (creditRow) creditRow.style.display = 'none';
+    if (cashRow) cashRow.style.display = 'flex';
+    
+    // Set amounts
+    if (orderTotal) orderTotal.textContent = `${toFaPrice(priceNum)} تومان`;
+    if (cashAmount) cashAmount.textContent = `${toFaPrice(priceNum)} تومان`;
   }
 
   modal.classList.remove('hidden');

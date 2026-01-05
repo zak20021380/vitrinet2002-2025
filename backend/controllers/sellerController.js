@@ -531,7 +531,7 @@ exports.deleteSeller = async (req, res) => {
 exports.upgradeSeller = async (req, res) => {
   try {
     const sellerId = req.user && (req.user.id || req.user._id);
-    const { planSlug, premium } = req.body || {};
+    const { planSlug, premium, creditUsed } = req.body || {};
 
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
@@ -540,6 +540,17 @@ exports.upgradeSeller = async (req, res) => {
     const seller = await Seller.findById(sellerId);
     if (!seller) {
       return res.status(404).json({ success: false, message: 'فروشنده پیدا نشد.' });
+    }
+
+    // Subscription plans are CASH-ONLY (no credit/wallet allowed)
+    const SUBSCRIPTION_PLAN_SLUGS = ['1month', '3month', '12month'];
+    const isSubscriptionPlan = SUBSCRIPTION_PLAN_SLUGS.includes(planSlug);
+    
+    if (isSubscriptionPlan && creditUsed && Number(creditUsed) > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'پرداخت اشتراک فقط به‌صورت نقدی امکان‌پذیر است. استفاده از اعتبار کیف پول برای خرید اشتراک مجاز نیست.' 
+      });
     }
 
     if (premium) {
