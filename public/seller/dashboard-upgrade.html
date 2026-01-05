@@ -491,78 +491,25 @@
         <span id="saveBadge" class="upgrade-modal__save-badge" hidden>صرفه‌جویی</span>
       </div>
       <section class="upgrade-checkout" id="upgradeCheckout">
-        <div id="upgradeCheckoutStatus" class="upgrade-checkout__status is-loading" role="status" aria-live="polite">
-          <span id="upgradeCheckoutStatusSpinner" class="upgrade-checkout__spinner" aria-hidden="true"></span>
-          <span id="upgradeCheckoutStatusText">در حال بررسی اطلاعات کیف پول...</span>
-          <button type="button" id="upgradeCheckoutRetryBtn" class="upgrade-checkout__retry" hidden>تلاش مجدد</button>
+        <!-- Subscription Cash-Only Notice -->
+        <div id="subscriptionCashOnlyNotice" class="subscription-cash-only-notice" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          <span>پرداخت اشتراک فقط به‌صورت نقدی امکان‌پذیر است.</span>
         </div>
 
-        <div class="special-ad-wallet-info">
-          <span class="special-ad-wallet-info__label">اعتبار فعلی شما:</span>
-          <span id="upgradeWalletBalance" class="special-ad-wallet-info__value">۰</span>
-        </div>
-
-        <div id="upgradeCreditToggle" class="special-ad-credit-toggle">
-          <div class="special-ad-credit-toggle__content">
-            <p class="special-ad-credit-toggle__label">استفاده از اعتبار</p>
-            <p id="upgradeCreditHint" class="special-ad-credit-toggle__hint">اعتبار شما برای کسر از هزینه استفاده می‌شود.</p>
+        <!-- Payment Summary - Premium Design -->
+        <div class="subscription-payment-summary">
+          <div class="subscription-payment-row subscription-payment-row--total">
+            <span class="subscription-payment-label">هزینه کل</span>
+            <span id="upgradeOrderTotal" class="subscription-payment-value subscription-payment-value--total">۰ تومان</span>
           </div>
-          <label class="special-ad-switch">
-            <input type="checkbox" id="upgradeCreditSwitch">
-            <span class="special-ad-switch__slider"></span>
-          </label>
-        </div>
-
-        <div id="upgradeCreditAllocation" class="special-ad-credit-allocation" hidden>
-          <div class="special-ad-credit-allocation__header">
-            <span class="special-ad-credit-allocation__max-label">حداکثر می‌توانید تا</span>
-            <span id="upgradeMaxCredit" class="special-ad-credit-allocation__max-value">۰ تومان</span>
-            <span class="special-ad-credit-allocation__max-label">با اعتبار پرداخت کنید</span>
-          </div>
-          <div class="special-ad-credit-allocation__control">
-            <input
-              type="range"
-              id="upgradeCreditSlider"
-              class="special-ad-credit-slider"
-              min="0"
-              max="0"
-              step="1000"
-              value="0"
-            >
-            <div class="special-ad-credit-input-wrap">
-              <input
-                type="text"
-                id="upgradeCreditInput"
-                class="special-ad-credit-input"
-                inputmode="numeric"
-                placeholder="۰"
-                value="۰"
-              >
-              <span class="special-ad-credit-input__unit">تومان</span>
-            </div>
-          </div>
-          <div class="special-ad-credit-chips">
-            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="25">۲۵٪</button>
-            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="50">۵۰٪</button>
-            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="100">حداکثر</button>
-          </div>
-          <p id="upgradeCreditClampHint" class="special-ad-credit-clamp-hint" hidden>
-            مقدار اعتبار به حداکثر مجاز تنظیم شد و از موجودی کیف پول شما کسر خواهد شد.
-          </p>
-        </div>
-
-        <div class="special-ad-price-breakdown">
-          <div class="special-ad-price-row">
-            <span class="special-ad-price-row__label">هزینه کل</span>
-            <span id="upgradeOrderTotal" class="special-ad-price-row__value">۰</span>
-          </div>
-          <div id="upgradeCreditRow" class="special-ad-price-row special-ad-price-row--credit">
-            <span class="special-ad-price-row__label">با اعتبار</span>
-            <span id="upgradeCreditAmount" class="special-ad-price-row__value is-discount">-۰ تومان</span>
-          </div>
-          <div id="upgradeCashRow" class="special-ad-price-row special-ad-price-row--cash">
-            <span class="special-ad-price-row__label">پرداخت نقدی</span>
-            <span id="upgradeCashAmount" class="special-ad-price-row__value">۰ تومان</span>
+          <div class="subscription-payment-divider"></div>
+          <div class="subscription-payment-row subscription-payment-row--cash">
+            <span class="subscription-payment-label">پرداخت نقدی</span>
+            <span id="upgradeCashAmount" class="subscription-payment-value subscription-payment-value--cash">۰ تومان</span>
           </div>
         </div>
       </section>

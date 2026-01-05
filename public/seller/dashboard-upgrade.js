@@ -980,61 +980,20 @@ window.selectPlan = async function (slug) {
   }
 
   // Handle subscription-specific UI (cash-only)
-  const creditToggle = modal.querySelector('#upgradeCreditToggle');
-  const creditAllocation = modal.querySelector('#upgradeCreditAllocation');
-  const creditSwitch = modal.querySelector('#upgradeCreditSwitch');
-  const creditRow = modal.querySelector('#upgradeCreditRow');
-  const cashRow = modal.querySelector('#upgradeCashRow');
+  const cashOnlyNotice = modal.querySelector('#subscriptionCashOnlyNotice');
   const orderTotal = modal.querySelector('#upgradeOrderTotal');
   const cashAmount = modal.querySelector('#upgradeCashAmount');
   
   if (isSubscriptionPlan) {
-    // Subscription: CASH-ONLY mode
-    // Hide credit toggle and allocation
-    if (creditToggle) creditToggle.style.display = 'none';
-    if (creditAllocation) creditAllocation.hidden = true;
-    if (creditSwitch) creditSwitch.checked = false;
-    
-    // Hide credit row, show only cash payment
-    if (creditRow) creditRow.style.display = 'none';
-    if (cashRow) cashRow.style.display = 'flex';
+    // Subscription: CASH-ONLY mode - show notice and simplified payment summary
+    if (cashOnlyNotice) cashOnlyNotice.style.display = 'flex';
     
     // Set amounts
     if (orderTotal) orderTotal.textContent = `${toFaPrice(priceNum)} تومان`;
     if (cashAmount) cashAmount.textContent = `${toFaPrice(priceNum)} تومان`;
-    
-    // Add cash-only notice
-    let cashOnlyNotice = modal.querySelector('#subscriptionCashOnlyNotice');
-    if (!cashOnlyNotice) {
-      cashOnlyNotice = document.createElement('div');
-      cashOnlyNotice.id = 'subscriptionCashOnlyNotice';
-      cashOnlyNotice.className = 'subscription-cash-only-notice';
-      cashOnlyNotice.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; flex-shrink: 0;">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4M12 8h.01"/>
-        </svg>
-        <span>پرداخت اشتراک فقط به‌صورت نقدی امکان‌پذیر است.</span>
-      `;
-      const checkoutSection = modal.querySelector('.upgrade-checkout');
-      if (checkoutSection) {
-        checkoutSection.insertBefore(cashOnlyNotice, checkoutSection.firstChild);
-      }
-    }
-    cashOnlyNotice.style.display = 'flex';
   } else {
-    // Other plans: credit is allowed
-    if (creditToggle) creditToggle.style.display = '';
-    
-    // Hide cash-only notice if it exists
-    const cashOnlyNotice = modal.querySelector('#subscriptionCashOnlyNotice');
+    // Other plans: hide cash-only notice
     if (cashOnlyNotice) cashOnlyNotice.style.display = 'none';
-    
-    // Reset credit state
-    if (creditSwitch) creditSwitch.checked = false;
-    if (creditAllocation) creditAllocation.hidden = true;
-    if (creditRow) creditRow.style.display = 'none';
-    if (cashRow) cashRow.style.display = 'flex';
     
     // Set amounts
     if (orderTotal) orderTotal.textContent = `${toFaPrice(priceNum)} تومان`;
