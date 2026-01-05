@@ -1327,9 +1327,9 @@ async function fetchMyPlans() {
   function getAdTypeLabel(plan) {
     const slug = plan.slug || plan.planSlug || '';
     switch (slug) {
-      case "ad_home":     return "تبلیغ در صفحه اول";
-      case "ad_search":   return "تبلیغ در جستجو";
-      case "ad_products": return "تبلیغ لیست محصولات";
+      case "ad_home":     return "تبلیغ صفحه اول";
+      case "ad_search":   return "تبلیغ جستجو";
+      case "ad_products": return "تبلیغ محصولات";
       default:            return "تبلیغ ویژه";
     }
   }
@@ -1346,82 +1346,39 @@ async function fetchMyPlans() {
     }
   }
 
-  // وضعیت پلن (active, expired, ...)
-  function statusBadge(plan) {
-    if (!plan.status) return "";
-    let background = "#94a3b8";
-    let textColor = "#fff";
-    let label = "";
-    switch (plan.status) {
-      case "active":
-        background = "#10B981";
-        label = "فعال";
-        break;
-      case "approved":
-        background = "#14b8a6";
-        label = "تایید شده";
-        break;
-      case "expired":
-        background = "#ef4444";
-        label = "منقضی";
-        break;
-      case "pending":
-        background = "#f59e0b";
-        label = "در انتظار";
-        break;
-      case "paid":
-        background = "#3b82f6";
-        label = "پرداخت شده";
-        break;
-      case "review":
-      case "under_review":
-        background = "#e2e8f0";
-        textColor = "#475569";
-        label = "زیر نظر";
-        break;
-      default:
-        label = plan.status;
+  // وضعیت پلن برای کلاس CSS
+  function getStatusClass(status) {
+    switch (status) {
+      case 'active': return 'myplans-card__status--active';
+      case 'approved': return 'myplans-card__status--approved';
+      case 'expired': return 'myplans-card__status--expired';
+      case 'pending': return 'myplans-card__status--pending';
+      case 'paid': return 'myplans-card__status--paid';
+      default: return 'myplans-card__status--pending';
     }
-    return `<span class="plan-status-badge" style="--badge-bg:${background}; --badge-text:${textColor};">${label}</span>`;
   }
 
-  function subStatusBadge(plan) {
-    const status = plan.status || (plan.active ? 'active' : '');
-    if (!status) return '';
-    let background = '#3B82F6';
-    let textColor = '#fff';
-    let label = 'فعال';
+  function getStatusLabel(status) {
     switch (status) {
-      case 'expired':
-        background = '#EF4444';
-        label = 'منقضی';
-        break;
-      case 'approved':
-        background = '#10B981';
-        label = 'تایید شده';
-        break;
-      case 'pending':
-        background = '#F59E0B';
-        label = 'در انتظار';
-        break;
-      case 'active':
-      default:
-        background = '#3B82F6';
-        label = 'فعال';
+      case 'active': return 'فعال';
+      case 'approved': return 'تایید شده';
+      case 'expired': return 'منقضی';
+      case 'pending': return 'در انتظار';
+      case 'paid': return 'پرداخت شده';
+      default: return status || 'نامشخص';
     }
-    return `<span class="plan-status-badge" style="--badge-bg:${background}; --badge-text:${textColor};">${label}</span>`;
   }
 
   function getAdLocationHint(plan) {
     const slug = plan.slug || plan.planSlug || '';
     const map = {
-      ad_home: 'محل نمایش: صفحه اصلی ویترینت',
-      ad_search: 'محل نمایش: پنجره جستجوی سریع',
-      ad_products: 'محل نمایش: صفحه لیست محصولات'
+      ad_home: 'نمایش در صفحه اصلی',
+      ad_search: 'نمایش در جستجو',
+      ad_products: 'نمایش در لیست محصولات'
     };
     if (map[slug]) return map[slug];
-    if (plan.productId) return 'محل نمایش: صفحه محصول تبلیغ‌شده';
-    if (plan.sellerId) return 'محل نمایش: صفحه فروشگاه شما';
+    if (plan.productId) return 'نمایش در صفحه محصول';
+    if (plan.sellerId) return 'نمایش در صفحه فروشگاه';
     return '';
   }
 
@@ -1479,65 +1436,37 @@ async function fetchMyPlans() {
     if (!info) return '';
     if (!info.started) {
       if (info.daysToStart <= 0) {
-        return 'این اشتراک از امروز فعال می‌شود';
+        return 'از امروز فعال می‌شود';
       }
       const value = info.daysToStart === 1 ? '۱' : toFaDigits(info.daysToStart);
-      return `<strong>${value}</strong> روز تا شروع اشتراک`;
+      return `<strong>${value}</strong> روز تا شروع`;
     }
 
     if (info.remainingDays <= 0) {
       if (info.graceRemainingDays != null && info.graceRemainingDays > 0) {
         const value = info.graceRemainingDays === 1 ? '۱' : toFaDigits(info.graceRemainingDays);
-        return `این اشتراک منقضی شده است • <strong>${value}</strong> روز تا حذف کامل`;
+        return `<strong>${value}</strong> روز تا حذف`;
       }
-      return 'این اشتراک به پایان رسیده است';
+      return 'منقضی شده';
     }
 
     const value = info.remainingDays === 1 ? '۱' : toFaDigits(info.remainingDays);
-    return `<strong>${value}</strong> روز تا پایان اشتراک`;
+    return `<strong>${value}</strong> روز باقیمانده`;
   }
 
-  function buildExpiryWarning(plan, info) {
-    if (!plan || !info || info.remainingDays > 0) return '';
-
-    const graceDaysLeft = info.graceRemainingDays != null
-      ? Math.max(0, info.graceRemainingDays)
-      : 0;
-    const expiryDateText = toJalaliDate(plan.endDate) || '';
-    const deadlineText = info.graceDeadline ? toJalaliDate(info.graceDeadline) : '';
-
-    const countdownText = graceDaysLeft > 0
-      ? `تنها ${graceDaysLeft === 1 ? '۱ روز' : `${toFaDigits(graceDaysLeft)} روز`} تا حذف کامل باقی مانده است`
-      : 'امروز آخرین فرصت شما برای جلوگیری از حذف کامل است';
-
-    const deadlineBadge = deadlineText
-      ? `<div class="plan-expiry-warning__deadline">مهلت نهایی: ${deadlineText}</div>`
-      : '';
-
-    return `
-      <div class="plan-expiry-warning" role="alert">
-        <div class="plan-expiry-warning__header">
-          <span class="plan-expiry-warning__icon" aria-hidden="true">⚠️</span>
-          <span>هشدار تمدید اشتراک</span>
-        </div>
-        <p class="plan-expiry-warning__body">
-          پلن اشتراک فروشگاه شما در تاریخ <strong>${expiryDateText || '-'}</strong> منقضی شده است. ${countdownText}.
-        </p>
-        <p class="plan-expiry-warning__cta">
-          اگر طی ۳ روز آینده تمدید انجام نشود، پنل و صفحه فروشگاه شما به طور کامل حذف خواهد شد.
-        </p>
-        <div class="plan-expiry-warning__actions">
-          <a class="plan-expiry-warning__btn" href="#content-sub">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14"></path>
-              <path d="m18 11-6-6-6 6"></path>
-            </svg>
-            <span>تمدید اشتراک فروشگاه</span>
-          </a>
-          ${deadlineBadge}
-        </div>
-      </div>
-    `;
+  function getRemainingDaysText(info) {
+    if (!info) return { text: '-', class: '' };
+    if (!info.started) {
+      if (info.daysToStart <= 0) return { text: 'امروز شروع', class: '' };
+      return { text: `${toFaDigits(info.daysToStart)} روز تا شروع`, class: '' };
+    }
+    if (info.remainingDays <= 0) {
+      return { text: 'منقضی شده', class: 'myplans-card__expiry-value--danger' };
+    }
+    if (info.remainingDays <= 7) {
+      return { text: `${toFaDigits(info.remainingDays)} روز`, class: 'myplans-card__expiry-value--warning' };
+    }
+    return { text: `${toFaDigits(info.remainingDays)} روز`, class: '' };
   }
 
   try {
@@ -1547,7 +1476,104 @@ async function fetchMyPlans() {
     const adPriceMap = (await adPriceMapPromise) || {};
 
     if (!res.ok || !json.plans || !json.plans.length) {
-      box.innerHTML = `<div class="upgrade-empty"><div class="upgrade-empty__icon">📋</div><h3 class="upgrade-empty__title">پلن فعالی یافت نشد</h3><p class="upgrade-empty__desc">هنوز هیچ پلن اشتراک یا تبلیغاتی خریداری نکرده‌اید.</p></div>`;
+      // Empty state - no plans at all
+      box.innerHTML = `
+        <div class="myplans-summary">
+          <div class="myplans-stat-chip myplans-stat-chip--sub">
+            <div class="myplans-stat-chip__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path d="M9 22V12h6v10"/>
+              </svg>
+            </div>
+            <div class="myplans-stat-chip__content">
+              <span class="myplans-stat-chip__value">۰</span>
+              <span class="myplans-stat-chip__label">پلن اشتراک</span>
+            </div>
+          </div>
+          <div class="myplans-stat-chip myplans-stat-chip--ad">
+            <div class="myplans-stat-chip__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+            </div>
+            <div class="myplans-stat-chip__content">
+              <span class="myplans-stat-chip__value">۰</span>
+              <span class="myplans-stat-chip__label">پلن تبلیغاتی</span>
+            </div>
+          </div>
+          <div class="myplans-stat-chip myplans-stat-chip--total">
+            <div class="myplans-stat-chip__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6"/>
+                <path d="M16 13H8M16 17H8M10 9H8"/>
+              </svg>
+            </div>
+            <div class="myplans-stat-chip__content">
+              <span class="myplans-stat-chip__value">۰</span>
+              <span class="myplans-stat-chip__label">جمع کل</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="myplans-section myplans-section--sub">
+          <div class="myplans-section__header">
+            <div class="myplans-section__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path d="M9 22V12h6v10"/>
+              </svg>
+            </div>
+            <h3 class="myplans-section__title">پلن‌های اشتراک فروشگاه</h3>
+          </div>
+          <div class="myplans-empty myplans-empty--sub">
+            <div class="myplans-empty__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path d="M9 22V12h6v10"/>
+              </svg>
+            </div>
+            <h4 class="myplans-empty__title">هنوز اشتراکی نداری</h4>
+            <p class="myplans-empty__desc">با خرید اشتراک، فروشگاهت رو فعال کن و به هزاران مشتری معرفی شو</p>
+            <button class="myplans-empty__cta" onclick="toggleTabs('sub')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              خرید اشتراک
+            </button>
+          </div>
+        </section>
+
+        <section class="myplans-section myplans-section--ad">
+          <div class="myplans-section__header">
+            <div class="myplans-section__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+            </div>
+            <h3 class="myplans-section__title">پلن‌های تبلیغات ویژه</h3>
+          </div>
+          <div class="myplans-empty myplans-empty--ad">
+            <div class="myplans-empty__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
+              </svg>
+            </div>
+            <h4 class="myplans-empty__title">هنوز تبلیغی نداری</h4>
+            <p class="myplans-empty__desc">با ثبت تبلیغ ویژه، محصولاتت رو در صدر نتایج نمایش بده</p>
+            <button class="myplans-empty__cta" onclick="toggleTabs('ads')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              ثبت تبلیغ ویژه
+            </button>
+          </div>
+        </section>
+      `;
       return;
     }
 
@@ -1570,267 +1596,278 @@ async function fetchMyPlans() {
     const subCount = subPlans.length;
     const adCount = adPlans.length;
 
-    // باکس شمارنده‌ها بالا
-    const statsBox = `
-      <div class="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-        <div class="bg-blue-50 border border-blue-100 rounded-xl py-4 flex flex-col items-center shadow-sm">
-          <span class="text-blue-600 text-2xl font-bold">${subCount}</span>
-          <span class="text-xs text-blue-700 mt-1">پلن اشتراک</span>
+    // Summary Row - Stat Chips
+    const summaryRow = `
+      <div class="myplans-summary">
+        <div class="myplans-stat-chip myplans-stat-chip--sub">
+          <div class="myplans-stat-chip__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+              <path d="M9 22V12h6v10"/>
+            </svg>
+          </div>
+          <div class="myplans-stat-chip__content">
+            <span class="myplans-stat-chip__value">${toFaDigits(subCount)}</span>
+            <span class="myplans-stat-chip__label">پلن اشتراک</span>
+          </div>
         </div>
-        <div class="bg-orange-50 border border-orange-100 rounded-xl py-4 flex flex-col items-center shadow-sm">
-          <span class="text-orange-500 text-2xl font-bold">${adCount}</span>
-          <span class="text-xs text-orange-700 mt-1">پلن تبلیغاتی</span>
+        <div class="myplans-stat-chip myplans-stat-chip--ad">
+          <div class="myplans-stat-chip__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+          </div>
+          <div class="myplans-stat-chip__content">
+            <span class="myplans-stat-chip__value">${toFaDigits(adCount)}</span>
+            <span class="myplans-stat-chip__label">پلن تبلیغاتی</span>
+          </div>
         </div>
-        <div class="bg-gray-50 border border-gray-100 rounded-xl py-4 flex flex-col items-center shadow-sm">
-          <span class="text-gray-800 text-2xl font-bold">${total}</span>
-          <span class="text-xs text-gray-700 mt-1">جمع کل پلن‌ها</span>
+        <div class="myplans-stat-chip myplans-stat-chip--total">
+          <div class="myplans-stat-chip__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <path d="M14 2v6h6"/>
+              <path d="M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+          </div>
+          <div class="myplans-stat-chip__content">
+            <span class="myplans-stat-chip__value">${toFaDigits(total)}</span>
+            <span class="myplans-stat-chip__label">جمع کل</span>
+          </div>
         </div>
       </div>
     `;
 
     // کارت‌های پلن اشتراک
-    let expiryWarningRendered = false;
-
     const subCards = subPlans.length
       ? subPlans.map(plan => {
-          const statusMarkup = subStatusBadge(plan);
-          const price = toFaPrice(getEffectivePlanPrice(plan, adPriceMap));
-          const startDate = toJalaliDate(plan.startDate) || '-';
-          const endDate = toJalaliDate(plan.endDate) || '-';
+          const status = plan.status || (plan.active ? 'active' : 'pending');
+          const statusClass = getStatusClass(status);
+          const statusLabel = getStatusLabel(status);
           const progressInfo = calculateSubscriptionProgress(plan);
-          const timelineMeta = buildTimelineMeta(progressInfo);
+          const remainingInfo = getRemainingDaysText(progressInfo);
           const progressValue = progressInfo ? Math.max(0, Math.min(100, Math.round(progressInfo.progress))) : 0;
+          const timelineMeta = buildTimelineMeta(progressInfo);
+          const endDate = toJalaliDate(plan.endDate) || '-';
+
           const progressSection = progressInfo
-            ? `<div class="my-plan-card__progress" style="--progress:${progressValue}%">
-                <div class="plan-progress-track">
-                  <span class="plan-progress-bar"></span>
+            ? `<div class="myplans-card__progress">
+                <div class="myplans-card__progress-track">
+                  <div class="myplans-card__progress-bar" style="width: ${progressValue}%"></div>
                 </div>
-                ${timelineMeta ? `<div class="progress-meta">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="8"></circle>
-                    <path d="M12 8v4l2.5 1.5"></path>
+                ${timelineMeta ? `<div class="myplans-card__progress-meta">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="8"/>
+                    <path d="M12 8v4l2.5 1.5"/>
                   </svg>
                   ${timelineMeta}
                 </div>` : ''}
               </div>`
             : '';
-          let expiryWarning = '';
-          if (!expiryWarningRendered && progressInfo && progressInfo.remainingDays <= 0) {
-            expiryWarning = buildExpiryWarning(plan, progressInfo);
-            if (expiryWarning) {
-              expiryWarningRendered = true;
-            }
-          }
-
-          const description = plan.description
-            ? `<p class="my-plan-card__description">${plan.description}</p>`
-            : '';
 
           return `
-            <article class="my-plan-card plan-card-surface subscription-card mb-4">
-              <div class="my-plan-card__header">
-                <div class="plan-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="17" rx="2" fill="none"></rect>
-                    <path d="M8 2v4"></path>
-                    <path d="M16 2v4"></path>
-                    <path d="M3 9h18"></path>
-                    <path d="M9 15l2 2 4-4"></path>
+            <article class="myplans-card myplans-card--sub">
+              <div class="myplans-card__header">
+                <span class="myplans-card__type">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="17" rx="2"/>
+                    <path d="M8 2v4M16 2v4M3 9h18"/>
                   </svg>
-                  پلن اشتراک فروشگاه
-                </div>
-                ${statusMarkup || ''}
+                  پلن اشتراک
+                </span>
+                <span class="myplans-card__status ${statusClass}">${statusLabel}</span>
               </div>
-              <div>
-                <h3 class="my-plan-card__title">${plan.title || '-'}</h3>
-                <div class="my-plan-card__price">
-                  <span class="price-amount">${price}</span>
-                  <span class="price-unit">تومان</span>
+              <div class="myplans-card__body">
+                <h3 class="myplans-card__name">${plan.title || 'اشتراک فروشگاه'}</h3>
+                <div class="myplans-card__benefit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12l5 5L20 7"/>
+                  </svg>
+                  نمایش فروشگاه در نتایج جستجو
                 </div>
               </div>
-              <div class="my-plan-card__dates">
-                <div class="info-row">
-                  <span class="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="4" y="5" width="16" height="15" rx="2" fill="none"></rect>
-                      <path d="M8 3v4"></path>
-                      <path d="M16 3v4"></path>
-                      <path d="M4 9h16"></path>
-                      <path d="M9 14h2"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <div class="info-label">تاریخ شروع</div>
-                    <div class="info-value" dir="ltr">${startDate}</div>
-                  </div>
+              <div class="myplans-card__expiry">
+                <div class="myplans-card__expiry-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="8"/>
+                    <path d="M12 8v4l2.5 1.5"/>
+                  </svg>
                 </div>
-                <div class="info-row info-row--end">
-                  <span class="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6 4v16"></path>
-                      <path d="M6 5h10l-2.5 3L16 11H6"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <div class="info-label">تاریخ پایان</div>
-                    <div class="info-value" dir="ltr">${endDate}</div>
-                  </div>
+                <div class="myplans-card__expiry-content">
+                  <span class="myplans-card__expiry-label">زمان باقیمانده</span>
+                  <span class="myplans-card__expiry-value ${remainingInfo.class}">${remainingInfo.text}</span>
                 </div>
               </div>
               ${progressSection}
-              ${expiryWarning}
-              ${description}
+              <a href="#content-sub" class="myplans-card__action myplans-card__action--primary" onclick="toggleTabs('sub')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                تمدید اشتراک
+              </a>
             </article>
           `;
         }).join('')
-      : `<div class="text-xs text-gray-400 py-5 text-center">هیچ پلن اشتراکی نداری!</div>`;
+      : `
+        <div class="myplans-empty myplans-empty--sub">
+          <div class="myplans-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+              <path d="M9 22V12h6v10"/>
+            </svg>
+          </div>
+          <h4 class="myplans-empty__title">هنوز اشتراکی نداری</h4>
+          <p class="myplans-empty__desc">با خرید اشتراک، فروشگاهت رو فعال کن و به هزاران مشتری معرفی شو</p>
+          <button class="myplans-empty__cta" onclick="toggleTabs('sub')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            خرید اشتراک
+          </button>
+        </div>
+      `;
 
-    // کارت تبلیغات (با نوع، عکس، تاریخ شروع و پایان وسط‌چین)
+    // کارت‌های تبلیغات
     const adCards = adPlans.length
       ? adPlans.map(plan => {
-          let mediaMarkup = '';
-          if (plan.bannerImage) {
-            let imgSrc = plan.bannerImage.startsWith('http')
-              ? plan.bannerImage
-              : UPLOADS_BASE + plan.bannerImage.replace(/^\/?uploads\//, '');
-            mediaMarkup = `<div class="plan-card__media-wrapper"><img src="${imgSrc}" alt="بنر تبلیغ"></div>`;
-          }
-          const status = statusBadge(plan);
+          const status = plan.status || 'pending';
+          const statusClass = getStatusClass(status);
+          const statusLabel = getStatusLabel(status);
           const adType = getAdTypeLabel(plan);
           const locationHint = getAdLocationHint(plan);
           const viewLink = plan.status === 'approved' ? resolveAdViewLink(plan) : '';
-          const productLink = plan.productId
-            ? `/product.html?id=${encodeURIComponent(String(plan.productId))}`
-            : '';
-          const shopLink = !productLink && plan.sellerId
-            ? `/shop.html?id=${encodeURIComponent(String(plan.sellerId))}`
-            : '';
+          const endDate = getAdEndDate(plan);
 
-          const actions = [
-            viewLink
-              ? `<a href="${viewLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 shadow-sm transition w-full sm:w-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5h11m0 0v11m0-11L5 21" />
-                  </svg>
-                  مشاهده تبلیغ
-                </a>`
-              : '',
-            productLink
-              ? `<a href="${productLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-200 transition w-full sm:w-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5l7 7-7 7M5 12h14" />
-                  </svg>
-                  صفحه محصول
-                </a>`
-              : '',
-            shopLink
-              ? `<a href="${shopLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition w-full sm:w-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l9 4 9-4" />
-                  </svg>
-                  صفحه فروشگاه
-                </a>`
-              : ''
-          ].filter(Boolean);
-
-          const actionsMarkup = actions.length
-            ? `<div class="plan-card__actions">${actions.join('')}</div>`
-            : '';
-
-          const locationMarkup = locationHint
-            ? `<div class="plan-card__hint">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 21s6-5.25 6-10.5A6 6 0 0 0 6 10.5C6 15.75 12 21 12 21z"></path>
-                  <circle cx="12" cy="10.5" r="1.8"></circle>
+          const actionBtn = viewLink
+            ? `<a href="${viewLink}" target="_blank" rel="noopener" class="myplans-card__action myplans-card__action--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                  <path d="M15 3h6v6"/>
+                  <path d="M10 14L21 3"/>
                 </svg>
-                ${locationHint}
-              </div>`
-            : '';
-
-          const description = plan.description
-            ? `<p class="my-plan-card__description my-plan-card__description--ad">${plan.description}</p>`
-            : '';
+                مشاهده تبلیغ
+              </a>`
+            : `<button class="myplans-card__action myplans-card__action--secondary" onclick="toggleTabs('ads')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                ثبت تبلیغ جدید
+              </button>`;
 
           return `
-            <article class="plan-card plan-card-surface plan-card--ad mb-4">
-              <div class="my-plan-card__header">
-                <div class="plan-pill plan-pill--ad">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 7v6l3 2"></path>
+            <article class="myplans-card myplans-card--ad">
+              <div class="myplans-card__header">
+                <span class="myplans-card__type">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 7v6l3 2"/>
                   </svg>
                   ${adType}
-                </div>
-                ${status || ''}
+                </span>
+                <span class="myplans-card__status ${statusClass}">${statusLabel}</span>
               </div>
-              <div>
-                <h3 class="my-plan-card__title">${plan.title || '-'}</h3>
-                <div class="my-plan-card__price">
-                  <span class="price-amount">${toFaPrice(getEffectivePlanPrice(plan, adPriceMap))}</span>
-                  <span class="price-unit">تومان</span>
-                </div>
-              </div>
-              ${mediaMarkup}
-              <div class="my-plan-card__dates">
-                <div class="info-row">
-                  <span class="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="4" y="5" width="16" height="15" rx="2" fill="none"></rect>
-                      <path d="M8 3v4"></path>
-                      <path d="M16 3v4"></path>
-                      <path d="M4 9h16"></path>
-                      <path d="M9 14h2"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <div class="info-label">تاریخ شروع</div>
-                    <div class="info-value" dir="ltr">${toJalaliDate(plan.startDate) || '-'}</div>
-                  </div>
-                </div>
-                <div class="info-row info-row--end">
-                  <span class="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6 4v16"></path>
-                      <path d="M6 5h10l-2.5 3L16 11H6"></path>
-                    </svg>
-                  </span>
-                  <div>
-                    <div class="info-label">تاریخ پایان</div>
-                    <div class="info-value" dir="ltr">${getAdEndDate(plan)}</div>
-                  </div>
+              <div class="myplans-card__body">
+                <h3 class="myplans-card__name">${plan.title || adType}</h3>
+                <div class="myplans-card__benefit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12l5 5L20 7"/>
+                  </svg>
+                  ${locationHint || 'نمایش ویژه در ویترینت'}
                 </div>
               </div>
-              ${locationMarkup}
-              ${description}
-              ${actionsMarkup}
+              <div class="myplans-card__expiry">
+                <div class="myplans-card__expiry-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                  </svg>
+                </div>
+                <div class="myplans-card__expiry-content">
+                  <span class="myplans-card__expiry-label">تاریخ پایان</span>
+                  <span class="myplans-card__expiry-value">${endDate}</span>
+                </div>
+              </div>
+              ${actionBtn}
             </article>
           `;
         }).join('')
-      : `<div class="text-xs text-gray-400 py-5 text-center">هنوز پلن تبلیغی نخریدی!</div>`;
+      : `
+        <div class="myplans-empty myplans-empty--ad">
+          <div class="myplans-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+          </div>
+          <h4 class="myplans-empty__title">هنوز تبلیغی نداری</h4>
+          <p class="myplans-empty__desc">با ثبت تبلیغ ویژه، محصولاتت رو در صدر نتایج نمایش بده</p>
+          <button class="myplans-empty__cta" onclick="toggleTabs('ads')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            ثبت تبلیغ ویژه
+          </button>
+        </div>
+      `;
 
     // خروجی نهایی صفحه
     box.innerHTML = `
-      ${statsBox}
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-2xl">🏷️</span>
-            <span class="text-lg font-bold text-blue-700">پلن‌های اشتراک فروشگاه</span>
+      ${summaryRow}
+
+      <section class="myplans-section myplans-section--sub">
+        <div class="myplans-section__header">
+          <div class="myplans-section__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+              <path d="M9 22V12h6v10"/>
+            </svg>
           </div>
+          <h3 class="myplans-section__title">پلن‌های اشتراک فروشگاه</h3>
+          ${subPlans.length ? `<span class="myplans-section__count">${toFaDigits(subCount)} پلن</span>` : ''}
+        </div>
+        <div class="myplans-grid">
           ${subCards}
         </div>
-        <div>
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-2xl">🎯</span>
-            <span class="text-lg font-bold text-orange-700">پلن‌های تبلیغات ویژه</span>
+      </section>
+
+      <section class="myplans-section myplans-section--ad">
+        <div class="myplans-section__header">
+          <div class="myplans-section__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
           </div>
+          <h3 class="myplans-section__title">پلن‌های تبلیغات ویژه</h3>
+          ${adPlans.length ? `<span class="myplans-section__count">${toFaDigits(adCount)} پلن</span>` : ''}
+        </div>
+        <div class="myplans-grid">
           ${adCards}
         </div>
-      </div>
+      </section>
     `;
   } catch (err) {
-    box.innerHTML = `<div class="upgrade-empty"><div class="upgrade-empty__icon">⚠️</div><h3 class="upgrade-empty__title">خطا در دریافت پلن‌ها</h3><p class="upgrade-empty__desc">لطفاً دوباره تلاش کنید.</p></div>`;
+    box.innerHTML = `
+      <div class="myplans-empty myplans-empty--sub">
+        <div class="myplans-empty__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+        </div>
+        <h4 class="myplans-empty__title">خطا در دریافت پلن‌ها</h4>
+        <p class="myplans-empty__desc">لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید</p>
+        <button class="myplans-empty__cta" onclick="fetchMyPlans()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 4v6h6"/>
+            <path d="M23 20v-6h-6"/>
+            <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+          </svg>
+          تلاش مجدد
+        </button>
+      </div>
+    `;
   }
 }
 
