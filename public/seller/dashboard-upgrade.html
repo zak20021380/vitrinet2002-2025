@@ -490,11 +490,87 @@
         <div id="upgrade-price" class="upgrade-modal__price" data-base="86000">۸۶,۰۰۰ تومان</div>
         <span id="saveBadge" class="upgrade-modal__save-badge" hidden>صرفه‌جویی</span>
       </div>
+      <section class="upgrade-checkout" id="upgradeCheckout">
+        <div id="upgradeCheckoutStatus" class="upgrade-checkout__status is-loading" role="status" aria-live="polite">
+          <span id="upgradeCheckoutStatusSpinner" class="upgrade-checkout__spinner" aria-hidden="true"></span>
+          <span id="upgradeCheckoutStatusText">?? ??? ?????? ??????????? ??????�</span>
+          <button type="button" id="upgradeCheckoutRetryBtn" class="upgrade-checkout__retry" hidden>???? ????</button>
+        </div>
+
+        <div class="special-ad-wallet-info">
+          <span class="special-ad-wallet-info__label">?????? ???? ???????:</span>
+          <span id="upgradeWalletBalance" class="special-ad-wallet-info__value">�</span>
+        </div>
+
+        <div id="upgradeCreditToggle" class="special-ad-credit-toggle">
+          <div class="special-ad-credit-toggle__content">
+            <p class="special-ad-credit-toggle__label">??????? ?? ??????</p>
+            <p id="upgradeCreditHint" class="special-ad-credit-toggle__hint">?????? ??? ?? ????? ?? ?? ??????.</p>
+          </div>
+          <label class="special-ad-switch">
+            <input type="checkbox" id="upgradeCreditSwitch">
+            <span class="special-ad-switch__slider"></span>
+          </label>
+        </div>
+
+        <div id="upgradeCreditAllocation" class="special-ad-credit-allocation" hidden>
+          <div class="special-ad-credit-allocation__header">
+            <span class="special-ad-credit-allocation__max-label">?????? ????????? ??</span>
+            <span id="upgradeMaxCredit" class="special-ad-credit-allocation__max-value">? ?????</span>
+            <span class="special-ad-credit-allocation__max-label">?? ?????? ?????? ????</span>
+          </div>
+          <div class="special-ad-credit-allocation__control">
+            <input
+              type="range"
+              id="upgradeCreditSlider"
+              class="special-ad-credit-slider"
+              min="0"
+              max="0"
+              step="1000"
+              value="0"
+            >
+            <div class="special-ad-credit-input-wrap">
+              <input
+                type="text"
+                id="upgradeCreditInput"
+                class="special-ad-credit-input"
+                inputmode="numeric"
+                placeholder="?"
+                value="?"
+              >
+              <span class="special-ad-credit-input__unit">?????</span>
+            </div>
+          </div>
+          <div class="special-ad-credit-chips">
+            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="25">??%</button>
+            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="50">??%</button>
+            <button type="button" class="special-ad-credit-chip upgrade-credit-chip" data-percent="100">??????</button>
+          </div>
+          <p id="upgradeCreditClampHint" class="special-ad-credit-clamp-hint" hidden>
+            ???? ??????? ????? ?? ??? ???? ??? ? ?? ?????? ???? ??????? ????? ???.
+          </p>
+        </div>
+
+        <div class="special-ad-price-breakdown">
+          <div class="special-ad-price-row">
+            <span class="special-ad-price-row__label">????? ??</span>
+            <span id="upgradeOrderTotal" class="special-ad-price-row__value">�</span>
+          </div>
+          <div id="upgradeCreditRow" class="special-ad-price-row special-ad-price-row--credit">
+            <span class="special-ad-price-row__label">?? ??????</span>
+            <span id="upgradeCreditAmount" class="special-ad-price-row__value is-discount">-? ?????</span>
+          </div>
+          <div id="upgradeCashRow" class="special-ad-price-row special-ad-price-row--cash">
+            <span class="special-ad-price-row__label">?????? ????</span>
+            <span id="upgradeCashAmount" class="special-ad-price-row__value">? ?????</span>
+          </div>
+        </div>
+      </section>
       <button id="goToPaymentBtn" class="upgrade-modal__cta">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
         </svg>
-        <span>ادامه و پرداخت</span>
+        <span id="upgradeCheckoutCtaText">??? ? ?????? ?????</span>
       </button>
     </div>
   </div>
@@ -804,3 +880,5 @@
   <script src="dashboard-upgrade.js"></script>
 </body>
 </html>
+
+
