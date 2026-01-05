@@ -22,7 +22,7 @@
 
     <!-- Body - Scrollable Content -->
     <div class="special-ad-body">
-      <form id="specialAdForm" class="special-ad-form">
+      <form id="specialAdForm" class="special-ad-form" novalidate>
         
         <!-- Step 1: Ad Type Selection -->
         <section class="special-ad-step">
@@ -98,8 +98,8 @@
               </div>
             </div>
             
-            <!-- Hidden native select for form submission -->
-            <select id="specialAdProductSelect" class="sam-dropdown__native-select" required tabindex="-1" aria-hidden="true">
+            <!-- Hidden native select for form submission (no required - custom validation handles it) -->
+            <select id="specialAdProductSelect" name="productId" class="sam-dropdown__native-select" tabindex="-1" aria-hidden="true">
               <option value="">یک مورد را انتخاب کنید...</option>
             </select>
           </div>
@@ -121,11 +121,11 @@
             <input 
               type="text" 
               id="specialAdTitle" 
+              name="title"
               class="special-ad-input" 
               placeholder="مثال: تخفیف ویژه عید"
               minlength="3"
               maxlength="25"
-              required
               autocomplete="off"
             >
             <div id="specialAdTitleCounter" class="special-ad-char-counter">۰ / ۲۵</div>
@@ -139,11 +139,11 @@
             </label>
             <textarea 
               id="specialAdText" 
+              name="text"
               class="special-ad-textarea" 
               placeholder="مثال: ۳۰٪ تخفیف تا پایان هفته!"
               minlength="10"
               maxlength="30"
-              required
               autocomplete="off"
             ></textarea>
             <div id="specialAdTextCounter" class="special-ad-char-counter">۰ / ۳۰</div>
@@ -278,7 +278,7 @@
 
     <!-- Footer - Premium CTA -->
     <footer class="special-ad-footer">
-      <button type="submit" form="specialAdForm" id="specialAdSubmitBtn" class="special-ad-submit-btn">
+      <button type="button" id="specialAdSubmitBtn" class="special-ad-submit-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 12l2 2 4-4"/>
           <circle cx="12" cy="12" r="10"/>

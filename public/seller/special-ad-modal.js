@@ -55,6 +55,18 @@
   // ─────────────────────────────────────────────────────
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+  // ─────────────────────────────────────────────────────
+  // Utility Functions (must be defined early for validation)
+  // ─────────────────────────────────────────────────────
+  const toFaDigits = (num) => {
+    if (num === null || num === undefined) return '';
+    return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  };
+
+  const toFaPrice = (num) => {
+    return toFaDigits((+num || 0).toLocaleString('en-US'));
+  };
+
   // ═══════════════════════════════════════════════════════════════════════════
   // VALIDATION & SANITIZATION MODULE
   // Strict form validation with Persian error messages
@@ -234,7 +246,9 @@
    * @param {string} message - Error message
    */
   const showFieldError = (fieldId, message) => {
-    let inputElement, errorElement, formGroup;
+    if (isDev) console.log('[Validation] showFieldError:', fieldId, message);
+    
+    let inputElement, formGroup;
 
     switch (fieldId) {
       case 'title':
@@ -273,6 +287,7 @@
       }
       errorEl.textContent = message;
       errorEl.hidden = false;
+      errorEl.style.display = 'flex'; // Ensure it's visible
     }
   };
 
@@ -312,6 +327,7 @@
       const errorEl = formGroup.querySelector('.special-ad-field-error');
       if (errorEl) {
         errorEl.hidden = true;
+        errorEl.style.display = 'none';
         errorEl.textContent = '';
       }
     }
@@ -334,12 +350,14 @@
    * @param {string} message - Alert message
    */
   const showTopAlert = (message) => {
+    if (isDev) console.log('[Validation] showTopAlert:', message);
+    
     let alertEl = document.getElementById('specialAdTopAlert');
     
     if (!alertEl) {
       alertEl = document.createElement('div');
       alertEl.id = 'specialAdTopAlert';
-      alertEl.className = 'special-ad-top-alert';
+      alertEl.className = 'special-ad-top-alert is-visible';
       alertEl.setAttribute('role', 'alert');
       alertEl.innerHTML = `
         <svg class="special-ad-top-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -354,10 +372,16 @@
         </button>
       `;
       
-      // Insert after header
-      const header = elements.backdrop?.querySelector('.special-ad-header');
-      if (header) {
-        header.after(alertEl);
+      // Insert at the beginning of the body (inside modal)
+      const modalBody = elements.backdrop?.querySelector('.special-ad-body');
+      if (modalBody) {
+        modalBody.insertBefore(alertEl, modalBody.firstChild);
+      } else {
+        // Fallback: insert after header
+        const header = elements.backdrop?.querySelector('.special-ad-header');
+        if (header) {
+          header.after(alertEl);
+        }
       }
       
       // Close button handler
@@ -367,6 +391,7 @@
     alertEl.querySelector('.special-ad-top-alert__text').textContent = message;
     alertEl.classList.add('is-visible');
     alertEl.hidden = false;
+    alertEl.style.display = 'flex'; // Ensure it's visible
   };
 
   /**
@@ -377,6 +402,7 @@
     if (alertEl) {
       alertEl.classList.remove('is-visible');
       alertEl.hidden = true;
+      alertEl.style.display = 'none';
     }
   };
 
@@ -403,7 +429,16 @@
     }
 
     if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Scroll within the modal body
+      const modalBody = elements.backdrop?.querySelector('.special-ad-body');
+      if (modalBody) {
+        const targetRect = targetElement.getBoundingClientRect();
+        const bodyRect = modalBody.getBoundingClientRect();
+        const scrollTop = modalBody.scrollTop + (targetRect.top - bodyRect.top) - 100;
+        modalBody.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      } else {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       
       // Focus the element if it's focusable
       if (targetElement.focus && fieldId !== 'image') {
@@ -418,6 +453,8 @@
    * @param {string} firstInvalidField - First invalid field ID
    */
   const displayValidationErrors = (errors, firstInvalidField) => {
+    if (isDev) console.log('[Validation] displayValidationErrors:', errors, firstInvalidField);
+    
     // Show top alert
     showTopAlert('لطفاً فیلدهای مشخص‌شده را تکمیل کنید');
 
@@ -428,7 +465,7 @@
 
     // Scroll to first invalid field
     if (firstInvalidField) {
-      scrollToField(firstInvalidField);
+      setTimeout(() => scrollToField(firstInvalidField), 100);
     }
   };
 
@@ -549,18 +586,6 @@
   };
 
   // ─────────────────────────────────────────────────────
-  // Utility Functions
-  // ─────────────────────────────────────────────────────
-  const toFaDigits = (num) => {
-    if (num === null || num === undefined) return '';
-    return String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-  };
-
-  const toFaPrice = (num) => {
-    return toFaDigits((+num || 0).toLocaleString('en-US'));
-  };
-
-  // ─────────────────────────────────────────────────────
   // API Functions
   // ─────────────────────────────────────────────────────
   const fetchSellerProfile = async () => {
@@ -642,10 +667,11 @@
   const updateProductPicker = () => {
     if (state.adType === 'product') {
       elements.productPicker.style.display = 'block';
-      elements.productSelect.required = true;
+      // Note: Don't set required on hidden native select - custom validation handles this
+      // Setting required on hidden/aria-hidden elements causes browser error:
+      // "An invalid form control with name='' is not focusable"
     } else {
       elements.productPicker.style.display = 'none';
-      elements.productSelect.required = false;
     }
   };
 
@@ -2319,7 +2345,18 @@
       chip.addEventListener('click', handleCreditChipClick);
     });
     
-    elements.form?.addEventListener('submit', handleSubmit);
+    // Form submission - prevent native validation, use custom only
+    // Note: form has novalidate attribute, but we also prevent submit event
+    elements.form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleSubmit(e);
+    });
+    
+    // Submit button click handler (button is type="button" to avoid native validation)
+    elements.submitBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSubmit(e);
+    });
   };
 
   // ─────────────────────────────────────────────────────

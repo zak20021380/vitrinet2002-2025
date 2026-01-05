@@ -2788,7 +2788,7 @@
    Top Alert Banner
    ───────────────────────────────────────────────────── */
 .special-ad-top-alert {
-  display: flex;
+  display: none; /* Hidden by default */
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
@@ -2801,14 +2801,11 @@
   font-weight: 600;
   animation: alertSlideIn 0.3s ease;
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+  z-index: 100;
 }
 
-.special-ad-top-alert[hidden] {
-  display: none;
-}
-
-.special-ad-top-alert:not(.is-visible) {
-  display: none;
+.special-ad-top-alert.is-visible {
+  display: flex !important; /* Show when visible */
 }
 
 .special-ad-top-alert__icon {
