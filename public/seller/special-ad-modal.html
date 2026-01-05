@@ -68,7 +68,38 @@
           <!-- Product Picker (shown when product type selected) -->
           <div id="specialAdProductPicker" class="special-ad-product-picker">
             <label class="special-ad-product-picker__label">انتخاب محصول</label>
-            <select id="specialAdProductSelect" class="special-ad-product-picker__select" required>
+            
+            <!-- Custom Premium Dropdown -->
+            <div class="sam-dropdown" id="specialAdDropdown" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="specialAdProductLabel">
+              <!-- Trigger Button -->
+              <button type="button" class="sam-dropdown__trigger" id="specialAdDropdownTrigger" aria-controls="specialAdDropdownList">
+                <span class="sam-dropdown__value" id="specialAdDropdownValue">یک مورد را انتخاب کنید...</span>
+                <svg class="sam-dropdown__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+              
+              <!-- Dropdown Panel -->
+              <div class="sam-dropdown__panel" id="specialAdDropdownPanel" role="listbox" aria-labelledby="specialAdProductLabel">
+                <!-- Search Input (optional for many items) -->
+                <div class="sam-dropdown__search-wrap">
+                  <svg class="sam-dropdown__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                  </svg>
+                  <input type="text" class="sam-dropdown__search" id="specialAdDropdownSearch" placeholder="جستجوی محصول..." autocomplete="off">
+                </div>
+                
+                <!-- Options List -->
+                <ul class="sam-dropdown__list" id="specialAdDropdownList">
+                  <!-- Items will be populated by JS -->
+                  <li class="sam-dropdown__empty">در حال بارگذاری...</li>
+                </ul>
+              </div>
+            </div>
+            
+            <!-- Hidden native select for form submission -->
+            <select id="specialAdProductSelect" class="sam-dropdown__native-select" required tabindex="-1" aria-hidden="true">
               <option value="">یک مورد را انتخاب کنید...</option>
             </select>
           </div>

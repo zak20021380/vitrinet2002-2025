@@ -77,7 +77,9 @@
     // Current image URL being displayed
     currentImageUrl: null,
     // Preload abort controller
-    imageLoadAbortController: null
+    imageLoadAbortController: null,
+    // Products list for dropdown filtering
+    productsList: []
   };
 
   // ─────────────────────────────────────────────────────
@@ -93,6 +95,13 @@
       typeCards: document.querySelectorAll('.special-ad-type-card'),
       productPicker: document.getElementById('specialAdProductPicker'),
       productSelect: document.getElementById('specialAdProductSelect'),
+      // Custom dropdown elements
+      dropdown: document.getElementById('specialAdDropdown'),
+      dropdownTrigger: document.getElementById('specialAdDropdownTrigger'),
+      dropdownValue: document.getElementById('specialAdDropdownValue'),
+      dropdownPanel: document.getElementById('specialAdDropdownPanel'),
+      dropdownList: document.getElementById('specialAdDropdownList'),
+      dropdownSearch: document.getElementById('specialAdDropdownSearch'),
       titleInput: document.getElementById('specialAdTitle'),
       titleCounter: document.getElementById('specialAdTitleCounter'),
       textInput: document.getElementById('specialAdText'),
@@ -770,6 +779,293 @@
     setCreditAmount(value);
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUSTOM DROPDOWN MODULE - Premium Product Selector
+  // Mobile-First, RTL-Ready, Accessible
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  let dropdownState = {
+    isOpen: false,
+    focusedIndex: -1,
+    filteredItems: []
+  };
+
+  /**
+   * Open the custom dropdown
+   */
+  const openDropdown = () => {
+    if (!elements.dropdown || dropdownState.isOpen) return;
+    
+    dropdownState.isOpen = true;
+    elements.dropdown.classList.add('is-open');
+    elements.dropdown.setAttribute('aria-expanded', 'true');
+    
+    // Reset search
+    if (elements.dropdownSearch) {
+      elements.dropdownSearch.value = '';
+      filterDropdownItems('');
+    }
+    
+    // Focus search input
+    setTimeout(() => {
+      elements.dropdownSearch?.focus();
+    }, 100);
+    
+    // Add click outside listener
+    document.addEventListener('click', handleDropdownClickOutside);
+    document.addEventListener('keydown', handleDropdownKeydown);
+  };
+
+  /**
+   * Close the custom dropdown
+   */
+  const closeDropdown = () => {
+    if (!elements.dropdown || !dropdownState.isOpen) return;
+    
+    dropdownState.isOpen = false;
+    dropdownState.focusedIndex = -1;
+    elements.dropdown.classList.remove('is-open');
+    elements.dropdown.setAttribute('aria-expanded', 'false');
+    
+    // Clear focus states
+    const items = elements.dropdownList?.querySelectorAll('.sam-dropdown__item');
+    items?.forEach(item => item.classList.remove('is-focused'));
+    
+    // Remove listeners
+    document.removeEventListener('click', handleDropdownClickOutside);
+    document.removeEventListener('keydown', handleDropdownKeydown);
+    
+    // Return focus to trigger
+    elements.dropdownTrigger?.focus();
+  };
+
+  /**
+   * Toggle dropdown open/close
+   */
+  const toggleDropdown = () => {
+    if (dropdownState.isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  };
+
+  /**
+   * Filter dropdown items based on search query
+   */
+  const filterDropdownItems = (query) => {
+    const items = elements.dropdownList?.querySelectorAll('.sam-dropdown__item');
+    if (!items) return;
+    
+    const normalizedQuery = query.trim().toLowerCase();
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+      const title = (item.dataset.title || '').toLowerCase();
+      const category = (item.dataset.category || '').toLowerCase();
+      
+      const matches = !normalizedQuery || 
+        title.includes(normalizedQuery) || 
+        category.includes(normalizedQuery);
+      
+      item.style.display = matches ? '' : 'none';
+      if (matches) visibleCount++;
+    });
+    
+    // Show/hide no results message
+    let noResults = elements.dropdownList?.querySelector('.sam-dropdown__no-results');
+    if (visibleCount === 0 && normalizedQuery) {
+      if (!noResults) {
+        noResults = document.createElement('li');
+        noResults.className = 'sam-dropdown__no-results';
+        noResults.innerHTML = `
+          <svg class="sam-dropdown__no-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <path d="M8 11h6"/>
+          </svg>
+          <p class="sam-dropdown__no-results-text">نتیجه‌ای یافت نشد</p>
+        `;
+        elements.dropdownList.appendChild(noResults);
+      }
+      noResults.style.display = '';
+    } else if (noResults) {
+      noResults.style.display = 'none';
+    }
+    
+    // Reset focus index
+    dropdownState.focusedIndex = -1;
+  };
+
+  /**
+   * Select a dropdown item
+   */
+  const selectDropdownItem = (item) => {
+    if (!item || item.classList.contains('is-disabled')) return;
+    
+    const value = item.dataset.value;
+    const title = item.dataset.title;
+    const image = item.dataset.image;
+    
+    // Update native select
+    if (elements.productSelect) {
+      elements.productSelect.value = value;
+      // Trigger change event for existing handlers
+      elements.productSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    
+    // Update custom dropdown display
+    if (elements.dropdownValue) {
+      elements.dropdownValue.textContent = title;
+      elements.dropdownValue.classList.remove('is-placeholder');
+    }
+    
+    // Update selected state
+    const items = elements.dropdownList?.querySelectorAll('.sam-dropdown__item');
+    items?.forEach(i => {
+      const isSelected = i.dataset.value === value;
+      i.classList.toggle('is-selected', isSelected);
+      i.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    });
+    
+    // Close dropdown
+    closeDropdown();
+    
+    // Trigger product selection handler
+    onProductSelected(value, image);
+  };
+
+  /**
+   * Handle click outside dropdown
+   */
+  const handleDropdownClickOutside = (e) => {
+    if (!elements.dropdown?.contains(e.target)) {
+      closeDropdown();
+    }
+  };
+
+  /**
+   * Handle keyboard navigation in dropdown
+   */
+  const handleDropdownKeydown = (e) => {
+    if (!dropdownState.isOpen) return;
+    
+    const items = Array.from(elements.dropdownList?.querySelectorAll('.sam-dropdown__item:not([style*="display: none"])') || []);
+    if (!items.length) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        dropdownState.focusedIndex = Math.min(dropdownState.focusedIndex + 1, items.length - 1);
+        updateDropdownFocus(items);
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        dropdownState.focusedIndex = Math.max(dropdownState.focusedIndex - 1, 0);
+        updateDropdownFocus(items);
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        if (dropdownState.focusedIndex >= 0 && items[dropdownState.focusedIndex]) {
+          selectDropdownItem(items[dropdownState.focusedIndex]);
+        }
+        break;
+        
+      case 'Escape':
+        e.preventDefault();
+        closeDropdown();
+        break;
+        
+      case 'Tab':
+        closeDropdown();
+        break;
+    }
+  };
+
+  /**
+   * Update focus state for keyboard navigation
+   */
+  const updateDropdownFocus = (items) => {
+    items.forEach((item, index) => {
+      const isFocused = index === dropdownState.focusedIndex;
+      item.classList.toggle('is-focused', isFocused);
+      if (isFocused) {
+        item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    });
+  };
+
+  /**
+   * Handle dropdown trigger click
+   */
+  const handleDropdownTriggerClick = (e) => {
+    e.preventDefault();
+    toggleDropdown();
+  };
+
+  /**
+   * Handle dropdown item click
+   */
+  const handleDropdownItemClick = (e) => {
+    const item = e.target.closest('.sam-dropdown__item');
+    if (item) {
+      selectDropdownItem(item);
+    }
+  };
+
+  /**
+   * Handle search input
+   */
+  const handleDropdownSearch = (e) => {
+    filterDropdownItems(e.target.value);
+  };
+
+  /**
+   * Reset dropdown to initial state
+   */
+  const resetDropdown = () => {
+    if (elements.dropdownValue) {
+      elements.dropdownValue.textContent = 'یک مورد را انتخاب کنید...';
+      elements.dropdownValue.classList.add('is-placeholder');
+    }
+    
+    const items = elements.dropdownList?.querySelectorAll('.sam-dropdown__item');
+    items?.forEach(item => {
+      item.classList.remove('is-selected', 'is-focused');
+      item.setAttribute('aria-selected', 'false');
+      item.style.display = '';
+    });
+    
+    if (elements.dropdownSearch) {
+      elements.dropdownSearch.value = '';
+    }
+    
+    dropdownState.focusedIndex = -1;
+    closeDropdown();
+  };
+
+  /**
+   * Attach dropdown event listeners
+   */
+  const attachDropdownListeners = () => {
+    elements.dropdownTrigger?.addEventListener('click', handleDropdownTriggerClick);
+    elements.dropdownList?.addEventListener('click', handleDropdownItemClick);
+    elements.dropdownSearch?.addEventListener('input', handleDropdownSearch);
+    
+    // Prevent form submission on Enter in search
+    elements.dropdownSearch?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+      }
+    });
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // END CUSTOM DROPDOWN MODULE
+  // ═══════════════════════════════════════════════════════════════════════════
+
   const updateWalletDisplay = () => {
     if (!elements.walletBalance) return;
     elements.walletBalance.textContent = `${toFaPrice(state.walletBalance)} تومان`;
@@ -835,6 +1131,16 @@
 
   const populateProducts = async () => {
     if (!elements.productSelect) return;
+    
+    // Show loading state in custom dropdown
+    if (elements.dropdownList) {
+      elements.dropdownList.innerHTML = `
+        <li class="sam-dropdown__loading">
+          <span class="sam-dropdown__loading-spinner"></span>
+          <span>در حال بارگذاری...</span>
+        </li>
+      `;
+    }
     elements.productSelect.innerHTML = '<option value="">در حال بارگذاری...</option>';
     
     const response = await fetchProducts();
@@ -853,22 +1159,77 @@
     
     if (!productList.length) {
       elements.productSelect.innerHTML = '<option value="">محصولی برای انتخاب نیست</option>';
+      if (elements.dropdownList) {
+        elements.dropdownList.innerHTML = `
+          <li class="sam-dropdown__empty">محصولی برای انتخاب نیست</li>
+        `;
+      }
+      if (elements.dropdownValue) {
+        elements.dropdownValue.textContent = 'محصولی برای انتخاب نیست';
+        elements.dropdownValue.classList.add('is-placeholder');
+      }
       return;
     }
     
     elements.productSelect.innerHTML = '<option value="">یک مورد را انتخاب کنید...</option>';
     
+    // Build custom dropdown items
+    let dropdownHTML = '';
+    
     productList.forEach(product => {
-      const option = document.createElement('option');
-      option.value = product._id || product.id;
-      option.textContent = product.title || product.name || 'بدون نام';
-      
-      // Extract image using helper
+      const productId = product._id || product.id;
+      const productTitle = product.title || product.name || 'بدون نام';
       const productImage = extractProductImage(product);
-      option.dataset.image = productImage || '';
+      const productCategory = product.category || product.categoryName || '';
+      const productPrice = product.price ? toFaPrice(product.price) + ' تومان' : '';
+      const subtitle = productCategory || productPrice;
       
+      // Native select option
+      const option = document.createElement('option');
+      option.value = productId;
+      option.textContent = productTitle;
+      option.dataset.image = productImage || '';
+      option.dataset.category = productCategory;
+      option.dataset.price = product.price || '';
       elements.productSelect.appendChild(option);
+      
+      // Custom dropdown item
+      const thumbHTML = productImage 
+        ? `<img class="sam-dropdown__item-thumb" src="${buildImageUrl(productImage)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+        : '';
+      
+      const subtitleHTML = subtitle 
+        ? `<span class="sam-dropdown__item-subtitle">${subtitle}</span>` 
+        : '';
+      
+      dropdownHTML += `
+        <li class="sam-dropdown__item" 
+            role="option" 
+            tabindex="-1"
+            data-value="${productId}" 
+            data-image="${productImage || ''}"
+            data-title="${productTitle}"
+            data-category="${productCategory}"
+            data-price="${product.price || ''}"
+            aria-selected="false">
+          ${thumbHTML}
+          <div class="sam-dropdown__item-content">
+            <span class="sam-dropdown__item-title">${productTitle}</span>
+            ${subtitleHTML}
+          </div>
+          <svg class="sam-dropdown__item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        </li>
+      `;
     });
+    
+    if (elements.dropdownList) {
+      elements.dropdownList.innerHTML = dropdownHTML;
+    }
+    
+    // Store products for search filtering
+    state.productsList = productList;
   };
 
   const setLoading = (loading) => {
@@ -1115,6 +1476,9 @@
     // Reset credit allocation UI
     toggleCreditAllocation(false);
     
+    // Reset custom dropdown
+    resetDropdown();
+    
     updateTypeCards();
     updateProductPicker();
     renderAdImageUI();
@@ -1186,6 +1550,9 @@
     });
     
     elements.productSelect?.addEventListener('change', handleProductChange);
+    
+    // Custom dropdown listeners
+    attachDropdownListeners();
     
     elements.titleInput?.addEventListener('input', () => {
       updateCharCounter(elements.titleInput, elements.titleCounter, 25);
