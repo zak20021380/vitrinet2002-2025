@@ -1610,27 +1610,54 @@
   position: absolute;
   top: 1rem;
   left: 1rem;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   color: #64748b;
-  font-size: 1.3rem;
-  font-weight: 300;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.upgrade-modal__close svg {
+  width: 20px;
+  height: 20px;
+  transition: all 0.25s ease;
 }
 
 .upgrade-modal__close:hover {
-  background: #fee2e2;
-  border-color: #fecaca;
+  background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: rgba(239, 68, 68, 0.3);
   color: #ef4444;
   transform: scale(1.05);
+  box-shadow: 
+    0 4px 16px rgba(239, 68, 68, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.upgrade-modal__close:hover svg {
+  transform: rotate(90deg);
+}
+
+.upgrade-modal__close:active {
+  transform: scale(0.95);
+  box-shadow: 
+    0 1px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.upgrade-modal__close:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
 }
 
 /* Modal Header */
@@ -2647,10 +2674,17 @@
   }
 
   .upgrade-modal__close {
-    width: 32px;
-    height: 32px;
-    font-size: 1.1rem;
-    top: 0.65rem;
+    width: 44px;
+    height: 44px;
+    top: 0.75rem;
+    left: 0.75rem;
+    border-radius: 14px;
+  }
+
+  .upgrade-modal__close svg {
+    width: 22px;
+    height: 22px;
+  }
     left: 0.65rem;
     border-radius: 8px;
   }
@@ -2955,6 +2989,19 @@
   /* Modal Extra Small */
   .upgrade-modal {
     padding: 1rem 0.85rem calc(env(safe-area-inset-bottom, 12px) + 0.85rem);
+  }
+
+  .upgrade-modal__close {
+    width: 40px;
+    height: 40px;
+    top: 0.65rem;
+    left: 0.65rem;
+    border-radius: 12px;
+  }
+
+  .upgrade-modal__close svg {
+    width: 20px;
+    height: 20px;
   }
 
   .upgrade-modal__title {
