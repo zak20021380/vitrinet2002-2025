@@ -8,6 +8,8 @@ const { calculateExpiry } = require('../utils/adDisplay');
 const { parseDurationHours } = require('../utils/adDisplayConfig');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
+const AD_TITLE_LIMITS = { min: 3, max: 25 };
+const AD_TEXT_LIMITS = { min: 10, max: 30 };
 const POPULATE_SPEC = [
   { path: 'sellerId', select: 'storename shopurl phone city address ownerName ownerLastname' },
   { path: 'productId', select: 'title price slug' },
@@ -37,6 +39,24 @@ function normalisePhone(phone) {
     return digits;
   }
   return null;
+}
+
+function containsExecutableMarkup(value) {
+  if (!value) return false;
+  const raw = String(value);
+  const lower = raw.toLowerCase();
+  return (
+    /<\s*\/?\s*[a-z][^>]*>/i.test(raw) ||
+    /on\w+\s*=/i.test(raw) ||
+    /javascript:/i.test(lower) ||
+    /data:text\/html/i.test(lower)
+  );
+}
+
+function sanitizeAdText(value) {
+  if (!value) return '';
+  const stripped = String(value).replace(/<[^>]*>/g, '');
+  return stripped.replace(/\s+/g, ' ').trim();
 }
 
 async function findEffectiveAdPlan(slug, sellerPhone) {
@@ -155,6 +175,7 @@ exports.createAdOrder = async (req, res) => {
     const productId  = req.fields.productId;
     const adTitle    = req.fields.title || req.fields.adTitle;
     const adText     = req.fields.text  || req.fields.adText;
+    const adKind     = req.fields.adKind || req.fields.adTypeKind;
     const image      = req.files?.image;
 
     // چک مقادیر اولیه
@@ -180,6 +201,54 @@ exports.createAdOrder = async (req, res) => {
       }
     }
 
+    const resolvedAdKind = adKind || (productId ? 'product' : 'shop');
+    if (resolvedAdKind === 'product' && !productId) {
+      return res.status(400).json({ success: false, message: 'انتخاب محصول الزامی است.' });
+    }
+
+    if (containsExecutableMarkup(adTitle)) {
+      return res.status(400).json({ success: false, message: 'ورودی عنوان تبلیغ نامعتبر است.' });
+    }
+
+    if (containsExecutableMarkup(adText)) {
+      return res.status(400).json({ success: false, message: 'ورودی متن جذاب نامعتبر است.' });
+    }
+
+    const cleanedTitle = sanitizeAdText(adTitle);
+    const cleanedText = sanitizeAdText(adText);
+
+    if (!cleanedTitle) {
+      return res.status(400).json({ success: false, message: 'عنوان تبلیغ الزامی است.' });
+    }
+
+    if (
+      cleanedTitle.length < AD_TITLE_LIMITS.min ||
+      cleanedTitle.length > AD_TITLE_LIMITS.max
+    ) {
+      return res.status(400).json({ success: false, message: 'عنوان تبلیغ باید بین ۳ تا ۲۵ کاراکتر باشد.' });
+    }
+
+    if (!cleanedText) {
+      return res.status(400).json({ success: false, message: 'متن جذاب الزامی است.' });
+    }
+
+    if (
+      cleanedText.length < AD_TEXT_LIMITS.min ||
+      cleanedText.length > AD_TEXT_LIMITS.max
+    ) {
+      return res.status(400).json({ success: false, message: 'متن جذاب باید بین ۱۰ تا ۳۰ کاراکتر باشد.' });
+    }
+
+    const productImages = Array.isArray(product?.images) ? product.images.filter(Boolean) : [];
+    const hasProductImage = productImages.length > 0;
+    if (resolvedAdKind === 'shop' && (!image || !image.size)) {
+      return res.status(400).json({ success: false, message: 'انتخاب تصویر الزامی است.' });
+    }
+
+    if (resolvedAdKind === 'product' && !image?.size && !hasProductImage) {
+      return res.status(400).json({ success: false, message: 'انتخاب تصویر الزامی است.' });
+    }
+
     // --- ذخیره عکس در uploads ---
     let bannerImage = undefined;
     if (image && image.size > 0) {
@@ -199,8 +268,8 @@ exports.createAdOrder = async (req, res) => {
       productId: productId || undefined,
       shopTitle: seller.storename,
       bannerImage: bannerImage,
-      adTitle: adTitle ? adTitle.trim() : undefined,
-      adText: adText ? adText.trim() : undefined,
+      adTitle: cleanedTitle,
+      adText: cleanedText,
       status: 'pending',
       createdAt: new Date(),
     });
@@ -573,4 +642,3 @@ exports.getActiveAds = async (req, res) => {
     res.status(500).json({ success: false, message: 'خطا در دریافت تبلیغات فعال', error: err.message });
   }
 };
-

@@ -84,13 +84,27 @@
     productImageRequestId: 0,
     imageRetryHintTimer: null,
     // Products list for dropdown filtering
-    productsList: []
+    productsList: [],
+    validationState: 'idle'
   };
 
   // ─────────────────────────────────────────────────────
   // DOM Elements
   // ─────────────────────────────────────────────────────
   let elements = {};
+
+  const ensureErrorElement = (container, id) => {
+    if (!container) return null;
+    let error = document.getElementById(id);
+    if (!error) {
+      error = document.createElement('div');
+      error.id = id;
+      error.className = 'special-ad-field-error';
+      error.hidden = true;
+      container.appendChild(error);
+    }
+    return error;
+  };
 
   const initElements = () => {
     elements = {
@@ -146,8 +160,14 @@
       creditAmount: document.getElementById('specialAdCreditAmount'),
       cashAmount: document.getElementById('specialAdCashAmount'),
       finalPrice: document.getElementById('specialAdFinalPrice'),
-      submitBtn: document.getElementById('specialAdSubmitBtn')
+      submitBtn: document.getElementById('specialAdSubmitBtn'),
+      imageSection: document.querySelector('.special-ad-image-section')
     };
+
+    elements.titleError = ensureErrorElement(elements.titleInput?.parentElement, 'specialAdTitleError');
+    elements.textError = ensureErrorElement(elements.textInput?.parentElement, 'specialAdTextError');
+    elements.productError = ensureErrorElement(elements.productPicker, 'specialAdProductError');
+    elements.imageErrorInline = ensureErrorElement(elements.imageSection, 'specialAdImageInlineError');
   };
 
   // ─────────────────────────────────────────────────────
@@ -160,6 +180,167 @@
 
   const toFaPrice = (num) => {
     return toFaDigits((+num || 0).toLocaleString('en-US'));
+  };
+
+  const VALIDATION_RULES = {
+    title: { min: 3, max: 25 },
+    text: { min: 10, max: 30 }
+  };
+
+  const ERROR_MESSAGES = {
+    title: {
+      required: 'عنوان تبلیغ الزامی است',
+      length: 'عنوان تبلیغ باید بین ۳ تا ۲۵ کاراکتر باشد',
+      invalid: 'ورودی عنوان تبلیغ نامعتبر است'
+    },
+    text: {
+      required: 'متن جذاب الزامی است',
+      length: 'متن جذاب باید بین ۱۰ تا ۳۰ کاراکتر باشد',
+      invalid: 'ورودی متن جذاب نامعتبر است'
+    },
+    product: {
+      required: 'انتخاب محصول الزامی است'
+    },
+    image: {
+      required: 'انتخاب تصویر الزامی است'
+    }
+  };
+
+  const containsExecutableMarkup = (value) => {
+    if (!value) return false;
+    const raw = String(value);
+    const lower = raw.toLowerCase();
+    return (
+      /<\s*\/?\s*[a-z][^>]*>/i.test(raw) ||
+      /on\w+\s*=/i.test(raw) ||
+      /javascript:/i.test(lower) ||
+      /data:text\/html/i.test(lower)
+    );
+  };
+
+  const sanitizeText = (value) => {
+    if (!value) return '';
+    const stripped = String(value).replace(/<[^>]*>/g, '');
+    return stripped.replace(/\s+/g, ' ').trim();
+  };
+
+  const getValidationMap = () => ({
+    title: {
+      input: elements.titleInput,
+      container: elements.titleInput?.closest('.special-ad-form-group'),
+      error: elements.titleError
+    },
+    text: {
+      input: elements.textInput,
+      container: elements.textInput?.closest('.special-ad-form-group'),
+      error: elements.textError
+    },
+    product: {
+      input: elements.dropdownTrigger || elements.productSelect,
+      container: elements.dropdown || elements.productPicker,
+      error: elements.productError,
+      focusTarget: elements.dropdownTrigger
+    },
+    image: {
+      input: elements.imagePreview,
+      container: elements.imageSection || elements.imagePreview,
+      error: elements.imageErrorInline,
+      focusTarget: elements.imagePreview
+    }
+  });
+
+  const setFieldError = (fieldKey, message) => {
+    const map = getValidationMap()[fieldKey];
+    if (!map) return;
+    map.container?.classList.add('has-error');
+    map.input?.classList.add('is-invalid');
+    if (fieldKey === 'product') {
+      elements.productPicker?.classList.add('has-error');
+    }
+    if (map.error) {
+      map.error.textContent = message;
+      map.error.hidden = false;
+      map.error.classList.add('is-visible');
+    }
+  };
+
+  const clearFieldError = (fieldKey) => {
+    const map = getValidationMap()[fieldKey];
+    if (!map) return;
+    map.container?.classList.remove('has-error');
+    map.input?.classList.remove('is-invalid');
+    if (fieldKey === 'product') {
+      elements.productPicker?.classList.remove('has-error');
+    }
+    if (map.error) {
+      map.error.textContent = '';
+      map.error.hidden = true;
+      map.error.classList.remove('is-visible');
+    }
+  };
+
+  const clearAllErrors = () => {
+    ['title', 'text', 'product', 'image'].forEach(clearFieldError);
+  };
+
+  const focusFirstInvalid = (fieldKey) => {
+    const map = getValidationMap()[fieldKey];
+    const target = map?.focusTarget || map?.input || map?.container;
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (typeof target.focus === 'function') {
+      target.focus({ preventScroll: true });
+    }
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    const sanitized = { title: '', text: '' };
+
+    const rawTitle = elements.titleInput?.value || '';
+    const rawText = elements.textInput?.value || '';
+
+    if (containsExecutableMarkup(rawTitle)) {
+      errors.push({ field: 'title', message: ERROR_MESSAGES.title.invalid });
+    } else {
+      const cleanedTitle = sanitizeText(rawTitle);
+      if (!cleanedTitle) {
+        errors.push({ field: 'title', message: ERROR_MESSAGES.title.required });
+      } else if (
+        cleanedTitle.length < VALIDATION_RULES.title.min ||
+        cleanedTitle.length > VALIDATION_RULES.title.max
+      ) {
+        errors.push({ field: 'title', message: ERROR_MESSAGES.title.length });
+      } else {
+        sanitized.title = cleanedTitle;
+      }
+    }
+
+    if (containsExecutableMarkup(rawText)) {
+      errors.push({ field: 'text', message: ERROR_MESSAGES.text.invalid });
+    } else {
+      const cleanedText = sanitizeText(rawText);
+      if (!cleanedText) {
+        errors.push({ field: 'text', message: ERROR_MESSAGES.text.required });
+      } else if (
+        cleanedText.length < VALIDATION_RULES.text.min ||
+        cleanedText.length > VALIDATION_RULES.text.max
+      ) {
+        errors.push({ field: 'text', message: ERROR_MESSAGES.text.length });
+      } else {
+        sanitized.text = cleanedText;
+      }
+    }
+
+    if (state.adType === 'product' && !state.selectedProductId) {
+      errors.push({ field: 'product', message: ERROR_MESSAGES.product.required });
+    }
+
+    if (state.imageState !== 'preview' || !state.currentImageUrl) {
+      errors.push({ field: 'image', message: ERROR_MESSAGES.image.required });
+    }
+
+    return { isValid: errors.length === 0, errors, sanitized };
   };
 
   // ─────────────────────────────────────────────────────
@@ -430,6 +611,9 @@
     state.imageState = newState;
     state.imageErrorReason = errorReason;
     renderAdImageUI();
+    if (newState === 'preview') {
+      clearFieldError('image');
+    }
   };
 
   /**
@@ -1458,6 +1642,7 @@
       state.adType = radio.value;
       updateTypeCards();
       updateProductPicker();
+      clearFieldError('product');
       
       if (state.adType === 'shop') {
         state.selectedProductId = null;
@@ -1481,6 +1666,7 @@
     
     // Use the image module
     onProductSelected(productId, productImage);
+    clearFieldError('product');
   };
 
   const handleImageEdit = () => {
@@ -1566,19 +1752,23 @@
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (state.isLoading) return;
-    
-    if (state.adType === 'product' && !state.selectedProductId) {
-      showToast('لطفاً یک محصول انتخاب کنید', true);
+
+    clearAllErrors();
+    const validation = validateForm();
+    if (!validation.isValid) {
+      state.validationState = 'invalid';
+      validation.errors.forEach(({ field, message }) => setFieldError(field, message));
+      focusFirstInvalid(validation.errors[0]?.field);
       return;
     }
-    
-    const title = elements.titleInput?.value?.trim();
-    if (!title) {
-      showToast('عنوان تبلیغ الزامی است', true);
-      return;
-    }
-    
+
+    state.validationState = 'valid';
+
+    if (elements.titleInput) elements.titleInput.value = validation.sanitized.title;
+    if (elements.textInput) elements.textInput.value = validation.sanitized.text;
+
     setLoading(true);
+    state.validationState = 'submitting';
     
     try {
       const profile = await fetchSellerProfile();
@@ -1593,8 +1783,9 @@
       const formData = new FormData();
       formData.append('sellerId', sellerId);
       formData.append('planSlug', state.planSlug);
-      formData.append('title', title);
-      formData.append('text', elements.textInput?.value?.trim() || '');
+      formData.append('adKind', state.adType);
+      formData.append('title', validation.sanitized.title);
+      formData.append('text', validation.sanitized.text);
       formData.append('useCredit', state.useCredit);
       formData.append('creditAmount', state.creditAmount);
       
@@ -1614,15 +1805,17 @@
       const result = await res.json();
       
       if (!res.ok || !result.success) {
+        state.validationState = 'error';
         showToast(result.message || 'ثبت تبلیغ ناموفق بود', true);
         setLoading(false);
         return;
       }
       
       closeModal();
+      state.validationState = 'success';
       showSuccessPopup({
         title: 'تبلیغ شما با موفقیت ثبت شد',
-        message: `تبلیغ «${title}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
+        message: `تبلیغ «${validation.sanitized.title}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
         details: [
           `پلن انتخابی: ${AD_PLAN_TITLES[state.planSlug]}`,
           state.creditAmount > 0 ? `کسر از اعتبار: ${toFaPrice(state.creditAmount)} تومان` : '',
@@ -1634,6 +1827,7 @@
       resetForm();
     } catch (err) {
       console.error('Submit error:', err);
+      state.validationState = 'error';
       showToast('خطا در ثبت تبلیغ', true);
     } finally {
       setLoading(false);
@@ -1674,6 +1868,7 @@
     state.imageState = 'empty';
     state.imageErrorReason = null;
     state.currentImageUrl = null;
+    state.validationState = 'idle';
     revokeCurrentObjectUrl();
 
     if (state.imageRetryHintTimer) {
@@ -1687,6 +1882,7 @@
     
     // Render empty state
     renderAdImageUI();
+    clearAllErrors();
     
     // Fetch data
     await Promise.all([
@@ -1730,6 +1926,7 @@
     state.imageState = 'empty';
     state.imageErrorReason = null;
     state.currentImageUrl = null;
+    state.validationState = 'idle';
 
     if (state.imageRetryHintTimer) {
       clearTimeout(state.imageRetryHintTimer);
@@ -1754,6 +1951,7 @@
     updateProductPicker();
     renderAdImageUI();
     updatePriceBreakdown();
+    clearAllErrors();
     
     if (elements.titleInput && elements.titleCounter) {
       updateCharCounter(elements.titleInput, elements.titleCounter, 25);
@@ -1827,10 +2025,12 @@
     
     elements.titleInput?.addEventListener('input', () => {
       updateCharCounter(elements.titleInput, elements.titleCounter, 25);
+      clearFieldError('title');
     });
     
     elements.textInput?.addEventListener('input', () => {
       updateCharCounter(elements.textInput, elements.textCounter, 30);
+      clearFieldError('text');
     });
     
     // Image actions
