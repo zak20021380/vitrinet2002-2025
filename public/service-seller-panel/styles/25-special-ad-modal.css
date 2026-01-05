@@ -1858,56 +1858,6 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   Overlay Change Button - Bottom Right Corner
-   ───────────────────────────────────────────────────── */
-.special-ad-image-overlay-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: 100px;
-  border: none;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #374151;
-  font-size: 0.82rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.special-ad-image-preview.has-image .special-ad-image-overlay-btn {
-  display: flex;
-}
-
-.special-ad-image-overlay-btn:hover {
-  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-  color: #fff;
-  transform: scale(1.05);
-  box-shadow: 
-    0 8px 24px rgba(16, 185, 129, 0.3),
-    0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.special-ad-image-overlay-btn:active {
-  transform: scale(0.98);
-}
-
-.special-ad-image-overlay-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* ─────────────────────────────────────────────────────
    Gallery Controls - Arrows & Indicator
    ───────────────────────────────────────────────────── */
 .special-ad-image-nav {
@@ -1921,10 +1871,11 @@
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.45);
   color: #fff;
   cursor: pointer;
   z-index: 12;
+  opacity: 0.75;
   transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.25);
 }
@@ -1935,11 +1886,11 @@
 }
 
 .special-ad-image-nav--prev {
-  left: 12px;
+  left: -6px;
 }
 
 .special-ad-image-nav--next {
-  right: 12px;
+  right: -6px;
 }
 
 .special-ad-image-preview.has-gallery .special-ad-image-nav {
@@ -1948,6 +1899,7 @@
 
 .special-ad-image-nav:hover {
   background: rgba(16, 185, 129, 0.95);
+  opacity: 1;
   transform: translateY(-50%) scale(1.05);
 }
 
@@ -1957,12 +1909,15 @@
 
 .special-ad-image-indicator {
   position: absolute;
-  bottom: 12px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
@@ -2161,12 +2116,21 @@
   flex: 1;
 }
 
+/* Microcopy Hint */
+.special-ad-image-hint {
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-align: center;
+}
+
 /* ─────────────────────────────────────────────────────
    Status Label
    ───────────────────────────────────────────────────── */
 .special-ad-image-status {
   display: block;
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 0.78rem;
   font-weight: 500;
   color: #94a3b8;
@@ -2233,7 +2197,6 @@
   .special-ad-image-preview__img,
   .special-ad-image-preview__placeholder,
   .special-ad-image-preview__placeholder-icon-wrap,
-  .special-ad-image-overlay-btn,
   .special-ad-image-preview__badge,
   .special-ad-image-action-btn,
   .special-ad-image-retry-btn {
