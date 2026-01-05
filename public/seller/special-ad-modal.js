@@ -62,6 +62,8 @@
     adType: 'product',
     selectedProductId: null,
     selectedProductImage: null,
+    productImages: [],
+    productImageIndex: 0,
     customImage: null,
     walletBalance: 0,
     useCredit: false,
@@ -76,6 +78,8 @@
     imageErrorReason: null,
     // Current image URL being displayed
     currentImageUrl: null,
+    // Track failed gallery URLs to avoid looping
+    failedGalleryUrls: new Set(),
     // Preload abort controller
     imageLoadAbortController: null,
     // Products list for dropdown filtering
@@ -109,6 +113,12 @@
       imagePreview: document.getElementById('specialAdImagePreview'),
       previewImg: document.getElementById('specialAdPreviewImg'),
       imagePlaceholder: document.getElementById('specialAdImagePlaceholder'),
+      imagePrev: document.getElementById('specialAdImagePrev'),
+      imageNext: document.getElementById('specialAdImageNext'),
+      imageIndicator: document.getElementById('specialAdImageIndicator'),
+      imageHint: document.getElementById('specialAdImageHint'),
+      imageHintText: document.getElementById('specialAdImageHintText'),
+      imageHintRetry: document.getElementById('specialAdImageHintRetry'),
       imageInput: document.getElementById('specialAdImageInput'),
       changeImageBtn: document.getElementById('specialAdChangeImageBtn'),
       changeImageText: document.getElementById('specialAdChangeImageText'),
@@ -287,6 +297,100 @@
   };
 
   /**
+   * Extract gallery image URLs from product data
+   */
+  const extractProductImages = (product) => {
+    if (!product) return [];
+    
+    const possibleFields = ['images', 'gallery', 'imageGallery', 'photos', 'image', 'primaryImageUrl', 'img', 'photo', 'thumbnail', 'mainImage'];
+    const results = [];
+    
+    const pushImage = (value) => {
+      if (!value) return;
+      if (typeof value === 'string' && value.trim()) {
+        results.push(value.trim());
+        return;
+      }
+      if (typeof value === 'object') {
+        const url = value.url || value.src || value.path || value.image || value.filename;
+        if (typeof url === 'string' && url.trim()) results.push(url.trim());
+      }
+    };
+    
+    possibleFields.forEach(field => {
+      const value = product[field];
+      if (!value) return;
+      
+      if (Array.isArray(value)) {
+        value.forEach(item => pushImage(item));
+        return;
+      }
+      
+      pushImage(value);
+    });
+    
+    return results;
+  };
+
+  /**
+   * Normalize gallery images to absolute URLs
+   */
+  const normalizeGalleryImages = (images = []) => {
+    const normalized = images
+      .map((img) => buildImageUrl(img))
+      .filter((url) => typeof url === 'string' && url.trim());
+    
+    return Array.from(new Set(normalized));
+  };
+
+  const clearGalleryHint = () => {
+    if (!elements.imageHint) return;
+    elements.imageHint.hidden = true;
+    if (elements.imageHintText) elements.imageHintText.textContent = '';
+  };
+
+  const showGalleryHint = (message) => {
+    if (!elements.imageHint) return;
+    if (elements.imageHintText) elements.imageHintText.textContent = message;
+    elements.imageHint.hidden = false;
+  };
+
+  const updateGalleryIndicator = () => {
+    if (!elements.imageIndicator) return;
+    const total = state.productImages.length;
+    const shouldShow = total > 1 && !state.customImage && state.imageState === 'preview';
+    if (!shouldShow) {
+      elements.imageIndicator.hidden = true;
+      return;
+    }
+    elements.imageIndicator.hidden = false;
+    elements.imageIndicator.textContent = `${toFaDigits(state.productImageIndex + 1)}/${toFaDigits(total)}`;
+  };
+
+  const updateGalleryNav = () => {
+    const total = state.productImages.length;
+    const shouldShow = total > 1 && !state.customImage && state.imageState === 'preview';
+    if (elements.imagePrev) elements.imagePrev.hidden = !shouldShow;
+    if (elements.imageNext) elements.imageNext.hidden = !shouldShow;
+    updateGalleryIndicator();
+  };
+
+  const findNextAvailableIndex = (startIndex, direction = 1) => {
+    const total = state.productImages.length;
+    if (!total) return null;
+    
+    for (let i = 1; i <= total; i += 1) {
+      const nextIndex = (startIndex + i * direction + total) % total;
+      const nextUrl = state.productImages[nextIndex];
+      if (!state.failedGalleryUrls.has(nextUrl)) {
+        return nextIndex;
+      }
+    }
+    
+    return null;
+  };
+
+  /**
    * Build absolute URL from image path
    */
   const buildImageUrl = (imagePath) => {
@@ -402,6 +506,8 @@
           elements.imageStatus.textContent = 'تصویر محصول به صورت خودکار نمایش داده می‌شود';
           elements.imageStatus.classList.remove('is-custom');
         }
+        clearGalleryHint();
+        updateGalleryNav();
         break;
         
       case 'loading':
@@ -417,6 +523,7 @@
         if (elements.imageStatus) {
           elements.imageStatus.textContent = 'در حال بارگذاری تصویر...';
         }
+        updateGalleryNav();
         break;
         
       case 'preview':
@@ -433,6 +540,7 @@
           elements.imageStatus.textContent = state.customImage ? 'تصویر سفارشی' : 'تصویر محصول';
           elements.imageStatus.classList.toggle('is-custom', !!state.customImage);
         }
+        updateGalleryNav();
         break;
         
       case 'error':
@@ -450,6 +558,7 @@
         if (elements.imageStatus) {
           elements.imageStatus.textContent = errorReason || 'خطا در بارگذاری';
         }
+        updateGalleryNav();
         break;
     }
   };
@@ -466,6 +575,8 @@
       currentObjectUrl = URL.createObjectURL(imageSource);
       state.currentImageUrl = currentObjectUrl;
       state.customImage = imageSource;
+      clearGalleryHint();
+      updateGalleryNav();
       setAdImageState('preview');
       return;
     }
@@ -496,6 +607,8 @@
     // Data URL - show immediately
     if (absoluteUrl.startsWith('data:')) {
       state.currentImageUrl = absoluteUrl;
+      clearGalleryHint();
+      updateGalleryNav();
       setAdImageState('preview');
       return;
     }
@@ -507,6 +620,8 @@
       await preloadImage(absoluteUrl);
       state.currentImageUrl = absoluteUrl;
       if (!isCustom) state.customImage = null;
+      clearGalleryHint();
+      updateGalleryNav();
       setAdImageState('preview');
       if (isDev) console.log('[AdImage] Image loaded successfully');
     } catch (err) {
@@ -521,6 +636,108 @@
     }
   };
 
+  const fetchProductDetails = async (productId) => {
+    try {
+      const res = await fetch(`${API_BASE}/products/${productId}`, withCreds());
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.product || data?.data || data;
+    } catch (err) {
+      console.error('fetchProductDetails error:', err);
+      return null;
+    }
+  };
+
+  const loadProductGallery = async (productId, fallbackImagePath, options = {}) => {
+    if (!productId) {
+      state.productImages = [];
+      state.productImageIndex = 0;
+      state.failedGalleryUrls = new Set();
+      if (!state.customImage) {
+        setAdImageState('empty');
+      }
+      updateGalleryNav();
+      return;
+    }
+    
+    state.failedGalleryUrls = new Set();
+    clearGalleryHint();
+    if (!state.customImage && !options.silent) {
+      setAdImageState('loading');
+    }
+    
+    const productDetails = await fetchProductDetails(productId);
+    const fallbackProduct = state.productsList?.find(product => (product._id || product.id) === productId);
+    const productSource = productDetails || fallbackProduct;
+    
+    let images = extractProductImages(productSource);
+    if (!images.length && fallbackImagePath) {
+      images = [fallbackImagePath];
+    }
+    
+    const normalized = normalizeGalleryImages(images);
+    state.productImages = normalized;
+    state.productImageIndex = 0;
+    
+    if (!normalized.length) {
+      if (!state.customImage) {
+        setAdImageState('empty');
+      }
+      updateGalleryNav();
+      return;
+    }
+    
+    if (!state.customImage) {
+      await showGalleryImageAt(0, 1);
+    } else {
+      updateGalleryNav();
+    }
+  };
+
+  const showGalleryImageAt = async (index, direction = 1) => {
+    const total = state.productImages.length;
+    if (!total) {
+      setAdImageState('empty');
+      return;
+    }
+    
+    const safeIndex = (index + total) % total;
+    const url = state.productImages[safeIndex];
+    state.productImageIndex = safeIndex;
+    
+    setAdImageState('loading');
+    
+    try {
+      await preloadImage(url);
+      state.currentImageUrl = url;
+      state.customImage = null;
+      clearGalleryHint();
+      setAdImageState('preview');
+      updateGalleryNav();
+    } catch (err) {
+      console.error('[AdImage] Gallery image load failed:', err.message);
+      state.failedGalleryUrls.add(url);
+      showGalleryHint('برخی تصاویر بارگذاری نشدند');
+      
+      const nextIndex = findNextAvailableIndex(safeIndex, direction);
+      if (nextIndex !== null) {
+        await showGalleryImageAt(nextIndex, direction);
+        return;
+      }
+      
+      state.currentImageUrl = null;
+      setAdImageState('error', 'تصویر قابل نمایش نیست');
+      updateGalleryNav();
+    }
+  };
+
+  const retryGalleryImage = async () => {
+    if (!state.productImages.length) return;
+    state.failedGalleryUrls = new Set();
+    clearGalleryHint();
+    await showGalleryImageAt(state.productImageIndex, 1);
+  };
+
   /**
    * Handle product selection - auto-load product image
    */
@@ -529,19 +746,8 @@
     
     state.selectedProductId = productId;
     state.selectedProductImage = productImagePath;
-    
-    // If user has custom image, don't override
-    if (state.customImage) {
-      if (isDev) console.log('[AdImage] Custom image exists, keeping it');
-      return;
-    }
-    
-    // Load product image
-    if (productImagePath) {
-      setAdImageSource(productImagePath, false);
-    } else {
-      setAdImageState('empty');
-    }
+
+    loadProductGallery(productId, productImagePath, { silent: !!state.customImage });
   };
 
   /**
@@ -552,6 +758,12 @@
     
     if (state.customImage) {
       setAdImageSource(state.customImage, true);
+      return;
+    }
+    
+    if (state.productImages.length) {
+      retryGalleryImage();
+      return;
     } else if (state.selectedProductImage) {
       setAdImageSource(state.selectedProductImage, false);
     } else {
@@ -571,7 +783,9 @@
     elements.imageInput.value = '';
     
     // Revert to product image if available
-    if (state.selectedProductImage) {
+    if (state.productImages.length) {
+      showGalleryImageAt(state.productImageIndex, 1);
+    } else if (state.selectedProductImage) {
       setAdImageSource(state.selectedProductImage, false);
     } else {
       setAdImageState('empty');
@@ -1304,6 +1518,56 @@
     onProductSelected(productId, productImage);
   };
 
+  const handleGalleryPrev = () => {
+    if (!state.productImages.length || state.customImage) return;
+    const total = state.productImages.length;
+    const prevIndex = (state.productImageIndex - 1 + total) % total;
+    showGalleryImageAt(prevIndex, -1);
+  };
+
+  const handleGalleryNext = () => {
+    if (!state.productImages.length || state.customImage) return;
+    const total = state.productImages.length;
+    const nextIndex = (state.productImageIndex + 1) % total;
+    showGalleryImageAt(nextIndex, 1);
+  };
+
+  const handleGallerySwipe = (() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+    
+    return {
+      start: (event) => {
+        if (!state.productImages.length || state.customImage) return;
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        isSwiping = true;
+      },
+      end: (event) => {
+        if (!isSwiping || !state.productImages.length || state.customImage) return;
+        const touch = event.changedTouches?.[0];
+        if (!touch) return;
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        isSwiping = false;
+        if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+        if (Math.abs(deltaX) < 40) return;
+        if (deltaX < 0) {
+          handleGalleryNext();
+        } else {
+          handleGalleryPrev();
+        }
+      }
+    };
+  })();
+
+  const handleHintRetry = () => {
+    retryImageLoad();
+  };
+
   const handleImageEdit = () => {
     elements.imageInput?.click();
   };
@@ -1488,6 +1752,9 @@
     state.selectedProductId = null;
     state.selectedProductImage = null;
     state.customImage = null;
+    state.productImages = [];
+    state.productImageIndex = 0;
+    state.failedGalleryUrls = new Set();
     state.useCredit = false;
     state.creditAmount = 0;
     state.maxCredit = 0;
@@ -1510,6 +1777,7 @@
     updateTypeCards();
     updateProductPicker();
     renderAdImageUI();
+    clearGalleryHint();
     updatePriceBreakdown();
     
     if (elements.titleInput && elements.titleCounter) {
@@ -1596,8 +1864,25 @@
     elements.removeImageBtn?.addEventListener('click', handleRemoveImage);
     elements.imagePlaceholder?.addEventListener('click', handlePlaceholderClick);
     elements.retryBtn?.addEventListener('click', handleRetryImage);
+    elements.imageHintRetry?.addEventListener('click', handleHintRetry);
+    elements.imagePrev?.addEventListener('click', handleGalleryPrev);
+    elements.imageNext?.addEventListener('click', handleGalleryNext);
     elements.editImageBtn?.addEventListener('click', handleImageEdit);
     elements.imageInput?.addEventListener('change', handleImageChange);
+    elements.imagePreview?.addEventListener('touchstart', handleGallerySwipe.start, { passive: true });
+    elements.imagePreview?.addEventListener('touchend', handleGallerySwipe.end, { passive: true });
+    elements.previewImg?.addEventListener('error', () => {
+      if (!state.customImage && state.productImages.length) {
+        state.failedGalleryUrls.add(state.currentImageUrl);
+        showGalleryHint('برخی تصاویر بارگذاری نشدند');
+        const nextIndex = findNextAvailableIndex(state.productImageIndex, 1);
+        if (nextIndex !== null) {
+          showGalleryImageAt(nextIndex, 1);
+        } else {
+          setAdImageState('error', 'تصویر قابل نمایش نیست');
+        }
+      }
+    });
     
     // Credit allocation controls
     elements.creditSwitch?.addEventListener('change', handleCreditToggle);
