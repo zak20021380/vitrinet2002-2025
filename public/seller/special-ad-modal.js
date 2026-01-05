@@ -680,11 +680,20 @@
       elements.totalPrice.textContent = `${toFaPrice(state.totalPrice)} تومان`;
     }
     
-    // Credit row
+    // Credit row - shown as payment method (not discount)
     if (state.creditAmount > 0) {
-      if (elements.creditRow) elements.creditRow.style.display = 'flex';
+      if (elements.creditRow) {
+        elements.creditRow.style.display = 'flex';
+        // Update label to show it's a payment method with 50% limit
+        const creditLabel = elements.creditRow.querySelector('.special-ad-price-row__label');
+        if (creditLabel) {
+          creditLabel.textContent = 'پرداخت با اعتبار (تا ۵۰٪)';
+        }
+      }
       if (elements.creditAmount) {
-        elements.creditAmount.textContent = `-${toFaPrice(state.creditAmount)} تومان`;
+        // Remove negative sign and discount styling
+        elements.creditAmount.textContent = `${toFaPrice(state.creditAmount)} تومان`;
+        elements.creditAmount.classList.remove('is-discount');
       }
       elements.creditToggle?.classList.add('is-active');
     } else {
@@ -692,15 +701,19 @@
       elements.creditToggle?.classList.remove('is-active');
     }
     
-    // Cash row (shown when using credit)
+    // Cash row - always shown with clear label
     if (elements.cashRow) {
-      elements.cashRow.style.display = state.creditAmount > 0 ? 'flex' : 'none';
+      elements.cashRow.style.display = 'flex';
+      const cashLabel = elements.cashRow.querySelector('.special-ad-price-row__label');
+      if (cashLabel) {
+        cashLabel.textContent = 'پرداخت نقدی';
+      }
     }
     if (elements.cashAmount) {
       elements.cashAmount.textContent = `${toFaPrice(cashAmount)} تومان`;
     }
     
-    // Final price
+    // Final price - strong emphasis
     if (elements.finalPrice) {
       elements.finalPrice.textContent = `${toFaPrice(state.finalPrice)} تومان`;
     }
@@ -713,12 +726,27 @@
     if (!elements.creditAllocation) return;
     
     if (show) {
-      // Calculate and set max credit
+      // Calculate and set max credit (50% of order total)
       state.maxCredit = calculateMaxCredit();
       
-      // Update max display
+      // Update max display with helper text
       if (elements.maxCreditDisplay) {
         elements.maxCreditDisplay.textContent = `${toFaPrice(state.maxCredit)} تومان`;
+      }
+      
+      // Update helper text to show 50% limit
+      const allocationHeader = elements.creditAllocation.querySelector('.special-ad-credit-allocation__header');
+      if (allocationHeader) {
+        const existingHelper = allocationHeader.querySelector('.credit-limit-helper');
+        if (!existingHelper) {
+          const helperText = document.createElement('p');
+          helperText.className = 'credit-limit-helper';
+          helperText.style.cssText = 'font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; text-align: center;';
+          helperText.textContent = `سقف مجاز اعتبار برای این سفارش: ${toFaPrice(state.maxCredit)} تومان`;
+          allocationHeader.appendChild(helperText);
+        } else {
+          existingHelper.textContent = `سقف مجاز اعتبار برای این سفارش: ${toFaPrice(state.maxCredit)} تومان`;
+        }
       }
       
       // Configure slider
@@ -1089,7 +1117,7 @@
       elements.creditToggle?.classList.remove('is-disabled');
       if (elements.creditSwitch) elements.creditSwitch.disabled = false;
       if (elements.creditHint) {
-        elements.creditHint.textContent = 'اعتبار شما برای کسر از هزینه استفاده می‌شود';
+        elements.creditHint.textContent = 'اعتبار شما به عنوان روش پرداخت استفاده می‌شود (حداکثر ۵۰٪ از مبلغ سفارش)';
         elements.creditHint.classList.remove('is-error');
       }
     }
