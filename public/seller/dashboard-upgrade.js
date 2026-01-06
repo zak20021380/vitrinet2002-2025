@@ -823,6 +823,9 @@ async function fetchAdPrices (force = false) {
         }
       });
 
+      // Also fetch slot availability
+      fetchSlotAvailability();
+
       return adPlanPriceCache;
     } catch (err) {
       console.error('❌ خطا در دریافت قیمت تبلیغات:', err);
@@ -834,6 +837,66 @@ async function fetchAdPrices (force = false) {
   })();
 
   return adPlanPricePromise;
+}
+
+/*──────────────── ۳.۵) گرفتن وضعیت ظرفیت اسلات‌ها ────────────────*/
+let slotAvailabilityCache = null;
+
+async function fetchSlotAvailability() {
+  try {
+    const res = await fetch(`${API_BASE}/adOrder/slots/availability`, withCreds());
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const json = await res.json();
+    
+    if (json.success && json.slots) {
+      slotAvailabilityCache = json.slots;
+      updateSlotAvailabilityUI(json.slots);
+    }
+    
+    return json;
+  } catch (err) {
+    console.error('❌ خطا در دریافت وضعیت ظرفیت:', err);
+    return null;
+  }
+}
+
+function updateSlotAvailabilityUI(slots) {
+  const slotKeys = ['ad_search', 'ad_home', 'ad_products'];
+  
+  slotKeys.forEach(slot => {
+    const info = slots[slot];
+    if (!info) return;
+    
+    // Update booked count
+    const bookedEl = document.querySelector(`[data-booked="${slot}"]`);
+    if (bookedEl) {
+      const bookedText = `${toFaDigits(info.booked_today_count)}/۳ رزرو امروز`;
+      bookedEl.textContent = bookedText;
+      
+      // Update availability row state
+      const availRow = bookedEl.closest('.upgrade-ad-capacity__row--availability');
+      if (availRow) {
+        availRow.classList.toggle('is-full', info.booked_today_count >= 3);
+      }
+    }
+    
+    // Update schedule text
+    const scheduleEl = document.querySelector(`[data-schedule="${slot}"]`);
+    if (scheduleEl) {
+      const scheduleText = scheduleEl.querySelector('.upgrade-ad-capacity__schedule-text');
+      if (scheduleText) {
+        if (info.days_until_next_available === 0) {
+          scheduleText.textContent = 'شروع: امروز (فعال تا پایان روز)';
+          scheduleEl.classList.remove('is-future');
+        } else {
+          const nextDate = new Date(info.next_available_date);
+          const dateStr = nextDate.toLocaleDateString('fa-IR');
+          scheduleText.textContent = `شروع: ${toFaDigits(info.days_until_next_available)} روز دیگر (${dateStr})`;
+          scheduleEl.classList.add('is-future');
+        }
+      }
+    }
+  });
 }
 
 
@@ -1043,6 +1106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     initUpgradeDashboard();
   }
   startAdApprovalWatcher();
+  
+  // Handle deep-linking: /seller/dashboard.html#upgrade-special-ads?ad_id=xxx
+  handleDeepLink();
+  
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       fetchPlanPrices();
@@ -1058,6 +1125,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch {}
 });
+
+/*──────────────── ۵.۵) Deep-Link Handler ────────────────*/
+function handleDeepLink() {
+  const hash = window.location.hash;
+  const urlParams = new URLSearchParams(window.location.search);
+  const adId = urlParams.get('ad_id');
+  
+  // Check for #upgrade-special-ads hash
+  if (hash === '#upgrade-special-ads' || hash.startsWith('#upgrade-special-ads')) {
+    // Switch to Special Ads tab
+    toggleTabs('ads');
+    
+    // Scroll to ads section
+    setTimeout(() => {
+      const adsSection = document.getElementById('content-ads');
+      if (adsSection) {
+        adsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+    
+    // If ad_id is provided, switch to My Plans and highlight the ad
+    if (adId) {
+      setTimeout(() => {
+        toggleTabs('myplans');
+        highlightAdInMyPlans(adId);
+      }, 300);
+    }
+  }
+  
+  // Also handle direct #myplans with ad_id
+  if (hash === '#myplans' && adId) {
+    toggleTabs('myplans');
+    setTimeout(() => highlightAdInMyPlans(adId), 500);
+  }
+}
+
+function highlightAdInMyPlans(adId) {
+  // Wait for My Plans to load
+  const checkAndHighlight = () => {
+    const adCard = document.querySelector(`[data-ad-id="${adId}"]`);
+    if (adCard) {
+      // Scroll to the card
+      adCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Add highlight animation
+      adCard.classList.add('myplans-card--highlighted');
+      
+      // Remove highlight after animation
+      setTimeout(() => {
+        adCard.classList.remove('myplans-card--highlighted');
+      }, 3000);
+      
+      return true;
+    }
+    return false;
+  };
+  
+  // Try immediately, then retry a few times
+  if (!checkAndHighlight()) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (checkAndHighlight() || attempts >= 10) {
+        clearInterval(interval);
+      }
+    }, 300);
+  }
+}
+
+// Listen for hash changes
+window.addEventListener('hashchange', handleDeepLink);
 
 
 /*  ─────── مدیریت مدال تبلیغ ویژه ─────── */
@@ -1895,9 +2033,58 @@ async function fetchMyPlans() {
               </button>`;
           }
 
-          // تاریخ فعالسازی (شروع نمایش)
-          const startDate = plan.displayedAt || plan.approvedAt || plan.startDate;
+          // Get ad ID for deep-linking
+          const adId = plan._id || plan.id || '';
+
+          // تاریخ فعالسازی (شروع نمایش) - use scheduledStartDate if available
+          const startDate = plan.scheduledStartDate || plan.displayedAt || plan.approvedAt || plan.startDate;
           const startDateFormatted = startDate ? toJalaliDate(startDate) : '-';
+          
+          // تاریخ پایان - use scheduledEndDate if available
+          const scheduledEndDate = plan.scheduledEndDate || null;
+          const endDateValue = scheduledEndDate ? toJalaliDate(scheduledEndDate) : getAdEndDate(plan);
+          
+          // Build scheduling info section for reserved ads
+          let schedulingSection = '';
+          if (plan.scheduledStartDate && (status === 'pending' || status === 'approved' || status === 'paid')) {
+            const schedStart = new Date(plan.scheduledStartDate);
+            const schedEnd = plan.scheduledEndDate ? new Date(plan.scheduledEndDate) : null;
+            const now = new Date();
+            const daysUntil = Math.ceil((schedStart - now) / (1000 * 60 * 60 * 24));
+            const isToday = daysUntil <= 0 && (!schedEnd || now <= schedEnd);
+            
+            schedulingSection = `
+              <div class="myplans-card__scheduling">
+                <div class="myplans-card__scheduling-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                  </svg>
+                  <span class="myplans-card__scheduling-label">تاریخ شروع رزرو:</span>
+                  <span class="myplans-card__scheduling-value">${toJalaliDate(plan.scheduledStartDate)}</span>
+                </div>
+                ${schedEnd ? `
+                <div class="myplans-card__scheduling-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                  <span class="myplans-card__scheduling-label">پایان:</span>
+                  <span class="myplans-card__scheduling-value">پایان روز ${toJalaliDate(plan.scheduledEndDate)}</span>
+                </div>
+                ` : ''}
+                ${!isToday && daysUntil > 0 ? `
+                <div class="myplans-card__scheduling-row" style="color: #f59e0b;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 8v4M12 16h.01"/>
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  <span>شروع: ${toFaDigits(daysUntil)} روز دیگر</span>
+                </div>
+                ` : ''}
+              </div>
+            `;
+          }
           
           // ساخت بخش تاریخ‌ها با طراحی حرفه‌ای
           const datesSection = `
@@ -1929,14 +2116,14 @@ async function fetchMyPlans() {
                 </div>
                 <div class="myplans-card__date-content">
                   <span class="myplans-card__date-label">تاریخ پایان</span>
-                  <span class="myplans-card__date-value">${endDate}</span>
+                  <span class="myplans-card__date-value">${endDateValue}</span>
                 </div>
               </div>
             </div>
           `;
 
           return `
-            <article class="myplans-card myplans-card--ad" data-plan-status="${status}">
+            <article class="myplans-card myplans-card--ad" data-plan-status="${status}" data-ad-id="${adId}">
               <div class="myplans-card__header">
                 <span class="myplans-card__type">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -1948,7 +2135,7 @@ async function fetchMyPlans() {
                 <span class="myplans-card__status ${statusClass}">${statusLabel}</span>
               </div>
               <div class="myplans-card__body">
-                <h3 class="myplans-card__name">${plan.title || adType}</h3>
+                <h3 class="myplans-card__name">${plan.title || plan.adTitle || adType}</h3>
                 <div class="myplans-card__benefit">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M5 12l5 5L20 7"/>
@@ -1956,6 +2143,7 @@ async function fetchMyPlans() {
                   ${locationHint || 'نمایش ویژه در ویترینت'}
                 </div>
               </div>
+              ${schedulingSection}
               ${datesSection}
               ${actionBtn}
             </article>

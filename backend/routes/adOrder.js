@@ -26,6 +26,19 @@ router.get(
   adOrderController.getSellerAdOrders
 );
 
+// ── گرفتن لیست سفارش‌های تبلیغ با اطلاعات زمان‌بندی (GET) ──
+router.get(
+  '/seller/scheduled',
+  authMiddleware('seller'),
+  adOrderController.getSellerAdOrdersWithScheduling
+);
+
+// ── دریافت وضعیت ظرفیت اسلات‌ها (برای UI) ──
+router.get(
+  '/slots/availability',
+  adOrderController.getSlotAvailability
+);
+
 // ── بروزرسانی وضعیت سفارش تبلیغ توسط ادمین ──
 router.patch(
   '/:id/status',

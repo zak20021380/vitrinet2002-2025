@@ -2141,19 +2141,49 @@
         return;
       }
       
+      // Extract scheduling info from response
+      const scheduling = result.adOrder?.scheduling || {};
+      const scheduledStartDate = scheduling.scheduled_start_date 
+        ? new Date(scheduling.scheduled_start_date).toLocaleDateString('fa-IR')
+        : null;
+      const scheduledEndDate = scheduling.scheduled_end_date
+        ? new Date(scheduling.scheduled_end_date).toLocaleDateString('fa-IR')
+        : null;
+      const daysUntilStart = scheduling.days_until_start || 0;
+      const isToday = scheduling.is_today || daysUntilStart === 0;
+      
+      // Build scheduling details for success popup
+      const scheduleDetails = [];
+      if (scheduledStartDate) {
+        if (isToday) {
+          scheduleDetails.push(`تاریخ شروع رزرو: امروز (${scheduledStartDate})`);
+        } else {
+          scheduleDetails.push(`تاریخ شروع رزرو: ${toFaDigits(daysUntilStart)} روز دیگر (${scheduledStartDate})`);
+        }
+      }
+      if (scheduledEndDate) {
+        scheduleDetails.push(`پایان: پایان روز ${scheduledEndDate}`);
+      }
+      
       closeModal();
       showSuccessPopup({
         title: 'تبلیغ شما با موفقیت ثبت شد',
         message: `تبلیغ «${sanitizedTitle}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
         details: [
           `پلن انتخابی: ${AD_PLAN_TITLES[state.planSlug]}`,
+          ...scheduleDetails,
           state.creditAmount > 0 ? `کسر از اعتبار: ${toFaPrice(state.creditAmount)} تومان` : '',
           `مبلغ پرداختی: ${toFaPrice(state.finalPrice)} تومان`
         ].filter(Boolean),
-        highlight: 'ثبت تبلیغ جدید'
+        highlight: isToday ? 'ثبت تبلیغ جدید' : `شروع: ${toFaDigits(daysUntilStart)} روز دیگر`
       });
       
       resetForm();
+      
+      // Refresh slot availability after successful submission
+      if (typeof fetchSlotAvailability === 'function') {
+        fetchSlotAvailability();
+      }
     } catch (err) {
       console.error('Submit error:', err);
       showToast('خطا در ثبت تبلیغ', true);
@@ -2217,7 +2247,8 @@
       (async () => {
         state.walletBalance = await fetchWalletBalance();
         updateWalletDisplay();
-      })()
+      })(),
+      updateSchedulePreview(planSlug)
     ]);
     
     updatePriceBreakdown();
@@ -2226,6 +2257,43 @@
     document.body.classList.add('overflow-hidden', 'no-scroll');
     
     setTimeout(() => elements.titleInput?.focus(), 300);
+  };
+
+  // Update schedule preview based on slot availability
+  const updateSchedulePreview = async (planSlug) => {
+    try {
+      const res = await fetch(`${API_BASE}/adOrder/slots/availability`, withCreds());
+      if (!res.ok) return;
+      
+      const json = await res.json();
+      if (!json.success || !json.slots) return;
+      
+      const slotInfo = json.slots[planSlug];
+      if (!slotInfo) return;
+      
+      // Update booked count
+      const bookedEl = document.querySelector('#specialAdScheduleBooked [data-booked-value]');
+      if (bookedEl) {
+        bookedEl.textContent = `${toFaDigits(slotInfo.booked_today_count)}/۳`;
+      }
+      
+      // Update schedule start text
+      const scheduleRow = document.getElementById('specialAdScheduleStart');
+      const scheduleText = scheduleRow?.querySelector('.special-ad-schedule-preview__start-text');
+      if (scheduleText) {
+        if (slotInfo.days_until_next_available === 0) {
+          scheduleText.textContent = 'شروع: امروز (فعال تا پایان روز)';
+          scheduleRow.classList.remove('is-future');
+        } else {
+          const nextDate = new Date(slotInfo.next_available_date);
+          const dateStr = nextDate.toLocaleDateString('fa-IR');
+          scheduleText.textContent = `شروع: ${toFaDigits(slotInfo.days_until_next_available)} روز دیگر (${dateStr})`;
+          scheduleRow.classList.add('is-future');
+        }
+      }
+    } catch (err) {
+      if (isDev) console.error('updateSchedulePreview error:', err);
+    }
   };
 
   const closeModal = () => {

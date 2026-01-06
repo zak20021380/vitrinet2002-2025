@@ -23,7 +23,15 @@ const adOrderSchema = new mongoose.Schema({
   displayDurationHours: { type: Number },               // مدت نمایش تبلیغ (ساعت)
   expiresAt: { type: Date },                            // زمان پایان نمایش تبلیغ
   expiredAt: { type: Date },                            // زمان منقضی شدن تبلیغ
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAPACITY & SCHEDULING FIELDS (Daily Capacity = 3 ads/day per slot)
+  // ═══════════════════════════════════════════════════════════════════════════
+  scheduledStartDate: { type: Date },                   // تاریخ شروع برنامه‌ریزی شده (روز نمایش)
+  scheduledEndDate: { type: Date },                     // تاریخ پایان برنامه‌ریزی شده (پایان روز نمایش)
   createdAt: { type: Date, default: Date.now }
 });
+
+// Index for efficient capacity queries
+adOrderSchema.index({ planSlug: 1, scheduledStartDate: 1, status: 1 });
 
 module.exports = mongoose.model('AdOrder', adOrderSchema);

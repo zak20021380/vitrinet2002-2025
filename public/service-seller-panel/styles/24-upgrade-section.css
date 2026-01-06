@@ -3635,3 +3635,349 @@
 .upgrade-loading span {
   color: #475569;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAPACITY & SCHEDULING UI - Special Ads
+   Premium, compact info rows with calendar icons
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Capacity Container */
+.upgrade-ad-capacity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  margin: 0.5rem 0;
+}
+
+/* Capacity Row */
+.upgrade-ad-capacity__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--c-text-secondary, #94a3b8);
+}
+
+.upgrade-ad-capacity__row svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.upgrade-ad-capacity__label {
+  color: var(--c-text-tertiary, #64748b);
+}
+
+.upgrade-ad-capacity__value {
+  font-weight: 600;
+  color: var(--c-text-primary, #e2e8f0);
+}
+
+/* Availability Row - Dynamic States */
+.upgrade-ad-capacity__row--availability {
+  padding: 0.35rem 0.5rem;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.upgrade-ad-capacity__row--availability svg {
+  color: #10b981;
+  opacity: 1;
+}
+
+.upgrade-ad-capacity__booked {
+  font-weight: 600;
+  color: #10b981;
+}
+
+/* Full capacity state */
+.upgrade-ad-capacity__row--availability.is-full {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.upgrade-ad-capacity__row--availability.is-full svg {
+  color: #f59e0b;
+}
+
+.upgrade-ad-capacity__row--availability.is-full .upgrade-ad-capacity__booked {
+  color: #f59e0b;
+}
+
+/* Schedule Row */
+.upgrade-ad-capacity__schedule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(14, 165, 233, 0.15);
+  border-radius: 10px;
+  margin-top: 0.25rem;
+}
+
+.upgrade-ad-capacity__schedule svg {
+  width: 18px;
+  height: 18px;
+  color: #0ea5e9;
+  flex-shrink: 0;
+}
+
+.upgrade-ad-capacity__schedule-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0ea5e9;
+  line-height: 1.4;
+}
+
+/* Future schedule state */
+.upgrade-ad-capacity__schedule.is-future {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.06));
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.upgrade-ad-capacity__schedule.is-future svg {
+  color: #f59e0b;
+}
+
+.upgrade-ad-capacity__schedule.is-future .upgrade-ad-capacity__schedule-text {
+  color: #f59e0b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FREQUENCY CAP INFO
+   Compact tooltip-style info row
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.upgrade-ad-frequency-cap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  border-radius: 10px;
+  margin: 0.5rem 0;
+}
+
+.upgrade-ad-frequency-cap > svg {
+  width: 16px;
+  height: 16px;
+  color: #8b5cf6;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.upgrade-ad-frequency-cap__text {
+  flex: 1;
+  font-size: 0.72rem;
+  color: #a78bfa;
+  line-height: 1.4;
+}
+
+.upgrade-ad-frequency-cap__tooltip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: rgba(139, 92, 246, 0.15);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.upgrade-ad-frequency-cap__tooltip svg {
+  width: 14px;
+  height: 14px;
+  color: #8b5cf6;
+}
+
+.upgrade-ad-frequency-cap__tooltip:hover {
+  background: rgba(139, 92, 246, 0.25);
+  transform: scale(1.1);
+}
+
+/* Tooltip on hover */
+.upgrade-ad-frequency-cap__tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 220px;
+  padding: 0.6rem 0.8rem;
+  background: #1e293b;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  font-size: 0.72rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.upgrade-ad-frequency-cap__tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1e293b;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 101;
+}
+
+.upgrade-ad-frequency-cap__tooltip:hover::after,
+.upgrade-ad-frequency-cap__tooltip:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MY PLANS - SCHEDULING INFO
+   Shows reserved start/end dates for ad orders
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.myplans-card__scheduling {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.65rem 0.75rem;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(14, 165, 233, 0.15);
+  border-radius: 12px;
+  margin: 0.5rem 0;
+}
+
+.myplans-card__scheduling-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.myplans-card__scheduling-row svg {
+  width: 16px;
+  height: 16px;
+  color: #0ea5e9;
+  flex-shrink: 0;
+}
+
+.myplans-card__scheduling-label {
+  color: var(--c-text-tertiary, #64748b);
+}
+
+.myplans-card__scheduling-value {
+  font-weight: 600;
+  color: #0ea5e9;
+}
+
+/* Highlight for ad_id match (deep-link) */
+.myplans-card--highlighted {
+  animation: highlightPulse 2s ease-out;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4), 0 12px 32px rgba(16, 185, 129, 0.2);
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6), 0 12px 32px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.2), 0 12px 32px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4), 0 12px 32px rgba(16, 185, 129, 0.2);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 640px) {
+  .upgrade-ad-capacity {
+    padding: 0.85rem 1rem;
+    gap: 0.6rem;
+  }
+  
+  .upgrade-ad-capacity__row {
+    font-size: 0.82rem;
+  }
+  
+  .upgrade-ad-capacity__schedule-text {
+    font-size: 0.82rem;
+  }
+  
+  .upgrade-ad-frequency-cap__text {
+    font-size: 0.75rem;
+  }
+  
+  .upgrade-ad-frequency-cap__tooltip::after {
+    max-width: 260px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .upgrade-ad-capacity__row {
+    font-size: 0.85rem;
+  }
+  
+  .upgrade-ad-frequency-cap {
+    padding: 0.55rem 0.75rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD VARIANT COLORS FOR CAPACITY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.upgrade-ad-card--search .upgrade-ad-capacity__schedule {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(34, 197, 94, 0.05));
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+.upgrade-ad-card--search .upgrade-ad-capacity__schedule svg,
+.upgrade-ad-card--search .upgrade-ad-capacity__schedule-text {
+  color: #10b981;
+}
+
+.upgrade-ad-card--home .upgrade-ad-capacity__schedule {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(59, 130, 246, 0.05));
+  border-color: rgba(14, 165, 233, 0.15);
+}
+
+.upgrade-ad-card--home .upgrade-ad-capacity__schedule svg,
+.upgrade-ad-card--home .upgrade-ad-capacity__schedule-text {
+  color: #0ea5e9;
+}
+
+.upgrade-ad-card--products .upgrade-ad-capacity__schedule {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(249, 115, 22, 0.05));
+  border-color: rgba(245, 158, 11, 0.15);
+}
+
+.upgrade-ad-card--products .upgrade-ad-capacity__schedule svg,
+.upgrade-ad-card--products .upgrade-ad-capacity__schedule-text {
+  color: #f59e0b;
+}

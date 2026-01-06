@@ -21,6 +21,114 @@ const PUBLIC_POPULATE_SPEC = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CAPACITY CONSTANTS - HARD RULE: 3 ads/day per slot
+// ═══════════════════════════════════════════════════════════════════════════
+const DAILY_CAPACITY = 3;
+const AD_SLOT_KEYS = ['ad_search', 'ad_home', 'ad_products'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAPACITY & SCHEDULING HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get start of day in local timezone (Iran Standard Time)
+ * @param {Date} date - Input date
+ * @returns {Date} - Start of day
+ */
+function getStartOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * Get end of day in local timezone
+ * @param {Date} date - Input date
+ * @returns {Date} - End of day (23:59:59.999)
+ */
+function getEndOfDay(date) {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+/**
+ * Count reservations for a specific slot on a specific date
+ * @param {string} planSlug - The ad slot key (ad_search, ad_home, ad_products)
+ * @param {Date} date - The date to check
+ * @returns {Promise<number>} - Count of reservations
+ */
+async function countReservationsForDate(planSlug, date) {
+  const startOfDay = getStartOfDay(date);
+  const endOfDay = getEndOfDay(date);
+  
+  const count = await AdOrder.countDocuments({
+    planSlug,
+    scheduledStartDate: { $gte: startOfDay, $lte: endOfDay },
+    status: { $in: ['pending', 'approved', 'paid'] }
+  });
+  
+  return count;
+}
+
+/**
+ * Find the next available date for a slot (earliest date with < 3 reservations)
+ * @param {string} planSlug - The ad slot key
+ * @returns {Promise<{date: Date, bookedCount: number, daysUntil: number}>}
+ */
+async function findNextAvailableDate(planSlug) {
+  const today = getStartOfDay(new Date());
+  let checkDate = new Date(today);
+  const maxDaysToCheck = 30; // Look up to 30 days ahead
+  
+  for (let i = 0; i < maxDaysToCheck; i++) {
+    const count = await countReservationsForDate(planSlug, checkDate);
+    
+    if (count < DAILY_CAPACITY) {
+      return {
+        date: new Date(checkDate),
+        bookedCount: count,
+        daysUntil: i
+      };
+    }
+    
+    // Move to next day
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+  
+  // If all 30 days are full, return day 31
+  return {
+    date: checkDate,
+    bookedCount: 0,
+    daysUntil: maxDaysToCheck
+  };
+}
+
+/**
+ * Get slot availability info for all ad slots
+ * @returns {Promise<Object>} - Availability info per slot
+ */
+async function getSlotAvailability() {
+  const availability = {};
+  const today = getStartOfDay(new Date());
+  
+  for (const slot of AD_SLOT_KEYS) {
+    const todayCount = await countReservationsForDate(slot, today);
+    const nextAvailable = await findNextAvailableDate(slot);
+    
+    availability[slot] = {
+      daily_capacity: DAILY_CAPACITY,
+      booked_today_count: todayCount,
+      available_today: todayCount < DAILY_CAPACITY,
+      next_available_date: nextAvailable.date.toISOString(),
+      days_until_next_available: nextAvailable.daysUntil
+    };
+  }
+  
+  return availability;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // VALIDATION & SANITIZATION HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -292,6 +400,13 @@ exports.createAdOrder = async (req, res) => {
       }
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CAPACITY-BASED SCHEDULING (HARD RULE: 3 ads/day per slot)
+    // ═══════════════════════════════════════════════════════════════════════════
+    const nextAvailable = await findNextAvailableDate(planSlug);
+    const scheduledStartDate = getStartOfDay(nextAvailable.date);
+    const scheduledEndDate = getEndOfDay(nextAvailable.date);
+
     // --- ذخیره عکس در uploads ---
     let bannerImage = undefined;
     if (hasImage) {
@@ -318,6 +433,9 @@ exports.createAdOrder = async (req, res) => {
       adTitle: sanitizedTitle || undefined,
       adText: sanitizedText || undefined,
       status: 'pending',
+      // Scheduling fields
+      scheduledStartDate,
+      scheduledEndDate,
       createdAt: new Date(),
     });
 
@@ -327,9 +445,19 @@ exports.createAdOrder = async (req, res) => {
     // await trackOrderCreated(adOrder);
     const responseOrder = await buildAdOrderResponse(adOrder);
 
+    // Add scheduling info to response
+    responseOrder.scheduling = {
+      scheduled_start_date: scheduledStartDate.toISOString(),
+      scheduled_end_date: scheduledEndDate.toISOString(),
+      days_until_start: nextAvailable.daysUntil,
+      is_today: nextAvailable.daysUntil === 0
+    };
+
     res.status(201).json({
       success: true,
-      message: 'سفارش تبلیغ ثبت شد.',
+      message: nextAvailable.daysUntil === 0 
+        ? 'سفارش تبلیغ ثبت شد و برای امروز برنامه‌ریزی شد.'
+        : `سفارش تبلیغ ثبت شد و برای ${nextAvailable.daysUntil} روز دیگر برنامه‌ریزی شد.`,
       adOrder: responseOrder
     });
   } catch (err) {
@@ -704,6 +832,75 @@ exports.getActiveAds = async (req, res) => {
     res.json({ success: true, ads: validAds });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطا در دریافت تبلیغات فعال', error: err.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SLOT AVAILABILITY ENDPOINT
+// Returns capacity info for all ad slots (for UI display)
+// ═══════════════════════════════════════════════════════════════════════════
+exports.getSlotAvailability = async (req, res) => {
+  try {
+    const availability = await getSlotAvailability();
+    
+    res.json({
+      success: true,
+      daily_capacity: DAILY_CAPACITY,
+      slots: availability,
+      frequency_cap: {
+        max_impressions_per_user: 2,
+        period_hours: 24,
+        description: 'حداکثر ۲ نمایش برای هر کاربر در ۲۴ ساعت'
+      }
+    });
+  } catch (err) {
+    console.error('❌ خطا در دریافت وضعیت ظرفیت:', err);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت وضعیت ظرفیت',
+      error: err.message
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GET SELLER AD ORDERS WITH SCHEDULING INFO
+// Enhanced to include scheduling details for My Plans section
+// ═══════════════════════════════════════════════════════════════════════════
+exports.getSellerAdOrdersWithScheduling = async (req, res) => {
+  try {
+    const { sellerId } = req.query;
+    if (!sellerId)
+      return res.status(400).json({ success: false, message: 'sellerId الزامی است.' });
+
+    const docs = await AdOrder.find({ sellerId }).sort({ createdAt: -1 });
+    const cache = new Map();
+    
+    const adOrders = await Promise.all(docs.map(async (doc) => {
+      const order = await buildAdOrderResponse(doc, { cache });
+      
+      // Add scheduling info
+      if (doc.scheduledStartDate) {
+        const now = new Date();
+        const startDate = new Date(doc.scheduledStartDate);
+        const endDate = doc.scheduledEndDate ? new Date(doc.scheduledEndDate) : getEndOfDay(startDate);
+        const daysUntil = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+        
+        order.scheduling = {
+          scheduled_start_date: startDate.toISOString(),
+          scheduled_end_date: endDate.toISOString(),
+          days_until_start: Math.max(0, daysUntil),
+          is_today: daysUntil <= 0 && now <= endDate,
+          is_past: now > endDate
+        };
+      }
+      
+      return order;
+    }));
+    
+    res.json({ success: true, adOrders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات تبلیغ', error: err.message });
   }
 };
 
