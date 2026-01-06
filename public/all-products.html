@@ -336,33 +336,52 @@
       transform: translateY(-4px);
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       🌟 PREMIUM HERO AD CARD - Clean & Exclusive Design
+       Mobile-first, RTL-ready, Accessible
+       ═══════════════════════════════════════════════════════════════ */
+    
     .product-card.ad-card {
       padding: 0;
       border: none;
       overflow: hidden;
       position: relative;
-      background: linear-gradient(140deg, rgba(224, 253, 250, 0.92) 0%, rgba(230, 244, 253, 0.95) 48%, #ffffff 100%);
+      background: #ffffff;
       display: flex;
+      flex-direction: column;
+      border-radius: 18px;
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 30px -5px rgba(16, 185, 129, 0.12),
+        0 20px 50px -12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      isolation: isolate;
     }
 
-    .product-card.ad-card::before,
-    .product-card.ad-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
+    /* Thin gradient top accent line */
     .product-card.ad-card::before {
-      background:
-        radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 55%),
-        radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.15), transparent 60%);
-      opacity: 0.9;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981 0%, #0ea5e9 50%, #8b5cf6 100%);
+      z-index: 10;
+      border-radius: 18px 18px 0 0;
     }
 
-    .product-card.ad-card::after {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.45) 70%);
-      mix-blend-mode: screen;
+    .product-card.ad-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 
+        0 8px 12px -2px rgba(0, 0, 0, 0.06),
+        0 20px 40px -8px rgba(16, 185, 129, 0.18),
+        0 30px 60px -15px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card.ad-card:active {
+      transform: translateY(-3px) scale(0.995);
+      transition: transform 0.1s ease;
     }
 
     .product-card.ad-card .ad-card-inner {
@@ -372,187 +391,395 @@
       flex-direction: column;
       width: 100%;
       height: 100%;
+      text-decoration: none;
+      color: inherit;
     }
 
+    /* ─────────────────────────────────────────────────────────────────
+       Hero Image Section with Blurred Background
+       ───────────────────────────────────────────────────────────────── */
     .ad-card-media {
       position: relative;
-      height: 220px;
+      height: 160px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.18));
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
+    /* Blurred background layer */
+    .ad-card-media .ad-card-bg-blur {
+      position: absolute;
+      inset: -20px;
+      background-size: cover;
+      background-position: center;
+      filter: blur(20px) saturate(1.2);
+      opacity: 0.6;
+      transform: scale(1.1);
+      z-index: 0;
+    }
+
+    /* Soft dark overlay for readability */
     .ad-card-media::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4), transparent 55%);
+      background: linear-gradient(
+        180deg, 
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0.7) 100%
+      );
       z-index: 1;
-    }
-
-    .ad-card-media::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0) 40%, rgba(15, 23, 42, 0.18) 100%);
-      z-index: 1;
+      pointer-events: none;
     }
 
     .ad-card-image {
+      position: relative;
+      z-index: 2;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scale(1.02);
-      transition: transform 0.35s ease;
+      transition: transform 0.4s ease;
     }
 
     .product-card.ad-card:hover .ad-card-image {
-      transform: scale(1.07);
+      transform: scale(1.03);
     }
 
     .ad-card-placeholder {
-      position: absolute;
-      inset: 0;
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      font-weight: 900;
-      color: #0ea5e9;
-      z-index: 2;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
     }
 
+    .ad-card-placeholder svg {
+      width: 48px;
+      height: 48px;
+      color: #cbd5e1;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Premium Badge - Quality Stamp Style with Tooltip
+       ───────────────────────────────────────────────────────────────── */
     .ad-card-badge {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 3;
-      background: linear-gradient(90deg, #f97316, #f59e0b);
-      color: #fff;
-      padding: 7px 16px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 0.85rem;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.7rem;
       letter-spacing: 0.02em;
-      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.28);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: help;
     }
 
+    .ad-card-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Tooltip */
+    .ad-card-badge::after {
+      content: 'این آیتم به صورت پروموت‌شده نمایش داده می‌شود.';
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: all 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      pointer-events: none;
+    }
+
+    .ad-card-badge:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Body Section - Clean Content Area
+       ───────────────────────────────────────────────────────────────── */
     .ad-card-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding: 22px 24px 24px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255, 255, 255, 0.65);
+      gap: 12px;
+      padding: 16px 18px 18px;
+      background: #ffffff;
     }
 
     .ad-card-header {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
     }
 
+    /* Product Title - Bold & Dominant */
     .product-card.ad-card .ad-card-title {
       color: #0f172a;
-      font-size: 1.3rem;
-      font-weight: 900;
+      font-size: 1.05rem;
+      font-weight: 800;
       line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin: 0;
+      transition: color 0.2s ease;
     }
 
+    .product-card.ad-card:hover .ad-card-title {
+      color: #059669;
+    }
+
+    /* Shop Name - Muted & Small */
     .ad-card-shop {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(14, 165, 233, 0.12);
-      color: #0ea5e9;
-      font-weight: 800;
-      border-radius: 999px;
-      font-size: 0.95rem;
+      gap: 5px;
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 0.8rem;
     }
 
-    .ad-card-shop i {
-      font-size: 1rem;
+    .ad-card-shop svg {
+      width: 13px;
+      height: 13px;
+      color: #94a3b8;
     }
 
+    /* Ad Text - Hidden by default */
     .ad-card-text {
-      background: rgba(255, 255, 255, 0.78);
-      border-radius: 14px;
-      padding: 16px 18px;
-      color: #1f2937;
-      font-weight: 600;
-      font-size: 0.96rem;
-      line-height: 1.7;
-      border: 1.5px solid rgba(16, 185, 129, 0.18);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      word-break: break-word;
+      display: none;
     }
 
+    /* ─────────────────────────────────────────────────────────────────
+       Footer - Price & CTA Section
+       ───────────────────────────────────────────────────────────────── */
     .ad-card-footer {
       margin-top: auto;
       display: flex;
       align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
     }
 
+    /* Price Display - Visually Separated */
     .ad-card-price {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ad-card-price__label {
+      display: none;
+    }
+
+    .ad-card-price__value {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ad-card-price__value svg {
+      width: 16px;
+      height: 16px;
+      color: #10b981;
+    }
+
+    /* CTA Button - Calm Brand Color, 44px height */
+    .ad-card-btn {
+      flex-shrink: 0;
+      position: relative;
+      background: #10b981;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0 20px;
+      border-radius: 12px;
+      color: #ffffff;
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: #047857;
-      background: rgba(16, 185, 129, 0.15);
-      padding: 9px 18px;
-      border-radius: 999px;
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.18);
-    }
-
-    .ad-card-price i {
-      color: #0ea5e9;
-      font-size: 1rem;
-    }
-
-    .ad-card-btn {
-      flex: 1 1 190px;
-      background: linear-gradient(92deg, #0ea5e9 0%, #10b981 100%);
-      box-shadow: 0 10px 28px rgba(14, 165, 233, 0.28);
-      font-size: 1.05rem;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      padding: 13px 0;
-      border-radius: 14px;
       justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      height: 44px;
+      min-height: 44px;
+      border: none;
+      cursor: pointer;
+      overflow: hidden;
     }
 
     .ad-card-btn:hover {
-      box-shadow: 0 16px 40px rgba(16, 185, 129, 0.32);
-      transform: translateY(-2px) scale(1.02);
+      background: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
     }
 
+    .ad-card-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    }
+
+    .ad-card-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .ad-card-btn:hover svg {
+      transform: translateX(-3px);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Skeleton Loading State
+       ───────────────────────────────────────────────────────────────── */
+    .ad-card-skeleton .ad-card-media,
+    .ad-card-skeleton .ad-card-title,
+    .ad-card-skeleton .ad-card-shop,
+    .ad-card-skeleton .ad-card-price,
+    .ad-card-skeleton .ad-card-btn {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+      color: transparent !important;
+    }
+
+    .ad-card-skeleton .ad-card-title,
+    .ad-card-skeleton .ad-card-shop {
+      border-radius: 6px;
+      height: 1em;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Responsive Design - Tablet
+       ───────────────────────────────────────────────────────────────── */
     @media (max-width: 1024px) {
       .ad-card-media {
-        height: 210px;
+        height: 150px;
       }
 
       .ad-card-body {
-        padding: 20px 22px 24px;
+        padding: 14px 16px 16px;
       }
     }
 
+    /* ─────────────────────────────────────────────────────────────────
+       Responsive Design - Mobile
+       ───────────────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
+      .product-card.ad-card {
+        border-radius: 16px;
+      }
+
+      .product-card.ad-card::before {
+        border-radius: 16px 16px 0 0;
+      }
+
       .ad-card-media {
-        height: 190px;
+        height: 140px;
+      }
+
+      .product-card.ad-card .ad-card-title {
+        font-size: 1rem;
+      }
+
+      .ad-card-body {
+        padding: 14px 16px 16px;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .product-card.ad-card .ad-card-title {
+        font-size: 0.95rem;
+      }
+
+      .ad-card-shop {
+        font-size: 0.75rem;
+      }
+
+      .ad-card-footer {
+        gap: 10px;
+      }
+
+      .ad-card-price__value {
+        font-size: 1rem;
+      }
+
+      .ad-card-btn {
+        padding: 0 16px;
+        font-size: 0.85rem;
+        height: 42px;
+        min-height: 42px;
+        border-radius: 10px;
+      }
+
+      .ad-card-badge {
+        top: 10px;
+        right: 10px;
+        font-size: 0.68rem;
+        padding: 4px 8px;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Extra Small Screens
+       ───────────────────────────────────────────────────────────────── */
+    @media (max-width: 400px) {
+      .ad-card-media {
+        height: 130px;
+      }
+
+      .ad-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .ad-card-price {
+        text-align: center;
+      }
+
+      .ad-card-btn {
+        width: 100%;
+        height: 44px;
       }
     }
 
@@ -573,63 +800,6 @@
 
       .product-image-container {
         height: 180px;
-      }
-
-      .product-card.ad-card {
-        padding: 0;
-      }
-
-      .ad-card-media {
-        height: 200px;
-      }
-
-      .ad-card-body {
-        padding: 20px 18px 22px;
-        gap: 14px;
-      }
-
-      .product-card.ad-card .ad-card-title {
-        font-size: 1.12rem;
-        line-height: 1.4;
-      }
-
-      .ad-card-shop {
-        font-size: 0.9rem;
-        gap: 6px;
-      }
-
-      .ad-card-text {
-        font-size: 0.88rem;
-        -webkit-line-clamp: 4;
-        line-clamp: 4;
-        padding: 14px 15px;
-        line-height: 1.65;
-      }
-
-      .ad-card-footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-
-      .ad-card-price {
-        width: 100%;
-        justify-content: center;
-        font-size: 0.98rem;
-      }
-
-      .ad-card-btn {
-        width: 100%;
-        flex: 1 1 auto;
-        font-size: 0.98rem;
-        padding: 12px 0;
-      }
-
-      .ad-card-badge {
-        top: 14px;
-        right: 14px;
-        font-size: 0.75rem;
-        padding: 6px 14px;
       }
 
       .product-title {
@@ -2985,47 +3155,103 @@
         targetUrl = `shop.html?id=${safeSellerId}`;
       }
 
-      const bannerSrc = ad.bannerImage ? `/uploads/${encodeURIComponent(ad.bannerImage)}` : '';
+      // Helper function to validate image URL (skip base64 and overly long URLs)
+      function isValidImageUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        // Skip base64 data URLs (they cause 431 errors when too long)
+        if (url.startsWith('data:')) return false;
+        // Skip URLs that are too long (over 2000 chars)
+        if (url.length > 2000) return false;
+        return true;
+      }
+
+      // Get safe image source
+      function getSafeImageSrc(url) {
+        if (!isValidImageUrl(url)) return '';
+        return url;
+      }
+
+      const bannerSrc = ad.bannerImage ? getSafeImageSrc(`/uploads/${ad.bannerImage}`) : '';
+      const boardImageSrc = seller && seller.boardImage ? getSafeImageSrc(seller.boardImage) : '';
+      const productImageSrc = product && product.images && product.images.length > 0 
+        ? getSafeImageSrc(product.images[0]) 
+        : '';
+      
       const safeImageAlt = escapeHtml(shopTitle || adTitleRaw);
+
+      // Placeholder HTML for fallback
+      const placeholderHtml = `<div class="ad-card-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
 
       let imageHtml = '';
       if (bannerSrc) {
-        imageHtml = `<img class="ad-card-image" src="${bannerSrc}" alt="${safeImageAlt}" loading="lazy">`;
-      } else if (seller && seller.boardImage) {
-        imageHtml = `<img class="ad-card-image" src="${escapeHtml(seller.boardImage)}" alt="${safeImageAlt}" loading="lazy">`;
+        imageHtml = `<img class="ad-card-image" src="${escapeHtml(bannerSrc)}" alt="${safeImageAlt}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ad-card-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
+      } else if (boardImageSrc) {
+        imageHtml = `<img class="ad-card-image" src="${escapeHtml(boardImageSrc)}" alt="${safeImageAlt}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ad-card-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
+      } else if (productImageSrc) {
+        imageHtml = `<img class="ad-card-image" src="${escapeHtml(productImageSrc)}" alt="${safeImageAlt}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ad-card-placeholder" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
       } else {
-        imageHtml = `<div class="ad-card-placeholder">AD</div>`;
+        imageHtml = placeholderHtml;
       }
 
       const safeAdTitle = escapeHtml(adTitleRaw);
       const safeShopTitle = escapeHtml(shopTitle);
       const safeAdText = escapeHtml(adTextRaw).replace(/\n/g, '<br>');
       const adTextTooltip = adTextRaw ? escapeHtml(adTextRaw.replace(/\s+/g, ' ').trim()) : '';
-      const ctaText = productId ? 'مشاهده پیشنهاد ویژه' : 'مشاهده فروشگاه ویژه';
+      const ctaText = 'مشاهده پیشنهاد';
 
-      const priceHtml = priceText ? `<div class="ad-card-price"><i class="fas fa-bolt"></i>${priceText}</div>` : '';
-      const adTextHtml = safeAdText ? `<div class="ad-card-text"${adTextTooltip ? ` title="${adTextTooltip}"` : ''}>${safeAdText}</div>` : '';
-      const shopHtml = `<div class="ad-card-shop"><i class="ri-store-3-line"></i><span>${safeShopTitle}</span></div>`;
+      // Get the best available image for background blur
+      const bgImageSrc = bannerSrc || boardImageSrc || productImageSrc || '';
+
+      const priceHtml = priceText ? `
+        <div class="ad-card-price">
+          <span class="ad-card-price__value">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            ${priceText}
+          </span>
+        </div>` : '';
+      
+      const shopHtml = `
+        <span class="ad-card-shop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <path d="M9 22V12h6v10"/>
+          </svg>
+          ${safeShopTitle}
+        </span>`;
+
+      // Blurred background div (only if we have an image)
+      const bgBlurHtml = bgImageSrc ? `<div class="ad-card-bg-blur" style="background-image:url('${escapeHtml(bgImageSrc)}')"></div>` : '';
 
       return `
     <article class="product-card ad-card" data-ad-card="true">
-      <div class="ad-card-inner">
+      <a href="${targetUrl}" class="ad-card-inner" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%;">
         <div class="ad-card-media">
+          ${bgBlurHtml}
           ${imageHtml}
-          <span class="ad-card-badge">تبلیغ ویژه</span>
+          <span class="ad-card-badge" title="این آیتم به صورت پروموت‌شده نمایش داده می‌شود.">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            ویژه
+          </span>
         </div>
         <div class="ad-card-body">
           <div class="ad-card-header">
+            <h3 class="product-title ad-card-title">${safeAdTitle}</h3>
             ${shopHtml}
-            <div class="product-title ad-card-title">${safeAdTitle}</div>
           </div>
-          ${adTextHtml}
           <div class="ad-card-footer">
             ${priceHtml}
-            <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" class="see-product-btn ad-card-btn">${ctaText}</a>
+            <span class="ad-card-btn">
+              ${ctaText}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </span>
           </div>
         </div>
-      </div>
+      </a>
     </article>
   `;
     }
@@ -3055,24 +3281,42 @@
       const adProductId = featuredAdProductId;
       let insertedProducts = 0;
 
+      // Helper to get safe image URL (skip base64 and long URLs)
+      function getSafeProductImage(images) {
+        if (!images || !images.length) return 'https://placehold.co/320x200?text=NO+IMAGE';
+        const img = images[0];
+        // Skip base64 data URLs
+        if (typeof img === 'string' && img.startsWith('data:')) {
+          return 'https://placehold.co/320x200?text=NO+IMAGE';
+        }
+        // Skip overly long URLs
+        if (typeof img === 'string' && img.length > 2000) {
+          return 'https://placehold.co/320x200?text=NO+IMAGE';
+        }
+        return img;
+      }
+
       list.forEach(p => {
         const productId = getProductIdFromProduct(p);
         if (adProductId && productId && adProductId === productId) {
           return;
         }
-        const img = (p.images?.length) ? p.images[0] : 'https://placehold.co/320x200?text=NO+IMAGE';
+        const img = getSafeProductImage(p.images);
+        const safeTitle = escapeHtml(p.title || '');
+        const safeAddress = escapeHtml(p.seller?.address || 'نامشخص');
+        const safeCategory = escapeHtml(p.seller?.category || '');
         const cardHtml = `
       <div class="product-card">
         <div class="product-image-container rounded-xl overflow-hidden shadow-sm">
-          <img class="product-image object-cover" src="${img}" alt="${p.title}" loading="lazy">
+          <img class="product-image object-cover" src="${escapeHtml(img)}" alt="${safeTitle}" loading="lazy" onerror="this.src='https://placehold.co/320x200?text=NO+IMAGE'">
         </div>
         <div class="product-details">
-          <div class="product-title">${p.title}</div>
-          <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${p.seller.address || "نامشخص"}</div>
+          <div class="product-title">${safeTitle}</div>
+          <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${safeAddress}</div>
           <div class="product-price">${formatPrice(p.price)}</div>
           <a href="product.html?id=${p._id}" target="_blank" rel="noopener noreferrer" class="see-product-btn">مشاهده محصول</a>
         </div>
-        <span class="tag">${p.seller.category || ""}</span>
+        <span class="tag">${safeCategory}</span>
       </div>`;
         wrap.insertAdjacentHTML('beforeend', cardHtml);
         insertedProducts++;
