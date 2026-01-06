@@ -1,7 +1,7 @@
 /**
- * Featured Ad Module - Dedicated Sponsored Section
- * Separate from search results with frequency capping & tracking
- * Version: 3.0
+ * Featured Ad Module - Compact Premium Micro-Card
+ * Single-row layout, mobile-first with frequency capping
+ * Version: 4.0
  */
 
 (function() {
@@ -20,9 +20,9 @@
     SESSION_KEY: 'vt_featured_ad_session',
     DISMISS_KEY: 'vt_featured_ad_dismissed',
     IMPRESSION_KEY: 'vt_featured_ad_impressions',
-    MAX_IMPRESSIONS_PER_SESSION: 3, // Frequency cap
-    CACHE_TTL_MS: 5 * 60 * 1000, // 5 minutes
-    ROTATION_INTERVAL_MS: 30 * 1000 // 30 seconds for rotation
+    MAX_IMPRESSIONS_PER_SESSION: 3,
+    CACHE_TTL_MS: 5 * 60 * 1000,
+    ROTATION_INTERVAL_MS: 30 * 1000
   };
 
   // ============================================
@@ -47,7 +47,7 @@
   // ============================================
   
   function generateSessionId() {
-    return 'sess_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    return 'sess_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 11);
   }
 
   function getSessionId() {
@@ -109,7 +109,6 @@
   // ============================================
   
   async function fetchAds(force = false) {
-    // Check cache
     if (!force && state.allAds.length && state.cacheTime) {
       const age = Date.now() - state.cacheTime;
       if (age < CONFIG.CACHE_TTL_MS) {
@@ -139,7 +138,6 @@
         return [];
       }
 
-      // Filter approved ads
       const approvedAds = data.ads.filter(
         ad => ad.planSlug === CONFIG.PLAN_SLUG && ad.status === 'approved'
       );
@@ -158,17 +156,12 @@
 
   async function trackImpression(adId) {
     if (!adId) return;
-    
     try {
       await fetch(`${CONFIG.API_BASE}${CONFIG.IMPRESSION_ENDPOINT}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          adId, 
-          sessionId: getSessionId(),
-          timestamp: Date.now()
-        })
+        body: JSON.stringify({ adId, sessionId: getSessionId(), timestamp: Date.now() })
       });
     } catch (error) {
       console.warn('[FeaturedAd] Impression tracking failed:', error);
@@ -177,17 +170,12 @@
 
   async function trackClick(adId) {
     if (!adId) return;
-    
     try {
       await fetch(`${CONFIG.API_BASE}${CONFIG.CLICK_ENDPOINT}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          adId, 
-          sessionId: getSessionId(),
-          timestamp: Date.now()
-        })
+        body: JSON.stringify({ adId, sessionId: getSessionId(), timestamp: Date.now() })
       });
     } catch (error) {
       console.warn('[FeaturedAd] Click tracking failed:', error);
@@ -195,30 +183,28 @@
   }
 
   // ============================================
-  // RENDER FUNCTIONS
+  // RENDER FUNCTIONS - TWO-ROW MICRO-CARD
   // ============================================
   
   function renderLoadingState() {
     return `
       <div class="featured-ad-card">
         <div class="featured-ad-header">
-          <div class="featured-ad-label">
-            <span class="featured-ad-badge">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M4.5 8.5c0-2.485 2.015-4.5 4.5-4.5h2c2.485 0 4.5 2.015 4.5 4.5v3c0 2.485-2.015 4.5-4.5 4.5h-2c-2.485 0-4.5-2.015-4.5-4.5v-3Z"/>
-              </svg>
-              تبلیغ
-            </span>
-            <span class="featured-ad-title-label">پیشنهاد ویژه</span>
-          </div>
+          <span class="featured-ad-badge">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15.5L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z"/>
+            </svg>
+            پیشنهاد ویژه
+          </span>
         </div>
-        <div class="featured-ad-loading">
-          <div class="featured-ad-loading-thumb"></div>
-          <div class="featured-ad-loading-info">
-            <div class="featured-ad-loading-line featured-ad-loading-line--short"></div>
-            <div class="featured-ad-loading-line featured-ad-loading-line--full"></div>
-            <div class="featured-ad-loading-line featured-ad-loading-line--medium"></div>
-            <div class="featured-ad-loading-line featured-ad-loading-line--cta"></div>
+        <div class="featured-ad-body">
+          <div class="featured-ad-loading">
+            <div class="featured-ad-loading-thumb"></div>
+            <div class="featured-ad-loading-info">
+              <div class="featured-ad-loading-line featured-ad-loading-line--title"></div>
+              <div class="featured-ad-loading-line featured-ad-loading-line--subtitle"></div>
+            </div>
+            <div class="featured-ad-loading-cta"></div>
           </div>
         </div>
       </div>
@@ -228,14 +214,12 @@
   function renderAdCard(ad) {
     if (!ad) return '';
 
-    // Extract data
     const productInfo = typeof ad.productId === 'object' ? ad.productId : null;
     const sellerInfo = typeof ad.sellerId === 'object' ? ad.sellerId : null;
     const productId = productInfo?._id || productInfo?.id || (typeof ad.productId === 'string' ? ad.productId : null);
     const sellerId = sellerInfo?._id || sellerInfo?.id || (typeof ad.sellerId === 'string' ? ad.sellerId : null);
     const sellerShopurl = sellerInfo?.shopurl;
 
-    // Build target URL
     let targetUrl = '#';
     if (productId) {
       targetUrl = `product.html?id=${productId}`;
@@ -247,8 +231,7 @@
 
     const adId = ad._id || ad.id || '';
     const title = escapeHTML(ad.adTitle || 'پیشنهاد ویژه');
-    const description = ad.adText ? escapeHTML(ad.adText).replace(/\n+/g, ' ').substring(0, 80) : '';
-    const shopName = escapeHTML(ad.shopTitle || sellerInfo?.storename || '');
+    const description = ad.adText ? escapeHTML(ad.adText).replace(/\n+/g, ' ').substring(0, 50) : '';
     const imageUrl = resolveImageUrl(ad.bannerImage);
 
     const thumbnailHTML = imageUrl
@@ -258,47 +241,35 @@
     return `
       <div class="featured-ad-card" data-ad-id="${escapeHTML(adId)}">
         <div class="featured-ad-header">
-          <div class="featured-ad-label">
-            <span class="featured-ad-badge">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M4.5 8.5c0-2.485 2.015-4.5 4.5-4.5h2c2.485 0 4.5 2.015 4.5 4.5v3c0 2.485-2.015 4.5-4.5 4.5h-2c-2.485 0-4.5-2.015-4.5-4.5v-3Z"/>
-                <path d="M7.5 8h5" stroke-linecap="round"/>
-                <path d="M7.5 11h3" stroke-linecap="round"/>
-              </svg>
-              تبلیغ
-            </span>
-            <span class="featured-ad-title-label">پیشنهاد ویژه</span>
-          </div>
+          <span class="featured-ad-badge">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10 2L12.5 7.5L18 8.5L14 12.5L15 18L10 15.5L5 18L6 12.5L2 8.5L7.5 7.5L10 2Z"/>
+            </svg>
+            پیشنهاد ویژه
+          </span>
           <button type="button" class="featured-ad-dismiss" aria-label="بستن تبلیغ" data-action="dismiss">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <path d="M6 6l8 8M14 6l-8 8"/>
             </svg>
           </button>
         </div>
-        <a href="${targetUrl}" class="featured-ad-content" data-action="click" data-ad-id="${escapeHTML(adId)}">
+        <div class="featured-ad-body">
           <div class="featured-ad-thumb">
             ${thumbnailHTML}
           </div>
-          <div class="featured-ad-info">
-            ${shopName ? `
-              <div class="featured-ad-shop">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 9l1.5-4.5A2 2 0 0 1 6.4 3h11.2a2 2 0 0 1 1.9 1.3L21 9"/>
-                  <path d="M20 9v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"/>
-                </svg>
-                ${shopName}
-              </div>
-            ` : ''}
-            <h4 class="featured-ad-name">${title}</h4>
-            ${description ? `<p class="featured-ad-desc">${description}</p>` : ''}
+          <a href="${targetUrl}" class="featured-ad-content" data-action="click" data-ad-id="${escapeHTML(adId)}">
+            <div class="featured-ad-info">
+              <h4 class="featured-ad-name">${title}</h4>
+              ${description ? `<p class="featured-ad-desc">${description}</p>` : '<p class="featured-ad-desc">پیشنهاد ویژه</p>'}
+            </div>
             <span class="featured-ad-cta">
               مشاهده
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M7 5l-5 5 5 5"/>
               </svg>
             </span>
-          </div>
-        </a>
+          </a>
+        </div>
       </div>
     `;
   }
@@ -321,7 +292,6 @@
     module.setAttribute('role', 'complementary');
     module.setAttribute('aria-label', 'تبلیغ ویژه');
 
-    // Insert after search form
     const searchForm = document.getElementById('searchForm');
     if (searchForm && searchForm.parentNode) {
       searchForm.parentNode.insertBefore(module, searchForm.nextSibling);
@@ -334,13 +304,11 @@
     const module = getModuleElement();
     if (!module) return;
 
-    // Check frequency cap
     if (getImpressionCount() >= CONFIG.MAX_IMPRESSIONS_PER_SESSION) {
       console.log('[FeaturedAd] Frequency cap reached');
       return;
     }
 
-    // Check if dismissed
     if (isDismissedThisSession()) {
       console.log('[FeaturedAd] Dismissed this session');
       return;
@@ -389,7 +357,6 @@
   function startRotation() {
     if (state.rotationTimer) return;
     if (state.allAds.length <= 1) return;
-
     state.rotationTimer = setInterval(rotateAd, CONFIG.ROTATION_INTERVAL_MS);
   }
 
@@ -405,13 +372,11 @@
   // ============================================
   
   async function loadAndShowAd() {
-    // Check if should show
     if (isDismissedThisSession()) return;
     if (getImpressionCount() >= CONFIG.MAX_IMPRESSIONS_PER_SESSION) return;
 
     const module = createModuleElement();
     
-    // Show loading state
     module.innerHTML = renderLoadingState();
     showModule();
 
@@ -423,18 +388,14 @@
         return;
       }
 
-      // Select first ad (or random for rotation)
       state.currentAd = ads[0];
       state.adIndex = 0;
 
-      // Render ad
       module.innerHTML = renderAdCard(state.currentAd);
       
-      // Track impression
       trackImpression(state.currentAd._id || state.currentAd.id);
       incrementImpressionCount();
 
-      // Start rotation if multiple ads
       if (ads.length > 1) {
         startRotation();
       }
@@ -452,7 +413,6 @@
   function handleModuleClick(event) {
     const target = event.target;
     
-    // Dismiss button
     if (target.closest('[data-action="dismiss"]')) {
       event.preventDefault();
       event.stopPropagation();
@@ -460,14 +420,12 @@
       return;
     }
 
-    // Ad click
     const clickTarget = target.closest('[data-action="click"]');
     if (clickTarget) {
       const adId = clickTarget.dataset.adId;
       if (adId) {
         trackClick(adId);
       }
-      // Let the link navigate naturally
     }
   }
 
@@ -478,20 +436,12 @@
   }
 
   function handleSearchBlur(event) {
-    // Don't hide if clicking inside the ad module
     const relatedTarget = event.relatedTarget;
     const module = getModuleElement();
     
     if (module && relatedTarget && module.contains(relatedTarget)) {
       return;
     }
-
-    // Optional: hide after delay if not interacting
-    // setTimeout(() => {
-    //   if (!document.activeElement?.closest('#featuredAdModule')) {
-    //     hideModule();
-    //   }
-    // }, 200);
   }
 
   // ============================================
@@ -503,10 +453,8 @@
     state.isDismissed = isDismissedThisSession();
     state.impressionCount = getImpressionCount();
 
-    // Create module element
     createModuleElement();
 
-    // Attach event listeners
     const module = getModuleElement();
     if (module) {
       module.addEventListener('click', handleModuleClick);
@@ -518,23 +466,19 @@
       searchInput.addEventListener('blur', handleSearchBlur);
     }
 
-    // Preload ads
     fetchAds();
 
     console.log('[FeaturedAd] Module initialized');
   }
 
-  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Cleanup on page unload
   window.addEventListener('beforeunload', stopRotation);
 
-  // Expose API
   window.FeaturedAdModule = {
     show: loadAndShowAd,
     hide: hideModule,

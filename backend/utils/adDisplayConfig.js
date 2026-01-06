@@ -115,7 +115,26 @@ function computeExpiresAt(planSlug, displayedAt, overrideHours) {
   }
   if (!hours) return null;
 
-  return new Date(baseDate.getTime() + hours * 60 * 60 * 1000);
+  // Convert hours to days (round up to ensure full days)
+  const durationDays = Math.ceil(hours / 24);
+  
+  // Business rule: Start day counts as a full active day
+  // expire_date = start_date + (N - 1) days, at 23:59:59
+  // Example: Start 1404/01/17, Duration 1 day → Expire 1404/01/17 23:59:59
+  // Example: Start 1404/01/17, Duration 3 days → Expire 1404/01/19 23:59:59
+  
+  // Get the start of the display day (midnight)
+  const startOfDay = new Date(baseDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  // Add (durationDays - 1) days to get the expiration date
+  const expirationDate = new Date(startOfDay);
+  expirationDate.setDate(expirationDate.getDate() + (durationDays - 1));
+  
+  // Set time to end of day (23:59:59.999)
+  expirationDate.setHours(23, 59, 59, 999);
+  
+  return expirationDate;
 }
 
 function getCleanupIntervalMs() {

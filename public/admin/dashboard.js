@@ -1636,7 +1636,7 @@ function renderAdOrders() {
       durationBadges.push(`<span><i class="ri-timer-line"></i>${escapeHtml(formatAdDuration(durationHours))}</span>`);
     }
     if (expiresAt) {
-      durationBadges.push(`<span><i class="ri-calendar-event-line"></i>پایان: ${escapeHtml(expiresAt)}</span>`);
+      durationBadges.push(`<span><i class="ri-calendar-event-line"></i>فعال تا پایان روز ${escapeHtml(expiresAt)}</span>`);
     }
     const durationMetaHtml = durationBadges.length
       ? `<div class="ad-cell-secondary ad-duration-badges">${durationBadges.join('')}</div>`
@@ -2092,7 +2092,7 @@ function renderAdOrderModal(order) {
             ${approvedAt ? `<span><span class="label">تاریخ تایید:</span> ${approvedAt}</span>` : ''}
             ${displayedAt ? `<span><span class="label">تاریخ نمایش:</span> ${displayedAt}</span>` : '<span><span class="label">تاریخ نمایش:</span> در انتظار تعیین</span>'}
             <span><span class="label">مدت نمایش:</span> ${escapeHtml(durationSummaryText)}</span>
-            ${expiresAt ? `<span><span class="label">پایان نمایش:</span> ${expiresAt}</span>` : ''}
+            ${expiresAt ? `<span><span class="label">فعال تا پایان روز:</span> ${expiresAt}</span>` : ''}
             ${planLocationRow}
           </div>
         </div>
@@ -2152,7 +2152,7 @@ function renderAdOrderModal(order) {
         ${reviewedAt ? `<span>آخرین بررسی: ${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}</span>` : ''}
         ${approvedAt ? `<span>تایید نهایی: ${approvedAt}</span>` : ''}
         ${displayedAt ? `<span>نمایش در سایت: ${displayedAt}</span>` : '<span>نمایش در سایت: در انتظار نمایش</span>'}
-        ${expiresAt ? `<span>پایان نمایش: ${expiresAt}</span>` : ''}
+        ${expiresAt ? `<span>فعال تا پایان روز: ${expiresAt}</span>` : ''}
       </div>
 
       <div class="ad-modal-status">

@@ -1424,16 +1424,50 @@ async function fetchMyPlans() {
     }
   }
 
-  // تاریخ پایان = یک روز بعد از شروع
+  // تاریخ پایان - استفاده از expiresAt از بک‌اند
+  // قانون: روز شروع به عنوان یک روز کامل حساب می‌شود
+  // اگر مدت N روز باشد: expire_date = start_date + (N-1) روز، ساعت ۲۳:۵۹:۵۹
   function getAdEndDate(plan) {
-    if (!plan.startDate) return "-";
+    // First check if backend provides expiresAt
+    if (plan.expiresAt) {
+      try {
+        return toJalaliDate(plan.expiresAt);
+      } catch {
+        return "-";
+      }
+    }
+    
+    // Fallback: calculate from displayedAt or approvedAt
+    const startDate = plan.displayedAt || plan.approvedAt || plan.startDate;
+    if (!startDate) return "-";
+    
     try {
-      const d = new Date(plan.startDate);
-      d.setDate(d.getDate() + 1);
-      return toJalaliDate(d.toISOString());
+      const d = new Date(startDate);
+      if (Number.isNaN(d.getTime())) return "-";
+      
+      // Get duration in hours (default 24 = 1 day)
+      const durationHours = plan.displayDurationHours || 24;
+      const durationDays = Math.ceil(durationHours / 24);
+      
+      // Business rule: start day counts as full day
+      // expire_date = start_date + (N-1) days at end of day
+      const startOfDay = new Date(d);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const expirationDate = new Date(startOfDay);
+      expirationDate.setDate(expirationDate.getDate() + (durationDays - 1));
+      
+      return toJalaliDate(expirationDate.toISOString());
     } catch {
       return "-";
     }
+  }
+  
+  // برچسب تاریخ پایان برای نمایش در UI
+  function getAdEndDateLabel(plan) {
+    const endDate = getAdEndDate(plan);
+    if (endDate === "-") return "تاریخ پایان نامشخص";
+    return `فعال تا پایان روز ${endDate}`;
   }
 
   // وضعیت پلن برای کلاس CSS
@@ -1898,7 +1932,7 @@ async function fetchMyPlans() {
                   </svg>
                 </div>
                 <div class="myplans-card__expiry-content">
-                  <span class="myplans-card__expiry-label">تاریخ پایان</span>
+                  <span class="myplans-card__expiry-label">فعال تا پایان روز</span>
                   <span class="myplans-card__expiry-value">${endDate}</span>
                 </div>
               </div>
