@@ -1149,3 +1149,346 @@
     transform: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────
+   Pending Ad Guard Modal
+   Premium Mobile-First Design
+   ───────────────────────────────────────────────────── */
+
+/* Body lock when modal is open */
+body.pending-guard-modal--open {
+  overflow: hidden;
+  touch-action: none;
+}
+
+.pending-guard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.pending-guard-modal.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pending-guard-modal.is-closing {
+  opacity: 0;
+}
+
+/* Backdrop */
+.pending-guard-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Container */
+.pending-guard-modal__container {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  z-index: 1;
+}
+
+/* Card */
+.pending-guard-modal__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem 1.75rem;
+  border-radius: 24px;
+  background: linear-gradient(165deg, #ffffff 0%, #fffbeb 100%);
+  box-shadow: 
+    0 24px 50px rgba(245, 158, 11, 0.2),
+    0 0 0 1px rgba(245, 158, 11, 0.1);
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pending-guard-modal.is-visible .pending-guard-modal__card {
+  transform: translateY(0) scale(1);
+}
+
+.pending-guard-modal.is-closing .pending-guard-modal__card {
+  transform: translateY(10px) scale(0.98);
+}
+
+/* Icon */
+.pending-guard-modal__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+  color: #f59e0b;
+  margin-bottom: 1.25rem;
+  animation: pendingIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes pendingIconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pending-guard-modal__icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* Title */
+.pending-guard-modal__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.65rem;
+  line-height: 1.4;
+}
+
+/* Message */
+.pending-guard-modal__message {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.75;
+  margin: 0 0 1rem;
+  max-width: 300px;
+}
+
+/* Plan Info Box */
+.pending-guard-modal__plan-info {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  margin-bottom: 1.25rem;
+}
+
+.pending-guard-modal__plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+}
+
+.pending-guard-modal__plan-row:not(:last-child) {
+  border-bottom: 1px dashed rgba(245, 158, 11, 0.2);
+}
+
+.pending-guard-modal__plan-label {
+  font-size: 0.78rem;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.pending-guard-modal__plan-value {
+  font-size: 0.82rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Actions */
+.pending-guard-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.pending-guard-modal__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9rem 1.25rem;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-height: 50px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pending-guard-modal__btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.pending-guard-modal__btn--primary {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.pending-guard-modal__btn--primary:hover,
+.pending-guard-modal__btn--primary:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+  outline: none;
+}
+
+.pending-guard-modal__btn--primary:active {
+  transform: translateY(0);
+}
+
+.pending-guard-modal__btn--secondary {
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  color: #475569;
+}
+
+.pending-guard-modal__btn--secondary:hover,
+.pending-guard-modal__btn--secondary:focus {
+  background: #f1f5f9;
+  color: #0f172a;
+  outline: none;
+}
+
+/* Pending Action Button Style in Card */
+.myplans-card__action--pending {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)) !important;
+  border: 1px dashed rgba(245, 158, 11, 0.4) !important;
+  color: #d97706 !important;
+}
+
+.myplans-card__action--pending:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08)) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+/* ─────────────────────────────────────────────────────
+   Responsive - Tablet & Desktop
+   ───────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .pending-guard-modal {
+    padding: 1.5rem;
+  }
+
+  .pending-guard-modal__container {
+    max-width: 420px;
+  }
+
+  .pending-guard-modal__card {
+    padding: 2.5rem 2rem 2rem;
+    border-radius: 28px;
+  }
+
+  .pending-guard-modal__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 22px;
+  }
+
+  .pending-guard-modal__icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pending-guard-modal__title {
+    font-size: 1.25rem;
+  }
+
+  .pending-guard-modal__message {
+    font-size: 0.92rem;
+  }
+
+  .pending-guard-modal__actions {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .pending-guard-modal__btn {
+    flex: 1;
+    padding: 0.95rem 1.5rem;
+    border-radius: 16px;
+    min-height: 52px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Extra Small Screens
+   ───────────────────────────────────────────────────── */
+@media (max-width: 390px) {
+  .pending-guard-modal {
+    padding: 0.75rem;
+  }
+
+  .pending-guard-modal__card {
+    padding: 1.5rem 1.25rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .pending-guard-modal__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    margin-bottom: 1rem;
+  }
+
+  .pending-guard-modal__icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pending-guard-modal__title {
+    font-size: 1.05rem;
+  }
+
+  .pending-guard-modal__message {
+    font-size: 0.82rem;
+  }
+
+  .pending-guard-modal__plan-info {
+    padding: 0.75rem 0.85rem;
+    border-radius: 12px;
+  }
+
+  .pending-guard-modal__plan-label {
+    font-size: 0.72rem;
+  }
+
+  .pending-guard-modal__plan-value {
+    font-size: 0.78rem;
+  }
+
+  .pending-guard-modal__btn {
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    min-height: 46px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Reduced Motion Support
+   ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pending-guard-modal,
+  .pending-guard-modal__card,
+  .pending-guard-modal__icon,
+  .pending-guard-modal__btn {
+    transition: none;
+    animation: none;
+  }
+
+  .pending-guard-modal.is-visible .pending-guard-modal__card {
+    transform: none;
+  }
+}

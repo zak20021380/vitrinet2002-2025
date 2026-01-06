@@ -1821,6 +1821,10 @@ async function fetchMyPlans() {
       `;
 
     // کارت‌های تبلیغات
+    // Check if any ad plan is pending (for guard flow)
+    const hasPendingAdPlan = adPlans.some(p => p.status === 'pending');
+    const pendingAdPlan = adPlans.find(p => p.status === 'pending');
+
     const adCards = adPlans.length
       ? adPlans.map(plan => {
           const status = plan.status || 'pending';
@@ -1831,24 +1835,42 @@ async function fetchMyPlans() {
           const viewLink = plan.status === 'approved' ? resolveAdViewLink(plan) : '';
           const endDate = getAdEndDate(plan);
 
-          const actionBtn = viewLink
-            ? `<a href="${viewLink}" target="_blank" rel="noopener" class="myplans-card__action myplans-card__action--primary">
+          // Guard flow: if pending, show modal instead of navigating
+          let actionBtn;
+          if (viewLink) {
+            actionBtn = `<a href="${viewLink}" target="_blank" rel="noopener" class="myplans-card__action myplans-card__action--primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
                   <path d="M15 3h6v6"/>
                   <path d="M10 14L21 3"/>
                 </svg>
                 مشاهده تبلیغ
-              </a>`
-            : `<button class="myplans-card__action myplans-card__action--secondary" onclick="toggleTabs('ads')">
+              </a>`;
+          } else if (status === 'pending') {
+            // Pending plan - show guard modal on click
+            const planName = plan.title || adType;
+            const submittedDate = plan.createdAt ? toJalaliDate(plan.createdAt) : '';
+            actionBtn = `<button class="myplans-card__action myplans-card__action--secondary myplans-card__action--pending" 
+                data-pending-plan-name="${planName}" 
+                data-pending-plan-date="${submittedDate}"
+                onclick="showPendingAdGuardModal(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                در انتظار تأیید
+              </button>`;
+          } else {
+            actionBtn = `<button class="myplans-card__action myplans-card__action--secondary" onclick="handleNewAdClick(event)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 5v14M5 12h14"/>
                 </svg>
                 ثبت تبلیغ جدید
               </button>`;
+          }
 
           return `
-            <article class="myplans-card myplans-card--ad">
+            <article class="myplans-card myplans-card--ad" data-plan-status="${status}">
               <div class="myplans-card__header">
                 <span class="myplans-card__type">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -1902,6 +1924,13 @@ async function fetchMyPlans() {
           </button>
         </div>
       `;
+
+    // Store pending ad info for guard modal
+    window.__pendingAdPlanInfo = hasPendingAdPlan ? {
+      name: pendingAdPlan?.title || getAdTypeLabel(pendingAdPlan),
+      date: pendingAdPlan?.createdAt ? toJalaliDate(pendingAdPlan.createdAt) : null,
+      status: pendingAdPlan?.status
+    } : null;
 
     // خروجی نهایی صفحه
     box.innerHTML = `
@@ -1980,3 +2009,179 @@ function toJalaliDate(isoStr) {
     return isoStr.split('T')[0];
   }
 }
+
+/* ─────────────────────────────────────────────────────
+   Pending Ad Guard Modal
+   Shows when user tries to create new ad while having pending approval
+   ───────────────────────────────────────────────────── */
+
+/**
+ * Handle click on "ثبت تبلیغ جدید" button
+ * Guards against creating new ad if there's a pending one
+ */
+function handleNewAdClick(event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  // Check if there's a pending ad plan from backend data
+  if (window.__pendingAdPlanInfo && window.__pendingAdPlanInfo.status === 'pending') {
+    showPendingAdGuardModal();
+    return;
+  }
+
+  // No pending plan, proceed to ads tab
+  toggleTabs('ads');
+}
+
+/**
+ * Show the pending ad approval guard modal
+ * @param {HTMLElement} [triggerBtn] - Optional button element with data attributes
+ */
+function showPendingAdGuardModal(triggerBtn) {
+  // Get plan info from trigger button or global state
+  let planName = '';
+  let planDate = '';
+
+  if (triggerBtn && triggerBtn.dataset) {
+    planName = triggerBtn.dataset.pendingPlanName || '';
+    planDate = triggerBtn.dataset.pendingPlanDate || '';
+  } else if (window.__pendingAdPlanInfo) {
+    planName = window.__pendingAdPlanInfo.name || '';
+    planDate = window.__pendingAdPlanInfo.date || '';
+  }
+
+  // Remove existing modal if any
+  const existingModal = document.getElementById('pendingAdGuardModal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Build plan info section if available
+  const planInfoHtml = (planName || planDate) ? `
+    <div class="pending-guard-modal__plan-info">
+      ${planName ? `<div class="pending-guard-modal__plan-row">
+        <span class="pending-guard-modal__plan-label">نام پلن:</span>
+        <span class="pending-guard-modal__plan-value">${planName}</span>
+      </div>` : ''}
+      ${planDate ? `<div class="pending-guard-modal__plan-row">
+        <span class="pending-guard-modal__plan-label">تاریخ ثبت:</span>
+        <span class="pending-guard-modal__plan-value">${planDate}</span>
+      </div>` : ''}
+    </div>
+  ` : '';
+
+  // Create modal HTML
+  const modalHtml = `
+    <div id="pendingAdGuardModal" class="pending-guard-modal" role="dialog" aria-modal="true" aria-labelledby="pendingGuardTitle">
+      <div class="pending-guard-modal__backdrop"></div>
+      <div class="pending-guard-modal__container">
+        <div class="pending-guard-modal__card">
+          <!-- Icon -->
+          <div class="pending-guard-modal__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+
+          <!-- Content -->
+          <h3 id="pendingGuardTitle" class="pending-guard-modal__title">در انتظار تأیید مدیر</h3>
+          <p class="pending-guard-modal__message">
+            پلن تبلیغاتی شما هنوز تأیید نشده است. لطفاً پس از تأیید مدیر سایت دوباره اقدام کنید.
+          </p>
+
+          ${planInfoHtml}
+
+          <!-- Actions -->
+          <div class="pending-guard-modal__actions">
+            <button type="button" class="pending-guard-modal__btn pending-guard-modal__btn--primary" onclick="closePendingAdGuardModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12l5 5L20 7"/>
+              </svg>
+              متوجه شدم
+            </button>
+            <button type="button" class="pending-guard-modal__btn pending-guard-modal__btn--secondary" onclick="openSupportForPendingAd()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              پیگیری وضعیت
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Insert modal into DOM
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  const modal = document.getElementById('pendingAdGuardModal');
+  const backdrop = modal.querySelector('.pending-guard-modal__backdrop');
+  const card = modal.querySelector('.pending-guard-modal__card');
+
+  // Prevent body scroll
+  document.body.classList.add('pending-guard-modal--open');
+
+  // Animate in
+  requestAnimationFrame(() => {
+    modal.classList.add('is-visible');
+  });
+
+  // Close on backdrop click
+  backdrop.addEventListener('click', closePendingAdGuardModal);
+
+  // Close on Escape key
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closePendingAdGuardModal();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+
+  // Focus trap - focus first button
+  const primaryBtn = modal.querySelector('.pending-guard-modal__btn--primary');
+  if (primaryBtn) {
+    setTimeout(() => primaryBtn.focus(), 100);
+  }
+}
+
+/**
+ * Close the pending ad guard modal
+ */
+function closePendingAdGuardModal() {
+  const modal = document.getElementById('pendingAdGuardModal');
+  if (!modal) return;
+
+  modal.classList.remove('is-visible');
+  modal.classList.add('is-closing');
+
+  // Remove after animation
+  setTimeout(() => {
+    modal.remove();
+    document.body.classList.remove('pending-guard-modal--open');
+  }, 280);
+}
+
+/**
+ * Open support/ticket section for pending ad inquiry
+ */
+function openSupportForPendingAd() {
+  closePendingAdGuardModal();
+
+  // Try to navigate to support/tickets section if available
+  const ticketsSection = document.querySelector('[data-section="tickets"]');
+  if (ticketsSection) {
+    ticketsSection.click();
+    return;
+  }
+
+  // Fallback: show toast with guidance
+  showToast('برای پیگیری وضعیت، از بخش «تیکت‌های پشتیبانی» اقدام کنید.', false);
+}
+
+// Make functions globally available
+window.showPendingAdGuardModal = showPendingAdGuardModal;
+window.closePendingAdGuardModal = closePendingAdGuardModal;
+window.handleNewAdClick = handleNewAdClick;
+window.openSupportForPendingAd = openSupportForPendingAd;
