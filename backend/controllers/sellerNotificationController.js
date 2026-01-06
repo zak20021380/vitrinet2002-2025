@@ -189,6 +189,32 @@ exports.createCustomerMessageNotification = async (sellerId, customerName, produ
 };
 
 /**
+ * ایجاد اعلان تایید تبلیغ
+ * @param {ObjectId} sellerId - شناسه فروشنده
+ * @param {ObjectId} adId - شناسه تبلیغ
+ * @param {string} adTitle - عنوان تبلیغ
+ */
+exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
+  try {
+    const notification = new SellerNotification({
+      sellerId,
+      type: 'ad_approved',
+      title: 'تبلیغ شما تایید شد',
+      message: 'تبلیغ شما آماده نمایش است. برای افزایش دیده‌شدن، یک پلن انتخاب کنید.',
+      relatedData: {
+        adId,
+        adTitle: adTitle || ''
+      }
+    });
+    await notification.save();
+    return notification;
+  } catch (err) {
+    console.error('createAdApprovedNotification error:', err);
+    return null;
+  }
+};
+
+/**
  * ایجاد اعلان تست (فقط برای تست)
  * POST /api/seller/notifications/test
  */

@@ -1930,3 +1930,426 @@
     justify-content: center;
   }
 }
+
+/* ============================================
+   AD APPROVED NOTIFICATION CARD
+   اعلان تایید تبلیغ - طراحی حرفه‌ای
+   ============================================ */
+
+/* Ad Approved Notification Item */
+.notification-item.is-ad-approved {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  margin-bottom: 12px;
+}
+
+.notification-item.is-ad-approved:hover {
+  transform: none !important;
+  background: transparent !important;
+}
+
+/* Ad Approved Card - Success Theme */
+.ad-approved-card {
+  position: relative;
+  background: linear-gradient(145deg, #0f2922 0%, #0d1f1a 50%, #0a1814 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(16, 185, 129, 0.1) inset;
+}
+
+.ad-approved-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+  opacity: 0.9;
+}
+
+.ad-approved-card:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.15),
+    0 0 0 1px rgba(16, 185, 129, 0.2) inset;
+  transform: translateY(-3px);
+}
+
+/* Unread State - Glowing Effect */
+.notification-item.is-ad-approved.is-unread .ad-approved-card {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 
+    0 4px 24px rgba(16, 185, 129, 0.2),
+    0 0 40px rgba(16, 185, 129, 0.08),
+    0 0 0 1px rgba(16, 185, 129, 0.3) inset;
+}
+
+.notification-item.is-ad-approved.is-unread .ad-approved-card::before {
+  opacity: 1;
+  animation: adApprovedGlow 2s ease-in-out infinite;
+}
+
+@keyframes adApprovedGlow {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+/* Unread Indicator Dot */
+.notification-item.is-ad-approved.is-unread .ad-approved-card::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+  animation: adApprovedDot 2s ease-in-out infinite;
+}
+
+@keyframes adApprovedDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* Ad Approved Header */
+.ad-approved-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  gap: 12px;
+}
+
+.ad-approved-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.ad-approved-card__badge svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Delete Button */
+.ad-approved-card__delete {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.ad-approved-card__delete svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ad-approved-card__delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: scale(1.08);
+}
+
+.ad-approved-card__delete:active {
+  transform: scale(0.95);
+}
+
+/* Ad Approved Body */
+.ad-approved-card__body {
+  padding: 18px 16px;
+  background: transparent;
+}
+
+.ad-approved-card__title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #34d399;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+}
+
+.ad-approved-card__content {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.ad-approved-card__ad-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ad-approved-card__ad-info svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #34d399;
+}
+
+/* Ad Approved Footer */
+.ad-approved-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(16, 185, 129, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ad-approved-card__meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ad-approved-card__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #34d399;
+  padding: 6px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.ad-approved-card__source svg {
+  width: 14px;
+  height: 14px;
+  color: #34d399;
+}
+
+.ad-approved-card__time {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+/* CTA Button - Choose Plan */
+.ad-approved-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.ad-approved-card__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.ad-approved-card__cta:active {
+  transform: translateY(0);
+}
+
+.ad-approved-card__cta svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   RESPONSIVE - TABLET
+   ============================================ */
+@media (max-width: 768px) {
+  .ad-approved-card {
+    border-radius: 18px;
+  }
+  
+  .ad-approved-card__header {
+    padding: 12px 14px;
+  }
+  
+  .ad-approved-card__badge {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  
+  .ad-approved-card__body {
+    padding: 16px 14px;
+  }
+  
+  .ad-approved-card__title {
+    font-size: 15px;
+  }
+  
+  .ad-approved-card__content {
+    font-size: 13px;
+  }
+  
+  .ad-approved-card__footer {
+    padding: 12px 14px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+@media (max-width: 480px) {
+  .notification-item.is-ad-approved {
+    margin-bottom: 10px;
+  }
+  
+  .ad-approved-card {
+    border-radius: 16px;
+  }
+  
+  .ad-approved-card__header {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .ad-approved-card__badge {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .ad-approved-card__badge svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .ad-approved-card__delete {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+  
+  .ad-approved-card__delete svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ad-approved-card__body {
+    padding: 12px 14px;
+  }
+
+  .ad-approved-card__title {
+    font-size: clamp(14px, 4vw, 16px);
+  }
+
+  .ad-approved-card__content {
+    font-size: clamp(13px, 3.7vw, 15px);
+  }
+
+  .ad-approved-card__ad-info {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .ad-approved-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .ad-approved-card__meta {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .ad-approved-card__source {
+    font-size: 12px;
+  }
+
+  .ad-approved-card__time {
+    font-size: 12px;
+  }
+
+  .ad-approved-card__cta {
+    width: 100%;
+    justify-content: center;
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ad-approved-card__header,
+  .ad-approved-card__body,
+  .ad-approved-card__footer {
+    padding: 12px;
+  }
+
+  .ad-approved-card__badge {
+    width: 100%;
+  }
+
+  .ad-approved-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ad-approved-card__time {
+    font-size: 11px;
+  }
+}

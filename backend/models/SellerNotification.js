@@ -15,7 +15,7 @@ const sellerNotificationSchema = new mongoose.Schema({
   // نوع اعلان
   type: {
     type: String,
-    enum: ['customer_message', 'product_like', 'order', 'review', 'admin_message', 'system', 'info'],
+    enum: ['customer_message', 'product_like', 'order', 'review', 'admin_message', 'system', 'info', 'ad_approved'],
     default: 'info'
   },
   // عنوان اعلان
@@ -58,10 +58,17 @@ const sellerNotificationSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
+    // شناسه تبلیغ (برای اعلان تایید تبلیغ)
+    adId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AdOrder'
+    },
     // نام مشتری
     customerName: String,
     // عنوان محصول
-    productTitle: String
+    productTitle: String,
+    // عنوان تبلیغ
+    adTitle: String
   }
 }, {
   timestamps: true

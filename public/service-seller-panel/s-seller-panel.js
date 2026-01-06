@@ -4203,6 +4203,19 @@ const Notifications = {
     await this.fetchFromServer();
     this.render();
 
+    // شروع polling برای به‌روزرسانی خودکار اعلان‌ها (هر 30 ثانیه)
+    this._pollInterval = setInterval(async () => {
+      if (!document.hidden) {
+        await this.fetchFromServer();
+        this.render();
+      }
+    }, 30000);
+
+    // توقف polling هنگام خروج از صفحه
+    window.addEventListener('beforeunload', () => {
+      if (this._pollInterval) clearInterval(this._pollInterval);
+    });
+
     // باز/بستن پنل
     this._els.btn.addEventListener('click', () => this.toggle());
     
@@ -4270,6 +4283,7 @@ const Notifications = {
       
       const isAdminMessage = li.classList.contains('is-admin-message');
       const isCustomerMessage = li.classList.contains('is-customer-message');
+      const isAdApproved = li.classList.contains('is-ad-approved');
       
       if (e.target.closest('.notif-delete')) {
         // حذف پیام
@@ -4280,6 +4294,11 @@ const Notifications = {
         } else {
           this.remove(li.dataset.id);
         }
+      } else if (e.target.closest('.notif-view-plans')) {
+        // کلیک روی دکمه انتخاب پلن تبلیغ
+        // علامت‌گذاری به عنوان خوانده شده
+        await this.markSellerNotificationRead(li.dataset.id);
+        // لینک خودش هدایت می‌کند
       } else if (e.target.closest('.notif-view-chat')) {
         // مشاهده گفتگو با مشتری
         e.preventDefault();
@@ -4314,7 +4333,7 @@ const Notifications = {
         // کلیک روی آیتم - علامت‌گذاری به عنوان خوانده شده
         if (isAdminMessage) {
           await this.markAdminMessageRead(li.dataset.id);
-        } else if (isCustomerMessage) {
+        } else if (isCustomerMessage || isAdApproved) {
           await this.markSellerNotificationRead(li.dataset.id);
         } else {
           this.markRead(li.dataset.id);
@@ -4541,7 +4560,10 @@ const Notifications = {
       const isCustomerMessage = n.isCustomerMessage === true ||
                                 notifType === 'customer_message';
 
-      const isTicket = !isAdminMessage && !isCustomerMessage && (
+      // بررسی اعلان تایید تبلیغ
+      const isAdApproved = notifType === 'ad_approved';
+
+      const isTicket = !isAdminMessage && !isCustomerMessage && !isAdApproved && (
                        notifType === 'ticket' ||
                        notifType === 'ticket_reply' ||
                        notifType === 'support' ||
@@ -4689,6 +4711,65 @@ const Notifications = {
                 </svg>
                 مشاهده گفتگو
               </button>
+            </footer>
+          </article>
+        </li>
+        `;
+      }
+
+      // Ad approved notification layout
+      if (isAdApproved) {
+        const adId = n.relatedData?.adId || '';
+        const adTitle = n.relatedData?.adTitle || '';
+        
+        return `
+        <li class="notification-item is-ad-approved ${n.read ? 'is-read' : 'is-unread'}" data-id="${n.id}" data-ad-id="${adId}" role="listitem">
+          <article class="ad-approved-card">
+            <header class="ad-approved-card__header">
+              <div class="ad-approved-card__badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                تبلیغ تایید شد
+              </div>
+              <button class="ad-approved-card__delete notif-delete" type="button" aria-label="حذف اعلان">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </header>
+            
+            <div class="ad-approved-card__body">
+              <h4 class="ad-approved-card__title">${this._escapeHtml(n.title || 'تبلیغ شما تایید شد')}</h4>
+              <p class="ad-approved-card__content">${this._escapeHtml(n.message || n.text || '')}</p>
+              ${adTitle ? `
+                <div class="ad-approved-card__ad-info">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="9" y1="9" x2="15" y2="9"/>
+                    <line x1="9" y1="13" x2="15" y2="13"/>
+                    <line x1="9" y1="17" x2="13" y2="17"/>
+                  </svg>
+                  ${this._escapeHtml(adTitle)}
+                </div>
+              ` : ''}
+            </div>
+            
+            <footer class="ad-approved-card__footer">
+              <div class="ad-approved-card__meta">
+                <span class="ad-approved-card__source">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  سیستم تبلیغات
+                </span>
+                <time class="ad-approved-card__time">${n.time || ''}</time>
+              </div>
+              <a href="/seller/dashboard.html?section=upgrade&ad=${adId}" class="ad-approved-card__cta notif-view-plans" data-ad-id="${adId}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                انتخاب پلن
+              </a>
             </footer>
           </article>
         </li>

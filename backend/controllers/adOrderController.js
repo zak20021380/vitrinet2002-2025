@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
 const { parseDurationHours } = require('../utils/adDisplayConfig');
+const { createAdApprovedNotification } = require('./sellerNotificationController');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
 const POPULATE_SPEC = [
@@ -435,6 +436,9 @@ exports.updateAdOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
     }
 
+    // ذخیره وضعیت قبلی برای بررسی تغییر از pending به approved
+    const previousStatus = adOrder.status;
+
     adOrder.status = status;
 
     if (Object.prototype.hasOwnProperty.call(req.body || {}, 'adminNote')) {
@@ -454,6 +458,20 @@ exports.updateAdOrderStatus = async (req, res) => {
       }
       adOrder.expiredAt = undefined;
       refreshExpiryMetadata(adOrder, { force: true });
+
+      // ارسال اعلان به فروشنده در صورت تغییر از pending به approved
+      if (previousStatus === 'pending') {
+        try {
+          await createAdApprovedNotification(
+            adOrder.sellerId,
+            adOrder._id,
+            adOrder.adTitle || adOrder.planTitle || ''
+          );
+        } catch (notifErr) {
+          console.error('⚠️ خطا در ارسال اعلان تایید تبلیغ:', notifErr);
+          // ادامه عملیات حتی در صورت خطای اعلان
+        }
+      }
     } else if (status === 'paid') {
       if (!adOrder.approvedAt) {
         adOrder.approvedAt = now;
