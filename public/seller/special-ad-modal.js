@@ -2156,13 +2156,13 @@
       const scheduleDetails = [];
       if (scheduledStartDate) {
         if (isToday) {
-          scheduleDetails.push(`تاریخ شروع رزرو: امروز (${scheduledStartDate})`);
+          scheduleDetails.push(`شروع نمایش: امروز (${scheduledStartDate}) – مدت: ۲۴ ساعت کامل`);
         } else {
-          scheduleDetails.push(`تاریخ شروع رزرو: ${toFaDigits(daysUntilStart)} روز دیگر (${scheduledStartDate})`);
+          scheduleDetails.push(`شروع نمایش: ${scheduledStartDate} – مدت: ۲۴ ساعت کامل`);
         }
       }
-      if (scheduledEndDate) {
-        scheduleDetails.push(`پایان: پایان روز ${scheduledEndDate}`);
+      if (scheduledEndDate && !scheduledStartDate) {
+        scheduleDetails.push(`مدت نمایش: ۲۴ ساعت کامل (${scheduledEndDate})`);
       }
       
       closeModal();
@@ -2282,12 +2282,14 @@
       const scheduleText = scheduleRow?.querySelector('.special-ad-schedule-preview__start-text');
       if (scheduleText) {
         if (slotInfo.days_until_next_available === 0) {
-          scheduleText.textContent = 'شروع: امروز (فعال تا پایان روز)';
+          const today = new Date();
+          const todayStr = today.toLocaleDateString('fa-IR');
+          scheduleText.textContent = `شروع نمایش: امروز (${todayStr}) – مدت: ۲۴ ساعت کامل`;
           scheduleRow.classList.remove('is-future');
         } else {
           const nextDate = new Date(slotInfo.next_available_date);
           const dateStr = nextDate.toLocaleDateString('fa-IR');
-          scheduleText.textContent = `شروع: ${toFaDigits(slotInfo.days_until_next_available)} روز دیگر (${dateStr})`;
+          scheduleText.textContent = `شروع نمایش: ${dateStr} – مدت: ۲۴ ساعت کامل`;
           scheduleRow.classList.add('is-future');
         }
       }

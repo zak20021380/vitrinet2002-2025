@@ -862,36 +862,54 @@ async function fetchSlotAvailability() {
 
 function updateSlotAvailabilityUI(slots) {
   const slotKeys = ['ad_search', 'ad_home', 'ad_products'];
+  const MAX_CAPACITY = 3;
   
   slotKeys.forEach(slot => {
     const info = slots[slot];
     if (!info) return;
     
-    // Update booked count
+    const bookedCount = info.booked_today_count || 0;
+    const remaining = MAX_CAPACITY - bookedCount;
+    
+    // Update capacity status with human-readable text
     const bookedEl = document.querySelector(`[data-booked="${slot}"]`);
     if (bookedEl) {
-      const bookedText = `${toFaDigits(info.booked_today_count)}/۳ رزرو امروز`;
+      let bookedText;
+      if (bookedCount >= MAX_CAPACITY) {
+        // Full: "Today is fully booked – 3 of 3 slots used"
+        bookedText = `امروز تکمیل شد – ${toFaDigits(MAX_CAPACITY)} از ${toFaDigits(MAX_CAPACITY)} جایگاه رزرو شده`;
+      } else if (remaining === 1) {
+        // Only 1 slot left
+        bookedText = `فقط ۱ جایگاه خالی برای امروز`;
+      } else {
+        // Multiple slots available
+        bookedText = `${toFaDigits(remaining)} جایگاه خالی برای امروز`;
+      }
       bookedEl.textContent = bookedText;
       
       // Update availability row state
       const availRow = bookedEl.closest('.upgrade-ad-capacity__row--availability');
       if (availRow) {
-        availRow.classList.toggle('is-full', info.booked_today_count >= 3);
+        availRow.classList.toggle('is-full', bookedCount >= MAX_CAPACITY);
       }
     }
     
-    // Update schedule text
+    // Update schedule text with clear 24-hour duration format
     const scheduleEl = document.querySelector(`[data-schedule="${slot}"]`);
     if (scheduleEl) {
       const scheduleText = scheduleEl.querySelector('.upgrade-ad-capacity__schedule-text');
       if (scheduleText) {
         if (info.days_until_next_available === 0) {
-          scheduleText.textContent = 'شروع: امروز (فعال تا پایان روز)';
+          // Today: "شروع نمایش: امروز (YYYY/MM/DD) – مدت: ۲۴ ساعت کامل"
+          const today = new Date();
+          const todayStr = today.toLocaleDateString('fa-IR');
+          scheduleText.textContent = `شروع نمایش: امروز (${todayStr}) – مدت: ۲۴ ساعت کامل`;
           scheduleEl.classList.remove('is-future');
         } else {
+          // Future: "شروع نمایش: YYYY/MM/DD – مدت: ۲۴ ساعت کامل"
           const nextDate = new Date(info.next_available_date);
           const dateStr = nextDate.toLocaleDateString('fa-IR');
-          scheduleText.textContent = `شروع: ${toFaDigits(info.days_until_next_available)} روز دیگر (${dateStr})`;
+          scheduleText.textContent = `شروع نمایش: ${dateStr} – مدت: ۲۴ ساعت کامل`;
           scheduleEl.classList.add('is-future');
         }
       }
@@ -1597,7 +1615,7 @@ async function fetchMyPlans() {
   function getAdEndDateLabel(plan) {
     const endDate = getAdEndDate(plan);
     if (endDate === "-") return "تاریخ پایان نامشخص";
-    return `فعال تا پایان روز ${endDate}`;
+    return `مدت نمایش: ۲۴ ساعت کامل (${endDate})`;
   }
 
   // وضعیت پلن برای کلاس CSS
@@ -2069,8 +2087,8 @@ async function fetchMyPlans() {
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 6v6l4 2"/>
                   </svg>
-                  <span class="myplans-card__scheduling-label">پایان:</span>
-                  <span class="myplans-card__scheduling-value">پایان روز ${toJalaliDate(plan.scheduledEndDate)}</span>
+                  <span class="myplans-card__scheduling-label">مدت نمایش:</span>
+                  <span class="myplans-card__scheduling-value">۲۴ ساعت کامل (${toJalaliDate(plan.scheduledEndDate)})</span>
                 </div>
                 ` : ''}
                 ${!isToday && daysUntil > 0 ? `
