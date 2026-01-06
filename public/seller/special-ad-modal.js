@@ -2152,30 +2152,30 @@
       const daysUntilStart = scheduling.days_until_start || 0;
       const isToday = scheduling.is_today || daysUntilStart === 0;
       
-      // Build scheduling details for success popup
-      const scheduleDetails = [];
-      if (scheduledStartDate) {
-        if (isToday) {
-          scheduleDetails.push(`شروع نمایش: امروز (${scheduledStartDate}) – مدت: ۲۴ ساعت کامل`);
-        } else {
-          scheduleDetails.push(`شروع نمایش: ${scheduledStartDate} – مدت: ۲۴ ساعت کامل`);
-        }
-      }
-      if (scheduledEndDate && !scheduledStartDate) {
-        scheduleDetails.push(`مدت نمایش: ۲۴ ساعت کامل (${scheduledEndDate})`);
-      }
+      // Get slot display name
+      const slotDisplayNames = {
+        ad_search: 'جستجوی محصولات',
+        ad_home: 'صفحه اصلی',
+        ad_products: 'لیست محصولات'
+      };
       
       closeModal();
       showSuccessPopup({
-        title: 'تبلیغ شما با موفقیت ثبت شد',
-        message: `تبلیغ «${sanitizedTitle}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
-        details: [
-          `پلن انتخابی: ${AD_PLAN_TITLES[state.planSlug]}`,
-          ...scheduleDetails,
-          state.creditAmount > 0 ? `کسر از اعتبار: ${toFaPrice(state.creditAmount)} تومان` : '',
-          `مبلغ پرداختی: ${toFaPrice(state.finalPrice)} تومان`
-        ].filter(Boolean),
-        highlight: isToday ? 'ثبت تبلیغ جدید' : `شروع: ${toFaDigits(daysUntilStart)} روز دیگر`
+        title: 'تبلیغ شما زمان‌بندی شد!',
+        startDate: isToday ? `امروز (${scheduledStartDate})` : scheduledStartDate,
+        duration: '۲۴ ساعت کامل',
+        slotName: slotDisplayNames[state.planSlug] || AD_PLAN_TITLES[state.planSlug],
+        amountPaid: state.finalPrice > 0 ? `${toFaPrice(state.finalPrice)} تومان` : null,
+        creditUsed: state.creditAmount > 0 ? `${toFaPrice(state.creditAmount)} تومان` : null,
+        frequencyCap: 'حداکثر ۲ بار برای هر کاربر',
+        onGoToMyAds: () => {
+          const myPlansTab = document.querySelector('[data-tab="myplans"]');
+          if (myPlansTab) myPlansTab.click();
+        },
+        onUpgradeAnother: () => {
+          // Re-open the modal for another ad
+          setTimeout(() => openModal(state.planSlug), 100);
+        }
       });
       
       resetForm();

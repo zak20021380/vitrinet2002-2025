@@ -131,95 +131,232 @@ function showToast(message, isError = false) {
 
 function showSuccessPopup(options = {}) {
   const {
-    title = 'عملیات موفق',
+    title = 'تبلیغ شما ثبت شد!',
     message = '',
     details = [],
     autoCloseMs = 0,
-    highlight = ''
+    highlight = '',
+    // New premium options
+    startDate = null,
+    duration = '۲۴ ساعت',
+    slotName = '',
+    amountPaid = null,
+    creditUsed = null,
+    frequencyCap = null,
+    onGoToMyAds = null,
+    onUpgradeAnother = null
   } = options;
 
-  const detailItems = Array.isArray(details)
-    ? details.filter(Boolean)
-    : (typeof details === 'string' && details.length ? [details] : []);
+  // Build secondary details for collapsible section
+  const secondaryDetails = [];
+  if (amountPaid) secondaryDetails.push({ label: 'مبلغ پرداختی', value: amountPaid });
+  if (creditUsed) secondaryDetails.push({ label: 'اعتبار استفاده شده', value: creditUsed });
+  if (frequencyCap) secondaryDetails.push({ label: 'محدودیت نمایش', value: frequencyCap });
+  
+  // Legacy details support
+  const legacyDetails = Array.isArray(details) ? details.filter(Boolean) : [];
 
   const overlay = document.createElement('div');
-  overlay.className = 'fixed inset-0 z-[120] flex items-center justify-center px-4 py-6 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200';
+  overlay.className = 'ad-success-overlay';
 
-  const card = document.createElement('div');
-  card.className = 'success-popup-card relative w-full max-w-md rounded-3xl bg-white px-6 py-8 text-center shadow-2xl';
+  const modal = document.createElement('div');
+  modal.className = 'ad-success-modal';
 
+  // Drag handle for mobile
+  const dragHandle = document.createElement('div');
+  dragHandle.className = 'ad-success-handle';
+
+  // Close button
   const closeBtn = document.createElement('button');
   closeBtn.type = 'button';
-  closeBtn.className = 'absolute left-4 top-4 text-slate-300 hover:text-rose-400 transition-colors';
-  closeBtn.innerHTML = '<span class="sr-only">بستن</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M6.4 5.1 5 6.5 10.5 12 5 17.5l1.4 1.4L12 13.4l5.6 5.5 1.4-1.4L13.4 12 19 6.5 17.6 5.1 12 10.6z"/></svg>';
+  closeBtn.className = 'ad-success-close';
+  closeBtn.setAttribute('aria-label', 'بستن');
+  closeBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
 
+  // Success icon with soft glow
   const iconWrap = document.createElement('div');
-  iconWrap.className = 'success-popup-icon mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 shadow-[0_12px_40px_-20px_rgba(16,185,129,0.8)]';
-  iconWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-10 w-10"><path fill="currentColor" d="M9.55 16.7 5.3 12.45l1.4-1.4 2.85 2.85 7.8-7.8 1.4 1.4z"/></svg>';
+  iconWrap.className = 'ad-success-icon';
+  iconWrap.innerHTML = `
+    <div class="ad-success-icon__glow"></div>
+    <div class="ad-success-icon__circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+  `;
 
-  if (highlight) {
-    const badge = document.createElement('span');
-    badge.className = 'mb-3 inline-flex items-center justify-center rounded-full bg-emerald-100 px-4 py-1 text-xs font-extrabold text-emerald-600';
-    badge.textContent = highlight;
-    card.appendChild(badge);
-  }
-
-  const titleEl = document.createElement('h3');
-  titleEl.className = 'text-xl font-extrabold text-emerald-600';
+  // Title - friendly headline
+  const titleEl = document.createElement('h2');
+  titleEl.className = 'ad-success-title';
   titleEl.textContent = title;
 
+  // Admin approval notice - important info banner
+  const approvalNotice = document.createElement('div');
+  approvalNotice.className = 'ad-success-approval';
+  approvalNotice.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4M12 8h.01"/>
+    </svg>
+    <span>تبلیغ شما پس از تایید مدیریت نمایش داده می‌شود</span>
+  `;
+
+  // Friendly message
   const messageEl = document.createElement('p');
-  messageEl.className = 'mt-2 text-sm leading-7 text-slate-600';
-  messageEl.textContent = message;
-
-  card.appendChild(closeBtn);
-  card.appendChild(iconWrap);
-  card.appendChild(titleEl);
-  card.appendChild(messageEl);
-
-  if (detailItems.length) {
-    const list = document.createElement('ul');
-    list.className = 'mt-4 space-y-2 text-right text-sm leading-7 text-slate-600';
-    detailItems.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'flex items-start gap-2';
-      li.innerHTML = `<span class="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-emerald-400"></span><span>${item}</span>`;
-      list.appendChild(li);
-    });
-    card.appendChild(list);
+  messageEl.className = 'ad-success-message';
+  if (startDate) {
+    messageEl.textContent = `پس از تایید، تبلیغ شما از ${startDate} به مدت ${duration} نمایش داده خواهد شد.`;
+  } else if (message) {
+    messageEl.textContent = message;
   }
 
-  const actionBtn = document.createElement('button');
-  actionBtn.type = 'button';
-  actionBtn.className = 'btn-grad mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-base font-black text-white shadow-lg hover:shadow-xl transition';
-  actionBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="m12 17 5-5-1.4-1.4-2.6 2.6V6h-2v7.2L8.4 10.6 7 12z"/></svg><span>باشه، متوجه شدم</span>';
+  // Summary block - 3 key facts (compact for mobile)
+  const summaryBlock = document.createElement('div');
+  summaryBlock.className = 'ad-success-summary';
+  
+  const summaryItems = [];
+  if (startDate) {
+    summaryItems.push({ icon: 'calendar', label: 'شروع', value: startDate });
+  }
+  summaryItems.push({ icon: 'clock', label: 'مدت', value: duration });
+  if (slotName) {
+    summaryItems.push({ icon: 'location', label: 'جایگاه', value: slotName });
+  }
 
-  card.appendChild(actionBtn);
-  overlay.appendChild(card);
+  const iconSvgs = {
+    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+    clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+    location: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`
+  };
+
+  summaryItems.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'ad-success-summary__row';
+    row.innerHTML = `
+      <span class="ad-success-summary__icon">${iconSvgs[item.icon]}</span>
+      <span class="ad-success-summary__label">${item.label}</span>
+      <span class="ad-success-summary__value">${item.value}</span>
+    `;
+    summaryBlock.appendChild(row);
+  });
+
+  // Collapsible details section
+  let detailsSection = null;
+  if (secondaryDetails.length > 0 || legacyDetails.length > 0) {
+    detailsSection = document.createElement('div');
+    detailsSection.className = 'ad-success-details';
+    
+    const detailsToggle = document.createElement('button');
+    detailsToggle.type = 'button';
+    detailsToggle.className = 'ad-success-details__toggle';
+    detailsToggle.innerHTML = `
+      <span>جزئیات بیشتر</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    `;
+    
+    const detailsContent = document.createElement('div');
+    detailsContent.className = 'ad-success-details__content';
+    
+    // Add secondary details
+    secondaryDetails.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'ad-success-details__row';
+      row.innerHTML = `<span>${item.label}</span><span>${item.value}</span>`;
+      detailsContent.appendChild(row);
+    });
+    
+    // Add legacy details
+    legacyDetails.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'ad-success-details__row ad-success-details__row--legacy';
+      row.textContent = item;
+      detailsContent.appendChild(row);
+    });
+    
+    detailsToggle.addEventListener('click', () => {
+      detailsSection.classList.toggle('is-expanded');
+    });
+    
+    detailsSection.appendChild(detailsToggle);
+    detailsSection.appendChild(detailsContent);
+  }
+
+  // CTA buttons - stacked for mobile
+  const ctaWrap = document.createElement('div');
+  ctaWrap.className = 'ad-success-cta';
+
+  const primaryBtn = document.createElement('button');
+  primaryBtn.type = 'button';
+  primaryBtn.className = 'ad-success-cta__primary';
+  primaryBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    <span>مشاهده تبلیغات من</span>
+  `;
+
+  const secondaryBtn = document.createElement('button');
+  secondaryBtn.type = 'button';
+  secondaryBtn.className = 'ad-success-cta__secondary';
+  secondaryBtn.textContent = 'ثبت تبلیغ دیگر';
+
+  ctaWrap.appendChild(primaryBtn);
+  ctaWrap.appendChild(secondaryBtn);
+
+  // Assemble modal - scrollable content wrapper
+  const contentWrap = document.createElement('div');
+  contentWrap.className = 'ad-success-content';
+  
+  contentWrap.appendChild(iconWrap);
+  contentWrap.appendChild(titleEl);
+  contentWrap.appendChild(approvalNotice);
+  if (messageEl.textContent) contentWrap.appendChild(messageEl);
+  contentWrap.appendChild(summaryBlock);
+  if (detailsSection) contentWrap.appendChild(detailsSection);
+
+  modal.appendChild(dragHandle);
+  modal.appendChild(closeBtn);
+  modal.appendChild(contentWrap);
+  modal.appendChild(ctaWrap);
+  overlay.appendChild(modal);
   document.body.appendChild(overlay);
   document.body.classList.add('overflow-hidden');
 
+  // Trigger animation
+  requestAnimationFrame(() => {
+    overlay.classList.add('is-visible');
+  });
+
   let closed = false;
-  const cleanup = () => {
+  const cleanup = (action = null) => {
     if (closed) return;
     closed = true;
-    overlay.classList.add('opacity-0');
-    card.classList.add('scale-95');
+    overlay.classList.remove('is-visible');
+    overlay.classList.add('is-closing');
     setTimeout(() => {
       overlay.remove();
-    }, 220);
-    document.body.classList.remove('overflow-hidden');
+      document.body.classList.remove('overflow-hidden');
+      
+      // Execute callbacks after modal closes
+      if (action === 'myads' && typeof onGoToMyAds === 'function') {
+        onGoToMyAds();
+      } else if (action === 'myads') {
+        // Default: switch to My Plans tab
+        const myPlansTab = document.querySelector('[data-tab="myplans"]');
+        if (myPlansTab) myPlansTab.click();
+      }
+      if (action === 'upgrade' && typeof onUpgradeAnother === 'function') {
+        onUpgradeAnother();
+      }
+    }, 280);
     document.removeEventListener('keydown', onKeydown);
   };
 
   const onKeydown = (event) => {
-    if (event.key === 'Escape') {
-      cleanup();
-    }
+    if (event.key === 'Escape') cleanup();
   };
 
-  closeBtn.addEventListener('click', cleanup);
-  actionBtn.addEventListener('click', cleanup);
+  closeBtn.addEventListener('click', () => cleanup());
+  primaryBtn.addEventListener('click', () => cleanup('myads'));
+  secondaryBtn.addEventListener('click', () => cleanup('upgrade'));
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) cleanup();
   });
@@ -2442,6 +2579,7 @@ function openSupportForPendingAd() {
 }
 
 // Make functions globally available
+window.showSuccessPopup = showSuccessPopup;
 window.showPendingAdGuardModal = showPendingAdGuardModal;
 window.closePendingAdGuardModal = closePendingAdGuardModal;
 window.handleNewAdClick = handleNewAdClick;
