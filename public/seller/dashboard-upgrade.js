@@ -1425,8 +1425,7 @@ async function fetchMyPlans() {
   }
 
   // تاریخ پایان - استفاده از expiresAt از بک‌اند
-  // قانون: روز شروع به عنوان یک روز کامل حساب می‌شود
-  // اگر مدت N روز باشد: expire_date = start_date + (N-1) روز، ساعت ۲۳:۵۹:۵۹
+  // قانون: انقضا براساس مدت زمان واقعی تبلیغ (مثلا ۲۴ ساعت) محاسبه می‌شود
   function getAdEndDate(plan) {
     // First check if backend provides expiresAt
     if (plan.expiresAt) {
@@ -1446,16 +1445,9 @@ async function fetchMyPlans() {
       if (Number.isNaN(d.getTime())) return "-";
       
       // Get duration in hours (default 24 = 1 day)
-      const durationHours = plan.displayDurationHours || 24;
-      const durationDays = Math.ceil(durationHours / 24);
-      
-      // Business rule: start day counts as full day
-      // expire_date = start_date + (N-1) days at end of day
-      const startOfDay = new Date(d);
-      startOfDay.setHours(0, 0, 0, 0);
-      
-      const expirationDate = new Date(startOfDay);
-      expirationDate.setDate(expirationDate.getDate() + (durationDays - 1));
+      const durationHours = Number(plan.displayDurationHours || 24);
+      const expirationDate = new Date(d);
+      expirationDate.setHours(expirationDate.getHours() + durationHours);
       
       return toJalaliDate(expirationDate.toISOString());
     } catch {
