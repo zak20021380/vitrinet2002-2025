@@ -1323,6 +1323,96 @@ async function fetchMyPlans() {
   box.innerHTML = `<div class="upgrade-loading"><div class="upgrade-loading__spinner"></div><span>در حال بارگذاری پلن‌ها…</span></div>`;
   const UPLOADS_BASE = `${API_BASE.replace('/api','')}/uploads/`;
 
+  // ─────────────────────────────────────────────────────
+  // Filter State Management
+  // ─────────────────────────────────────────────────────
+  let currentFilter = 'all'; // 'all' | 'sub' | 'ad'
+
+  function initFilterChips() {
+    const chips = box.querySelectorAll('.myplans-stat-chip[data-filter]');
+    chips.forEach(chip => {
+      chip.setAttribute('role', 'button');
+      chip.setAttribute('tabindex', '0');
+      chip.setAttribute('aria-pressed', 'false');
+      
+      chip.addEventListener('click', () => handleFilterClick(chip));
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleFilterClick(chip);
+        }
+      });
+    });
+  }
+
+  function handleFilterClick(chip) {
+    const filter = chip.dataset.filter;
+    const chips = box.querySelectorAll('.myplans-stat-chip[data-filter]');
+    
+    // Toggle: if same filter clicked, reset to 'all'
+    if (currentFilter === filter) {
+      currentFilter = 'all';
+      chips.forEach(c => {
+        c.classList.remove('is-active');
+        c.setAttribute('aria-pressed', 'false');
+      });
+    } else {
+      currentFilter = filter;
+      chips.forEach(c => {
+        const isActive = c.dataset.filter === filter;
+        c.classList.toggle('is-active', isActive);
+        c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+    
+    applyFilter(currentFilter);
+  }
+
+  function applyFilter(filter) {
+    const subSection = box.querySelector('.myplans-section--sub');
+    const adSection = box.querySelector('.myplans-section--ad');
+    
+    // Animate sections based on filter
+    if (filter === 'all' || filter === 'total') {
+      // Show all sections
+      showSection(subSection);
+      showSection(adSection);
+    } else if (filter === 'sub') {
+      showSection(subSection);
+      hideSection(adSection);
+    } else if (filter === 'ad') {
+      hideSection(subSection);
+      showSection(adSection);
+    }
+  }
+
+  function showSection(section) {
+    if (!section) return;
+    section.classList.remove('is-filtering-out');
+    section.classList.add('is-filtering-in');
+    section.style.display = '';
+    section.style.maxHeight = '';
+    section.style.marginBottom = '';
+    
+    // Remove animation class after completion
+    setTimeout(() => {
+      section.classList.remove('is-filtering-in');
+    }, 400);
+  }
+
+  function hideSection(section) {
+    if (!section) return;
+    section.classList.remove('is-filtering-in');
+    section.classList.add('is-filtering-out');
+    
+    // After animation, hide completely
+    setTimeout(() => {
+      if (section.classList.contains('is-filtering-out')) {
+        section.style.display = 'none';
+      }
+    }, 350);
+  }
+
   // تشخیص نوع تبلیغ براساس slug
   function getAdTypeLabel(plan) {
     const slug = plan.slug || plan.planSlug || '';
@@ -1478,8 +1568,8 @@ async function fetchMyPlans() {
     if (!res.ok || !json.plans || !json.plans.length) {
       // Empty state - no plans at all
       box.innerHTML = `
-        <div class="myplans-summary">
-          <div class="myplans-stat-chip myplans-stat-chip--sub">
+        <div class="myplans-summary" role="group" aria-label="فیلتر پلن‌ها">
+          <button type="button" class="myplans-stat-chip myplans-stat-chip--sub" data-filter="sub" role="button" tabindex="0" aria-pressed="false" aria-label="فیلتر پلن‌های اشتراک">
             <div class="myplans-stat-chip__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
@@ -1490,8 +1580,8 @@ async function fetchMyPlans() {
               <span class="myplans-stat-chip__value">۰</span>
               <span class="myplans-stat-chip__label">پلن اشتراک</span>
             </div>
-          </div>
-          <div class="myplans-stat-chip myplans-stat-chip--ad">
+          </button>
+          <button type="button" class="myplans-stat-chip myplans-stat-chip--ad" data-filter="ad" role="button" tabindex="0" aria-pressed="false" aria-label="فیلتر پلن‌های تبلیغاتی">
             <div class="myplans-stat-chip__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <circle cx="12" cy="12" r="10"/>
@@ -1502,8 +1592,8 @@ async function fetchMyPlans() {
               <span class="myplans-stat-chip__value">۰</span>
               <span class="myplans-stat-chip__label">پلن تبلیغاتی</span>
             </div>
-          </div>
-          <div class="myplans-stat-chip myplans-stat-chip--total">
+          </button>
+          <button type="button" class="myplans-stat-chip myplans-stat-chip--total" data-filter="total" role="button" tabindex="0" aria-pressed="false" aria-label="نمایش همه پلن‌ها">
             <div class="myplans-stat-chip__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -1515,7 +1605,7 @@ async function fetchMyPlans() {
               <span class="myplans-stat-chip__value">۰</span>
               <span class="myplans-stat-chip__label">جمع کل</span>
             </div>
-          </div>
+          </button>
         </div>
 
         <section class="myplans-section myplans-section--sub">
@@ -1574,6 +1664,8 @@ async function fetchMyPlans() {
           </div>
         </section>
       `;
+      // Initialize interactive filter chips for empty state
+      initFilterChips();
       return;
     }
 
@@ -1596,10 +1688,10 @@ async function fetchMyPlans() {
     const subCount = subPlans.length;
     const adCount = adPlans.length;
 
-    // Summary Row - Stat Chips
+    // Summary Row - Interactive Filter Chips
     const summaryRow = `
-      <div class="myplans-summary">
-        <div class="myplans-stat-chip myplans-stat-chip--sub">
+      <div class="myplans-summary" role="group" aria-label="فیلتر پلن‌ها">
+        <button type="button" class="myplans-stat-chip myplans-stat-chip--sub" data-filter="sub" role="button" tabindex="0" aria-pressed="false" aria-label="فیلتر پلن‌های اشتراک">
           <div class="myplans-stat-chip__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
@@ -1610,8 +1702,8 @@ async function fetchMyPlans() {
             <span class="myplans-stat-chip__value">${toFaDigits(subCount)}</span>
             <span class="myplans-stat-chip__label">پلن اشتراک</span>
           </div>
-        </div>
-        <div class="myplans-stat-chip myplans-stat-chip--ad">
+        </button>
+        <button type="button" class="myplans-stat-chip myplans-stat-chip--ad" data-filter="ad" role="button" tabindex="0" aria-pressed="false" aria-label="فیلتر پلن‌های تبلیغاتی">
           <div class="myplans-stat-chip__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="10"/>
@@ -1622,8 +1714,8 @@ async function fetchMyPlans() {
             <span class="myplans-stat-chip__value">${toFaDigits(adCount)}</span>
             <span class="myplans-stat-chip__label">پلن تبلیغاتی</span>
           </div>
-        </div>
-        <div class="myplans-stat-chip myplans-stat-chip--total">
+        </button>
+        <button type="button" class="myplans-stat-chip myplans-stat-chip--total" data-filter="total" role="button" tabindex="0" aria-pressed="false" aria-label="نمایش همه پلن‌ها">
           <div class="myplans-stat-chip__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -1635,7 +1727,7 @@ async function fetchMyPlans() {
             <span class="myplans-stat-chip__value">${toFaDigits(total)}</span>
             <span class="myplans-stat-chip__label">جمع کل</span>
           </div>
-        </div>
+        </button>
       </div>
     `;
 
@@ -1847,6 +1939,9 @@ async function fetchMyPlans() {
         </div>
       </section>
     `;
+
+    // Initialize interactive filter chips
+    initFilterChips();
   } catch (err) {
     box.innerHTML = `
       <div class="myplans-empty myplans-empty--sub">
