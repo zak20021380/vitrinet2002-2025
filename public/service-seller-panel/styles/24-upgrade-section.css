@@ -974,106 +974,97 @@
    ───────────────────────────────────────────────────── */
 .upgrade-ads-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
 .upgrade-ad-card {
   position: relative;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--c-glass-border);
-  border-radius: 20px;
-  padding: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 0.65rem 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  transition: all 0.3s ease;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
   overflow: hidden;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 .upgrade-ad-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #10b981, #0ea5e9);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  content: none;
 }
 
 .upgrade-ad-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
-}
-
-.upgrade-ad-card:hover::before {
-  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
 }
 
 .upgrade-ad-card--search::before {
-  background: linear-gradient(90deg, #10b981, #22c55e);
+  background: none;
 }
 
 .upgrade-ad-card--home::before {
-  background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+  background: none;
 }
 
 .upgrade-ad-card--products::before {
-  background: linear-gradient(90deg, #f59e0b, #f97316);
+  background: none;
 }
 
 /* Ad Badge */
 .upgrade-ad-badge {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  top: 0.65rem;
+  left: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: rgba(148, 163, 184, 0.2);
 }
 
 .upgrade-ad-card--search .upgrade-ad-badge {
-  background: linear-gradient(135deg, #10b981, #22c55e);
+  background: rgba(16, 185, 129, 0.18);
+  color: #0f766e;
 }
 
 .upgrade-ad-card--home .upgrade-ad-badge {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  background: rgba(14, 165, 233, 0.18);
+  color: #0369a1;
 }
 
 .upgrade-ad-card--products .upgrade-ad-badge {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
+  background: rgba(245, 158, 11, 0.18);
+  color: #92400e;
 }
 
 /* Ad Header */
 .upgrade-ad-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  text-align: center;
-  padding-top: 0.5rem;
+  gap: 0.6rem;
+  text-align: right;
+  padding-top: 0.35rem;
 }
 
 .upgrade-ad-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .upgrade-ad-icon svg {
-  width: 26px;
-  height: 26px;
-  color: #10b981;
+  width: 18px;
+  height: 18px;
+  color: #334155;
 }
 
 .upgrade-ad-card--home .upgrade-ad-icon {
@@ -1091,13 +1082,13 @@
 }
 
 .upgrade-ad-card--products .upgrade-ad-icon svg {
-  color: #f59e0b;
+  color: #92400e;
 }
 
 .upgrade-ad-title {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--c-text-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -1105,106 +1096,145 @@
 .upgrade-ad-pricing {
   display: flex;
   align-items: baseline;
-  justify-content: center;
-  gap: 0.35rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
 }
 
 .upgrade-ad-price {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #10b981;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .upgrade-ad-card--home .upgrade-ad-price {
-  color: #0ea5e9;
+  color: #0f172a;
 }
 
 .upgrade-ad-card--products .upgrade-ad-price {
-  color: #f59e0b;
+  color: #0f172a;
 }
 
 .upgrade-ad-unit {
-  font-size: 0.8rem;
-  color: var(--c-text-secondary);
+  font-size: 0.72rem;
+  color: #64748b;
 }
 
-/* Ad Features */
-.upgrade-ad-features {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Ad Content */
+.upgrade-ad-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.upgrade-ad-feature {
+.upgrade-ad-duration {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.upgrade-ad-info {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  color: var(--c-text-secondary);
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-.upgrade-ad-feature__icon {
+.upgrade-ad-info__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  color: #10b981;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: #475569;
 }
 
-.upgrade-ad-feature__icon svg {
-  width: 100%;
-  height: 100%;
+.upgrade-ad-info__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.upgrade-ad-card--home .upgrade-ad-feature__icon {
-  color: #0ea5e9;
+.upgrade-ad-info__item svg {
+  width: 14px;
+  height: 14px;
+  color: #94a3b8;
+  flex-shrink: 0;
 }
 
-.upgrade-ad-card--products .upgrade-ad-feature__icon {
-  color: #f59e0b;
+.upgrade-ad-info__divider {
+  color: #cbd5f5;
+}
+
+.upgrade-ad-info__text {
+  white-space: nowrap;
+}
+
+.upgrade-ad-urgency {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #0f766e;
+  min-height: 1rem;
+}
+
+.upgrade-ad-urgency.is-hidden {
+  visibility: hidden;
 }
 
 /* Ad CTA */
 .upgrade-ad-cta {
   margin-top: auto;
-  padding: 0.8rem 1rem;
+  padding: 0.55rem 1rem;
+  min-height: 42px;
   border-radius: 12px;
-  border: none;
-  font-size: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  color: #0f172a;
+  background: #ffffff;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s ease;
+  box-shadow: none;
+  width: 100%;
 }
 
 .upgrade-ad-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(16, 185, 129, 0.3);
+  background: #f1f5f9;
+  border-color: rgba(100, 116, 139, 0.5);
+  transform: translateY(-1px);
 }
 
 .upgrade-ad-card--home .upgrade-ad-cta {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.2);
+  background: #ffffff;
 }
 
 .upgrade-ad-card--home .upgrade-ad-cta:hover {
-  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.3);
+  background: #f1f5f9;
 }
 
 .upgrade-ad-card--products .upgrade-ad-cta {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2);
+  background: #ffffff;
 }
 
 .upgrade-ad-card--products .upgrade-ad-cta:hover {
-  box-shadow: 0 10px 28px rgba(245, 158, 11, 0.3);
+  background: #f1f5f9;
+}
+
+@media (min-width: 768px) {
+  .upgrade-ad-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .upgrade-ad-content {
+    flex: 1;
+  }
+
+  .upgrade-ad-cta {
+    width: auto;
+    min-width: 140px;
+    margin-top: 0;
+    margin-inline-start: auto;
+  }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -2521,45 +2551,46 @@
   /* Ad Cards Mobile */
   .upgrade-ads-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0.9rem;
   }
 
   .upgrade-ad-card {
-    padding: 1.25rem;
-    border-radius: 16px;
+    padding: 0.6rem 0.75rem;
+    border-radius: 14px;
   }
 
   .upgrade-ad-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
   }
 
   .upgrade-ad-icon svg {
-    width: 22px;
-    height: 22px;
+    width: 16px;
+    height: 16px;
   }
 
   .upgrade-ad-title {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .upgrade-ad-price {
-    font-size: 1.35rem;
+    font-size: 1.05rem;
   }
 
-  .upgrade-ad-features {
-    gap: 0.4rem;
+  .upgrade-ad-info__row {
+    font-size: 0.7rem;
   }
 
-  .upgrade-ad-feature {
-    font-size: 0.78rem;
+  .upgrade-ad-duration,
+  .upgrade-ad-urgency {
+    font-size: 0.7rem;
   }
 
   .upgrade-ad-cta {
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 10px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   /* My Plans Mobile */

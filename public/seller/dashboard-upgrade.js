@@ -872,28 +872,29 @@ function updateSlotAvailabilityUI(slots) {
     if (bookedEl) {
       const bookedText = `${toFaDigits(info.booked_today_count)}/۳ رزرو امروز`;
       bookedEl.textContent = bookedText;
-      
-      // Update availability row state
-      const availRow = bookedEl.closest('.upgrade-ad-capacity__row--availability');
-      if (availRow) {
-        availRow.classList.toggle('is-full', info.booked_today_count >= 3);
-      }
     }
     
     // Update schedule text
-    const scheduleEl = document.querySelector(`[data-schedule="${slot}"]`);
-    if (scheduleEl) {
-      const scheduleText = scheduleEl.querySelector('.upgrade-ad-capacity__schedule-text');
-      if (scheduleText) {
-        if (info.days_until_next_available === 0) {
-          scheduleText.textContent = 'شروع: امروز (فعال تا پایان روز)';
-          scheduleEl.classList.remove('is-future');
-        } else {
-          const nextDate = new Date(info.next_available_date);
-          const dateStr = nextDate.toLocaleDateString('fa-IR');
-          scheduleText.textContent = `شروع: ${toFaDigits(info.days_until_next_available)} روز دیگر (${dateStr})`;
-          scheduleEl.classList.add('is-future');
-        }
+    const scheduleText = document.querySelector(`[data-schedule-text="${slot}"]`);
+    if (scheduleText) {
+      const nextDate = info.next_available_date ? new Date(info.next_available_date) : new Date();
+      const dateStr = nextDate.toLocaleDateString('fa-IR');
+      if (info.days_until_next_available === 0) {
+        scheduleText.textContent = `شروع: امروز (${dateStr})`;
+      } else {
+        scheduleText.textContent = `شروع: ${toFaDigits(info.days_until_next_available)} روز دیگر (${dateStr})`;
+      }
+    }
+
+    // Update urgency line
+    const urgencyEl = document.querySelector(`[data-urgency="${slot}"]`);
+    if (urgencyEl) {
+      const remaining = Math.max(0, 3 - Number(info.booked_today_count || 0));
+      if (remaining > 0) {
+        urgencyEl.textContent = `فقط ${toFaDigits(remaining)} جایگاه باقی مانده امروز`;
+        urgencyEl.classList.remove('is-hidden');
+      } else {
+        urgencyEl.classList.add('is-hidden');
       }
     }
   });
