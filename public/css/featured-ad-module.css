@@ -1,0 +1,507 @@
+/**
+ * Featured Ad Module - Dedicated Sponsored Section
+ * Clearly separated from search results, mobile-first
+ * Version: 3.0
+ */
+
+/* ============================================
+   FEATURED AD MODULE - MAIN CONTAINER
+   ============================================ */
+
+.featured-ad-module {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 16px auto 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.featured-ad-module.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.featured-ad-module.is-dismissed {
+  display: none !important;
+}
+
+/* ============================================
+   AD CARD CONTAINER
+   ============================================ */
+
+.featured-ad-card {
+  position: relative;
+  background: linear-gradient(145deg, #ffffff 0%, #fafffe 100%);
+  border-radius: 18px;
+  border: 1.5px solid rgba(16, 185, 129, 0.18);
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.featured-ad-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(16, 185, 129, 0.12),
+    0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+/* ============================================
+   AD HEADER - BADGE & DISMISS
+   ============================================ */
+
+.featured-ad-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.06) 0%, rgba(14, 165, 233, 0.04) 100%);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.featured-ad-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featured-ad-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #047857;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  letter-spacing: 0.3px;
+}
+
+.featured-ad-badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.featured-ad-title-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.featured-ad-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(100, 116, 139, 0.08);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.featured-ad-dismiss:hover {
+  background: rgba(100, 116, 139, 0.15);
+  color: #475569;
+}
+
+.featured-ad-dismiss:focus-visible {
+  outline: 2px solid rgba(16, 185, 129, 0.4);
+  outline-offset: 2px;
+}
+
+.featured-ad-dismiss svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================
+   AD CONTENT - LINK WRAPPER
+   ============================================ */
+
+.featured-ad-content {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+.featured-ad-content:hover {
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.featured-ad-content:focus-visible {
+  outline: none;
+  background: rgba(16, 185, 129, 0.04);
+}
+
+/* ============================================
+   AD THUMBNAIL
+   ============================================ */
+
+.featured-ad-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.featured-ad-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.featured-ad-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+  color: #94a3b8;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(14, 165, 233, 0.08) 100%);
+}
+
+/* ============================================
+   AD INFO
+   ============================================ */
+
+.featured-ad-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.featured-ad-shop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.featured-ad-shop svg {
+  width: 11px;
+  height: 11px;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.featured-ad-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-ad-desc {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================
+   AD CTA BUTTON
+   ============================================ */
+
+.featured-ad-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 18px;
+  margin-top: auto;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.featured-ad-cta:hover {
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+.featured-ad-cta svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+.featured-ad-content:hover .featured-ad-cta svg {
+  transform: translateX(-3px);
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.featured-ad-loading {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+}
+
+.featured-ad-loading-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: featuredAdShimmer 1.5s infinite;
+}
+
+.featured-ad-loading-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.featured-ad-loading-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: featuredAdShimmer 1.5s infinite;
+}
+
+.featured-ad-loading-line--short { width: 40%; }
+.featured-ad-loading-line--medium { width: 70%; }
+.featured-ad-loading-line--full { width: 100%; }
+.featured-ad-loading-line--cta { 
+  width: 100px; 
+  height: 44px; 
+  margin-top: auto;
+  border-radius: 10px;
+}
+
+@keyframes featuredAdShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   DIVIDER BETWEEN AD AND RESULTS
+   ============================================ */
+
+.featured-ad-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 0 4px;
+}
+
+.featured-ad-divider::before,
+.featured-ad-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.3) 50%, transparent 100%);
+}
+
+.featured-ad-divider-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE (< 640px)
+   ============================================ */
+
+@media (max-width: 639px) {
+  .featured-ad-module {
+    margin-top: 12px;
+    max-width: 100%;
+  }
+
+  .featured-ad-card {
+    border-radius: 14px;
+    margin: 0 -2px;
+  }
+
+  .featured-ad-header {
+    padding: 8px 12px;
+  }
+
+  .featured-ad-badge {
+    padding: 3px 8px;
+    font-size: 0.68rem;
+  }
+
+  .featured-ad-title-label {
+    font-size: 0.72rem;
+  }
+
+  .featured-ad-content {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .featured-ad-thumb {
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+  }
+
+  .featured-ad-info {
+    gap: 6px;
+  }
+
+  .featured-ad-name {
+    font-size: 0.95rem;
+  }
+
+  .featured-ad-desc {
+    font-size: 0.78rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .featured-ad-cta {
+    width: 100%;
+    min-height: 48px;
+    font-size: 0.88rem;
+  }
+
+  .featured-ad-loading {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .featured-ad-loading-thumb {
+    width: 100%;
+    height: 120px;
+  }
+
+  .featured-ad-loading-line--cta {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   EXTRA SMALL MOBILE (< 380px)
+   ============================================ */
+
+@media (max-width: 379px) {
+  .featured-ad-header {
+    padding: 6px 10px;
+  }
+
+  .featured-ad-content {
+    padding: 10px;
+  }
+
+  .featured-ad-thumb {
+    height: 120px;
+  }
+
+  .featured-ad-name {
+    font-size: 0.88rem;
+  }
+}
+
+/* ============================================
+   TABLET & DESKTOP (≥ 640px)
+   ============================================ */
+
+@media (min-width: 640px) {
+  .featured-ad-module {
+    margin-top: 18px;
+  }
+
+  .featured-ad-card {
+    border-radius: 20px;
+  }
+
+  .featured-ad-header {
+    padding: 12px 16px;
+  }
+
+  .featured-ad-content {
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .featured-ad-thumb {
+    width: 100px;
+    height: 100px;
+  }
+
+  .featured-ad-cta {
+    width: auto;
+    align-self: flex-start;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-ad-module {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+
+  .featured-ad-module.is-visible {
+    transform: none;
+  }
+
+  .featured-ad-loading-thumb,
+  .featured-ad-loading-line {
+    animation: none;
+    background: #e2e8f0;
+  }
+}
+
+/* ============================================
+   HIDE OLD IMPLEMENTATIONS
+   ============================================ */
+
+.ad-popup-custom,
+#adPopup,
+.search-ad-section {
+  display: none !important;
+}

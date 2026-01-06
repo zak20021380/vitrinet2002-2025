@@ -3298,6 +3298,10 @@ const res = await fetch('http://localhost:5000/api/adOrder/active?planSlug=ad_se
 
 
 
+// ============================================
+// OLD AD POPUP - DISABLED
+// Now using featured-ad-module.js instead
+// ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.querySelector('input[type="text"][placeholder^="جستجو"]');
@@ -3311,40 +3315,24 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleAdPopupVisibility(adPopup, false);
   };
 
-  // رویداد باز شدن پاپ‌آپ
-  if (searchInput) {
-    searchInput.addEventListener('focus', window.showAdBannerPopup);
-    searchInput.addEventListener('click', window.showAdBannerPopup);
-  } else {
-    console.error("❌ input جستجو پیدا نشد!");
-  }
+  // DISABLED: Old popup behavior - now using FeaturedAdModule
+  // The new featured-ad-module.js handles ad display separately
+  // if (searchInput) {
+  //   searchInput.addEventListener('focus', window.showAdBannerPopup);
+  //   searchInput.addEventListener('click', window.showAdBannerPopup);
+  // }
 
-  // بستن با دکمه
+  // بستن با دکمه (kept for backward compatibility)
   if (closeAdBtn) {
     closeAdBtn.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       hideAdPopup();
     });
-  } else {
-    console.error("❌ دکمه بستن تبلیغ پیدا نشد!");
-  }
-
-  // بستن با تایپ در سرچ
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      if (!adPopup) return;
-      if (adSlot && adSlot.dataset.loaded === 'true') {
-        toggleAdPopupVisibility(adPopup, false);
-      } else {
-        hideAdPopup();
-      }
-    });
   }
 
   // بستن با کلیک بیرون از پاپ‌آپ
   document.addEventListener('mousedown', function(e) {
-    // فقط وقتی پاپ‌آپ بازه و روی خود پاپ‌آپ یا محتواش کلیک نشده و روی input سرچ هم کلیک نشده:
     if (
       adPopup &&
       adPopup.classList.contains('is-visible') &&
@@ -3431,9 +3419,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
     const highlight = params.get('highlightAd') || (hash && hash.startsWith('ad_') ? hash : '');
-    if (highlight === 'ad_search' && typeof window.showAdBannerPopup === 'function') {
+    if (highlight === 'ad_search') {
+      // Use new FeaturedAdModule instead of old popup
       setTimeout(() => {
-        window.showAdBannerPopup();
+        if (typeof window.FeaturedAdModule !== 'undefined' && window.FeaturedAdModule.show) {
+          window.FeaturedAdModule.show();
+        }
       }, 600);
     }
   } catch (err) {

@@ -19,7 +19,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="style-index.css" />
+  <link rel="stylesheet" href="css/featured-ad-module.css" />
   <script src="main-index.js" defer></script>
+  <script src="js/featured-ad-module.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <script src="/nav-active.js" defer></script>
 
@@ -246,39 +248,45 @@
           </button>
         </form>
 
-        <!-- نتایج جستجو -->
-        <div id="searchResultsPanel" class="hidden w-full mt-6" role="region" aria-live="polite"
+        <!-- ماژول تبلیغ ویژه - جدا از نتایج جستجو -->
+        <div id="featuredAdModule" class="featured-ad-module" role="complementary" aria-label="تبلیغ ویژه"></div>
+
+        <!-- جداکننده بین تبلیغ و نتایج -->
+        <div id="adResultsDivider" class="featured-ad-divider hidden">
+          <span class="featured-ad-divider-text">نتایج جستجو</span>
+        </div>
+
+        <!-- نتایج جستجو - کاملاً جدا از تبلیغ -->
+        <div id="searchResultsPanel" class="hidden w-full mt-4" role="region" aria-live="polite"
           aria-label="نتایج جستجو">
-          <div class="max-w-4xl mx-auto w-full">
+          <div class="max-w-xl mx-auto w-full">
             <div
-              class="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-[0_25px_70px_rgba(14,165,233,0.18)] backdrop-blur-xl px-4 py-5 sm:px-8 sm:py-7">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              class="relative overflow-hidden rounded-2xl border border-white/70 bg-white/95 shadow-[0_20px_50px_rgba(14,165,233,0.12)] backdrop-blur-xl px-4 py-4 sm:px-6 sm:py-5">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
                 <div class="flex items-center gap-2">
                   <span
-                    class="inline-flex items-center justify-center rounded-2xl bg-emerald-50 px-3 py-1 text-sm font-extrabold text-emerald-600 shadow-sm">
+                    class="inline-flex items-center justify-center rounded-xl bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-600 shadow-sm">
                     نتایج جستجو
                   </span>
-                  <span id="searchQueryLabel" class="text-sm font-bold text-slate-500"></span>
+                  <span id="searchQueryLabel" class="text-xs font-bold text-slate-400"></span>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-slate-400">
-                  <button id="closeSearchPanel" type="button"
-                    class="inline-flex items-center gap-1 rounded-full border border-transparent px-3 py-1.5 font-bold text-slate-500 transition hover:text-slate-700">
-                    بستن
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
+                <button id="closeSearchPanel" type="button"
+                  class="inline-flex items-center gap-1 rounded-lg border border-transparent px-2.5 py-1 text-xs font-bold text-slate-500 transition hover:text-slate-700 hover:bg-slate-50">
+                  بستن
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
-              <div id="searchResultsContainer" class="mt-5 space-y-7"></div>
+              <div id="searchResultsContainer" class="space-y-4"></div>
             </div>
           </div>
         </div>
 
-        <!-- پاپ‌آپ تبلیغ دقیقا بعد از فرم سرچ -->
-        <div id="adPopup" class="ad-popup-custom" aria-hidden="true">
+        <!-- پاپ‌آپ تبلیغ قدیمی - غیرفعال -->
+        <div id="adPopup" class="ad-popup-custom" aria-hidden="true" style="display:none !important;">
           <div class="ad-popup-surface">
             <button type="button" id="closeAdBtn" class="ad-close-btn" aria-label="بستن تبلیغ">
               <span>بستن</span>
