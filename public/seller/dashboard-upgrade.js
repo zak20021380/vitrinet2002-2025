@@ -1903,6 +1903,46 @@ async function fetchMyPlans() {
               </button>`;
           }
 
+          // تاریخ فعالسازی (شروع نمایش)
+          const startDate = plan.displayedAt || plan.approvedAt || plan.startDate;
+          const startDateFormatted = startDate ? toJalaliDate(startDate) : '-';
+          
+          // ساخت بخش تاریخ‌ها با طراحی حرفه‌ای
+          const datesSection = `
+            <div class="myplans-card__dates">
+              <div class="myplans-card__date-item myplans-card__date-item--start">
+                <div class="myplans-card__date-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    <path d="M12 12v4l2 1" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="myplans-card__date-content">
+                  <span class="myplans-card__date-label">تاریخ فعالسازی</span>
+                  <span class="myplans-card__date-value">${startDateFormatted}</span>
+                </div>
+              </div>
+              <div class="myplans-card__date-divider">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="myplans-card__date-item myplans-card__date-item--end">
+                <div class="myplans-card__date-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                    <path d="M9 16l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="myplans-card__date-content">
+                  <span class="myplans-card__date-label">تاریخ پایان</span>
+                  <span class="myplans-card__date-value">${endDate}</span>
+                </div>
+              </div>
+            </div>
+          `;
+
           return `
             <article class="myplans-card myplans-card--ad" data-plan-status="${status}">
               <div class="myplans-card__header">
@@ -1924,18 +1964,7 @@ async function fetchMyPlans() {
                   ${locationHint || 'نمایش ویژه در ویترینت'}
                 </div>
               </div>
-              <div class="myplans-card__expiry">
-                <div class="myplans-card__expiry-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <path d="M16 2v4M8 2v4M3 10h18"/>
-                  </svg>
-                </div>
-                <div class="myplans-card__expiry-content">
-                  <span class="myplans-card__expiry-label">فعال تا پایان روز</span>
-                  <span class="myplans-card__expiry-value">${endDate}</span>
-                </div>
-              </div>
+              ${datesSection}
               ${actionBtn}
             </article>
           `;

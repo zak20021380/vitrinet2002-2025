@@ -1492,3 +1492,400 @@ body.pending-guard-modal--open {
     transform: none;
   }
 }
+
+
+/* ─────────────────────────────────────────────────────
+   Premium Dates Section - Activation & Expiry Display
+   Professional UI/UX Design
+   ───────────────────────────────────────────────────── */
+.myplans-card__dates {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Subtle gradient overlay */
+.myplans-card__dates::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0.03) 0%, 
+    transparent 30%,
+    transparent 70%,
+    rgba(245, 158, 11, 0.03) 100%
+  );
+  pointer-events: none;
+}
+
+.myplans-card--ad .myplans-card__dates {
+  border-color: rgba(245, 158, 11, 0.15);
+  background: linear-gradient(145deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.myplans-card--ad .myplans-card__dates::before {
+  background: linear-gradient(90deg, 
+    rgba(245, 158, 11, 0.04) 0%, 
+    transparent 30%,
+    transparent 70%,
+    rgba(239, 68, 68, 0.03) 100%
+  );
+}
+
+/* Date Item */
+.myplans-card__date-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  position: relative;
+  z-index: 1;
+  transition: background 0.25s ease;
+}
+
+.myplans-card__date-item:hover {
+  background: rgba(248, 250, 252, 0.6);
+}
+
+.myplans-card__date-item--start {
+  border-radius: 16px 0 0 16px;
+}
+
+.myplans-card__date-item--end {
+  border-radius: 0 16px 16px 0;
+}
+
+/* Date Icon */
+.myplans-card__date-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.myplans-card__date-item:hover .myplans-card__date-icon {
+  transform: scale(1.05);
+}
+
+.myplans-card__date-item--start .myplans-card__date-icon {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+  color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+.myplans-card__date-item--end .myplans-card__date-icon {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.08));
+  color: #0ea5e9;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.12);
+}
+
+.myplans-card--ad .myplans-card__date-item--start .myplans-card__date-icon {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+  color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+}
+
+.myplans-card--ad .myplans-card__date-item--end .myplans-card__date-icon {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
+  color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+.myplans-card__date-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Date Content */
+.myplans-card__date-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.myplans-card__date-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.myplans-card__date-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  direction: ltr;
+  text-align: right;
+}
+
+.myplans-card__date-item--start .myplans-card__date-value {
+  color: #059669;
+}
+
+.myplans-card__date-item--end .myplans-card__date-value {
+  color: #0284c7;
+}
+
+.myplans-card--ad .myplans-card__date-item--start .myplans-card__date-value {
+  color: #d97706;
+}
+
+.myplans-card--ad .myplans-card__date-item--end .myplans-card__date-value {
+  color: #dc2626;
+}
+
+/* Date Divider - Arrow */
+.myplans-card__date-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.myplans-card__date-divider::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  width: 1px;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(203, 213, 225, 0.5) 20%,
+    rgba(203, 213, 225, 0.5) 80%,
+    transparent 100%
+  );
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.myplans-card__date-divider svg {
+  width: 16px;
+  height: 16px;
+  color: #cbd5e1;
+  background: #f8fafc;
+  border-radius: 50%;
+  padding: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.myplans-card--ad .myplans-card__date-divider svg {
+  background: #fffbeb;
+  color: #fbbf24;
+}
+
+/* ─────────────────────────────────────────────────────
+   Responsive - Mobile Optimizations
+   ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .myplans-card__dates {
+    flex-direction: column;
+    border-radius: 14px;
+  }
+
+  .myplans-card__date-item {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .myplans-card__date-item--start {
+    border-radius: 14px 14px 0 0;
+    border-bottom: 1px dashed rgba(203, 213, 225, 0.4);
+  }
+
+  .myplans-card__date-item--end {
+    border-radius: 0 0 14px 14px;
+  }
+
+  .myplans-card__date-divider {
+    width: 100%;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .myplans-card__date-divider::before {
+    display: none;
+  }
+
+  .myplans-card__date-divider svg {
+    display: none;
+  }
+
+  .myplans-card__date-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .myplans-card__date-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .myplans-card__date-label {
+    font-size: 0.65rem;
+  }
+
+  .myplans-card__date-value {
+    font-size: 0.85rem;
+  }
+}
+
+/* Extra Small Screens */
+@media (max-width: 390px) {
+  .myplans-card__dates {
+    border-radius: 12px;
+  }
+
+  .myplans-card__date-item {
+    padding: 0.65rem 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .myplans-card__date-item--start {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .myplans-card__date-item--end {
+    border-radius: 0 0 12px 12px;
+  }
+
+  .myplans-card__date-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .myplans-card__date-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .myplans-card__date-label {
+    font-size: 0.62rem;
+  }
+
+  .myplans-card__date-value {
+    font-size: 0.8rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Tablet & Desktop - Horizontal Layout
+   ───────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .myplans-card__dates {
+    border-radius: 18px;
+  }
+
+  .myplans-card__date-item {
+    padding: 1rem 1.15rem;
+    gap: 0.75rem;
+  }
+
+  .myplans-card__date-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .myplans-card__date-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .myplans-card__date-label {
+    font-size: 0.72rem;
+  }
+
+  .myplans-card__date-value {
+    font-size: 0.98rem;
+  }
+
+  .myplans-card__date-divider {
+    width: 40px;
+  }
+
+  .myplans-card__date-divider svg {
+    width: 18px;
+    height: 18px;
+    padding: 3px;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1024px) {
+  .myplans-card__dates {
+    border-radius: 20px;
+  }
+
+  .myplans-card__date-item {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .myplans-card__date-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .myplans-card__date-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .myplans-card__date-label {
+    font-size: 0.75rem;
+  }
+
+  .myplans-card__date-value {
+    font-size: 1.02rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Animation & Hover Effects
+   ───────────────────────────────────────────────────── */
+.myplans-card__dates {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.myplans-card:hover .myplans-card__dates {
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(203, 213, 225, 0.9);
+}
+
+.myplans-card--ad:hover .myplans-card__dates {
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .myplans-card__dates,
+  .myplans-card__date-item,
+  .myplans-card__date-icon {
+    transition: none;
+  }
+}
