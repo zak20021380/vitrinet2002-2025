@@ -1683,6 +1683,69 @@ async function fetchMyPlans() {
   const UPLOADS_BASE = `${API_BASE.replace('/api','')}/uploads/`;
 
   // ─────────────────────────────────────────────────────
+  // Fetch subscription status first for hero stats
+  // ─────────────────────────────────────────────────────
+  let subscriptionStatus = null;
+  try {
+    const subRes = await fetch(`${API_BASE}/sellerPlans/subscription-status`, withCreds());
+    if (subRes.ok) {
+      subscriptionStatus = await subRes.json();
+    }
+  } catch (err) {
+    console.warn('Failed to fetch subscription status:', err);
+  }
+
+  // Update hero stats with real subscription data
+  function updateMyPlansHeroStats(subStatus, adCount) {
+    const heroStat1Value = document.getElementById('heroStat1Value');
+    const heroStat2Value = document.getElementById('heroStat2Value');
+    const heroStat3Value = document.getElementById('heroStat3Value');
+    const heroStat1Label = document.getElementById('heroStat1Label');
+    const heroStat2Label = document.getElementById('heroStat2Label');
+    const heroStat3Label = document.getElementById('heroStat3Label');
+
+    // Only update if we're on myplans tab
+    const myPlansContent = document.getElementById('content-myplans');
+    if (!myPlansContent || myPlansContent.hidden) return;
+
+    // Stat 1: Subscription status
+    if (heroStat1Value && heroStat1Label) {
+      if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
+        heroStat1Value.textContent = '✓';
+        heroStat1Label.textContent = 'اشتراک فعال';
+      } else if (subStatus && subStatus.hasSubscription && !subStatus.isActive) {
+        heroStat1Value.textContent = '✗';
+        heroStat1Label.textContent = 'منقضی شده';
+      } else {
+        heroStat1Value.textContent = '—';
+        heroStat1Label.textContent = 'بدون اشتراک';
+      }
+    }
+
+    // Stat 2: Active ads count
+    if (heroStat2Value && heroStat2Label) {
+      heroStat2Value.textContent = toFaDigits(adCount || 0);
+      heroStat2Label.textContent = 'تبلیغ فعال';
+    }
+
+    // Stat 3: Remaining days
+    if (heroStat3Value && heroStat3Label) {
+      if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
+        if (subStatus.endsToday) {
+          heroStat3Value.textContent = 'امروز';
+          heroStat3Label.textContent = 'پایان اشتراک';
+        } else {
+          heroStat3Value.textContent = toFaDigits(subStatus.remainingDays);
+          heroStat3Label.textContent = 'روز باقیمانده';
+        }
+      } else {
+        heroStat3Value.textContent = '—';
+        heroStat3Label.textContent = 'روز باقیمانده';
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────
   // Filter State Management
   // ─────────────────────────────────────────────────────
   let currentFilter = 'all'; // 'all' | 'sub' | 'ad'
@@ -1917,6 +1980,11 @@ async function fetchMyPlans() {
       return `<strong>${value}</strong> روز تا شروع`;
     }
 
+    // Handle "ends today" case
+    if (info.endsToday) {
+      return '<strong>امروز</strong> پایان می‌یابد';
+    }
+
     if (info.remainingDays <= 0) {
       if (info.graceRemainingDays != null && info.graceRemainingDays > 0) {
         const value = info.graceRemainingDays === 1 ? '۱' : toFaDigits(info.graceRemainingDays);
@@ -1935,6 +2003,10 @@ async function fetchMyPlans() {
       if (info.daysToStart <= 0) return { text: 'امروز شروع', class: '' };
       return { text: `${toFaDigits(info.daysToStart)} روز تا شروع`, class: '' };
     }
+    // Handle "ends today" case
+    if (info.endsToday) {
+      return { text: 'امروز پایان می‌یابد', class: 'myplans-card__expiry-value--warning' };
+    }
     if (info.remainingDays <= 0) {
       return { text: 'منقضی شده', class: 'myplans-card__expiry-value--danger' };
     }
@@ -1951,6 +2023,9 @@ async function fetchMyPlans() {
     const adPriceMap = (await adPriceMapPromise) || {};
 
     if (!res.ok || !json.plans || !json.plans.length) {
+      // Update hero stats for empty state
+      updateMyPlansHeroStats(subscriptionStatus, 0);
+      
       // Empty state - no plans at all
       box.innerHTML = `
         <div class="myplans-summary" role="group" aria-label="فیلتر پلن‌ها">
@@ -2072,6 +2147,12 @@ async function fetchMyPlans() {
     const total = json.plans.length;
     const subCount = subPlans.length;
     const adCount = adPlans.length;
+    
+    // Count active ads for hero stats
+    const activeAdCount = adPlans.filter(p => p.status === 'approved' || p.status === 'active' || p.status === 'paid').length;
+    
+    // Update hero stats with real data
+    updateMyPlansHeroStats(subscriptionStatus, activeAdCount);
 
     // Summary Row - Interactive Filter Chips
     const summaryRow = `
@@ -2116,16 +2197,35 @@ async function fetchMyPlans() {
       </div>
     `;
 
-    // کارت‌های پلن اشتراک
+    // کارت‌های پلن اشتراک - استفاده از subscriptionStatus برای دقت بیشتر
     const subCards = subPlans.length
       ? subPlans.map(plan => {
-          const status = plan.status || (plan.active ? 'active' : 'pending');
+          // Use server-provided subscription status if available and matches this plan
+          const useServerStatus = subscriptionStatus && subscriptionStatus.hasSubscription && 
+            (plan.planSlug === subscriptionStatus.planSlug || subPlans.length === 1);
+          
+          const status = useServerStatus && subscriptionStatus.isActive ? 'active' : 
+                        (plan.status || (plan.active ? 'active' : 'pending'));
           const statusClass = getStatusClass(status);
           const statusLabel = getStatusLabel(status);
-          const progressInfo = calculateSubscriptionProgress(plan);
+          
+          // Use server-calculated remaining days for accuracy
+          let progressInfo;
+          if (useServerStatus) {
+            progressInfo = {
+              progress: subscriptionStatus.progress || 0,
+              remainingDays: subscriptionStatus.remainingDays,
+              started: true,
+              endsToday: subscriptionStatus.endsToday
+            };
+          } else {
+            progressInfo = calculateSubscriptionProgress(plan);
+          }
+          
           const remainingInfo = getRemainingDaysText(progressInfo);
           const progressValue = progressInfo ? Math.max(0, Math.min(100, Math.round(progressInfo.progress))) : 0;
           const timelineMeta = buildTimelineMeta(progressInfo);
+          const startDate = toJalaliDate(plan.startDate) || '-';
           const endDate = toJalaliDate(plan.endDate) || '-';
 
           const progressSection = progressInfo
@@ -2142,6 +2242,20 @@ async function fetchMyPlans() {
                 </div>` : ''}
               </div>`
             : '';
+
+          // Build dates section
+          const datesSection = `
+            <div class="myplans-card__dates">
+              <div class="myplans-card__date-row">
+                <span class="myplans-card__date-label">شروع:</span>
+                <span class="myplans-card__date-value">${startDate}</span>
+              </div>
+              <div class="myplans-card__date-row">
+                <span class="myplans-card__date-label">پایان:</span>
+                <span class="myplans-card__date-value">${endDate}</span>
+              </div>
+            </div>
+          `;
 
           return `
             <article class="myplans-card myplans-card--sub">
@@ -2163,6 +2277,7 @@ async function fetchMyPlans() {
                   </svg>
                   نمایش فروشگاه در نتایج جستجو
                 </div>
+                ${datesSection}
               </div>
               <div class="myplans-card__expiry">
                 <div class="myplans-card__expiry-icon">
@@ -2181,7 +2296,7 @@ async function fetchMyPlans() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 5v14M5 12h14"/>
                 </svg>
-                تمدید اشتراک
+                ${status === 'expired' ? 'تمدید اشتراک' : 'تمدید اشتراک'}
               </a>
             </article>
           `;
