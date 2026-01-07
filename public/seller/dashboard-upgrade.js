@@ -1740,25 +1740,76 @@ async function fetchMyPlans() {
     // Convert summary to subscription-status format
     subscriptionStatus = {
       hasSubscription: !!summaryData.subscription,
-      isActive: summaryData.subscription?.isActive || false,
-      remainingDays: summaryData.subscription?.remainingDays || 0,
-      planName: summaryData.subscription?.planName || null,
-      endsToday: summaryData.subscription?.remainingDays === 0 && summaryData.subscription?.isActive
+      isActive: summaryData.subscription?.isActive ?? false,
+      remainingDays: summaryData.subscription?.remainingDays ?? 0,
+      planName: summaryData.subscription?.planName ?? null,
+      endsToday: (summaryData.subscription?.remainingDays ?? 0) === 0 && (summaryData.subscription?.isActive ?? false)
     };
   }
 
-  // Update hero stats with real subscription data (using new summary-based function)
-  function updateMyPlansHeroStatsFromSummary(summary, hasError) {
+  function getMyPlansHeroElements() {
+    const myPlansContent = document.getElementById('content-myplans');
+    if (!myPlansContent) {
+      console.warn('[MyPlans] Missing #content-myplans block; cannot update tiles.');
+      return null;
+    }
+
     const heroStat1Value = document.getElementById('heroStat1Value');
     const heroStat2Value = document.getElementById('heroStat2Value');
     const heroStat3Value = document.getElementById('heroStat3Value');
     const heroStat1Label = document.getElementById('heroStat1Label');
     const heroStat2Label = document.getElementById('heroStat2Label');
     const heroStat3Label = document.getElementById('heroStat3Label');
+    const summaryError = myPlansContent.querySelector('#myPlansSummaryError');
+
+    const missing = [];
+    if (!heroStat1Value) missing.push('#heroStat1Value');
+    if (!heroStat1Label) missing.push('#heroStat1Label');
+    if (!heroStat2Value) missing.push('#heroStat2Value');
+    if (!heroStat2Label) missing.push('#heroStat2Label');
+    if (!heroStat3Value) missing.push('#heroStat3Value');
+    if (!heroStat3Label) missing.push('#heroStat3Label');
+    if (!summaryError) missing.push('#myPlansSummaryError');
+
+    if (missing.length) {
+      console.warn(`[MyPlans] Missing tiles elements: ${missing.join(', ')}`);
+    }
+
+    return {
+      myPlansContent,
+      heroStat1Value,
+      heroStat2Value,
+      heroStat3Value,
+      heroStat1Label,
+      heroStat2Label,
+      heroStat3Label,
+      summaryError
+    };
+  }
+
+  function normalizeNumber(value) {
+    const rawValue = Number(value ?? 0);
+    if (!Number.isFinite(rawValue)) return 0;
+    return Math.max(0, rawValue);
+  }
+
+  // Update hero stats with real subscription data (using new summary-based function)
+  function updateMyPlansHeroStatsFromSummary(summary, hasError) {
+    const elements = getMyPlansHeroElements();
+    if (!elements) return;
+    const {
+      myPlansContent,
+      heroStat1Value,
+      heroStat2Value,
+      heroStat3Value,
+      heroStat1Label,
+      heroStat2Label,
+      heroStat3Label,
+      summaryError
+    } = elements;
 
     // Only update if we're on myplans tab
-    const myPlansContent = document.getElementById('content-myplans');
-    if (!myPlansContent || myPlansContent.hidden) return;
+    if (myPlansContent.hidden) return;
 
     // Remove loading state
     [heroStat1Value, heroStat2Value, heroStat3Value].forEach(el => {
@@ -1766,107 +1817,71 @@ async function fetchMyPlans() {
     });
 
     // Handle error state
-    if (hasError) {
-      if (heroStat1Value) heroStat1Value.textContent = '!';
-      if (heroStat1Label) heroStat1Label.textContent = 'خطا';
-      if (heroStat2Value) heroStat2Value.textContent = '!';
-      if (heroStat2Label) heroStat2Label.textContent = 'خطا';
-      if (heroStat3Value) heroStat3Value.textContent = '!';
-      if (heroStat3Label) heroStat3Label.textContent = 'خطا';
-      return;
+    if (summaryError) {
+      summaryError.hidden = !hasError;
     }
 
     const sub = summary?.subscription;
-    const adCount = summary?.activeAdsCount || 0;
+    const planName = typeof sub?.planName === 'string' ? sub.planName.trim() : sub?.planName;
+    const subscriptionStatusText = planName || 'بدون اشتراک';
+    const adCount = normalizeNumber(summary?.activeAdsCount ?? 0);
+    const remainingDays = sub?.isActive ? normalizeNumber(sub?.remainingDays ?? 0) : 0;
 
     // Stat 1: Subscription status
-    if (heroStat1Value && heroStat1Label) {
-      if (sub && sub.isActive) {
-        heroStat1Value.textContent = sub.planName || 'فعال';
-        heroStat1Label.textContent = 'اشتراک فعال';
-      } else {
-        heroStat1Value.textContent = '—';
-        heroStat1Label.textContent = 'بدون اشتراک';
-      }
-    }
+    if (heroStat1Value) heroStat1Value.textContent = subscriptionStatusText;
+    if (heroStat1Label) heroStat1Label.textContent = 'وضعیت اشتراک';
 
     // Stat 2: Active ads count
-    if (heroStat2Value && heroStat2Label) {
-      heroStat2Value.textContent = toFaDigits(adCount);
-      heroStat2Label.textContent = 'تبلیغ فعال';
-    }
+    if (heroStat2Value) heroStat2Value.textContent = toFaDigits(adCount);
+    if (heroStat2Label) heroStat2Label.textContent = 'تبلیغ فعال';
 
     // Stat 3: Remaining days (SUBSCRIPTION remaining days, not ads)
-    if (heroStat3Value && heroStat3Label) {
-      if (sub && sub.isActive) {
-        const remaining = sub.remainingDays || 0;
-        if (remaining === 0) {
-          heroStat3Value.textContent = 'امروز';
-          heroStat3Label.textContent = 'پایان اشتراک';
-        } else {
-          heroStat3Value.textContent = toFaDigits(remaining);
-          heroStat3Label.textContent = 'روز باقیمانده';
-        }
-      } else {
-        heroStat3Value.textContent = '۰';
-        heroStat3Label.textContent = 'روز باقیمانده';
-      }
-    }
+    if (heroStat3Value) heroStat3Value.textContent = toFaDigits(remainingDays);
+    if (heroStat3Label) heroStat3Label.textContent = 'روز باقیمانده';
   }
 
   // Legacy function for backward compatibility
   function updateMyPlansHeroStats(subStatus, adCount) {
-    const heroStat1Value = document.getElementById('heroStat1Value');
-    const heroStat2Value = document.getElementById('heroStat2Value');
-    const heroStat3Value = document.getElementById('heroStat3Value');
-    const heroStat1Label = document.getElementById('heroStat1Label');
-    const heroStat2Label = document.getElementById('heroStat2Label');
-    const heroStat3Label = document.getElementById('heroStat3Label');
+    const elements = getMyPlansHeroElements();
+    if (!elements) return;
+    const {
+      myPlansContent,
+      heroStat1Value,
+      heroStat2Value,
+      heroStat3Value,
+      heroStat1Label,
+      heroStat2Label,
+      heroStat3Label,
+      summaryError
+    } = elements;
 
     // Only update if we're on myplans tab
-    const myPlansContent = document.getElementById('content-myplans');
-    if (!myPlansContent || myPlansContent.hidden) return;
+    if (myPlansContent.hidden) return;
 
     // Remove loading state
     [heroStat1Value, heroStat2Value, heroStat3Value].forEach(el => {
       if (el) el.classList.remove('is-loading');
     });
 
-    // Stat 1: Subscription status
-    if (heroStat1Value && heroStat1Label) {
-      if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
-        heroStat1Value.textContent = subStatus.planName || 'فعال';
-        heroStat1Label.textContent = 'اشتراک فعال';
-      } else if (subStatus && subStatus.hasSubscription && !subStatus.isActive) {
-        heroStat1Value.textContent = '✗';
-        heroStat1Label.textContent = 'منقضی شده';
-      } else {
-        heroStat1Value.textContent = '—';
-        heroStat1Label.textContent = 'بدون اشتراک';
-      }
+    if (summaryError) {
+      summaryError.hidden = true;
     }
+
+    // Stat 1: Subscription status
+    const legacyPlanName = typeof subStatus?.planName === 'string' ? subStatus.planName.trim() : subStatus?.planName;
+    const subscriptionStatusText = legacyPlanName || 'بدون اشتراک';
+    if (heroStat1Value) heroStat1Value.textContent = subscriptionStatusText;
+    if (heroStat1Label) heroStat1Label.textContent = 'وضعیت اشتراک';
 
     // Stat 2: Active ads count
-    if (heroStat2Value && heroStat2Label) {
-      heroStat2Value.textContent = toFaDigits(adCount || 0);
-      heroStat2Label.textContent = 'تبلیغ فعال';
-    }
+    const normalizedAdCount = normalizeNumber(adCount ?? 0);
+    if (heroStat2Value) heroStat2Value.textContent = toFaDigits(normalizedAdCount);
+    if (heroStat2Label) heroStat2Label.textContent = 'تبلیغ فعال';
 
     // Stat 3: Remaining days (SUBSCRIPTION remaining days)
-    if (heroStat3Value && heroStat3Label) {
-      if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
-        if (subStatus.endsToday) {
-          heroStat3Value.textContent = 'امروز';
-          heroStat3Label.textContent = 'پایان اشتراک';
-        } else {
-          heroStat3Value.textContent = toFaDigits(subStatus.remainingDays || 0);
-          heroStat3Label.textContent = 'روز باقیمانده';
-        }
-      } else {
-        heroStat3Value.textContent = '۰';
-        heroStat3Label.textContent = 'روز باقیمانده';
-      }
-    }
+    const remainingDays = subStatus?.isActive ? normalizeNumber(subStatus?.remainingDays ?? 0) : 0;
+    if (heroStat3Value) heroStat3Value.textContent = toFaDigits(remainingDays);
+    if (heroStat3Label) heroStat3Label.textContent = 'روز باقیمانده';
   }
 
   // ─────────────────────────────────────────────────────
