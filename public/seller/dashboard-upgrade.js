@@ -705,9 +705,9 @@ const HERO_CONTENT = {
     title: 'پلن‌های من',
     desc: 'وضعیت اشتراک و تبلیغات فعال خودت رو مدیریت کن',
     stats: [
-      { value: '—', label: 'اشتراک فعال' },
-      { value: '—', label: 'تبلیغ فعال' },
-      { value: '—', label: 'روز باقیمانده' }
+      { value: '', label: 'بدون اشتراک', skeleton: true },
+      { value: '۰', label: 'تبلیغ فعال', skeleton: true },
+      { value: '۰', label: 'روز باقیمانده', skeleton: true }
     ],
     icon: `<svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
       <defs>
@@ -767,14 +767,45 @@ function updateHeroContent(tab) {
   if (heroTitle) heroTitle.textContent = content.title;
   if (heroDesc) heroDesc.textContent = content.desc;
 
-  // Update stats
+  // Update stats - handle skeleton state for myplans
   if (content.stats && content.stats.length >= 3) {
-    if (heroStat1Value) heroStat1Value.textContent = content.stats[0].value;
-    if (heroStat1Label) heroStat1Label.textContent = content.stats[0].label;
-    if (heroStat2Value) heroStat2Value.textContent = content.stats[1].value;
-    if (heroStat2Label) heroStat2Label.textContent = content.stats[1].label;
-    if (heroStat3Value) heroStat3Value.textContent = content.stats[2].value;
-    if (heroStat3Label) heroStat3Label.textContent = content.stats[2].label;
+    const showSkeleton = tab === 'myplans' && content.stats[0].skeleton;
+    
+    if (showSkeleton) {
+      // Show skeleton loaders for myplans tab
+      if (heroStat1Value) {
+        heroStat1Value.innerHTML = '<span class="hero-stat-skeleton"></span>';
+        heroStat1Value.classList.add('is-loading');
+      }
+      if (heroStat2Value) {
+        heroStat2Value.innerHTML = '<span class="hero-stat-skeleton"></span>';
+        heroStat2Value.classList.add('is-loading');
+      }
+      if (heroStat3Value) {
+        heroStat3Value.innerHTML = '<span class="hero-stat-skeleton"></span>';
+        heroStat3Value.classList.add('is-loading');
+      }
+      if (heroStat1Label) heroStat1Label.textContent = content.stats[0].label;
+      if (heroStat2Label) heroStat2Label.textContent = content.stats[1].label;
+      if (heroStat3Label) heroStat3Label.textContent = content.stats[2].label;
+    } else {
+      // Normal update
+      if (heroStat1Value) {
+        heroStat1Value.textContent = content.stats[0].value;
+        heroStat1Value.classList.remove('is-loading');
+      }
+      if (heroStat1Label) heroStat1Label.textContent = content.stats[0].label;
+      if (heroStat2Value) {
+        heroStat2Value.textContent = content.stats[1].value;
+        heroStat2Value.classList.remove('is-loading');
+      }
+      if (heroStat2Label) heroStat2Label.textContent = content.stats[1].label;
+      if (heroStat3Value) {
+        heroStat3Value.textContent = content.stats[2].value;
+        heroStat3Value.classList.remove('is-loading');
+      }
+      if (heroStat3Label) heroStat3Label.textContent = content.stats[2].label;
+    }
   }
 
   // Update glow color based on tab
@@ -1683,19 +1714,107 @@ async function fetchMyPlans() {
   const UPLOADS_BASE = `${API_BASE.replace('/api','')}/uploads/`;
 
   // ─────────────────────────────────────────────────────
-  // Fetch subscription status first for hero stats
+  // Fetch summary data for hero stats (fast endpoint)
   // ─────────────────────────────────────────────────────
-  let subscriptionStatus = null;
+  let summaryData = null;
+  let summaryError = false;
+  
   try {
-    const subRes = await fetch(`${API_BASE}/sellerPlans/subscription-status`, withCreds());
-    if (subRes.ok) {
-      subscriptionStatus = await subRes.json();
+    const summaryRes = await fetch(`${API_BASE}/sellerPlans/summary`, withCreds());
+    if (summaryRes.ok) {
+      summaryData = await summaryRes.json();
+    } else {
+      summaryError = true;
     }
   } catch (err) {
-    console.warn('Failed to fetch subscription status:', err);
+    console.warn('Failed to fetch plans summary:', err);
+    summaryError = true;
   }
 
-  // Update hero stats with real subscription data
+  // Update hero stats immediately with summary data
+  updateMyPlansHeroStatsFromSummary(summaryData, summaryError);
+
+  // Also fetch subscription-status for backward compatibility
+  let subscriptionStatus = null;
+  if (summaryData?.subscription) {
+    // Convert summary to subscription-status format
+    subscriptionStatus = {
+      hasSubscription: !!summaryData.subscription,
+      isActive: summaryData.subscription?.isActive || false,
+      remainingDays: summaryData.subscription?.remainingDays || 0,
+      planName: summaryData.subscription?.planName || null,
+      endsToday: summaryData.subscription?.remainingDays === 0 && summaryData.subscription?.isActive
+    };
+  }
+
+  // Update hero stats with real subscription data (using new summary-based function)
+  function updateMyPlansHeroStatsFromSummary(summary, hasError) {
+    const heroStat1Value = document.getElementById('heroStat1Value');
+    const heroStat2Value = document.getElementById('heroStat2Value');
+    const heroStat3Value = document.getElementById('heroStat3Value');
+    const heroStat1Label = document.getElementById('heroStat1Label');
+    const heroStat2Label = document.getElementById('heroStat2Label');
+    const heroStat3Label = document.getElementById('heroStat3Label');
+
+    // Only update if we're on myplans tab
+    const myPlansContent = document.getElementById('content-myplans');
+    if (!myPlansContent || myPlansContent.hidden) return;
+
+    // Remove loading state
+    [heroStat1Value, heroStat2Value, heroStat3Value].forEach(el => {
+      if (el) el.classList.remove('is-loading');
+    });
+
+    // Handle error state
+    if (hasError) {
+      if (heroStat1Value) heroStat1Value.textContent = '!';
+      if (heroStat1Label) heroStat1Label.textContent = 'خطا';
+      if (heroStat2Value) heroStat2Value.textContent = '!';
+      if (heroStat2Label) heroStat2Label.textContent = 'خطا';
+      if (heroStat3Value) heroStat3Value.textContent = '!';
+      if (heroStat3Label) heroStat3Label.textContent = 'خطا';
+      return;
+    }
+
+    const sub = summary?.subscription;
+    const adCount = summary?.activeAdsCount || 0;
+
+    // Stat 1: Subscription status
+    if (heroStat1Value && heroStat1Label) {
+      if (sub && sub.isActive) {
+        heroStat1Value.textContent = sub.planName || 'فعال';
+        heroStat1Label.textContent = 'اشتراک فعال';
+      } else {
+        heroStat1Value.textContent = '—';
+        heroStat1Label.textContent = 'بدون اشتراک';
+      }
+    }
+
+    // Stat 2: Active ads count
+    if (heroStat2Value && heroStat2Label) {
+      heroStat2Value.textContent = toFaDigits(adCount);
+      heroStat2Label.textContent = 'تبلیغ فعال';
+    }
+
+    // Stat 3: Remaining days (SUBSCRIPTION remaining days, not ads)
+    if (heroStat3Value && heroStat3Label) {
+      if (sub && sub.isActive) {
+        const remaining = sub.remainingDays || 0;
+        if (remaining === 0) {
+          heroStat3Value.textContent = 'امروز';
+          heroStat3Label.textContent = 'پایان اشتراک';
+        } else {
+          heroStat3Value.textContent = toFaDigits(remaining);
+          heroStat3Label.textContent = 'روز باقیمانده';
+        }
+      } else {
+        heroStat3Value.textContent = '۰';
+        heroStat3Label.textContent = 'روز باقیمانده';
+      }
+    }
+  }
+
+  // Legacy function for backward compatibility
   function updateMyPlansHeroStats(subStatus, adCount) {
     const heroStat1Value = document.getElementById('heroStat1Value');
     const heroStat2Value = document.getElementById('heroStat2Value');
@@ -1708,10 +1827,15 @@ async function fetchMyPlans() {
     const myPlansContent = document.getElementById('content-myplans');
     if (!myPlansContent || myPlansContent.hidden) return;
 
+    // Remove loading state
+    [heroStat1Value, heroStat2Value, heroStat3Value].forEach(el => {
+      if (el) el.classList.remove('is-loading');
+    });
+
     // Stat 1: Subscription status
     if (heroStat1Value && heroStat1Label) {
       if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
-        heroStat1Value.textContent = '✓';
+        heroStat1Value.textContent = subStatus.planName || 'فعال';
         heroStat1Label.textContent = 'اشتراک فعال';
       } else if (subStatus && subStatus.hasSubscription && !subStatus.isActive) {
         heroStat1Value.textContent = '✗';
@@ -1728,18 +1852,18 @@ async function fetchMyPlans() {
       heroStat2Label.textContent = 'تبلیغ فعال';
     }
 
-    // Stat 3: Remaining days
+    // Stat 3: Remaining days (SUBSCRIPTION remaining days)
     if (heroStat3Value && heroStat3Label) {
       if (subStatus && subStatus.hasSubscription && subStatus.isActive) {
         if (subStatus.endsToday) {
           heroStat3Value.textContent = 'امروز';
           heroStat3Label.textContent = 'پایان اشتراک';
         } else {
-          heroStat3Value.textContent = toFaDigits(subStatus.remainingDays);
+          heroStat3Value.textContent = toFaDigits(subStatus.remainingDays || 0);
           heroStat3Label.textContent = 'روز باقیمانده';
         }
       } else {
-        heroStat3Value.textContent = '—';
+        heroStat3Value.textContent = '۰';
         heroStat3Label.textContent = 'روز باقیمانده';
       }
     }
@@ -2551,23 +2675,44 @@ async function fetchMyPlans() {
     // Initialize interactive filter chips
     initFilterChips();
   } catch (err) {
+    console.error('fetchMyPlans error:', err);
+    
+    // Update hero stats to show error state
+    const heroStat1Value = document.getElementById('heroStat1Value');
+    const heroStat2Value = document.getElementById('heroStat2Value');
+    const heroStat3Value = document.getElementById('heroStat3Value');
+    const heroStat1Label = document.getElementById('heroStat1Label');
+    const heroStat2Label = document.getElementById('heroStat2Label');
+    const heroStat3Label = document.getElementById('heroStat3Label');
+    
+    [heroStat1Value, heroStat2Value, heroStat3Value].forEach(el => {
+      if (el) el.classList.remove('is-loading');
+    });
+    
+    if (heroStat1Value) heroStat1Value.textContent = '!';
+    if (heroStat1Label) heroStat1Label.textContent = 'خطا';
+    if (heroStat2Value) heroStat2Value.textContent = '!';
+    if (heroStat2Label) heroStat2Label.textContent = 'خطا';
+    if (heroStat3Value) heroStat3Value.textContent = '!';
+    if (heroStat3Label) heroStat3Label.textContent = 'خطا';
+    
     box.innerHTML = `
-      <div class="myplans-empty myplans-empty--sub">
-        <div class="myplans-empty__icon">
+      <div class="myplans-error">
+        <div class="myplans-error__icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 8v4M12 16h.01"/>
           </svg>
         </div>
-        <h4 class="myplans-empty__title">خطا در دریافت پلن‌ها</h4>
-        <p class="myplans-empty__desc">لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید</p>
-        <button class="myplans-empty__cta" onclick="fetchMyPlans()">
+        <h4 class="myplans-error__title">خطا در دریافت اطلاعات</h4>
+        <p class="myplans-error__desc">خطا در دریافت اطلاعات. دوباره تلاش کنید.</p>
+        <button class="myplans-error__cta" onclick="fetchMyPlans()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 4v6h6"/>
             <path d="M23 20v-6h-6"/>
             <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
           </svg>
-          تلاش مجدد
+          دوباره تلاش کنید
         </button>
       </div>
     `;

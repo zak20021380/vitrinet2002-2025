@@ -4262,3 +4262,163 @@
 .upgrade-ad-card--products .upgrade-ad-capacity__booked {
   color: #f59e0b;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HERO STATS SKELETON LOADER
+   For "پلن‌های من" tab loading state
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hero-stat-skeleton {
+  display: inline-block;
+  width: 2.5rem;
+  height: 1.1rem;
+  background: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.15) 0%,
+    rgba(139, 92, 246, 0.25) 50%,
+    rgba(139, 92, 246, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: heroSkeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes heroSkeletonPulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.upgrade-hero__stat-value.is-loading {
+  min-width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Error state for hero stats */
+.upgrade-hero__stat-value[data-error="true"] {
+  color: #ef4444;
+}
+
+/* Responsive skeleton */
+@media (max-width: 640px) {
+  .hero-stat-skeleton {
+    width: 2rem;
+    height: 0.9rem;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MY PLANS ERROR STATE
+   For API error handling in "پلن‌های من" section
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.myplans-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: linear-gradient(165deg, rgba(239, 68, 68, 0.06), rgba(239, 68, 68, 0.02));
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 20px;
+  gap: 1rem;
+}
+
+.myplans-error__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
+  color: #ef4444;
+}
+
+.myplans-error__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.myplans-error__title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #dc2626;
+  margin: 0;
+}
+
+.myplans-error__desc {
+  font-size: 0.9rem;
+  color: #b91c1c;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.myplans-error__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  min-height: 48px;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.myplans-error__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+.myplans-error__cta:active {
+  transform: translateY(0);
+}
+
+.myplans-error__cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .myplans-error {
+    padding: 2rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .myplans-error__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+  }
+
+  .myplans-error__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .myplans-error__title {
+    font-size: 1rem;
+  }
+
+  .myplans-error__desc {
+    font-size: 0.85rem;
+  }
+}

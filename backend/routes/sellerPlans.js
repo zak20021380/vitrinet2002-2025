@@ -129,4 +129,64 @@ router.get('/my', auth('seller'), async (req, res) => {
   }
 });
 
+// GET /api/sellerPlans/summary
+// Returns a compact summary for the "پلن‌های من" dashboard block
+// Includes subscription info and active ads count with server-calculated remaining days
+router.get('/summary', auth('seller'), async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const serverNow = new Date();
+
+    // Find the most recent active subscription plan
+    const activePlan = await SellerPlan.findOne({
+      sellerId,
+      status: 'active',
+      endDate: { $gte: serverNow }
+    }).sort({ endDate: -1 }).lean();
+
+    // Count active ads (status = 'approved' or 'paid' and not expired)
+    const activeAdsCount = await AdOrder.countDocuments({
+      sellerId,
+      status: { $in: ['approved', 'paid'] },
+      $or: [
+        { expiresAt: { $gte: serverNow } },
+        { expiresAt: { $exists: false } }
+      ]
+    });
+
+    // Build subscription response
+    let subscription = null;
+    if (activePlan) {
+      const endDate = new Date(activePlan.endDate);
+      const msPerDay = 24 * 60 * 60 * 1000;
+      let remainingDays = Math.ceil((endDate - serverNow) / msPerDay);
+      if (remainingDays < 0) remainingDays = 0;
+
+      // Map plan slug to friendly name
+      const planNameMap = {
+        '1month': 'اشتراک ۱ ماهه',
+        '3month': 'اشتراک ۳ ماهه',
+        '12month': 'اشتراک ۱ ساله'
+      };
+      const planName = activePlan.planTitle || planNameMap[activePlan.planSlug] || 'اشتراک فروشگاه';
+
+      subscription = {
+        isActive: true,
+        planName,
+        remainingDays,
+        endDate: endDate.toISOString()
+      };
+    }
+
+    res.json({
+      subscription,
+      activeAdsCount,
+      serverNow: serverNow.toISOString()
+    });
+  } catch (err) {
+    console.error('plans/summary error:', err);
+    res.status(500).json({ message: 'خطا در دریافت اطلاعات' });
+  }
+});
+
 module.exports = router;
