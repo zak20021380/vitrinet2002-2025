@@ -10404,6 +10404,7 @@
           order: 'ri-shopping-cart-fill',
           admin_message: 'ri-admin-fill',
           system: 'ri-settings-3-fill',
+          ad_approved: 'ri-rocket-2-fill',
           info: 'ri-information-fill'
         };
         return icons[type] || 'ri-notification-3-line';
@@ -10418,14 +10419,15 @@
           product_like: 'لایک جدید',
           order: 'سفارش جدید',
           admin_message: 'پیام مدیر',
-          system: 'سیستمی'
+          system: 'سیستمی',
+          ad_approved: 'تایید تبلیغ'
         };
         return statusTexts[item.type] || 'جدید';
       };
 
       // تابع برای تعیین اینکه آیا اعلان قابل کلیک است
       const isClickable = (type) => {
-        return ['review', 'customer_message', 'product_like'].includes(type);
+        return ['review', 'customer_message', 'product_like', 'ad_approved'].includes(type);
       };
 
       // تابع برای تعیین متن راهنمای عمل
@@ -10433,9 +10435,19 @@
         const hints = {
           review: 'مشاهده و مدیریت نظرات',
           customer_message: 'مشاهده پیام‌ها',
-          product_like: 'مشاهده محصول'
+          product_like: 'مشاهده محصول',
+          ad_approved: 'مشاهده پلن‌ها'
         };
         return hints[type] || null;
+      };
+
+      const buildAdApprovedUrl = (notification) => {
+        const adId = notification?.relatedData?.adId;
+        const actionUrl = notification?.relatedData?.actionUrl;
+        if (adId) {
+          return `/seller/dashboard.html?ad_id=${encodeURIComponent(adId)}#upgrade-special-ads`;
+        }
+        return actionUrl || '/seller/dashboard.html#upgrade-special-ads';
       };
 
       notifications.forEach((item) => {
@@ -10613,6 +10625,7 @@
       
       const type = notificationItem.getAttribute('data-type');
       const id = notificationItem.getAttribute('data-id');
+      const notificationData = notifications.find((item) => item.id === id);
       
       // بستن مدال اعلان‌ها
       closeModal();
@@ -10637,6 +10650,11 @@
               showSection('products');
             }
             break;
+          case 'ad_approved': {
+            const targetUrl = buildAdApprovedUrl(notificationData);
+            window.location.href = targetUrl;
+            break;
+          }
           default:
             break;
         }
