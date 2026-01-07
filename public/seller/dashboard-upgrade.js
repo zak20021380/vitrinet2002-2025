@@ -1256,15 +1256,18 @@ window.selectPlan = async function (slug) {
 
 
 /*──────────────── ۵) اجرا بعد از لود ────────────────*/
-document.addEventListener('DOMContentLoaded', async () => {
+async function bootstrapUpgradeDashboard() {
+  if (window.__upgradeDashboardBootstrapped) return;
+  window.__upgradeDashboardBootstrapped = true;
+
   if (document.getElementById('tab-sub')) {
     initUpgradeDashboard();
   }
   startAdApprovalWatcher();
-  
+
   // Handle deep-linking: /seller/dashboard.html#upgrade-special-ads?ad_id=xxx
   handleDeepLink();
-  
+
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       fetchPlanPrices();
@@ -1279,78 +1282,130 @@ document.addEventListener('DOMContentLoaded', async () => {
       updatePremiumBadge(data?.seller?.isPremium);
     }
   } catch {}
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapUpgradeDashboard);
+} else {
+  bootstrapUpgradeDashboard();
+}
 
 /*──────────────── ۵.۵) Deep-Link Handler ────────────────*/
+function parseUpgradeDeepLink() {
+  const hashValue = window.location.hash || '';
+  let section = hashValue;
+  let hashQuery = '';
+  if (hashValue.includes('?')) {
+    const parts = hashValue.split('?');
+    section = parts[0];
+    hashQuery = parts.slice(1).join('?');
+  }
+
+  const hashParams = new URLSearchParams(hashQuery);
+  const searchParams = new URLSearchParams(window.location.search);
+
+  return {
+    section: section.replace('#', ''),
+    adId: hashParams.get('ad_id') || searchParams.get('ad_id'),
+    focus: hashParams.get('focus') || searchParams.get('focus')
+  };
+}
+
 function handleDeepLink() {
-  const hash = window.location.hash;
-  const urlParams = new URLSearchParams(window.location.search);
-  const adId = urlParams.get('ad_id');
-  
-  // Check for #upgrade-special-ads hash
-  if (hash === '#upgrade-special-ads' || hash.startsWith('#upgrade-special-ads')) {
-    // Switch to Special Ads tab
+  const { section, adId, focus } = parseUpgradeDeepLink();
+
+  if (section === 'upgrade-special-ads') {
     toggleTabs('ads');
-    
-    // Scroll to ads section
+
     setTimeout(() => {
       const adsSection = document.getElementById('content-ads');
       if (adsSection) {
         adsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }, 100);
-    
-    // If ad_id is provided, switch to My Plans and highlight the ad
-    if (adId) {
+    }, 120);
+
+    if (focus === 'my_plans' || adId) {
       setTimeout(() => {
         toggleTabs('myplans');
-        highlightAdInMyPlans(adId);
-      }, 300);
+        focusMyPlans(adId);
+      }, 260);
     }
   }
-  
-  // Also handle direct #myplans with ad_id
-  if (hash === '#myplans' && adId) {
+
+  if (section === 'myplans') {
     toggleTabs('myplans');
-    setTimeout(() => highlightAdInMyPlans(adId), 500);
+    setTimeout(() => focusMyPlans(adId), 260);
   }
 }
 
-function highlightAdInMyPlans(adId) {
-  // Wait for My Plans to load
-  const checkAndHighlight = () => {
-    const adCard = document.querySelector(`[data-ad-id="${adId}"]`);
+function showMyPlansHint(message) {
+  const section = document.querySelector('#content-myplans .myplans-section--ad');
+  if (!section) return;
+
+  let hint = section.querySelector('.myplans-deeplink-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.className = 'myplans-deeplink-hint';
+    const header = section.querySelector('.myplans-section__header');
+    if (header && header.parentNode) {
+      header.parentNode.insertBefore(hint, header.nextSibling);
+    } else {
+      section.prepend(hint);
+    }
+  }
+
+  hint.textContent = message;
+  hint.classList.add('is-visible');
+
+  setTimeout(() => {
+    hint.classList.remove('is-visible');
+    setTimeout(() => hint?.remove(), 500);
+  }, 3500);
+}
+
+function focusMyPlans(adId) {
+  let attempts = 0;
+  const maxAttempts = 12;
+  const retryDelay = 250;
+  let hasScrolled = false;
+
+  const tryFocus = () => {
+    const myPlansContent = document.getElementById('content-myplans');
+    const grid = myPlansContent?.querySelector('.myplans-grid');
+    const adCard = adId ? document.querySelector(`[data-ad-id="${adId}"]`) : null;
+
+    if (myPlansContent && !hasScrolled) {
+      myPlansContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      hasScrolled = true;
+    }
+
     if (adCard) {
-      // Scroll to the card
       adCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Add highlight animation
       adCard.classList.add('myplans-card--highlighted');
-      
-      // Remove highlight after animation
       setTimeout(() => {
         adCard.classList.remove('myplans-card--highlighted');
-      }, 3000);
-      
-      return true;
+      }, 2500);
+      return;
     }
-    return false;
+
+    attempts += 1;
+    const contentReady = Boolean(grid && grid.children.length);
+    if (attempts < maxAttempts && (!myPlansContent || !contentReady)) {
+      setTimeout(tryFocus, retryDelay);
+      return;
+    }
+
+    if (adId && myPlansContent) {
+      showMyPlansHint('این تبلیغ هنوز در «پلن‌های من» دیده نمی‌شود. لطفاً صفحه را تازه کنید.');
+    }
   };
-  
-  // Try immediately, then retry a few times
-  if (!checkAndHighlight()) {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (checkAndHighlight() || attempts >= 10) {
-        clearInterval(interval);
-      }
-    }, 300);
-  }
+
+  tryFocus();
 }
 
 // Listen for hash changes
 window.addEventListener('hashchange', handleDeepLink);
+window.addEventListener('popstate', handleDeepLink);
 
 
 /*  ─────── مدیریت مدال تبلیغ ویژه ─────── */

@@ -205,7 +205,7 @@ exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
         adId,
         adTitle: adTitle || '',
         // Deep-link URL for navigation
-        actionUrl: `/seller/dashboard.html#upgrade-special-ads?ad_id=${adId}`
+        actionUrl: `/seller/dashboard.html#upgrade-special-ads?ad_id=${adId}&focus=my_plans`
       }
     });
     await notification.save();
