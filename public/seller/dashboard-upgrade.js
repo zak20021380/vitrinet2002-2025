@@ -791,15 +791,23 @@ function updateHeroContent(tab) {
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
   // پشتیبانی از هر دو نسخه قدیم و جدید
-  const tabButtons = document.querySelectorAll('.upgrade-tab, #tab-sub, #tab-ads, #tab-myplans');
+  const tabButtons = document.querySelectorAll('.upgrade-tab, [data-tab="sub"], [data-tab="ads"], [data-tab="myplans"], #tab-sub, #tab-ads, #tab-myplans');
   const contentSub = document.getElementById('content-sub');
   const contentAds = document.getElementById('content-ads');
   const contentMy  = document.getElementById('content-myplans');
 
-  if (!contentSub || !contentAds || !contentMy) return;
+  if (!contentSub || !contentAds || !contentMy) {
+    console.warn('[Upgrade] Missing content elements, aborting init');
+    return;
+  }
 
   tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
+    // جلوگیری از اضافه کردن چندباره event listener
+    if (btn.dataset.upgradeListenerAttached) return;
+    btn.dataset.upgradeListenerAttached = 'true';
+    
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const tab = btn.dataset.tab || btn.id?.replace('tab-', '');
       if (tab) toggleTabs(tab);
     });
@@ -1257,12 +1265,14 @@ window.selectPlan = async function (slug) {
 
 /*──────────────── ۵) اجرا بعد از لود ────────────────*/
 async function bootstrapUpgradeDashboard() {
-  if (window.__upgradeDashboardBootstrapped) return;
-  window.__upgradeDashboardBootstrapped = true;
-
-  if (document.getElementById('tab-sub')) {
-    initUpgradeDashboard();
+  // پشتیبانی از هر دو نسخه قدیم و جدید
+  const hasUpgradeTabs = document.getElementById('tab-sub') || document.querySelector('.upgrade-tab[data-tab="sub"]') || document.querySelector('[data-tab="sub"]');
+  
+  if (!hasUpgradeTabs) {
+    return;
   }
+
+  initUpgradeDashboard();
   startAdApprovalWatcher();
 
   // Handle deep-linking: /seller/dashboard.html#upgrade-special-ads?ad_id=xxx
@@ -1287,7 +1297,8 @@ async function bootstrapUpgradeDashboard() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bootstrapUpgradeDashboard);
 } else {
-  bootstrapUpgradeDashboard();
+  // تأخیر کوتاه برای اطمینان از رندر کامل HTML (مخصوصاً وقتی از طریق fetch لود می‌شود)
+  setTimeout(bootstrapUpgradeDashboard, 50);
 }
 
 /*──────────────── ۵.۵) Deep-Link Handler ────────────────*/

@@ -1600,13 +1600,21 @@ function setMainImageIndex(idx) {
       /* 1) دریافت و تزریق HTML */
       const res = await fetch('dashboard-upgrade.html');
       if (!res.ok) throw new Error('خطا در دریافت محتوا');
-      main.innerHTML = await res.text();
+      const htmlText = await res.text();
+      
+      // استخراج فقط محتوای داخل body یا main
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      const mainContent = doc.querySelector('main') || doc.querySelector('.upgrade-section') || doc.body;
+      main.innerHTML = mainContent ? mainContent.innerHTML : htmlText;
 
       /* 2) اگر اسکریپت قبلاً وجود دارد (ریفرشِ گرم)، حذفش کن تا کش نشود */
       const old = document.getElementById('upgrade-js-script');
       if (old) old.remove();
 
-      /* 3) افزودن اسکریپت و اجرای تابع init */
+      /* 3) افزودن اسکریپت و اجرای تابع init - با تأخیر برای اطمینان از رندر کامل */
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const s = document.createElement('script');
       s.id  = 'upgrade-js-script';
       s.src = 'dashboard-upgrade.js';
