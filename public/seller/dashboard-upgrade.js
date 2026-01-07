@@ -707,7 +707,7 @@ const HERO_CONTENT = {
     stats: [
       { value: '', label: 'بدون اشتراک', skeleton: true },
       { value: '۰', label: 'تبلیغ فعال', skeleton: true },
-      { value: '۰', label: 'روز باقیمانده', skeleton: true }
+      { value: '۰', label: 'باقی‌مانده اشتراک', skeleton: true }
     ],
     icon: `<svg viewBox="0 0 24 24" fill="none" class="upgrade-hero__icon-svg">
       <defs>
@@ -1825,7 +1825,10 @@ async function fetchMyPlans() {
     const planName = typeof sub?.planName === 'string' ? sub.planName.trim() : sub?.planName;
     const subscriptionStatusText = planName || 'بدون اشتراک';
     const adCount = normalizeNumber(summary?.activeAdsCount ?? 0);
-    const remainingDays = sub?.isActive ? normalizeNumber(sub?.remainingDays ?? 0) : 0;
+    const isSubscriptionActive = !!sub?.isActive;
+    const remainingDays = isSubscriptionActive ? normalizeNumber(sub?.remainingDays ?? 0) : 0;
+    const remainingDaysText = `${toFaDigits(remainingDays)} روز`;
+    const remainingDaysSubtext = isSubscriptionActive ? 'تا پایان اشتراک' : 'اشتراک فعال نیست';
 
     // Stat 1: Subscription status
     if (heroStat1Value) heroStat1Value.textContent = subscriptionStatusText;
@@ -1836,8 +1839,8 @@ async function fetchMyPlans() {
     if (heroStat2Label) heroStat2Label.textContent = 'تبلیغ فعال';
 
     // Stat 3: Remaining days (SUBSCRIPTION remaining days, not ads)
-    if (heroStat3Value) heroStat3Value.textContent = toFaDigits(remainingDays);
-    if (heroStat3Label) heroStat3Label.textContent = 'روز باقیمانده';
+    if (heroStat3Value) heroStat3Value.textContent = remainingDaysText;
+    if (heroStat3Label) heroStat3Label.innerHTML = `باقی‌مانده اشتراک<br><small>${remainingDaysSubtext}</small>`;
   }
 
   // Legacy function for backward compatibility
@@ -1879,9 +1882,12 @@ async function fetchMyPlans() {
     if (heroStat2Label) heroStat2Label.textContent = 'تبلیغ فعال';
 
     // Stat 3: Remaining days (SUBSCRIPTION remaining days)
-    const remainingDays = subStatus?.isActive ? normalizeNumber(subStatus?.remainingDays ?? 0) : 0;
-    if (heroStat3Value) heroStat3Value.textContent = toFaDigits(remainingDays);
-    if (heroStat3Label) heroStat3Label.textContent = 'روز باقیمانده';
+    const isSubscriptionActive = !!subStatus?.isActive;
+    const remainingDays = isSubscriptionActive ? normalizeNumber(subStatus?.remainingDays ?? 0) : 0;
+    const remainingDaysText = `${toFaDigits(remainingDays)} روز`;
+    const remainingDaysSubtext = isSubscriptionActive ? 'تا پایان اشتراک' : 'اشتراک فعال نیست';
+    if (heroStat3Value) heroStat3Value.textContent = remainingDaysText;
+    if (heroStat3Label) heroStat3Label.innerHTML = `باقی‌مانده اشتراک<br><small>${remainingDaysSubtext}</small>`;
   }
 
   // ─────────────────────────────────────────────────────
