@@ -10404,6 +10404,7 @@
           order: 'ri-shopping-cart-fill',
           admin_message: 'ri-admin-fill',
           system: 'ri-settings-3-fill',
+          ad_approved: 'ri-checkbox-circle-fill',
           info: 'ri-information-fill'
         };
         return icons[type] || 'ri-notification-3-line';
@@ -10424,7 +10425,10 @@
       };
 
       // تابع برای تعیین اینکه آیا اعلان قابل کلیک است
-      const isClickable = (type) => {
+      const isClickable = (type, item) => {
+        if (type === 'ad_approved') {
+          return Boolean(item?.relatedData?.actionUrl);
+        }
         return ['review', 'customer_message', 'product_like'].includes(type);
       };
 
@@ -10433,7 +10437,8 @@
         const hints = {
           review: 'مشاهده و مدیریت نظرات',
           customer_message: 'مشاهده پیام‌ها',
-          product_like: 'مشاهده محصول'
+          product_like: 'مشاهده محصول',
+          ad_approved: 'مشاهده پلن‌های من'
         };
         return hints[type] || null;
       };
@@ -10441,10 +10446,13 @@
       notifications.forEach((item) => {
         const wrapper = document.createElement('article');
         const typeClass = item.type ? `notification-item--${item.type}` : '';
-        const clickableClass = isClickable(item.type) ? 'notification-item--clickable' : '';
+        const clickableClass = isClickable(item.type, item) ? 'notification-item--clickable' : '';
         wrapper.className = `notification-item ${typeClass} ${clickableClass}`.trim();
         wrapper.setAttribute('data-id', item.id);
         wrapper.setAttribute('data-type', item.type || 'info');
+        if (item.relatedData?.actionUrl) {
+          wrapper.setAttribute('data-action-url', item.relatedData.actionUrl);
+        }
 
         const accent = item.read ? '#cbd5e1' : '#0ea5e9';
         const accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(14, 165, 233, 0.16)';
@@ -10603,6 +10611,20 @@
       deleteNotification(id);
     });
 
+    const navigateToNotificationAction = (actionUrl) => {
+      if (!actionUrl) return;
+      const targetUrl = new URL(actionUrl, window.location.origin);
+      if (targetUrl.pathname === window.location.pathname) {
+        if (targetUrl.hash) {
+          window.location.hash = targetUrl.hash;
+        } else if (targetUrl.search) {
+          window.location.search = targetUrl.search;
+        }
+        return;
+      }
+      window.location.href = targetUrl.toString();
+    };
+
     // هندل کلیک روی اعلان‌های قابل کلیک
     listContainer.addEventListener('click', (event) => {
       // اگر روی دکمه حذف کلیک شده، کاری نکن
@@ -10613,6 +10635,7 @@
       
       const type = notificationItem.getAttribute('data-type');
       const id = notificationItem.getAttribute('data-id');
+      const actionUrl = notificationItem.getAttribute('data-action-url');
       
       // بستن مدال اعلان‌ها
       closeModal();
@@ -10620,6 +10643,9 @@
       // هدایت به بخش مربوطه بر اساس نوع اعلان
       setTimeout(() => {
         switch (type) {
+          case 'ad_approved':
+            navigateToNotificationAction(actionUrl);
+            break;
           case 'review':
             // هدایت به بخش مدیریت نظرات
             if (typeof showSection === 'function') {

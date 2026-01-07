@@ -1610,8 +1610,15 @@ function setMainImageIndex(idx) {
       const s = document.createElement('script');
       s.id  = 'upgrade-js-script';
       s.src = 'dashboard-upgrade.js';
-      s.onload = () =>
-        typeof initUpgradeDashboard === 'function' && initUpgradeDashboard();
+      s.onload = () => {
+        if (typeof bootstrapUpgradeDashboard === 'function') {
+          bootstrapUpgradeDashboard();
+          return;
+        }
+        if (typeof initUpgradeDashboard === 'function') {
+          initUpgradeDashboard();
+        }
+      };
       document.body.appendChild(s);
     } catch (err) {
       console.error(err);
@@ -1919,5 +1926,19 @@ async function loadPerformanceStatus() {
 
 
 
+// ─── Deep-link handler for upgrade section ───────────────────────
+function hasUpgradeDeepLink() {
+  const hash = window.location.hash || '';
+  return hash.startsWith('#upgrade-special-ads');
+}
 
+function handleUpgradeDeepLinkNavigation() {
+  if (!hasUpgradeDeepLink()) return;
+  const upgradeSectionLoaded = document.querySelector('.upgrade-section');
+  if (upgradeSectionLoaded) return;
+  document.getElementById('menu-upgrade')?.click();
+}
 
+window.addEventListener('hashchange', handleUpgradeDeepLinkNavigation);
+window.addEventListener('popstate', handleUpgradeDeepLinkNavigation);
+document.addEventListener('DOMContentLoaded', handleUpgradeDeepLinkNavigation);
