@@ -10690,6 +10690,10 @@ loadCustomers();
     $$('#resv-week .resv-day-btn, #resv-week .resv-day-chip').forEach((b, i) => b.classList.toggle('active', i === idx));
     updateDateHint();
     renderTimes();
+    // Auto-scroll active day into view
+    if (typeof window.scrollActiveDayIntoView === 'function') {
+      requestAnimationFrame(() => window.scrollActiveDayIntoView());
+    }
   }
 
 
@@ -11030,7 +11034,94 @@ function cleanScheduleData() {
     enforce24hTimeInput('resv-time-input');
     enforce24hTimeInput('work-start');
     enforce24hTimeInput('work-end');
+
+    // Initialize day selector scroll functionality
+    initDaySelectorScroll();
   })();
+
+  // Day selector horizontal scroll with drag support and auto-scroll
+  function initDaySelectorScroll() {
+    const scrollContainer = document.getElementById('resv-week');
+    const scrollWrap = document.getElementById('resv-days-wrap');
+    if (!scrollContainer || !scrollWrap) return;
+
+    // Update scroll affordance indicators
+    function updateScrollAffordance() {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+      const canScrollStart = scrollLeft > 2;
+      const canScrollEnd = scrollLeft < scrollWidth - clientWidth - 2;
+      
+      scrollWrap.classList.toggle('can-scroll-start', canScrollStart);
+      scrollWrap.classList.toggle('can-scroll-end', canScrollEnd);
+    }
+
+    // Initial check and on scroll
+    scrollContainer.addEventListener('scroll', updateScrollAffordance, { passive: true });
+    // Check after modal opens (slight delay for render)
+    setTimeout(updateScrollAffordance, 100);
+    // Also check on resize
+    window.addEventListener('resize', updateScrollAffordance, { passive: true });
+
+    // Drag to scroll on desktop
+    let isDragging = false;
+    let startX = 0;
+    let scrollLeftStart = 0;
+    let hasMoved = false;
+
+    scrollContainer.addEventListener('mousedown', (e) => {
+      // Only left mouse button
+      if (e.button !== 0) return;
+      isDragging = true;
+      hasMoved = false;
+      startX = e.pageX - scrollContainer.offsetLeft;
+      scrollLeftStart = scrollContainer.scrollLeft;
+      scrollContainer.classList.add('is-dragging');
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const x = e.pageX - scrollContainer.offsetLeft;
+      const walk = (x - startX);
+      if (Math.abs(walk) > 3) hasMoved = true;
+      scrollContainer.scrollLeft = scrollLeftStart - walk;
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      scrollContainer.classList.remove('is-dragging');
+    });
+
+    // Prevent click on chips if we were dragging
+    scrollContainer.addEventListener('click', (e) => {
+      if (hasMoved) {
+        e.stopPropagation();
+        e.preventDefault();
+        hasMoved = false;
+      }
+    }, true);
+
+    // Scroll active day chip into view
+    window.scrollActiveDayIntoView = function() {
+      const activeBtn = scrollContainer.querySelector('.resv-day-btn.active');
+      if (!activeBtn) return;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      const scrollLeft = scrollContainer.scrollLeft;
+      
+      // Target: center the button in the container
+      const targetScroll = scrollLeft + (btnRect.left - containerRect.left) - (containerRect.width / 2) + (btnRect.width / 2);
+      
+      scrollContainer.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth'
+      });
+
+      setTimeout(updateScrollAffordance, 350);
+    };
+  }
 })();
 
 

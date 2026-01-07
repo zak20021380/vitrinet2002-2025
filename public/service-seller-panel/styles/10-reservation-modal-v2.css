@@ -155,14 +155,78 @@
   gap: 10px;
 }
 
+/* Scroll wrapper with fade affordance */
+.resv-days-scroll-wrap {
+  position: relative;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+/* Fade gradients for scroll affordance */
+.resv-days-scroll-wrap::before,
+.resv-days-scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.resv-days-scroll-wrap::before {
+  right: 0;
+  background: linear-gradient(to left, rgba(22, 22, 24, 0.95) 0%, transparent 100%);
+}
+
+.resv-days-scroll-wrap::after {
+  left: 0;
+  background: linear-gradient(to right, rgba(22, 22, 24, 0.95) 0%, transparent 100%);
+}
+
+.resv-days-scroll-wrap.can-scroll-start::after {
+  opacity: 1;
+}
+
+.resv-days-scroll-wrap.can-scroll-end::before {
+  opacity: 1;
+}
+
 .resv-days-scroll {
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 4px 0 8px;
+  scroll-behavior: smooth;
+  /* Critical for iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
+  /* Prevent vertical scroll lock on touch */
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  /* Hide scrollbar but keep functionality */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* Ensure single line */
+  flex-wrap: nowrap;
+  /* Prevent text selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Touch action for horizontal scroll only */
+  touch-action: pan-x;
+  /* Cursor for drag affordance on desktop */
+  cursor: grab;
+}
+
+.resv-days-scroll:active {
+  cursor: grabbing;
+}
+
+.resv-days-scroll.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .resv-days-scroll::-webkit-scrollbar {
@@ -186,6 +250,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  /* Prevent shrinking */
+  flex-shrink: 0;
+  /* Ensure tappable on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .resv-day-btn:hover {
