@@ -199,8 +199,8 @@ exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
     const notification = new SellerNotification({
       sellerId,
       type: 'ad_approved',
-      title: 'تبلیغ شما تایید شد',
-      message: 'تبلیغ شما آماده نمایش است. از بخش ارتقا → پلن‌های من جزئیات را مشاهده کنید.',
+      title: 'تبلیغ شما تأیید شد',
+      message: 'تبلیغ شما آماده نمایش است.  برای مشاهده جزئیات، به بخش «ارتقا» و سپس «پلن‌های من» مراجعه کنید.',
       relatedData: {
         adId,
         adTitle: adTitle || '',
