@@ -200,12 +200,13 @@ exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
       sellerId,
       type: 'ad_approved',
       title: 'تبلیغ شما تایید شد',
-      message: 'تبلیغ شما آماده نمایش است. برای مشاهده جزئیات کلیک کنید.',
+      message: 'تبلیغ شما آماده نمایش است. از بخش ارتقا → پلن‌های من جزئیات را مشاهده کنید.',
       relatedData: {
         adId,
         adTitle: adTitle || '',
-        // Deep-link URL for navigation
-        actionUrl: `/seller/dashboard.html#upgrade-special-ads?ad_id=${adId}&focus=my_plans`
+        // Deep-link URL - همیشه به داشبورد فروشنده محصول هدایت می‌کند
+        // هرگز به s-seller-panel یا service-seller-panel هدایت نمی‌شود
+        actionUrl: `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${adId}`
       }
     });
     await notification.save();

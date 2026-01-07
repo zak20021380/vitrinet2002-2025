@@ -3038,6 +3038,84 @@
     color: #4f46e5;
   }
 
+  /* استایل‌های اعلان تایید تبلیغ - طراحی پریمیوم سبز */
+  .notification-item--ad_approved {
+    position: relative;
+    border-color: rgba(16, 185, 129, 0.25);
+    background: linear-gradient(145deg, #ffffff 0%, #ecfdf5 100%);
+    box-shadow: 0 14px 28px rgba(16, 185, 129, 0.12);
+    overflow: hidden;
+  }
+
+  .notification-item--ad_approved::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08), transparent 50%);
+    pointer-events: none;
+  }
+
+  .notification-item--ad_approved .notification-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .notification-item--ad_approved .notification-chip {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+
+  .notification-item--ad_approved .notification-action-hint {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.08));
+    color: #059669;
+    font-weight: 700;
+  }
+
+  .notification-item--ad_approved .notification-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .notification-item--ad_approved:hover .notification-chevron,
+  .notification-item--ad_approved:focus .notification-chevron {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateX(-2px);
+  }
+
+  .notification-item--ad_approved.notification-item--clickable {
+    cursor: pointer;
+  }
+
+  .notification-item--ad_approved.notification-item--clickable:hover {
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: 0 18px 36px rgba(16, 185, 129, 0.18);
+    background: linear-gradient(145deg, #ffffff 0%, #d1fae5 100%);
+  }
+
+  .notification-item--ad_approved.notification-item--clickable:focus {
+    outline: 2px solid rgba(16, 185, 129, 0.5);
+    outline-offset: 2px;
+  }
+
+  .notification-item--ad_approved.notification-item--clickable:active {
+    transform: scale(0.99);
+  }
+
+  /* لایه کلیک‌پذیر برای اعلان تایید تبلیغ */
+  .notification-item--ad_approved .notification-clickable-area {
+    display: contents;
+  }
+
   @media (max-width: 640px) {
     .notification-card {
       padding: 18px 16px 10px;
@@ -3053,6 +3131,17 @@
       width: 42px;
       height: 42px;
       font-size: 20px;
+    }
+
+    /* موبایل - اعلان تایید تبلیغ */
+    .notification-item--ad_approved {
+      min-height: 44px;
+    }
+
+    .notification-item--ad_approved .notification-chevron {
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
     }
   }
 
@@ -10454,8 +10543,16 @@
           wrapper.setAttribute('data-action-url', item.relatedData.actionUrl);
         }
 
-        const accent = item.read ? '#cbd5e1' : '#0ea5e9';
-        const accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(14, 165, 233, 0.16)';
+        // برای اعلان تایید تبلیغ، رنگ سبز موفقیت
+        const isAdApproved = item.type === 'ad_approved';
+        let accent, accentSoft;
+        if (isAdApproved) {
+          accent = item.read ? '#94a3b8' : '#10b981';
+          accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(16, 185, 129, 0.16)';
+        } else {
+          accent = item.read ? '#cbd5e1' : '#0ea5e9';
+          accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(14, 165, 233, 0.16)';
+        }
         wrapper.style.setProperty('--accent', accent);
         wrapper.style.setProperty('--accent-soft', accentSoft);
 
@@ -10463,30 +10560,66 @@
         const statusText = getStatusText(item);
         const actionHint = getActionHint(item.type);
 
-        wrapper.innerHTML = `
-          <div class="notification-icon">
-            <i class="${icon}"></i>
-          </div>
-          <div class="notification-body">
-            <h4>${item.title || 'اعلان جدید'}</h4>
-            <p>${item.message}</p>
-            <div class="notification-meta">
-              <span class="notification-chip"><i class="ri-flashlight-line"></i>${statusText}</span>
-              <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
+        // ساختار ویژه برای اعلان تایید تبلیغ - کارت یکپارچه کلیک‌پذیر
+        if (isAdApproved) {
+          // اعلان تایید تبلیغ با طراحی پریمیوم
+          wrapper.setAttribute('tabindex', '0');
+          wrapper.setAttribute('role', 'button');
+          wrapper.setAttribute('aria-label', `${item.title || 'تبلیغ شما تایید شد'} - برای مشاهده پلن‌ها کلیک کنید`);
+          
+          wrapper.innerHTML = `
+            <div class="notification-icon">
+              <i class="${icon}"></i>
             </div>
-            ${actionHint ? `<div class="notification-action-hint"><i class="ri-arrow-left-line"></i>${actionHint}</div>` : ''}
-          </div>
-          <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
-            <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"/>
-              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-              <line x1="10" y1="11" x2="10" y2="17"/>
-              <line x1="14" y1="11" x2="14" y2="17"/>
-            </svg>
-            <span class="notification-remove__text">حذف</span>
-          </button>
-        `;
+            <div class="notification-body">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <h4>${item.title || 'تبلیغ شما تایید شد'}</h4>
+                <span class="notification-chevron"><i class="ri-arrow-left-s-line"></i></span>
+              </div>
+              <p>${item.message || 'تبلیغ شما آماده نمایش است. برای انتخاب پلن کلیک کنید.'}</p>
+              <div class="notification-meta">
+                <span class="notification-chip"><i class="ri-checkbox-circle-fill"></i>${statusText}</span>
+                <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
+              </div>
+            </div>
+            <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان" style="align-self:flex-start;">
+              <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+              <span class="notification-remove__text">حذف</span>
+            </button>
+          `;
+        } else {
+          // سایر اعلان‌ها - ساختار قبلی
+          wrapper.innerHTML = `
+            <div class="notification-icon">
+              <i class="${icon}"></i>
+            </div>
+            <div class="notification-body">
+              <h4>${item.title || 'اعلان جدید'}</h4>
+              <p>${item.message}</p>
+              <div class="notification-meta">
+                <span class="notification-chip"><i class="ri-flashlight-line"></i>${statusText}</span>
+                <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
+              </div>
+              ${actionHint ? `<div class="notification-action-hint"><i class="ri-arrow-left-line"></i>${actionHint}</div>` : ''}
+            </div>
+            <button class="notification-remove" data-remove="${item.id}" aria-label="حذف اعلان">
+              <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+              <span class="notification-remove__text">حذف</span>
+            </button>
+          `;
+        }
 
         listContainer.appendChild(wrapper);
       });
@@ -10611,9 +10744,34 @@
       deleteNotification(id);
     });
 
-    const navigateToNotificationAction = (actionUrl) => {
+    /**
+     * هدایت به URL اعلان با گارد امنیتی
+     * هرگز به s-seller-panel یا service-seller-panel هدایت نمی‌کند
+     */
+    const navigateToNotificationAction = (actionUrl, adId) => {
       if (!actionUrl) return;
+      
+      // گارد امنیتی: جلوگیری از هدایت به پنل سرویس‌دهنده
+      const blockedPaths = ['s-seller-panel', 'service-seller-panel', 'service-seller'];
+      const lowerUrl = actionUrl.toLowerCase();
+      if (blockedPaths.some(blocked => lowerUrl.includes(blocked))) {
+        console.warn('[Ad Approved Guard] Blocked redirect to service-seller panel:', actionUrl);
+        // به جای آن، به بخش ارتقا در داشبورد محصول هدایت کن
+        const safeUrl = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
+        window.location.href = safeUrl;
+        return;
+      }
+      
       const targetUrl = new URL(actionUrl, window.location.origin);
+      
+      // گارد دوم: اطمینان از اینکه مسیر در seller/dashboard.html است
+      if (!targetUrl.pathname.includes('/seller/dashboard.html')) {
+        console.warn('[Ad Approved Guard] Redirecting to seller dashboard instead of:', targetUrl.pathname);
+        const safeUrl = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
+        window.location.href = safeUrl;
+        return;
+      }
+      
       if (targetUrl.pathname === window.location.pathname) {
         if (targetUrl.hash) {
           window.location.hash = targetUrl.hash;
@@ -10623,6 +10781,34 @@
         return;
       }
       window.location.href = targetUrl.toString();
+    };
+
+    /**
+     * هندل کلیک/کیبورد روی اعلان تایید تبلیغ
+     */
+    const handleAdApprovedAction = (notificationItem) => {
+      const actionUrl = notificationItem.getAttribute('data-action-url');
+      const id = notificationItem.getAttribute('data-id');
+      
+      // استخراج ad_id از relatedData یا URL
+      let adId = null;
+      try {
+        const urlParams = new URLSearchParams(actionUrl?.split('?')[1] || '');
+        adId = urlParams.get('ad_id');
+      } catch (e) {}
+      
+      // بستن مدال
+      closeModal();
+      
+      // هدایت امن به بخش ارتقا
+      setTimeout(() => {
+        if (actionUrl) {
+          navigateToNotificationAction(actionUrl, adId);
+        } else {
+          // اگر URL نداشت، به صفحه پیش‌فرض ارتقا برو
+          window.location.href = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
+        }
+      }, 150);
     };
 
     // هندل کلیک روی اعلان‌های قابل کلیک
@@ -10637,15 +10823,18 @@
       const id = notificationItem.getAttribute('data-id');
       const actionUrl = notificationItem.getAttribute('data-action-url');
       
+      // هدایت به بخش مربوطه بر اساس نوع اعلان
+      if (type === 'ad_approved') {
+        // استفاده از هندلر ویژه با گارد امنیتی
+        handleAdApprovedAction(notificationItem);
+        return;
+      }
+      
       // بستن مدال اعلان‌ها
       closeModal();
       
-      // هدایت به بخش مربوطه بر اساس نوع اعلان
       setTimeout(() => {
         switch (type) {
-          case 'ad_approved':
-            navigateToNotificationAction(actionUrl);
-            break;
           case 'review':
             // هدایت به بخش مدیریت نظرات
             if (typeof showSection === 'function') {
@@ -10667,6 +10856,20 @@
             break;
         }
       }, 150);
+    });
+
+    // پشتیبانی از کیبورد برای اعلان تایید تبلیغ (Enter/Space)
+    listContainer.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      
+      const notificationItem = event.target.closest('.notification-item--ad_approved.notification-item--clickable');
+      if (!notificationItem) return;
+      
+      // جلوگیری از اسکرول با Space
+      event.preventDefault();
+      
+      // اجرای عمل کلیک
+      handleAdApprovedAction(notificationItem);
     });
 
     fetchNotifications();
