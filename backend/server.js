@@ -79,7 +79,6 @@ app.use('/api/plans', planRoutes);
 app.use('/api/adPlans', adPlanRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/shops', require('./routes/shops'));
-app.use('/api/home-card-sections', require('./routes/homeCardSections'));
 app.use('/api/service-portfolio', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/portfolios', require('./routes/sellerPortfolioRoutes'));
 app.use('/api/portfolio', require('./routes/sellerPortfolioRoutes'));

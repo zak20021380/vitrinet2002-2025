@@ -7626,7 +7626,6 @@ const panels = {
   ads:       document.getElementById('ads-panel'),
   'income-insights': document.getElementById('income-insights-panel'),
   'ad-orders': document.getElementById('ad-orders-panel'),
-  'home-section': document.getElementById('home-section-panel'),
   messages:  document.getElementById('messages-panel'),
   tickets: document.getElementById('tickets-panel'),
   'daily-visits': document.getElementById('daily-visits-panel'),
@@ -7694,11 +7693,6 @@ menuLinks.forEach(link => {
     // لود محتوای AJAX برای آمار روزانه بازدید
     if (section === 'daily-visits') {
       loadDailyVisContent();
-    }
-
-    // لود محتوای کارت‌های صفحه اصلی
-    if (section === 'home-section') {
-      loadHomeSectionContent();
     }
 
     if (section === 'income-insights') {
@@ -9500,7 +9494,6 @@ panels['plans'] = document.getElementById('plans-panel');
 
 panels['ads'] = document.getElementById('ads-panel');
 panels['messages'] = document.getElementById('messages-panel');
-panels['home-section'] = document.getElementById('home-section-panel');
 
 
 /* المان‌های ورودی */
@@ -10635,15 +10628,6 @@ function loadIncomeInsightsContent() {
     loadingMessage: 'در حال آماده‌سازی داشبورد درآمد...',
     errorMessage: 'خطا در بارگیری داشبورد درآمد. مسیر فایل را بررسی کنید.',
     scriptKey: 'income-insights'
-  });
-}
-
-// لود محتوای کارت‌های صفحه اصلی با AJAX
-function loadHomeSectionContent() {
-  loadExternalPanel('home-section-panel', 'home-section.html', {
-    loadingMessage: 'در حال بارگیری محتوا...',
-    errorMessage: 'خطا در بارگیری محتوای کارت‌های صفحه اصلی.',
-    scriptKey: 'home-section'
   });
 }
 
