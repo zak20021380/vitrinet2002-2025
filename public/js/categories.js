@@ -96,7 +96,6 @@
             <a href="shops-by-category.html?cat=${encodeURIComponent(cat.catId)}" class="btn-grad category-card__cta" aria-label="مشاهده فروشگاه‌های ${categoryName}">
               <span>
                 مشاهده فروشگاه‌ها
-                <i class="ri-arrow-left-down-line text-lg"></i>
               </span>
             </a>
           </article>
