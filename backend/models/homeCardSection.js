@@ -2,111 +2,66 @@ const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    tag: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    description: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    location: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    price: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    imageUrl: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    link: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    buttonText: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    order: {
-      type: Number,
-      default: 0,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    title: { type: String, required: true, trim: true },
+    tag: { type: String, trim: true, default: '' },
+    description: { type: String, trim: true, default: '' },
+    location: { type: String, trim: true, default: '' },
+    price: { type: String, trim: true, default: '' },
+    imageUrl: { type: String, trim: true, default: '' },
+    link: { type: String, trim: true, default: '' },
+    buttonText: { type: String, trim: true, default: '' },
+    order: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
   },
+  { _id: true, timestamps: true }
+);
+
+const sectionStoreSchema = new mongoose.Schema(
   {
-    _id: true,
-    timestamps: true,
-  }
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Seller',
+      required: true,
+    },
+    order: { type: Number, default: 0 },
+    badgeMode: {
+      type: String,
+      enum: ['none', 'manual', 'auto'],
+      default: 'none',
+    },
+    isActive: { type: Boolean, default: true },
+  },
+  { _id: true, timestamps: true }
 );
 
 const homeCardSectionSchema = new mongoose.Schema(
   {
-    title: {
+    title: { type: String, required: true, trim: true },
+    subtitle: { type: String, trim: true, default: '' },
+    description: { type: String, trim: true, default: '' },
+    slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    viewAllText: { type: String, trim: true, default: '' },
+    viewAllLink: { type: String, trim: true, default: '' },
+    scope: {
       type: String,
-      required: true,
-      trim: true,
+      enum: ['all_cities', 'specific_city'],
+      default: 'all_cities',
     },
-    subtitle: {
+    cityId: { type: String, trim: true, default: '' },
+    cityName: { type: String, trim: true, default: '' },
+    layout: {
       type: String,
-      trim: true,
-      default: '',
+      enum: ['carousel', 'grid'],
+      default: 'carousel',
     },
-    description: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    viewAllText: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    viewAllLink: {
-      type: String,
-      trim: true,
-      default: '',
-    },
-    order: {
-      type: Number,
-      default: 0,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    cards: {
-      type: [cardSchema],
-      default: [],
-    },
+    ctaText: { type: String, trim: true, default: '' },
+    ctaLink: { type: String, trim: true, default: '' },
+    order: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+    cards: { type: [cardSchema], default: [] },
+    stores: { type: [sectionStoreSchema], default: [] },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 function normaliseSlug(slug) {
@@ -122,8 +77,10 @@ function normaliseSlug(slug) {
 }
 
 homeCardSectionSchema.pre('validate', function (next) {
-  if (this.slug) {
-    this.slug = normaliseSlug(this.slug);
+  if (this.slug) this.slug = normaliseSlug(this.slug);
+  if (this.scope !== 'specific_city') {
+    this.cityId = '';
+    this.cityName = '';
   }
   next();
 });

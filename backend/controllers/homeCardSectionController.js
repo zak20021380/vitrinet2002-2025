@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const HomeCardSection = require('../models/homeCardSection');
 
 const normaliseSlug = HomeCardSection.normaliseSlug || ((slug) => slug);
@@ -15,7 +16,6 @@ function toBoolean(value, defaultValue = true) {
 }
 
 function toNumber(value, defaultValue = 0) {
-  if (value === undefined || value === null || value === '') return defaultValue;
   const num = Number(value);
   return Number.isFinite(num) ? num : defaultValue;
 }
@@ -25,46 +25,110 @@ function sanitiseText(value) {
   return `${value}`.trim();
 }
 
-function mapCardPayload(cardBody = {}) {
+function mapSectionPayload(body = {}) {
+  const title = sanitiseText(body.title);
+  if (!title) throw new Error('TITLE_REQUIRED');
+
   const payload = {
-    title: sanitiseText(cardBody.title),
-    tag: sanitiseText(cardBody.tag),
-    description: sanitiseText(cardBody.description),
-    location: sanitiseText(cardBody.location),
-    price: sanitiseText(cardBody.price),
-    imageUrl: sanitiseText(cardBody.imageUrl),
-    link: sanitiseText(cardBody.link),
-    buttonText: sanitiseText(cardBody.buttonText),
-    order: toNumber(cardBody.order),
-    isActive: toBoolean(cardBody.isActive, true),
+    title,
+    subtitle: sanitiseText(body.subtitle),
+    description: sanitiseText(body.description),
+    slug: normaliseSlug(body.slug || title),
+    viewAllText: sanitiseText(body.viewAllText),
+    viewAllLink: sanitiseText(body.viewAllLink),
+    ctaText: sanitiseText(body.ctaText),
+    ctaLink: sanitiseText(body.ctaLink),
+    scope: body.scope === 'specific_city' ? 'specific_city' : 'all_cities',
+    cityId: sanitiseText(body.cityId),
+    cityName: sanitiseText(body.cityName),
+    layout: body.layout === 'grid' ? 'grid' : 'carousel',
+    order: toNumber(body.order),
+    isActive: toBoolean(body.isActive, true),
   };
 
-  if (!payload.title) {
-    throw new Error('TITLE_REQUIRED');
+  if (!payload.slug) throw new Error('SLUG_REQUIRED');
+  if (payload.scope === 'specific_city' && !payload.cityId && !payload.cityName) {
+    throw new Error('CITY_REQUIRED');
+  }
+
+  if (Array.isArray(body.stores)) {
+    payload.stores = body.stores
+      .map((store, index) => {
+        const sellerId = sanitiseText(store?.sellerId || store?.seller?._id || store?._id);
+        if (!mongoose.Types.ObjectId.isValid(sellerId)) return null;
+        return {
+          sellerId,
+          order: toNumber(store.order, index),
+          badgeMode: ['manual', 'auto', 'none'].includes(store.badgeMode) ? store.badgeMode : 'none',
+          isActive: toBoolean(store.isActive, true),
+        };
+      })
+      .filter(Boolean);
   }
 
   return payload;
 }
 
-function serialiseSection(sectionDoc) {
+function isRecent(dateValue) {
+  const created = new Date(dateValue || 0).getTime();
+  if (!created) return false;
+  return Date.now() - created <= 1000 * 60 * 60 * 24 * 21;
+}
+
+function serialiseSection(sectionDoc, { publicOnly = false } = {}) {
   if (!sectionDoc) return null;
   const plain = sectionDoc.toObject({ virtuals: false });
+
+
   const cards = Array.isArray(plain.cards)
     ? [...plain.cards]
+        .filter((card) => (publicOnly ? toBoolean(card.isActive, true) : true))
         .map((card) => ({
-          ...card,
           _id: card._id?.toString?.() || card._id,
+          title: card.title || '',
+          tag: card.tag || '',
+          description: card.description || '',
+          location: card.location || '',
+          price: card.price || '',
+          imageUrl: card.imageUrl || '',
+          link: card.link || '',
+          buttonText: card.buttonText || '',
           order: toNumber(card.order),
           isActive: toBoolean(card.isActive, true),
         }))
-        .sort((a, b) => {
-          if (a.order !== b.order) {
-            return a.order - b.order;
-          }
-          const aTime = new Date(a.createdAt || 0).getTime();
-          const bTime = new Date(b.createdAt || 0).getTime();
-          return aTime - bTime;
+        .sort((a, b) => a.order - b.order)
+    : [];
+
+  const stores = Array.isArray(plain.stores)
+    ? [...plain.stores]
+        .filter((entry) => (publicOnly ? toBoolean(entry.isActive, true) : true))
+        .map((entry) => {
+          const seller = entry.sellerId && typeof entry.sellerId === 'object' ? entry.sellerId : null;
+          const badgeMode = ['manual', 'auto', 'none'].includes(entry.badgeMode) ? entry.badgeMode : 'none';
+          const autoNew = badgeMode === 'auto' && seller ? isRecent(seller.createdAt) : false;
+          return {
+            _id: entry._id?.toString?.() || entry._id,
+            sellerId: seller?._id?.toString?.() || entry.sellerId?.toString?.() || entry.sellerId,
+            order: toNumber(entry.order),
+            badgeMode,
+            showNewBadge: badgeMode === 'manual' || autoNew,
+            isActive: toBoolean(entry.isActive, true),
+            seller: seller
+              ? {
+                  _id: seller._id,
+                  storename: seller.storename || '',
+                  shopurl: seller.shopurl || '',
+                  address: seller.address || '',
+                  city: seller.city || '',
+                  region: seller.region || '',
+                  boardImage: seller.boardImage || '',
+                  category: seller.category || '',
+                  createdAt: seller.createdAt || null,
+                }
+              : null,
+          };
         })
+        .sort((a, b) => a.order - b.order)
     : [];
 
   return {
@@ -75,37 +139,31 @@ function serialiseSection(sectionDoc) {
     slug: plain.slug,
     viewAllText: plain.viewAllText || '',
     viewAllLink: plain.viewAllLink || '',
+    ctaText: plain.ctaText || '',
+    ctaLink: plain.ctaLink || '',
+    scope: plain.scope || 'all_cities',
+    cityId: plain.cityId || '',
+    cityName: plain.cityName || '',
+    layout: plain.layout || 'carousel',
     order: toNumber(plain.order),
     isActive: toBoolean(plain.isActive, true),
     createdAt: plain.createdAt,
     updatedAt: plain.updatedAt,
     cards,
+    stores,
   };
+}
+
+async function findSections(query = {}) {
+  return HomeCardSection.find(query)
+    .populate('stores.sellerId', 'storename shopurl address city region boardImage category createdAt')
+    .sort({ order: 1, createdAt: -1 });
 }
 
 exports.getPublicSections = async (req, res) => {
   try {
-    const sections = await HomeCardSection.find({ isActive: true })
-      .sort({ order: 1, createdAt: -1 })
-      .lean();
-
-    const normalised = sections.map((section) => ({
-      ...section,
-      order: toNumber(section.order),
-      cards: Array.isArray(section.cards)
-        ? section.cards
-            .filter((card) => toBoolean(card.isActive, true))
-            .map((card) => ({
-              ...card,
-              _id: card._id?.toString?.() || card._id,
-              order: toNumber(card.order),
-              isActive: true,
-            }))
-            .sort((a, b) => a.order - b.order)
-        : [],
-    }));
-
-    res.json(normalised);
+    const sections = await findSections({ isActive: true });
+    res.json(sections.map((section) => serialiseSection(section, { publicOnly: true })));
   } catch (err) {
     console.error('Error fetching public home sections:', err);
     res.status(500).json({ message: 'خطا در دریافت اطلاعات سکشن‌ها' });
@@ -115,16 +173,11 @@ exports.getPublicSections = async (req, res) => {
 exports.getBySlug = async (req, res) => {
   try {
     const slug = normaliseSlug(req.params.slug);
-    const section = await HomeCardSection.findOne({ slug });
-
-    if (!section || !toBoolean(section.isActive, true)) {
+    const section = await HomeCardSection.findOne({ slug, isActive: true }).populate('stores.sellerId', 'storename shopurl address city region boardImage category createdAt');
+    if (!section) {
       return res.status(404).json({ message: 'سکشن موردنظر یافت نشد.' });
     }
-
-    const serialised = serialiseSection(section);
-    serialised.cards = serialised.cards.filter((card) => toBoolean(card.isActive, true));
-
-    res.json(serialised);
+    res.json(serialiseSection(section, { publicOnly: true }));
   } catch (err) {
     console.error('Error fetching section by slug:', err);
     res.status(500).json({ message: 'خطا در دریافت سکشن' });
@@ -133,9 +186,8 @@ exports.getBySlug = async (req, res) => {
 
 exports.getAllSections = async (req, res) => {
   try {
-    const sections = await HomeCardSection.find()
-      .sort({ order: 1, createdAt: -1 });
-    res.json(sections.map(serialiseSection));
+    const sections = await findSections();
+    res.json(sections.map((section) => serialiseSection(section)));
   } catch (err) {
     console.error('Error fetching all sections:', err);
     res.status(500).json({ message: 'خطا در دریافت لیست سکشن‌ها' });
@@ -144,10 +196,8 @@ exports.getAllSections = async (req, res) => {
 
 exports.getSectionById = async (req, res) => {
   try {
-    const section = await HomeCardSection.findById(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
+    const section = await HomeCardSection.findById(req.params.id).populate('stores.sellerId', 'storename shopurl address city region boardImage category createdAt');
+    if (!section) return res.status(404).json({ message: 'سکشن یافت نشد.' });
     res.json(serialiseSection(section));
   } catch (err) {
     console.error('Error fetching section by id:', err);
@@ -157,39 +207,16 @@ exports.getSectionById = async (req, res) => {
 
 exports.createSection = async (req, res) => {
   try {
-    const payload = {
-      title: sanitiseText(req.body.title),
-      subtitle: sanitiseText(req.body.subtitle),
-      description: sanitiseText(req.body.description),
-      slug: normaliseSlug(req.body.slug),
-      viewAllText: sanitiseText(req.body.viewAllText),
-      viewAllLink: sanitiseText(req.body.viewAllLink),
-      order: toNumber(req.body.order),
-      isActive: toBoolean(req.body.isActive, true),
-    };
-
-    if (!payload.title) {
-      return res.status(400).json({ message: 'عنوان سکشن الزامی است.' });
-    }
-
-    if (!payload.slug) {
-      return res.status(400).json({ message: 'اسلاگ سکشن الزامی است.' });
-    }
-
-    if (Array.isArray(req.body.cards)) {
-      payload.cards = req.body.cards.map(mapCardPayload);
-    }
-
+    const payload = mapSectionPayload(req.body || {});
     const section = await HomeCardSection.create(payload);
-    res.status(201).json(serialiseSection(section));
+    const hydrated = await HomeCardSection.findById(section._id).populate('stores.sellerId', 'storename shopurl address city region boardImage category createdAt');
+    res.status(201).json(serialiseSection(hydrated));
   } catch (err) {
     console.error('Error creating section:', err);
-    if (err?.code === 11000) {
-      return res.status(409).json({ message: 'اسلاگ تکراری است. مقدار دیگری انتخاب کنید.' });
-    }
-    if (err?.message === 'TITLE_REQUIRED') {
-      return res.status(400).json({ message: 'عنوان کارت الزامی است.' });
-    }
+    if (err?.code === 11000) return res.status(409).json({ message: 'اسلاگ تکراری است. مقدار دیگری انتخاب کنید.' });
+    if (err?.message === 'TITLE_REQUIRED') return res.status(400).json({ message: 'عنوان سکشن الزامی است.' });
+    if (err?.message === 'SLUG_REQUIRED') return res.status(400).json({ message: 'اسلاگ سکشن الزامی است.' });
+    if (err?.message === 'CITY_REQUIRED') return res.status(400).json({ message: 'برای سکشن شهری، شهر الزامی است.' });
     res.status(500).json({ message: 'خطا در ایجاد سکشن جدید.' });
   }
 };
@@ -197,47 +224,19 @@ exports.createSection = async (req, res) => {
 exports.updateSection = async (req, res) => {
   try {
     const section = await HomeCardSection.findById(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
+    if (!section) return res.status(404).json({ message: 'سکشن یافت نشد.' });
 
-    const fields = ['title', 'subtitle', 'description', 'viewAllText', 'viewAllLink'];
-    fields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        section[field] = sanitiseText(req.body[field]);
-      }
-    });
-
-    if (req.body.slug !== undefined) {
-      const newSlug = normaliseSlug(req.body.slug);
-      if (!newSlug) {
-        return res.status(400).json({ message: 'اسلاگ معتبر نیست.' });
-      }
-      section.slug = newSlug;
-    }
-
-    if (req.body.order !== undefined) {
-      section.order = toNumber(req.body.order);
-    }
-
-    if (req.body.isActive !== undefined) {
-      section.isActive = toBoolean(req.body.isActive, true);
-    }
-
-    if (Array.isArray(req.body.cards)) {
-      section.cards = req.body.cards.map(mapCardPayload);
-    }
-
+    const payload = mapSectionPayload({ ...section.toObject(), ...req.body });
+    Object.assign(section, payload);
     await section.save();
-    res.json(serialiseSection(section));
+
+    const hydrated = await HomeCardSection.findById(section._id).populate('stores.sellerId', 'storename shopurl address city region boardImage category createdAt');
+    res.json(serialiseSection(hydrated));
   } catch (err) {
     console.error('Error updating section:', err);
-    if (err?.code === 11000) {
-      return res.status(409).json({ message: 'اسلاگ تکراری است.' });
-    }
-    if (err?.message === 'TITLE_REQUIRED') {
-      return res.status(400).json({ message: 'عنوان کارت الزامی است.' });
-    }
+    if (err?.code === 11000) return res.status(409).json({ message: 'اسلاگ تکراری است.' });
+    if (err?.message === 'TITLE_REQUIRED') return res.status(400).json({ message: 'عنوان سکشن الزامی است.' });
+    if (err?.message === 'CITY_REQUIRED') return res.status(400).json({ message: 'برای سکشن شهری، شهر الزامی است.' });
     res.status(500).json({ message: 'خطا در ویرایش سکشن.' });
   }
 };
@@ -245,9 +244,7 @@ exports.updateSection = async (req, res) => {
 exports.deleteSection = async (req, res) => {
   try {
     const section = await HomeCardSection.findByIdAndDelete(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
+    if (!section) return res.status(404).json({ message: 'سکشن یافت نشد.' });
     res.json({ message: 'سکشن با موفقیت حذف شد.' });
   } catch (err) {
     console.error('Error deleting section:', err);
@@ -255,83 +252,7 @@ exports.deleteSection = async (req, res) => {
   }
 };
 
-exports.addCard = async (req, res) => {
-  try {
-    const section = await HomeCardSection.findById(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
-
-    const cardPayload = mapCardPayload(req.body);
-    section.cards.push(cardPayload);
-
-    await section.save();
-    res.status(201).json(serialiseSection(section));
-  } catch (err) {
-    console.error('Error adding card:', err);
-    if (err?.message === 'TITLE_REQUIRED') {
-      return res.status(400).json({ message: 'عنوان کارت الزامی است.' });
-    }
-    res.status(500).json({ message: 'خطا در افزودن کارت.' });
-  }
-};
-
-exports.updateCard = async (req, res) => {
-  try {
-    const section = await HomeCardSection.findById(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
-
-    const card = section.cards.id(req.params.cardId);
-    if (!card) {
-      return res.status(404).json({ message: 'کارت یافت نشد.' });
-    }
-
-    const updatable = ['title', 'tag', 'description', 'location', 'price', 'imageUrl', 'link', 'buttonText'];
-    updatable.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        card[field] = sanitiseText(req.body[field]);
-      }
-    });
-
-    if (req.body.order !== undefined) {
-      card.order = toNumber(req.body.order);
-    }
-
-    if (req.body.isActive !== undefined) {
-      card.isActive = toBoolean(req.body.isActive, true);
-    }
-
-    if (!card.title) {
-      return res.status(400).json({ message: 'عنوان کارت نمی‌تواند خالی باشد.' });
-    }
-
-    await section.save();
-    res.json(serialiseSection(section));
-  } catch (err) {
-    console.error('Error updating card:', err);
-    res.status(500).json({ message: 'خطا در ویرایش کارت.' });
-  }
-};
-
-exports.removeCard = async (req, res) => {
-  try {
-    const section = await HomeCardSection.findById(req.params.id);
-    if (!section) {
-      return res.status(404).json({ message: 'سکشن یافت نشد.' });
-    }
-
-    const card = section.cards.id(req.params.cardId);
-    if (!card) {
-      return res.status(404).json({ message: 'کارت یافت نشد.' });
-    }
-
-    card.remove();
-    await section.save();
-    res.json(serialiseSection(section));
-  } catch (err) {
-    console.error('Error removing card:', err);
-    res.status(500).json({ message: 'خطا در حذف کارت.' });
-  }
-};
+// Legacy no-op card endpoints kept for compatibility
+exports.addCard = async (req, res) => res.status(410).json({ message: 'مدیریت کارت منسوخ شده است.' });
+exports.updateCard = async (req, res) => res.status(410).json({ message: 'مدیریت کارت منسوخ شده است.' });
+exports.removeCard = async (req, res) => res.status(410).json({ message: 'مدیریت کارت منسوخ شده است.' });

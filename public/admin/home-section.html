@@ -209,7 +209,8 @@
     input[type="text"],
     input[type="number"],
     textarea,
-    input[type="url"] {
+    input[type="url"],
+    select {
       width: 100%;
       padding: 0.75rem 0.85rem;
       border-radius: 12px;
@@ -544,24 +545,46 @@
                 <input type="text" id="sectionTitle" name="title" placeholder="مثلاً محصولات ویژه" required />
               </div>
               <div class="form-group">
-                <label for="sectionSlug">اسلاگ (انگلیسی) *</label>
-                <input type="text" id="sectionSlug" name="slug" placeholder="popular-products" required />
+                <label for="sectionSlug">اسلاگ</label>
+                <input type="text" id="sectionSlug" name="slug" placeholder="auto from title" />
               </div>
               <div class="form-group">
-                <label for="sectionViewAllText">متن دکمه مشاهده همه</label>
+                <label for="sectionScope">دامنه سکشن</label>
+                <select id="sectionScope" name="scope">
+                  <option value="all_cities">تمام شهرها</option>
+                  <option value="specific_city">فقط یک شهر</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sectionCityName">نام شهر (اختیاری برای تمام شهرها)</label>
+                <input type="text" id="sectionCityName" name="cityName" placeholder="مثلاً سنندج" />
+              </div>
+              <div class="form-group">
+                <label for="sectionCityId">شناسه شهر (اختیاری)</label>
+                <input type="text" id="sectionCityId" name="cityId" placeholder="city-id" />
+              </div>
+              <div class="form-group">
+                <label for="sectionLayout">چیدمان</label>
+                <select id="sectionLayout" name="layout">
+                  <option value="carousel">اسلایدر</option>
+                  <option value="grid">گرید</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sectionOrder">ترتیب نمایش</label>
+                <input type="number" id="sectionOrder" name="order" min="0" step="1" value="0" />
+              </div>
+              <div class="form-group">
+                <label for="sectionViewAllText">متن CTA</label>
                 <input type="text" id="sectionViewAllText" name="viewAllText" placeholder="مشاهده همه" />
               </div>
               <div class="form-group">
-                <label for="sectionViewAllLink">لینک دکمه مشاهده همه</label>
+                <label for="sectionViewAllLink">لینک CTA</label>
                 <input type="url" id="sectionViewAllLink" name="viewAllLink" placeholder="https://example.com" />
               </div>
               <div class="form-group">
                 <label for="sectionSubtitleInput">زیرعنوان</label>
                 <input type="text" id="sectionSubtitleInput" name="subtitle" placeholder="توضیح کوتاه برای کاربران" />
-              </div>
-              <div class="form-group">
-                <label for="sectionOrder">ترتیب نمایش</label>
-                <input type="number" id="sectionOrder" name="order" min="0" step="1" value="0" />
               </div>
             </div>
             <div class="form-group">
@@ -592,16 +615,20 @@
           <div class="cards-panel" id="cardsPanel">
             <div class="cards-header">
               <div>
-                <h3 class="panel-title" id="cardsPanelTitle">کارت‌های سکشن</h3>
-                <p class="page-subtitle">برای افزودن کارت جدید، روی دکمه زیر کلیک کنید.</p>
+                <h3 class="panel-title" id="cardsPanelTitle">فروشگاه‌های سکشن</h3>
+                <p class="page-subtitle">جستجو کنید، اضافه کنید و ترتیب را با Drag & Drop تغییر دهید.</p>
               </div>
-              <button class="secondary-btn" id="addCardBtn">
-                <i class="ri-add-line"></i>
-                افزودن کارت
-              </button>
             </div>
+            <div class="form-grid" style="margin-bottom:1rem;">
+              <div class="form-group" style="grid-column:1/-1;">
+                <label for="storeSearchInput">جستجوی فروشگاه (نام یا شناسه)</label>
+                <input type="text" id="storeSearchInput" placeholder="مثلاً کافه / 66f..." />
+              </div>
+            </div>
+            <div class="cards-list" id="storeSearchResults"></div>
+            <hr style="margin:1rem 0; border:0; border-top:1px solid var(--border);"/>
             <div class="cards-list" id="cardsContainer">
-              <div class="empty-state">ابتدا یک سکشن را انتخاب یا ایجاد کنید تا کارت‌ها نمایش داده شوند.</div>
+              <div class="empty-state">ابتدا یک سکشن را انتخاب یا ایجاد کنید تا فروشگاه‌ها نمایش داده شوند.</div>
             </div>
           </div>
         </section>
@@ -610,490 +637,238 @@
 
   <div class="toast" id="toast"></div>
 
-  <div class="modal-backdrop" id="cardModalBackdrop">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="cardModalTitle">کارت جدید</h3>
-      </div>
-      <form id="cardForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="cardTitle">عنوان کارت *</label>
-            <input type="text" id="cardTitle" name="title" required />
-          </div>
-          <div class="form-group">
-            <label for="cardTag">تگ / برچسب</label>
-            <input type="text" id="cardTag" name="tag" />
-          </div>
-          <div class="form-group">
-            <label for="cardLocation">مکان / توضیح کوتاه</label>
-            <input type="text" id="cardLocation" name="location" />
-          </div>
-          <div class="form-group">
-            <label for="cardPrice">قیمت / مقدار</label>
-            <input type="text" id="cardPrice" name="price" />
-          </div>
-          <div class="form-group">
-            <label for="cardOrder">ترتیب نمایش</label>
-            <input type="number" id="cardOrder" name="order" value="0" />
-          </div>
-          <div class="form-group">
-            <label for="cardButtonText">متن دکمه</label>
-            <input type="text" id="cardButtonText" name="buttonText" placeholder="مثلاً مشاهده محصول" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="cardImageUrl">آدرس تصویر</label>
-          <input type="url" id="cardImageUrl" name="imageUrl" placeholder="https://" />
-        </div>
-        <div class="form-group">
-          <label for="cardLink">لینک مقصد کارت</label>
-          <input type="url" id="cardLink" name="link" placeholder="https://" />
-        </div>
-        <div class="form-group">
-          <label for="cardDescription">توضیحات کارت</label>
-          <textarea id="cardDescription" name="description" placeholder="توضیح تکمیلی کارت"></textarea>
-        </div>
-        <div class="checkbox-field">
-          <input type="checkbox" id="cardIsActive" name="isActive" checked />
-          <label for="cardIsActive">کارت فعال باشد</label>
-        </div>
-        <div class="modal-actions">
-          <button type="submit" class="primary-btn">
-            <i class="ri-check-double-line"></i>
-            ذخیره کارت
-          </button>
-          <button type="button" class="secondary-btn" id="cancelCardBtn">
-            <i class="ri-close-line"></i>
-            انصراف
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <script>
-    (() => {
-      const CLEANUP_KEY = '__homeSectionCleanup';
-      if (typeof window !== 'undefined' && typeof window[CLEANUP_KEY] === 'function') {
-        window[CLEANUP_KEY]();
-      }
+(() => {
+  const API_BASE = '/api/home-card-sections';
+  const SHOPS_API = '/api/shops';
+  const toastEl = document.getElementById('toast');
+  const sectionsContainer = document.getElementById('sectionsContainer');
+  const sectionCountEl = document.getElementById('sectionCount');
+  const cardsContainer = document.getElementById('cardsContainer');
+  const cardsCountBadge = document.getElementById('cardsCountBadge');
+  const cardsPanelTitle = document.getElementById('cardsPanelTitle');
+  const searchInput = document.getElementById('storeSearchInput');
+  const searchResults = document.getElementById('storeSearchResults');
 
-      const API_BASE = '/api/home-card-sections';
-      const toastEl = document.getElementById('toast');
-      const sectionsContainer = document.getElementById('sectionsContainer');
-      const sectionCountEl = document.getElementById('sectionCount');
-      const cardsContainer = document.getElementById('cardsContainer');
-      const cardsCountBadge = document.getElementById('cardsCountBadge');
-      const cardModalBackdrop = document.getElementById('cardModalBackdrop');
-      const cardModalTitle = document.getElementById('cardModalTitle');
-      const cardsPanelTitle = document.getElementById('cardsPanelTitle');
+  const sectionForm = document.getElementById('sectionForm');
+  const editorTitle = document.getElementById('editorTitle');
+  const editorSubtitle = document.getElementById('editorSubtitle');
+  const deleteSectionBtn = document.getElementById('deleteSectionBtn');
+  const resetFormBtn = document.getElementById('resetFormBtn');
+  const newSectionBtn = document.getElementById('newSectionBtn');
 
-      const sectionForm = document.getElementById('sectionForm');
-      const sectionEditor = document.getElementById('sectionEditor');
-      const editorTitle = document.getElementById('editorTitle');
-      const editorSubtitle = document.getElementById('editorSubtitle');
-      const deleteSectionBtn = document.getElementById('deleteSectionBtn');
-      const resetFormBtn = document.getElementById('resetFormBtn');
-      const newSectionBtn = document.getElementById('newSectionBtn');
-      const addCardBtn = document.getElementById('addCardBtn');
-      const cardForm = document.getElementById('cardForm');
-      const cancelCardBtn = document.getElementById('cancelCardBtn');
+  let sections = [];
+  let shops = [];
+  let selectedSectionId = null;
 
-      let sections = [];
-      let selectedSectionId = null;
-      let editingCardId = null;
-      let toastTimeout = null;
+  const sectionFields = {
+    title: document.getElementById('sectionTitle'), slug: document.getElementById('sectionSlug'),
+    subtitle: document.getElementById('sectionSubtitleInput'), description: document.getElementById('sectionDescription'),
+    scope: document.getElementById('sectionScope'), cityName: document.getElementById('sectionCityName'), cityId: document.getElementById('sectionCityId'),
+    layout: document.getElementById('sectionLayout'), order: document.getElementById('sectionOrder'),
+    viewAllText: document.getElementById('sectionViewAllText'), viewAllLink: document.getElementById('sectionViewAllLink'),
+    isActive: document.getElementById('sectionIsActive')
+  };
 
-      const sectionFields = {
-        title: document.getElementById('sectionTitle'),
-        slug: document.getElementById('sectionSlug'),
-        viewAllText: document.getElementById('sectionViewAllText'),
-        viewAllLink: document.getElementById('sectionViewAllLink'),
-        subtitle: document.getElementById('sectionSubtitleInput'),
-        order: document.getElementById('sectionOrder'),
-        description: document.getElementById('sectionDescription'),
-        isActive: document.getElementById('sectionIsActive'),
+  const fnum = (n) => new Intl.NumberFormat('fa-IR').format(n || 0);
+  const toast = (msg, type='success') => { toastEl.className = `toast ${type} show`; toastEl.textContent = msg; setTimeout(() => toastEl.classList.remove('show'), 2600); };
+  const sortByOrder = (arr) => arr.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
+
+  function selectedSection() { return sections.find(s => s._id === selectedSectionId) || null; }
+
+  function renderSections() {
+    sortByOrder(sections);
+    sectionCountEl.textContent = `${fnum(sections.length)} سکشن`;
+    sectionsContainer.innerHTML = sections.length ? '' : '<div class="empty-state">سکشنی ثبت نشده است.</div>';
+    sections.forEach((s) => {
+      const el = document.createElement('div');
+      el.className = `section-item ${s._id===selectedSectionId?'active':''}`;
+      el.draggable = true;
+      el.dataset.id = s._id;
+      el.innerHTML = `<div class="section-item-title">${s.title || 'بدون عنوان'}</div>
+        <div class="section-meta"><span class="badge">${s.scope==='specific_city'?'شهر خاص':'همه شهرها'}</span><span>${s.isActive ? 'فعال':'غیرفعال'}</span></div>
+        <div class="section-meta"><span>${fnum((s.stores||[]).length)} فروشگاه</span><span>ترتیب ${Number(s.order)||0}</span></div>`;
+      el.onclick = () => selectSection(s._id);
+      el.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/section-id', s._id));
+      el.addEventListener('dragover', (e) => e.preventDefault());
+      el.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const fromId = e.dataTransfer.getData('text/section-id');
+        if (!fromId || fromId === s._id) return;
+        const fromIndex = sections.findIndex(x => x._id === fromId);
+        const toIndex = sections.findIndex(x => x._id === s._id);
+        const [moved] = sections.splice(fromIndex, 1);
+        sections.splice(toIndex, 0, moved);
+        sections.forEach((x,i) => x.order = i);
+        renderSections();
+        await persistSectionOrder();
+      });
+      sectionsContainer.appendChild(el);
+    });
+  }
+
+  function renderStores() {
+    const section = selectedSection();
+    cardsPanelTitle.textContent = `فروشگاه‌های سکشن: ${section?.title || '-'}`;
+    const stores = sortByOrder([...(section?.stores || [])]);
+    cardsCountBadge.textContent = `${fnum(stores.length)} فروشگاه`;
+    if (!section) {
+      cardsContainer.innerHTML = '<div class="empty-state">ابتدا سکشن را انتخاب کنید.</div>'; return;
+    }
+    if (!stores.length) {
+      cardsContainer.innerHTML = '<div class="empty-state">فروشگاهی اضافه نشده است.</div>'; return;
+    }
+    cardsContainer.innerHTML = '';
+    stores.forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'card-item';
+      row.draggable = true;
+      row.dataset.storeId = item.sellerId;
+      const seller = item.seller || {};
+      row.innerHTML = `<div class="card-item-head"><h4>${seller.storename || 'فروشگاه'}</h4></div>
+        <div class="card-item-meta">${seller.city || ''} ${seller.address ? '• '+seller.address : ''}</div>
+        <div class="form-grid" style="margin-top:.6rem;"><div class="form-group"><label>Badge NEW</label>
+          <select data-badge="${item.sellerId}"><option value="none">بدون برچسب</option><option value="manual">دستی</option><option value="auto">اتومات (جدید)</option></select></div></div>
+        <div class="card-item-actions"><button class="danger-btn" data-remove="${item.sellerId}">حذف</button></div>`;
+      row.querySelector(`select[data-badge="${item.sellerId}"]`).value = item.badgeMode || 'none';
+      row.querySelector(`select[data-badge="${item.sellerId}"]`).onchange = (e) => { item.badgeMode = e.target.value; saveSelectedSection(); };
+      row.querySelector(`[data-remove="${item.sellerId}"]`).onclick = () => { section.stores = section.stores.filter(x => x.sellerId !== item.sellerId); renderStores(); saveSelectedSection(); };
+      row.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/store-id', item.sellerId));
+      row.addEventListener('dragover', (e) => e.preventDefault());
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromId = e.dataTransfer.getData('text/store-id');
+        const storesLocal = section.stores || [];
+        const fi = storesLocal.findIndex(x => x.sellerId === fromId); const ti = storesLocal.findIndex(x => x.sellerId === item.sellerId);
+        if (fi < 0 || ti < 0 || fi === ti) return;
+        const [mv] = storesLocal.splice(fi,1); storesLocal.splice(ti,0,mv); storesLocal.forEach((x,i)=>x.order=i);
+        renderStores(); saveSelectedSection();
+      });
+      cardsContainer.appendChild(row);
+    });
+  }
+
+  function renderSearch() {
+    const section = selectedSection();
+    const q = (searchInput.value || '').trim().toLowerCase();
+    if (!section) { searchResults.innerHTML = '<div class="empty-state">برای افزودن فروشگاه، ابتدا سکشن را ذخیره/انتخاب کنید.</div>'; return; }
+    const selectedIds = new Set((section.stores||[]).map(x => x.sellerId));
+    const list = shops.filter(s => !selectedIds.has(s.id) && (!q || (s.storename||'').toLowerCase().includes(q) || String(s.id).includes(q))).slice(0, 12);
+    searchResults.innerHTML = list.length ? '' : '<div class="empty-state">نتیجه‌ای یافت نشد.</div>';
+    list.forEach((shop) => {
+      const row = document.createElement('div');
+      row.className = 'card-item';
+      row.innerHTML = `<div class="card-item-head"><h4>${shop.storename || 'بدون نام'}</h4></div><div class="card-item-meta">${shop.city || ''} ${shop.address ? '• '+shop.address : ''}</div><div class="card-item-actions"><button class="secondary-btn">افزودن</button></div>`;
+      row.querySelector('button').onclick = () => {
+        section.stores = section.stores || [];
+        section.stores.push({ sellerId: shop.id, order: section.stores.length, badgeMode: 'none', isActive: true, seller: { storename: shop.storename, city: shop.city, address: shop.address }});
+        renderStores(); renderSearch(); saveSelectedSection();
       };
+      searchResults.appendChild(row);
+    });
+  }
 
-      const cardFields = {
-        title: document.getElementById('cardTitle'),
-        tag: document.getElementById('cardTag'),
-        location: document.getElementById('cardLocation'),
-        price: document.getElementById('cardPrice'),
-        order: document.getElementById('cardOrder'),
-        buttonText: document.getElementById('cardButtonText'),
-        imageUrl: document.getElementById('cardImageUrl'),
-        link: document.getElementById('cardLink'),
-        description: document.getElementById('cardDescription'),
-        isActive: document.getElementById('cardIsActive'),
-      };
+  function fillForm(section = null) {
+    sectionForm.reset();
+    sectionFields.order.value = section?.order ?? 0;
+    sectionFields.isActive.checked = section?.isActive !== false;
+    Object.keys(sectionFields).forEach((k) => {
+      const el = sectionFields[k];
+      if (!el || !section || el.type === 'checkbox') return;
+      el.value = section[k] ?? '';
+    });
+    if (section && sectionFields.isActive) sectionFields.isActive.checked = section.isActive !== false;
+    editorTitle.textContent = section ? `ویرایش سکشن: ${section.title}` : 'افزودن سکشن جدید';
+    editorSubtitle.textContent = 'مدیریت سکشن‌های صفحه اصلی به همراه فروشگاه‌ها';
+    deleteSectionBtn.hidden = !section;
+    renderStores(); renderSearch();
+  }
 
-      function showToast(message, type = 'success') {
-        clearTimeout(toastTimeout);
-        toastEl.textContent = message;
-        toastEl.className = `toast ${type}`;
-        requestAnimationFrame(() => toastEl.classList.add('show'));
-        toastTimeout = setTimeout(() => {
-          toastEl.classList.remove('show');
-        }, 3200);
-      }
+  async function fetchSections() {
+    const res = await fetch(`${API_BASE}/admin/all`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || 'خطا در دریافت سکشن‌ها');
+    sections = Array.isArray(data) ? data : [];
+    renderSections();
+    if (sections.length) selectSection(selectedSectionId || sections[0]._id); else fillForm(null);
+  }
 
-      function formatCount(count) {
-        return new Intl.NumberFormat('fa-IR').format(count);
-      }
+  async function fetchShops() {
+    const res = await fetch(SHOPS_API, { credentials: 'include' });
+    shops = res.ok ? (await res.json()) : [];
+  }
 
-      function sortSections() {
-        sections.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-      }
+  function selectSection(id) {
+    selectedSectionId = id;
+    renderSections();
+    fillForm(selectedSection());
+  }
 
-      function updateSectionCount() {
-        sectionCountEl.textContent = `${formatCount(sections.length)} سکشن`;
-      }
+  async function saveSelectedSection() {
+    const section = selectedSection();
+    if (!section) return;
+    await fetch(`${API_BASE}/${section._id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify(section)
+    });
+  }
 
-      function renderSectionsList() {
-        updateSectionCount();
-        sectionsContainer.innerHTML = '';
+  async function persistSectionOrder() {
+    for (const sec of sections) await fetch(`${API_BASE}/${sec._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ order: sec.order }) });
+  }
 
-        if (!sections.length) {
-          sectionsContainer.innerHTML = '<div class="empty-state">تا کنون سکشنی ثبت نشده است. با دکمه «سکشن جدید» شروع کنید.</div>';
-          return;
-        }
+  sectionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const current = selectedSection();
+    const payload = {
+      title: sectionFields.title.value.trim(), slug: sectionFields.slug.value.trim(), subtitle: sectionFields.subtitle.value.trim(),
+      description: sectionFields.description.value.trim(), scope: sectionFields.scope.value, cityName: sectionFields.cityName.value.trim(), cityId: sectionFields.cityId.value.trim(),
+      layout: sectionFields.layout.value, order: Number(sectionFields.order.value)||0, viewAllText: sectionFields.viewAllText.value.trim(), viewAllLink: sectionFields.viewAllLink.value.trim(),
+      ctaText: sectionFields.viewAllText.value.trim(), ctaLink: sectionFields.viewAllLink.value.trim(), isActive: sectionFields.isActive.checked,
+      stores: (current?.stores||[]).map((x,i) => ({ sellerId: x.sellerId, order: i, badgeMode: x.badgeMode || 'none', isActive: true }))
+    };
+    if (!payload.title) return toast('عنوان الزامی است.', 'error');
+    if (payload.scope === 'specific_city' && !payload.cityName && !payload.cityId) return toast('برای سکشن شهری، شهر را وارد کنید.', 'error');
+    const method = current ? 'PUT' : 'POST';
+    const url = current ? `${API_BASE}/${current._id}` : API_BASE;
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) return toast(data?.message || 'خطا در ذخیره', 'error');
+    await fetchSections();
+    selectSection(data._id);
+    toast('با موفقیت ذخیره شد.');
+  });
 
-        sections.forEach((section) => {
-          const item = document.createElement('div');
-          item.className = 'section-item' + (section._id === selectedSectionId ? ' active' : '');
-          item.innerHTML = `
-            <div class="section-item-title">${section.title || 'بدون عنوان'}</div>
-            <div class="section-meta">
-              <span class="badge">${section.slug || 'بدون اسلاگ'}</span>
-              <span>${section.isActive ? 'فعال' : 'غیرفعال'}</span>
-            </div>
-            <div class="section-meta">
-              <span><i class="ri-stack-line"></i> ${formatCount(section.cards?.length || 0)} کارت</span>
-              <span><i class="ri-hashtag"></i> ترتیب ${Number(section.order) || 0}</span>
-            </div>
-          `;
-          item.addEventListener('click', () => selectSection(section._id));
-          sectionsContainer.appendChild(item);
-        });
-      }
+  deleteSectionBtn.onclick = async () => {
+    const current = selectedSection(); if (!current) return;
+    if (!confirm('سکشن حذف شود؟')) return;
+    const res = await fetch(`${API_BASE}/${current._id}`, { method: 'DELETE', credentials: 'include' });
+    if (!res.ok) return toast('حذف ناموفق بود.', 'error');
+    selectedSectionId = null;
+    await fetchSections();
+    toast('سکشن حذف شد.');
+  };
 
-      function resetSectionForm() {
-        sectionForm.reset();
-        sectionFields.order.value = 0;
-        sectionFields.isActive.checked = true;
-        deleteSectionBtn.hidden = true;
-        selectedSectionId = null;
-        editorTitle.textContent = 'افزودن سکشن جدید';
-        editorSubtitle.textContent = 'مشخصات سکشن و محتوای کارت‌ها را در این قسمت ثبت کنید.';
-        cardsContainer.innerHTML = '<div class="empty-state">ابتدا یک سکشن را انتخاب یا ایجاد کنید تا کارت‌ها نمایش داده شوند.</div>';
-        cardsCountBadge.textContent = '۰ کارت';
-        cardsPanelTitle.textContent = 'کارت‌های سکشن';
-      }
+  resetFormBtn.onclick = () => fillForm(selectedSection());
+  newSectionBtn.onclick = (e) => { e.preventDefault(); selectedSectionId = null; renderSections(); fillForm(null); };
+  searchInput.addEventListener('input', renderSearch);
+  sectionFields.scope.addEventListener('change', () => {
+    const specific = sectionFields.scope.value === 'specific_city';
+    sectionFields.cityName.disabled = !specific;
+    sectionFields.cityId.disabled = !specific;
+  });
 
-      function fillSectionForm(section) {
-        sectionFields.title.value = section.title || '';
-        sectionFields.slug.value = section.slug || '';
-        sectionFields.viewAllText.value = section.viewAllText || '';
-        sectionFields.viewAllLink.value = section.viewAllLink || '';
-        sectionFields.subtitle.value = section.subtitle || '';
-        sectionFields.order.value = Number(section.order) || 0;
-        sectionFields.description.value = section.description || '';
-        sectionFields.isActive.checked = section.isActive !== false;
-      }
-
-      function renderCards(section) {
-        const cards = Array.isArray(section.cards) ? [...section.cards] : [];
-        cards.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-
-        cardsCountBadge.textContent = `${formatCount(cards.length)} کارت`;
-        cardsPanelTitle.textContent = `کارت‌های سکشن: ${section.title || ''}`;
-
-        if (!cards.length) {
-          cardsContainer.innerHTML = '<div class="empty-state">برای این سکشن هنوز کارتی ثبت نشده است.</div>';
-          return;
-        }
-
-        cardsContainer.innerHTML = '';
-        cards.forEach((card) => {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'card-item';
-          wrapper.innerHTML = `
-            <div class="card-item-header">
-              <div class="card-item-title">${card.title || 'بدون عنوان'}</div>
-              <span class="badge">${card.isActive !== false ? 'فعال' : 'غیرفعال'}</span>
-            </div>
-            <div class="card-item-meta">
-              ${card.tag ? `<span><i class="ri-price-tag-3-line"></i> ${card.tag}</span>` : ''}
-              ${card.location ? `<span><i class="ri-map-pin-line"></i> ${card.location}</span>` : ''}
-              ${card.price ? `<span><i class="ri-money-cny-box-line"></i> ${card.price}</span>` : ''}
-              <span><i class="ri-hashtag"></i> ترتیب ${Number(card.order) || 0}</span>
-            </div>
-            ${card.description ? `<div class="muted">${card.description}</div>` : ''}
-            <div class="card-actions">
-              <button class="ghost-btn" data-action="edit" data-id="${card._id}"><i class="ri-edit-line"></i> ویرایش</button>
-              <button class="ghost-btn danger" data-action="delete" data-id="${card._id}"><i class="ri-delete-bin-line"></i> حذف</button>
-              ${card.link ? `<a class="ghost-btn" href="${card.link}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده لینک</a>` : ''}
-            </div>
-          `;
-          wrapper.querySelector('[data-action="edit"]').addEventListener('click', (event) => {
-            event.stopPropagation();
-            openCardModal(card);
-          });
-          wrapper.querySelector('[data-action="delete"]').addEventListener('click', (event) => {
-            event.stopPropagation();
-            deleteCard(card._id);
-          });
-          cardsContainer.appendChild(wrapper);
-        });
-      }
-
-      async function fetchSections() {
-        try {
-          const res = await fetch(`${API_BASE}/admin/all`, { credentials: 'include' });
-          if (!res.ok) throw new Error('خطا در دریافت سکشن‌ها');
-          sections = await res.json();
-          sortSections();
-          renderSectionsList();
-          if (sections.length) {
-            selectSection(sections[0]._id);
-          }
-        } catch (err) {
-          console.error(err);
-          showToast('خطا در دریافت اطلاعات از سرور', 'error');
-        }
-      }
-
-      function selectSection(sectionId) {
-        const target = sections.find((item) => item._id === sectionId);
-        if (!target) return;
-        selectedSectionId = sectionId;
-        renderSectionsList();
-        fillSectionForm(target);
-        renderCards(target);
-        deleteSectionBtn.hidden = false;
-        editorTitle.textContent = `ویرایش سکشن: ${target.title || ''}`;
-        editorSubtitle.textContent = 'تغییرات خود را ذخیره کنید تا در صفحه اصلی اعمال شود.';
-      }
-
-      sectionForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const payload = {
-          title: sectionFields.title.value.trim(),
-          slug: sectionFields.slug.value.trim(),
-          viewAllText: sectionFields.viewAllText.value.trim(),
-          viewAllLink: sectionFields.viewAllLink.value.trim(),
-          subtitle: sectionFields.subtitle.value.trim(),
-          description: sectionFields.description.value.trim(),
-          order: Number(sectionFields.order.value) || 0,
-          isActive: sectionFields.isActive.checked,
-        };
-
-        if (!payload.title || !payload.slug) {
-          showToast('عنوان و اسلاگ سکشن الزامی است.', 'error');
-          return;
-        }
-
-        const method = selectedSectionId ? 'PUT' : 'POST';
-        const url = selectedSectionId ? `${API_BASE}/${selectedSectionId}` : API_BASE;
-
-        try {
-          const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره سکشن');
-
-          const index = sections.findIndex((item) => item._id === data._id);
-          if (index > -1) {
-            sections[index] = data;
-          } else {
-            sections.push(data);
-          }
-          sortSections();
-          renderSectionsList();
-          selectSection(data._id);
-          showToast('سکشن با موفقیت ذخیره شد.');
-        } catch (err) {
-          console.error(err);
-          showToast(err.message || 'خطایی رخ داد.', 'error');
-        }
-      });
-
-      deleteSectionBtn.addEventListener('click', async () => {
-        if (!selectedSectionId) return;
-        if (!confirm('آیا از حذف این سکشن مطمئن هستید؟')) return;
-        try {
-          const res = await fetch(`${API_BASE}/${selectedSectionId}`, {
-            method: 'DELETE',
-            credentials: 'include',
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.message || 'خطا در حذف سکشن');
-          sections = sections.filter((item) => item._id !== selectedSectionId);
-          resetSectionForm();
-          renderSectionsList();
-          showToast('سکشن با موفقیت حذف شد.');
-        } catch (err) {
-          console.error(err);
-          showToast(err.message || 'خطایی رخ داد.', 'error');
-        }
-      });
-
-      resetFormBtn.addEventListener('click', () => {
-        resetSectionForm();
-        renderSectionsList();
-      });
-
-      newSectionBtn.addEventListener('click', () => {
-        resetSectionForm();
-        sectionFields.slug.focus();
-      });
-
-      addCardBtn.addEventListener('click', () => {
-        if (!selectedSectionId) {
-          showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
-          return;
-        }
-        openCardModal();
-      });
-
-      function openCardModal(card = null) {
-        editingCardId = card?._id || null;
-        cardModalTitle.textContent = editingCardId ? 'ویرایش کارت' : 'کارت جدید';
-        cardForm.reset();
-        cardFields.order.value = 0;
-        cardFields.isActive.checked = true;
-
-        if (card) {
-          cardFields.title.value = card.title || '';
-          cardFields.tag.value = card.tag || '';
-          cardFields.location.value = card.location || '';
-          cardFields.price.value = card.price || '';
-          cardFields.order.value = Number(card.order) || 0;
-          cardFields.buttonText.value = card.buttonText || '';
-          cardFields.imageUrl.value = card.imageUrl || '';
-          cardFields.link.value = card.link || '';
-          cardFields.description.value = card.description || '';
-          cardFields.isActive.checked = card.isActive !== false;
-        }
-
-        cardModalBackdrop.classList.add('active');
-      }
-
-      function closeCardModal() {
-        cardModalBackdrop.classList.remove('active');
-        editingCardId = null;
-      }
-
-      cancelCardBtn.addEventListener('click', () => {
-        closeCardModal();
-      });
-
-      cardModalBackdrop.addEventListener('click', (event) => {
-        if (event.target === cardModalBackdrop) {
-          closeCardModal();
-        }
-      });
-
-      cardForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!selectedSectionId) {
-          showToast('ابتدا یک سکشن را انتخاب کنید.', 'error');
-          return;
-        }
-
-        const payload = {
-          title: cardFields.title.value.trim(),
-          tag: cardFields.tag.value.trim(),
-          location: cardFields.location.value.trim(),
-          price: cardFields.price.value.trim(),
-          order: Number(cardFields.order.value) || 0,
-          buttonText: cardFields.buttonText.value.trim(),
-          imageUrl: cardFields.imageUrl.value.trim(),
-          link: cardFields.link.value.trim(),
-          description: cardFields.description.value.trim(),
-          isActive: cardFields.isActive.checked,
-        };
-
-        if (!payload.title) {
-          showToast('عنوان کارت الزامی است.', 'error');
-          return;
-        }
-
-        const method = editingCardId ? 'PUT' : 'POST';
-        const url = editingCardId
-          ? `${API_BASE}/${selectedSectionId}/cards/${editingCardId}`
-          : `${API_BASE}/${selectedSectionId}/cards`;
-
-        try {
-          const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.message || 'خطا در ذخیره کارت');
-
-          const index = sections.findIndex((item) => item._id === data._id);
-          if (index > -1) {
-            sections[index] = data;
-          }
-          sortSections();
-          renderSectionsList();
-          selectSection(data._id);
-          closeCardModal();
-          showToast('کارت با موفقیت ذخیره شد.');
-        } catch (err) {
-          console.error(err);
-          showToast(err.message || 'خطایی رخ داد.', 'error');
-        }
-      });
-
-      async function deleteCard(cardId) {
-        if (!selectedSectionId || !cardId) return;
-        if (!confirm('حذف کارت انتخاب شده؟')) return;
-        try {
-          const res = await fetch(`${API_BASE}/${selectedSectionId}/cards/${cardId}`, {
-            method: 'DELETE',
-            credentials: 'include',
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.message || 'خطا در حذف کارت');
-          const index = sections.findIndex((item) => item._id === data._id);
-          if (index > -1) {
-            sections[index] = data;
-          }
-          renderSectionsList();
-          selectSection(data._id);
-          showToast('کارت حذف شد.');
-        } catch (err) {
-          console.error(err);
-          showToast(err.message || 'خطایی رخ داد.', 'error');
-        }
-      }
-
-      const handleKeydown = (event) => {
-        if (event.key === 'Escape' && cardModalBackdrop.classList.contains('active')) {
-          closeCardModal();
-        }
-      };
-
-      document.addEventListener('keydown', handleKeydown);
-
-      window[CLEANUP_KEY] = () => {
-        document.removeEventListener('keydown', handleKeydown);
-        delete window[CLEANUP_KEY];
-      };
-
-      fetchSections();
-    })();
-  </script>
+  (async () => {
+    try {
+      await Promise.all([fetchShops(), fetchSections()]);
+      sectionFields.scope.dispatchEvent(new Event('change'));
+    } catch (err) {
+      console.error(err); toast(err.message || 'خطا در بارگذاری', 'error');
+    }
+  })();
+})();
+</script>
 
 <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
 <!--

@@ -2195,7 +2195,86 @@ async function loadPopularProducts() {
 
 // بارگذاری محصولات هنگام آماده‌شدن صفحه
 window.addEventListener('DOMContentLoaded', loadPopularProducts);
+window.addEventListener('DOMContentLoaded', loadDynamicHomepageSections);
+window.addEventListener('DOMContentLoaded', () => { const cityChip = document.querySelector('#cityBtn .hero-city-chip__text'); if (!cityChip) return; new MutationObserver(() => loadDynamicHomepageSections()).observe(cityChip, { childList: true, characterData: true, subtree: true }); });
 
+
+
+function getSelectedCityMeta() {
+  const cityChip = document.querySelector('#cityBtn .hero-city-chip__text');
+  const cityName = (cityChip?.textContent || '').trim();
+  const cityId = normalizeText(cityName);
+  return { cityName, cityId };
+}
+
+function matchesCitySection(section, cityMeta) {
+  if (!section || section.isActive === false) return false;
+  if (section.scope !== 'specific_city') return true;
+  const sectionCityId = normalizeText(section.cityId || '');
+  const sectionCityName = normalizeText(section.cityName || '');
+  return (!!sectionCityId && sectionCityId === cityMeta.cityId) || (!!sectionCityName && sectionCityName === cityMeta.cityId);
+}
+
+function buildDynamicStoreCard(item) {
+  const seller = item?.seller || {};
+  const href = seller.shopurl ? `/shop/${seller.shopurl}` : '#';
+  const img = seller.boardImage || 'assets/images/shop-placeholder.svg';
+  const badge = item?.showNewBadge ? '<span class="absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full bg-[#10b981] text-white bg-opacity-90">جدید</span>' : '';
+  return `<a href="${href}" class="group relative min-w-[250px] max-w-[270px] flex-shrink-0 p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+      ${badge}
+      <img src="${img}" alt="${escapeHTML(seller.storename || '')}" class="w-full h-36 rounded-2xl object-cover mb-4" onerror="this.src='assets/images/shop-placeholder.svg'"/>
+      <h4 class="font-extrabold text-lg text-gray-800 truncate">${escapeHTML(seller.storename || 'فروشگاه')}</h4>
+      <p class="text-sm text-gray-500 truncate mt-1">${escapeHTML([seller.city, seller.address].filter(Boolean).join(' • '))}</p>
+    </a>`;
+}
+
+function renderDynamicHomeSections(sections) {
+  const wrapper = document.getElementById('homepage-dynamic-sections');
+  if (!wrapper) return;
+  wrapper.innerHTML = '';
+  if (!sections.length) {
+    wrapper.classList.add('hidden');
+    return;
+  }
+  wrapper.classList.remove('hidden');
+
+  sections.forEach((section, idx) => {
+    const stores = Array.isArray(section.stores) ? section.stores.filter((x) => x?.seller) : [];
+    if (!stores.length) return;
+    const sliderId = `dynamic-section-${idx}`;
+    const isGrid = section.layout === 'grid';
+    const cardsHTML = stores
+      .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0))
+      .map(buildDynamicStoreCard)
+      .join('');
+
+    const cta = section.ctaLink || section.viewAllLink
+      ? `<a href="${section.ctaLink || section.viewAllLink}" class="text-[#10b981] hover:text-[#0ea5e9] font-bold text-sm sm:text-base bg-[#e0fdfa] px-5 py-2 rounded-full shadow transition-all duration-200 whitespace-nowrap">${escapeHTML(section.ctaText || section.viewAllText || 'مشاهده همه')}</a>`
+      : '';
+
+    const node = document.createElement('section');
+    node.className = 'max-w-6xl mx-auto w-full mt-8 mb-10';
+    node.innerHTML = `<div class="flex items-center justify-between mb-6 px-1"><div><h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800"><span class="bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent">${escapeHTML(section.title || '')}</span></h3>${section.subtitle ? `<p class="text-sm sm:text-base text-gray-500 mt-2">${escapeHTML(section.subtitle)}</p>` : ''}</div>${cta}</div>
+      <div id="${sliderId}" class="${isGrid ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5' : 'flex overflow-x-auto gap-5 pb-2 hide-scrollbar'}">${cardsHTML}</div>`;
+    wrapper.appendChild(node);
+    if (!isGrid) updateSliderNavVisibility(sliderId);
+  });
+}
+
+async function loadDynamicHomepageSections() {
+  try {
+    const res = await fetch('/api/home-card-sections');
+    if (!res.ok) throw new Error('Failed to load sections');
+    const payload = await res.json();
+    const active = Array.isArray(payload) ? payload.filter((s) => s?.isActive !== false).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)) : [];
+    const cityMeta = getSelectedCityMeta();
+    const citySections = active.filter((s) => s.scope === 'specific_city' && matchesCitySection(s, cityMeta));
+    const allCitySections = active.filter((s) => s.scope !== 'specific_city');
+    renderDynamicHomeSections(citySections.length ? citySections : allCitySections);
+  } catch (err) {
+    console.warn('Dynamic home sections failed:', err);
+  }
+}
 // اسکرول روان و drag برای مغازه‌های بانتا
 const bantaSlider = document.getElementById('banta-shops-section');
 let bantaDown = false, bantaStartX, bantaScrollLeft, bantaLastX, bantaVelocity = 0, bantaMomentumID;
