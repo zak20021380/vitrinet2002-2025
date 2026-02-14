@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style-index.css" />
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
@@ -69,6 +70,7 @@
       transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 101;
       padding: 0;
+      padding-bottom: 90px; /* فضا برای bottom nav */
       overflow-y: auto;
       border-radius: 24px 0 0 24px;
     }
@@ -248,6 +250,19 @@
       visibility: visible;
     }
 
+    /* تنظیم z-index برای قرار گرفتن منو روی bottom nav */
+    .nav-links {
+      z-index: 101 !important;
+    }
+
+    .mobile-overlay {
+      z-index: 100 !important;
+    }
+
+    .mobile-bottom-nav {
+      z-index: 40 !important;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -286,7 +301,7 @@
 
     /* بخش ورود فروشندگان قبلی */
     .existing-seller-section {
-      margin-top: 0.75rem;
+      margin-top: 1.25rem;
       padding-top: 0;
     }
 
@@ -294,54 +309,55 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .existing-seller-divider-line {
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, #d1d5db, transparent);
+      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
     }
 
     .existing-seller-divider-text {
-      font-size: 0.8rem;
+      font-size: 0.875rem;
       font-weight: 600;
       color: #9ca3af;
-      padding: 0 0.25rem;
+      padding: 0 0.5rem;
     }
 
     .existing-seller-card {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.85rem 1rem;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%);
-      border: 1.5px solid rgba(14, 165, 233, 0.18);
-      border-radius: 1rem;
+      gap: 0.875rem;
+      padding: 1rem 1.125rem;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border: 1.5px solid rgba(14, 165, 233, 0.15);
+      border-radius: 1.125rem;
       transition: all 0.3s ease;
     }
 
     .existing-seller-card:hover {
-      border-color: rgba(14, 165, 233, 0.35);
-      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.12);
+      border-color: rgba(14, 165, 233, 0.3);
+      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
+      transform: translateY(-2px);
     }
 
     .existing-seller-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+      border-radius: 0.875rem;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
       flex-shrink: 0;
     }
 
     .existing-seller-icon svg {
-      width: 22px;
-      height: 22px;
+      width: 23px;
+      height: 23px;
       color: white;
     }
 
@@ -351,14 +367,14 @@
     }
 
     .existing-seller-title {
-      font-size: 0.95rem;
-      font-weight: 800;
+      font-size: 1rem;
+      font-weight: 700;
       color: #1e293b;
-      margin-bottom: 0.15rem;
+      margin-bottom: 0.25rem;
     }
 
     .existing-seller-desc {
-      font-size: 0.78rem;
+      font-size: 0.8125rem;
       color: #64748b;
       line-height: 1.5;
     }
@@ -367,23 +383,23 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
-      padding: 0.6rem 1rem;
+      gap: 0.5rem;
+      padding: 0.625rem 1.125rem;
       background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
       color: white;
-      font-size: 0.82rem;
+      font-size: 0.875rem;
       font-weight: 700;
-      border-radius: 0.65rem;
+      border-radius: 0.75rem;
       text-decoration: none;
       transition: all 0.25s ease;
-      box-shadow: 0 3px 10px rgba(14, 165, 233, 0.28);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
       white-space: nowrap;
       flex-shrink: 0;
     }
 
     .existing-seller-btn:hover {
       background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      box-shadow: 0 5px 14px rgba(14, 165, 233, 0.35);
+      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
       transform: translateY(-1px);
     }
 
@@ -392,24 +408,29 @@
     }
 
     .existing-seller-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 17px;
+      height: 17px;
       transition: transform 0.25s ease;
     }
 
     .existing-seller-btn:hover svg {
-      transform: translateX(-2px);
+      transform: translateX(-3px);
     }
 
     @media (max-width: 480px) {
+      .existing-seller-section {
+        margin-top: 1rem;
+      }
+
       .existing-seller-card {
         flex-wrap: wrap;
+        padding: 0.875rem 1rem;
       }
       
       .existing-seller-btn {
         width: 100%;
-        margin-top: 0.5rem;
-        padding: 0.7rem 1rem;
+        margin-top: 0.625rem;
+        padding: 0.75rem 1rem;
       }
     }
 
@@ -666,6 +687,50 @@
 
   <!-- Mobile Overlay (خارج از header برای پوشش کامل صفحه) -->
   <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav lg:hidden" id="mobileBottomNav" aria-label="ناوبری موبایل" style="z-index: 40;">
+    <ul>
+      <li>
+        <a href="/index.html" class="nav-item" data-page="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>خانه</span>
+        </a>
+      </li>
+      <li>
+        <a href="/categories.html" class="nav-item" data-page="categories">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>دسته‌بندی</span>
+        </a>
+      </li>
+      <li>
+        <a href="/service-shops.html" class="nav-item" data-page="services">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>خدمات</span>
+        </a>
+      </li>
+      <li>
+        <a href="/user/dashboard.html" class="nav-item" data-page="panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>پنل من</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
 
   <!-- فرم ثبت فروشگاه -->
   <main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:48px;">

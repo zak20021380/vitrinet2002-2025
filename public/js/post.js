@@ -34,6 +34,7 @@ function toggleMobileMenu() {
   mobileMenuBtn.classList.toggle('active');
   mobileMenu.classList.toggle('active');
   mobileOverlay.classList.toggle('active');
+  document.body.classList.toggle('mobile-menu-open');
   document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
 }
 
