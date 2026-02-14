@@ -2043,13 +2043,13 @@ function renderPopularProductsSection(section) {
         ? `<p class="popular-card-description text-sm text-gray-600 leading-relaxed">${escapeHTML(card.description)}</p>`
         : '';
       const location = card.location
-        ? `<div class="popular-card-location flex flex-row-reverse items-center justify-end gap-2 text-sm text-gray-700 font-bold">
+        ? `<div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
+            <span class="truncate">${escapeHTML(card.location)}</span>
             <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
               <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
               <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
               <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
             </svg>
-            <span class="truncate">${escapeHTML(card.location)}</span>
           </div>`
         : '';
       const price = card.price
@@ -2064,7 +2064,7 @@ function renderPopularProductsSection(section) {
           <img src="${imageUrl}" alt="${escapeHTML(card.title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" onerror="this.src='assets/images/shop-placeholder.svg'"/>
           ${tag}
         </div>
-        <div class="popular-card-body flex flex-col gap-3 w-full text-right">
+        <div class="popular-card-body flex flex-col gap-3 w-full text-center">
           <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
             ${escapeHTML(card.title)}
           </h4>
@@ -2128,17 +2128,17 @@ async function loadPopularProductsFallback(slider) {
             ${escapeHTML(cat)}
           </span>
         </div>
-        <div class="popular-card-body flex flex-col gap-3 w-full text-right">
+        <div class="popular-card-body flex flex-col gap-3 w-full text-center">
           <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
             ${escapeHTML(p.title)}
           </h4>
-          <div class="popular-card-location flex flex-row-reverse items-center justify-end gap-2 text-sm text-gray-700 font-bold">
+          <div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
+            <span class="truncate">${escapeHTML(loc)}</span>
             <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
               <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
               <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Z" fill="#10b981"/>
               <circle cx="11" cy="9" r="2.5" fill="#0ea5e9"/>
             </svg>
-            <span class="truncate">${escapeHTML(loc)}</span>
           </div>
           <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
             ${escapeHTML(priceText)}
