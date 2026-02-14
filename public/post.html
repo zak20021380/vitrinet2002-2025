@@ -56,23 +56,170 @@
 
     /* Enhanced mobile header styles */
 
+    /* Mobile Menu Panel */
     .nav-links {
       position: fixed;
       top: 0;
       right: -100%;
-      width: 70%;
-      max-width: 280px;
+      width: 75%;
+      max-width: 320px;
       height: 100vh;
-      background: white;
-      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: right 0.3s ease;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 100;
-      padding: 1.5rem;
+      padding: 0;
       overflow-y: auto;
+      border-radius: 24px 0 0 24px;
     }
 
     .nav-links.active {
       right: 0;
+    }
+
+    /* Menu Header */
+    .nav-links-header {
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 24px 0 0 0;
+    }
+
+    .nav-links-title {
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links-title svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .nav-close-btn {
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .nav-close-btn svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    /* Menu Items Container */
+    .nav-menu-items {
+      padding: 1rem 0.75rem;
+    }
+
+    /* Menu Item Styles */
+    .nav-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.25s ease;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-menu-item::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 0;
+      background: linear-gradient(180deg, #10b981, #0ea5e9);
+      border-radius: 4px 0 0 4px;
+      transition: height 0.25s ease;
+    }
+
+    .nav-menu-item:hover {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+      color: #10b981;
+      transform: translateX(-4px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+
+    .nav-menu-item:hover::before {
+      height: 60%;
+    }
+
+    .nav-menu-item svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    /* Different colors for each menu item */
+    .nav-menu-item.home-item:hover {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: #166534;
+      box-shadow: 0 4px 12px rgba(22, 101, 52, 0.15);
+    }
+
+    .nav-menu-item.home-item:hover::before {
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+    }
+
+    .nav-menu-item.category-item:hover {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+    }
+
+    .nav-menu-item.category-item:hover::before {
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+    }
+
+    .nav-menu-item.login-item {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    }
+
+    .nav-menu-item.login-item:hover {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      transform: translateX(-4px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    }
+
+    .nav-menu-item.login-item::before {
+      background: white;
+      opacity: 0.5;
+    }
+
+    .nav-menu-item.login-item:hover::before {
+      height: 60%;
+      opacity: 1;
     }
 
     .mobile-overlay {
@@ -82,12 +229,19 @@
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
       z-index: 99;
       display: none;
+      animation: fadeIn 0.3s ease;
     }
 
     .mobile-overlay.active {
       display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .glass {
@@ -304,6 +458,71 @@
       transform: rotate(-45deg);
       top: 8px;
     }
+
+    /* Header Navigation Buttons */
+    .header-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .header-nav-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Home Button */
+    .header-nav-home {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .header-nav-home:hover {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2);
+    }
+
+    /* Categories Button */
+    .header-nav-categories {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .header-nav-categories:hover {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    /* Login Button */
+    .header-nav-login {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .header-nav-login:hover {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+    }
+
+    .header-nav-login svg {
+      width: 16px;
+      height: 16px;
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -341,13 +560,25 @@
         </div>
 
         <!-- Desktop Navigation -->
-        <nav class="hidden sm:flex items-center space-x-1 sm:space-x-2 md:space-x-4 rtl:space-x-reverse">
-          <a href="index.html"
-            class="text-gray-700 hover:text-[#10b981] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">خانه</a>
-          <a href="categories.html"
-            class="text-gray-700 hover:text-[#0ea5e9] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">دسته‌بندی</a>
-          <a href="login.html"
-            class="text-gray-700 hover:text-[#0ea5e9] font-medium px-3 py-2 text-sm md:text-base transition-colors duration-200">ورود</a>
+        <nav class="hidden sm:flex items-center space-x-2 sm:space-x-3 md:space-x-4 rtl:space-x-reverse">
+          <a href="index.html" class="header-nav-btn header-nav-home">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+            <span>خانه</span>
+          </a>
+          <a href="categories.html" class="header-nav-btn header-nav-categories">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zM3.75 10.5h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zM3.75 17.25h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5z" />
+            </svg>
+            <span>دسته‌بندی</span>
+          </a>
+          <a href="login.html" class="header-nav-btn header-nav-login">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            <span>ورود</span>
+          </a>
         </nav>
 
         <!-- Mobile menu button -->
@@ -361,21 +592,38 @@
 
     <!-- Mobile Navigation -->
     <div class="nav-links sm:hidden" id="mobile-menu">
-      <div class="flex items-center justify-between mb-6">
-        <span class="font-bold text-lg text-gray-800">منو</span>
-        <button class="text-gray-500 hover:text-gray-700" id="close-menu">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      <div class="nav-links-header">
+        <span class="nav-links-title">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+          </svg>
+          منو
+        </span>
+        <button class="nav-close-btn" id="close-menu">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
-      <div class="space-y-3">
-        <a href="index.html"
-          class="block text-gray-700 hover:text-[#10b981] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">خانه</a>
-        <a href="categories.html"
-          class="block text-gray-700 hover:text-[#0ea5e9] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">دسته‌بندی</a>
-        <a href="login.html"
-          class="block text-gray-700 hover:text-[#0ea5e9] font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-all duration-200">ورود</a>
+      <div class="nav-menu-items">
+        <a href="index.html" class="nav-menu-item home-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+          <span>خانه</span>
+        </a>
+        <a href="categories.html" class="nav-menu-item category-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zM3.75 10.5h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zM3.75 17.25h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5zm6.75 0h4.5v4.5h-4.5v-4.5z" />
+          </svg>
+          <span>دسته‌بندی</span>
+        </a>
+        <a href="login.html" class="nav-menu-item login-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          <span>ورود</span>
+        </a>
       </div>
     </div>
 

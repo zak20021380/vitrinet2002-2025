@@ -39,7 +39,14 @@ function toggleMobileMenu() {
 
 mobileMenuBtn.addEventListener('click', toggleMobileMenu);
 closeMenuBtn.addEventListener('click', toggleMobileMenu);
-mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+// بستن مدال با کلیک روی قسمت خارجی (overlay)
+mobileOverlay.addEventListener('click', (e) => {
+  // فقط اگر روی خود overlay کلیک شود، نه روی عناصر داخل آن
+  if (e.target === mobileOverlay) {
+    toggleMobileMenu();
+  }
+});
 
 // Close menu when clicking on a link
 document.querySelectorAll('.nav-links a').forEach(link => {
