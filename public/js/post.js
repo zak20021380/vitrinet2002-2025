@@ -37,13 +37,27 @@ function toggleMobileMenu() {
   document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
 }
 
-mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-closeMenuBtn.addEventListener('click', toggleMobileMenu);
+if (mobileMenuBtn) {
+  mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+}
 
-// بستن مدال با کلیک روی قسمت خارجی (overlay)
-mobileOverlay.addEventListener('click', (e) => {
-  // فقط اگر روی خود overlay کلیک شود، نه روی عناصر داخل آن
-  if (e.target === mobileOverlay) {
+if (closeMenuBtn) {
+  closeMenuBtn.addEventListener('click', toggleMobileMenu);
+}
+
+// بستن مدال با کلیک روی قسمت خارجی (overlay) - حرفه‌ای‌تر
+if (mobileOverlay) {
+  mobileOverlay.addEventListener('click', (e) => {
+    // بستن مدال هنگام کلیک روی overlay
+    if (e.target === mobileOverlay && mobileMenu && mobileMenu.classList.contains('active')) {
+      toggleMobileMenu();
+    }
+  });
+}
+
+// بستن مدال با فشار کلید Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
     toggleMobileMenu();
   }
 });
@@ -51,7 +65,7 @@ mobileOverlay.addEventListener('click', (e) => {
 // Close menu when clicking on a link
 document.querySelectorAll('.nav-links a').forEach(link => {
   link.addEventListener('click', () => {
-    if (mobileMenu.classList.contains('active')) {
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
       toggleMobileMenu();
     }
   });
