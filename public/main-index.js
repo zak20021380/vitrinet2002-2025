@@ -2367,6 +2367,10 @@ function buildManagedManualCard(cardData = {}) {
         ${escapeHTML(title)}
       </h4>
       <div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22">
+          <circle cx="11" cy="11" r="10" fill="#e0f7fa"/>
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z" fill="#10b981"/>
+        </svg>
         <span class="truncate">${escapeHTML(location)}</span>
       </div>
       ${priceText ? `
