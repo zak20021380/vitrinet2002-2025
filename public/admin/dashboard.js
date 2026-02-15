@@ -883,6 +883,503 @@ function bindHomepageSectionManager() {
   }
 }
 
+// Homepage manager v2 override: adds per-section manual card CRUD while preserving section CRUD.
+function normalizeHomepageCard(card = {}) {
+  if (!card || typeof card !== 'object') return null;
+  const id = toIdString(card._id || card.id);
+  return {
+    _id: id || '',
+    title: String(card.title || '').trim(),
+    image: String(card.image || '').trim(),
+    category: String(card.category || '').trim(),
+    price: Number.isFinite(Number(card.price)) ? Number(card.price) : 0,
+    location: String(card.location || '').trim(),
+    link: String(card.link || '').trim(),
+    displayOrder: Math.max(0, Number(card.displayOrder) || 0)
+  };
+}
+
+function sortHomepageCards(list = []) {
+  return [...list].sort((a, b) => {
+    const orderA = Number.isFinite(a?.displayOrder) ? a.displayOrder : 0;
+    const orderB = Number.isFinite(b?.displayOrder) ? b.displayOrder : 0;
+    if (orderA !== orderB) return orderA - orderB;
+    return String(a?._id || '').localeCompare(String(b?._id || ''));
+  });
+}
+
+function normalizeHomepageSection(section = {}) {
+  if (!section || typeof section !== 'object') return null;
+  const id = toIdString(section._id || section.id);
+  if (!id) return null;
+
+  return {
+    ...section,
+    _id: id,
+    title: String(section.title || '').trim(),
+    type: String(section.type || 'latest').trim().toLowerCase(),
+    categoryFilter: String(section.categoryFilter || '').trim(),
+    sort: String(section.sort || 'latest').trim().toLowerCase(),
+    limit: Math.max(1, Math.min(40, Number(section.limit) || 10)),
+    displayOrder: Math.max(0, Number(section.displayOrder) || 0),
+    isActive: Boolean(section.isActive),
+    cards: sortHomepageCards(
+      (Array.isArray(section.cards) ? section.cards : [])
+        .map(normalizeHomepageCard)
+        .filter(Boolean)
+    )
+  };
+}
+
+function formatHomepageCardPrice(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0 تومان';
+  return `${formatNumber(Math.round(num))} تومان`;
+}
+
+function getHomepageCardImageUrl(path) {
+  const raw = String(path || '').trim();
+  if (!raw) return '';
+  return toAbsoluteMediaUrl(raw, '');
+}
+
+function getHomepageCardFormBySection(sectionId) {
+  if (!sectionId) return null;
+  return document.querySelector(`form[data-homepage-card-form="${sectionId}"]`);
+}
+
+function setHomepageCardFormMode(form, isEditing) {
+  if (!form) return;
+  const submitBtn = form.querySelector('[data-role="card-submit"]');
+  const resetBtn = form.querySelector('[data-role="card-reset"]');
+  if (submitBtn) {
+    submitBtn.innerHTML = isEditing
+      ? '<i class="ri-save-line"></i> ذخیره ویرایش کارت'
+      : '<i class="ri-add-circle-line"></i> افزودن کارت';
+  }
+  if (resetBtn) {
+    resetBtn.style.display = isEditing ? '' : 'none';
+  }
+}
+
+function setHomepageCardFormMessage(form, message, type = 'info') {
+  if (!form) return;
+  const box = form.querySelector('[data-role="card-form-message"]');
+  if (!box) return;
+
+  if (!message) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+
+  const palette = {
+    success: { bg: '#dcfce7', color: '#166534' },
+    error: { bg: '#fee2e2', color: '#b91c1c' },
+    info: { bg: '#e0f2fe', color: '#0369a1' }
+  };
+  const style = palette[type] || palette.info;
+  box.style.display = 'block';
+  box.style.background = style.bg;
+  box.style.color = style.color;
+  box.textContent = message;
+}
+
+function resetHomepageCardForm(sectionId) {
+  const form = getHomepageCardFormBySection(sectionId);
+  if (!form) return;
+  form.reset();
+  const idInput = form.querySelector('[data-field="card-id"]');
+  if (idInput) idInput.value = '';
+  const hintEl = form.querySelector('[data-role="card-image-hint"]');
+  if (hintEl) hintEl.textContent = 'برای کارت جدید تصویر الزامی است.';
+  setHomepageCardFormMode(form, false);
+  setHomepageCardFormMessage(form, '');
+}
+
+function fillHomepageCardForm(sectionId, card) {
+  const form = getHomepageCardFormBySection(sectionId);
+  if (!form || !card) return;
+
+  const idInput = form.querySelector('[data-field="card-id"]');
+  const titleInput = form.querySelector('[data-field="title"]');
+  const categoryInput = form.querySelector('[data-field="category"]');
+  const priceInput = form.querySelector('[data-field="price"]');
+  const locationInput = form.querySelector('[data-field="location"]');
+  const linkInput = form.querySelector('[data-field="link"]');
+  const hintEl = form.querySelector('[data-role="card-image-hint"]');
+
+  if (idInput) idInput.value = card._id || '';
+  if (titleInput) titleInput.value = card.title || '';
+  if (categoryInput) categoryInput.value = card.category || '';
+  if (priceInput) priceInput.value = Number.isFinite(Number(card.price)) ? String(Number(card.price)) : '0';
+  if (locationInput) locationInput.value = card.location || '';
+  if (linkInput) linkInput.value = card.link || '';
+  if (hintEl) {
+    const src = getHomepageCardImageUrl(card.image);
+    hintEl.innerHTML = src
+      ? `تصویر فعلی: <a href="${escapeHtml(src)}" target="_blank" rel="noopener">مشاهده تصویر</a>`
+      : 'برای تغییر تصویر، فایل جدید انتخاب کنید.';
+  }
+
+  setHomepageCardFormMode(form, true);
+  setHomepageCardFormMessage(form, 'در حال ویرایش کارت انتخاب‌شده.', 'info');
+}
+
+async function saveHomepageCardFromForm(form) {
+  const sectionId = String(form?.dataset.sectionId || '').trim();
+  if (!sectionId) return;
+
+  const cardId = String(form.querySelector('[data-field="card-id"]')?.value || '').trim();
+  const title = String(form.querySelector('[data-field="title"]')?.value || '').trim();
+  const category = String(form.querySelector('[data-field="category"]')?.value || '').trim();
+  const location = String(form.querySelector('[data-field="location"]')?.value || '').trim();
+  const link = String(form.querySelector('[data-field="link"]')?.value || '').trim();
+  const priceRaw = String(form.querySelector('[data-field="price"]')?.value || '').trim();
+  const imageInput = form.querySelector('[data-field="image"]');
+  const imageFile = imageInput?.files?.[0] || null;
+  const price = Number(priceRaw);
+
+  if (!title) {
+    setHomepageCardFormMessage(form, 'عنوان کارت الزامی است.', 'error');
+    return;
+  }
+  if (!category) {
+    setHomepageCardFormMessage(form, 'دسته کارت الزامی است.', 'error');
+    return;
+  }
+  if (!location) {
+    setHomepageCardFormMessage(form, 'موقعیت کارت الزامی است.', 'error');
+    return;
+  }
+  if (!Number.isFinite(price) || price < 0) {
+    setHomepageCardFormMessage(form, 'قیمت کارت باید عدد معتبر باشد.', 'error');
+    return;
+  }
+  if (!cardId && !imageFile) {
+    setHomepageCardFormMessage(form, 'برای کارت جدید باید تصویر آپلود شود.', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.set('title', title);
+  formData.set('category', category);
+  formData.set('price', String(price));
+  formData.set('location', location);
+  formData.set('link', link);
+  if (imageFile) {
+    formData.set('image', imageFile);
+  }
+
+  const isEdit = Boolean(cardId);
+  const url = isEdit
+    ? `${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(sectionId)}/cards/${encodeURIComponent(cardId)}`
+    : `${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(sectionId)}/cards`;
+  const method = isEdit ? 'PUT' : 'POST';
+
+  setHomepageCardFormMessage(form, 'در حال ذخیره کارت...', 'info');
+
+  try {
+    const res = await fetch(url, {
+      method,
+      credentials: 'include',
+      body: formData
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'ذخیره کارت انجام نشد.');
+    }
+
+    await ensureHomepageSectionsLoaded(true);
+    const refreshedForm = getHomepageCardFormBySection(sectionId);
+    if (refreshedForm) {
+      resetHomepageCardForm(sectionId);
+      setHomepageCardFormMessage(
+        refreshedForm,
+        isEdit ? 'کارت با موفقیت ویرایش شد.' : 'کارت جدید ذخیره شد.',
+        'success'
+      );
+    }
+  } catch (error) {
+    console.error('saveHomepageCardFromForm error:', error);
+    setHomepageCardFormMessage(form, error.message || 'خطا در ذخیره کارت.', 'error');
+  }
+}
+
+async function deleteHomepageCard(sectionId, cardId) {
+  if (!sectionId || !cardId) return;
+  if (!confirm('این کارت حذف شود؟')) return;
+
+  try {
+    const res = await fetch(
+      `${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(sectionId)}/cards/${encodeURIComponent(cardId)}`,
+      {
+        method: 'DELETE',
+        credentials: 'include'
+      }
+    );
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'حذف کارت انجام نشد.');
+    }
+    await ensureHomepageSectionsLoaded(true);
+  } catch (error) {
+    console.error('deleteHomepageCard error:', error);
+    alert(`خطا: ${error.message}`);
+  }
+}
+
+function renderHomepageSections() {
+  const listEl = document.getElementById('homepageSectionsList');
+  const emptyEl = document.getElementById('homepageSectionsEmpty');
+  if (!listEl || !emptyEl) return;
+
+  listEl.innerHTML = '';
+
+  if (!homepageSectionsList.length) {
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  homepageSectionsList.forEach((section, index) => {
+    const cards = sortHomepageCards(Array.isArray(section.cards) ? section.cards : []);
+    const cardsMarkup = cards.length
+      ? cards.map((card) => {
+          const imageUrl = getHomepageCardImageUrl(card.image);
+          const hasLink = Boolean(card.link);
+          return `
+            <article class="homepage-card-item">
+              <div class="homepage-card-item__media">
+                ${imageUrl
+                  ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(card.title || 'card')}" loading="lazy" />`
+                  : '<div class="homepage-card-item__placeholder">No Image</div>'}
+              </div>
+              <div class="homepage-card-item__content">
+                <div class="homepage-card-item__title">${escapeHtml(card.title || 'Untitled')}</div>
+                <div class="homepage-card-item__meta">
+                  <span>${escapeHtml(card.category || '—')}</span>
+                  <span>${escapeHtml(formatHomepageCardPrice(card.price))}</span>
+                  <span>${escapeHtml(card.location || '—')}</span>
+                  ${hasLink ? `<a href="${escapeHtml(card.link)}" target="_blank" rel="noopener">Link</a>` : '<span>No Link</span>'}
+                </div>
+              </div>
+              <div class="homepage-card-item__actions">
+                <button type="button" data-action="card-edit" data-id="${section._id}" data-card-id="${card._id}">
+                  <i class="ri-edit-line"></i> ویرایش کارت
+                </button>
+                <button type="button" class="danger" data-action="card-delete" data-id="${section._id}" data-card-id="${card._id}">
+                  <i class="ri-delete-bin-line"></i> حذف کارت
+                </button>
+              </div>
+            </article>
+          `;
+        }).join('')
+      : '<div class="homepage-cards-empty">هنوز کارتی برای این ردیف ثبت نشده است.</div>';
+
+    const item = document.createElement('article');
+    item.className = 'homepage-section-item';
+    item.innerHTML = `
+      <div class="homepage-section-item__head">
+        <div class="homepage-section-item__title">${escapeHtml(section.title || 'بدون عنوان')}</div>
+        <span class="homepage-section-item__status ${section.isActive ? 'active' : 'inactive'}">
+          ${section.isActive ? 'فعال' : 'غیرفعال'}
+        </span>
+      </div>
+      <div class="homepage-section-item__meta">
+        <span>نوع: ${escapeHtml(getHomepageTypeLabel(section.type))}</span>
+        <span>مرتب‌سازی: ${escapeHtml(getHomepageSortLabel(section.sort))}</span>
+        <span>تعداد: ${formatNumber(section.limit)}</span>
+        <span>ترتیب: ${formatNumber(section.displayOrder)}</span>
+        <span>کارت‌ها: ${formatNumber(cards.length)}</span>
+        ${section.categoryFilter ? `<span>دسته: ${escapeHtml(section.categoryFilter)}</span>` : ''}
+      </div>
+      <div class="homepage-section-item__actions">
+        <button type="button" data-action="edit" data-id="${section._id}"><i class="ri-edit-line"></i> ویرایش</button>
+        <button type="button" data-action="toggle" data-id="${section._id}">
+          <i class="${section.isActive ? 'ri-eye-off-line' : 'ri-eye-line'}"></i>
+          ${section.isActive ? 'مخفی' : 'نمایش'}
+        </button>
+        <button type="button" data-action="move-up" data-id="${section._id}" ${index === 0 ? 'disabled' : ''}>
+          <i class="ri-arrow-up-line"></i> بالا
+        </button>
+        <button type="button" data-action="move-down" data-id="${section._id}" ${index === homepageSectionsList.length - 1 ? 'disabled' : ''}>
+          <i class="ri-arrow-down-line"></i> پایین
+        </button>
+        <button type="button" class="danger" data-action="delete" data-id="${section._id}">
+          <i class="ri-delete-bin-line"></i> حذف
+        </button>
+      </div>
+      <div class="homepage-section-cards-manager">
+        <form class="homepage-card-form" data-homepage-card-form="${section._id}" data-section-id="${section._id}" autocomplete="off">
+          <h4>مدیریت کارت‌های این ردیف</h4>
+          <input type="hidden" data-field="card-id" />
+          <div class="homepage-card-form__row">
+            <div>
+              <label>عنوان کارت *</label>
+              <input type="text" data-field="title" required placeholder="مثلا: کفش اسپرت" />
+            </div>
+            <div>
+              <label>دسته *</label>
+              <input type="text" data-field="category" required placeholder="مثلا: پوشاک" />
+            </div>
+          </div>
+          <div class="homepage-card-form__row">
+            <div>
+              <label>قیمت *</label>
+              <input type="number" data-field="price" required min="0" step="1" placeholder="0" />
+            </div>
+            <div>
+              <label>موقعیت *</label>
+              <input type="text" data-field="location" required placeholder="سنندج،..." />
+            </div>
+          </div>
+          <div class="homepage-card-form__row">
+            <div>
+              <label>لینک (اختیاری)</label>
+              <input type="text" data-field="link" placeholder="https://... or /path" />
+            </div>
+            <div>
+              <label>تصویر کارت *</label>
+              <input type="file" data-field="image" accept="image/*" />
+              <small data-role="card-image-hint">برای کارت جدید تصویر الزامی است.</small>
+            </div>
+          </div>
+          <div class="homepage-card-form__actions">
+            <button type="submit" data-role="card-submit"><i class="ri-add-circle-line"></i> افزودن کارت</button>
+            <button type="button" class="secondary" data-role="card-reset" data-action="card-reset" data-id="${section._id}" style="display:none;">
+              <i class="ri-refresh-line"></i> فرم جدید
+            </button>
+          </div>
+          <div class="homepage-card-form__message" data-role="card-form-message" style="display:none;"></div>
+        </form>
+        <div class="homepage-card-list">
+          ${cardsMarkup}
+        </div>
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+function bindHomepageSectionManager() {
+  const form = document.getElementById('homepageSectionForm');
+  const resetBtn = document.getElementById('homepageSectionResetBtn');
+  const refreshBtn = document.getElementById('homepageSectionsRefresh');
+  const listEl = document.getElementById('homepageSectionsList');
+  const typeInput = document.getElementById('homepageSectionType');
+  const categoryInput = document.getElementById('homepageSectionCategory');
+  const sortInput = document.getElementById('homepageSectionSort');
+
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', saveHomepageSectionFromForm);
+  }
+
+  if (resetBtn && !resetBtn.dataset.bound) {
+    resetBtn.dataset.bound = 'true';
+    resetBtn.addEventListener('click', () => {
+      resetHomepageSectionForm();
+    });
+  }
+
+  if (refreshBtn && !refreshBtn.dataset.bound) {
+    refreshBtn.dataset.bound = 'true';
+    refreshBtn.addEventListener('click', async () => {
+      const original = refreshBtn.innerHTML;
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> در حال بروزرسانی';
+      try {
+        await ensureHomepageSectionsLoaded(true);
+      } catch (error) {
+        alert(`خطا: ${error.message}`);
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = original;
+      }
+    });
+  }
+
+  if (typeInput && categoryInput && !typeInput.dataset.bound) {
+    typeInput.dataset.bound = 'true';
+    const syncCategoryRequiredState = () => {
+      const mustHaveCategory = typeInput.value === 'category';
+      categoryInput.required = mustHaveCategory;
+      categoryInput.placeholder = mustHaveCategory
+        ? 'برای نوع دسته‌بندی الزامی است'
+        : 'اختیاری - مثلا پوشاک';
+
+      if (sortInput) {
+        if (typeInput.value === 'popular' && sortInput.value === 'latest') {
+          sortInput.value = 'most-liked';
+        }
+        if (typeInput.value === 'latest' && sortInput.value === 'most-liked') {
+          sortInput.value = 'latest';
+        }
+      }
+    };
+    syncCategoryRequiredState();
+    typeInput.addEventListener('change', syncCategoryRequiredState);
+  }
+
+  if (listEl && !listEl.dataset.bound) {
+    listEl.dataset.bound = 'true';
+
+    listEl.addEventListener('submit', async (event) => {
+      const cardForm = event.target.closest('form[data-homepage-card-form]');
+      if (!cardForm) return;
+      event.preventDefault();
+      await saveHomepageCardFromForm(cardForm);
+    });
+
+    listEl.addEventListener('click', (event) => {
+      const actionBtn = event.target.closest('button[data-action]');
+      if (!actionBtn) return;
+      const id = String(actionBtn.dataset.id || '').trim();
+      const action = actionBtn.dataset.action;
+      const cardId = String(actionBtn.dataset.cardId || '').trim();
+      if (!id) return;
+
+      if (action === 'edit') {
+        const section = homepageSectionsList.find((item) => item._id === id);
+        if (section) fillHomepageSectionForm(section);
+        return;
+      }
+      if (action === 'toggle') {
+        toggleHomepageSection(id);
+        return;
+      }
+      if (action === 'delete') {
+        deleteHomepageSection(id);
+        return;
+      }
+      if (action === 'move-up') {
+        moveHomepageSection(id, 'up');
+        return;
+      }
+      if (action === 'move-down') {
+        moveHomepageSection(id, 'down');
+        return;
+      }
+      if (action === 'card-reset') {
+        resetHomepageCardForm(id);
+        return;
+      }
+      if (action === 'card-edit') {
+        const section = homepageSectionsList.find((item) => item._id === id);
+        const card = section?.cards?.find((item) => item._id === cardId);
+        if (section && card) {
+          fillHomepageCardForm(id, card);
+        }
+        return;
+      }
+      if (action === 'card-delete') {
+        deleteHomepageCard(id, cardId);
+      }
+    });
+  }
+}
+
 function escapeHtml(value) {
   if (value === null || value === undefined) return '';
   return String(value)

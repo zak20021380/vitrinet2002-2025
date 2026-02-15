@@ -3,6 +3,53 @@ const mongoose = require('mongoose');
 const HOMEPAGE_SECTION_TYPES = ['latest', 'category', 'popular', 'discounted'];
 const HOMEPAGE_SECTION_SORTS = ['latest', 'oldest', 'price-desc', 'price-asc', 'most-liked'];
 
+const homepageSectionCardSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 140
+    },
+    image: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 2048
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 120
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0
+    },
+    location: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 180
+    },
+    link: {
+      type: String,
+      trim: true,
+      default: '',
+      maxlength: 2048
+    },
+    displayOrder: {
+      type: Number,
+      min: 0,
+      default: 0
+    }
+  },
+  { _id: true, timestamps: false }
+);
+
 const homepageSectionSchema = new mongoose.Schema(
   {
     title: {
@@ -42,6 +89,10 @@ const homepageSectionSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+    cards: {
+      type: [homepageSectionCardSchema],
+      default: []
     }
   },
   { timestamps: true }

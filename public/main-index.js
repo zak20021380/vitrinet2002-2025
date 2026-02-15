@@ -2321,17 +2321,89 @@ async function fetchHomepageSectionProducts(sectionId) {
   return Array.isArray(payload?.products) ? payload.products : [];
 }
 
+function getManagedManualCardPriceText(card) {
+  const price = Number(card?.price);
+  if (!Number.isFinite(price) || price < 0) return '';
+  return `${Math.round(price).toLocaleString('fa-IR')} Toman`;
+}
+
+function buildManagedManualCard(cardData = {}) {
+  const title = String(cardData?.title || 'Item').trim() || 'Item';
+  const category = String(cardData?.category || 'Category').trim() || 'Category';
+  const image = resolveImagePath(cardData?.image, 'assets/images/shop-placeholder.svg');
+  const location = String(cardData?.location || '-').trim() || '-';
+  const priceText = getManagedManualCardPriceText(cardData);
+  const link = String(cardData?.link || '').trim();
+  const isExternal = /^(https?:)?\/\//i.test(link);
+
+  const card = document.createElement(link ? 'a' : 'div');
+  if (link) {
+    card.href = link;
+    if (isExternal) {
+      card.target = '_blank';
+      card.rel = 'noopener';
+    }
+  }
+  card.className = `
+    group glass popular-product-card min-w-[245px] max-w-[280px] flex-shrink-0 flex flex-col
+    p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
+    hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
+  `;
+  card.dataset.productName = title;
+  card.dataset.productCategory = category;
+  if (Number.isFinite(Number(cardData?.price))) {
+    card.dataset.productPrice = String(Number(cardData.price));
+  }
+
+  card.innerHTML = `
+    <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+      <img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" loading="lazy" onerror="this.src='assets/images/shop-placeholder.svg'"/>
+      <span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">
+        ${escapeHTML(category)}
+      </span>
+    </div>
+    <div class="popular-card-body flex flex-col gap-3 w-full text-center">
+      <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
+        ${escapeHTML(title)}
+      </h4>
+      <div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
+        <span class="truncate">${escapeHTML(location)}</span>
+      </div>
+      ${priceText ? `
+      <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
+        ${escapeHTML(priceText)}
+      </div>` : ''}
+    </div>
+    ${link ? `
+    <div class="popular-card-footer w-full">
+      <span class="card-action-btn w-full justify-center">
+        View
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </span>
+    </div>` : ''}
+  `;
+
+  return card;
+}
+
 function createManagedHomepageRow(section) {
   const row = document.createElement('section');
   row.className = 'homepage-managed-row';
 
-  const rowTitle = escapeHTML(String(section?.title || 'محصولات'));
+  const rowTitle = escapeHTML(String(section?.title || 'Products'));
+  const cardsCount = Array.isArray(section?.cards) ? section.cards.length : 0;
   const rowSubtitleParts = [];
   if (section?.categoryFilter) {
-    rowSubtitleParts.push(`دسته: ${String(section.categoryFilter).trim()}`);
+    rowSubtitleParts.push(`Category: ${String(section.categoryFilter).trim()}`);
   }
-  rowSubtitleParts.push(`تعداد: ${Number(section?.limit) || 10}`);
-  const rowSubtitle = rowSubtitleParts.join(' • ');
+  if (cardsCount > 0) {
+    rowSubtitleParts.push(`Cards: ${cardsCount.toLocaleString('fa-IR')}`);
+  } else {
+    rowSubtitleParts.push(`Count: ${Number(section?.limit) || 10}`);
+  }
+  const rowSubtitle = rowSubtitleParts.join(' | ');
 
   row.innerHTML = `
     <div class="homepage-managed-row__header">
@@ -2339,14 +2411,14 @@ function createManagedHomepageRow(section) {
         <h3 class="homepage-managed-row__title"><span>${rowTitle}</span></h3>
         <p class="homepage-managed-row__subtitle">${escapeHTML(rowSubtitle)}</p>
       </div>
-      <a class="homepage-managed-row__cta" href="all-products.html">مشاهده همه</a>
+      <a class="homepage-managed-row__cta" href="all-products.html">View all</a>
     </div>
     <div class="homepage-managed-row__body">
-      <button type="button" class="homepage-managed-row__nav is-prev" aria-label="نمایش مورد بعدی">
+      <button type="button" class="homepage-managed-row__nav is-prev" aria-label="Show next">
         <i class="ri-arrow-right-s-line text-xl"></i>
       </button>
       <div class="homepage-managed-row__slider hide-scrollbar"></div>
-      <button type="button" class="homepage-managed-row__nav is-next" aria-label="نمایش مورد قبلی">
+      <button type="button" class="homepage-managed-row__nav is-next" aria-label="Show previous">
         <i class="ri-arrow-left-s-line text-xl"></i>
       </button>
     </div>
@@ -2386,12 +2458,30 @@ async function loadHomepageManagedSections() {
     const slider = row.querySelector('.homepage-managed-row__slider');
     if (!slider) return row;
 
-    slider.innerHTML = '<div class="homepage-managed-row__state">در حال بارگذاری...</div>';
+    const manualCards = Array.isArray(section?.cards)
+      ? [...section.cards].sort((a, b) => {
+          const orderA = Number(a?.displayOrder) || 0;
+          const orderB = Number(b?.displayOrder) || 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return String(a?._id || '').localeCompare(String(b?._id || ''));
+        })
+      : [];
+
+    if (manualCards.length) {
+      slider.innerHTML = '';
+      manualCards.forEach((cardData) => {
+        slider.appendChild(buildManagedManualCard(cardData));
+      });
+      bindManagedRowNavigation(row);
+      return row;
+    }
+
+    slider.innerHTML = '<div class="homepage-managed-row__state">Loading...</div>';
 
     try {
       const products = await fetchHomepageSectionProducts(section._id || section.id);
       if (!products.length) {
-        slider.innerHTML = '<div class="homepage-managed-row__state">محصولی برای این ردیف پیدا نشد.</div>';
+        slider.innerHTML = '<div class="homepage-managed-row__state">No cards found for this row.</div>';
         return row;
       }
 
@@ -2402,7 +2492,7 @@ async function loadHomepageManagedSections() {
       bindManagedRowNavigation(row);
     } catch (error) {
       console.warn('loadHomepageManagedSections -> products fetch failed', error);
-      slider.innerHTML = '<div class="homepage-managed-row__state">خطا در دریافت محصولات این ردیف.</div>';
+      slider.innerHTML = '<div class="homepage-managed-row__state">Failed to load row cards.</div>';
     }
     return row;
   }));

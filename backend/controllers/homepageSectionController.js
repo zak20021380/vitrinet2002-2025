@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 const {
@@ -6,8 +8,15 @@ const {
   HOMEPAGE_SECTION_SORTS
 } = require('../models/HomepageSection');
 
+const BACKEND_ROOT = path.join(__dirname, '..');
+const HOMEPAGE_CARD_UPLOAD_PREFIX = '/uploads/homepage-cards/';
+
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
+}
+
+function hasOwn(source, key) {
+  return Object.prototype.hasOwnProperty.call(source || {}, key);
 }
 
 function escapeRegex(value = '') {
@@ -19,10 +28,113 @@ function toNumber(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function normalizeUploadedPath(file) {
+  if (!file?.path) return '';
+  const relative = path.relative(BACKEND_ROOT, file.path).replace(/\\/g, '/');
+  if (!relative) return '';
+  if (relative.startsWith('uploads/')) {
+    return `/${relative}`;
+  }
+  return `/uploads/${path.basename(file.path)}`;
+}
+
+function isHomepageCardUploadPath(imagePath) {
+  const value = String(imagePath || '').trim();
+  return value.startsWith(HOMEPAGE_CARD_UPLOAD_PREFIX);
+}
+
+function removeCardImageFile(imagePath) {
+  const value = String(imagePath || '').trim();
+  if (!isHomepageCardUploadPath(value)) return;
+
+  const filePath = path.join(BACKEND_ROOT, value.replace(/^\//, ''));
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.warn('removeCardImageFile failed:', filePath, error?.message || error);
+  }
+}
+
+function normalizeHomepageCardPayload(body = {}, { partial = false } = {}) {
+  const next = {};
+
+  if (!partial || hasOwn(body, '_id') || hasOwn(body, 'id')) {
+    const cardId = String(body._id || body.id || '').trim();
+    if (cardId && isValidObjectId(cardId)) {
+      next._id = cardId;
+    }
+  }
+
+  if (!partial || hasOwn(body, 'title')) {
+    const title = String(body.title || '').trim();
+    if (!title) {
+      throw new Error('card title is required.');
+    }
+    next.title = title;
+  }
+
+  if (!partial || hasOwn(body, 'image')) {
+    const image = String(body.image || '').trim();
+    if (!image) {
+      throw new Error('card image is required.');
+    }
+    next.image = image;
+  }
+
+  if (!partial || hasOwn(body, 'category')) {
+    const category = String(body.category || '').trim();
+    if (!category) {
+      throw new Error('card category is required.');
+    }
+    next.category = category;
+  }
+
+  if (!partial || hasOwn(body, 'price')) {
+    const price = toNumber(body.price, NaN);
+    if (!Number.isFinite(price) || price < 0) {
+      throw new Error('card price must be a non-negative number.');
+    }
+    next.price = price;
+  }
+
+  if (!partial || hasOwn(body, 'location')) {
+    const location = String(body.location || '').trim();
+    if (!location) {
+      throw new Error('card location is required.');
+    }
+    next.location = location;
+  }
+
+  if (!partial || hasOwn(body, 'link')) {
+    next.link = String(body.link || '').trim();
+  }
+
+  if (!partial || hasOwn(body, 'displayOrder')) {
+    next.displayOrder = Math.max(0, Math.floor(toNumber(body.displayOrder, 0)));
+  }
+
+  return next;
+}
+
+function normalizeHomepageCardsPayload(cards = []) {
+  if (!Array.isArray(cards)) {
+    throw new Error('cards must be an array.');
+  }
+  return cards.map((item, index) => {
+    const normalized = normalizeHomepageCardPayload(item || {});
+    if (!hasOwn(item || {}, 'displayOrder')) {
+      normalized.displayOrder = index + 1;
+    }
+    return normalized;
+  });
+}
+
 function normalizeSectionPayload(body = {}, { partial = false } = {}) {
   const next = {};
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'title')) {
+  if (!partial || hasOwn(body, 'title')) {
     const title = String(body.title || '').trim();
     if (!title) {
       throw new Error('title is required.');
@@ -30,7 +142,7 @@ function normalizeSectionPayload(body = {}, { partial = false } = {}) {
     next.title = title;
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'type')) {
+  if (!partial || hasOwn(body, 'type')) {
     const type = String(body.type || 'latest').trim().toLowerCase();
     if (!HOMEPAGE_SECTION_TYPES.includes(type)) {
       throw new Error(`type must be one of: ${HOMEPAGE_SECTION_TYPES.join(', ')}`);
@@ -38,11 +150,11 @@ function normalizeSectionPayload(body = {}, { partial = false } = {}) {
     next.type = type;
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'categoryFilter')) {
+  if (!partial || hasOwn(body, 'categoryFilter')) {
     next.categoryFilter = String(body.categoryFilter || '').trim();
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'sort')) {
+  if (!partial || hasOwn(body, 'sort')) {
     const sort = String(body.sort || 'latest').trim().toLowerCase();
     if (!HOMEPAGE_SECTION_SORTS.includes(sort)) {
       throw new Error(`sort must be one of: ${HOMEPAGE_SECTION_SORTS.join(', ')}`);
@@ -50,18 +162,22 @@ function normalizeSectionPayload(body = {}, { partial = false } = {}) {
     next.sort = sort;
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'limit')) {
+  if (!partial || hasOwn(body, 'limit')) {
     const limit = Math.max(1, Math.min(40, Math.floor(toNumber(body.limit, 10))));
     next.limit = limit;
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'displayOrder')) {
+  if (!partial || hasOwn(body, 'displayOrder')) {
     const displayOrder = Math.max(0, Math.floor(toNumber(body.displayOrder, 0)));
     next.displayOrder = displayOrder;
   }
 
-  if (!partial || Object.prototype.hasOwnProperty.call(body, 'isActive')) {
+  if (!partial || hasOwn(body, 'isActive')) {
     next.isActive = Boolean(body.isActive);
+  }
+
+  if (!partial || hasOwn(body, 'cards')) {
+    next.cards = normalizeHomepageCardsPayload(body.cards || []);
   }
 
   const type = next.type || String(body.type || '').trim().toLowerCase();
@@ -131,12 +247,50 @@ function formatProductForHomepage(product) {
   };
 }
 
+function formatSectionCard(card) {
+  if (!card) return null;
+  return {
+    _id: card._id,
+    title: String(card.title || ''),
+    image: String(card.image || ''),
+    category: String(card.category || ''),
+    price: Number(card.price || 0),
+    location: String(card.location || ''),
+    link: String(card.link || ''),
+    displayOrder: Math.max(0, Number(card.displayOrder) || 0)
+  };
+}
+
+function formatSectionForResponse(section) {
+  if (!section) return null;
+  const raw = typeof section.toObject === 'function'
+    ? section.toObject()
+    : { ...section };
+
+  const cards = Array.isArray(raw.cards)
+    ? raw.cards
+        .map(formatSectionCard)
+        .filter(Boolean)
+        .sort((a, b) => {
+          const orderA = Number(a?.displayOrder) || 0;
+          const orderB = Number(b?.displayOrder) || 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return String(a?._id || '').localeCompare(String(b?._id || ''));
+        })
+    : [];
+
+  return { ...raw, cards };
+}
+
 exports.listAdminSections = async (req, res) => {
   try {
     const sections = await HomepageSection.find()
       .sort({ displayOrder: 1, createdAt: 1 })
       .lean();
-    return res.json({ success: true, sections });
+    return res.json({
+      success: true,
+      sections: sections.map(formatSectionForResponse).filter(Boolean)
+    });
   } catch (error) {
     console.error('listAdminSections error:', error);
     return res.status(500).json({ success: false, message: 'Failed to load homepage sections.' });
@@ -148,7 +302,10 @@ exports.listActiveSections = async (req, res) => {
     const sections = await HomepageSection.find({ isActive: true })
       .sort({ displayOrder: 1, createdAt: 1 })
       .lean();
-    return res.json({ success: true, sections });
+    return res.json({
+      success: true,
+      sections: sections.map(formatSectionForResponse).filter(Boolean)
+    });
   } catch (error) {
     console.error('listActiveSections error:', error);
     return res.status(500).json({ success: false, message: 'Failed to load active homepage sections.' });
@@ -159,7 +316,7 @@ exports.createSection = async (req, res) => {
   try {
     const payload = normalizeSectionPayload(req.body || {});
 
-    if (!Object.prototype.hasOwnProperty.call(req.body || {}, 'displayOrder')) {
+    if (!hasOwn(req.body || {}, 'displayOrder')) {
       const lastSection = await HomepageSection.findOne()
         .sort({ displayOrder: -1, createdAt: -1 })
         .select('displayOrder')
@@ -168,7 +325,7 @@ exports.createSection = async (req, res) => {
     }
 
     const section = await HomepageSection.create(payload);
-    return res.status(201).json({ success: true, section });
+    return res.status(201).json({ success: true, section: formatSectionForResponse(section) });
   } catch (error) {
     console.error('createSection error:', error);
     return res.status(400).json({ success: false, message: error.message || 'Failed to create section.' });
@@ -192,7 +349,7 @@ exports.updateSection = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Section not found.' });
     }
 
-    return res.json({ success: true, section });
+    return res.json({ success: true, section: formatSectionForResponse(section) });
   } catch (error) {
     console.error('updateSection error:', error);
     return res.status(400).json({ success: false, message: error.message || 'Failed to update section.' });
@@ -210,6 +367,9 @@ exports.deleteSection = async (req, res) => {
     if (!section) {
       return res.status(404).json({ success: false, message: 'Section not found.' });
     }
+
+    const cards = Array.isArray(section.cards) ? section.cards : [];
+    cards.forEach((card) => removeCardImageFile(card?.image));
 
     return res.json({ success: true, message: 'Section deleted successfully.' });
   } catch (error) {
@@ -237,7 +397,7 @@ exports.toggleSection = async (req, res) => {
     }
 
     await section.save();
-    return res.json({ success: true, section });
+    return res.json({ success: true, section: formatSectionForResponse(section) });
   } catch (error) {
     console.error('toggleSection error:', error);
     return res.status(500).json({ success: false, message: 'Failed to update section status.' });
@@ -278,7 +438,10 @@ exports.reorderSections = async (req, res) => {
       .sort({ displayOrder: 1, createdAt: 1 })
       .lean();
 
-    return res.json({ success: true, sections });
+    return res.json({
+      success: true,
+      sections: sections.map(formatSectionForResponse).filter(Boolean)
+    });
   } catch (error) {
     console.error('reorderSections error:', error);
     return res.status(500).json({ success: false, message: 'Failed to reorder sections.' });
@@ -303,7 +466,7 @@ exports.getSectionProducts = async (req, res) => {
 
     const query = buildSectionProductQuery(section);
     if (!query) {
-      return res.json({ success: true, section, products: [] });
+      return res.json({ success: true, section: formatSectionForResponse(section), products: [] });
     }
 
     const products = await Product.find(query)
@@ -317,11 +480,139 @@ exports.getSectionProducts = async (req, res) => {
 
     return res.json({
       success: true,
-      section,
+      section: formatSectionForResponse(section),
       products: products.map(formatProductForHomepage)
     });
   } catch (error) {
     console.error('getSectionProducts error:', error);
     return res.status(500).json({ success: false, message: 'Failed to load section products.' });
+  }
+};
+
+exports.createSectionCard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid section id.' });
+    }
+
+    const section = await HomepageSection.findById(id);
+    if (!section) {
+      return res.status(404).json({ success: false, message: 'Section not found.' });
+    }
+
+    const payload = normalizeHomepageCardPayload(req.body || {});
+    const uploadedImage = normalizeUploadedPath(req.file);
+    if (uploadedImage) {
+      payload.image = uploadedImage;
+    }
+
+    if (!payload.image) {
+      return res.status(400).json({ success: false, message: 'Card image is required.' });
+    }
+
+    if (!hasOwn(req.body || {}, 'displayOrder')) {
+      const maxOrder = (Array.isArray(section.cards) ? section.cards : []).reduce((max, item) => {
+        const order = Number(item?.displayOrder) || 0;
+        return order > max ? order : max;
+      }, 0);
+      payload.displayOrder = maxOrder + 1;
+    }
+
+    section.cards.push(payload);
+    await section.save();
+
+    const savedCard = section.cards[section.cards.length - 1];
+    return res.status(201).json({
+      success: true,
+      card: formatSectionCard(savedCard),
+      section: formatSectionForResponse(section)
+    });
+  } catch (error) {
+    console.error('createSectionCard error:', error);
+    return res.status(400).json({ success: false, message: error.message || 'Failed to create card.' });
+  }
+};
+
+exports.updateSectionCard = async (req, res) => {
+  try {
+    const { id, cardId } = req.params;
+    if (!isValidObjectId(id) || !isValidObjectId(cardId)) {
+      return res.status(400).json({ success: false, message: 'Invalid section/card id.' });
+    }
+
+    const section = await HomepageSection.findById(id);
+    if (!section) {
+      return res.status(404).json({ success: false, message: 'Section not found.' });
+    }
+
+    const card = section.cards.id(cardId);
+    if (!card) {
+      return res.status(404).json({ success: false, message: 'Card not found.' });
+    }
+
+    const payload = normalizeHomepageCardPayload(req.body || {}, { partial: true });
+    const uploadedImage = normalizeUploadedPath(req.file);
+    if (uploadedImage) {
+      payload.image = uploadedImage;
+    }
+
+    const keys = Object.keys(payload);
+    if (!keys.length) {
+      return res.status(400).json({ success: false, message: 'No card fields to update.' });
+    }
+
+    const previousImage = String(card.image || '').trim();
+    keys.forEach((key) => {
+      card[key] = payload[key];
+    });
+
+    await section.save();
+
+    if (payload.image && previousImage && previousImage !== payload.image) {
+      removeCardImageFile(previousImage);
+    }
+
+    return res.json({
+      success: true,
+      card: formatSectionCard(card),
+      section: formatSectionForResponse(section)
+    });
+  } catch (error) {
+    console.error('updateSectionCard error:', error);
+    return res.status(400).json({ success: false, message: error.message || 'Failed to update card.' });
+  }
+};
+
+exports.deleteSectionCard = async (req, res) => {
+  try {
+    const { id, cardId } = req.params;
+    if (!isValidObjectId(id) || !isValidObjectId(cardId)) {
+      return res.status(400).json({ success: false, message: 'Invalid section/card id.' });
+    }
+
+    const section = await HomepageSection.findById(id);
+    if (!section) {
+      return res.status(404).json({ success: false, message: 'Section not found.' });
+    }
+
+    const card = section.cards.id(cardId);
+    if (!card) {
+      return res.status(404).json({ success: false, message: 'Card not found.' });
+    }
+
+    const imageToDelete = String(card.image || '').trim();
+    card.deleteOne();
+    await section.save();
+    removeCardImageFile(imageToDelete);
+
+    return res.json({
+      success: true,
+      message: 'Card deleted successfully.',
+      section: formatSectionForResponse(section)
+    });
+  } catch (error) {
+    console.error('deleteSectionCard error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete card.' });
   }
 };
