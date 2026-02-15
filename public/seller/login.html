@@ -194,12 +194,96 @@
     .hamburger-btn span:not(:last-child) {
       margin-bottom: 4px;
     }
+    .seller-login-main {
+      max-width: 44rem;
+      margin-top: 1.2rem;
+      padding: 0.75rem;
+      min-height: calc(100vh - 4.5rem);
+    }
+    .seller-login-card {
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 1.6rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(14, 165, 233, 0.12);
+      padding: 2rem;
+    }
+    .seller-login-title {
+      color: #0f766e;
+      font-size: clamp(1.65rem, 2.6vw, 2.15rem);
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+    }
+    .seller-field-label {
+      color: #1e293b;
+      margin-bottom: 0.45rem;
+      display: inline-block;
+    }
+    .seller-input,
+    .seller-password-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.95rem;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+      color: #0f172a;
+      font-size: 0.98rem;
+      min-height: 3.2rem;
+    }
+    .seller-input::placeholder,
+    .seller-password-input::placeholder {
+      color: #94a3b8;
+    }
+    .seller-input:focus,
+    .seller-password-input:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.13);
+      outline: none;
+      background: #fff;
+    }
+    .seller-toggle-password {
+      color: #64748b;
+      transition: color .2s ease;
+    }
+    .seller-toggle-password:hover { color: #0ea5e9; }
+    .seller-submit-btn {
+      border-radius: 0.95rem;
+      min-height: 3.25rem;
+      font-size: 1.12rem;
+      letter-spacing: 0.02em;
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.2);
+    }
+    .seller-submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(14, 165, 233, 0.22);
+    }
+    .seller-login-meta {
+      padding-top: 0.2rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.55);
+      margin-top: 0.1rem;
+    }
+    .seller-signup-box {
+      margin-top: 1.1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(203, 213, 225, 0.65);
+    }
     @media (max-width: 640px) {
       .glass {padding: 1.1rem .6rem !important;}
       .header-logo {font-size: 1.4rem;}
       .header-nav {max-height:0; padding-top:0; padding-bottom:0; overflow:hidden;}
       #nav-toggle:checked + .header-nav {max-height:12rem; padding-top:.5rem; padding-bottom:.5rem;}
       .modal-content {padding: 1.3rem .5rem 1rem .5rem;}
+      .seller-login-main {
+        margin-top: 0.5rem;
+        padding: 0.55rem;
+        min-height: calc(100vh - 4.2rem);
+      }
+      .seller-login-card {
+        padding: 1.1rem 0.9rem;
+        border-radius: 1.2rem;
+      }
+      .seller-submit-btn {
+        min-height: 3rem;
+        font-size: 1rem;
+      }
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -261,25 +345,25 @@
   </header>
 
   <!-- فرم ورود -->
-  <main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:36px;">
-    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10 w-full fadein" id="login-section">
+  <main class="seller-login-main mx-auto w-full flex flex-col justify-center items-center">
+    <section class="glass seller-login-card w-full fadein" id="login-section">
       <a href="../index.html" class="header-logo">ویترینت</a>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-[#10b981] mb-7 text-center">ورود به حساب فروشنده</h2>
+      <h2 class="seller-login-title font-extrabold text-center">ورود به حساب فروشنده</h2>
       <form id="login-form" class="space-y-6" autocomplete="on" novalidate>
         <div>
-          <label class="block text-sm font-bold mb-1" for="phone">شماره موبایل <span class="text-red-500">*</span></label>
+          <label class="seller-field-label text-sm font-bold" for="phone">شماره موبایل <span class="text-red-500">*</span></label>
           <input type="text" id="phone" maxlength="11" inputmode="numeric"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
+            class="seller-input p-3 text-left ltr"
             placeholder="09121234567" required />
         </div>
         <div>
-          <label class="block text-sm font-bold mb-1" for="password">رمز عبور <span class="text-red-500">*</span></label>
+          <label class="seller-field-label text-sm font-bold" for="password">رمز عبور <span class="text-red-500">*</span></label>
           <div class="relative">
             <input type="password" id="password"
-              class="w-full p-3 pl-10 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
+              class="seller-password-input p-3 pl-10"
               placeholder="رمز عبور" required autocomplete="current-password" />
             <button type="button" id="toggle-password"
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+              class="seller-toggle-password absolute left-3 top-1/2 -translate-y-1/2 focus:outline-none">
               <svg id="eye-open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -292,8 +376,8 @@
             </button>
           </div>
         </div>
-        <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">ورود</button>
-        <div class="flex flex-row-reverse justify-between items-center mt-2">
+        <button type="submit" class="seller-submit-btn w-full brand-btn text-white py-3 font-bold transition mt-2">ورود</button>
+        <div class="seller-login-meta flex flex-row-reverse justify-between items-center mt-2">
           <button type="button" id="forgot-btn" class="flex items-center gap-1 text-xs text-[#0ea5e9] underline hover:text-[#10b981] font-bold transition">
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m0 4a9 9 0 1 0-9-9m9 13a4 4 0 0 1-4-4h8a4 4 0 0 1-4 4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             فراموشی رمز عبور؟
@@ -302,7 +386,7 @@
         </div>
         <div id="error-message" class="text-red-500 text-center text-sm mt-1 min-h-[22px]"></div>
       </form>
-      <div class="text-center text-sm mt-3">
+      <div class="seller-signup-box text-center text-sm mt-3">
         <span>فروشنده جدید هستید؟ </span>
         <a href="../post.html" class="text-[#0ea5e9] underline hover:text-[#10b981] font-bold">ساخت حساب فروشندگی</a>
       </div>
