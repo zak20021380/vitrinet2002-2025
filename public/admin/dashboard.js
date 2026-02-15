@@ -992,7 +992,7 @@ function resetHomepageCardForm(sectionId) {
   const idInput = form.querySelector('[data-field="card-id"]');
   if (idInput) idInput.value = '';
   const hintEl = form.querySelector('[data-role="card-image-hint"]');
-  if (hintEl) hintEl.textContent = 'برای کارت جدید تصویر الزامی است.';
+  if (hintEl) hintEl.textContent = 'تصویر اختیاری است — در صورت عدم انتخاب، تصویر پیش‌فرض استفاده می‌شود.';
   setHomepageCardFormMode(form, false);
   setHomepageCardFormMessage(form, '');
 }
@@ -1056,10 +1056,7 @@ async function saveHomepageCardFromForm(form) {
     setHomepageCardFormMessage(form, 'قیمت کارت باید عدد معتبر باشد.', 'error');
     return;
   }
-  if (!cardId && !imageFile) {
-    setHomepageCardFormMessage(form, 'برای کارت جدید باید تصویر آپلود شود.', 'error');
-    return;
-  }
+  // Image is optional — server uses a default placeholder if not provided
 
   const formData = new FormData();
   formData.set('title', title);
@@ -1242,7 +1239,7 @@ function renderHomepageSections() {
             <div>
               <label>تصویر کارت *</label>
               <input type="file" data-field="image" accept="image/*" />
-              <small data-role="card-image-hint">برای کارت جدید تصویر الزامی است.</small>
+              <small data-role="card-image-hint">تصویر اختیاری است — در صورت عدم انتخاب، تصویر پیش‌فرض استفاده می‌شود.</small>
             </div>
           </div>
           <div class="homepage-card-form__actions">

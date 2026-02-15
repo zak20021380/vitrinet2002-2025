@@ -10,6 +10,7 @@ const {
 
 const BACKEND_ROOT = path.join(__dirname, '..');
 const HOMEPAGE_CARD_UPLOAD_PREFIX = '/uploads/homepage-cards/';
+const DEFAULT_CARD_IMAGE = '/uploads/homepage-cards/placeholder.svg';
 
 function isValidObjectId(value) {
   return mongoose.Types.ObjectId.isValid(value);
@@ -46,6 +47,7 @@ function isHomepageCardUploadPath(imagePath) {
 function removeCardImageFile(imagePath) {
   const value = String(imagePath || '').trim();
   if (!isHomepageCardUploadPath(value)) return;
+  if (value === DEFAULT_CARD_IMAGE) return;
 
   const filePath = path.join(BACKEND_ROOT, value.replace(/^\//, ''));
   try {
@@ -77,10 +79,7 @@ function normalizeHomepageCardPayload(body = {}, { partial = false } = {}) {
 
   if (!partial || hasOwn(body, 'image')) {
     const image = String(body.image || '').trim();
-    if (!image) {
-      throw new Error('card image is required.');
-    }
-    next.image = image;
+    next.image = image || DEFAULT_CARD_IMAGE;
   }
 
   if (!partial || hasOwn(body, 'category')) {
@@ -508,7 +507,7 @@ exports.createSectionCard = async (req, res) => {
     }
 
     if (!payload.image) {
-      return res.status(400).json({ success: false, message: 'Card image is required.' });
+      payload.image = DEFAULT_CARD_IMAGE;
     }
 
     if (!hasOwn(req.body || {}, 'displayOrder')) {
