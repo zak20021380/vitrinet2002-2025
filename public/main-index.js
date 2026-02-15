@@ -2196,6 +2196,223 @@ async function loadPopularProducts() {
 // بارگذاری محصولات هنگام آماده‌شدن صفحه
 window.addEventListener('DOMContentLoaded', loadPopularProducts);
 
+const HOMEPAGE_SECTIONS_API_BASE = `${SEARCH_API_BASE}/homepage-sections`;
+
+function getManagedProductPriceText(product) {
+  const hasDiscount = Boolean(product?.discountActive) && Number(product?.discountPrice) > 0;
+  const finalPrice = hasDiscount ? Number(product.discountPrice) : Number(product?.price);
+  if (!Number.isFinite(finalPrice)) return '';
+  return `${finalPrice.toLocaleString('fa-IR')} تومان`;
+}
+
+function buildManagedProductCard(product) {
+  const title = product?.title || 'محصول';
+  const category = product?.category || 'دسته‌بندی نشده';
+  const image = resolveImagePath(product?.image || product?.images?.[0], 'assets/images/shop-placeholder.svg');
+  const location = product?.sellerLocation || '—';
+  const shopName = product?.shopName || 'فروشگاه';
+  const priceText = getManagedProductPriceText(product);
+  const productId = product?._id ? String(product._id) : '';
+
+  const card = document.createElement('a');
+  card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
+  card.className = `
+    group glass popular-product-card min-w-[245px] max-w-[280px] flex-shrink-0 flex flex-col
+    p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
+    hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
+  `;
+  card.dataset.productId = productId;
+  card.dataset.productName = title;
+  card.dataset.productCategory = category;
+  if (Number.isFinite(Number(product?.price))) {
+    card.dataset.productPrice = String(Number(product.price));
+  }
+  if (product?.sellerId) {
+    card.dataset.sellerId = String(product.sellerId);
+  }
+  if (shopName) {
+    card.dataset.shopName = shopName;
+  }
+
+  card.innerHTML = `
+    <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
+      <img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" loading="lazy" onerror="this.src='assets/images/shop-placeholder.svg'"/>
+      <span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">
+        ${escapeHTML(category)}
+      </span>
+    </div>
+    <div class="popular-card-body flex flex-col gap-3 w-full text-center">
+      <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
+        ${escapeHTML(title)}
+      </h4>
+      <p class="text-sm text-slate-500 truncate">${escapeHTML(shopName)}</p>
+      <div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
+        <span class="truncate">${escapeHTML(location)}</span>
+      </div>
+      ${priceText ? `
+      <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
+        ${escapeHTML(priceText)}
+      </div>` : ''}
+    </div>
+    <div class="popular-card-footer w-full">
+      <span class="card-action-btn w-full justify-center">
+        مشاهده
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </span>
+    </div>
+  `;
+
+  return card;
+}
+
+function bindManagedRowNavigation(rowEl) {
+  const slider = rowEl.querySelector('.homepage-managed-row__slider');
+  const prevBtn = rowEl.querySelector('.homepage-managed-row__nav.is-prev');
+  const nextBtn = rowEl.querySelector('.homepage-managed-row__nav.is-next');
+  if (!slider || !prevBtn || !nextBtn) return;
+
+  const updateButtons = () => {
+    const maxScroll = Math.max(0, slider.scrollWidth - slider.clientWidth);
+    const atStart = slider.scrollLeft <= 4;
+    const atEnd = slider.scrollLeft >= maxScroll - 4;
+    const hasOverflow = maxScroll > 8;
+
+    prevBtn.disabled = !hasOverflow || atStart;
+    nextBtn.disabled = !hasOverflow || atEnd;
+    prevBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
+    nextBtn.style.display = hasOverflow ? 'inline-flex' : 'none';
+  };
+
+  const scrollAmount = () => {
+    const first = slider.querySelector(':scope > *');
+    if (!first) return slider.clientWidth || 280;
+    return Math.max(first.getBoundingClientRect().width + 16, 220);
+  };
+
+  prevBtn.addEventListener('click', () => {
+    slider.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+  });
+  nextBtn.addEventListener('click', () => {
+    slider.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+  });
+
+  slider.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+  updateButtons();
+}
+
+async function fetchActiveHomepageSections() {
+  const res = await fetch(`${HOMEPAGE_SECTIONS_API_BASE}/public`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch homepage sections: ${res.status}`);
+  }
+  const payload = await res.json().catch(() => ({}));
+  return Array.isArray(payload?.sections) ? payload.sections : [];
+}
+
+async function fetchHomepageSectionProducts(sectionId) {
+  const res = await fetch(`${HOMEPAGE_SECTIONS_API_BASE}/${encodeURIComponent(sectionId)}/products`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch section products: ${res.status}`);
+  }
+  const payload = await res.json().catch(() => ({}));
+  return Array.isArray(payload?.products) ? payload.products : [];
+}
+
+function createManagedHomepageRow(section) {
+  const row = document.createElement('section');
+  row.className = 'homepage-managed-row';
+
+  const rowTitle = escapeHTML(String(section?.title || 'محصولات'));
+  const rowSubtitleParts = [];
+  if (section?.categoryFilter) {
+    rowSubtitleParts.push(`دسته: ${String(section.categoryFilter).trim()}`);
+  }
+  rowSubtitleParts.push(`تعداد: ${Number(section?.limit) || 10}`);
+  const rowSubtitle = rowSubtitleParts.join(' • ');
+
+  row.innerHTML = `
+    <div class="homepage-managed-row__header">
+      <div>
+        <h3 class="homepage-managed-row__title"><span>${rowTitle}</span></h3>
+        <p class="homepage-managed-row__subtitle">${escapeHTML(rowSubtitle)}</p>
+      </div>
+      <a class="homepage-managed-row__cta" href="all-products.html">مشاهده همه</a>
+    </div>
+    <div class="homepage-managed-row__body">
+      <button type="button" class="homepage-managed-row__nav is-prev" aria-label="نمایش مورد بعدی">
+        <i class="ri-arrow-right-s-line text-xl"></i>
+      </button>
+      <div class="homepage-managed-row__slider hide-scrollbar"></div>
+      <button type="button" class="homepage-managed-row__nav is-next" aria-label="نمایش مورد قبلی">
+        <i class="ri-arrow-left-s-line text-xl"></i>
+      </button>
+    </div>
+  `;
+
+  return row;
+}
+
+async function loadHomepageManagedSections() {
+  const wrapper = document.getElementById('homepage-managed-sections-wrapper');
+  const container = document.getElementById('homepage-managed-sections-list');
+  if (!wrapper || !container) return;
+
+  wrapper.classList.add('hidden');
+  container.innerHTML = '';
+
+  let sections = [];
+  try {
+    sections = await fetchActiveHomepageSections();
+  } catch (error) {
+    console.warn('loadHomepageManagedSections -> sections fetch failed', error);
+    return;
+  }
+
+  if (!sections.length) {
+    return;
+  }
+
+  const sortedSections = [...sections].sort((a, b) => {
+    const orderA = Number(a?.displayOrder) || 0;
+    const orderB = Number(b?.displayOrder) || 0;
+    return orderA - orderB;
+  });
+
+  const rows = await Promise.all(sortedSections.map(async (section) => {
+    const row = createManagedHomepageRow(section);
+    const slider = row.querySelector('.homepage-managed-row__slider');
+    if (!slider) return row;
+
+    slider.innerHTML = '<div class="homepage-managed-row__state">در حال بارگذاری...</div>';
+
+    try {
+      const products = await fetchHomepageSectionProducts(section._id || section.id);
+      if (!products.length) {
+        slider.innerHTML = '<div class="homepage-managed-row__state">محصولی برای این ردیف پیدا نشد.</div>';
+        return row;
+      }
+
+      slider.innerHTML = '';
+      products.forEach((product) => {
+        slider.appendChild(buildManagedProductCard(product));
+      });
+      bindManagedRowNavigation(row);
+    } catch (error) {
+      console.warn('loadHomepageManagedSections -> products fetch failed', error);
+      slider.innerHTML = '<div class="homepage-managed-row__state">خطا در دریافت محصولات این ردیف.</div>';
+    }
+    return row;
+  }));
+
+  rows.forEach((row) => container.appendChild(row));
+  wrapper.classList.remove('hidden');
+}
+
+window.addEventListener('DOMContentLoaded', loadHomepageManagedSections);
+
 // اسکرول روان و drag برای مغازه‌های بانتا
 const bantaSlider = document.getElementById('banta-shops-section');
 let bantaDown = false, bantaStartX, bantaScrollLeft, bantaLastX, bantaVelocity = 0, bantaMomentumID;

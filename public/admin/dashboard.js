@@ -435,6 +435,454 @@ window.deleteShoppingCenter = async function(id) {
   }
 };
 
+function normalizeHomepageSection(section = {}) {
+  if (!section || typeof section !== 'object') return null;
+  const id = toIdString(section._id || section.id);
+  if (!id) return null;
+
+  return {
+    ...section,
+    _id: id,
+    title: String(section.title || '').trim(),
+    type: String(section.type || 'latest').trim().toLowerCase(),
+    categoryFilter: String(section.categoryFilter || '').trim(),
+    sort: String(section.sort || 'latest').trim().toLowerCase(),
+    limit: Math.max(1, Math.min(40, Number(section.limit) || 10)),
+    displayOrder: Math.max(0, Number(section.displayOrder) || 0),
+    isActive: Boolean(section.isActive)
+  };
+}
+
+function sortHomepageSections(list = []) {
+  return [...list].sort((a, b) => {
+    const orderA = Number.isFinite(a?.displayOrder) ? a.displayOrder : 0;
+    const orderB = Number.isFinite(b?.displayOrder) ? b.displayOrder : 0;
+    if (orderA !== orderB) return orderA - orderB;
+    const dateA = new Date(a?.createdAt || 0).getTime();
+    const dateB = new Date(b?.createdAt || 0).getTime();
+    return dateA - dateB;
+  });
+}
+
+function getHomepageTypeLabel(type) {
+  const labels = {
+    latest: 'جدیدترین',
+    category: 'دسته‌بندی',
+    popular: 'محبوب‌ترین',
+    discounted: 'تخفیف‌دار'
+  };
+  return labels[type] || type || 'نامشخص';
+}
+
+function getHomepageSortLabel(sort) {
+  const labels = {
+    latest: 'جدیدترین',
+    oldest: 'قدیمی‌ترین',
+    'most-liked': 'بیشترین پسند',
+    'price-desc': 'گران‌ترین',
+    'price-asc': 'ارزان‌ترین'
+  };
+  return labels[sort] || sort || 'نامشخص';
+}
+
+function setHomepageSectionFormMessage(message, type = 'info') {
+  const box = document.getElementById('homepageSectionFormMessage');
+  if (!box) return;
+
+  if (!message) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+
+  const palette = {
+    success: { bg: '#dcfce7', color: '#166534' },
+    error: { bg: '#fee2e2', color: '#b91c1c' },
+    info: { bg: '#e0f2fe', color: '#0369a1' }
+  };
+  const style = palette[type] || palette.info;
+  box.style.display = 'block';
+  box.style.background = style.bg;
+  box.style.color = style.color;
+  box.textContent = message;
+}
+
+function resetHomepageSectionForm() {
+  const form = document.getElementById('homepageSectionForm');
+  if (!form) return;
+  form.reset();
+  const idInput = document.getElementById('homepageSectionId');
+  const submitBtn = document.getElementById('homepageSectionSubmitBtn');
+  if (idInput) idInput.value = '';
+  homepageSectionEditingId = null;
+  if (submitBtn) {
+    submitBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره ردیف';
+  }
+  setHomepageSectionFormMessage('');
+}
+
+function fillHomepageSectionForm(section) {
+  if (!section) return;
+  const idInput = document.getElementById('homepageSectionId');
+  const titleInput = document.getElementById('homepageSectionTitle');
+  const typeInput = document.getElementById('homepageSectionType');
+  const sortInput = document.getElementById('homepageSectionSort');
+  const categoryInput = document.getElementById('homepageSectionCategory');
+  const limitInput = document.getElementById('homepageSectionLimit');
+  const orderInput = document.getElementById('homepageSectionOrder');
+  const activeInput = document.getElementById('homepageSectionIsActive');
+  const submitBtn = document.getElementById('homepageSectionSubmitBtn');
+
+  homepageSectionEditingId = section._id;
+  if (idInput) idInput.value = section._id;
+  if (titleInput) titleInput.value = section.title || '';
+  if (typeInput) typeInput.value = section.type || 'latest';
+  if (sortInput) sortInput.value = section.sort || 'latest';
+  if (categoryInput) categoryInput.value = section.categoryFilter || '';
+  if (limitInput) limitInput.value = section.limit || 10;
+  if (orderInput) orderInput.value = section.displayOrder || 0;
+  if (activeInput) activeInput.checked = Boolean(section.isActive);
+  if (submitBtn) {
+    submitBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره ویرایش';
+  }
+  setHomepageSectionFormMessage('در حال ویرایش ردیف انتخاب‌شده.', 'info');
+}
+
+function renderHomepageSectionCategories() {
+  const datalist = document.getElementById('homepageSectionCategories');
+  if (!datalist) return;
+
+  const names = new Set();
+  (Array.isArray(productsList) ? productsList : []).forEach((product) => {
+    const category = String(product?.category || '').trim();
+    if (category) names.add(category);
+  });
+  (Array.isArray(categoryManagerState?.categories) ? categoryManagerState.categories : []).forEach((item) => {
+    const category = String(getCategoryName(item) || '').trim();
+    if (category) names.add(category);
+  });
+
+  const options = [...names].sort((a, b) => a.localeCompare(b, 'fa-IR', { sensitivity: 'base' }));
+  datalist.innerHTML = options.map((name) => `<option value="${escapeHtml(name)}"></option>`).join('');
+}
+
+function renderHomepageSections() {
+  const listEl = document.getElementById('homepageSectionsList');
+  const emptyEl = document.getElementById('homepageSectionsEmpty');
+  if (!listEl || !emptyEl) return;
+
+  listEl.innerHTML = '';
+
+  if (!homepageSectionsList.length) {
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  homepageSectionsList.forEach((section, index) => {
+    const item = document.createElement('article');
+    item.className = 'homepage-section-item';
+    item.innerHTML = `
+      <div class="homepage-section-item__head">
+        <div class="homepage-section-item__title">${escapeHtml(section.title || 'بدون عنوان')}</div>
+        <span class="homepage-section-item__status ${section.isActive ? 'active' : 'inactive'}">
+          ${section.isActive ? 'فعال' : 'غیرفعال'}
+        </span>
+      </div>
+      <div class="homepage-section-item__meta">
+        <span>نوع: ${escapeHtml(getHomepageTypeLabel(section.type))}</span>
+        <span>مرتب‌سازی: ${escapeHtml(getHomepageSortLabel(section.sort))}</span>
+        <span>تعداد: ${formatNumber(section.limit)}</span>
+        <span>ترتیب: ${formatNumber(section.displayOrder)}</span>
+        ${section.categoryFilter ? `<span>دسته: ${escapeHtml(section.categoryFilter)}</span>` : ''}
+      </div>
+      <div class="homepage-section-item__actions">
+        <button type="button" data-action="edit" data-id="${section._id}"><i class="ri-edit-line"></i> ویرایش</button>
+        <button type="button" data-action="toggle" data-id="${section._id}">
+          <i class="${section.isActive ? 'ri-eye-off-line' : 'ri-eye-line'}"></i>
+          ${section.isActive ? 'مخفی' : 'نمایش'}
+        </button>
+        <button type="button" data-action="move-up" data-id="${section._id}" ${index === 0 ? 'disabled' : ''}>
+          <i class="ri-arrow-up-line"></i> بالا
+        </button>
+        <button type="button" data-action="move-down" data-id="${section._id}" ${index === homepageSectionsList.length - 1 ? 'disabled' : ''}>
+          <i class="ri-arrow-down-line"></i> پایین
+        </button>
+        <button type="button" class="danger" data-action="delete" data-id="${section._id}">
+          <i class="ri-delete-bin-line"></i> حذف
+        </button>
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+async function fetchHomepageSectionsAdmin() {
+  const res = await fetch(`${ADMIN_API_BASE}/homepage-sections/admin`, {
+    credentials: 'include'
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload?.message || 'خطا در دریافت تنظیمات صفحه اصلی');
+  }
+  const sections = Array.isArray(payload?.sections) ? payload.sections : [];
+  return sortHomepageSections(sections.map(normalizeHomepageSection).filter(Boolean));
+}
+
+async function ensureHomepageSectionsLoaded(force = false) {
+  if (force) {
+    homepageSectionsLoaded = false;
+    homepageSectionsLoadingPromise = null;
+  }
+
+  if (homepageSectionsLoaded && !force) {
+    renderHomepageSections();
+    renderHomepageSectionCategories();
+    return homepageSectionsList;
+  }
+
+  if (!homepageSectionsLoadingPromise) {
+    homepageSectionsLoadingPromise = (async () => {
+      const sections = await fetchHomepageSectionsAdmin();
+      homepageSectionsList = sections;
+      homepageSectionsLoaded = true;
+      renderHomepageSections();
+      renderHomepageSectionCategories();
+      updateSidebarCounts();
+      updateHeaderCounts();
+      return sections;
+    })().finally(() => {
+      homepageSectionsLoadingPromise = null;
+    });
+  }
+
+  return homepageSectionsLoadingPromise;
+}
+
+async function saveHomepageSectionFromForm(event) {
+  event.preventDefault();
+  const id = homepageSectionEditingId || String(document.getElementById('homepageSectionId')?.value || '').trim();
+  const title = String(document.getElementById('homepageSectionTitle')?.value || '').trim();
+  const type = String(document.getElementById('homepageSectionType')?.value || 'latest').trim();
+  const sort = String(document.getElementById('homepageSectionSort')?.value || 'latest').trim();
+  const categoryFilter = String(document.getElementById('homepageSectionCategory')?.value || '').trim();
+  const limit = Math.max(1, Math.min(40, Number(document.getElementById('homepageSectionLimit')?.value) || 10));
+  const displayOrder = Math.max(0, Number(document.getElementById('homepageSectionOrder')?.value) || 0);
+  const isActive = Boolean(document.getElementById('homepageSectionIsActive')?.checked);
+
+  if (!title) {
+    setHomepageSectionFormMessage('عنوان ردیف الزامی است.', 'error');
+    return;
+  }
+  if (type === 'category' && !categoryFilter) {
+    setHomepageSectionFormMessage('برای نوع دسته‌بندی، فیلتر دسته را وارد کنید.', 'error');
+    return;
+  }
+
+  const payload = { title, type, categoryFilter, sort, limit, displayOrder, isActive };
+  const url = id
+    ? `${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(id)}`
+    : `${ADMIN_API_BASE}/homepage-sections/admin`;
+  const method = id ? 'PUT' : 'POST';
+
+  setHomepageSectionFormMessage('در حال ذخیره...', 'info');
+  try {
+    const res = await fetch(url, {
+      method,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'ذخیره انجام نشد.');
+    }
+
+    await ensureHomepageSectionsLoaded(true);
+    resetHomepageSectionForm();
+    setHomepageSectionFormMessage(id ? 'ردیف با موفقیت ویرایش شد.' : 'ردیف جدید ذخیره شد.', 'success');
+  } catch (error) {
+    console.error('saveHomepageSectionFromForm error:', error);
+    setHomepageSectionFormMessage(error.message || 'خطا در ذخیره تنظیمات.', 'error');
+  }
+}
+
+async function toggleHomepageSection(id) {
+  const target = homepageSectionsList.find((item) => item._id === id);
+  if (!target) return;
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(id)}/toggle`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive: !target.isActive })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'تغییر وضعیت انجام نشد.');
+    }
+    await ensureHomepageSectionsLoaded(true);
+  } catch (error) {
+    console.error('toggleHomepageSection error:', error);
+    alert(`خطا: ${error.message}`);
+  }
+}
+
+async function deleteHomepageSection(id) {
+  if (!confirm('این ردیف از صفحه اصلی حذف شود؟')) return;
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data?.message || 'حذف انجام نشد.');
+    }
+    if (homepageSectionEditingId === id) {
+      resetHomepageSectionForm();
+    }
+    await ensureHomepageSectionsLoaded(true);
+  } catch (error) {
+    console.error('deleteHomepageSection error:', error);
+    alert(`خطا: ${error.message}`);
+  }
+}
+
+async function persistHomepageSectionReorder(ordered) {
+  const sections = ordered.map((item, index) => ({
+    id: item._id,
+    displayOrder: index + 1
+  }));
+
+  const res = await fetch(`${ADMIN_API_BASE}/homepage-sections/admin/reorder`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sections })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.message || 'ذخیره ترتیب انجام نشد.');
+  }
+  const nextList = Array.isArray(data?.sections) ? data.sections : [];
+  homepageSectionsList = sortHomepageSections(nextList.map(normalizeHomepageSection).filter(Boolean));
+  renderHomepageSections();
+  updateSidebarCounts();
+  updateHeaderCounts();
+}
+
+async function moveHomepageSection(id, direction) {
+  const idx = homepageSectionsList.findIndex((item) => item._id === id);
+  if (idx < 0) return;
+  const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= homepageSectionsList.length) return;
+
+  const reordered = [...homepageSectionsList];
+  const [moved] = reordered.splice(idx, 1);
+  reordered.splice(targetIdx, 0, moved);
+
+  try {
+    await persistHomepageSectionReorder(reordered);
+  } catch (error) {
+    console.error('moveHomepageSection error:', error);
+    alert(`خطا: ${error.message}`);
+  }
+}
+
+function bindHomepageSectionManager() {
+  const form = document.getElementById('homepageSectionForm');
+  const resetBtn = document.getElementById('homepageSectionResetBtn');
+  const refreshBtn = document.getElementById('homepageSectionsRefresh');
+  const listEl = document.getElementById('homepageSectionsList');
+  const typeInput = document.getElementById('homepageSectionType');
+  const categoryInput = document.getElementById('homepageSectionCategory');
+  const sortInput = document.getElementById('homepageSectionSort');
+
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', saveHomepageSectionFromForm);
+  }
+
+  if (resetBtn && !resetBtn.dataset.bound) {
+    resetBtn.dataset.bound = 'true';
+    resetBtn.addEventListener('click', () => {
+      resetHomepageSectionForm();
+    });
+  }
+
+  if (refreshBtn && !refreshBtn.dataset.bound) {
+    refreshBtn.dataset.bound = 'true';
+    refreshBtn.addEventListener('click', async () => {
+      const original = refreshBtn.innerHTML;
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> در حال بروزرسانی';
+      try {
+        await ensureHomepageSectionsLoaded(true);
+      } catch (error) {
+        alert(`خطا: ${error.message}`);
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = original;
+      }
+    });
+  }
+
+  if (typeInput && categoryInput && !typeInput.dataset.bound) {
+    typeInput.dataset.bound = 'true';
+    const syncCategoryRequiredState = () => {
+      const mustHaveCategory = typeInput.value === 'category';
+      categoryInput.required = mustHaveCategory;
+      categoryInput.placeholder = mustHaveCategory
+        ? 'برای نوع دسته‌بندی الزامی است'
+        : 'اختیاری - مثلاً پوشاک';
+
+      if (sortInput) {
+        if (typeInput.value === 'popular' && sortInput.value === 'latest') {
+          sortInput.value = 'most-liked';
+        }
+        if (typeInput.value === 'latest' && sortInput.value === 'most-liked') {
+          sortInput.value = 'latest';
+        }
+      }
+    };
+    syncCategoryRequiredState();
+    typeInput.addEventListener('change', syncCategoryRequiredState);
+  }
+
+  if (listEl && !listEl.dataset.bound) {
+    listEl.dataset.bound = 'true';
+    listEl.addEventListener('click', (event) => {
+      const actionBtn = event.target.closest('button[data-action]');
+      if (!actionBtn) return;
+      const id = String(actionBtn.dataset.id || '').trim();
+      const action = actionBtn.dataset.action;
+      if (!id) return;
+
+      if (action === 'edit') {
+        const section = homepageSectionsList.find((item) => item._id === id);
+        if (section) fillHomepageSectionForm(section);
+        return;
+      }
+      if (action === 'toggle') {
+        toggleHomepageSection(id);
+        return;
+      }
+      if (action === 'delete') {
+        deleteHomepageSection(id);
+        return;
+      }
+      if (action === 'move-up') {
+        moveHomepageSection(id, 'up');
+        return;
+      }
+      if (action === 'move-down') {
+        moveHomepageSection(id, 'down');
+      }
+    });
+  }
+}
+
 function escapeHtml(value) {
   if (value === null || value === undefined) return '';
   return String(value)
@@ -1369,6 +1817,10 @@ let shoppingCentersList = [];
 let shoppingCentersLoaded = false;
 let shoppingCentersLoadingPromise = null;
 let shoppingCenterFormMessageTimer = null;
+let homepageSectionsList = [];
+let homepageSectionsLoaded = false;
+let homepageSectionsLoadingPromise = null;
+let homepageSectionEditingId = null;
 let productsSortMode = 'newest';  // حالت پیش‌فرض مرتب‌سازی
 let productSearchQuery = '';      // کوئری جستجو (برای فیلتر)
 
@@ -5132,6 +5584,10 @@ function updateSidebarCounts() {
   }
   const centersCountEl = document.getElementById('count-shopping-centers');
   if (centersCountEl) centersCountEl.textContent = formatNumber(shoppingCentersList.length);
+  const homepageSectionsCountEl = document.getElementById('count-homepage-sections');
+  if (homepageSectionsCountEl) homepageSectionsCountEl.textContent = homepageSectionsList.length > 0
+    ? formatNumber(homepageSectionsList.length)
+    : '';
 
   const ticketCountEl = document.getElementById('count-tickets');
   if (ticketCountEl) {
@@ -5160,6 +5616,10 @@ function updateHeaderCounts() {
   }
   const centersHeaderEl = document.getElementById('header-shopping-centers-count');
   if (centersHeaderEl) centersHeaderEl.textContent = `(${formatNumber(shoppingCentersList.length)} مرکز خرید)`;
+  const homepageSectionsHeaderEl = document.getElementById('header-homepage-sections-count');
+  if (homepageSectionsHeaderEl) {
+    homepageSectionsHeaderEl.textContent = `(${formatNumber(homepageSectionsList.length)} ردیف)`;
+  }
 
   const unread = getTotalUnreadMessages();
   // اگر صفر بود خالی بنویس
@@ -7621,6 +8081,7 @@ const panels = {
   'service-plan-management': document.getElementById('service-plan-management-panel'),
   categories: document.getElementById('categories-panel'),
   products:  document.getElementById('products-panel'),
+  'homepage-manager': document.getElementById('homepage-manager-panel'),
   'shopping-centers': document.getElementById('shopping-centers-panel'),
   plans:     document.getElementById('plans-panel'),
   ads:       document.getElementById('ads-panel'),
@@ -7664,6 +8125,12 @@ menuLinks.forEach(link => {
 
     if (section === 'shopping-centers') {
       await ensureShoppingCentersLoaded();
+    }
+
+    if (section === 'homepage-manager') {
+      bindHomepageSectionManager();
+      renderHomepageSectionCategories();
+      await ensureHomepageSectionsLoaded();
     }
 
     if (section === 'service-plan-management') {
@@ -7971,18 +8438,24 @@ if (shoppingCentersRefreshBtn) {
   });
 }
 
+bindHomepageSectionManager();
+
 // -------- لود اولیه دیتا و بروزرسانی --------
 // نسخهٔ اصلاح‌شده‌ی updateAll — فقط همین تابع را جایگزین کن
 async function updateAll() {
   try {
     // ۱) واکشی هم‌زمان داده‌ها و آمار داشبورد
-    const [users, shops, products, centers, stats, tickets] = await Promise.all([
+    const [users, shops, products, centers, stats, tickets, homepageSections] = await Promise.all([
       fetchUsers(),
       fetchShops(),
       fetchProducts(),
       fetchShoppingCenters(),
       fetchDashboardStats(),
-      fetchSupportTickets()
+      fetchSupportTickets(),
+      fetchHomepageSectionsAdmin().catch((error) => {
+        console.warn('homepage sections initial load failed:', error);
+        return [];
+      })
     ]);
 
     // ۲) ست‌کردن آرایه‌های سراسری
@@ -7990,7 +8463,11 @@ async function updateAll() {
     shopsList    = shops;
     shoppingCentersList = centers;
     shoppingCentersLoaded = true;
+    homepageSectionsList = Array.isArray(homepageSections) ? homepageSections : [];
+    homepageSectionsLoaded = true;
     renderShoppingCenters();
+    renderHomepageSections();
+    renderHomepageSectionCategories();
     renderCategoryFilter(); // بروزرسانی فیلتر دسته‌بندی پس از بارگذاری
     await refreshSellerPerformanceMap();
     console.group('🟢 shopsList snapshot');

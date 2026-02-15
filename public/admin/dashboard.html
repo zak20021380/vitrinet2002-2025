@@ -67,6 +67,7 @@
         <a href="#" data-section="service-plan-management"><i class="ri-hand-heart-line"></i> مدیریت پلن‌های خدماتی <span class="count" id="count-service-plans">0</span></a>
         <a href="#" data-section="categories"><i class="ri-folders-line"></i> مدیریت دسته‌بندی‌ها</a>
         <a href="#" data-section="products"><i class="ri-box-3-line"></i> محصولات <span class="count" id="count-products">0</span></a>
+        <a href="#" data-section="homepage-manager"><i class="ri-layout-grid-line"></i> Homepage Manager <span class="count" id="count-homepage-sections"></span></a>
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
         <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
         <a href="#" data-section="ads"><i class="ri-megaphone-line"></i> مدیریت قیمت تبلیغات</a>
@@ -927,6 +928,83 @@
 
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="section-panel" id="homepage-manager-panel" style="display:none;">
+    <div class="content-header">Homepage Manager <span class="header-count" id="header-homepage-sections-count"></span></div>
+    <div class="homepage-manager-grid">
+      <form id="homepageSectionForm" class="homepage-section-form" autocomplete="off">
+        <h3>تنظیم ردیف جدید صفحه اصلی</h3>
+        <input type="hidden" id="homepageSectionId" />
+        <div>
+          <label for="homepageSectionTitle">عنوان ردیف *</label>
+          <input type="text" id="homepageSectionTitle" placeholder="مثلاً محصولات تازه اضافه‌شده" required />
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="homepageSectionType">نوع</label>
+            <select id="homepageSectionType" required>
+              <option value="latest">جدیدترین محصولات</option>
+              <option value="category">بر اساس دسته‌بندی</option>
+              <option value="popular">محبوب‌ترین محصولات</option>
+              <option value="discounted">محصولات تخفیف‌دار</option>
+            </select>
+          </div>
+          <div>
+            <label for="homepageSectionSort">مرتب‌سازی</label>
+            <select id="homepageSectionSort" required>
+              <option value="latest">جدیدترین</option>
+              <option value="oldest">قدیمی‌ترین</option>
+              <option value="most-liked">بیشترین پسند</option>
+              <option value="price-desc">بیشترین قیمت</option>
+              <option value="price-asc">کمترین قیمت</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="homepageSectionCategory">فیلتر دسته‌بندی</label>
+            <input type="text" id="homepageSectionCategory" list="homepageSectionCategories" placeholder="اختیاری - مثلاً پوشاک" />
+            <datalist id="homepageSectionCategories"></datalist>
+          </div>
+          <div>
+            <label for="homepageSectionLimit">تعداد کارت</label>
+            <input type="number" id="homepageSectionLimit" min="1" max="40" value="10" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="homepageSectionOrder">ترتیب نمایش</label>
+            <input type="number" id="homepageSectionOrder" min="0" value="0" required />
+          </div>
+          <div class="homepage-section-active-wrap">
+            <label class="switch">
+              <input type="checkbox" id="homepageSectionIsActive" checked />
+              <span class="switch-slider"></span>
+            </label>
+            <span>فعال در صفحه اصلی</span>
+          </div>
+        </div>
+        <div class="homepage-section-form-actions">
+          <button type="submit" id="homepageSectionSubmitBtn"><i class="ri-save-line"></i> ذخیره ردیف</button>
+          <button type="button" id="homepageSectionResetBtn" class="secondary"><i class="ri-refresh-line"></i> فرم جدید</button>
+        </div>
+        <div id="homepageSectionFormMessage" class="homepage-section-form-message" style="display:none;"></div>
+      </form>
+
+      <div class="homepage-sections-board">
+        <div class="homepage-sections-board-header">
+          <strong>ردیف‌های فعلی صفحه اصلی</strong>
+          <button type="button" id="homepageSectionsRefresh" class="homepage-sections-refresh">
+            <i class="ri-refresh-line"></i> بروزرسانی
+          </button>
+        </div>
+        <div id="homepageSectionsList" class="homepage-sections-list"></div>
+        <div id="homepageSectionsEmpty" class="homepage-sections-empty" style="display:none;">
+          هنوز ردیفی برای صفحه اصلی تعریف نشده است.
+        </div>
+      </div>
     </div>
   </div>
 
