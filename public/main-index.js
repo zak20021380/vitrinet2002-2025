@@ -2217,7 +2217,7 @@ function buildManagedProductCard(product) {
   const card = document.createElement('a');
   card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
   card.className = `
-    group glass popular-product-card min-w-[245px] max-w-[280px] flex-shrink-0 flex flex-col
+    group glass popular-product-card min-w-[265px] max-w-[280px] flex-shrink-0 flex flex-col
     p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
     hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
   `;
@@ -2345,7 +2345,7 @@ function buildManagedManualCard(cardData = {}) {
     }
   }
   card.className = `
-    group glass popular-product-card min-w-[245px] max-w-[280px] flex-shrink-0 flex flex-col
+    group glass popular-product-card min-w-[265px] max-w-[280px] flex-shrink-0 flex flex-col
     p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
     hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
   `;
