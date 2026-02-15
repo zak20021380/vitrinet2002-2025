@@ -2393,25 +2393,11 @@ function createManagedHomepageRow(section) {
   row.className = 'homepage-managed-row';
 
   const rowTitle = escapeHTML(String(section?.title || 'Products'));
-  const cardsCount = Array.isArray(section?.cards) ? section.cards.length : 0;
-  const rowSubtitleParts = [];
-  if (section?.categoryFilter) {
-    rowSubtitleParts.push(`Category: ${String(section.categoryFilter).trim()}`);
-  }
-  if (cardsCount > 0) {
-    rowSubtitleParts.push(`Cards: ${cardsCount.toLocaleString('fa-IR')}`);
-  } else {
-    rowSubtitleParts.push(`Count: ${Number(section?.limit) || 10}`);
-  }
-  const rowSubtitle = rowSubtitleParts.join(' | ');
 
   row.innerHTML = `
     <div class="homepage-managed-row__header">
-      <div>
-        <h3 class="homepage-managed-row__title"><span>${rowTitle}</span></h3>
-        <p class="homepage-managed-row__subtitle">${escapeHTML(rowSubtitle)}</p>
-      </div>
-      <a class="homepage-managed-row__cta" href="all-products.html">View all</a>
+      <h3 class="homepage-managed-row__title"><span>${rowTitle}</span></h3>
+      <a class="homepage-managed-row__cta" href="all-products.html">مشاهده همه</a>
     </div>
     <div class="homepage-managed-row__body">
       <button type="button" class="homepage-managed-row__nav is-prev" aria-label="Show next">
