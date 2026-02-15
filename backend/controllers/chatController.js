@@ -1208,8 +1208,8 @@ exports.replyToChat = async (req, res) => {
       return res.status(404).json({ error: 'چت پیدا نشد.' });
     }
 
-  // ۳. فقط فروشنده‌ی عضو این چت می‌تواند پاسخ بدهد
-  if (!req.user || req.user.role !== 'seller') {
+  // ۳. فقط فروشنده‌ی عضو این چت می‌تواند پاسخ بدهد (یا ادمین)
+  if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
@@ -1763,7 +1763,7 @@ exports.contactAdmin = async (req, res) => {
     const content = (text || message || '').trim();
   if (!content)
       return res.status(400).json({ error: 'متن پیام اجباری است.' });
-  if (!req.user || req.user.role !== 'seller')
+  if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin'))
       return res.status(403).json({ error: 'فقط فروشنده مجاز است.' });
 
   const sellerDoc = await Seller.findById(req.user.id).select('blockedByAdmin');

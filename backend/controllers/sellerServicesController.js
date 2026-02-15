@@ -88,7 +88,7 @@ async function mustOwnService(sellerId, serviceId) {
 // لیست سرویس‌های فروشندهٔ جاری با pagination، سرچ و فیلتر وضعیت
 exports.getMyServices = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
@@ -133,7 +133,7 @@ exports.getMyServices = async (req, res) => {
 // ساخت سرویس جدید برای فروشندهٔ جاری
 exports.createService = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
@@ -158,7 +158,7 @@ exports.createService = async (req, res) => {
 // دریافت یک سرویس (فقط مالک)
 exports.getServiceById = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
     const svc = await mustOwnService(req.user.id, req.params.id);
@@ -174,7 +174,7 @@ exports.getServiceById = async (req, res) => {
 // ویرایش سرویس (فقط مالک)
 exports.updateService = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
@@ -202,7 +202,7 @@ exports.updateService = async (req, res) => {
 // تغییر سریع وضعیت فعال/غیرفعال (فقط مالک)
 exports.toggleActive = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
     const svc = await mustOwnService(req.user.id, req.params.id);
@@ -223,7 +223,7 @@ exports.toggleActive = async (req, res) => {
 // حذف سرویس (فقط مالک)
 exports.deleteService = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'seller') {
+    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
     const svc = await mustOwnService(req.user.id, req.params.id);

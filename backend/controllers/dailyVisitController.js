@@ -77,9 +77,24 @@ exports.getVisits = async (req, res) => {
     const filter = {};
 
     // بررسی تاریخ‌ها
-    if (from || to) filter.date = {};
-    if (from) filter.date.$gte = new Date(from);
-    if (to) filter.date.$lte = new Date(to);
+// ✅ FIXED — validate before using
+if (from || to) {
+  filter.date = {};
+  if (from) {
+    const fromDate = new Date(from);
+    if (isNaN(fromDate.getTime())) {
+      return res.status(400).json({ message: 'تاریخ شروع نامعتبر است' });
+    }
+    filter.date.$gte = fromDate;
+  }
+  if (to) {
+    const toDate = new Date(to);
+    if (isNaN(toDate.getTime())) {
+      return res.status(400).json({ message: 'تاریخ پایان نامعتبر است' });
+    }
+    filter.date.$lte = toDate;
+  }
+}
 
     // بررسی اینکه sellerId معتبر باشد و سپس به فیلتر اضافه کنیم
     if (sellerId) {

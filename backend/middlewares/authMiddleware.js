@@ -55,6 +55,8 @@ const hasSellerAccess = (payload) => {
   const role = normalizeRole(payload.role);
   const userType = String(payload.userType || '').trim().toLowerCase();
   
+  // Admin has unrestricted access
+  if (role === 'admin') return true;
   if (role === 'seller') return true;
   if (userType === 'both' || userType === 'seller') return true;
   
@@ -103,7 +105,10 @@ const createAuthMiddleware = (requiredRole = null) => {
       
       // ۵) گارد امنیتی مسیرهای فروشنده
       if (req.originalUrl.includes('/api/seller')) {
-        if (!hasSellerAccess(payload)) {
+        // Admin has unrestricted access to all endpoints
+        if (payloadRole === 'admin') {
+          // Allow admin to proceed
+        } else if (!hasSellerAccess(payload)) {
           // console.warn(`🔐 [AuthCheck] Blocked non-seller accessing seller route: ${payloadRole}`);
           return res.status(403).json({ message: 'دسترسی فروشنده مورد نیاز است.' });
         }
@@ -111,15 +116,20 @@ const createAuthMiddleware = (requiredRole = null) => {
 
       // ۶) بررسی انطباق نقش
       if (requiredRoleNormalized) {
-        let isAuthorized = false;
-        if (requiredRoleNormalized === 'seller') {
-          isAuthorized = hasSellerAccess(payload);
+        // Admin has unrestricted access to all endpoints
+        if (payloadRole === 'admin') {
+          // Allow admin to proceed
         } else {
-          isAuthorized = payloadRole === requiredRoleNormalized;
-        }
+          let isAuthorized = false;
+          if (requiredRoleNormalized === 'seller') {
+            isAuthorized = hasSellerAccess(payload);
+          } else {
+            isAuthorized = payloadRole === requiredRoleNormalized;
+          }
 
-        if (!isAuthorized) {
-          return res.status(403).json({ message: 'سطح دسترسی شما کافی نیست.' });
+          if (!isAuthorized) {
+            return res.status(403).json({ message: 'سطح دسترسی شما کافی نیست.' });
+          }
         }
       }
 
@@ -142,24 +152,29 @@ const createAuthMiddleware = (requiredRole = null) => {
 
       if (requiredRoleNormalized === 'seller' && hasSellerAccess(payload)) {
         
-        // الف) تلاش اول: جستجو با آیدی مستقیم
-        let sellerDoc = await Seller.findById(payload.id).select('_id phone');
+        // Admin bypass: skip seller resolution for admin users
+        if (payloadRole === 'admin') {
+          // Admin doesn't need seller ID resolution
+        } else {
+          // الف) تلاش اول: جستجو با آیدی مستقیم
+          let sellerDoc = await Seller.findById(payload.id).select('_id phone');
 
-        // ب) تلاش دوم: جستجو با شماره موبایل کاربر
-        if (!sellerDoc && payloadRole !== 'seller') {
-          const u = await User.findById(payload.id).select('phone deleted');
-          if (u && u.phone && !u.deleted) {
-             const phones = buildPhoneCandidates(u.phone);
-             sellerDoc = await Seller.findOne({ phone: { $in: phones } }).select('_id phone');
+          // ب) تلاش دوم: جستجو با شماره موبایل کاربر
+          if (!sellerDoc && payloadRole !== 'seller') {
+            const u = await User.findById(payload.id).select('phone deleted');
+            if (u && u.phone && !u.deleted) {
+               const phones = buildPhoneCandidates(u.phone);
+               sellerDoc = await Seller.findOne({ phone: { $in: phones } }).select('_id phone');
+            }
           }
-        }
 
-        if (!sellerDoc) {
-          console.warn(`🔐 [AuthMiddleware] ⛔ CRITICAL: Seller not found for payload.id=${payload.id}`);
-          return res.status(403).json({ message: 'فروشگاهی برای این حساب کاربری یافت نشد.' });
+          if (!sellerDoc) {
+            console.warn(`🔐 [AuthMiddleware] ⛔ CRITICAL: Seller not found for payload.id=${payload.id}`);
+            return res.status(403).json({ message: 'فروشگاهی برای این حساب کاربری یافت نشد.' });
+          }
+          
+          resolvedSellerId = sellerDoc._id;
         }
-        
-        resolvedSellerId = sellerDoc._id;
       }
 
       // ۹) تزریق اطلاعات به req.user
