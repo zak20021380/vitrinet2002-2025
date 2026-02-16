@@ -490,9 +490,9 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      text-align: right;
+      text-align: center;
       gap: 10px;
       flex: 1;
       padding: 0;
@@ -528,7 +528,7 @@
     .ad-card-shop {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 4px;
       font-size: 0.9rem;
       color: #64748b;
@@ -748,9 +748,9 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      text-align: right;
+      text-align: center;
       gap: 10px;
       flex: 1;
     }
@@ -1024,7 +1024,7 @@
       font-weight: 700;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 4px;
     }
 
@@ -1836,6 +1836,31 @@
         top: 68px;
       }
     }
+    
+    /* Animations for register button */
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    
+    .animate-ping {
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: .7;
+      }
+    }
   </style>
   <style>
     /* Header Scroll Effect */
@@ -2028,7 +2053,7 @@
             <a href="post.html" class="px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center gap-2"
               style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
               <i class="fas fa-store"></i>
-              <span>ثبت فروشگاه</span>
+              <span>ثبت رایگان فروشگاه</span>
             </a>
           </div>
         </div>
@@ -2074,6 +2099,33 @@
             </div>
           </button>
         </div>
+      </div>
+      
+      <!-- Register Store Button - Mobile Header -->
+      <div class="px-4 pb-3">
+        <a href="post.html" 
+          class="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-[900] text-sm text-white transition-all duration-300 active:scale-[0.98] relative overflow-hidden group"
+          style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);">
+          <!-- Animated shine effect -->
+          <div class="absolute inset-0 -translate-x-full group-active:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          
+          <!-- Icon with pulse animation -->
+          <div class="relative">
+            <div class="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+            <i class="fas fa-store-alt text-base relative z-10"></i>
+          </div>
+          
+          <!-- Text with badge -->
+          <span class="relative flex items-center gap-2">
+            ثبت رایگان فروشگاه
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/25 backdrop-blur-sm border border-white/30">
+              FREE
+            </span>
+          </span>
+          
+          <!-- Arrow icon -->
+          <i class="fas fa-arrow-left text-xs"></i>
+        </a>
       </div>
     </div>
   </header>
@@ -2284,6 +2336,32 @@
             <i class="fas fa-sign-in-alt text-lg"></i>
           </div>
           <span>ورود / ثبت‌نام</span>
+        </a>
+        
+        <!-- Premium Register Store Button - Compact Version -->
+        <a href="post.html"
+          class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl font-bold text-white transition-all group relative overflow-hidden mt-2"
+          style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);">
+          <!-- Animated shine effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+          
+          <!-- Icon with subtle glow -->
+          <div class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm flex-shrink-0">
+            <i class="fas fa-store-alt text-base relative z-10"></i>
+          </div>
+          
+          <!-- Text content -->
+          <div class="flex-1 relative min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm truncate">ثبت رایگان فروشگاه</span>
+              <span class="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-white/20 backdrop-blur-sm border border-white/25 flex-shrink-0">
+                FREE
+              </span>
+            </div>
+          </div>
+          
+          <!-- Arrow icon -->
+          <i class="fas fa-chevron-left text-xs relative group-hover:-translate-x-0.5 transition-transform flex-shrink-0"></i>
         </a>
       </div>
     </nav>
@@ -2663,6 +2741,7 @@
       const overlay = document.getElementById('hamburgerMenuOverlay');
       const drawer = document.getElementById('hamburgerMenuDrawer');
       const closeBtn = document.getElementById('closeHamburgerMenu');
+      const bottomNav = document.querySelector('.mobile-nav');
 
       function openMenu() {
         overlay.classList.remove('hidden');
@@ -2671,6 +2750,13 @@
           drawer.classList.remove('-translate-x-full');
         }, 10);
         document.body.style.overflow = 'hidden';
+        
+        // Hide bottom nav when menu opens
+        if (bottomNav) {
+          bottomNav.style.transform = 'translateY(110%)';
+          bottomNav.style.opacity = '0';
+          bottomNav.style.pointerEvents = 'none';
+        }
       }
 
       function closeMenu() {
@@ -2680,6 +2766,13 @@
           overlay.classList.add('hidden');
         }, 300);
         document.body.style.overflow = '';
+        
+        // Show bottom nav when menu closes
+        if (bottomNav) {
+          bottomNav.style.transform = '';
+          bottomNav.style.opacity = '';
+          bottomNav.style.pointerEvents = '';
+        }
       }
 
       if (hamburgerBtn) hamburgerBtn.addEventListener('click', openMenu);
