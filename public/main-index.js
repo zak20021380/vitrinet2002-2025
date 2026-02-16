@@ -2394,13 +2394,23 @@ function buildManagedManualCard(cardData = {}) {
 function createManagedHomepageRow(section) {
   const row = document.createElement('section');
   row.className = 'homepage-managed-row';
-
   const rowTitle = escapeHTML(String(section?.title || 'Products'));
-
+  const sectionId = String(section?._id || section?.id || '').trim();
+  const sectionTitle = String(section?.title || '').trim();
+  const query = new URLSearchParams();
+  if (sectionId) {
+    query.set('sectionId', sectionId);
+  }
+  if (sectionTitle) {
+    query.set('sectionTitle', sectionTitle);
+  }
+  const viewAllHref = query.toString()
+    ? `all-products.html?${query.toString()}`
+    : 'all-products.html';
   row.innerHTML = `
     <div class="homepage-managed-row__header">
       <h3 class="homepage-managed-row__title"><span>${rowTitle}</span></h3>
-      <a class="homepage-managed-row__cta" href="all-products.html">مشاهده همه</a>
+      <a class="homepage-managed-row__cta" href="${escapeHTML(viewAllHref)}">مشاهده همه</a>
     </div>
     <div class="homepage-managed-row__body">
       <button type="button" class="homepage-managed-row__nav is-prev" aria-label="Show next">

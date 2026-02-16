@@ -2384,6 +2384,9 @@
     let mobileFiltersCloseTimer = null;
 
     const AD_PLAN_SLUG = 'ad_products';
+    const HOMEPAGE_SECTIONS_API_BASE = '/api/homepage-sections';
+    const HOMEPAGE_SECTION_ID_PARAM = 'sectionId';
+    const HOMEPAGE_SECTION_TITLE_PARAM = 'sectionTitle';
 
     const categories = [
       "همه محصولات", "پوشاک", "خوراک", "خدمات", "دیجیتال", "زیبایی",
@@ -2412,6 +2415,91 @@
       return '';
     }
 
+    function getHomepageSectionContext() {
+      const params = new URLSearchParams(window.location.search || '');
+      const sectionId = String(params.get(HOMEPAGE_SECTION_ID_PARAM) || '').trim();
+      const sectionTitle = String(params.get(HOMEPAGE_SECTION_TITLE_PARAM) || '').trim();
+      return {
+        sectionId,
+        sectionTitle,
+        isScoped: Boolean(sectionId)
+      };
+    }
+
+    const homepageSectionContext = getHomepageSectionContext();
+
+    function normalizeSectionCardImage(image) {
+      const value = String(image || '').trim();
+      if (!value) return '';
+      if (value.startsWith('data:')) return value;
+      if (/^(https?:)?\/\//i.test(value)) return value;
+      if (value.startsWith('/')) return value;
+      if (value.startsWith('uploads/')) return `/${value}`;
+      return value;
+    }
+
+    function mapManualSectionCardToProduct(card, index) {
+      const category = String(card?.category || '').trim();
+      const title = String(card?.title || '').trim() || `Product ${index + 1}`;
+      const image = normalizeSectionCardImage(card?.image);
+      const price = Number(card?.price);
+      return {
+        _id: String(card?._id || card?.id || `homepage-card-${index + 1}`).trim(),
+        title,
+        category,
+        price: Number.isFinite(price) ? price : 0,
+        images: image ? [image] : [],
+        link: String(card?.link || '').trim(),
+        seller: {
+          storename: '',
+          address: String(card?.location || '').trim() || 'نامشخص',
+          category
+        }
+      };
+    }
+
+    function mapSectionProductToAllProductsShape(product) {
+      const productId = getProductIdFromProduct(product);
+      const category = String(product?.category || '').trim();
+      const price = Number(product?.price);
+      const images = Array.isArray(product?.images) && product.images.length
+        ? product.images
+        : (product?.image ? [product.image] : []);
+      return {
+        _id: productId,
+        title: String(product?.title || '').trim(),
+        category,
+        price: Number.isFinite(price) ? price : 0,
+        images,
+        seller: {
+          storename: String(product?.shopName || '').trim(),
+          address: String(product?.sellerLocation || '').trim() || 'نامشخص',
+          category
+        }
+      };
+    }
+
+    function applySectionScopedPageTitle(section) {
+      if (!homepageSectionContext.isScoped) return;
+      const title = String(section?.title || homepageSectionContext.sectionTitle || '').trim();
+      if (!title) return;
+      homepageSectionContext.sectionTitle = title;
+      document.title = `${title} | محصولات`;
+    }
+
+    function buildSectionFetchUrl(sectionId) {
+      return `${HOMEPAGE_SECTIONS_API_BASE}/${encodeURIComponent(sectionId)}/products`;
+    }
+
+    function sortSectionCards(cards) {
+      return [...cards].sort((a, b) => {
+        const orderA = Number(a?.displayOrder) || 0;
+        const orderB = Number(b?.displayOrder) || 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return String(a?._id || '').localeCompare(String(b?._id || ''));
+      });
+    }
+
     let currentSort = null;          // cheap | expensive | null
     let currentShop = DEFAULT_SHOP_LABEL;
     let currentCategory = "همه محصولات";
@@ -2432,8 +2520,12 @@
       setCurrentShop(DEFAULT_SHOP_LABEL);
       populateShopDropdowns();
       await fetchShoppingCenters();
-      await fetchFeaturedAd();
-      await fetchProductsFromAPI();
+      if (homepageSectionContext.isScoped) {
+        await fetchProductsForHomepageSection();
+      } else {
+        await fetchFeaturedAd();
+        await fetchProductsFromAPI();
+      }
     });
 
     /* --------------------- منوی همبرگر --------------------- */
@@ -2935,6 +3027,11 @@
 
     /* ---------------------- واکشی محصولات ---------------------- */
     async function fetchFeaturedAd() {
+      if (homepageSectionContext.isScoped) {
+        featuredAd = null;
+        featuredAdProductId = null;
+        return;
+      }
       try {
         const response = await fetch(`/api/adOrder/active?planSlug=${AD_PLAN_SLUG}`);
         if (!response.ok) throw new Error('خطا در دریافت تبلیغ فعال');
@@ -2953,6 +3050,51 @@
         console.warn('خطا در دریافت تبلیغ ویژه محصولات:', err);
         featuredAd = null;
         featuredAdProductId = null;
+      }
+    }
+
+    async function fetchProductsForHomepageSection() {
+      const wrap = document.getElementById('mainProductsList');
+      if (!wrap) {
+        console.warn('mainProductsList container missing');
+        return;
+      }
+
+      featuredAd = null;
+      featuredAdProductId = null;
+
+      try {
+        const response = await fetch(buildSectionFetchUrl(homepageSectionContext.sectionId));
+        if (!response.ok) {
+          throw new Error('خطا در دریافت محصولات این بخش');
+        }
+
+        const payload = await response.json().catch(() => ({}));
+        const section = payload?.section && typeof payload.section === 'object'
+          ? payload.section
+          : null;
+        applySectionScopedPageTitle(section);
+
+        const cards = Array.isArray(section?.cards)
+          ? sortSectionCards(section.cards)
+          : [];
+
+        if (cards.length) {
+          allProducts = cards.map(mapManualSectionCardToProduct);
+        } else {
+          const scopedProducts = Array.isArray(payload?.products) ? payload.products : [];
+          allProducts = scopedProducts.map(mapSectionProductToAllProductsShape);
+        }
+
+        filterAndSortProducts();
+      } catch (err) {
+        console.error('Error fetching managed section products:', err);
+        wrap.innerHTML =
+          `<div style="grid-column:1/-1;text-align:center;padding:40px">
+         <i class="fas fa-bug" style="font-size:3rem;color:#e11d48"></i>
+         <h4 style="color:#e11d48">خطا در دریافت محصولات این ردیف</h4>
+         <div style="color:#888">${escapeHtml(err.message || 'Unknown error')}</div>
+       </div>`;
       }
     }
 
@@ -3150,6 +3292,14 @@
   `;
     }
 
+    function getProductCardTargetUrl(product) {
+      const manualLink = String(product?.link || '').trim();
+      if (manualLink) return manualLink;
+      const productId = getProductIdFromProduct(product);
+      if (productId) return `product.html?id=${encodeURIComponent(productId)}`;
+      return '#';
+    }
+
     function renderProducts(list) {
       const wrap = document.getElementById('mainProductsList');
       if (!wrap) return;
@@ -3195,6 +3345,7 @@
         if (adProductId && productId && adProductId === productId) {
           return;
         }
+        const targetUrl = getProductCardTargetUrl(p);
         const img = getSafeProductImage(p.images);
         const safeTitle = escapeHtml(p.title || '');
         const safeAddress = escapeHtml(p.seller?.address || 'نامشخص');
@@ -3208,7 +3359,7 @@
           <div class="product-title">${safeTitle}</div>
           <div class="shop-address"><i class="fas fa-map-marker-alt" style="color:#10b981;margin-left:5px"></i>${safeAddress}</div>
           <div class="product-price">${formatPrice(p.price)}</div>
-          <a href="product.html?id=${p._id}" target="_blank" rel="noopener noreferrer" class="see-product-btn">مشاهده محصول</a>
+          <a href="${escapeHtml(targetUrl)}" target="_blank" rel="noopener noreferrer" class="see-product-btn">مشاهده محصول</a>
         </div>
         <span class="tag">${safeCategory}</span>
       </div>`;
