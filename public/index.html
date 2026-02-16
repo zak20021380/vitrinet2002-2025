@@ -947,6 +947,115 @@
 </script>
 -->
 
+  <script>
+    (function () {
+      const MANAGED_ROW_SELECTOR = '#homepage-managed-sections-list .homepage-managed-row';
+      const MANAGED_CTA_SELECTOR = '.homepage-managed-row__cta';
+      const MANAGED_SECTIONS_API = '/api/homepage-sections/public';
+
+      let managedSectionsPromise = null;
+
+      function getManagedSections() {
+        if (!managedSectionsPromise) {
+          managedSectionsPromise = fetch(MANAGED_SECTIONS_API)
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error('Failed to fetch managed sections: ' + response.status);
+              }
+              return response.json();
+            })
+            .then(function (payload) {
+              const sections = Array.isArray(payload && payload.sections) ? payload.sections : [];
+              return sections.sort(function (a, b) {
+                const orderA = Number(a && a.displayOrder) || 0;
+                const orderB = Number(b && b.displayOrder) || 0;
+                return orderA - orderB;
+              });
+            })
+            .catch(function (error) {
+              console.warn('Unable to load managed homepage sections for CTA links.', error);
+              return [];
+            });
+        }
+
+        return managedSectionsPromise;
+      }
+
+      function buildAllProductsHref(section) {
+        const params = new URLSearchParams();
+        const sectionId = section && (section._id || section.id);
+        const sectionSlug = section && section.slug;
+        const sectionTitle = section && section.title;
+
+        if (sectionId) params.set('sectionId', sectionId);
+        if (sectionSlug) params.set('sectionSlug', sectionSlug);
+        if (sectionTitle) params.set('sectionTitle', sectionTitle);
+
+        const query = params.toString();
+        return query ? 'all-products.html?' + query : 'all-products.html';
+      }
+
+      function applyManagedRowLinks() {
+        const rows = Array.from(document.querySelectorAll(MANAGED_ROW_SELECTOR));
+        if (!rows.length) return;
+
+        getManagedSections().then(function (sections) {
+          if (!sections.length) return;
+
+          rows.forEach(function (row, index) {
+            const cta = row.querySelector(MANAGED_CTA_SELECTOR);
+            const section = sections[index];
+            if (!cta || !section) return;
+
+            const href = buildAllProductsHref(section);
+            cta.setAttribute('href', href);
+            cta.dataset.sectionId = String(section._id || section.id || '');
+          });
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        applyManagedRowLinks();
+
+        document.addEventListener('click', function (event) {
+          const cta = event.target && event.target.closest(MANAGED_CTA_SELECTOR);
+          if (!cta) return;
+
+          const row = cta.closest('.homepage-managed-row');
+          if (!row) return;
+
+          const fallbackHref = cta.getAttribute('href') || '';
+          if (cta.dataset.sectionId || /sectionId=/.test(fallbackHref)) {
+            return;
+          }
+
+          event.preventDefault();
+
+          const allRows = Array.from(document.querySelectorAll(MANAGED_ROW_SELECTOR));
+          const rowIndex = allRows.indexOf(row);
+          if (rowIndex < 0) {
+            window.location.href = 'all-products.html';
+            return;
+          }
+
+          getManagedSections().then(function (sections) {
+            const section = sections[rowIndex];
+            window.location.href = buildAllProductsHref(section);
+          });
+        });
+
+        const managedContainer = document.getElementById('homepage-managed-sections-list');
+        if (!managedContainer || typeof MutationObserver === 'undefined') return;
+
+        const observer = new MutationObserver(function () {
+          applyManagedRowLinks();
+        });
+
+        observer.observe(managedContainer, { childList: true, subtree: true });
+      });
+    })();
+  </script>
+
 </body>
 
 </html>
