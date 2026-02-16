@@ -281,6 +281,105 @@ function formatSectionForResponse(section) {
   return { ...raw, cards };
 }
 
+async function fetchOrderedSectionIds() {
+  const sections = await HomepageSection.find()
+    .sort({ displayOrder: 1, createdAt: 1 })
+    .select('_id')
+    .lean();
+
+  return sections
+    .map((item) => String(item?._id || '').trim())
+    .filter((id) => id && isValidObjectId(id));
+}
+
+async function writeSectionOrderSequence(orderedIds = []) {
+  if (!Array.isArray(orderedIds) || !orderedIds.length) return;
+
+  const bulk = orderedIds.map((id, index) => ({
+    updateOne: {
+      filter: { _id: id },
+      update: { $set: { displayOrder: index + 1 } }
+    }
+  }));
+
+  if (bulk.length) {
+    await HomepageSection.bulkWrite(bulk);
+  }
+}
+
+async function placeSectionAtDisplayOrder(sectionId, requestedOrder, { appendIfInvalid = true } = {}) {
+  const targetId = String(sectionId || '').trim();
+  if (!targetId || !isValidObjectId(targetId)) return;
+
+  const orderedIds = await fetchOrderedSectionIds();
+  const withoutTarget = orderedIds.filter((id) => id !== targetId);
+  const maxPosition = withoutTarget.length + 1;
+
+  let position = Math.floor(toNumber(requestedOrder, appendIfInvalid ? maxPosition : 1));
+  if (!Number.isFinite(position)) {
+    position = appendIfInvalid ? maxPosition : 1;
+  }
+
+  if (position <= 0) {
+    position = appendIfInvalid ? maxPosition : 1;
+  }
+
+  position = Math.min(Math.max(position, 1), maxPosition);
+  withoutTarget.splice(position - 1, 0, targetId);
+  await writeSectionOrderSequence(withoutTarget);
+}
+
+async function normalizeSectionDisplayOrderSequence() {
+  const orderedIds = await fetchOrderedSectionIds();
+  await writeSectionOrderSequence(orderedIds);
+}
+
+function sortSectionCards(cards = []) {
+  return [...cards].sort((a, b) => {
+    const orderA = Number(a?.displayOrder) || 0;
+    const orderB = Number(b?.displayOrder) || 0;
+    if (orderA !== orderB) return orderA - orderB;
+    return String(a?._id || '').localeCompare(String(b?._id || ''));
+  });
+}
+
+function normalizeSectionCardOrderSequence(section) {
+  if (!section || !Array.isArray(section.cards) || !section.cards.length) return;
+  const orderedCards = sortSectionCards(section.cards);
+  orderedCards.forEach((card, index) => {
+    if (!card) return;
+    card.displayOrder = index + 1;
+  });
+}
+
+function placeSectionCardAtDisplayOrder(section, cardId, requestedOrder, { appendIfInvalid = true } = {}) {
+  if (!section || !Array.isArray(section.cards) || !section.cards.length) return;
+  const targetId = String(cardId || '').trim();
+  if (!targetId) return;
+
+  const orderedCards = sortSectionCards(section.cards);
+  const targetCard = orderedCards.find((card) => String(card?._id || '') === targetId);
+  if (!targetCard) return;
+
+  const withoutTarget = orderedCards.filter((card) => String(card?._id || '') !== targetId);
+  const maxPosition = withoutTarget.length + 1;
+
+  let position = Math.floor(toNumber(requestedOrder, appendIfInvalid ? maxPosition : 1));
+  if (!Number.isFinite(position)) {
+    position = appendIfInvalid ? maxPosition : 1;
+  }
+  if (position <= 0) {
+    position = appendIfInvalid ? maxPosition : 1;
+  }
+
+  position = Math.min(Math.max(position, 1), maxPosition);
+  withoutTarget.splice(position - 1, 0, targetCard);
+  withoutTarget.forEach((card, index) => {
+    if (!card) return;
+    card.displayOrder = index + 1;
+  });
+}
+
 exports.listAdminSections = async (req, res) => {
   try {
     const sections = await HomepageSection.find()
@@ -313,18 +412,18 @@ exports.listActiveSections = async (req, res) => {
 
 exports.createSection = async (req, res) => {
   try {
+    const hasDisplayOrder = hasOwn(req.body || {}, 'displayOrder');
+    const requestedDisplayOrder = hasDisplayOrder ? req.body.displayOrder : null;
     const payload = normalizeSectionPayload(req.body || {});
 
-    if (!hasOwn(req.body || {}, 'displayOrder')) {
-      const lastSection = await HomepageSection.findOne()
-        .sort({ displayOrder: -1, createdAt: -1 })
-        .select('displayOrder')
-        .lean();
-      payload.displayOrder = Number(lastSection?.displayOrder || 0) + 1;
-    }
-
     const section = await HomepageSection.create(payload);
-    return res.status(201).json({ success: true, section: formatSectionForResponse(section) });
+    await placeSectionAtDisplayOrder(section._id, requestedDisplayOrder, { appendIfInvalid: true });
+    const refreshedSection = await HomepageSection.findById(section._id);
+
+    return res.status(201).json({
+      success: true,
+      section: formatSectionForResponse(refreshedSection || section)
+    });
   } catch (error) {
     console.error('createSection error:', error);
     return res.status(400).json({ success: false, message: error.message || 'Failed to create section.' });
@@ -338,14 +437,21 @@ exports.updateSection = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid section id.' });
     }
 
+    const hasDisplayOrder = hasOwn(req.body || {}, 'displayOrder');
+    const requestedDisplayOrder = hasDisplayOrder ? req.body.displayOrder : null;
     const payload = normalizeSectionPayload(req.body || {}, { partial: true });
-    const section = await HomepageSection.findByIdAndUpdate(id, payload, {
+    let section = await HomepageSection.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true
     });
 
     if (!section) {
       return res.status(404).json({ success: false, message: 'Section not found.' });
+    }
+
+    if (hasDisplayOrder) {
+      await placeSectionAtDisplayOrder(id, requestedDisplayOrder, { appendIfInvalid: true });
+      section = await HomepageSection.findById(id);
     }
 
     return res.json({ success: true, section: formatSectionForResponse(section) });
@@ -369,6 +475,7 @@ exports.deleteSection = async (req, res) => {
 
     const cards = Array.isArray(section.cards) ? section.cards : [];
     cards.forEach((card) => removeCardImageFile(card?.image));
+    await normalizeSectionDisplayOrderSequence();
 
     return res.json({ success: true, message: 'Section deleted successfully.' });
   } catch (error) {
@@ -416,7 +523,7 @@ exports.reorderSections = async (req, res) => {
       if (!isValidObjectId(id)) return;
 
       const displayOrder = Math.max(
-        0,
+        1,
         Math.floor(toNumber(item?.displayOrder, index + 1))
       );
 
@@ -433,6 +540,7 @@ exports.reorderSections = async (req, res) => {
     }
 
     await HomepageSection.bulkWrite(bulk);
+    await normalizeSectionDisplayOrderSequence();
     const sections = await HomepageSection.find()
       .sort({ displayOrder: 1, createdAt: 1 })
       .lean();
@@ -500,6 +608,8 @@ exports.createSectionCard = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Section not found.' });
     }
 
+    const hasDisplayOrder = hasOwn(req.body || {}, 'displayOrder');
+    const requestedDisplayOrder = hasDisplayOrder ? req.body.displayOrder : null;
     const payload = normalizeHomepageCardPayload(req.body || {});
     const uploadedImage = normalizeUploadedPath(req.file);
     if (uploadedImage) {
@@ -510,21 +620,14 @@ exports.createSectionCard = async (req, res) => {
       payload.image = DEFAULT_CARD_IMAGE;
     }
 
-    if (!hasOwn(req.body || {}, 'displayOrder')) {
-      const maxOrder = (Array.isArray(section.cards) ? section.cards : []).reduce((max, item) => {
-        const order = Number(item?.displayOrder) || 0;
-        return order > max ? order : max;
-      }, 0);
-      payload.displayOrder = maxOrder + 1;
-    }
-
     section.cards.push(payload);
+    const savedCard = section.cards[section.cards.length - 1];
+    placeSectionCardAtDisplayOrder(section, savedCard?._id, requestedDisplayOrder, { appendIfInvalid: true });
     await section.save();
 
-    const savedCard = section.cards[section.cards.length - 1];
     return res.status(201).json({
       success: true,
-      card: formatSectionCard(savedCard),
+      card: formatSectionCard(section.cards.id(savedCard?._id) || savedCard),
       section: formatSectionForResponse(section)
     });
   } catch (error) {
@@ -550,6 +653,8 @@ exports.updateSectionCard = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Card not found.' });
     }
 
+    const hasDisplayOrder = hasOwn(req.body || {}, 'displayOrder');
+    const requestedDisplayOrder = hasDisplayOrder ? req.body.displayOrder : null;
     const payload = normalizeHomepageCardPayload(req.body || {}, { partial: true });
     const uploadedImage = normalizeUploadedPath(req.file);
     if (uploadedImage) {
@@ -565,6 +670,12 @@ exports.updateSectionCard = async (req, res) => {
     keys.forEach((key) => {
       card[key] = payload[key];
     });
+
+    if (hasDisplayOrder) {
+      placeSectionCardAtDisplayOrder(section, cardId, requestedDisplayOrder, { appendIfInvalid: true });
+    } else {
+      normalizeSectionCardOrderSequence(section);
+    }
 
     await section.save();
 
@@ -602,6 +713,7 @@ exports.deleteSectionCard = async (req, res) => {
 
     const imageToDelete = String(card.image || '').trim();
     card.deleteOne();
+    normalizeSectionCardOrderSequence(section);
     await section.save();
     removeCardImageFile(imageToDelete);
 

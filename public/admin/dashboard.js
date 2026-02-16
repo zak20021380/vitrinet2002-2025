@@ -948,6 +948,35 @@ function getHomepageCardFormBySection(sectionId) {
   return document.querySelector(`form[data-homepage-card-form="${sectionId}"]`);
 }
 
+function getHomepageSectionById(sectionId) {
+  const id = String(sectionId || '').trim();
+  if (!id) return null;
+  return homepageSectionsList.find((item) => item && item._id === id) || null;
+}
+
+function getHomepageCardNextOrder(sectionId) {
+  const section = getHomepageSectionById(sectionId);
+  const cards = Array.isArray(section?.cards) ? section.cards : [];
+  const maxOrder = cards.reduce((max, card) => {
+    const order = Number(card?.displayOrder) || 0;
+    return order > max ? order : max;
+  }, 0);
+  return Math.max(1, maxOrder + 1);
+}
+
+function syncHomepageCardOrderInput(form, preferredOrder = null) {
+  if (!form) return;
+  const orderInput = form.querySelector('[data-field="display-order"]');
+  if (!orderInput) return;
+
+  const sectionId = String(form.dataset.sectionId || '').trim();
+  const preferred = Math.floor(Number(preferredOrder));
+  const fallback = getHomepageCardNextOrder(sectionId);
+  const finalOrder = Number.isFinite(preferred) && preferred > 0 ? preferred : fallback;
+  orderInput.min = '1';
+  orderInput.value = String(Math.max(1, finalOrder));
+}
+
 function setHomepageCardFormMode(form, isEditing) {
   if (!form) return;
   const submitBtn = form.querySelector('[data-role="card-submit"]');
@@ -993,6 +1022,7 @@ function resetHomepageCardForm(sectionId) {
   if (idInput) idInput.value = '';
   const hintEl = form.querySelector('[data-role="card-image-hint"]');
   if (hintEl) hintEl.textContent = 'تصویر اختیاری است — در صورت عدم انتخاب، تصویر پیش‌فرض استفاده می‌شود.';
+  syncHomepageCardOrderInput(form);
   setHomepageCardFormMode(form, false);
   setHomepageCardFormMessage(form, '');
 }
@@ -1007,6 +1037,7 @@ function fillHomepageCardForm(sectionId, card) {
   const priceInput = form.querySelector('[data-field="price"]');
   const locationInput = form.querySelector('[data-field="location"]');
   const linkInput = form.querySelector('[data-field="link"]');
+  const orderInput = form.querySelector('[data-field="display-order"]');
   const hintEl = form.querySelector('[data-role="card-image-hint"]');
 
   if (idInput) idInput.value = card._id || '';
@@ -1015,6 +1046,7 @@ function fillHomepageCardForm(sectionId, card) {
   if (priceInput) priceInput.value = Number.isFinite(Number(card.price)) ? String(Number(card.price)) : '0';
   if (locationInput) locationInput.value = card.location || '';
   if (linkInput) linkInput.value = card.link || '';
+  if (orderInput) orderInput.value = Math.max(1, Number(card.displayOrder) || 1);
   if (hintEl) {
     const src = getHomepageCardImageUrl(card.image);
     hintEl.innerHTML = src
@@ -1035,10 +1067,13 @@ async function saveHomepageCardFromForm(form) {
   const category = String(form.querySelector('[data-field="category"]')?.value || '').trim();
   const location = String(form.querySelector('[data-field="location"]')?.value || '').trim();
   const link = String(form.querySelector('[data-field="link"]')?.value || '').trim();
+  const displayOrderRaw = String(form.querySelector('[data-field="display-order"]')?.value || '').trim();
   const priceRaw = String(form.querySelector('[data-field="price"]')?.value || '').trim();
   const imageInput = form.querySelector('[data-field="image"]');
   const imageFile = imageInput?.files?.[0] || null;
   const price = Number(priceRaw);
+  const displayOrder = Math.floor(Number(displayOrderRaw));
+  const hasDisplayOrder = Number.isFinite(displayOrder) && displayOrder > 0;
 
   if (!title) {
     setHomepageCardFormMessage(form, 'عنوان کارت الزامی است.', 'error');
@@ -1064,6 +1099,9 @@ async function saveHomepageCardFromForm(form) {
   formData.set('price', String(price));
   formData.set('location', location);
   formData.set('link', link);
+  if (hasDisplayOrder) {
+    formData.set('displayOrder', String(displayOrder));
+  }
   if (imageFile) {
     formData.set('image', imageFile);
   }
@@ -1141,10 +1179,12 @@ function renderHomepageSections() {
   emptyEl.style.display = 'none';
   homepageSectionsList.forEach((section, index) => {
     const cards = sortHomepageCards(Array.isArray(section.cards) ? section.cards : []);
+    const defaultCardOrder = Math.max(1, cards.length + 1);
     const cardsMarkup = cards.length
       ? cards.map((card) => {
           const imageUrl = getHomepageCardImageUrl(card.image);
           const hasLink = Boolean(card.link);
+          const cardOrder = Math.max(1, Number(card.displayOrder) || 1);
           return `
             <article class="homepage-card-item">
               <div class="homepage-card-item__media">
@@ -1155,6 +1195,7 @@ function renderHomepageSections() {
               <div class="homepage-card-item__content">
                 <div class="homepage-card-item__title">${escapeHtml(card.title || 'Untitled')}</div>
                 <div class="homepage-card-item__meta">
+                  <span>جایگاه از راست: ${formatNumber(cardOrder)}</span>
                   <span>${escapeHtml(card.category || '—')}</span>
                   <span>${escapeHtml(formatHomepageCardPrice(card.price))}</span>
                   <span>${escapeHtml(card.location || '—')}</span>
@@ -1240,6 +1281,13 @@ function renderHomepageSections() {
               <label>تصویر کارت *</label>
               <input type="file" data-field="image" accept="image/*" />
               <small data-role="card-image-hint">تصویر اختیاری است — در صورت عدم انتخاب، تصویر پیش‌فرض استفاده می‌شود.</small>
+            </div>
+          </div>
+          <div class="homepage-card-form__row">
+            <div style="grid-column:1 / -1;">
+              <label>جایگاه کارت از سمت راست *</label>
+              <input type="number" data-field="display-order" min="1" step="1" value="${defaultCardOrder}" required placeholder="1" />
+              <small>عدد 1 یعنی اولین کارت سمت راست این ردیف در صفحه اصلی.</small>
             </div>
           </div>
           <div class="homepage-card-form__actions">
