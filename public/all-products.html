@@ -259,6 +259,15 @@
       gap: 15px;
       margin: 25px 0;
       justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .dropdown-filter {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .filter-btn {
@@ -276,6 +285,12 @@
       gap: 8px;
       color: var(--text-medium);
       position: relative;
+    }
+
+    .dropdown-filter .filter-btn[aria-expanded="true"] {
+      background: linear-gradient(92deg, var(--primary-color) 0%, #0ea5e9 100%);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(16, 185, 129, 0.22);
     }
 
     .filter-btn:hover,
@@ -969,7 +984,16 @@
 
     #priceFilterMenu {
       padding: 15px;
-      min-width: 250px;
+      min-width: 270px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    #shopsDropdown {
+      min-width: 240px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 8px;
     }
 
     #applyPriceFilter {
@@ -1005,40 +1029,158 @@
     }
 
     .dropdown-menu {
-      padding: 7px 0;
-      animation: fadeIn .18s;
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 230px;
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.14), 0 8px 24px rgba(14, 165, 233, 0.12);
+      overflow: hidden;
+      z-index: 75;
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+      transform-origin: top right;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      text-align: right;
+      direction: rtl;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .dropdown-menu.is-open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     .dropdown-item {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       width: 100%;
       background: none;
-      border: none;
-      padding: 12px 25px 12px 18px;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 14px;
       text-align: right;
-      font-size: 1rem;
-      color: #374151;
+      font-size: 0.96rem;
+      line-height: 1.75;
+      color: #334155;
       font-family: inherit;
       font-weight: 700;
       cursor: pointer;
-      transition: background .12s, color .14s;
+      transition: background .18s ease, color .18s ease, box-shadow .18s ease;
     }
 
-    .dropdown-item:hover {
-      background: linear-gradient(90deg, #e0fdfa 0%, #e6f4fd 100%);
+    .dropdown-item:hover,
+    .dropdown-item.is-active {
+      background: linear-gradient(90deg, rgba(224, 253, 250, 0.95) 0%, rgba(230, 244, 253, 0.95) 100%);
+      color: #0f766e;
+    }
+
+    .dropdown-item.is-selected {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.12) 0%, rgba(14, 165, 233, 0.16) 100%);
+      color: #0369a1;
+      box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.18);
+    }
+
+    .dropdown-item:focus-visible {
+      outline: 2px solid rgba(14, 165, 233, 0.45);
+      outline-offset: -2px;
+    }
+
+    .dropdown-item__text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropdown-item__chevron {
+      flex-shrink: 0;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .dropdown-item:hover .dropdown-item__chevron,
+    .dropdown-item.is-active .dropdown-item__chevron {
       color: #0ea5e9;
+      transform: translateX(-2px);
+    }
+
+    .category-dropdown-menu {
+      width: min(680px, calc(100vw - 40px));
+      min-width: 420px;
+      max-height: 60vh;
+      padding: 0;
+    }
+
+    .category-dropdown-content {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.95fr) minmax(220px, 1.05fr);
+      max-height: 60vh;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fcfb 100%);
+    }
+
+    .category-column {
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 60vh;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(14, 165, 233, 0.3) transparent;
+    }
+
+    .category-column--primary {
+      border-left: 1px solid rgba(226, 232, 240, 0.9);
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+    }
+
+    .category-column--secondary {
+      background: #ffffff;
+    }
+
+    .category-column-empty {
+      margin: 0;
+      padding: 22px 16px;
+      font-size: 0.9rem;
+      color: #64748b;
+      text-align: right;
+      line-height: 1.8;
+      font-weight: 600;
+    }
+
+    .category-column .dropdown-item {
+      font-size: 0.95rem;
+      padding: 11px 12px;
+    }
+
+    .category-dropdown-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.14);
+      backdrop-filter: blur(1.5px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      z-index: 62;
+    }
+
+    .category-dropdown-backdrop.is-visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (max-width: 980px) {
+      .category-dropdown-menu {
+        min-width: 360px;
+        width: min(560px, calc(100vw - 32px));
+      }
+
+      .category-dropdown-content {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     .products-list {
@@ -1336,6 +1478,9 @@
       padding: 10px 0;
       max-height: 240px;
       overflow-y: auto;
+      opacity: 1;
+      transform: none;
+      z-index: auto;
     }
 
     .mobile-dropdown::-webkit-scrollbar {
@@ -2160,38 +2305,30 @@
     <!-- فیلترهای جذاب -->
     <div class="filters-section desktop">
       <!-- فیلتر اصلی همه محصولات -->
-      <div class="dropdown-filter" style="position: relative; display:inline-block;">
-        <button class="filter-btn active" id="mainFilterBtn" data-filter="all">
+      <div class="dropdown-filter dropdown-filter--category">
+        <button class="filter-btn active" id="mainFilterBtn" data-filter="all" aria-haspopup="menu" aria-expanded="false" type="button">
           <i class="fas fa-boxes"></i>
           همه محصولات
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         </button>
-        <div class="dropdown-menu" id="filterDropdown"
-          style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
-          <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
-          <button class="dropdown-item" data-filter="خوراک">خوراک</button>
-          <button class="dropdown-item" data-filter="خدمات">خدمات</button>
-          <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
-          <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
-          <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
-          <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
-          <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
-          <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
-          <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
-          <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
-          <button class="dropdown-item" data-filter="خودرو">خودرو</button>
+        <div class="dropdown-menu category-dropdown-menu" id="filterDropdown" role="menu" aria-label="انتخاب دسته‌بندی" style="display:none;">
+          <div class="category-dropdown-content">
+            <div class="category-column category-column--primary" id="categoryListDesktop"></div>
+            <div class="category-column category-column--secondary" id="subcategoryListDesktop">
+              <p class="category-column-empty">برای دیدن زیر‌دسته‌ها یک دسته را انتخاب کنید.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- مراکز خرید -->
-      <div class="dropdown-filter" style="position: relative; display:inline-block;">
-        <button class="filter-btn" id="shopsBtn">
+      <div class="dropdown-filter">
+        <button class="filter-btn" id="shopsBtn" aria-haspopup="menu" aria-expanded="false" type="button">
           <i class="fas fa-store"></i>
           همه مراکز خرید
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         </button>
-        <div class="dropdown-menu" id="shopsDropdown"
-          style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+        <div class="dropdown-menu" id="shopsDropdown" style="display:none;">
         </div>
       </div>
 
@@ -2206,14 +2343,13 @@
       </button>
 
       <!-- فیلتر قیمت -->
-      <div class="dropdown-filter" style="position: relative; display:inline-block;">
-        <button class="filter-btn" id="priceFilterBtn">
+      <div class="dropdown-filter">
+        <button class="filter-btn" id="priceFilterBtn" aria-haspopup="menu" aria-expanded="false" type="button">
           <i class="fas fa-dollar-sign"></i>
           فیلتر قیمت
           <i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>
         </button>
-        <div class="dropdown-menu" id="priceFilterMenu"
-          style="display:none; position:absolute; right:0; top:110%; z-index:9; min-width:200px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(16,185,129,0.14); overflow:hidden; border:1.5px solid #0ea5e95b;">
+        <div class="dropdown-menu" id="priceFilterMenu" style="display:none;">
           <div class="price-range">
             <label for="minPrice">حداقل قیمت:</label>
             <input type="number" id="minPrice" placeholder="حداقل قیمت" min="0">
@@ -2228,6 +2364,7 @@
         </div>
       </div>
     </div>
+    <div class="category-dropdown-backdrop" id="categoryDropdownBackdrop" aria-hidden="true"></div>
 
     <div class="products-list" id="mainProductsList">
       <!-- محصولات اینجا رندر می‌شوند -->
@@ -2265,20 +2402,7 @@
               <span>همه محصولات</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            <div class="dropdown-menu mobile-dropdown" id="filterDropdownMobile" style="display:none;">
-              <button class="dropdown-item" data-filter="پوشاک">پوشاک</button>
-              <button class="dropdown-item" data-filter="خوراک">خوراک</button>
-              <button class="dropdown-item" data-filter="خدمات">خدمات</button>
-              <button class="dropdown-item" data-filter="دیجیتال">دیجیتال</button>
-              <button class="dropdown-item" data-filter="زیبایی">زیبایی</button>
-              <button class="dropdown-item" data-filter="کتاب و تحریر">کتاب و تحریر</button>
-              <button class="dropdown-item" data-filter="لوازم خانگی">لوازم خانگی</button>
-              <button class="dropdown-item" data-filter="ورزشی">ورزشی</button>
-              <button class="dropdown-item" data-filter="تالار و مجالس">تالار و مجالس</button>
-              <button class="dropdown-item" data-filter="قنادی و شیرینی">قنادی و شیرینی</button>
-              <button class="dropdown-item" data-filter="گل و گیاه">گل و گیاه</button>
-              <button class="dropdown-item" data-filter="خودرو">خودرو</button>
-            </div>
+            <div class="dropdown-menu mobile-dropdown" id="filterDropdownMobile" style="display:none;"></div>
           </div>
         </section>
 
@@ -2393,8 +2517,12 @@
       "کتاب و تحریر", "لوازم خانگی", "ورزشی", "تالار و مجالس",
       "قنادی و شیرینی", "گل و گیاه", "خودرو"
     ];
+    const DEFAULT_CATEGORY_LABEL = "همه محصولات";
     const DEFAULT_SHOP_LABEL = "همه مراکز خرید";
     let shoppingCenters = [];
+    let categoryTree = [];
+    let currentSubcategory = '';
+    let activeDesktopCategoryPanel = DEFAULT_CATEGORY_LABEL;
 
     function escapeHtml(value) {
       if (value === null || value === undefined) return '';
@@ -2502,7 +2630,7 @@
 
     let currentSort = null;          // cheap | expensive | null
     let currentShop = DEFAULT_SHOP_LABEL;
-    let currentCategory = "همه محصولات";
+    let currentCategory = DEFAULT_CATEGORY_LABEL;
     let currentPriceFilter = null;          // {min,max} | null
 
     /* --------------------- آماده‌سازی دراپ‌داون‌ها --------------------- */
@@ -2518,6 +2646,7 @@
       setupEventListeners();
       setupHamburgerMenu();
       setCurrentShop(DEFAULT_SHOP_LABEL);
+      refreshCategoryDropdowns();
       populateShopDropdowns();
       await fetchShoppingCenters();
       if (homepageSectionContext.isScoped) {
@@ -2636,11 +2765,283 @@
       }
     }
 
+    function normalizeTextValue(value) {
+      return (typeof value === 'string') ? value.trim() : '';
+    }
+
+    function getPrimaryCategoryFromProduct(product) {
+      const candidates = [
+        product?.category,
+        product?.seller?.category,
+        product?.sellerCategory,
+        product?.categoryName,
+        product?.seller?.categoryName
+      ];
+      for (const candidate of candidates) {
+        const normalized = normalizeTextValue(candidate);
+        if (normalized) return normalized;
+      }
+      return '';
+    }
+
+    function getProductSubcategoryValues(product) {
+      const values = new Set();
+      const candidates = [
+        product?.subcategory,
+        product?.subCategory,
+        product?.sub_category,
+        product?.seller?.subcategory,
+        product?.seller?.subCategory,
+        product?.seller?.sub_category,
+        product?.sellerSubcategory
+      ];
+
+      function addValue(entry) {
+        const value = normalizeTextValue(entry);
+        if (value) values.add(value);
+      }
+
+      candidates.forEach(entry => {
+        if (Array.isArray(entry)) {
+          entry.forEach(addValue);
+        } else {
+          addValue(entry);
+        }
+      });
+
+      const parentCategory = getPrimaryCategoryFromProduct(product);
+      if (parentCategory) {
+        values.delete(parentCategory);
+      }
+
+      return Array.from(values).sort((a, b) => a.localeCompare(b, 'fa', { sensitivity: 'base' }));
+    }
+
+    function buildCategoryTreeFromProducts(sourceProducts) {
+      const baseCategories = categories
+        .map(name => normalizeTextValue(name))
+        .filter(Boolean)
+        .filter(name => name !== DEFAULT_CATEGORY_LABEL);
+
+      const map = new Map();
+      baseCategories.forEach((name, index) => {
+        map.set(name, { name, subcategories: new Set(), order: index });
+      });
+
+      const list = Array.isArray(sourceProducts) ? sourceProducts : [];
+      list.forEach(product => {
+        const categoryName = getPrimaryCategoryFromProduct(product);
+        if (!categoryName || categoryName === DEFAULT_CATEGORY_LABEL) return;
+
+        if (!map.has(categoryName)) {
+          map.set(categoryName, { name: categoryName, subcategories: new Set(), order: Number.MAX_SAFE_INTEGER });
+        }
+
+        const entry = map.get(categoryName);
+        getProductSubcategoryValues(product).forEach(sub => {
+          if (sub && sub !== categoryName) {
+            entry.subcategories.add(sub);
+          }
+        });
+      });
+
+      const knownEntries = baseCategories
+        .map(name => map.get(name))
+        .filter(Boolean);
+
+      const extraEntries = [];
+      map.forEach((entry, key) => {
+        if (!baseCategories.includes(key)) {
+          extraEntries.push(entry);
+        }
+      });
+      extraEntries.sort((a, b) => a.name.localeCompare(b.name, 'fa', { sensitivity: 'base' }));
+
+      const orderedEntries = [...knownEntries, ...extraEntries].map(entry => ({
+        name: entry.name,
+        subcategories: Array.from(entry.subcategories).sort((a, b) => a.localeCompare(b, 'fa', { sensitivity: 'base' }))
+      }));
+
+      return [{ name: DEFAULT_CATEGORY_LABEL, subcategories: [] }, ...orderedEntries];
+    }
+
+    function setSimpleDropdownOpenState(menuElement, triggerButton, isOpen) {
+      if (!menuElement || !triggerButton) return;
+      if (isOpen) {
+        menuElement.style.display = 'block';
+        requestAnimationFrame(() => {
+          menuElement.classList.add('is-open');
+        });
+        triggerButton.setAttribute('aria-expanded', 'true');
+      } else {
+        menuElement.classList.remove('is-open');
+        menuElement.style.display = 'none';
+        triggerButton.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function setCategoryDropdownOpenState(isOpen) {
+      const categoryMenu = document.getElementById('filterDropdown');
+      const categoryButton = document.getElementById('mainFilterBtn');
+      const backdrop = document.getElementById('categoryDropdownBackdrop');
+
+      if (!categoryMenu || !categoryButton) return;
+
+      setSimpleDropdownOpenState(categoryMenu, categoryButton, isOpen);
+      if (backdrop) {
+        backdrop.classList.toggle('is-visible', isOpen);
+        backdrop.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      }
+    }
+
+    function closeDesktopDropdowns(exceptId = '') {
+      const shopsMenu = document.getElementById('shopsDropdown');
+      const shopsButton = document.getElementById('shopsBtn');
+      const priceMenu = document.getElementById('priceFilterMenu');
+      const priceButton = document.getElementById('priceFilterBtn');
+
+      if (exceptId !== 'filterDropdown') {
+        setCategoryDropdownOpenState(false);
+      }
+      if (exceptId !== 'shopsDropdown') {
+        setSimpleDropdownOpenState(shopsMenu, shopsButton, false);
+      }
+      if (exceptId !== 'priceFilterMenu') {
+        setSimpleDropdownOpenState(priceMenu, priceButton, false);
+      }
+    }
+
+    function renderDesktopSubcategoryPanel(categoryName) {
+      const panel = document.getElementById('subcategoryListDesktop');
+      if (!panel) return;
+
+      const selectedCategory = categoryTree.find(entry => entry.name === categoryName);
+      const subcategories = Array.isArray(selectedCategory?.subcategories) ? selectedCategory.subcategories : [];
+
+      if (!selectedCategory || !subcategories.length) {
+        panel.innerHTML = '<p class="category-column-empty">برای این دسته زیر‌دسته‌ای ثبت نشده است.</p>';
+        return;
+      }
+
+      const allSubcategoriesSelected = currentCategory === categoryName && !currentSubcategory;
+
+      const itemsHtml = [
+        `<button type="button" class="dropdown-item dropdown-item--subcategory ${allSubcategoriesSelected ? 'is-selected' : ''}" data-role="subcategory" data-parent-category="${escapeHtml(categoryName)}" data-subcategory="">
+          <span class="dropdown-item__text">همه موارد ${escapeHtml(categoryName)}</span>
+        </button>`
+      ];
+
+      subcategories.forEach(sub => {
+        const isSelected = currentCategory === categoryName && currentSubcategory === sub;
+        itemsHtml.push(
+          `<button type="button" class="dropdown-item dropdown-item--subcategory ${isSelected ? 'is-selected' : ''}" data-role="subcategory" data-parent-category="${escapeHtml(categoryName)}" data-subcategory="${escapeHtml(sub)}">
+            <span class="dropdown-item__text">${escapeHtml(sub)}</span>
+          </button>`
+        );
+      });
+
+      panel.innerHTML = itemsHtml.join('');
+    }
+
+    function renderDesktopCategoryPanel(categoryName) {
+      const categoryList = document.getElementById('categoryListDesktop');
+      if (!categoryList) return;
+
+      const fallbackCategory = categoryTree[0]?.name || DEFAULT_CATEGORY_LABEL;
+      activeDesktopCategoryPanel = categoryTree.some(entry => entry.name === categoryName)
+        ? categoryName
+        : fallbackCategory;
+
+      const html = categoryTree.map(entry => {
+        const hasSubcategories = Array.isArray(entry.subcategories) && entry.subcategories.length > 0;
+        const isActivePanel = activeDesktopCategoryPanel === entry.name;
+        const isSelectedCategory = currentCategory === entry.name;
+        const classNames = ['dropdown-item', 'dropdown-item--category'];
+        if (isActivePanel) classNames.push('is-active');
+        if (isSelectedCategory) classNames.push('is-selected');
+        const chevron = hasSubcategories
+          ? '<i class="fas fa-chevron-left dropdown-item__chevron" aria-hidden="true"></i>'
+          : '';
+        return `<button type="button" class="${classNames.join(' ')}" data-role="category" data-filter="${escapeHtml(entry.name)}" data-has-subcategories="${hasSubcategories ? 'true' : 'false'}">
+          <span class="dropdown-item__text">${escapeHtml(entry.name)}</span>
+          ${chevron}
+        </button>`;
+      }).join('');
+
+      categoryList.innerHTML = html;
+      renderDesktopSubcategoryPanel(activeDesktopCategoryPanel);
+    }
+
+    function renderMobileCategoryMenu() {
+      const mobileMenu = document.getElementById('filterDropdownMobile');
+      if (!mobileMenu) return;
+
+      const html = categoryTree.map(entry => {
+        const hasSubcategories = Array.isArray(entry.subcategories) && entry.subcategories.length > 0;
+        const isSelected = currentCategory === entry.name;
+        const chevron = hasSubcategories
+          ? '<i class="fas fa-chevron-left dropdown-item__chevron" aria-hidden="true"></i>'
+          : '';
+        return `<button type="button" class="dropdown-item ${isSelected ? 'is-selected' : ''}" data-filter="${escapeHtml(entry.name)}">
+          <span class="dropdown-item__text">${escapeHtml(entry.name)}</span>
+          ${chevron}
+        </button>`;
+      }).join('');
+
+      mobileMenu.innerHTML = html;
+    }
+
+    function updateCategoryButtonLabels() {
+      const categoryLabel = currentCategory === DEFAULT_CATEGORY_LABEL
+        ? DEFAULT_CATEGORY_LABEL
+        : (currentSubcategory ? `${currentCategory} / ${currentSubcategory}` : currentCategory);
+      const safeCategoryLabel = escapeHtml(categoryLabel);
+
+      const desktopBtn = document.getElementById('mainFilterBtn');
+      if (desktopBtn) {
+        desktopBtn.innerHTML = `<i class="fas fa-boxes"></i>${safeCategoryLabel}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      }
+
+      const mobileBtn = document.getElementById('mainFilterBtnMobile');
+      if (mobileBtn) {
+        mobileBtn.innerHTML = `<i class="fas fa-boxes"></i><span>${safeCategoryLabel}</span><i class="fas fa-chevron-down"></i>`;
+      }
+    }
+
+    function refreshCategoryDropdowns() {
+      categoryTree = buildCategoryTreeFromProducts(allProducts);
+      const categoryNames = new Set(categoryTree.map(entry => entry.name));
+
+      if (!categoryNames.has(currentCategory)) {
+        currentCategory = DEFAULT_CATEGORY_LABEL;
+        currentSubcategory = '';
+      }
+
+      const selectedCategory = categoryTree.find(entry => entry.name === currentCategory);
+      const validSubcategories = new Set(selectedCategory?.subcategories || []);
+      if (currentSubcategory && !validSubcategories.has(currentSubcategory)) {
+        currentSubcategory = '';
+      }
+
+      if (!categoryNames.has(activeDesktopCategoryPanel)) {
+        activeDesktopCategoryPanel = currentCategory || DEFAULT_CATEGORY_LABEL;
+      }
+
+      renderDesktopCategoryPanel(activeDesktopCategoryPanel);
+      renderMobileCategoryMenu();
+      updateCategoryButtonLabels();
+    }
+
     function setupEventListeners() {
       /* --- جستجو --- */
       const searchInput = document.getElementById('searchInput');
       if (searchInput) {
         searchInput.addEventListener('input', filterAndSortProducts);
+      }
+
+      const searchInputMobile = document.getElementById('searchInputMobile');
+      if (searchInputMobile) {
+        searchInputMobile.addEventListener('input', filterAndSortProducts);
       }
 
       /* --- فیلترهای دسکتاپ --- */
@@ -2718,38 +3119,80 @@
       const shopMenu = document.getElementById('shopsDropdown');
       const mainFilterBtn = document.getElementById('mainFilterBtn');
       const shopsBtn = document.getElementById('shopsBtn');
+      const priceFilterBtn = document.getElementById('priceFilterBtn');
       const priceFilterMenu = document.getElementById('priceFilterMenu');
+      const categoryBackdrop = document.getElementById('categoryDropdownBackdrop');
 
-      // فیلتر دسته‌بندی
       if (mainFilterBtn && catMenu && shopMenu && priceFilterMenu) {
         mainFilterBtn.addEventListener('click', e => {
           e.stopPropagation();
-          catMenu.style.display = catMenu.style.display === 'block' ? 'none' : 'block';
-          shopMenu.style.display = 'none';
-          priceFilterMenu.style.display = 'none';
+          const willOpen = catMenu.style.display !== 'block';
+          closeDesktopDropdowns();
+          if (willOpen) {
+            activeDesktopCategoryPanel = currentCategory || DEFAULT_CATEGORY_LABEL;
+            renderDesktopCategoryPanel(activeDesktopCategoryPanel);
+            setCategoryDropdownOpenState(true);
+          }
         });
       }
 
-      // فیلتر فروشگاه
       if (shopsBtn && shopMenu && catMenu && priceFilterMenu) {
         shopsBtn.addEventListener('click', e => {
           e.stopPropagation();
-          shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
-          catMenu.style.display = 'none';
-          priceFilterMenu.style.display = 'none';
+          const willOpen = shopMenu.style.display !== 'block';
+          closeDesktopDropdowns();
+          if (willOpen) {
+            setSimpleDropdownOpenState(shopMenu, shopsBtn, true);
+          }
         });
       }
 
-      // فیلتر دسته‌بندی
-      if (catMenu && mainFilterBtn) {
-        document.querySelectorAll('#filterDropdown .dropdown-item').forEach(item => {
-          item.addEventListener('click', function () {
-            currentCategory = this.dataset.filter;
-            mainFilterBtn.innerHTML =
-              `<i class="fas fa-boxes"></i>${currentCategory}<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+      if (priceFilterBtn && priceFilterMenu) {
+        priceFilterBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          const willOpen = priceFilterMenu.style.display !== 'block';
+          closeDesktopDropdowns();
+          if (willOpen) {
+            setSimpleDropdownOpenState(priceFilterMenu, priceFilterBtn, true);
+          }
+        });
+      }
+
+      if (catMenu) {
+        catMenu.addEventListener('click', event => {
+          event.stopPropagation();
+          const target = event.target.closest('.dropdown-item');
+          if (!target) return;
+
+          const role = target.dataset.role || 'category';
+          if (role === 'category') {
+            const nextCategory = normalizeTextValue(target.dataset.filter) || DEFAULT_CATEGORY_LABEL;
+            const hasSubcategories = target.dataset.hasSubcategories === 'true';
+            currentCategory = nextCategory;
+            currentSubcategory = '';
+            activeDesktopCategoryPanel = nextCategory;
+            renderDesktopCategoryPanel(activeDesktopCategoryPanel);
+            updateCategoryButtonLabels();
             filterAndSortProducts();
             updateActiveFilters();
-          });
+            if (!hasSubcategories) {
+              closeDesktopDropdowns();
+            }
+            return;
+          }
+
+          if (role === 'subcategory') {
+            const parentCategory = normalizeTextValue(target.dataset.parentCategory) || currentCategory;
+            const nextSubcategory = normalizeTextValue(target.dataset.subcategory);
+            currentCategory = parentCategory || DEFAULT_CATEGORY_LABEL;
+            currentSubcategory = nextSubcategory || '';
+            activeDesktopCategoryPanel = currentCategory;
+            renderDesktopCategoryPanel(activeDesktopCategoryPanel);
+            updateCategoryButtonLabels();
+            filterAndSortProducts();
+            updateActiveFilters();
+            closeDesktopDropdowns();
+          }
         });
       }
 
@@ -2761,9 +3204,28 @@
           setCurrentShop(target.dataset.shop);
           filterAndSortProducts();
           updateActiveFilters();
-          shopMenu.style.display = 'none';
+          closeDesktopDropdowns();
         });
       }
+
+      if (categoryBackdrop) {
+        categoryBackdrop.addEventListener('click', () => {
+          closeDesktopDropdowns();
+        });
+      }
+
+      document.addEventListener('click', event => {
+        const desktopFilters = document.querySelector('.filters-section.desktop');
+        if (!desktopFilters || !desktopFilters.contains(event.target)) {
+          closeDesktopDropdowns();
+        }
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+          closeDesktopDropdowns();
+        }
+      });
     }
 
     function setupMobileFilters() {
@@ -2818,15 +3280,16 @@
 
       // فیلتر دسته‌بندی موبایل
       if (catMenuMobile && mainFilterBtnMobile) {
-        document.querySelectorAll('#filterDropdownMobile .dropdown-item').forEach(item => {
-          item.addEventListener('click', function () {
-            currentCategory = this.dataset.filter;
-            mainFilterBtnMobile.innerHTML =
-              `<i class="fas fa-boxes"></i><span>${currentCategory}</span><i class="fas fa-chevron-down"></i>`;
-            updateActiveFilters();
-            catMenuMobile.style.display = 'none';
-            mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
-          });
+        catMenuMobile.addEventListener('click', event => {
+          const target = event.target.closest('.dropdown-item');
+          if (!target) return;
+          event.stopPropagation();
+          currentCategory = normalizeTextValue(target.dataset.filter) || DEFAULT_CATEGORY_LABEL;
+          currentSubcategory = '';
+          updateCategoryButtonLabels();
+          updateActiveFilters();
+          catMenuMobile.style.display = 'none';
+          mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
         });
       }
 
@@ -2874,6 +3337,7 @@
 
       if (sortCheap) {
         sortCheap.addEventListener('click', function () {
+          closeDesktopDropdowns();
           currentSort = 'cheap';
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
@@ -2884,6 +3348,7 @@
 
       if (sortExpensive) {
         sortExpensive.addEventListener('click', function () {
+          closeDesktopDropdowns();
           currentSort = 'expensive';
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
@@ -2916,20 +3381,7 @@
     }
 
     function setupPriceFilter() {
-      const priceMenu = document.getElementById('priceFilterMenu');
       const priceFilterBtn = document.getElementById('priceFilterBtn');
-      const filterDropdown = document.getElementById('filterDropdown');
-      const shopsDropdown = document.getElementById('shopsDropdown');
-
-      // فیلتر قیمت دسکتاپ
-      if (priceFilterBtn && priceMenu && filterDropdown && shopsDropdown) {
-        priceFilterBtn.addEventListener('click', e => {
-          e.stopPropagation();
-          priceMenu.style.display = priceMenu.style.display === 'block' ? 'none' : 'block';
-          filterDropdown.style.display = 'none';
-          shopsDropdown.style.display = 'none';
-        });
-      }
 
       const applyPriceFilter = document.getElementById('applyPriceFilter');
       const minPrice = document.getElementById('minPrice');
@@ -2952,6 +3404,7 @@
           priceFilterBtn.classList.add('active');
           filterAndSortProducts();
           updateActiveFilters();
+          closeDesktopDropdowns();
         });
       }
     }
@@ -3086,6 +3539,7 @@
           allProducts = scopedProducts.map(mapSectionProductToAllProductsShape);
         }
 
+        refreshCategoryDropdowns();
         filterAndSortProducts();
       } catch (err) {
         console.error('Error fetching managed section products:', err);
@@ -3114,6 +3568,7 @@
         }
         allProducts = await response.json();
 
+        refreshCategoryDropdowns();
         filterAndSortProducts();
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -3135,12 +3590,15 @@
     /* -------------------- فیلتر و مرتب‌سازی -------------------- */
     function filterAndSortProducts() {
       const searchInput = document.getElementById('searchInput');
+      const searchInputMobile = document.getElementById('searchInputMobile');
       const productsList = document.getElementById('mainProductsList');
 
       if (!productsList) return;
 
       // دریافت مقدار جستجو با بررسی null safety
-      const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const desktopQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      const mobileQuery = searchInputMobile ? searchInputMobile.value.trim().toLowerCase() : '';
+      const q = mobileQuery || desktopQuery;
       let list = [...allProducts];
 
       if (currentShop !== DEFAULT_SHOP_LABEL) {
@@ -3149,7 +3607,12 @@
           return sellerName === currentShop;
         });
       }
-      if (currentCategory !== "همه محصولات") list = list.filter(p => p.category === currentCategory);
+      if (currentCategory !== DEFAULT_CATEGORY_LABEL) {
+        list = list.filter(p => getPrimaryCategoryFromProduct(p) === currentCategory);
+      }
+      if (currentSubcategory) {
+        list = list.filter(p => getProductSubcategoryValues(p).includes(currentSubcategory));
+      }
       if (currentPriceFilter) list = list.filter(p => p.price >= currentPriceFilter.min && p.price <= currentPriceFilter.max);
       if (q) list = list.filter(p => p.title?.toLowerCase().includes(q));
 
@@ -3385,10 +3848,13 @@
 
       activeFiltersContainer.innerHTML = '';
 
-      if (currentCategory !== "همه محصولات") {
+      if (currentCategory !== DEFAULT_CATEGORY_LABEL) {
+        const categoryFilterLabel = currentSubcategory
+          ? `${currentCategory} / ${currentSubcategory}`
+          : currentCategory;
         activeFiltersContainer.innerHTML += `
       <div class="active-filter">
-        <span>دسته: ${currentCategory}</span>
+        <span>دسته: ${escapeHtml(categoryFilterLabel)}</span>
         <span class="remove" onclick="removeFilter('category')">×</span>
       </div>
     `;
@@ -3427,23 +3893,28 @@
     function removeFilter(type) {
       switch (type) {
         case 'category':
-          currentCategory = "همه محصولات";
+          currentCategory = DEFAULT_CATEGORY_LABEL;
+          currentSubcategory = '';
           const mainFilterBtn = document.getElementById('mainFilterBtn');
           const mainFilterBtnMobile = document.getElementById('mainFilterBtnMobile');
 
           if (mainFilterBtn) {
-            mainFilterBtn.innerHTML =
-              `<i class="fas fa-boxes"></i>همه محصولات<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+            mainFilterBtn.setAttribute('aria-expanded', 'false');
           }
           if (mainFilterBtnMobile) {
-            mainFilterBtnMobile.innerHTML =
-              `<i class="fas fa-boxes"></i><span>همه محصولات</span><i class="fas fa-chevron-down"></i>`;
             mainFilterBtnMobile.setAttribute('aria-expanded', 'false');
           }
+          updateCategoryButtonLabels();
+          renderDesktopCategoryPanel(currentCategory);
+          closeDesktopDropdowns();
           break;
         case 'shop':
           setCurrentShop(DEFAULT_SHOP_LABEL);
+          const shopsBtn = document.getElementById('shopsBtn');
           const shopsBtnMobile = document.getElementById('shopsBtnMobile');
+          if (shopsBtn) {
+            shopsBtn.setAttribute('aria-expanded', 'false');
+          }
           if (shopsBtnMobile) {
             shopsBtnMobile.setAttribute('aria-expanded', 'false');
           }
@@ -3460,6 +3931,7 @@
           if (priceFilterBtn) {
             priceFilterBtn.innerHTML =
               `<i class="fas fa-dollar-sign"></i>فیلتر قیمت<i class="fas fa-chevron-down" style="margin-right:7px;font-size:0.95em"></i>`;
+            priceFilterBtn.setAttribute('aria-expanded', 'false');
           }
           if (priceFilterBtnMobile) {
             priceFilterBtnMobile.innerHTML =
@@ -3481,13 +3953,6 @@
       filterAndSortProducts();
     }
 
-    /* --- بستن تمام منوها با کلیک بیرون --- */
-    document.body.addEventListener('click', () => {
-      ['filterDropdown', 'shopsDropdown', 'priceFilterMenu'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-    });
   </script>
 
   <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
