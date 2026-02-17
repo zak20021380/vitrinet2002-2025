@@ -129,6 +129,8 @@
       href: '/index.html',
       label: 'خانه',
       icon: '<path d="M3 10.75 12 3l9 7.75V20a1.5 1.5 0 0 1-1.5 1.5H15a1.5 1.5 0 0 1-1.5-1.5v-4.25h-3V20A1.5 1.5 0 0 1 9 21.5H4.5A1.5 1.5 0 0 1 3 20v-9.25Z" fill="currentColor"/><path d="M9.5 21.5v-5.25A1.25 1.25 0 0 1 10.75 15h2.5A1.25 1.25 0 0 1 14.5 16.25V21.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+      iconOutline: '<path d="M3 10.75 12 3l9 7.75V20a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20v-9.25Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 21.5v-5.25A1.25 1.25 0 0 1 10.75 15h2.5A1.25 1.25 0 0 1 14.5 16.25V21.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+      iconFilled: '<path d="M3 10.75 12 3l9 7.75V20a1.5 1.5 0 0 1-1.5 1.5H15a1.5 1.5 0 0 1-1.5-1.5v-4.25h-3V20A1.5 1.5 0 0 1 9 21.5H4.5A1.5 1.5 0 0 1 3 20v-9.25Z" fill="currentColor"/><path d="M9.5 21.5v-5.25A1.25 1.25 0 0 1 10.75 15h2.5A1.25 1.25 0 0 1 14.5 16.25V21.5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>',
       matches: ['/', '/index.html', 'index.html']
     },
     {
@@ -136,6 +138,8 @@
       href: '/categories.html',
       label: 'دسته‌بندی',
       icon: '<path d="M4 4.5h6a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 10 13.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5Z" fill="currentColor"/><path d="M14 4.5h6a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 20 13.5h-6a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 14 4.5Z" fill="currentColor"/><path d="M4 14.5h6A1.5 1.5 0 0 1 11.5 16v4A1.5 1.5 0 0 1 10 21.5H4A1.5 1.5 0 0 1 2.5 20v-4A1.5 1.5 0 0 1 4 14.5Z" fill="currentColor"/><path d="M14 14.5h6a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 20 21.5h-6a1.5 1.5 0 0 1-1.5-1.5v-4a1.5 1.5 0 0 1 1.5-1.5Z" fill="currentColor"/>',
+      iconOutline: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/>',
+      iconFilled: '<path d="M4 4.5h6a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 10 13.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5Z" fill="currentColor"/><path d="M14 4.5h6a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 20 13.5h-6a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 14 4.5Z" fill="currentColor"/><path d="M4 14.5h6A1.5 1.5 0 0 1 11.5 16v4A1.5 1.5 0 0 1 10 21.5H4A1.5 1.5 0 0 1 2.5 20v-4A1.5 1.5 0 0 1 4 14.5Z" fill="currentColor"/><path d="M14 14.5h6a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 20 21.5h-6a1.5 1.5 0 0 1-1.5-1.5v-4a1.5 1.5 0 0 1 1.5-1.5Z" fill="currentColor"/>',
       matches: [
         '/categories.html',
         'categories.html',
@@ -164,6 +168,8 @@
       href: '/shops-by-category.html?cat=service',
       label: 'خدمات',
       icon: '<path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8.25v7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.25 12h7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+      iconOutline: '<path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.25v7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.25 12h7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+      iconFilled: '<path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Z" fill="currentColor"/><path d="M12 8.25v7.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M8.25 12h7.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>',
       matches: [
         '/service-directory.html',
         'service-directory.html',
@@ -182,6 +188,8 @@
       href: '/login.html',
       label: 'ورود',
       icon: '<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 1.5c-3 0-6.5 1.54-6.5 4.5v.5A1.5 1.5 0 0 0 7 20h10a1.5 1.5 0 0 0 1.5-1.5v-.5c0-2.96-3.5-4.5-6.5-4.5Z" fill="currentColor"/>',
+      iconOutline: '<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19v-.5c0-2.96 3.5-4.5 6.5-4.5s6.5 1.54 6.5 4.5v.5A1.5 1.5 0 0 1 17 20.5H7A1.5 1.5 0 0 1 5.5 19Z" fill="none" stroke="currentColor" stroke-width="1.7"/>',
+      iconFilled: '<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 1.5c-3 0-6.5 1.54-6.5 4.5v.5A1.5 1.5 0 0 0 7 20h10a1.5 1.5 0 0 0 1.5-1.5v-.5c0-2.96-3.5-4.5-6.5-4.5Z" fill="currentColor"/>',
       labelClass: 'login-mobile-label',
       extraClass: 'nav-item-account',
       matches: [
@@ -250,7 +258,23 @@
           justify-content: space-between;
           align-items: center;
           gap: 6px;
+          overflow: hidden;
           transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .mobile-nav-indicator {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 72px;
+          height: 52px;
+          border-radius: 999px;
+          background: rgba(16, 185, 129, 0.1);
+          opacity: 0;
+          pointer-events: none;
+          transform: translate3d(0, 12px, 0);
+          transition: transform 0.2s ease, width 0.2s ease, opacity 0.2s ease;
+          z-index: 0;
         }
 
         .mobile-bottom-nav ul {
@@ -286,6 +310,8 @@
 
         .mobile-nav .nav-item,
         .mobile-bottom-nav .nav-item {
+          position: relative;
+          z-index: 1;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -312,7 +338,15 @@
 
         .mobile-nav .nav-item:active,
         .mobile-bottom-nav .nav-item:active {
-          transform: scale(0.96);
+          transform: scale(1.05);
+        }
+
+        .mobile-nav .nav-icon-wrap,
+        .mobile-bottom-nav .nav-icon-wrap {
+          position: relative;
+          width: 24px;
+          height: 24px;
+          flex-shrink: 0;
         }
 
         .mobile-nav .nav-item svg,
@@ -320,8 +354,22 @@
           width: 24px;
           height: 24px;
           color: inherit;
-          flex-shrink: 0;
-          transition: transform 0.2s ease;
+          position: absolute;
+          inset: 0;
+          transform-origin: center;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .mobile-nav .nav-item .nav-icon-outline,
+        .mobile-bottom-nav .nav-item .nav-icon-outline {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .mobile-nav .nav-item .nav-icon-filled,
+        .mobile-bottom-nav .nav-item .nav-icon-filled {
+          opacity: 0;
+          transform: scale(0.84);
         }
 
         .mobile-nav .nav-item .nav-label,
@@ -336,13 +384,20 @@
         .mobile-nav .nav-item.active,
         .mobile-bottom-nav .nav-item.active {
           color: #0f766e;
-          background: rgba(16, 185, 129, 0.1);
+          background: transparent;
           font-weight: 600;
         }
 
-        .mobile-nav .nav-item.active svg,
-        .mobile-bottom-nav .nav-item.active svg {
-          transform: translateY(-1px);
+        .mobile-nav .nav-item.active .nav-icon-outline,
+        .mobile-bottom-nav .nav-item.active .nav-icon-outline {
+          opacity: 0;
+          transform: scale(0.84);
+        }
+
+        .mobile-nav .nav-item.active .nav-icon-filled,
+        .mobile-bottom-nav .nav-item.active .nav-icon-filled {
+          opacity: 1;
+          transform: scale(1);
         }
 
         .mobile-nav .nav-item.active .nav-label,
@@ -359,6 +414,7 @@
       @media (prefers-reduced-motion: reduce) {
         .mobile-nav,
         .mobile-bottom-nav,
+        .mobile-nav-indicator,
         .mobile-nav .nav-item,
         .mobile-bottom-nav .nav-item,
         .mobile-nav .nav-item svg,
@@ -383,17 +439,28 @@
     link.className = 'nav-item';
     link.href = config.href;
     link.setAttribute('id', config.id);
+    link.setAttribute('aria-label', config.label);
 
     if (config.extraClass) {
       link.classList.add(config.extraClass);
     }
 
-    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    icon.setAttribute('viewBox', '0 0 24 24');
-    icon.setAttribute('fill', 'none');
-    icon.setAttribute('aria-hidden', 'true');
-    appendSvgContent(icon, config.icon);
-    icon.classList.add('nav-icon');
+    const iconWrap = document.createElement('span');
+    iconWrap.className = 'nav-icon-wrap';
+
+    const outlineIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    outlineIcon.setAttribute('viewBox', '0 0 24 24');
+    outlineIcon.setAttribute('fill', 'none');
+    outlineIcon.setAttribute('aria-hidden', 'true');
+    outlineIcon.classList.add('nav-icon', 'nav-icon-outline');
+    appendSvgContent(outlineIcon, config.iconOutline || config.icon || '');
+
+    const filledIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    filledIcon.setAttribute('viewBox', '0 0 24 24');
+    filledIcon.setAttribute('fill', 'none');
+    filledIcon.setAttribute('aria-hidden', 'true');
+    filledIcon.classList.add('nav-icon', 'nav-icon-filled');
+    appendSvgContent(filledIcon, config.iconFilled || config.iconOutline || config.icon || '');
 
     const label = document.createElement('span');
     label.className = 'nav-label';
@@ -402,10 +469,56 @@
     }
     label.textContent = config.label;
 
-    link.appendChild(icon);
+    iconWrap.appendChild(outlineIcon);
+    iconWrap.appendChild(filledIcon);
+    link.appendChild(iconWrap);
     link.appendChild(label);
 
     return link;
+  }
+
+  function ensureNavIndicator(nav) {
+    if (!nav) return null;
+
+    let indicator = nav.querySelector('.mobile-nav-indicator');
+    if (!indicator) {
+      indicator = document.createElement('span');
+      indicator.className = 'mobile-nav-indicator';
+      indicator.setAttribute('aria-hidden', 'true');
+      nav.insertBefore(indicator, nav.firstChild);
+    }
+
+    nav.classList.add('has-indicator');
+    return indicator;
+  }
+
+  function updateNavIndicator(nav, activeItem) {
+    if (!nav) return;
+    const indicator = ensureNavIndicator(nav);
+    if (!indicator) return;
+
+    if (!activeItem) {
+      indicator.style.opacity = '0';
+      return;
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    const activeRect = activeItem.getBoundingClientRect();
+    if (!navRect.width || !activeRect.width) {
+      indicator.style.opacity = '0';
+      return;
+    }
+
+    const width = Math.max(60, Math.min(activeRect.width - 10, 88));
+    const height = Math.max(46, Math.min(navRect.height - 12, 54));
+    const left = activeRect.left - navRect.left + ((activeRect.width - width) / 2);
+    const top = (navRect.height - height) / 2;
+    const clampedLeft = Math.max(6, Math.min(left, navRect.width - width - 6));
+
+    indicator.style.width = `${width}px`;
+    indicator.style.height = `${height}px`;
+    indicator.style.transform = `translate3d(${clampedLeft}px, ${top}px, 0)`;
+    indicator.style.opacity = '1';
   }
 
   function getCurrentPath() {
@@ -529,6 +642,8 @@
         item.removeAttribute('aria-current');
       }
     });
+
+    updateNavIndicator(nav, activeItem);
   }
 
   function initialiseNav() {
@@ -582,6 +697,18 @@
   }
 
   let navElement = null;
+  let navLayoutRaf = null;
+
+  function queueNavLayoutUpdate() {
+    if (navLayoutRaf !== null) {
+      cancelAnimationFrame(navLayoutRaf);
+    }
+
+    navLayoutRaf = requestAnimationFrame(() => {
+      navLayoutRaf = null;
+      setActiveState(navElement);
+    });
+  }
 
   window.addEventListener('DOMContentLoaded', () => {
     navElement = initialiseNav();
@@ -590,19 +717,24 @@
   window.addEventListener('storage', (event) => {
     if (!event.key || ['token', 'seller', 'user'].includes(event.key)) {
       updateAuthNavigationState();
+      queueNavLayoutUpdate();
     }
   });
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       updateAuthNavigationState();
+      queueNavLayoutUpdate();
     }
   });
 
   document.addEventListener('mobileNavReady', () => {
     updateAuthNavigationState();
+    queueNavLayoutUpdate();
   });
 
   window.addEventListener('hashchange', () => setActiveState(navElement));
   window.addEventListener('popstate', () => setActiveState(navElement));
+  window.addEventListener('resize', queueNavLayoutUpdate);
+  window.addEventListener('orientationchange', queueNavLayoutUpdate);
 })();
