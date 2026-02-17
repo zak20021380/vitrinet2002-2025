@@ -1464,10 +1464,10 @@
 <body>
   <!-- هدر بهبود یافته -->
 <header class="w-full bg-white/30 sm:bg-white/90 backdrop-blur-xl sm:backdrop-blur-md shadow-none sm:shadow-sm sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto flex flex-nowrap sm:flex-wrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3 gap-y-2">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 gap-2">
     <div class="flex items-center gap-2 flex-shrink-0">
       <a href="index.html" class="logo-vitreenet">Vitreenet</a>
-      <div class="flex items-center gap-1 px-2 py-1 rounded-full ml-2" style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); backdrop-filter: blur(5px);">
+      <div class="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full ml-2" style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); backdrop-filter: blur(5px);">
         <svg width="16" height="16" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow">
           <defs>
             <linearGradient id="city-icon" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
@@ -1480,26 +1480,101 @@
         <span class="font-bold text-white text-xs sm:text-sm drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
       </div>
     </div>
-    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-nowrap text-sm sm:text-base w-auto">
-      <a href="index.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-teal-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+    <nav id="desktopNav" class="flex items-center justify-end gap-2 sm:gap-3 flex-nowrap text-sm sm:text-base w-auto flex-shrink-0">
+      <a href="index.html" class="main-nav-link hidden lg:flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-teal-600 font-bold px-2 sm:px-3 transition text-[12px] md:text-base">
         <i class="ri-home-5-line text-lg md:hidden"></i>
         <span>خانه</span>
       </a>
-      <a href="categories.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+      <a href="categories.html" class="main-nav-link hidden lg:flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition text-[12px] md:text-base">
         <i class="ri-layout-grid-line text-lg md:hidden"></i>
         <span>دسته‌بندی</span>
       </a>
-      <a href="login.html" class="main-nav-link flex-1 md:flex-none flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition hide-on-mobile text-[12px] md:text-base">
+      <a href="login.html" class="main-nav-link hidden lg:flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-sky-600 font-bold px-2 sm:px-3 transition text-[12px] md:text-base">
         <i class="ri-login-box-line text-lg md:hidden"></i>
         <span>ورود</span>
       </a>
-      <a href="post.html" id="registerShopBtn" class="btn-grad px-3 sm:px-4 py-1 rounded-full font-bold text-sm transition sm:shadow sm:hover:scale-105">
+      <a href="post.html" id="registerShopBtn" class="btn-grad hidden lg:inline-flex px-3 sm:px-4 py-1 rounded-full font-bold text-sm transition sm:shadow sm:hover:scale-105">
         <span>ثبت فروشگاه</span>
       </a>
+      <div class="lg:hidden flex items-center gap-2">
+        <button type="button" id="shoppingCentersRewardBtn"
+          class="w-10 h-10 rounded-xl text-white flex items-center justify-center transition-all duration-200 active:scale-95"
+          style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); box-shadow: 0 6px 14px rgba(249, 115, 22, 0.28);"
+          aria-haspopup="dialog" aria-controls="shoppingCentersRewardModal" aria-expanded="false" aria-label="جایزه و مدال">
+          <i class="fas fa-medal text-sm"></i>
+        </button>
+        <button type="button" id="shoppingCentersHamburgerBtn"
+          class="w-10 h-10 rounded-xl bg-white border border-emerald-100 text-emerald-600 flex items-center justify-center transition-all duration-200 active:scale-95 hover:bg-emerald-50"
+          style="box-shadow: 0 6px 14px rgba(15, 118, 110, 0.14);"
+          aria-label="باز کردن منو">
+          <i class="fas fa-bars text-sm"></i>
+        </button>
+      </div>
     </nav>
   </div>
 </header>
 
+
+  <div id="shoppingCentersMenuOverlay"
+    class="fixed inset-0 z-[120] bg-slate-900/45 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 lg:hidden">
+    <aside id="shoppingCentersMenuDrawer"
+      class="absolute left-0 top-0 h-full w-[84vw] max-w-[330px] bg-white shadow-2xl -translate-x-full transition-transform duration-300 ease-out p-4 flex flex-col text-right">
+      <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+            <i class="fas fa-store text-white text-xs"></i>
+          </div>
+          <span class="font-extrabold text-slate-700 text-sm">منوی سریع</span>
+        </div>
+        <button id="shoppingCentersMenuClose" type="button"
+          class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors duration-200"
+          aria-label="بستن منو">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <nav class="flex flex-col gap-2 text-sm font-bold text-slate-700">
+        <a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">خانه</a>
+        <a href="categories.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">دسته‌بندی</a>
+        <a href="all-products.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">محصولات</a>
+        <a href="all-shopping-centers.html"
+          class="px-3 py-2.5 rounded-xl"
+          style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(14, 165, 233, 0.12) 100%); color: #0f766e;">مراکز خرید</a>
+        <a href="login.html" class="px-3 py-2.5 rounded-xl hover:bg-sky-50 hover:text-sky-700 transition-colors duration-200">ورود / ثبت‌نام</a>
+      </nav>
+    </aside>
+  </div>
+
+  <div id="shoppingCentersRewardModal"
+    class="fixed inset-0 z-[130] hidden items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4"
+    role="dialog" aria-modal="true" aria-labelledby="shoppingCentersRewardTitle">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl text-white flex items-center justify-center"
+            style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);">
+            <i class="fas fa-medal text-sm"></i>
+          </div>
+          <h3 id="shoppingCentersRewardTitle" class="text-base font-extrabold text-slate-800">مدال و جایزه</h3>
+        </div>
+        <button id="shoppingCentersRewardClose" type="button"
+          class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors duration-200"
+          aria-label="بستن">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+      <p class="mt-4 text-sm font-semibold text-slate-600 leading-7">
+        برای مشاهده کدهای جایزه و کمپین‌های فعال، از صفحه اصلی ویترینت وارد بخش جوایز شوید.
+      </p>
+      <a href="index.html"
+        class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-extrabold text-white"
+        style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+        <i class="fas fa-gift text-xs"></i>
+        مشاهده جوایز
+      </a>
+    </div>
+  </div>
 
   <div class="container">
     <div style="margin: 0 auto 28px; max-width: 500px;">
@@ -1693,7 +1768,83 @@
   </footer>
 
   <script src="all-shopping-centers.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const menuBtn = document.getElementById('shoppingCentersHamburgerBtn');
+      const menuOverlay = document.getElementById('shoppingCentersMenuOverlay');
+      const menuDrawer = document.getElementById('shoppingCentersMenuDrawer');
+      const menuClose = document.getElementById('shoppingCentersMenuClose');
 
+      const rewardBtn = document.getElementById('shoppingCentersRewardBtn');
+      const rewardModal = document.getElementById('shoppingCentersRewardModal');
+      const rewardClose = document.getElementById('shoppingCentersRewardClose');
+
+      if (menuBtn && menuOverlay && menuDrawer && menuClose) {
+        const openMenu = function () {
+          menuOverlay.classList.remove('hidden');
+          requestAnimationFrame(function () {
+            menuOverlay.classList.add('opacity-100');
+            menuDrawer.classList.remove('-translate-x-full');
+          });
+          document.body.style.overflow = 'hidden';
+        };
+
+        const closeMenu = function () {
+          menuOverlay.classList.remove('opacity-100');
+          menuDrawer.classList.add('-translate-x-full');
+          setTimeout(function () {
+            menuOverlay.classList.add('hidden');
+          }, 300);
+          document.body.style.overflow = '';
+        };
+
+        menuBtn.addEventListener('click', openMenu);
+        menuClose.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', function (event) {
+          if (event.target === menuOverlay) {
+            closeMenu();
+          }
+        });
+        menuDrawer.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', closeMenu);
+        });
+        document.addEventListener('keydown', function (event) {
+          if ((event.key === 'Escape' || event.key === 'Esc') && !menuOverlay.classList.contains('hidden')) {
+            closeMenu();
+          }
+        });
+      }
+
+      if (rewardBtn && rewardModal && rewardClose) {
+        const openReward = function () {
+          rewardModal.classList.remove('hidden');
+          rewardModal.classList.add('flex');
+          rewardBtn.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        };
+
+        const closeReward = function () {
+          rewardModal.classList.add('hidden');
+          rewardModal.classList.remove('flex');
+          rewardBtn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        };
+
+        rewardBtn.addEventListener('click', openReward);
+        rewardClose.addEventListener('click', closeReward);
+        rewardModal.addEventListener('click', function (event) {
+          if (event.target === rewardModal) {
+            closeReward();
+          }
+        });
+        document.addEventListener('keydown', function (event) {
+          if ((event.key === 'Escape' || event.key === 'Esc') && !rewardModal.classList.contains('hidden')) {
+            closeReward();
+          }
+        });
+      }
+    });
+  </script>
 
 <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
 <!--
