@@ -124,6 +124,70 @@
       height: 1.45rem;
       filter: drop-shadow(0 1px 1px rgba(0,0,0,0.06));
     }
+    .login-header {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+      box-shadow: 0 8px 22px -16px rgba(2, 132, 199, 0.35);
+    }
+    .login-header-inner {
+      max-width: 72rem;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      padding: .7rem .85rem;
+    }
+    .topbar-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.35rem;
+      padding: .48rem 1rem;
+      border-radius: 999px;
+      font-size: .9rem;
+      font-weight: 900;
+      color: #fff;
+      text-decoration: none;
+      white-space: nowrap;
+      background: linear-gradient(92deg, #10b981 0%, #0ea5e9 100%);
+      box-shadow: 0 8px 18px -12px rgba(16, 185, 129, 0.9);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .topbar-cta:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px -14px rgba(14, 165, 233, 0.95);
+    }
+    .cta-label-short {
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .login-header-inner {
+        padding: .9rem 1.65rem;
+      }
+    }
+    @media (max-width: 420px) {
+      .login-header-inner {
+        padding: .58rem .65rem;
+        gap: .55rem;
+      }
+      .logo-vitrin {
+        font-size: 1rem;
+      }
+      .topbar-cta {
+        padding: .42rem .8rem;
+        font-size: .81rem;
+        min-height: 2.15rem;
+      }
+      .cta-label-long {
+        display: none;
+      }
+      .cta-label-short {
+        display: inline;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -149,15 +213,15 @@
 <body class="text-gray-800 overflow-x-hidden">
 
 <!-- Header فقط لوگوی متنی خوش استایل و لینک به صفحه اصلی + ثبت رایگان فروشگاه -->
-<header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-40">
-  <div class="max-w-6xl mx-auto flex items-center justify-between px-3 sm:px-7 py-2 sm:py-3 gap-2 relative">
+<header class="login-header w-full sticky top-0 z-40">
+  <div class="login-header-inner">
     <a href="index.html" class="logo-vitrin select-none" title="ویترینت - صفحه اصلی">ویترینت</a>
     <a href="/post.html"
-       class="rounded-full font-extrabold bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-white shadow-md transition-all duration-150 text-[14px] sm:text-[15px] px-4 sm:px-5 py-2 sm:py-[9px] flex items-center justify-center
-              hover:scale-105 hover:from-[#0ea5e9] hover:to-[#10b981]"
-       style="letter-spacing:-.01em; text-decoration:none; min-width:120px; max-width:195px;"
+       class="topbar-cta"
+       style="letter-spacing:-.01em;"
        title="ثبت رایگان فروشگاه">
-      ثبت رایگان فروشگاه
+      <span class="cta-label-long">ثبت رایگان فروشگاه</span>
+      <span class="cta-label-short">ثبت فروشگاه</span>
     </a>
   </div>
 </header>
