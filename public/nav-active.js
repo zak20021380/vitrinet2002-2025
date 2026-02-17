@@ -247,33 +247,33 @@
           right: 16px;
           bottom: calc(16px + env(safe-area-inset-bottom, 0px));
           z-index: 1000;
-          height: 76px;
+          height: 78px;
           padding: 8px;
           background: #fff;
-          border-radius: 26px;
+          border-radius: 28px;
           border: 1px solid rgba(15, 23, 42, 0.06);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-          backdrop-filter: saturate(1.1) blur(14px);
-          -webkit-backdrop-filter: saturate(1.1) blur(14px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+          backdrop-filter: saturate(1.05) blur(10px);
+          -webkit-backdrop-filter: saturate(1.05) blur(10px);
           justify-content: space-between;
           align-items: center;
           gap: 6px;
           overflow: hidden;
-          transition: transform 0.2s ease, opacity 0.2s ease;
+          transition: transform 0.24s ease-in-out, opacity 0.24s ease-in-out;
         }
 
         .mobile-nav-indicator {
           position: absolute;
           top: 0;
           left: 0;
-          width: 72px;
-          height: 52px;
-          border-radius: 999px;
-          background: rgba(16, 185, 129, 0.1);
+          width: 74px;
+          height: 48px;
+          border-radius: 22px;
+          background: rgba(16, 185, 129, 0.09);
           opacity: 0;
           pointer-events: none;
-          transform: translate3d(0, 12px, 0);
-          transition: transform 0.2s ease, width 0.2s ease, opacity 0.2s ease;
+          transform: translate3d(0, 14px, 0);
+          transition: transform 0.24s ease-in-out, width 0.24s ease-in-out, opacity 0.2s ease-in-out;
           z-index: 0;
         }
 
@@ -320,13 +320,13 @@
           min-height: 44px;
           min-width: 44px;
           height: 100%;
-          color: #64748b;
+          color: #5f6b7a;
           text-decoration: none;
           font-weight: 400;
           gap: 4px;
           padding: 6px 4px;
           border-radius: 16px;
-          transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+          transition: transform 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out;
           -webkit-tap-highlight-color: transparent;
         }
 
@@ -338,7 +338,7 @@
 
         .mobile-nav .nav-item:active,
         .mobile-bottom-nav .nav-item:active {
-          transform: scale(1.05);
+          transform: scale(1.04);
         }
 
         .mobile-nav .nav-icon-wrap,
@@ -357,7 +357,7 @@
           position: absolute;
           inset: 0;
           transform-origin: center;
-          transition: transform 0.2s ease, opacity 0.2s ease;
+          transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
         }
 
         .mobile-nav .nav-item .nav-icon-outline,
@@ -378,6 +378,8 @@
           font-size: 11.5px;
           font-weight: inherit;
           line-height: 1.1;
+          opacity: 0.92;
+          transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
           white-space: nowrap;
         }
 
@@ -404,6 +406,7 @@
         .mobile-bottom-nav .nav-item.active .nav-label,
         .mobile-bottom-nav .nav-item.active span {
           font-weight: 600;
+          opacity: 1;
         }
 
         body.${BODY_READY_CLASS} .mobile-bottom-nav {
@@ -509,8 +512,8 @@
       return;
     }
 
-    const width = Math.max(60, Math.min(activeRect.width - 10, 88));
-    const height = Math.max(46, Math.min(navRect.height - 12, 54));
+    const width = Math.max(68, Math.min(activeRect.width + 6, 96));
+    const height = Math.max(46, Math.min(navRect.height - 16, 50));
     const left = activeRect.left - navRect.left + ((activeRect.width - width) / 2);
     const top = (navRect.height - height) / 2;
     const clampedLeft = Math.max(6, Math.min(left, navRect.width - width - 6));
