@@ -2079,14 +2079,28 @@
           </span>
         </a>
 
-        <!-- Left: Location Badge -->
+        <!-- Left: Header Actions -->
         <div class="flex items-center gap-2">
+          <!-- Reward Badge -->
+          <button type="button" id="rewardClaimBtn"
+            class="w-9 h-9 rounded-xl text-white flex items-center justify-center transition-all duration-200 active:scale-95"
+            style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);"
+            aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false" aria-label="Reward and medal">
+            <i class="fas fa-medal text-sm"></i>
+          </button>
           <!-- Location Badge -->
           <div class="flex items-center gap-1.5 px-3 py-2 rounded-full cursor-pointer"
             style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
             <i class="fas fa-map-marker-alt text-white text-xs"></i>
             <span class="text-white text-xs font-bold">سنندج</span>
           </div>
+          <!-- Hamburger Menu Button -->
+          <button type="button" id="hamburgerMenuBtn"
+            class="w-9 h-9 rounded-xl bg-white border border-emerald-100 text-emerald-600 flex items-center justify-center transition-all duration-200 active:scale-95 hover:bg-emerald-50"
+            style="box-shadow: 0 4px 12px rgba(15, 118, 110, 0.12);"
+            aria-label="Open menu">
+            <i class="fas fa-bars text-sm"></i>
+          </button>
         </div>
       </div>
       
@@ -2118,6 +2132,70 @@
       </div>
     </div>
   </header>
+
+  <!-- Mobile Hamburger Menu -->
+  <div id="hamburgerMenuOverlay"
+    class="fixed inset-0 z-[120] bg-slate-900/45 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 lg:hidden">
+    <aside id="hamburgerMenuDrawer"
+      class="h-full w-[82vw] max-w-[320px] bg-white shadow-2xl -translate-x-full transition-transform duration-300 ease-out p-4 flex flex-col">
+      <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+            style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+            <i class="fas fa-store text-white text-xs"></i>
+          </div>
+          <span class="font-extrabold text-slate-700 text-sm">Quick Menu</span>
+        </div>
+        <button id="closeHamburgerMenu" type="button"
+          class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors duration-200"
+          aria-label="Close menu">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+
+      <nav class="flex flex-col gap-2 text-sm font-bold text-slate-700">
+        <a href="index.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">Home</a>
+        <a href="all-products.html"
+          class="px-3 py-2.5 rounded-xl"
+          style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(14, 165, 233, 0.12) 100%); color: #0f766e;">Products</a>
+        <a href="categories.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">Categories</a>
+        <a href="all-shops.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">Shops</a>
+        <a href="all-shopping-centers.html" class="px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200">Centers</a>
+        <a href="login.html" class="px-3 py-2.5 rounded-xl hover:bg-sky-50 hover:text-sky-700 transition-colors duration-200">Login / Register</a>
+      </nav>
+    </aside>
+  </div>
+
+  <!-- Reward Modal -->
+  <div id="rewardModal"
+    class="fixed inset-0 z-[130] hidden items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4"
+    role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl text-white flex items-center justify-center"
+            style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);">
+            <i class="fas fa-medal text-sm"></i>
+          </div>
+          <h3 id="rewardModalTitle" class="text-base font-extrabold text-slate-800">Medal & Reward</h3>
+        </div>
+        <button id="closeRewardModal" type="button"
+          class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors duration-200"
+          aria-label="Close">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+      <p class="mt-4 text-sm font-semibold text-slate-600 leading-7">
+        For reward codes and active campaigns, open the Vitreenet home page.
+      </p>
+      <a href="index.html"
+        class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-extrabold text-white"
+        style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);">
+        <i class="fas fa-gift text-xs"></i>
+        View rewards
+      </a>
+    </div>
+  </div>
 
   <!-- Mobile Hero Search Section -->
   <section class="lg:hidden" style="background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, rgba(14, 165, 233, 0.06) 50%, transparent 100%);">
@@ -2586,6 +2664,7 @@
       // تنظیمات اولیه
       setupEventListeners();
       setupHamburgerMenu();
+      setupRewardModal();
       setCurrentShop(DEFAULT_SHOP_LABEL);
       refreshCategoryDropdowns();
       populateShopDropdowns();
@@ -2606,16 +2685,17 @@
       const closeBtn = document.getElementById('closeHamburgerMenu');
       const bottomNav = document.querySelector('.mobile-bottom-nav, .mobile-nav');
 
+      if (!hamburgerBtn || !overlay || !drawer || !closeBtn) return;
+
       function openMenu() {
         overlay.classList.remove('hidden');
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           overlay.classList.add('opacity-100');
           drawer.classList.remove('-translate-x-full');
-        }, 10);
+        });
         document.body.style.overflow = 'hidden';
         document.body.classList.add('hide-mobile-nav');
-        
-        // Hide bottom nav when menu opens
+
         if (bottomNav) {
           bottomNav.style.transform = 'translateY(110%)';
           bottomNav.style.opacity = '0';
@@ -2631,8 +2711,7 @@
         }, 300);
         document.body.style.overflow = '';
         document.body.classList.remove('hide-mobile-nav');
-        
-        // Show bottom nav when menu closes
+
         if (bottomNav) {
           bottomNav.style.transform = '';
           bottomNav.style.opacity = '';
@@ -2640,9 +2719,53 @@
         }
       }
 
-      if (hamburgerBtn) hamburgerBtn.addEventListener('click', openMenu);
-      if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-      if (overlay) overlay.addEventListener('click', closeMenu);
+      hamburgerBtn.addEventListener('click', openMenu);
+      closeBtn.addEventListener('click', closeMenu);
+      overlay.addEventListener('click', event => {
+        if (event.target === overlay) {
+          closeMenu();
+        }
+      });
+      document.addEventListener('keydown', event => {
+        if ((event.key === 'Escape' || event.key === 'Esc') && !overlay.classList.contains('hidden')) {
+          closeMenu();
+        }
+      });
+    }
+
+    function setupRewardModal() {
+      const rewardBtn = document.getElementById('rewardClaimBtn');
+      const modal = document.getElementById('rewardModal');
+      const closeBtn = document.getElementById('closeRewardModal');
+
+      if (!rewardBtn || !modal || !closeBtn) return;
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        rewardBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        rewardBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+
+      rewardBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', event => {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+      document.addEventListener('keydown', event => {
+        if ((event.key === 'Escape' || event.key === 'Esc') && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
     }
 
     async function fetchShoppingCenters() {
@@ -4133,3 +4256,4 @@
 </body>
 
 </html>
+
