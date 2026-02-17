@@ -44,6 +44,35 @@
     return Boolean(sellerId || (typeof sellerSlug === 'string' && sellerSlug.trim())) || isServiceSellerAccount(seller);
   }
 
+  function hasValidCustomerProfile(user) {
+    if (!user || typeof user !== 'object') return false;
+    const userId = user._id || user.id || user.userId;
+    const userPhone = typeof user.phone === 'string' ? user.phone.trim() : '';
+    return Boolean(userId || userPhone);
+  }
+
+  function parseJwtPayload(token) {
+    if (typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 3 || typeof atob !== 'function') return null;
+
+    try {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+      return JSON.parse(atob(padded));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function hasActiveAuthToken(token) {
+    if (typeof token !== 'string' || !token.trim()) return false;
+    const payload = parseJwtPayload(token.trim());
+    if (!payload || typeof payload !== 'object') return false;
+    if (typeof payload.exp !== 'number') return true;
+    return payload.exp > Math.floor(Date.now() / 1000);
+  }
+
   function updateAuthNavigationState() {
     const loginLink = document.getElementById('loginNavLink');
     const loginMobile = document.getElementById('loginMobileLink');
@@ -60,11 +89,13 @@
     let labelText = 'ورود';
     let accountType = '';
 
-    if (token && user && typeof user === 'object') {
+    const hasAuthenticatedSession = hasActiveAuthToken(token);
+
+    if (hasAuthenticatedSession && hasValidCustomerProfile(user)) {
       targetUrl = 'user/dashboard.html';
       labelText = 'پنل من';
       accountType = 'customer';
-    } else if (token && hasValidSellerProfile(seller)) {
+    } else if (hasAuthenticatedSession && hasValidSellerProfile(seller)) {
       targetUrl = buildSellerPanelLink(seller);
       labelText = 'پنل فروشنده';
       accountType = 'seller';
@@ -249,12 +280,12 @@
           z-index: 1000;
           height: 78px;
           padding: 8px;
-          background: #fff;
+          background: rgba(255, 255, 255, 0.68);
           border-radius: 28px;
-          border: 1px solid rgba(15, 23, 42, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.2);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
-          backdrop-filter: saturate(1.05) blur(10px);
-          -webkit-backdrop-filter: saturate(1.05) blur(10px);
+          backdrop-filter: saturate(1.1) blur(14px);
+          -webkit-backdrop-filter: saturate(1.1) blur(14px);
           justify-content: space-between;
           align-items: center;
           gap: 6px;
@@ -275,6 +306,14 @@
           transform: translate3d(0, 14px, 0);
           transition: transform 0.24s ease-in-out, width 0.24s ease-in-out, opacity 0.2s ease-in-out;
           z-index: 0;
+        }
+
+        @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+          .mobile-nav,
+          .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(203, 213, 225, 0.9);
+          }
         }
 
         .mobile-bottom-nav ul {
