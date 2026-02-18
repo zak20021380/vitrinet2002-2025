@@ -2198,75 +2198,6 @@ window.addEventListener('DOMContentLoaded', loadPopularProducts);
 
 const HOMEPAGE_SECTIONS_API_BASE = `${SEARCH_API_BASE}/homepage-sections`;
 
-function getManagedProductPriceText(product) {
-  const hasDiscount = Boolean(product?.discountActive) && Number(product?.discountPrice) > 0;
-  const finalPrice = hasDiscount ? Number(product.discountPrice) : Number(product?.price);
-  if (!Number.isFinite(finalPrice)) return '';
-  return `${finalPrice.toLocaleString('fa-IR')} تومان`;
-}
-
-function buildManagedProductCard(product) {
-  const title = product?.title || 'محصول';
-  const category = product?.category || 'دسته‌بندی نشده';
-  const image = resolveImagePath(product?.image || product?.images?.[0], 'assets/images/shop-placeholder.svg');
-  const location = product?.sellerLocation || '—';
-  const shopName = product?.shopName || 'فروشگاه';
-  const priceText = getManagedProductPriceText(product);
-  const productId = product?._id ? String(product._id) : '';
-
-  const card = document.createElement('a');
-  card.href = productId ? `product.html?id=${encodeURIComponent(productId)}` : '#';
-  card.className = `
-    group glass popular-product-card min-w-[265px] max-w-[280px] flex-shrink-0 flex flex-col
-    p-4 rounded-3xl shadow-xl border border-[#0ea5e9]/20 bg-white/95 backdrop-blur-[5px]
-    hover:-translate-y-1 hover:shadow-2xl hover:border-[#0ea5e9]/40 transition-all duration-300
-  `;
-  card.dataset.productId = productId;
-  card.dataset.productName = title;
-  card.dataset.productCategory = category;
-  if (Number.isFinite(Number(product?.price))) {
-    card.dataset.productPrice = String(Number(product.price));
-  }
-  if (product?.sellerId) {
-    card.dataset.sellerId = String(product.sellerId);
-  }
-  if (shopName) {
-    card.dataset.shopName = shopName;
-  }
-
-  card.innerHTML = `
-    <div class="popular-card-image w-full h-[130px] sm:h-[170px] rounded-2xl mb-5 flex items-center justify-center relative overflow-hidden" style="background:linear-gradient(120deg,#d4fbe8,#e0fdfa,#c8f7e6); box-shadow:inset 0 2px 10px rgba(16,185,129,0.1);">
-      <img src="${escapeHTML(image)}" alt="${escapeHTML(title)}" class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300" loading="lazy" onerror="this.src='assets/images/shop-placeholder.svg'"/>
-      <span class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-[#10b981] to-[#0ea5e9] text-white shadow-md">
-        ${escapeHTML(category)}
-      </span>
-    </div>
-    <div class="popular-card-body flex flex-col gap-3 w-full text-center">
-      <h4 class="font-extrabold text-lg sm:text-xl bg-gradient-to-r from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent leading-8">
-        ${escapeHTML(title)}
-      </h4>
-      <p class="text-sm text-slate-500 truncate">${escapeHTML(shopName)}</p>
-      <div class="popular-card-location flex flex-row items-center justify-center gap-2 text-sm text-gray-700 font-bold">
-        <span class="truncate">${escapeHTML(location)}</span>
-      </div>
-      ${priceText ? `
-      <div class="popular-card-price self-center inline-flex items-center justify-center bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 px-4 py-1 rounded-full text-[#10b981] font-extrabold text-base shadow-sm text-center">
-        ${escapeHTML(priceText)}
-      </div>` : ''}
-    </div>
-    <div class="popular-card-footer w-full">
-      <span class="card-action-btn w-full justify-center">
-        مشاهده
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-        </svg>
-      </span>
-    </div>
-  `;
-
-  return card;
-}
-
 function bindManagedRowNavigation(rowEl) {
   const slider = rowEl.querySelector('.homepage-managed-row__slider');
   const prevBtn = rowEl.querySelector('.homepage-managed-row__nav.is-prev');
@@ -2310,15 +2241,6 @@ async function fetchActiveHomepageSections() {
   }
   const payload = await res.json().catch(() => ({}));
   return Array.isArray(payload?.sections) ? payload.sections : [];
-}
-
-async function fetchHomepageSectionProducts(sectionId) {
-  const res = await fetch(`${HOMEPAGE_SECTIONS_API_BASE}/${encodeURIComponent(sectionId)}/products`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch section products: ${res.status}`);
-  }
-  const payload = await res.json().catch(() => ({}));
-  return Array.isArray(payload?.products) ? payload.products : [];
 }
 
 function getManagedManualCardPriceText(card) {
@@ -2452,11 +2374,7 @@ async function loadHomepageManagedSections() {
     return orderA - orderB;
   });
 
-  const rows = await Promise.all(sortedSections.map(async (section) => {
-    const row = createManagedHomepageRow(section);
-    const slider = row.querySelector('.homepage-managed-row__slider');
-    if (!slider) return row;
-
+  const rows = sortedSections.map((section) => {
     const manualCards = Array.isArray(section?.cards)
       ? [...section.cards].sort((a, b) => {
           const orderA = Number(a?.displayOrder) || 0;
@@ -2466,35 +2384,25 @@ async function loadHomepageManagedSections() {
         })
       : [];
 
-    if (manualCards.length) {
-      slider.innerHTML = '';
-      manualCards.forEach((cardData) => {
-        slider.appendChild(buildManagedManualCard(cardData));
-      });
-      bindManagedRowNavigation(row);
-      return row;
+    if (!manualCards.length) {
+      return null;
     }
 
-    slider.innerHTML = '<div class="homepage-managed-row__state">Loading...</div>';
+    const row = createManagedHomepageRow(section);
+    const slider = row.querySelector('.homepage-managed-row__slider');
+    if (!slider) return row;
 
-    try {
-      const products = await fetchHomepageSectionProducts(section._id || section.id);
-      if (!products.length) {
-        slider.innerHTML = '<div class="homepage-managed-row__state">No cards found for this row.</div>';
-        return row;
-      }
-
-      slider.innerHTML = '';
-      products.forEach((product) => {
-        slider.appendChild(buildManagedProductCard(product));
-      });
-      bindManagedRowNavigation(row);
-    } catch (error) {
-      console.warn('loadHomepageManagedSections -> products fetch failed', error);
-      slider.innerHTML = '<div class="homepage-managed-row__state">Failed to load row cards.</div>';
-    }
+    slider.innerHTML = '';
+    manualCards.forEach((cardData) => {
+      slider.appendChild(buildManagedManualCard(cardData));
+    });
+    bindManagedRowNavigation(row);
     return row;
-  }));
+  }).filter(Boolean);
+
+  if (!rows.length) {
+    return;
+  }
 
   rows.forEach((row) => container.appendChild(row));
   wrapper.classList.remove('hidden');

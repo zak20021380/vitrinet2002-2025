@@ -571,6 +571,11 @@ exports.getSectionProducts = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Section is not active.' });
     }
 
+    const manualCards = Array.isArray(section.cards) ? section.cards.filter(Boolean) : [];
+    if (!manualCards.length) {
+      return res.json({ success: true, section: formatSectionForResponse(section), products: [] });
+    }
+
     const query = buildSectionProductQuery(section);
     if (!query) {
       return res.json({ success: true, section: formatSectionForResponse(section), products: [] });

@@ -464,27 +464,6 @@ function sortHomepageSections(list = []) {
   });
 }
 
-function getHomepageTypeLabel(type) {
-  const labels = {
-    latest: 'جدیدترین',
-    category: 'دسته‌بندی',
-    popular: 'محبوب‌ترین',
-    discounted: 'تخفیف‌دار'
-  };
-  return labels[type] || type || 'نامشخص';
-}
-
-function getHomepageSortLabel(sort) {
-  const labels = {
-    latest: 'جدیدترین',
-    oldest: 'قدیمی‌ترین',
-    'most-liked': 'بیشترین پسند',
-    'price-desc': 'گران‌ترین',
-    'price-asc': 'ارزان‌ترین'
-  };
-  return labels[sort] || sort || 'نامشخص';
-}
-
 function setHomepageSectionFormMessage(message, type = 'info') {
   const box = document.getElementById('homepageSectionFormMessage');
   if (!box) return;
@@ -525,9 +504,6 @@ function fillHomepageSectionForm(section) {
   if (!section) return;
   const idInput = document.getElementById('homepageSectionId');
   const titleInput = document.getElementById('homepageSectionTitle');
-  const typeInput = document.getElementById('homepageSectionType');
-  const sortInput = document.getElementById('homepageSectionSort');
-  const categoryInput = document.getElementById('homepageSectionCategory');
   const limitInput = document.getElementById('homepageSectionLimit');
   const orderInput = document.getElementById('homepageSectionOrder');
   const activeInput = document.getElementById('homepageSectionIsActive');
@@ -536,9 +512,6 @@ function fillHomepageSectionForm(section) {
   homepageSectionEditingId = section._id;
   if (idInput) idInput.value = section._id;
   if (titleInput) titleInput.value = section.title || '';
-  if (typeInput) typeInput.value = section.type || 'latest';
-  if (sortInput) sortInput.value = section.sort || 'latest';
-  if (categoryInput) categoryInput.value = section.categoryFilter || '';
   if (limitInput) limitInput.value = section.limit || 10;
   if (orderInput) orderInput.value = section.displayOrder || 0;
   if (activeInput) activeInput.checked = Boolean(section.isActive);
@@ -546,24 +519,6 @@ function fillHomepageSectionForm(section) {
     submitBtn.innerHTML = '<i class="ri-save-line"></i> ذخیره ویرایش';
   }
   setHomepageSectionFormMessage('در حال ویرایش ردیف انتخاب‌شده.', 'info');
-}
-
-function renderHomepageSectionCategories() {
-  const datalist = document.getElementById('homepageSectionCategories');
-  if (!datalist) return;
-
-  const names = new Set();
-  (Array.isArray(productsList) ? productsList : []).forEach((product) => {
-    const category = String(product?.category || '').trim();
-    if (category) names.add(category);
-  });
-  (Array.isArray(categoryManagerState?.categories) ? categoryManagerState.categories : []).forEach((item) => {
-    const category = String(getCategoryName(item) || '').trim();
-    if (category) names.add(category);
-  });
-
-  const options = [...names].sort((a, b) => a.localeCompare(b, 'fa-IR', { sensitivity: 'base' }));
-  datalist.innerHTML = options.map((name) => `<option value="${escapeHtml(name)}"></option>`).join('');
 }
 
 function renderHomepageSections() {
@@ -590,11 +545,8 @@ function renderHomepageSections() {
         </span>
       </div>
       <div class="homepage-section-item__meta">
-        <span>نوع: ${escapeHtml(getHomepageTypeLabel(section.type))}</span>
-        <span>مرتب‌سازی: ${escapeHtml(getHomepageSortLabel(section.sort))}</span>
         <span>تعداد: ${formatNumber(section.limit)}</span>
         <span>ترتیب: ${formatNumber(section.displayOrder)}</span>
-        ${section.categoryFilter ? `<span>دسته: ${escapeHtml(section.categoryFilter)}</span>` : ''}
       </div>
       <div class="homepage-section-item__actions">
         <button type="button" data-action="edit" data-id="${section._id}"><i class="ri-edit-line"></i> ویرایش</button>
@@ -637,7 +589,6 @@ async function ensureHomepageSectionsLoaded(force = false) {
 
   if (homepageSectionsLoaded && !force) {
     renderHomepageSections();
-    renderHomepageSectionCategories();
     return homepageSectionsList;
   }
 
@@ -647,7 +598,6 @@ async function ensureHomepageSectionsLoaded(force = false) {
       homepageSectionsList = sections;
       homepageSectionsLoaded = true;
       renderHomepageSections();
-      renderHomepageSectionCategories();
       updateSidebarCounts();
       updateHeaderCounts();
       return sections;
@@ -663,9 +613,6 @@ async function saveHomepageSectionFromForm(event) {
   event.preventDefault();
   const id = homepageSectionEditingId || String(document.getElementById('homepageSectionId')?.value || '').trim();
   const title = String(document.getElementById('homepageSectionTitle')?.value || '').trim();
-  const type = String(document.getElementById('homepageSectionType')?.value || 'latest').trim();
-  const sort = String(document.getElementById('homepageSectionSort')?.value || 'latest').trim();
-  const categoryFilter = String(document.getElementById('homepageSectionCategory')?.value || '').trim();
   const limit = Math.max(1, Math.min(40, Number(document.getElementById('homepageSectionLimit')?.value) || 10));
   const displayOrder = Math.max(0, Number(document.getElementById('homepageSectionOrder')?.value) || 0);
   const isActive = Boolean(document.getElementById('homepageSectionIsActive')?.checked);
@@ -674,12 +621,8 @@ async function saveHomepageSectionFromForm(event) {
     setHomepageSectionFormMessage('عنوان ردیف الزامی است.', 'error');
     return;
   }
-  if (type === 'category' && !categoryFilter) {
-    setHomepageSectionFormMessage('برای نوع دسته‌بندی، فیلتر دسته را وارد کنید.', 'error');
-    return;
-  }
-
-  const payload = { title, type, categoryFilter, sort, limit, displayOrder, isActive };
+  // Keep type/sort/category untouched on edit; use backend defaults for new rows.
+  const payload = { title, limit, displayOrder, isActive };
   const url = id
     ? `${ADMIN_API_BASE}/homepage-sections/admin/${encodeURIComponent(id)}`
     : `${ADMIN_API_BASE}/homepage-sections/admin`;
@@ -795,9 +738,6 @@ function bindHomepageSectionManager() {
   const resetBtn = document.getElementById('homepageSectionResetBtn');
   const refreshBtn = document.getElementById('homepageSectionsRefresh');
   const listEl = document.getElementById('homepageSectionsList');
-  const typeInput = document.getElementById('homepageSectionType');
-  const categoryInput = document.getElementById('homepageSectionCategory');
-  const sortInput = document.getElementById('homepageSectionSort');
 
   if (form && !form.dataset.bound) {
     form.dataset.bound = 'true';
@@ -826,28 +766,6 @@ function bindHomepageSectionManager() {
         refreshBtn.innerHTML = original;
       }
     });
-  }
-
-  if (typeInput && categoryInput && !typeInput.dataset.bound) {
-    typeInput.dataset.bound = 'true';
-    const syncCategoryRequiredState = () => {
-      const mustHaveCategory = typeInput.value === 'category';
-      categoryInput.required = mustHaveCategory;
-      categoryInput.placeholder = mustHaveCategory
-        ? 'برای نوع دسته‌بندی الزامی است'
-        : 'اختیاری - مثلاً پوشاک';
-
-      if (sortInput) {
-        if (typeInput.value === 'popular' && sortInput.value === 'latest') {
-          sortInput.value = 'most-liked';
-        }
-        if (typeInput.value === 'latest' && sortInput.value === 'most-liked') {
-          sortInput.value = 'latest';
-        }
-      }
-    };
-    syncCategoryRequiredState();
-    typeInput.addEventListener('change', syncCategoryRequiredState);
   }
 
   if (listEl && !listEl.dataset.bound) {
@@ -1225,12 +1143,9 @@ function renderHomepageSections() {
         </span>
       </div>
       <div class="homepage-section-item__meta">
-        <span>نوع: ${escapeHtml(getHomepageTypeLabel(section.type))}</span>
-        <span>مرتب‌سازی: ${escapeHtml(getHomepageSortLabel(section.sort))}</span>
         <span>تعداد: ${formatNumber(section.limit)}</span>
         <span>ترتیب: ${formatNumber(section.displayOrder)}</span>
         <span>کارت‌ها: ${formatNumber(cards.length)}</span>
-        ${section.categoryFilter ? `<span>دسته: ${escapeHtml(section.categoryFilter)}</span>` : ''}
       </div>
       <div class="homepage-section-item__actions">
         <button type="button" data-action="edit" data-id="${section._id}"><i class="ri-edit-line"></i> ویرایش</button>
@@ -1312,9 +1227,6 @@ function bindHomepageSectionManager() {
   const resetBtn = document.getElementById('homepageSectionResetBtn');
   const refreshBtn = document.getElementById('homepageSectionsRefresh');
   const listEl = document.getElementById('homepageSectionsList');
-  const typeInput = document.getElementById('homepageSectionType');
-  const categoryInput = document.getElementById('homepageSectionCategory');
-  const sortInput = document.getElementById('homepageSectionSort');
 
   if (form && !form.dataset.bound) {
     form.dataset.bound = 'true';
@@ -1343,28 +1255,6 @@ function bindHomepageSectionManager() {
         refreshBtn.innerHTML = original;
       }
     });
-  }
-
-  if (typeInput && categoryInput && !typeInput.dataset.bound) {
-    typeInput.dataset.bound = 'true';
-    const syncCategoryRequiredState = () => {
-      const mustHaveCategory = typeInput.value === 'category';
-      categoryInput.required = mustHaveCategory;
-      categoryInput.placeholder = mustHaveCategory
-        ? 'برای نوع دسته‌بندی الزامی است'
-        : 'اختیاری - مثلا پوشاک';
-
-      if (sortInput) {
-        if (typeInput.value === 'popular' && sortInput.value === 'latest') {
-          sortInput.value = 'most-liked';
-        }
-        if (typeInput.value === 'latest' && sortInput.value === 'most-liked') {
-          sortInput.value = 'latest';
-        }
-      }
-    };
-    syncCategoryRequiredState();
-    typeInput.addEventListener('change', syncCategoryRequiredState);
   }
 
   if (listEl && !listEl.dataset.bound) {
@@ -8671,7 +8561,6 @@ menuLinks.forEach(link => {
 
     if (section === 'homepage-manager') {
       bindHomepageSectionManager();
-      renderHomepageSectionCategories();
       await ensureHomepageSectionsLoaded();
     }
 
@@ -9009,7 +8898,6 @@ async function updateAll() {
     homepageSectionsLoaded = true;
     renderShoppingCenters();
     renderHomepageSections();
-    renderHomepageSectionCategories();
     renderCategoryFilter(); // بروزرسانی فیلتر دسته‌بندی پس از بارگذاری
     await refreshSellerPerformanceMap();
     console.group('🟢 shopsList snapshot');
