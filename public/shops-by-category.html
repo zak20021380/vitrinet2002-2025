@@ -139,19 +139,43 @@
     }
     .sort-select-wrap {
       position: relative;
+      border-radius: 1rem;
+      isolation: isolate;
+    }
+    .sort-select-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.14));
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+    .sort-select-wrap:hover::before,
+    .sort-select-wrap:focus-within::before {
+      opacity: 1;
     }
     .sort-select-wrap::after {
       content: '';
       position: absolute;
       top: 50%;
       right: 1rem;
-      width: 0.55rem;
-      height: 0.55rem;
-      border-left: 2px solid #0f766e;
-      border-bottom: 2px solid #0f766e;
+      width: 0.62rem;
+      height: 0.62rem;
+      border-left: 2px solid #0b766e;
+      border-bottom: 2px solid #0b766e;
       transform: translateY(-58%) rotate(-45deg);
       pointer-events: none;
-      opacity: 0.7;
+      opacity: 0.9;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      z-index: 2;
+    }
+    .sort-select-wrap:hover::after,
+    .sort-select-wrap:focus-within::after {
+      transform: translateY(-46%) rotate(-45deg);
+      opacity: 1;
     }
 
     /* --- Inputs --- */
@@ -174,7 +198,28 @@
     }
     #sortSelect {
       appearance: none;
-      padding-right: 2.2rem;
+      position: relative;
+      z-index: 1;
+      padding-right: 2.4rem;
+      padding-left: 2.55rem;
+      border: 1.7px solid #8ce6dd;
+      background:
+        radial-gradient(circle at 1.05rem 50%, rgba(249, 115, 22, 0.92) 0 0.22rem, transparent 0.25rem),
+        linear-gradient(140deg, #ffffff 0%, #f0fdfa 52%, #e6f6ff 100%);
+      color: #0f172a;
+      font-weight: 800;
+      box-shadow: 0 12px 20px -18px rgba(5, 150, 105, 0.75);
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease, background-color 0.22s ease;
+    }
+    #sortSelect:hover {
+      border-color: #14b8a6;
+      box-shadow: 0 14px 22px -18px rgba(14, 165, 233, 0.75);
+      transform: translateY(-1px);
+    }
+    #sortSelect:focus {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.16), 0 14px 22px -18px rgba(14, 165, 233, 0.75);
+      transform: translateY(0);
     }
 
     /* --- Category Chips --- */
@@ -387,6 +432,9 @@
       .sort-select-wrap::after {
         right: 0.9rem;
       }
+      #sortSelect {
+        padding-left: 2.35rem;
+      }
       .filter-title-row {
         margin-bottom: 0.78rem;
         padding-bottom: 0.65rem;
@@ -428,6 +476,9 @@
         min-height: 2.8rem;
         border-radius: 0.82rem;
         padding: 0.58rem 0.82rem;
+      }
+      #sortSelect {
+        border-radius: 0.9rem;
       }
       .shop-filters-container {
         padding: 0.86rem;
