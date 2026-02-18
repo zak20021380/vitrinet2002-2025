@@ -12,10 +12,18 @@
 
   <style>
     /* --- Base Settings --- */
+    :root {
+      --vt-bg: #f8f9fb;
+      --vt-accent: #00b894;
+      --vt-accent-deep: #009f7f;
+      --vt-text: #1f2937;
+      --vt-muted: #64748b;
+      --vt-radius: 16px;
+    }
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
-      color: #064e3b;
+      background: var(--vt-bg);
+      color: var(--vt-text);
       overflow-x: hidden;
       min-height: 100vh;
     }
@@ -38,46 +46,75 @@
     /* --- Hero Glass Panel --- */
     .category-hero {
       background: #ffffff;
-      border-radius: 2rem;
-      border: 1px solid #ffffff;
-      box-shadow: 0 20px 40px -10px rgba(6, 78, 59, 0.06);
+      border-radius: var(--vt-radius);
+      border: 1px solid rgba(0, 184, 148, 0.1);
+      box-shadow: 0 24px 44px -30px rgba(15, 23, 42, 0.35);
     }
 
     .category-pill {
-      background: linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #059669;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      background: linear-gradient(120deg, rgba(0, 184, 148, 0.14), rgba(0, 184, 148, 0.07));
+      border: 1px solid rgba(0, 184, 148, 0.23);
+      color: #007d64;
+      box-shadow: 0 6px 18px -14px rgba(0, 184, 148, 0.7);
+    }
+
+    .results-stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 1.2rem;
+      border-radius: var(--vt-radius);
+      border: 1px solid rgba(0, 184, 148, 0.3);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(233, 252, 247, 0.86));
+      box-shadow: 0 16px 34px -26px rgba(0, 184, 148, 0.95), 0 0 0 1px rgba(0, 184, 148, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    .results-stat-number {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--vt-accent);
+      text-shadow: 0 0 18px rgba(0, 184, 148, 0.35);
+    }
+    .results-stat-label {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #0f766e;
+      white-space: nowrap;
     }
 
     /* --- Filters Shell --- */
     .filters-shell {
       position: relative;
-      background: linear-gradient(155deg, rgba(255, 255, 255, 0.95) 0%, rgba(236, 253, 245, 0.92) 55%, rgba(224, 242, 254, 0.88) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.14);
-      border-radius: 1.75rem;
-      padding: 1rem;
-      box-shadow: 0 18px 38px -24px rgba(6, 78, 59, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(246, 252, 251, 0.82));
+      border: 1px solid rgba(0, 184, 148, 0.18);
+      border-radius: var(--vt-radius);
+      padding: 0.95rem;
+      box-shadow: 0 20px 36px -28px rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(14px);
       overflow: hidden;
     }
     .filters-shell::before {
       content: '';
       position: absolute;
-      top: -95px;
-      right: -75px;
-      width: 210px;
-      height: 210px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0));
+      top: -90px;
+      right: -80px;
+      width: 190px;
+      height: 190px;
+      background: radial-gradient(circle, rgba(0, 184, 148, 0.2), rgba(0, 184, 148, 0));
       pointer-events: none;
     }
     .filters-shell::after {
       content: '';
       position: absolute;
-      bottom: -105px;
-      left: -85px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0));
+      bottom: -110px;
+      left: -90px;
+      width: 210px;
+      height: 210px;
+      background: radial-gradient(circle, rgba(0, 184, 148, 0.13), rgba(0, 184, 148, 0));
       pointer-events: none;
     }
     .filters-shell > * {
@@ -85,61 +122,60 @@
       z-index: 1;
     }
 
-    .filter-toolbar {
+    .filter-card-row {
       display: flex;
       width: 100%;
-      flex-wrap: wrap;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.85rem;
-      padding: 0.75rem;
-      border-radius: 1.2rem;
-      border: 1px solid rgba(16, 185, 129, 0.16);
-      background: rgba(255, 255, 255, 0.84);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      gap: 0.65rem;
+      padding: 0.5rem;
+      border-radius: var(--vt-radius);
+      border: 1px solid rgba(0, 184, 148, 0.12);
+      background: rgba(255, 255, 255, 0.63);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
     }
-    .filter-toolbar-head {
-      display: inline-flex;
+    .filter-tabs-scroll {
+      display: flex;
+      width: 100%;
       align-items: center;
       gap: 0.5rem;
-      color: #065f46;
-      min-width: fit-content;
-      padding-inline: 0.3rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 184, 148, 0.35) transparent;
+      padding-bottom: 0.1rem;
     }
-    .filter-toolbar-head span {
-      font-size: 0.84rem;
-      font-weight: 900;
-      color: #1e293b;
+    .filter-tabs-scroll::-webkit-scrollbar {
+      height: 6px;
     }
-    .filter-toolbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      flex: 1;
+    .filter-tabs-scroll::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(0, 184, 148, 0.35);
     }
 
     .filter-search-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr) minmax(210px, 250px);
       gap: 0.75rem;
-      margin-top: 0.8rem;
+      margin: 0;
+      align-items: stretch;
     }
     .filter-input-wrap {
       position: relative;
+      min-height: 52px;
     }
     .filter-input-wrap .search-icon {
       position: absolute;
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
+      color: #7d8ca2;
       pointer-events: none;
     }
     .sort-select-wrap {
       position: relative;
-      border-radius: 1rem;
+      min-height: 52px;
+      border-radius: var(--vt-radius);
       isolation: isolate;
     }
     .sort-select-wrap::before {
@@ -147,7 +183,7 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.14));
+      background: linear-gradient(135deg, rgba(0, 184, 148, 0.18), rgba(0, 184, 148, 0.08));
       pointer-events: none;
       z-index: 0;
       opacity: 0;
@@ -164,8 +200,8 @@
       right: 1rem;
       width: 0.62rem;
       height: 0.62rem;
-      border-left: 2px solid #0b766e;
-      border-bottom: 2px solid #0b766e;
+      border-left: 2px solid #007b63;
+      border-bottom: 2px solid #007b63;
       transform: translateY(-58%) rotate(-45deg);
       pointer-events: none;
       opacity: 0.9;
@@ -181,70 +217,84 @@
     /* --- Inputs --- */
     .vitrine-input {
       width: 100%;
-      min-height: 3.15rem;
-      padding: 0.88rem 1.05rem;
-      border-radius: 1rem;
-      background: rgba(255, 255, 255, 0.94);
-      border: 1.6px solid #d3dde8;
-      color: #334155;
-      font-weight: 600;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      min-height: 52px;
+      height: 100%;
+      padding: 0.82rem 1rem;
+      border-radius: var(--vt-radius);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1.5px solid #d7e1ea;
+      color: #243244;
+      font-weight: 700;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+    }
+    .vitrine-input:hover {
+      border-color: rgba(0, 184, 148, 0.4);
+      transform: translateY(-1px);
     }
     .vitrine-input:focus {
       background: #fff;
-      border-color: #0ea5e9;
-      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.13);
+      border-color: var(--vt-accent);
+      box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.17), 0 8px 20px -16px rgba(0, 184, 148, 0.85);
       outline: none;
+      transform: translateY(0);
     }
     #sortSelect {
       appearance: none;
       position: relative;
       z-index: 1;
-      padding-right: 2.4rem;
-      padding-left: 2.55rem;
-      border: 1.7px solid #8ce6dd;
-      background:
-        radial-gradient(circle at 1.05rem 50%, rgba(249, 115, 22, 0.92) 0 0.22rem, transparent 0.25rem),
-        linear-gradient(140deg, #ffffff 0%, #f0fdfa 52%, #e6f6ff 100%);
+      padding-right: 2.25rem;
+      padding-left: 0.95rem;
+      border: 1.5px solid #d7e1ea;
+      background: rgba(255, 255, 255, 0.94);
       color: #0f172a;
       font-weight: 800;
-      box-shadow: 0 12px 20px -18px rgba(5, 150, 105, 0.75);
-      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease, background-color 0.22s ease;
+      box-shadow: none;
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
     }
     #sortSelect:hover {
-      border-color: #14b8a6;
-      box-shadow: 0 14px 22px -18px rgba(14, 165, 233, 0.75);
+      border-color: rgba(0, 184, 148, 0.42);
       transform: translateY(-1px);
     }
     #sortSelect:focus {
-      border-color: #0ea5e9;
-      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.16), 0 14px 22px -18px rgba(14, 165, 233, 0.75);
+      border-color: var(--vt-accent);
+      box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.16), 0 14px 22px -20px rgba(0, 184, 148, 0.85);
       transform: translateY(0);
+    }
+    #searchInput {
+      padding-left: 2.8rem;
     }
 
     /* --- Category Chips --- */
+    #subcatContainer {
+      width: 100%;
+      margin: 0;
+      justify-content: flex-start;
+      row-gap: 0.5rem;
+    }
     .category-chip {
-      padding: 0.6rem 1.18rem;
+      min-height: 44px;
+      padding: 0.56rem 1rem;
       border-radius: 999px;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 800;
-      background: rgba(255, 255, 255, 0.88);
-      border: 1.5px solid #d7e2ee;
-      color: #475569;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1.4px solid #d5e0ea;
+      color: #425466;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      white-space: nowrap;
     }
     .category-chip:hover {
-      border-color: #14b8a6;
-      color: #0f766e;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px -10px rgba(15, 118, 110, 0.45);
+      border-color: rgba(0, 184, 148, 0.45);
+      color: #007660;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 16px -13px rgba(0, 184, 148, 0.7);
     }
     .category-chip.active {
-      background: linear-gradient(100deg, #059669 6%, #0891b2 100%);
+      background: var(--vt-accent);
       color: #fff;
-      border-color: transparent;
-      box-shadow: 0 10px 22px -12px rgba(5, 150, 105, 0.65);
+      border-color: var(--vt-accent);
+      box-shadow: 0 10px 20px -13px rgba(0, 184, 148, 0.95);
     }
 
     /* --- Type Filter Buttons --- */
@@ -253,53 +303,59 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.72rem 1.15rem;
-      min-height: 2.85rem;
-      border-radius: 0.95rem;
-      font-size: 0.835rem;
+      flex: 0 0 auto;
+      padding: 0.68rem 1.05rem;
+      min-height: 44px;
+      border-radius: 16px;
+      font-size: 0.82rem;
       font-weight: 800;
-      background: linear-gradient(150deg, #ffffff 0%, #f8fafc 100%);
-      border: 1.5px solid #d7e2ee;
-      color: #475569;
+      background: rgba(255, 255, 255, 0.4);
+      border: 1.4px solid #d2dde8;
+      color: #415568;
       cursor: pointer;
       transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, color 0.22s ease;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+      box-shadow: none;
       white-space: nowrap;
     }
     .type-filter-btn:hover {
-      border-color: #14b8a6;
-      color: #0f766e;
-      transform: translateY(-1.5px);
-      box-shadow: 0 8px 16px -12px rgba(15, 118, 110, 0.45);
+      border-color: rgba(0, 184, 148, 0.5);
+      color: #007660;
+      transform: translateY(-1px);
     }
     .type-filter-btn.active {
-      background: linear-gradient(120deg, #059669 0%, #0ea5e9 100%);
+      background: var(--vt-accent);
       color: #fff;
-      border-color: transparent;
-      box-shadow: 0 12px 20px -11px rgba(5, 150, 105, 0.65);
+      border-color: var(--vt-accent);
+      box-shadow: 0 0 0 1px rgba(0, 184, 148, 0.35), 0 14px 24px -18px rgba(0, 184, 148, 0.95);
     }
     .type-filter-btn.active svg {
       filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3));
     }
+    .type-filter-btn:focus-visible,
+    .category-chip:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.2);
+    }
 
     /* --- Shop Filters Container --- */
     .shop-filters-container {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(16, 185, 129, 0.17);
-      border-radius: 1.35rem;
-      padding: 1.1rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 184, 148, 0.12);
+      border-radius: var(--vt-radius);
+      padding: 0.85rem;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
     }
     .filter-title-row {
       display: flex;
       align-items: center;
       gap: 0.55rem;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px dashed rgba(16, 185, 129, 0.28);
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px dashed rgba(0, 184, 148, 0.28);
     }
     .filter-title-row h3 {
-      font-size: 0.98rem;
+      font-size: 0.94rem;
       color: #1f2937;
       font-weight: 900;
       letter-spacing: -0.01em;
@@ -323,7 +379,7 @@
     .filter-label svg {
       width: 17px;
       height: 17px;
-      color: #0f766e;
+      color: #007660;
     }
     .filter-chips {
       display: flex;
@@ -365,135 +421,81 @@
     }
 
     #typeFilterWrapper,
-    #viewTypeFilterWrapper {
+    #viewTypeFilterWrapper,
+    #shopFiltersContainer {
       width: 100%;
       transition: opacity 0.3s ease-in-out;
     }
 
-    @media (min-width: 768px) {
-      .filter-search-grid {
-        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-      }
-    }
-
     @media (max-width: 1024px) {
       .filters-shell {
-        border-radius: 1.45rem;
-        padding: 0.9rem;
+        padding: 0.85rem;
       }
-      .filter-toolbar {
-        align-items: stretch;
-        justify-content: flex-start;
+      .filter-card-row {
+        padding: 0.45rem;
       }
-      .filter-toolbar-head {
-        width: 100%;
-        justify-content: center;
-        padding: 0.4rem 0.6rem;
-        border-radius: 0.85rem;
-        background: rgba(236, 253, 245, 0.82);
-        border: 1px dashed rgba(16, 185, 129, 0.26);
+      .filter-search-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       }
-      .filter-toolbar-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.55rem;
-      }
-      .type-filter-btn {
-        width: 100%;
-        min-height: 2.95rem;
+      .filter-tabs-scroll {
+        flex-wrap: wrap;
+        overflow-x: visible;
       }
       .shop-filters-container {
-        border-radius: 1.15rem;
-      }
-      #subcatContainer {
-        row-gap: 0.5rem;
+        padding: 0.8rem;
       }
     }
 
     @media (max-width: 768px) {
       .filters-shell {
         margin-top: 1rem !important;
-        padding: 0.78rem;
+        padding: 0.75rem;
       }
       .filter-search-grid {
-        gap: 0.62rem;
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
       }
       .vitrine-input {
-        min-height: 3rem;
+        min-height: 48px;
         font-size: 16px;
       }
-      #searchInput {
-        padding-left: 2.9rem;
+      .filter-input-wrap,
+      .sort-select-wrap {
+        min-height: 48px;
       }
-      .filter-input-wrap .search-icon {
-        left: 0.88rem;
+      .filter-tabs-scroll {
+        overflow-x: auto;
+        flex-wrap: nowrap;
       }
-      .sort-select-wrap::after {
-        right: 0.9rem;
-      }
-      #sortSelect {
-        padding-left: 2.35rem;
-      }
-      .filter-title-row {
-        margin-bottom: 0.78rem;
-        padding-bottom: 0.65rem;
-      }
-      .filter-title-row h3 {
-        font-size: 0.9rem;
-      }
-      .filter-label {
-        font-size: 0.79rem;
+      #subcatContainer {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.15rem;
       }
       .category-chip {
-        min-height: 2.5rem;
-        display: inline-flex;
-        align-items: center;
+        flex: 0 0 auto;
       }
     }
 
     @media (max-width: 640px) {
       .filters-shell {
-        border-radius: 1.15rem;
-        padding: 0.68rem;
+        border-radius: 16px;
+        padding: 0.7rem;
       }
-      .filter-toolbar {
-        padding: 0.62rem;
-        border-radius: 0.95rem;
-      }
-      .filter-toolbar-head {
-        gap: 0.4rem;
-        padding: 0.36rem 0.5rem;
-      }
-      .filter-toolbar-head span {
-        font-size: 0.78rem;
-      }
-      .filter-toolbar-actions {
-        grid-template-columns: 1fr;
+      .filter-card-row {
+        border-radius: 16px;
       }
       .type-filter-btn {
+        min-height: 44px;
         font-size: 0.8rem;
-        min-height: 2.8rem;
-        border-radius: 0.82rem;
-        padding: 0.58rem 0.82rem;
-      }
-      #sortSelect {
-        border-radius: 0.9rem;
-      }
-      .shop-filters-container {
-        padding: 0.86rem;
-        border-radius: 0.95rem;
-      }
-      .filter-group {
-        margin-bottom: 0.72rem;
+        padding: 0.58rem 0.9rem;
       }
       .filter-chip {
         font-size: 0.72rem;
         padding: 0.48rem 0.76rem;
       }
       .category-chip {
-        font-size: 0.76rem;
-        min-height: 2.4rem;
+        min-height: 44px;
       }
     }
 
@@ -1393,93 +1395,74 @@
           </div>
 
           <!-- Stats Badge - Centered -->
-          <div class="px-6 py-3 rounded-2xl flex items-center gap-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12)); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
-            <div class="text-3xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] bg-clip-text text-transparent" id="resultsMeta">0</div>
-            <div class="text-sm font-bold text-emerald-800">فروشگاه فعال</div>
+          <div class="results-stat-chip">
+            <div class="results-stat-number" id="resultsMeta">0</div>
+            <div class="results-stat-label">فروشگاه فعال</div>
           </div>
 
         </div>
         <div class="filters-shell mt-8 max-w-5xl mx-auto">
-          <!-- Filter Type Toggle - Only visible when cat=service -->
-          <div id="typeFilterWrapper" style="display: none;">
-            <div class="filter-toolbar">
-              <div class="filter-toolbar-head">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+          <div id="typeFilterWrapper" class="filter-card-row" style="display: none;">
+            <div id="typeFilterContainer" class="filter-tabs-scroll" role="tablist" aria-label="فیلتر نوع محتوا">
+              <button class="type-filter-btn active" data-type="all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
-                <span>فیلتر نمایش</span>
+                همه موارد
+              </button>
+              <button class="type-filter-btn" data-type="service">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                مغازه‌های خدماتی
+              </button>
+              <button class="type-filter-btn" data-type="portfolio">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                نمونه کارها
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-card-row">
+            <div class="filter-search-grid">
+              <div class="filter-input-wrap">
+                <input type="text" id="searchInput" class="vitrine-input" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
+                <span class="search-icon">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </span>
               </div>
-              <div id="typeFilterContainer" class="filter-toolbar-actions">
-                <button class="type-filter-btn active" data-type="all">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                  </svg>
-                  همه موارد
-                </button>
-                <button class="type-filter-btn" data-type="service">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                  مغازه‌های خدماتی
-                </button>
-                <button class="type-filter-btn" data-type="portfolio">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  نمونه کارها
-                </button>
+              <div class="sort-select-wrap">
+                <select id="sortSelect" class="vitrine-input cursor-pointer">
+                  <option value="popular">محبوب‌ترین</option>
+                  <option value="newest">جدیدترین</option>
+                  <option value="rating_desc">بیشترین امتیاز</option>
+                </select>
               </div>
             </div>
           </div>
 
-          <!-- Search and Sort -->
-          <div class="filter-search-grid">
-            <div class="filter-input-wrap">
-              <input type="text" id="searchInput" class="vitrine-input pl-12" placeholder="جستجو در نام مغازه، محله یا آدرس..."/>
-              <span class="search-icon">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          <div id="viewTypeFilterWrapper" class="filter-card-row" style="display: none;">
+            <div class="filter-tabs-scroll" id="viewTypeFilterContainer" role="tablist" aria-label="نوع نمایش نتایج">
+              <button class="type-filter-btn active" data-view-type="shops">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
-              </span>
-            </div>
-            <div class="sort-select-wrap">
-              <select id="sortSelect" class="vitrine-input cursor-pointer">
-                <option value="popular">🔥 محبوب‌ترین</option>
-                <option value="newest">🆕 جدیدترین</option>
-                <option value="rating_desc">⭐ بیشترین امتیاز</option>
-              </select>
+                فروشگاه‌ها
+              </button>
+              <button class="type-filter-btn" data-view-type="products">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                کالاها
+              </button>
             </div>
           </div>
 
-          <!-- Shop/Products View Toggle (for non-service categories ONLY) -->
-          <div id="viewTypeFilterWrapper" class="mt-3" style="display: none;">
-            <div class="filter-toolbar">
-              <div class="filter-toolbar-head">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-                <span>نوع نمایش</span>
-              </div>
-              <div class="filter-toolbar-actions" id="viewTypeFilterContainer">
-                <button class="type-filter-btn active" data-view-type="shops">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
-                  فروشگاه‌ها
-                </button>
-                <button class="type-filter-btn" data-view-type="products">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                  </svg>
-                  کالاها
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Professional Shop Filters (for non-service categories) -->
-          <div id="shopFiltersContainer" class="mt-3" style="display: none;">
+          <div id="shopFiltersContainer" class="filter-card-row" style="display: none;">
             <div class="shop-filters-container">
               <div class="filter-title-row">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1522,9 +1505,10 @@
             </div>
           </div>
 
-          <!-- Subcategories - Centered -->
-          <div id="subcatContainer" class="mt-4 hidden flex-wrap gap-2 justify-center">
-            <button class="category-chip active" data-sub="all">همه</button>
+          <div id="subcatRow" class="filter-card-row hidden">
+            <div id="subcatContainer" class="hidden flex-wrap gap-2">
+              <button class="category-chip active" data-sub="all">همه</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1671,7 +1655,7 @@
         resultsGrid: document.getElementById('results-grid'),
         portfolioSection: document.getElementById('portfolioSection'),
         sectionDivider: document.getElementById('sectionDivider'),
-        typeFilterButtons: Array.from(document.querySelectorAll('.type-filter-btn'))
+        typeFilterButtons: Array.from(document.querySelectorAll('#typeFilterContainer .type-filter-btn'))
       };
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -1723,7 +1707,7 @@
 
         if (!isServiceCategory && !isGeneralCategory) {
           // Show filter with smooth transition for non-service categories
-          viewTypeFilterWrapper.style.display = 'block';
+          viewTypeFilterWrapper.style.display = 'flex';
           viewTypeFilterWrapper.style.opacity = '0';
 
           // Trigger animation after display
@@ -1790,7 +1774,7 @@
         populateShoppingCenterFilter(state.shoppingCenters);
 
         // Show the filter container with animation
-        shopFiltersContainer.style.display = 'block';
+        shopFiltersContainer.style.display = 'flex';
         shopFiltersContainer.style.opacity = '0';
         requestAnimationFrame(() => {
           shopFiltersContainer.style.transition = 'opacity 0.3s ease-in-out';
@@ -2198,8 +2182,10 @@
       
       function setupServiceView(allShops, portfolioItems = []) {
          const subcats = [...new Set(allShops.map(s => s.subcategory).filter(Boolean))];
+         const subcatRow = document.getElementById('subcatRow');
          if (subcats.length > 0) {
              const container = document.getElementById('subcatContainer');
+             if (subcatRow) subcatRow.classList.remove('hidden');
              container.classList.remove('hidden');
              container.classList.add('flex');
              
@@ -2222,6 +2208,8 @@
                  state.activeSubcategory = 'all';
                  applyFiltersAndRender();
              }
+         } else if (subcatRow) {
+             subcatRow.classList.add('hidden');
          }
          // Portfolio Logic
          const portfolioSec = document.getElementById('portfolioSection');
@@ -2334,6 +2322,7 @@
         ui.typeFilterButtons.forEach(btn => {
           btn.addEventListener('click', () => {
             const type = btn.getAttribute('data-type');
+            if (!type) return;
             state.typeFilter = type;
             setActiveTypeFilterButton(type);
             applyFiltersAndRender();
