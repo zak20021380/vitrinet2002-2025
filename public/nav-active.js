@@ -259,7 +259,7 @@
     style.textContent = `
       @media (max-width: 1024px) {
         body.${BODY_READY_CLASS} {
-          padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+          padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
         }
 
         body.${BODY_READY_CLASS}.hide-mobile-nav {
@@ -274,45 +274,75 @@
         .mobile-bottom-nav {
           display: flex !important;
           position: fixed;
-          left: 16px;
-          right: 16px;
-          bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+          left: 12px;
+          right: 12px;
+          bottom: calc(20px + env(safe-area-inset-bottom, 0px));
           z-index: 1000;
-          height: 78px;
-          padding: 8px;
-          background: rgba(255, 255, 255, 0.68);
-          border-radius: 28px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
-          backdrop-filter: saturate(1.1) blur(14px);
-          -webkit-backdrop-filter: saturate(1.1) blur(14px);
+          height: 82px;
+          padding: 10px 6px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+          border-radius: 32px;
+          border: 1.5px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.08),
+            0 2px 8px rgba(0, 0, 0, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          backdrop-filter: saturate(1.8) blur(20px);
+          -webkit-backdrop-filter: saturate(1.8) blur(20px);
           justify-content: space-between;
           align-items: center;
-          gap: 6px;
-          overflow: hidden;
-          transition: transform 0.24s ease-in-out, opacity 0.24s ease-in-out;
+          gap: 4px;
+          overflow: visible;
+          transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
+                      opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                      box-shadow 0.32s ease;
+        }
+
+        .mobile-nav::before,
+        .mobile-bottom-nav::before {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          border-radius: 32px;
+          padding: 1px;
+          background: linear-gradient(135deg, 
+            rgba(16, 185, 129, 0.15) 0%, 
+            rgba(59, 130, 246, 0.1) 50%,
+            rgba(168, 85, 247, 0.12) 100%);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          opacity: 0.6;
+          pointer-events: none;
         }
 
         .mobile-nav-indicator {
           position: absolute;
           top: 0;
           left: 0;
-          width: 74px;
-          height: 48px;
-          border-radius: 22px;
-          background: rgba(16, 185, 129, 0.09);
+          width: 76px;
+          height: 52px;
+          border-radius: 24px;
+          background: linear-gradient(135deg, 
+            rgba(16, 185, 129, 0.14) 0%, 
+            rgba(5, 150, 105, 0.12) 100%);
+          box-shadow: 
+            0 4px 12px rgba(16, 185, 129, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
           opacity: 0;
           pointer-events: none;
-          transform: translate3d(0, 14px, 0);
-          transition: transform 0.24s ease-in-out, width 0.24s ease-in-out, opacity 0.2s ease-in-out;
+          transform: translate3d(0, 15px, 0);
+          transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
+                      width 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
+                      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 0;
         }
 
         @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
           .mobile-nav,
           .mobile-bottom-nav {
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(203, 213, 225, 0.9);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
+            border: 1.5px solid rgba(203, 213, 225, 0.6);
           }
         }
 
@@ -322,7 +352,7 @@
           justify-content: space-between;
           width: 100%;
           height: 100%;
-          gap: 6px;
+          gap: 4px;
           margin: 0;
           padding: 0;
           list-style: none;
@@ -334,14 +364,14 @@
         }
 
         body.hide-mobile-nav .mobile-nav {
-          transform: translateY(140%);
+          transform: translateY(150%);
           opacity: 0;
           pointer-events: none;
           visibility: hidden;
         }
 
         body.hide-mobile-nav .mobile-bottom-nav {
-          transform: translateY(140%);
+          transform: translateY(150%);
           opacity: 0;
           pointer-events: none;
           visibility: hidden;
@@ -356,59 +386,69 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 44px;
-          min-width: 44px;
+          min-height: 48px;
+          min-width: 48px;
           height: 100%;
-          color: #5f6b7a;
+          color: #64748b;
           text-decoration: none;
-          font-weight: 400;
-          gap: 4px;
-          padding: 6px 4px;
-          border-radius: 16px;
-          transition: transform 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+          font-weight: 500;
+          gap: 5px;
+          padding: 8px 6px;
+          border-radius: 20px;
+          transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
+                      color 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
+                      background-color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
           -webkit-tap-highlight-color: transparent;
+          cursor: pointer;
+        }
+
+        .mobile-nav .nav-item:hover,
+        .mobile-bottom-nav .nav-item:hover {
+          background: rgba(16, 185, 129, 0.06);
         }
 
         .mobile-nav .nav-item:focus-visible,
         .mobile-bottom-nav .nav-item:focus-visible {
           outline: none;
-          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.24);
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
         }
 
         .mobile-nav .nav-item:active,
         .mobile-bottom-nav .nav-item:active {
-          transform: scale(1.04);
+          transform: scale(0.96);
         }
 
         .mobile-nav .nav-icon-wrap,
         .mobile-bottom-nav .nav-icon-wrap {
           position: relative;
-          width: 24px;
-          height: 24px;
+          width: 26px;
+          height: 26px;
           flex-shrink: 0;
         }
 
         .mobile-nav .nav-item svg,
         .mobile-bottom-nav .nav-item svg {
-          width: 24px;
-          height: 24px;
+          width: 26px;
+          height: 26px;
           color: inherit;
           position: absolute;
           inset: 0;
           transform-origin: center;
-          transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+          transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), 
+                      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
         }
 
         .mobile-nav .nav-item .nav-icon-outline,
         .mobile-bottom-nav .nav-item .nav-icon-outline {
           opacity: 1;
-          transform: scale(1);
+          transform: scale(1) rotate(0deg);
         }
 
         .mobile-nav .nav-item .nav-icon-filled,
         .mobile-bottom-nav .nav-item .nav-icon-filled {
           opacity: 0;
-          transform: scale(0.84);
+          transform: scale(0.8) rotate(-8deg);
         }
 
         .mobile-nav .nav-item .nav-label,
@@ -416,15 +456,18 @@
         .mobile-bottom-nav .nav-item span {
           font-size: 11.5px;
           font-weight: inherit;
-          line-height: 1.1;
-          opacity: 0.92;
-          transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+          line-height: 1.2;
+          opacity: 0.88;
+          transition: color 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
+                      opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+                      transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
           white-space: nowrap;
+          letter-spacing: 0.01em;
         }
 
         .mobile-nav .nav-item.active,
         .mobile-bottom-nav .nav-item.active {
-          color: #0f766e;
+          color: #059669;
           background: transparent;
           font-weight: 600;
         }
@@ -432,13 +475,14 @@
         .mobile-nav .nav-item.active .nav-icon-outline,
         .mobile-bottom-nav .nav-item.active .nav-icon-outline {
           opacity: 0;
-          transform: scale(0.84);
+          transform: scale(0.8) rotate(8deg);
         }
 
         .mobile-nav .nav-item.active .nav-icon-filled,
         .mobile-bottom-nav .nav-item.active .nav-icon-filled {
           opacity: 1;
-          transform: scale(1);
+          transform: scale(1.08) rotate(0deg);
+          filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
         }
 
         .mobile-nav .nav-item.active .nav-label,
@@ -446,6 +490,7 @@
         .mobile-bottom-nav .nav-item.active span {
           font-weight: 600;
           opacity: 1;
+          transform: translateY(-1px);
         }
 
         body.${BODY_READY_CLASS} .mobile-bottom-nav {
@@ -551,11 +596,11 @@
       return;
     }
 
-    const width = Math.max(68, Math.min(activeRect.width + 6, 96));
-    const height = Math.max(46, Math.min(navRect.height - 16, 50));
+    const width = Math.max(72, Math.min(activeRect.width + 8, 100));
+    const height = Math.max(50, Math.min(navRect.height - 20, 54));
     const left = activeRect.left - navRect.left + ((activeRect.width - width) / 2);
     const top = (navRect.height - height) / 2;
-    const clampedLeft = Math.max(6, Math.min(left, navRect.width - width - 6));
+    const clampedLeft = Math.max(8, Math.min(left, navRect.width - width - 8));
 
     indicator.style.width = `${width}px`;
     indicator.style.height = `${height}px`;
