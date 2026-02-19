@@ -1082,12 +1082,136 @@ async function deleteHomepageCard(sectionId, cardId) {
   }
 }
 
+const HOMEPAGE_INDEX_ROWS_CACHE_MS = 30000;
+const HOMEPAGE_INDEX_PRODUCT_ROW_SELECTORS = [
+  '#drag-scroll-cards',
+  '#hair-salon-slider',
+  '#carwash-slider',
+  '#popular-products-slider',
+  '#shopping-centers-slider'
+];
+let homepageIndexRowsStatsCache = null;
+let homepageIndexRowsStatsFetchedAt = 0;
+let homepageIndexRowsStatsPromise = null;
+
+function extractIndexRowsStatsFromHtml(htmlText) {
+  const html = String(htmlText || '').trim();
+  if (!html) return null;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const body = doc?.body;
+  if (!body) return null;
+
+  const uniqueSections = [];
+  const seenSections = new Set();
+
+  HOMEPAGE_INDEX_PRODUCT_ROW_SELECTORS.forEach((selector) => {
+    const target = doc.querySelector(selector);
+    const section = target?.closest('section') || null;
+    if (!section) return;
+
+    const sectionId = section.id
+      ? `id:${section.id}`
+      : `${selector}@${Array.from(doc.querySelectorAll('section')).indexOf(section)}`;
+    if (seenSections.has(sectionId)) return;
+
+    seenSections.add(sectionId);
+    uniqueSections.push(section);
+  });
+
+  const totalRows = uniqueSections.length;
+  const activeRows = uniqueSections.filter((section) => !section.classList.contains('hidden')).length;
+
+  return {
+    totalRows,
+    activeRows,
+    inactiveRows: Math.max(0, totalRows - activeRows)
+  };
+}
+
+async function getHomepageIndexRowsStats(force = false) {
+  const now = Date.now();
+  const canUseCache = !force
+    && homepageIndexRowsStatsCache
+    && (now - homepageIndexRowsStatsFetchedAt) < HOMEPAGE_INDEX_ROWS_CACHE_MS;
+
+  if (canUseCache) {
+    return homepageIndexRowsStatsCache;
+  }
+
+  if (!homepageIndexRowsStatsPromise) {
+    homepageIndexRowsStatsPromise = (async () => {
+      const res = await fetch('/index.html', {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (!res.ok) {
+        throw new Error(`index.html unavailable (${res.status})`);
+      }
+      const html = await res.text();
+      const stats = extractIndexRowsStatsFromHtml(html);
+      if (!stats) {
+        throw new Error('unable to parse index.html rows');
+      }
+      homepageIndexRowsStatsCache = stats;
+      homepageIndexRowsStatsFetchedAt = Date.now();
+      return stats;
+    })()
+      .catch((error) => {
+        console.warn('getHomepageIndexRowsStats failed:', error);
+        return homepageIndexRowsStatsCache;
+      })
+      .finally(() => {
+        homepageIndexRowsStatsPromise = null;
+      });
+  }
+
+  return homepageIndexRowsStatsPromise;
+}
+
+async function updateHomepageSectionsOverview() {
+  const activeEl = document.getElementById('homepageOverviewActiveCount');
+  const totalEl = document.getElementById('homepageOverviewTotalCount');
+  const inactiveEl = document.getElementById('homepageOverviewInactiveCount');
+  const visibleCardsEl = document.getElementById('homepageOverviewVisibleCards');
+  const hintEl = document.getElementById('homepageSectionsOverviewHint');
+
+  if (!activeEl && !totalEl && !inactiveEl && !visibleCardsEl && !hintEl) return;
+
+  const managedSections = Array.isArray(homepageSectionsList) ? homepageSectionsList : [];
+  const totalManaged = managedSections.length;
+  const activeManaged = managedSections.filter((item) => Boolean(item?.isActive)).length;
+  const inactiveManaged = Math.max(0, totalManaged - activeManaged);
+
+  const indexStats = await getHomepageIndexRowsStats();
+  const totalRows = Number.isFinite(indexStats?.totalRows) ? Number(indexStats.totalRows) : 0;
+
+  if (activeEl) activeEl.textContent = formatNumber(activeManaged);
+  if (totalEl) totalEl.textContent = formatNumber(totalRows);
+  if (inactiveEl) inactiveEl.textContent = formatNumber(inactiveManaged);
+  if (visibleCardsEl) visibleCardsEl.textContent = formatNumber(totalManaged);
+
+  if (hintEl) {
+    if (totalManaged === 0) {
+      hintEl.textContent = `در حال حاضر ردیف مدیریت‌شده‌ای وجود ندارد. در index.html تعداد ${formatNumber(totalRows)} ردیف محصول ثابت شناسایی شد.`;
+      return;
+    }
+    if (activeManaged === 0) {
+      hintEl.textContent = `همه ردیف‌های مدیریت‌شده غیرفعال هستند. در index.html تعداد ${formatNumber(totalRows)} ردیف محصول ثابت وجود دارد.`;
+      return;
+    }
+    hintEl.textContent = `${formatNumber(activeManaged)} ردیف فعال از ${formatNumber(totalManaged)} ردیف مدیریت‌شده ثبت شده است. در index.html تعداد ${formatNumber(totalRows)} ردیف محصول ثابت وجود دارد.`;
+  }
+}
+
 function renderHomepageSections() {
   const listEl = document.getElementById('homepageSectionsList');
   const emptyEl = document.getElementById('homepageSectionsEmpty');
   if (!listEl || !emptyEl) return;
 
   listEl.innerHTML = '';
+  void updateHomepageSectionsOverview();
 
   if (!homepageSectionsList.length) {
     emptyEl.style.display = 'block';
@@ -6050,7 +6174,11 @@ function updateHeaderCounts() {
   if (centersHeaderEl) centersHeaderEl.textContent = `(${formatNumber(shoppingCentersList.length)} مرکز خرید)`;
   const homepageSectionsHeaderEl = document.getElementById('header-homepage-sections-count');
   if (homepageSectionsHeaderEl) {
-    homepageSectionsHeaderEl.textContent = `(${formatNumber(homepageSectionsList.length)} ردیف)`;
+    const totalSections = homepageSectionsList.length;
+    const activeSections = homepageSectionsList.filter((item) => Boolean(item?.isActive)).length;
+    homepageSectionsHeaderEl.textContent = totalSections > 0
+      ? `(${formatNumber(activeSections)} فعال از ${formatNumber(totalSections)} ردیف)`
+      : `(${formatNumber(totalSections)} ردیف)`;
   }
 
   const unread = getTotalUnreadMessages();

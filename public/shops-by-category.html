@@ -33,15 +33,227 @@
 
     /* --- Header --- */
     #mainHeader {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+      box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.55), 0 1px 0 rgba(15, 23, 42, 0.06);
+    }
+    #headerInner {
+      padding: 0.9rem 1.25rem;
+      gap: 0.95rem;
+    }
+    #logoCityWrap {
+      gap: 0.55rem;
+      min-width: 0;
+    }
+    .vitreenet-brand__title {
+      font-weight: 900;
+      letter-spacing: 0.13em;
+    }
+    .header-ghost-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.48rem;
+    }
+    .header-ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: rgba(255, 255, 255, 0.84);
+      color: #0f172a;
+      min-height: 42px;
+      padding: 0.56rem 0.9rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+      box-shadow: 0 8px 22px -18px rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+    }
+    .header-ghost-btn:hover {
+      border-color: rgba(0, 184, 148, 0.46);
+      box-shadow: 0 12px 22px -18px rgba(0, 184, 148, 0.5);
+      transform: translateY(-1px);
+    }
+    .header-ghost-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.17);
+    }
+    .header-ghost-btn svg {
+      width: 18px;
+      height: 18px;
+      color: #0f766e;
+    }
+    .header-ghost-btn--icon {
+      width: 42px;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .header-ghost-btn--city {
+      min-width: 90px;
+    }
+    #headerCity {
+      color: #0f766e;
+      font-size: 0.86rem;
+      font-weight: 800;
+      letter-spacing: 0.01em !important;
+      line-height: 1.1;
+    }
+    #registerShopBtn {
+      background: #00B894 !important;
+      border: 1px solid #00B894;
+      color: #ffffff !important;
+      box-shadow: 0 12px 24px -16px rgba(0, 184, 148, 0.95);
+      border-radius: 999px;
+      padding-inline: 1.22rem !important;
+    }
+    #registerShopBtn::before {
+      content: none !important;
+    }
+    #registerShopBtn:hover,
+    #registerShopBtn:focus-visible {
+      background: #00a985 !important;
+      border-color: #00a985;
+      box-shadow: 0 16px 26px -16px rgba(0, 169, 133, 0.95);
+      transform: translateY(-1px);
+    }
+    .header-menu-btn {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.14);
+      background: #ffffff;
+      color: #0f766e;
+      box-shadow: 0 8px 18px -13px rgba(15, 23, 42, 0.4);
+      align-items: center;
+      justify-content: center;
+      gap: 3.5px;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .header-menu-btn span {
+      display: block;
+      width: 16px;
+      height: 1.7px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+    .header-menu-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: rgba(15, 23, 42, 0.42);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.26s ease;
+    }
+    .header-menu-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header-menu-drawer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: min(84vw, 320px);
+      height: 100%;
+      background: #ffffff;
+      box-shadow: 18px 0 44px -24px rgba(15, 23, 42, 0.58);
+      transform: translateX(-104%);
+      transition: transform 0.26s ease;
+      padding: 1rem 0.95rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+    }
+    .header-menu-overlay.is-open .header-menu-drawer {
+      transform: translateX(0);
+    }
+    .header-menu-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.8rem;
+    }
+    .header-menu-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #334155;
+      letter-spacing: 0.01em;
+    }
+    .header-menu-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 1.1rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-menu-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .header-ghost-btn--mobile {
+      width: 100%;
+      justify-content: flex-start;
+      gap: 0.6rem;
+      min-height: 46px;
+      font-weight: 800;
+    }
+    #headerCityMobile {
+      color: #0f766e;
+      font-weight: 800;
     }
     .nav-link {
       font-weight: 700; color: #334155; transition: color 0.2s; position: relative;
     }
     .nav-link:hover { color: #10b981; }
+    @media (max-width: 767px) {
+      #desktopNav {
+        display: none !important;
+      }
+      #headerGhostWrap {
+        display: none !important;
+      }
+      .header-menu-btn {
+        display: inline-flex;
+      }
+      #headerInner {
+        padding: 0.68rem 0.78rem;
+        gap: 0.5rem;
+      }
+      .vitreenet-brand {
+        gap: 0.42rem;
+      }
+      .vitreenet-brand__mark svg {
+        width: 35px;
+        height: 35px;
+      }
+      .vitreenet-brand__title {
+        font-size: 1.02rem;
+        letter-spacing: 0.07em;
+      }
+      .vitreenet-brand__subtitle {
+        display: none;
+      }
+      #registerShopBtn {
+        font-size: 0.77rem !important;
+        padding: 0.54rem 0.84rem !important;
+      }
+    }
+    @media (min-width: 768px) {
+      .header-menu-overlay {
+        display: none !important;
+      }
+    }
 
     /* --- Hero Glass Panel --- */
     .category-hero {
@@ -1374,20 +1586,17 @@
         </span>
       </a>
 
-      <!-- بج شهر - نمایش در دسکتاپ و موبایل -->
-      <div class="flex items-center gap-1 px-2.5 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg header-item"
-           style="background:linear-gradient(90deg,#10b981E6 70%,#0ea5e9E6); border: 1.5px solid #fff6; backdrop-filter: blur(5px);">
-        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" class="ml-1 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
-              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
-            </linearGradient>
-          </defs>
-          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
-            fill="url(#city-icon)"/>
-        </svg>
-        <span id="headerCity" class="font-bold text-white text-[12px] sm:text-[13px] md:text-[14px] drop-shadow-sm" style="letter-spacing:.3px;">سنندج</span>
+      <!-- بج شهر - نمایش در دسکتاپ -->
+      <div id="headerGhostWrap" class="header-ghost-wrap header-item">
+        <button type="button" id="headerLocationBtn" class="header-ghost-btn header-ghost-btn--icon" aria-label="Location">
+          <svg width="18" height="18" fill="none" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+              fill="currentColor"/>
+          </svg>
+        </button>
+        <button type="button" id="headerCityBtn" class="header-ghost-btn header-ghost-btn--city" aria-label="City">
+          <span id="headerCity">سنندج</span>
+        </button>
       </div>
     </div>
 
@@ -1406,12 +1615,37 @@
 
     <!-- دکمه‌های اکشن هدر -->
     <div class="flex items-center gap-2 header-item">
+      <button type="button" id="headerMenuBtn" class="header-menu-btn md:hidden" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <a href="post.html" id="registerShopBtn" class="btn-grad px-4 py-2 md:px-5 md:py-2.5 rounded-full font-extrabold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 whitespace-nowrap text-white text-sm md:text-base header-item">
         ثبت فروشگاه
       </a>
     </div>
   </div>
 </header>
+
+<div id="headerMenuOverlay" class="header-menu-overlay" aria-hidden="true">
+  <aside id="headerMenuDrawer" class="header-menu-drawer" aria-label="Header menu">
+    <div class="header-menu-top">
+      <p class="header-menu-title">MENU</p>
+      <button type="button" id="headerMenuClose" class="header-menu-close" aria-label="Close menu">×</button>
+    </div>
+    <div class="header-menu-content">
+      <button type="button" id="headerLocationBtnMobile" class="header-ghost-btn header-ghost-btn--mobile" aria-label="Location">
+        <svg width="18" height="18" fill="none" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            fill="currentColor"/>
+        </svg>
+      </button>
+      <button type="button" id="headerCityBtnMobile" class="header-ghost-btn header-ghost-btn--mobile" aria-label="City">
+        <span id="headerCityMobile"></span>
+      </button>
+    </div>
+  </aside>
+</div>
 
   <main class="px-4 sm:px-6 lg:px-8 pt-12 pb-16">
     <section class="max-w-7xl mx-auto flex flex-col gap-10">
@@ -2731,6 +2965,64 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
         document.addEventListener('portfolio:rendered', init);
       })();
 
+    })();
+  </script>
+  <script>
+    (function () {
+      function setupHeaderMenu() {
+        const menuBtn = document.getElementById('headerMenuBtn');
+        const menuClose = document.getElementById('headerMenuClose');
+        const menuOverlay = document.getElementById('headerMenuOverlay');
+        const menuDrawer = document.getElementById('headerMenuDrawer');
+        const cityDesktop = document.getElementById('headerCity');
+        const cityMobile = document.getElementById('headerCityMobile');
+        const cityBtnMobile = document.getElementById('headerCityBtnMobile');
+        const locationBtnMobile = document.getElementById('headerLocationBtnMobile');
+
+        if (!menuBtn || !menuClose || !menuOverlay || !menuDrawer) return;
+
+        if (cityDesktop && cityMobile) {
+          cityMobile.textContent = (cityDesktop.textContent || '').trim();
+        }
+
+        const openMenu = () => {
+          menuOverlay.classList.add('is-open');
+          menuOverlay.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+        };
+
+        const closeMenu = () => {
+          menuOverlay.classList.remove('is-open');
+          menuOverlay.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        };
+
+        menuBtn.addEventListener('click', openMenu);
+        menuClose.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', (event) => {
+          if (event.target === menuOverlay) {
+            closeMenu();
+          }
+        });
+        document.addEventListener('keydown', (event) => {
+          if ((event.key === 'Escape' || event.key === 'Esc') && menuOverlay.classList.contains('is-open')) {
+            closeMenu();
+          }
+        });
+
+        if (cityBtnMobile) {
+          cityBtnMobile.addEventListener('click', closeMenu);
+        }
+        if (locationBtnMobile) {
+          locationBtnMobile.addEventListener('click', closeMenu);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupHeaderMenu);
+      } else {
+        setupHeaderMenu();
+      }
     })();
   </script>
 </body>
