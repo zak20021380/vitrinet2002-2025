@@ -2277,6 +2277,13 @@
           <div class="invite-rewards-container">
             <!-- کارت دعوت کاربر -->
             <div class="invite-reward-card user">
+              <button
+                type="button"
+                class="invite-rules-info-btn"
+                onclick="openInviteRulesModal('friend')"
+                aria-label="قوانین دعوت از دوستان"
+                title="قوانین دعوت از دوستان"
+              >ⓘ</button>
               <div class="invite-reward-icon user">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
@@ -2294,6 +2301,13 @@
 
             <!-- کارت دعوت فروشنده -->
             <div class="invite-reward-card vendor">
+              <button
+                type="button"
+                class="invite-rules-info-btn"
+                onclick="openInviteRulesModal('seller')"
+                aria-label="قوانین دعوت از فروشنده"
+                title="قوانین دعوت از فروشنده"
+              >ⓘ</button>
               <div class="invite-reward-icon vendor">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -2312,6 +2326,58 @@
           <div class="invite-code-section">
             <p class="invite-code-label">کد معرف شما</p>
             <p class="invite-code-value" dir="ltr">${code}</p>
+          </div>
+
+          <!-- پاپ‌آپ قوانین دعوت از دوستان -->
+          <div
+            class="invite-rules-popup-overlay"
+            id="inviteFriendRulesPopup"
+            aria-hidden="true"
+            onclick="closeInviteRulesModalOnOverlay(event, 'friend')"
+          >
+            <div class="invite-rules-popup" role="dialog" aria-modal="true" aria-labelledby="inviteFriendRulesTitle">
+              <button
+                type="button"
+                class="invite-rules-popup-close"
+                onclick="closeInviteRulesModal('friend')"
+                aria-label="بستن"
+              >×</button>
+              <h3 class="invite-rules-popup-title" id="inviteFriendRulesTitle">قوانین دعوت از دوستان</h3>
+              <div class="invite-rules-popup-body">
+                <ul class="invite-rules-list">
+                  <li>پاداش هر دعوت موفق: ۵,۰۰۰ تومان اعتبار.</li>
+                  <li>پاداش زمانی ثبت می‌شود که کاربر دعوت‌شده اولین رزرو موفق خود را انجام دهد.</li>
+                  <li>هر کاربر فقط یک‌بار با کد معرف ثبت می‌شود و فقط یک پاداش ثبت خواهد شد.</li>
+                  <li>دعوت‌های غیرواقعی یا تکراری مشمول پاداش نیستند.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- پاپ‌آپ قوانین دعوت از فروشنده -->
+          <div
+            class="invite-rules-popup-overlay"
+            id="inviteSellerRulesPopup"
+            aria-hidden="true"
+            onclick="closeInviteRulesModalOnOverlay(event, 'seller')"
+          >
+            <div class="invite-rules-popup" role="dialog" aria-modal="true" aria-labelledby="inviteSellerRulesTitle">
+              <button
+                type="button"
+                class="invite-rules-popup-close"
+                onclick="closeInviteRulesModal('seller')"
+                aria-label="بستن"
+              >×</button>
+              <h3 class="invite-rules-popup-title" id="inviteSellerRulesTitle">قوانین دعوت از فروشنده</h3>
+              <div class="invite-rules-popup-body">
+                <ul class="invite-rules-list">
+                  <li>پاداش هر دعوت فروشنده موفق: ۵۰,۰۰۰ تومان اعتبار.</li>
+                  <li>فروشنده باید ثبت‌نام را کامل کند و حساب او تایید نهایی شود.</li>
+                  <li>پاداش پس از تایید اطلاعات فروشنده به کیف پول شما اضافه می‌شود.</li>
+                  <li>ثبت چند حساب برای یک کسب‌وکار یا اطلاعات نامعتبر، پاداش را باطل می‌کند.</li>
+                </ul>
+              </div>
+            </div>
           </div>
         `;
       } else if (data.isExploreModal) {
@@ -2609,8 +2675,41 @@
       const overlay = document.getElementById('missionModalOverlay');
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
+      closeAnyInviteRulesModal();
       document.body.style.overflow = '';
       currentMissionType = null;
+    }
+
+    function getInviteRulesPopupId(type) {
+      return type === 'seller' ? 'inviteSellerRulesPopup' : 'inviteFriendRulesPopup';
+    }
+
+    function openInviteRulesModal(type) {
+      const popup = document.getElementById(getInviteRulesPopupId(type));
+      if (!popup) return;
+      popup.classList.add('active');
+      popup.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeInviteRulesModal(type) {
+      const popup = document.getElementById(getInviteRulesPopupId(type));
+      if (!popup) return;
+      popup.classList.remove('active');
+      popup.setAttribute('aria-hidden', 'true');
+    }
+
+    function closeInviteRulesModalOnOverlay(event, type) {
+      if (event.target === event.currentTarget) {
+        closeInviteRulesModal(type);
+      }
+    }
+
+    function closeAnyInviteRulesModal() {
+      const activePopup = document.querySelector('.invite-rules-popup-overlay.active');
+      if (!activePopup) return false;
+      activePopup.classList.remove('active');
+      activePopup.setAttribute('aria-hidden', 'true');
+      return true;
     }
 
     // هندل کردن اکشن‌های ماموریت
@@ -2778,6 +2877,7 @@
     // بستن با Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (closeAnyInviteRulesModal()) return;
         closeMissionModal();
       }
     });
@@ -2959,6 +3059,9 @@
     window.showInstallAppMission = showInstallAppMission;
     window.closeMissionModal = closeMissionModal;
     window.handleMissionAction = handleMissionAction;
+    window.openInviteRulesModal = openInviteRulesModal;
+    window.closeInviteRulesModal = closeInviteRulesModal;
+    window.closeInviteRulesModalOnOverlay = closeInviteRulesModalOnOverlay;
     window.showCompletedMissionModal = showCompletedMissionModal;
     window.closeCompletedMissionModal = closeCompletedMissionModal;
 

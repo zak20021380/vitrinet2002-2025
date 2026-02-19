@@ -638,3 +638,128 @@
     font-size: 0.95rem;
   }
 }
+
+/* Invite rules popups (info icon + modal) */
+.invite-rules-info-btn {
+  position: absolute;
+  top: 0.7rem;
+  inset-inline-start: 0.7rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.invite-rules-info-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+}
+
+.invite-rules-info-btn:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: 1px;
+}
+
+.invite-rules-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.78);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.invite-rules-popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.invite-rules-popup {
+  width: min(92vw, 420px);
+  max-height: 84vh;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1rem 1rem 1.25rem;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.invite-rules-popup-close {
+  position: absolute;
+  top: 0.6rem;
+  inset-inline-end: 0.6rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invite-rules-popup-title {
+  margin: 0;
+  padding-inline-end: 2.1rem;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.invite-rules-popup-body {
+  margin-top: 0.85rem;
+}
+
+.invite-rules-list {
+  margin: 0;
+  padding: 0 1rem 0 0;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.9;
+  font-weight: 600;
+}
+
+.invite-rules-list li + li {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 480px) {
+  .invite-rules-popup {
+    width: 94vw;
+    border-radius: 0.9rem;
+    padding: 0.95rem 0.9rem 1.1rem;
+  }
+
+  .invite-rules-popup-title {
+    font-size: 0.95rem;
+  }
+
+  .invite-rules-list {
+    font-size: 0.86rem;
+    line-height: 1.8;
+  }
+}
