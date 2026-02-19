@@ -644,32 +644,62 @@
   position: absolute;
   top: 0.7rem;
   inset-inline-start: 0.7rem;
-  width: 1.55rem;
-  height: 1.55rem;
-  border: none;
+  width: 1.74rem;
+  height: 1.74rem;
+  border: 1px solid rgba(148, 163, 184, 0.34);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 2;
-  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.18);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow:
+    0 8px 18px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.invite-rules-info-btn::before {
+  content: 'i';
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #475569;
+  line-height: 1;
+  transform: translateY(-0.02rem);
+  text-rendering: geometricPrecision;
+}
+
+.invite-rules-info-btn::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  pointer-events: none;
 }
 
 .invite-rules-info-btn:hover {
-  transform: scale(1.06);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow:
+    0 12px 22px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.88) inset;
+}
+
+.invite-rules-info-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 5px 12px rgba(15, 23, 42, 0.13),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 }
 
 .invite-rules-info-btn:focus-visible {
-  outline: 2px solid #0f172a;
-  outline-offset: 1px;
+  outline: 2px solid #334155;
+  outline-offset: 2px;
 }
 
 .invite-rules-popup-overlay {
@@ -904,23 +934,37 @@
 .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn {
   top: 0.55rem;
   inset-inline-start: 0.55rem;
-  width: 1.65rem;
-  height: 1.65rem;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  font-size: 0.9rem;
-  color: #334155;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+  width: 1.8rem;
+  height: 1.8rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow:
+    0 10px 20px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.86) inset;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.user .invite-rules-info-btn {
+  background: linear-gradient(145deg, #ffffff 0%, #f4edff 100%);
+  border-color: rgba(139, 92, 246, 0.34);
+  box-shadow:
+    0 10px 20px rgba(109, 40, 217, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.84) inset;
+}
+
+.mission-modal-header.invite + .mission-modal-body .invite-reward-card.user .invite-rules-info-btn::before {
   color: #6d28d9;
-  border-color: rgba(139, 92, 246, 0.35);
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.vendor .invite-rules-info-btn {
-  color: #b45309;
+  background: linear-gradient(145deg, #ffffff 0%, #fff6e8 100%);
   border-color: rgba(245, 158, 11, 0.38);
+  box-shadow:
+    0 10px 20px rgba(180, 83, 9, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.84) inset;
+}
+
+.mission-modal-header.invite + .mission-modal-body .invite-reward-card.vendor .invite-rules-info-btn::before {
+  color: #b45309;
 }
 
 /* Popup card polish */
@@ -985,10 +1029,14 @@
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.62rem;
+    height: 1.62rem;
     top: 0.45rem;
     inset-inline-start: 0.45rem;
+  }
+
+  .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn::before {
+    font-size: 0.75rem;
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-code-section {
