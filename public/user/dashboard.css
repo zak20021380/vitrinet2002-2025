@@ -640,65 +640,60 @@
 }
 
 /* Invite rules popups (info icon + modal) */
+.invite-reward-title-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-bottom: 0.375rem;
+}
+
+.invite-reward-title-row .invite-reward-title {
+  margin: 0;
+}
+
 .invite-rules-info-btn {
-  position: absolute;
-  top: 0.7rem;
-  inset-inline-start: 0.7rem;
-  width: 1.74rem;
-  height: 1.74rem;
-  border: 1px solid rgba(148, 163, 184, 0.34);
-  border-radius: 999px;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  color: transparent;
-  font-size: 0;
-  line-height: 0;
+  position: static;
+  width: 15px;
+  height: 15px;
+  border: none;
+  background: transparent;
+  color: #1e293b;
+  opacity: 0.5;
+  font-size: 15px;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  margin: 0;
   cursor: pointer;
-  z-index: 2;
-  box-shadow:
-    0 8px 18px rgba(15, 23, 42, 0.14),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  flex: 0 0 15px;
+  box-shadow: none;
+  transition: opacity 0.16s ease;
 }
 
 .invite-rules-info-btn::before {
-  content: 'i';
-  font-family: 'Poppins', 'Vazirmatn', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 900;
-  color: #475569;
-  line-height: 1;
-  transform: translateY(-0.02rem);
-  text-rendering: geometricPrecision;
+  content: none;
 }
 
 .invite-rules-info-btn::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  pointer-events: none;
+  content: none;
 }
 
 .invite-rules-info-btn:hover {
-  transform: translateY(-1px) scale(1.03);
-  box-shadow:
-    0 12px 22px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.88) inset;
+  color: #1e293b;
+  opacity: 0.5;
 }
 
 .invite-rules-info-btn:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow:
-    0 5px 12px rgba(15, 23, 42, 0.13),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  color: #1e293b;
+  opacity: 0.5;
 }
 
 .invite-rules-info-btn:focus-visible {
-  outline: 2px solid #334155;
+  border-radius: 4px;
+  outline: 2px solid rgba(148, 163, 184, 0.45);
   outline-offset: 2px;
 }
 
@@ -710,11 +705,11 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(15, 23, 42, 0.78);
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.22s ease, visibility 0.22s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .invite-rules-popup-overlay.active {
@@ -728,23 +723,31 @@
   max-height: 84vh;
   overflow: auto;
   background: #ffffff;
-  border-radius: 1rem;
-  padding: 1rem 1rem 1.25rem;
+  border-radius: 20px;
+  padding: 24px;
   position: relative;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.invite-rules-popup-overlay.active .invite-rules-popup {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .invite-rules-popup-close {
   position: absolute;
-  top: 0.6rem;
-  inset-inline-end: 0.6rem;
-  width: 2rem;
-  height: 2rem;
+  top: 14px;
+  inset-inline-end: 14px;
+  width: 28px;
+  height: 28px;
   border: none;
   border-radius: 999px;
-  background: #f8fafc;
-  color: #0f172a;
-  font-size: 1.35rem;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 22px;
   line-height: 1;
   cursor: pointer;
   display: inline-flex;
@@ -754,23 +757,28 @@
 
 .invite-rules-popup-title {
   margin: 0;
-  padding-inline-end: 2.1rem;
+  padding-inline-end: 34px;
   color: #0f172a;
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 800;
+  text-align: right;
 }
 
 .invite-rules-popup-body {
   margin-top: 0.85rem;
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.8;
 }
 
 .invite-rules-list {
   margin: 0;
   padding: 0 1rem 0 0;
   color: #334155;
-  font-size: 0.9rem;
-  line-height: 1.9;
+  font-size: 14px;
+  line-height: 1.8;
   font-weight: 600;
+  text-align: right;
 }
 
 .invite-rules-list li + li {
@@ -779,9 +787,9 @@
 
 @media (max-width: 480px) {
   .invite-rules-popup {
-    width: 94vw;
-    border-radius: 0.9rem;
-    padding: 0.95rem 0.9rem 1.1rem;
+    width: 85vw;
+    border-radius: 20px;
+    padding: 24px;
   }
 
   .invite-rules-popup-title {
@@ -789,7 +797,7 @@
   }
 
   .invite-rules-list {
-    font-size: 0.86rem;
+    font-size: 14px;
     line-height: 1.8;
   }
 }
@@ -932,39 +940,32 @@
 
 /* Better info icon styling inside invite cards */
 .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn {
-  top: 0.55rem;
-  inset-inline-start: 0.55rem;
-  width: 1.8rem;
-  height: 1.8rem;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
-  border-color: rgba(148, 163, 184, 0.34);
-  box-shadow:
-    0 10px 20px rgba(15, 23, 42, 0.14),
-    0 0 0 1px rgba(255, 255, 255, 0.86) inset;
+  position: static;
+  width: 15px;
+  height: 15px;
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  opacity: 0.5;
+  box-shadow: none;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.user .invite-rules-info-btn {
-  background: linear-gradient(145deg, #ffffff 0%, #f4edff 100%);
-  border-color: rgba(139, 92, 246, 0.34);
-  box-shadow:
-    0 10px 20px rgba(109, 40, 217, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.84) inset;
+  color: #1e293b;
+  opacity: 0.5;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.user .invite-rules-info-btn::before {
-  color: #6d28d9;
+  content: none;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.vendor .invite-rules-info-btn {
-  background: linear-gradient(145deg, #ffffff 0%, #fff6e8 100%);
-  border-color: rgba(245, 158, 11, 0.38);
-  box-shadow:
-    0 10px 20px rgba(180, 83, 9, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.84) inset;
+  color: #1e293b;
+  opacity: 0.5;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-reward-card.vendor .invite-rules-info-btn::before {
-  color: #b45309;
+  content: none;
 }
 
 /* Popup card polish */
@@ -973,18 +974,19 @@
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup {
-  border-radius: 1.1rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.32);
+  border-radius: 20px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup-title {
-  font-size: 1.04rem;
-  font-weight: 900;
+  font-size: 1.02rem;
+  font-weight: 800;
+  text-align: right;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup-close {
-  border: 1px solid #e2e8f0;
+  border: none;
+  color: #9ca3af;
 }
 
 @media (max-width: 480px) {
@@ -1029,14 +1031,12 @@
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn {
-    width: 1.62rem;
-    height: 1.62rem;
-    top: 0.45rem;
-    inset-inline-start: 0.45rem;
+    width: 15px;
+    height: 15px;
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-rules-info-btn::before {
-    font-size: 0.75rem;
+    content: none;
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-code-section {
@@ -1049,7 +1049,7 @@
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-rules-popup {
-    width: 95vw;
+    width: 85vw;
     max-height: 82vh;
   }
 }

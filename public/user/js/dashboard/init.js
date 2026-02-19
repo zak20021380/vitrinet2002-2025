@@ -2277,13 +2277,6 @@
           <div class="invite-rewards-container">
             <!-- کارت دعوت کاربر -->
             <div class="invite-reward-card user">
-              <button
-                type="button"
-                class="invite-rules-info-btn"
-                onclick="openInviteRulesModal('friend')"
-                aria-label="قوانین دعوت از دوستان"
-                title="قوانین دعوت از دوستان"
-              >ⓘ</button>
               <div class="invite-reward-icon user">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
@@ -2293,7 +2286,16 @@
                 </svg>
               </div>
               <div class="invite-reward-content">
-                <p class="invite-reward-title">دعوت از دوستان</p>
+                <div class="invite-reward-title-row">
+                  <p class="invite-reward-title">دعوت از دوستان</p>
+                  <button
+                    type="button"
+                    class="invite-rules-info-btn"
+                    onclick="openInviteRulesModal('friend')"
+                    aria-label="قوانین دعوت از دوستان"
+                    title="قوانین دعوت از دوستان"
+                  >&#9432;</button>
+                </div>
                 <p class="invite-reward-subtitle">وقتی اولین رزروشون رو انجام بدن</p>
               </div>
               <div class="invite-reward-badge user">۵,۰۰۰ تومان</div>
@@ -2301,13 +2303,6 @@
 
             <!-- کارت دعوت فروشنده -->
             <div class="invite-reward-card vendor">
-              <button
-                type="button"
-                class="invite-rules-info-btn"
-                onclick="openInviteRulesModal('seller')"
-                aria-label="قوانین دعوت از فروشنده"
-                title="قوانین دعوت از فروشنده"
-              >ⓘ</button>
               <div class="invite-reward-icon vendor">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -2315,7 +2310,16 @@
                 </svg>
               </div>
               <div class="invite-reward-content">
-                <p class="invite-reward-title">دعوت از فروشنده</p>
+                <div class="invite-reward-title-row">
+                  <p class="invite-reward-title">دعوت از فروشنده</p>
+                  <button
+                    type="button"
+                    class="invite-rules-info-btn"
+                    onclick="openInviteRulesModal('seller')"
+                    aria-label="قوانین دعوت از فروشنده"
+                    title="قوانین دعوت از فروشنده"
+                  >&#9432;</button>
+                </div>
                 <p class="invite-reward-subtitle">پاداش ویژه برای معرفی کسب‌وکار!</p>
               </div>
               <div class="invite-reward-badge vendor">۵۰,۰۰۰ تومان</div>
