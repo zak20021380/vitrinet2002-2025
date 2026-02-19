@@ -705,7 +705,11 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.5);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(30, 41, 59, 0.28) 0%, rgba(15, 23, 42, 0.65) 72%),
+    rgba(2, 6, 23, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -719,53 +723,76 @@
 }
 
 .invite-rules-popup {
-  width: min(92vw, 420px);
+  width: min(92vw, 432px);
   max-height: 84vh;
   overflow: auto;
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 24px;
+  background: linear-gradient(170deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 24px;
+  padding: 1.15rem 1.15rem 1rem;
   position: relative;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  box-shadow:
+    0 26px 58px rgba(2, 6, 23, 0.28),
+    0 2px 10px rgba(15, 23, 42, 0.08);
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(12px) scale(0.985);
   transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.invite-rules-popup::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 4px;
+  border-radius: 24px 24px 0 0;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 52%, #f59e0b 100%);
 }
 
 .invite-rules-popup-overlay.active .invite-rules-popup {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .invite-rules-popup-close {
   position: absolute;
-  top: 14px;
-  inset-inline-end: 14px;
-  width: 28px;
-  height: 28px;
-  border: none;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 999px;
-  background: transparent;
-  color: #9ca3af;
-  font-size: 22px;
+  background: rgba(248, 250, 252, 0.88);
+  color: #64748b;
+  font-size: 21px;
   line-height: 1;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.invite-rules-popup-close:hover {
+  color: #0f172a;
+  border-color: rgba(99, 102, 241, 0.35);
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1);
 }
 
 .invite-rules-popup-title {
   margin: 0;
-  padding-inline-end: 34px;
-  color: #0f172a;
-  font-size: 1.02rem;
-  font-weight: 800;
+  padding-inline-end: 2.3rem;
+  color: #0b1324;
+  font-size: 1.04rem;
+  font-weight: 900;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   text-align: right;
 }
 
 .invite-rules-popup-body {
-  margin-top: 0.85rem;
+  margin-top: 0.9rem;
   text-align: right;
   font-size: 14px;
   line-height: 1.8;
@@ -773,32 +800,64 @@
 
 .invite-rules-list {
   margin: 0;
-  padding: 0 1rem 0 0;
-  color: #334155;
+  padding: 0;
+  list-style: none;
+  color: #1e293b;
   font-size: 14px;
-  line-height: 1.8;
+  line-height: 1.85;
   font-weight: 600;
   text-align: right;
+  display: grid;
+  gap: 0.55rem;
 }
 
-.invite-rules-list li + li {
-  margin-top: 0.35rem;
+.invite-rules-list li {
+  position: relative;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.95) 100%);
+  padding: 0.62rem 0.78rem;
+  padding-inline-end: 2rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.invite-rules-list li::before {
+  content: "";
+  position: absolute;
+  top: 0.92rem;
+  inset-inline-end: 0.76rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
 @media (max-width: 480px) {
   .invite-rules-popup {
-    width: 85vw;
+    width: 90vw;
     border-radius: 20px;
-    padding: 24px;
+    padding: 1rem 0.95rem 0.9rem;
   }
 
   .invite-rules-popup-title {
     font-size: 0.95rem;
+    padding-inline-end: 2.1rem;
   }
 
   .invite-rules-list {
-    font-size: 14px;
-    line-height: 1.8;
+    font-size: 13.5px;
+    line-height: 1.78;
+  }
+
+  .invite-rules-list li {
+    padding: 0.56rem 0.68rem;
+    padding-inline-end: 1.85rem;
+  }
+
+  .invite-rules-list li::before {
+    top: 0.84rem;
+    inset-inline-end: 0.64rem;
   }
 }
 
@@ -970,23 +1029,26 @@
 
 /* Popup card polish */
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup-overlay {
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup {
-  border-radius: 20px;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  border-radius: 24px;
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 26px 58px rgba(2, 6, 23, 0.3),
+    0 2px 10px rgba(15, 23, 42, 0.08);
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup-title {
-  font-size: 1.02rem;
-  font-weight: 800;
+  font-size: 1.04rem;
+  font-weight: 900;
   text-align: right;
 }
 
 .mission-modal-header.invite + .mission-modal-body .invite-rules-popup-close {
-  border: none;
-  color: #9ca3af;
+  color: #64748b;
 }
 
 @media (max-width: 480px) {
@@ -1049,7 +1111,7 @@
   }
 
   .mission-modal-header.invite + .mission-modal-body .invite-rules-popup {
-    width: 85vw;
+    width: 90vw;
     max-height: 82vh;
   }
 }
