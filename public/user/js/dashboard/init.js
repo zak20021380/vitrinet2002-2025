@@ -4962,21 +4962,9 @@
         return `
           <div class="${cardClasses} where-is-card !p-0 !min-h-[140px]" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}" dir="rtl">
             <div class="where-is-card-layout">
-              <div class="where-is-card-head">
-                <span class="where-is-chip">امشب فعال</span>
-                ${isCompleted ? `
-                  <span class="where-is-status" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20 6L9 17l-5-5"></path>
-                    </svg>
-                  </span>
-                ` : `<span class="where-is-status where-is-status--placeholder" aria-hidden="true"></span>`}
-              </div>
-
-              <div class="where-is-card-main">
-                <p class="where-is-reward">${rewardText}</p>
-                <p class="where-is-title">📍 اینجا کجاست؟</p>
-              </div>
+              <span class="where-is-chip ${isCompleted ? 'is-completed' : ''}">${isCompleted ? 'انجام شد' : 'امشب فعال'}</span>
+              <p class="where-is-reward">${rewardText}</p>
+              <p class="where-is-title">📍 اینجا کجاست؟</p>
 
               <div class="where-is-card-foot">
                 <p class="where-is-hint">حدس بزن و اعتبار بگیر</p>
