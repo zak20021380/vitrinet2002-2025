@@ -4956,6 +4956,42 @@
         : `<span class="mission-reward-icon">${config.icon}</span>`;
       const subtitleHtml = config.subtitle ? `<p class="mission-subtitle">${config.subtitle}</p>` : '';
       const rewardText = config.rewardText || `${formattedAmount} تومان`;
+
+      // Dedicated RTL flex layout for Where-Is mission card (no absolute-positioned content)
+      if (missionId === 'user-where-is') {
+        return `
+          <div class="${cardClasses} !p-0 !min-h-[140px]" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}" dir="rtl">
+            <div class="flex flex-col justify-between p-4 min-h-[140px] h-full text-white">
+              <div class="flex justify-between items-start">
+                <span class="inline-flex items-center rounded-full bg-white/20 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  ⏱️ فقط تا امشب
+                </span>
+                ${isCompleted ? `
+                  <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white backdrop-blur-sm" aria-hidden="true">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 6L9 17l-5-5"></path>
+                    </svg>
+                  </span>
+                ` : `<span class="h-7 w-7 opacity-0" aria-hidden="true"></span>`}
+              </div>
+
+              <div class="mt-2 flex flex-col gap-1">
+                <p class="m-0 text-lg font-bold leading-tight">${rewardText}</p>
+                <p class="m-0 text-base font-bold leading-tight">📍 اینجا کجاست؟</p>
+              </div>
+
+              <div class="flex justify-between items-end">
+                <p class="m-0 text-xs text-white/80">حدس بزن و اعتبار بگیر</p>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white backdrop-blur-sm" aria-hidden="true">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       
       return `
         <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
