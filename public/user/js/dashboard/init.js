@@ -2251,11 +2251,14 @@
       icon.style.cssText = '';
       reward.style.cssText = '';
       title.style.cssText = '';
+      actions.style.display = '';
+      overlay.classList.remove('where-is-mode');
 
       // مخفی کردن دکمه dismiss برای مدال رزرو نوبت (فقط یک دکمه اصلی نمایش داده می‌شود)
       const isBookingModal = Boolean(data.isBookingModal);
+      const isWhereIsModal = Boolean(data.isWhereIsModal);
       if (dismissButton) {
-        dismissButton.style.display = isBookingModal ? 'none' : '';
+        dismissButton.style.display = (isBookingModal || isWhereIsModal) ? 'none' : '';
       }
 
       // تنظیم کلاس رنگ
@@ -2381,6 +2384,44 @@
                   <li>ثبت چند حساب برای یک کسب‌وکار یا اطلاعات نامعتبر، پاداش را باطل می‌کند.</li>
                 </ul>
               </div>
+            </div>
+          </div>
+        `;
+      } else if (data.isWhereIsModal) {
+        whereIsSelectedOptionId = null;
+        overlay.classList.add('where-is-mode');
+        icon.style.display = 'none';
+        reward.style.display = '';
+        reward.textContent = data.reward;
+        actions.style.display = 'none';
+        actions.innerHTML = '';
+
+        const options = Array.isArray(data.options) ? data.options : [];
+        const optionsHTML = options.map((option, index) => `
+          <button
+            type="button"
+            class="where-is-option"
+            data-option-id="${option.id}"
+            onclick="selectWhereIsOption('${option.id}')"
+          >
+            <span class="where-is-option-index">${index + 1}</span>
+            <span class="where-is-option-text">${option.text}</span>
+          </button>
+        `).join('');
+
+        bodyContent.innerHTML = `
+          <div class="where-is-sheet">
+            <p class="where-is-subtitle">${data.subtitle || ''}</p>
+            <figure class="where-is-image-wrap">
+              <img src="${data.quizImage || '/assets/images/shop-placeholder.svg'}" alt="تصویر فروشگاه" class="where-is-image" loading="lazy" />
+            </figure>
+            <div class="where-is-options" id="whereIsOptions">
+              ${optionsHTML}
+            </div>
+            <div class="where-is-submit-wrap">
+              <button type="button" class="where-is-submit-btn" id="whereIsSubmitBtn" onclick="submitWhereIsAnswer()" disabled>
+                ثبت پاسخ
+              </button>
             </div>
           </div>
         `;
@@ -2641,7 +2682,7 @@
       }
 
       // ساخت دکمه‌ها (فقط برای مدال‌هایی که دکمه سفارشی ندارند)
-      if (!data.isBookingModal) {
+      if (!data.isBookingModal && !data.isWhereIsModal) {
         let actionsHTML = '';
         
         if (data.primaryBtn) {
@@ -2678,10 +2719,12 @@
     function closeMissionModal() {
       const overlay = document.getElementById('missionModalOverlay');
       overlay.classList.remove('active');
+      overlay.classList.remove('where-is-mode');
       overlay.setAttribute('aria-hidden', 'true');
       closeAnyInviteRulesModal();
       document.body.style.overflow = '';
       currentMissionType = null;
+      whereIsSelectedOptionId = null;
     }
 
     function getInviteRulesPopupId(type) {
@@ -2914,6 +2957,29 @@
       showMissionModal('installApp');
     }
 
+    function showWhereIsMission() {
+      showMissionModal('whereIs');
+    }
+
+    function selectWhereIsOption(optionId) {
+      whereIsSelectedOptionId = optionId;
+      const options = document.querySelectorAll('.where-is-option');
+      options.forEach((option) => {
+        option.classList.toggle('is-selected', option.dataset.optionId === optionId);
+      });
+
+      const submitButton = document.getElementById('whereIsSubmitBtn');
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+
+    function submitWhereIsAnswer() {
+      if (!whereIsSelectedOptionId) return;
+      showCopyToast('پاسخ شما ثبت شد. نتیجه تا پایان امشب اعلام می‌شود.');
+      closeMissionModal();
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // مودال ماموریت انجام شده - طراحی پریمیوم
     // ═══════════════════════════════════════════════════════════════
@@ -3061,8 +3127,11 @@
     window.showBookAppointmentMission = showBookAppointmentMission;
     window.showExploreMission = showExploreMission;
     window.showInstallAppMission = showInstallAppMission;
+    window.showWhereIsMission = showWhereIsMission;
     window.closeMissionModal = closeMissionModal;
     window.handleMissionAction = handleMissionAction;
+    window.selectWhereIsOption = selectWhereIsOption;
+    window.submitWhereIsAnswer = submitWhereIsAnswer;
     window.openInviteRulesModal = openInviteRulesModal;
     window.closeInviteRulesModal = closeInviteRulesModal;
     window.closeInviteRulesModalOnOverlay = closeInviteRulesModalOnOverlay;
@@ -4776,6 +4845,18 @@
     
     // Mission card configurations with icons and styles
     const missionCardConfigs = {
+      'user-where-is': {
+        htmlId: 'missionWhereIs',
+        style: 'where-is',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 20v-5h6v5"/></svg>`,
+        title: 'اینجا کجاست؟ 📍',
+        subtitle: 'حدس بزن و اعتبار بگیر',
+        fomoBadge: 'فقط تا امشب ⏱️',
+        fixedAmount: 5000,
+        rewardText: '۵,۰۰۰ تومان',
+        onclick: 'showWhereIsMission()',
+        order: 0
+      },
       'user-referral': {
         htmlId: 'missionInvite',
         style: 'invite',
@@ -4819,7 +4900,7 @@
     };
 
     // Generate skeleton cards HTML
-    function generateSkeletonCards(count = 5) {
+    function generateSkeletonCards(count = Object.keys(missionCardConfigs).length) {
       let html = '';
       for (let i = 0; i < count; i++) {
         html += `
@@ -4834,10 +4915,13 @@
 
     // Generate mission card HTML
     function generateMissionCardHTML(missionId, config, mission, isCompleted = false) {
-      const formattedAmount = mission ? new Intl.NumberFormat('fa-IR').format(mission.amount) : '---';
+      const amountValue = typeof config.fixedAmount === 'number'
+        ? config.fixedAmount
+        : (mission && typeof mission.amount === 'number' ? mission.amount : 0);
+      const formattedAmount = new Intl.NumberFormat('fa-IR').format(amountValue);
       
       // These missions should ALWAYS be active unless explicitly completed
-      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete'];
+      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete', 'user-where-is'];
       const isActive = alwaysActiveMissions.includes(missionId) ? true : (mission ? mission.isActive : true);
       
       let cardClasses = `mission-card ${config.style}`;
@@ -4864,21 +4948,26 @@
       
       // Special badge for install-app
       const specialBadge = config.badge ? `<span class="mission-special-badge">${config.badge}</span>` : '';
+      const fomoBadge = config.fomoBadge ? `<span class="mission-fomo-badge">${config.fomoBadge}</span>` : '';
       
       // Icon HTML (handle emoji vs SVG)
       const iconHtml = config.icon.startsWith('<svg') 
         ? `<span class="mission-reward-icon">${config.icon}</span>`
         : `<span class="mission-reward-icon">${config.icon}</span>`;
+      const subtitleHtml = config.subtitle ? `<p class="mission-subtitle">${config.subtitle}</p>` : '';
+      const rewardText = config.rewardText || `${formattedAmount} تومان`;
       
       return `
         <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
           ${completedBadge}
           ${specialBadge}
+          ${fomoBadge}
           <div class="mission-reward">
             ${iconHtml}
-            ${formattedAmount} تومان
+            ${rewardText}
           </div>
           <p class="mission-title">${config.title}</p>
+          ${subtitleHtml}
           <div class="mission-arrow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -4893,9 +4982,10 @@
     async function loadUserMissions() {
       const missionsScroll = document.querySelector('.missions-scroll');
       if (!missionsScroll) return;
+      const missionCardCount = Object.keys(missionCardConfigs).length;
 
       // Show skeleton loading immediately
-      missionsScroll.innerHTML = generateSkeletonCards(5);
+      missionsScroll.innerHTML = generateSkeletonCards(missionCardCount);
 
       try {
         const res = await fetch('/api/missions/users', {
@@ -4945,7 +5035,7 @@
           generateMissionCardHTML(c.missionId, c.config, c.mission, c.isCompleted)
         ).join('');
 
-        console.log('✅ User missions loaded - all 5 cards rendered');
+        console.log(`✅ User missions loaded - all ${missionCardCount} cards rendered`);
       } catch (err) {
         console.warn('Error loading user missions:', err);
         renderFallbackMissions(missionsScroll);

@@ -77,6 +77,21 @@ const profileState = {
         },
         secondaryBtn: null
       },
+      whereIs: {
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 20v-5h6v5"/><path d="M9 5h6"/></svg>`,
+        reward: '۵,۰۰۰ تومان',
+        title: 'اینجا کجاست؟ 📍',
+        subtitle: 'حدس بزن و اعتبار بگیر',
+        fomoBadge: 'فقط تا امشب ⏱️',
+        isWhereIsModal: true,
+        quizImage: '/assets/images/shop-placeholder.svg',
+        options: [
+          { id: 'a', text: 'کافه ترنج' },
+          { id: 'b', text: 'بوتیک پارمیس' },
+          { id: 'c', text: 'کتاب‌فروشی آفتاب' },
+          { id: 'd', text: 'نانوایی سنگک بازار' }
+        ]
+      },
       installApp: {
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 6v6"/><path d="M9 9l3 3 3-3"/></svg>`,
         reward: '۱۰,۰۰۰ تومان',
@@ -93,6 +108,7 @@ const profileState = {
     };
 
 let currentMissionType = null;
+let whereIsSelectedOptionId = null;
 let userReferralCode = null;
 
 let deferredPrompt = null;
