@@ -4848,8 +4848,8 @@
       'user-where-is': {
         htmlId: 'missionWhereIs',
         style: 'where-is',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 20v-5h6v5"/></svg>`,
-        title: 'اینجا کجاست؟ 📍',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1" fill="currentColor"/><path d="M12 14V8"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>`,
+        title: 'اینجا کجاست؟',
         subtitle: 'حدس بزن و اعتبار بگیر',
         fomoBadge: 'فقط تا امشب ⏱️',
         fixedAmount: 5000,
@@ -4962,9 +4962,18 @@
         return `
           <div class="${cardClasses} where-is-card !p-0 !min-h-[140px]" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}" dir="rtl">
             <div class="where-is-card-layout">
-              <span class="where-is-chip ${isCompleted ? 'is-completed' : ''}">${isCompleted ? 'انجام شد' : 'امشب فعال'}</span>
+              <div class="where-is-header-row">
+                <span class="where-is-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M12 14V8"/>
+                    <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/>
+                  </svg>
+                </span>
+                <span class="where-is-chip ${isCompleted ? 'is-completed' : ''}">${isCompleted ? 'انجام شد' : 'امشب فعال'}</span>
+              </div>
               <p class="where-is-reward">${rewardText}</p>
-              <p class="where-is-title">📍 اینجا کجاست؟</p>
+              <p class="where-is-title">اینجا کجاست؟</p>
 
               <div class="where-is-card-foot">
                 <p class="where-is-hint">حدس بزن و اعتبار بگیر</p>
