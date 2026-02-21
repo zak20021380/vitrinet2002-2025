@@ -390,20 +390,26 @@
       flex: 0 0 170px;
       min-width: 170px;
       width: 170px;
-      height: 120px;
+      height: 140px;
+      min-height: 140px;
+      max-height: 140px;
       
       /* Scroll snap alignment */
       scroll-snap-align: start;
       scroll-snap-stop: normal;
       
       /* Visual styling */
-      padding: 1.125rem 1rem 1rem;
+      padding: 1rem;
       border-radius: 1.25rem;
       background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
       border: 1px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.5rem;
     }
 
     .mission-card-skeleton::before {
@@ -428,18 +434,19 @@
     }
 
     .skeleton-reward {
-      width: 90px;
+      width: 100px;
       height: 32px;
       background: rgba(255, 255, 255, 0.5);
       border-radius: 10px;
-      margin-bottom: 0.75rem;
+      flex-shrink: 0;
     }
 
     .skeleton-title {
-      width: 100px;
-      height: 16px;
+      width: 110px;
+      height: 18px;
       background: rgba(255, 255, 255, 0.4);
       border-radius: 6px;
+      flex: 1;
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -450,15 +457,16 @@
       flex: 0 0 170px;
       min-width: 170px;
       width: 170px;
-      height: auto;
-      min-height: 126px;
+      height: 140px;
+      min-height: 140px;
+      max-height: 140px;
       
       /* Scroll snap - start alignment for more predictable positioning */
       scroll-snap-align: start;
       scroll-snap-stop: normal;
       
       /* Visual styling */
-      padding: 0.95rem 0.95rem 0.9rem;
+      padding: 1rem;
       border-radius: 1.25rem;
       position: relative;
       overflow: hidden;
@@ -467,7 +475,8 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.35rem;
+      justify-content: space-between;
+      gap: 0.5rem;
       text-align: right;
       
       /* Glass morphism effect */
@@ -793,7 +802,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 1.02rem;
+      font-size: 1.05rem;
       font-weight: 800;
       color: #fff;
       margin: 0;
@@ -802,15 +811,15 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-height: 32px;
+      flex-shrink: 0;
     }
 
     .mission-reward-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       background: rgba(255, 255, 255, 0.15);
       border-radius: 10px;
       backdrop-filter: blur(4px);
@@ -834,17 +843,17 @@
     }
 
     .mission-title {
-      font-size: 0.82rem;
+      font-size: 0.875rem;
       font-weight: 700;
       color: rgba(255, 255, 255, 0.95);
       margin: 0;
-      line-height: 1.45;
+      line-height: 1.4;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: 2.35em;
+      flex: 1;
       max-width: 100%;
     }
 
@@ -859,12 +868,13 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       max-width: 100%;
+      flex-shrink: 0;
     }
 
     .mission-arrow {
       position: static;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       background: rgba(255, 255, 255, 0.15);
       border-radius: 50%;
       display: flex;
@@ -872,7 +882,6 @@
       justify-content: center;
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       backdrop-filter: blur(4px);
-      margin-top: auto;
       align-self: flex-end;
       flex-shrink: 0;
     }
@@ -883,8 +892,8 @@
     }
 
     .mission-arrow svg {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
       stroke: #fff;
       stroke-width: 2.5;
     }
@@ -946,7 +955,7 @@
         -webkit-transform: translateZ(0);
         
         /* Minimum height */
-        min-height: 130px;
+        min-height: 150px;
       }
 
       .mission-card,
@@ -956,9 +965,10 @@
         min-width: 165px !important;
         width: 165px !important;
         max-width: 165px !important;
-        height: auto;
-        min-height: 120px;
-        padding: 0.9rem 0.82rem 0.8rem;
+        height: 140px !important;
+        min-height: 140px !important;
+        max-height: 140px !important;
+        padding: 1rem;
         
         /* Scroll snap - start for stable card alignment */
         scroll-snap-align: start;
@@ -971,12 +981,18 @@
         will-change: transform;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
+        
+        /* Proper flex layout */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.5rem;
       }
 
       .mission-reward {
-        font-size: 0.95rem;
-        gap: 0.35rem;
-        min-height: 30px;
+        font-size: 1rem;
+        gap: 0.4rem;
+        flex-shrink: 0;
       }
 
       .mission-reward-icon {
@@ -991,25 +1007,26 @@
       }
 
       .mission-title {
-        font-size: 0.77rem;
+        font-size: 0.8rem;
         line-height: 1.4;
-        min-height: 2.3em;
+        flex: 1;
       }
 
       .mission-subtitle {
-        font-size: 0.66rem;
+        font-size: 0.68rem;
+        flex-shrink: 0;
       }
 
       .mission-arrow {
-        width: 26px;
-        height: 26px;
-        margin-top: auto;
+        width: 28px;
+        height: 28px;
         align-self: flex-end;
+        flex-shrink: 0;
       }
 
       .mission-arrow svg {
-        width: 13px;
-        height: 13px;
+        width: 14px;
+        height: 14px;
       }
     }
 
@@ -1018,23 +1035,30 @@
       .missions-scroll {
         gap: 0.625rem;
         padding: 0.5rem 0.75rem 0.875rem 0.75rem;
-        min-height: 120px;
+        min-height: 145px;
         scroll-snap-type: x proximity;
       }
 
       .mission-card,
       .mission-card-skeleton {
-        flex: 0 0 150px !important;
-        min-width: 150px !important;
-        width: 150px !important;
-        max-width: 150px !important;
-        padding: 0.82rem 0.72rem 0.72rem;
-        min-height: 114px;
+        flex: 0 0 155px !important;
+        min-width: 155px !important;
+        width: 155px !important;
+        max-width: 155px !important;
+        height: 135px !important;
+        min-height: 135px !important;
+        max-height: 135px !important;
+        padding: 0.95rem;
         border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.45rem;
       }
 
       .mission-reward {
-        font-size: 0.88rem;
+        font-size: 0.95rem;
+        flex-shrink: 0;
       }
 
       .mission-reward-icon {
@@ -1044,12 +1068,24 @@
       }
 
       .mission-title {
-        font-size: 0.72rem;
-        min-height: 2.25em;
+        font-size: 0.75rem;
+        flex: 1;
       }
 
       .mission-subtitle {
-        font-size: 0.62rem;
+        font-size: 0.65rem;
+        flex-shrink: 0;
+      }
+
+      .mission-arrow {
+        width: 26px;
+        height: 26px;
+        flex-shrink: 0;
+      }
+
+      .mission-arrow svg {
+        width: 13px;
+        height: 13px;
       }
     }
 
@@ -1066,7 +1102,7 @@
         gap: 0.875rem;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        min-height: 135px;
+        min-height: 150px;
       }
 
       .mission-card,
@@ -1074,8 +1110,14 @@
         flex: 0 0 175px;
         min-width: 175px;
         width: 175px;
-        padding: 1.125rem 1rem 1rem;
-        min-height: 125px;
+        height: 140px;
+        min-height: 140px;
+        max-height: 140px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.5rem;
       }
     }
 
@@ -1092,6 +1134,7 @@
         gap: 1rem;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
+        min-height: 150px;
       }
 
       .mission-card,
@@ -1099,7 +1142,14 @@
         flex: 0 0 180px;
         min-width: 180px;
         width: 180px;
+        height: 140px;
+        min-height: 140px;
+        max-height: 140px;
         padding: 1.125rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.5rem;
       }
 
       .mission-reward {
@@ -1107,7 +1157,7 @@
       }
 
       .mission-title {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
       }
     }
 
