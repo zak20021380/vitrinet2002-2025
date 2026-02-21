@@ -5526,10 +5526,6 @@
         const cards = [];
         
         Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
-          if (missionId === 'user-where-is' && !whereIsState?.active) {
-            return;
-          }
-
           // Default to active for user missions if not found in API
           const mission = missionMap[missionId] || { amount: 0, isActive: true };
           const isCompleted = window.completedMissions.has(missionId);
@@ -5568,7 +5564,6 @@
       }
 
       const cards = Object.entries(missionCardConfigs)
-        .filter(([missionId]) => missionId !== 'user-where-is' || Boolean(whereIsState?.active))
         .sort((a, b) => a[1].order - b[1].order)
         .map(([missionId, config]) => {
           const isCompleted = window.completedMissions.has(missionId);
