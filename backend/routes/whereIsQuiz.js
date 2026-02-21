@@ -249,6 +249,29 @@ router.get('/where-is-quiz/admin', auth('admin'), async (req, res, next) => {
   }
 });
 
+router.patch('/where-is-quiz/admin/status', auth('admin'), async (req, res, next) => {
+  try {
+    if (!Object.prototype.hasOwnProperty.call(req.body || {}, 'active')) {
+      return res.status(400).json({ message: 'وضعیت انتشار ارسال نشده است.' });
+    }
+
+    const quiz = await getOrCreateQuiz();
+    quiz.active = parseBoolean(req.body?.active, Boolean(quiz.active));
+    quiz.updatedAt = new Date();
+    await quiz.save();
+
+    return res.json({
+      success: true,
+      message: quiz.active
+        ? 'وضعیت انتشار با موفقیت فعال شد.'
+        : 'وضعیت انتشار با موفقیت غیرفعال شد.',
+      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, res, next) => {
   try {
     const options = normaliseOptionsFromBody(req.body);

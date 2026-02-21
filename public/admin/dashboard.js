@@ -12684,6 +12684,7 @@ const missionsState = {
 };
 
 const WHERE_IS_QUIZ_ADMIN_API_BASE = `${ADMIN_API_BASE}/where-is-quiz/admin`;
+const WHERE_IS_QUIZ_ADMIN_STATUS_API_BASE = `${WHERE_IS_QUIZ_ADMIN_API_BASE}/status`;
 const whereIsQuizAdminForm = document.getElementById('whereIsAdminForm');
 const whereIsQuizImageInput = document.getElementById('whereIsQuizImageInput');
 const whereIsQuizImagePreview = document.getElementById('whereIsQuizImagePreview');
@@ -12716,6 +12717,7 @@ const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
 
 let whereIsQuizAdminState = { ...DEFAULT_WHERE_IS_ADMIN_QUIZ };
 let whereIsQuizManagerInitialised = false;
+let whereIsQuizStatusToggleInFlight = false;
 
 function normaliseWhereIsAdminQuiz(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
@@ -12863,6 +12865,24 @@ async function saveWhereIsQuizAdmin(formData) {
   return payload;
 }
 
+async function saveWhereIsQuizAdminStatus(active) {
+  const response = await fetch(WHERE_IS_QUIZ_ADMIN_STATUS_API_BASE, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ active: Boolean(active) })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.message || 'بروزرسانی وضعیت انتشار انجام نشد.');
+  }
+  const quiz = normaliseWhereIsAdminQuiz(payload.quiz);
+  whereIsQuizAdminState = quiz;
+  return payload;
+}
+
 function handleWhereIsQuizImagePreview(event) {
   const file = event.target?.files?.[0];
   if (!file) {
@@ -12901,6 +12921,47 @@ async function handleWhereIsQuizFormSubmit(event) {
   }
 }
 
+async function handleWhereIsQuizActiveToggleChange() {
+  if (!whereIsQuizActiveInput || whereIsQuizStatusToggleInFlight) return;
+
+  const previousActive = Boolean(whereIsQuizAdminState?.active);
+  const nextActive = Boolean(whereIsQuizActiveInput.checked);
+  if (previousActive === nextActive) return;
+
+  whereIsQuizStatusToggleInFlight = true;
+  whereIsQuizActiveInput.disabled = true;
+  setWhereIsQuizMessage('در حال بروزرسانی وضعیت انتشار...', 'info');
+
+  const optimisticState = {
+    ...whereIsQuizAdminState,
+    active: nextActive,
+    updatedAt: new Date().toISOString()
+  };
+  setWhereIsQuizStatusBadge(optimisticState);
+
+  try {
+    const payload = await saveWhereIsQuizAdminStatus(nextActive);
+    populateWhereIsQuizForm(payload.quiz);
+    setWhereIsQuizMessage(payload.message || 'وضعیت انتشار با موفقیت بروزرسانی شد.', 'info');
+  } catch (error) {
+    console.error('update where-is quiz status failed:', error);
+    if (whereIsQuizActiveInput) {
+      whereIsQuizActiveInput.checked = previousActive;
+    }
+    whereIsQuizAdminState = {
+      ...whereIsQuizAdminState,
+      active: previousActive
+    };
+    setWhereIsQuizStatusBadge(whereIsQuizAdminState);
+    setWhereIsQuizMessage(error.message || 'خطا در بروزرسانی وضعیت انتشار.', 'error');
+  } finally {
+    whereIsQuizStatusToggleInFlight = false;
+    if (whereIsQuizActiveInput) {
+      whereIsQuizActiveInput.disabled = false;
+    }
+  }
+}
+
 async function ensureWhereIsQuizManagerLoaded() {
   if (!whereIsQuizAdminForm) return;
   try {
@@ -12921,6 +12982,9 @@ function initWhereIsQuizManager() {
       handleWhereIsQuizFormSubmit(event).catch((error) => console.error(error));
     });
     whereIsQuizImageInput?.addEventListener('change', handleWhereIsQuizImagePreview);
+    whereIsQuizActiveInput?.addEventListener('change', () => {
+      handleWhereIsQuizActiveToggleChange().catch((error) => console.error(error));
+    });
   }
 
   ensureWhereIsQuizManagerLoaded().catch((error) => console.error(error));
