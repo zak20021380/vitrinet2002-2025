@@ -5397,7 +5397,7 @@
       const formattedAmount = new Intl.NumberFormat('fa-IR').format(amountValue);
       
       // These missions should ALWAYS be active unless explicitly completed
-      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete'];
+      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete', 'user-where-is'];
       const isActive = alwaysActiveMissions.includes(missionId) ? true : (mission ? mission.isActive : true);
       
       let cardClasses = `mission-card ${config.style}`;
@@ -5530,7 +5530,7 @@
           const mission = missionMap[missionId] || { amount: 0, isActive: true };
           const isCompleted = window.completedMissions.has(missionId);
           const resolvedMission = missionId === 'user-where-is'
-            ? { ...mission, isActive: Boolean(whereIsState?.active) }
+            ? { ...mission, isActive: true }
             : mission;
           
           cards.push({
@@ -5568,7 +5568,7 @@
         .map(([missionId, config]) => {
           const isCompleted = window.completedMissions.has(missionId);
           const mission = missionId === 'user-where-is'
-            ? { amount: 0, isActive: Boolean(whereIsState?.active) }
+            ? { amount: 0, isActive: true }
             : { amount: 0, isActive: true };
           return generateMissionCardHTML(missionId, config, mission, isCompleted);
         });
