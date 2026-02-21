@@ -5234,7 +5234,7 @@
       const formattedAmount = new Intl.NumberFormat('fa-IR').format(amountValue);
       
       // These missions should ALWAYS be active unless explicitly completed
-      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete', 'user-where-is'];
+      const alwaysActiveMissions = ['user-book-appointment', 'user-review', 'user-referral', 'user-app-install', 'user-profile-complete'];
       const isActive = alwaysActiveMissions.includes(missionId) ? true : (mission ? mission.isActive : true);
       
       let cardClasses = `mission-card ${config.style}`;
@@ -5323,12 +5323,13 @@
       const missionsScroll = document.querySelector('.missions-scroll');
       if (!missionsScroll) return;
       const missionCardCount = Object.keys(missionCardConfigs).length;
+      let whereIsState = null;
 
       // Show skeleton loading immediately
       missionsScroll.innerHTML = generateSkeletonCards(missionCardCount);
 
       try {
-        const whereIsState = await fetchWhereIsQuiz();
+        whereIsState = await fetchWhereIsQuiz();
         if (missionCardConfigs['user-where-is']) {
           const resolvedSubtitle = whereIsState?.quiz?.subtitle
             || missionData?.whereIs?.subtitle
@@ -5342,13 +5343,13 @@
 
         if (!res.ok) {
           console.warn('Failed to load missions from API');
-          renderFallbackMissions(missionsScroll);
+          renderFallbackMissions(missionsScroll, whereIsState);
           return;
         }
 
         const data = await res.json();
         if (!data.success || !Array.isArray(data.data)) {
-          renderFallbackMissions(missionsScroll);
+          renderFallbackMissions(missionsScroll, whereIsState);
           return;
         }
 
@@ -5362,14 +5363,21 @@
         const cards = [];
         
         Object.entries(missionCardConfigs).forEach(([missionId, config]) => {
+          if (missionId === 'user-where-is' && !whereIsState?.active) {
+            return;
+          }
+
           // Default to active for user missions if not found in API
           const mission = missionMap[missionId] || { amount: 0, isActive: true };
           const isCompleted = window.completedMissions.has(missionId);
+          const resolvedMission = missionId === 'user-where-is'
+            ? { ...mission, isActive: Boolean(whereIsState?.active) }
+            : mission;
           
           cards.push({
             missionId,
             config,
-            mission,
+            mission: resolvedMission,
             isCompleted,
             order: isCompleted ? 100 + config.order : config.order
           });
@@ -5386,21 +5394,25 @@
         console.log(`✅ User missions loaded - all ${missionCardCount} cards rendered`);
       } catch (err) {
         console.warn('Error loading user missions:', err);
-        renderFallbackMissions(missionsScroll);
+        renderFallbackMissions(missionsScroll, whereIsState);
       }
     }
 
     // Fallback rendering with static data
-    function renderFallbackMissions(container) {
+    function renderFallbackMissions(container, whereIsState = null) {
       if (missionCardConfigs['user-where-is']) {
         missionCardConfigs['user-where-is'].subtitle = missionData?.whereIs?.subtitle || 'حدس بزن و اعتبار بگیر';
       }
 
       const cards = Object.entries(missionCardConfigs)
+        .filter(([missionId]) => missionId !== 'user-where-is' || Boolean(whereIsState?.active))
         .sort((a, b) => a[1].order - b[1].order)
         .map(([missionId, config]) => {
           const isCompleted = window.completedMissions.has(missionId);
-          return generateMissionCardHTML(missionId, config, { amount: 0, isActive: true }, isCompleted);
+          const mission = missionId === 'user-where-is'
+            ? { amount: 0, isActive: Boolean(whereIsState?.active) }
+            : { amount: 0, isActive: true };
+          return generateMissionCardHTML(missionId, config, mission, isCompleted);
         });
       
       container.innerHTML = cards.join('');
