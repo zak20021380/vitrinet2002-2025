@@ -12701,6 +12701,7 @@ const whereIsQuizCorrectLinkInput = document.getElementById('whereIsQuizCorrectL
 const whereIsQuizStatusBadge = document.getElementById('whereIsAdminStatusBadge');
 const whereIsQuizMessageEl = document.getElementById('whereIsAdminMessage');
 const whereIsQuizSubmitBtn = document.getElementById('whereIsAdminSubmitBtn');
+const whereIsQuizDeleteBtn = document.getElementById('whereIsQuizDeleteBtn');
 
 const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
   title: 'اینجا کجاست؟',
@@ -12726,6 +12727,7 @@ const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
 let whereIsQuizAdminState = { ...DEFAULT_WHERE_IS_ADMIN_QUIZ };
 let whereIsQuizManagerInitialised = false;
 let whereIsQuizStatusToggleInFlight = false;
+let whereIsQuizDeleteInFlight = false;
 
 function normaliseWhereIsCorrectOptionDetails(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
@@ -12921,6 +12923,20 @@ async function saveWhereIsQuizAdminStatus(active) {
   return payload;
 }
 
+async function deleteWhereIsQuizAdmin() {
+  const response = await fetch(WHERE_IS_QUIZ_ADMIN_API_BASE, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.message || 'حذف سوال انجام نشد.');
+  }
+  const quiz = normaliseWhereIsAdminQuiz(payload.quiz);
+  whereIsQuizAdminState = quiz;
+  return payload;
+}
+
 function handleWhereIsQuizImagePreview(event) {
   const file = event.target?.files?.[0];
   if (!file) {
@@ -13000,6 +13016,44 @@ async function handleWhereIsQuizActiveToggleChange() {
   }
 }
 
+async function handleWhereIsQuizDeleteClick() {
+  if (whereIsQuizDeleteInFlight) return;
+  if (!whereIsQuizAdminForm) return;
+
+  const confirmed = window.confirm('آیا از حذف کامل سوال فعلی مسابقه مطمئن هستید؟');
+  if (!confirmed) return;
+
+  whereIsQuizDeleteInFlight = true;
+  const initialDeleteBtnHtml = whereIsQuizDeleteBtn ? whereIsQuizDeleteBtn.innerHTML : '';
+  if (whereIsQuizDeleteBtn) {
+    whereIsQuizDeleteBtn.disabled = true;
+    whereIsQuizDeleteBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> در حال حذف...';
+  }
+  if (whereIsQuizSubmitBtn) {
+    whereIsQuizSubmitBtn.disabled = true;
+  }
+
+  setWhereIsQuizMessage('در حال حذف سوال...', 'info');
+  try {
+    const payload = await deleteWhereIsQuizAdmin();
+    populateWhereIsQuizForm(payload.quiz);
+    if (whereIsQuizImageInput) whereIsQuizImageInput.value = '';
+    setWhereIsQuizMessage(payload.message || 'سوال مسابقه حذف شد.', 'info');
+  } catch (error) {
+    console.error('delete where-is quiz failed:', error);
+    setWhereIsQuizMessage(error.message || 'خطا در حذف سوال مسابقه.', 'error');
+  } finally {
+    whereIsQuizDeleteInFlight = false;
+    if (whereIsQuizDeleteBtn) {
+      whereIsQuizDeleteBtn.disabled = false;
+      whereIsQuizDeleteBtn.innerHTML = initialDeleteBtnHtml || '<i class="ri-delete-bin-6-line" aria-hidden="true"></i> حذف سوال';
+    }
+    if (whereIsQuizSubmitBtn) {
+      whereIsQuizSubmitBtn.disabled = false;
+    }
+  }
+}
+
 async function ensureWhereIsQuizManagerLoaded() {
   if (!whereIsQuizAdminForm) return;
   try {
@@ -13022,6 +13076,9 @@ function initWhereIsQuizManager() {
     whereIsQuizImageInput?.addEventListener('change', handleWhereIsQuizImagePreview);
     whereIsQuizActiveInput?.addEventListener('change', () => {
       handleWhereIsQuizActiveToggleChange().catch((error) => console.error(error));
+    });
+    whereIsQuizDeleteBtn?.addEventListener('click', () => {
+      handleWhereIsQuizDeleteClick().catch((error) => console.error(error));
     });
   }
 

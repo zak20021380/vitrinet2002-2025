@@ -317,6 +317,36 @@ router.patch('/where-is-quiz/admin/status', auth('admin'), async (req, res, next
   }
 });
 
+router.delete('/where-is-quiz/admin', auth('admin'), async (req, res, next) => {
+  try {
+    const currentQuiz = await WhereIsQuiz.findOne({ slug: QUIZ_SLUG });
+    if (currentQuiz) {
+      const previousImageUrl = currentQuiz.imageUrl || '';
+      await currentQuiz.deleteOne();
+      if (previousImageUrl) {
+        await cleanupStoredImage(previousImageUrl);
+      }
+    }
+
+    const quiz = await getOrCreateQuiz();
+    quiz.updatedAt = new Date();
+    quiz.active = false;
+    await quiz.save();
+
+    return res.json({
+      success: true,
+      message: 'سوال مسابقه با موفقیت حذف شد.',
+      quiz: toClientQuiz(quiz, {
+        includeAnswer: true,
+        includeReward: true,
+        includeCorrectOptionDetails: true
+      })
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, res, next) => {
   try {
     const options = normaliseOptionsFromBody(req.body);
