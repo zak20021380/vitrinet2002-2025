@@ -12688,6 +12688,7 @@ const whereIsQuizAdminForm = document.getElementById('whereIsAdminForm');
 const whereIsQuizImageInput = document.getElementById('whereIsQuizImageInput');
 const whereIsQuizImagePreview = document.getElementById('whereIsQuizImagePreview');
 const whereIsQuizSubtitleInput = document.getElementById('whereIsQuizSubtitleInput');
+const whereIsQuizRewardInput = document.getElementById('whereIsQuizRewardInput');
 const whereIsQuizActiveInput = document.getElementById('whereIsQuizActiveInput');
 const whereIsQuizOptionAInput = document.getElementById('whereIsQuizOptionA');
 const whereIsQuizOptionBInput = document.getElementById('whereIsQuizOptionB');
@@ -12700,6 +12701,7 @@ const whereIsQuizSubmitBtn = document.getElementById('whereIsAdminSubmitBtn');
 const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
   title: 'اینجا کجاست؟',
   subtitle: 'حدس بزن و جایزه ببر',
+  rewardToman: 5000,
   imageUrl: '/assets/images/shop-placeholder.svg',
   options: [
     { id: 'a', text: '' },
@@ -12733,10 +12735,15 @@ function normaliseWhereIsAdminQuiz(raw) {
   });
 
   const correctOptionId = String(source.correctOptionId || 'a').trim().toLowerCase();
+  const rewardValue = Number(source.rewardToman);
+  const rewardToman = Number.isFinite(rewardValue) && rewardValue >= 0
+    ? Math.round(rewardValue)
+    : DEFAULT_WHERE_IS_ADMIN_QUIZ.rewardToman;
 
   return {
     title: String(source.title || DEFAULT_WHERE_IS_ADMIN_QUIZ.title).trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.title,
     subtitle: String(source.subtitle || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle).trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle,
+    rewardToman,
     imageUrl: String(source.imageUrl || '').trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.imageUrl,
     options: orderedOptions,
     correctOptionId: ['a', 'b', 'c', 'd'].includes(correctOptionId) ? correctOptionId : 'a',
@@ -12773,6 +12780,7 @@ function populateWhereIsQuizForm(quiz) {
   const source = normaliseWhereIsAdminQuiz(quiz);
   whereIsQuizAdminState = source;
   if (whereIsQuizSubtitleInput) whereIsQuizSubtitleInput.value = source.subtitle || '';
+  if (whereIsQuizRewardInput) whereIsQuizRewardInput.value = String(source.rewardToman ?? DEFAULT_WHERE_IS_ADMIN_QUIZ.rewardToman);
   if (whereIsQuizActiveInput) whereIsQuizActiveInput.checked = Boolean(source.active);
   if (whereIsQuizOptionAInput) whereIsQuizOptionAInput.value = source.options.find((item) => item.id === 'a')?.text || '';
   if (whereIsQuizOptionBInput) whereIsQuizOptionBInput.value = source.options.find((item) => item.id === 'b')?.text || '';
@@ -12803,7 +12811,15 @@ function collectWhereIsQuizFormData() {
     throw new Error('لطفاً گزینه صحیح را مشخص کنید.');
   }
 
+  const rewardRaw = String(whereIsQuizRewardInput?.value ?? '').trim();
+  const rewardNumber = rewardRaw ? Number(rewardRaw) : DEFAULT_WHERE_IS_ADMIN_QUIZ.rewardToman;
+  if (!Number.isFinite(rewardNumber) || rewardNumber < 0) {
+    throw new Error('لطفاً مبلغ جایزه معتبر از صفر به بالا وارد کنید.');
+  }
+  const rewardToman = Math.round(rewardNumber);
+
   formData.append('subtitle', whereIsQuizSubtitleInput?.value?.trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle);
+  formData.append('rewardToman', String(rewardToman));
   formData.append('active', String(Boolean(whereIsQuizActiveInput?.checked)));
   formData.append('correctOptionId', correctOption);
   formData.append('optionA', optionA);

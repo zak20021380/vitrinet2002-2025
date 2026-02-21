@@ -79,7 +79,8 @@ const profileState = {
       },
       whereIs: {
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1" fill="currentColor"/><path d="M12 14V8"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>`,
-        reward: '۵,۰۰۰ تومان',
+        reward: 'جایزه پس از پاسخ صحیح',
+        rewardToman: 5000,
         title: 'اینجا کجاست؟',
         subtitle: 'حدس بزن و اعتبار بگیر',
         fomoBadge: 'فقط تا امشب ⏱️',

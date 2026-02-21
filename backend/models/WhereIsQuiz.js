@@ -65,6 +65,11 @@ const whereIsQuizSchema = new mongoose.Schema(
       enum: QUIZ_OPTION_IDS,
       default: 'a'
     },
+    rewardToman: {
+      type: Number,
+      default: 5000,
+      min: 0
+    },
     active: {
       type: Boolean,
       default: false

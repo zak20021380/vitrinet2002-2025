@@ -12,6 +12,7 @@ const QUIZ_SLUG = 'default';
 const QUIZ_UPLOAD_SUBDIR = path.join('uploads', 'where-is-quiz');
 const QUIZ_UPLOAD_DIR = path.join(__dirname, '..', QUIZ_UPLOAD_SUBDIR);
 const QUIZ_IMAGE_PLACEHOLDER = '/assets/images/shop-placeholder.svg';
+const DEFAULT_REWARD_TOMAN = 5000;
 
 if (!fs.existsSync(QUIZ_UPLOAD_DIR)) {
   fs.mkdirSync(QUIZ_UPLOAD_DIR, { recursive: true });
@@ -67,9 +68,26 @@ function normaliseOptionsFromBody(body = {}) {
   }));
 }
 
-function toClientQuiz(doc, { includeAnswer = false } = {}) {
+function normaliseStoredRewardToman(input, fallback = DEFAULT_REWARD_TOMAN) {
+  const numeric = Number(input);
+  if (!Number.isFinite(numeric)) return fallback;
+  const rounded = Math.round(numeric);
+  if (rounded < 0) return fallback;
+  return rounded;
+}
+
+function parseRewardTomanFromRequest(input) {
+  if (input === undefined || input === null || input === '') return DEFAULT_REWARD_TOMAN;
+  const numeric = Number(input);
+  if (!Number.isFinite(numeric)) return null;
+  const rounded = Math.round(numeric);
+  if (rounded < 0) return null;
+  return rounded;
+}
+
+function toClientQuiz(doc, { includeAnswer = false, includeReward = false } = {}) {
   if (!doc) {
-    return {
+    const payload = {
       title: 'اینجا کجاست؟',
       subtitle: 'حدس بزن و جایزه ببر',
       imageUrl: QUIZ_IMAGE_PLACEHOLDER,
@@ -77,6 +95,10 @@ function toClientQuiz(doc, { includeAnswer = false } = {}) {
       active: false,
       updatedAt: null
     };
+    if (includeReward) {
+      payload.rewardToman = DEFAULT_REWARD_TOMAN;
+    }
+    return payload;
   }
 
   const options = Array.isArray(doc.options)
@@ -104,6 +126,10 @@ function toClientQuiz(doc, { includeAnswer = false } = {}) {
     active: Boolean(doc.active),
     updatedAt: doc.updatedAt || null
   };
+
+  if (includeReward) {
+    payload.rewardToman = normaliseStoredRewardToman(doc.rewardToman, DEFAULT_REWARD_TOMAN);
+  }
 
   if (includeAnswer) {
     payload.correctOptionId = OPTION_IDS.includes(String(doc.correctOptionId || '').toLowerCase())
@@ -193,14 +219,19 @@ router.post('/where-is-quiz/submit', auth('user'), async (req, res, next) => {
 
     const correctOptionId = String(quiz.correctOptionId || '').trim().toLowerCase();
     const isCorrect = selectedOptionId === correctOptionId;
+    const rewardToman = normaliseStoredRewardToman(quiz.rewardToman, DEFAULT_REWARD_TOMAN);
 
-    return res.json({
+    const responsePayload = {
       success: true,
       isCorrect,
       message: isCorrect
         ? 'پاسخ شما صحیح بود. تبریک!'
         : 'پاسخ شما ثبت شد.'
-    });
+    };
+    if (isCorrect) {
+      responsePayload.rewardToman = rewardToman;
+    }
+    return res.json(responsePayload);
   } catch (error) {
     return next(error);
   }
@@ -211,7 +242,7 @@ router.get('/where-is-quiz/admin', auth('admin'), async (req, res, next) => {
     const quiz = await getOrCreateQuiz();
     return res.json({
       success: true,
-      quiz: toClientQuiz(quiz, { includeAnswer: true })
+      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
     });
   } catch (error) {
     return next(error);
@@ -232,6 +263,12 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
       return res.status(400).json({ message: 'گزینه صحیح نامعتبر است.' });
     }
 
+    const rewardToman = parseRewardTomanFromRequest(req.body?.rewardToman);
+    if (rewardToman === null) {
+      await cleanupTempUpload(req.file);
+      return res.status(400).json({ message: 'مبلغ جایزه باید عددی صفر یا بیشتر باشد.' });
+    }
+
     const quiz = await getOrCreateQuiz();
     const previousImageUrl = quiz.imageUrl || '';
     const nextImageUrl = req.file
@@ -242,6 +279,7 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
     quiz.subtitle = String(req.body?.subtitle || '').trim() || 'حدس بزن و جایزه ببر';
     quiz.options = options;
     quiz.correctOptionId = correctOptionId;
+    quiz.rewardToman = rewardToman;
     quiz.active = parseBoolean(req.body?.active, true);
     quiz.imageUrl = nextImageUrl;
     quiz.updatedAt = new Date();
@@ -255,7 +293,7 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
     return res.json({
       success: true,
       message: 'سوال «اینجا کجاست؟» با موفقیت ذخیره شد.',
-      quiz: toClientQuiz(quiz, { includeAnswer: true })
+      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
     });
   } catch (error) {
     await cleanupTempUpload(req.file);

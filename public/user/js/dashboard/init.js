@@ -2325,11 +2325,17 @@
         return found || { id, text: '' };
       });
 
+      const rewardValue = Number(source.rewardToman ?? missionData?.whereIs?.rewardToman);
+      const rewardToman = Number.isFinite(rewardValue) && rewardValue >= 0
+        ? Math.round(rewardValue)
+        : 0;
+
       return {
         title: String(source.title || missionData.whereIs.title || 'اینجا کجاست؟').trim() || 'اینجا کجاست؟',
         subtitle: String(source.subtitle || missionData.whereIs.subtitle || '').trim(),
         imageUrl: String(source.imageUrl || missionData.whereIs.quizImage || '/assets/images/shop-placeholder.svg').trim() || '/assets/images/shop-placeholder.svg',
-        options: orderedOptions
+        options: orderedOptions,
+        rewardToman
       };
     }
 
@@ -2341,6 +2347,10 @@
       missionData.whereIs.options = Array.isArray(quiz.options) && quiz.options.length === 4
         ? quiz.options.map((item) => ({ id: item.id, text: item.text || '' }))
         : missionData.whereIs.options;
+      missionData.whereIs.rewardToman = Number.isFinite(Number(quiz.rewardToman)) && Number(quiz.rewardToman) >= 0
+        ? Math.round(Number(quiz.rewardToman))
+        : (missionData.whereIs.rewardToman || 0);
+      missionData.whereIs.reward = 'جایزه پس از پاسخ صحیح';
     }
 
     async function fetchWhereIsQuiz(force = false) {
@@ -2587,8 +2597,8 @@
         whereIsSelectedOptionId = null;
         overlay.classList.add('where-is-mode');
         icon.style.display = 'none';
-        reward.style.display = '';
-        reward.textContent = data.reward;
+        reward.style.display = 'none';
+        reward.textContent = '';
         actions.style.display = 'none';
         actions.innerHTML = '';
 
@@ -2614,6 +2624,7 @@
             <div class="where-is-options" id="whereIsOptions">
               ${optionsHTML}
             </div>
+            <div class="where-is-result" id="whereIsResult"></div>
             <div class="where-is-submit-wrap">
               <button type="button" class="where-is-submit-btn" id="whereIsSubmitBtn" onclick="submitWhereIsAnswer()" disabled>
                 ثبت پاسخ
@@ -3158,6 +3169,52 @@
       showMissionModal('whereIs');
     }
 
+    function formatWhereIsRewardLabel(amount) {
+      const numeric = Number(amount);
+      const safeAmount = Number.isFinite(numeric) && numeric >= 0 ? Math.round(numeric) : 0;
+      return `${safeAmount.toLocaleString('fa-IR')} تومان`;
+    }
+
+    function renderWhereIsResult({ isCorrect = false, message = '', rewardToman = 0 } = {}) {
+      const resultEl = document.getElementById('whereIsResult');
+      const rewardBadge = document.getElementById('missionModalReward');
+      if (!resultEl) return;
+
+      if (!message && !isCorrect) {
+        resultEl.classList.remove('is-visible', 'is-correct', 'is-error');
+        resultEl.innerHTML = '';
+        if (rewardBadge) {
+          rewardBadge.style.display = 'none';
+          rewardBadge.textContent = '';
+        }
+        return;
+      }
+
+      if (isCorrect) {
+        const rewardLabel = formatWhereIsRewardLabel(rewardToman);
+        resultEl.classList.remove('is-error');
+        resultEl.classList.add('is-visible', 'is-correct');
+        resultEl.innerHTML = `
+          <p class="where-is-result-title">پاسخ صحیح بود</p>
+          <p class="where-is-result-text">${escapeHtml(message || 'آفرین! پاسخ شما درست است.')}</p>
+          <p class="where-is-result-reward">جایزه این سوال: <strong>${escapeHtml(rewardLabel)}</strong></p>
+        `;
+        if (rewardBadge) {
+          rewardBadge.style.display = '';
+          rewardBadge.textContent = rewardLabel;
+        }
+        return;
+      }
+
+      resultEl.classList.remove('is-correct');
+      resultEl.classList.add('is-visible', 'is-error');
+      resultEl.innerHTML = `<p class="where-is-result-text">${escapeHtml(message || 'پاسخ ثبت شد. دوباره تلاش کنید.')}</p>`;
+      if (rewardBadge) {
+        rewardBadge.style.display = 'none';
+        rewardBadge.textContent = '';
+      }
+    }
+
     function selectWhereIsOption(optionId) {
       whereIsSelectedOptionId = optionId;
       const options = document.querySelectorAll('.where-is-option');
@@ -3165,15 +3222,19 @@
         option.classList.toggle('is-selected', option.dataset.optionId === optionId);
       });
 
+      renderWhereIsResult();
+
       const submitButton = document.getElementById('whereIsSubmitBtn');
       if (submitButton) {
         submitButton.disabled = false;
+        submitButton.textContent = 'ثبت پاسخ';
       }
     }
 
     async function submitWhereIsAnswer() {
       if (!whereIsSelectedOptionId) return;
       const submitButton = document.getElementById('whereIsSubmitBtn');
+      const optionButtons = Array.from(document.querySelectorAll('.where-is-option'));
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = 'در حال ثبت...';
@@ -3191,12 +3252,41 @@
           throw new Error(payload?.message || 'ثبت پاسخ انجام نشد.');
         }
 
-        showCopyToast(payload?.message || 'پاسخ شما ثبت شد.');
-        closeMissionModal();
+        if (payload?.isCorrect) {
+          const rewardToman = Number.isFinite(Number(payload?.rewardToman)) && Number(payload?.rewardToman) >= 0
+            ? Math.round(Number(payload.rewardToman))
+            : Math.round(Number(missionData?.whereIs?.rewardToman) || 0);
+
+          renderWhereIsResult({
+            isCorrect: true,
+            message: payload?.message || 'پاسخ شما صحیح بود.',
+            rewardToman
+          });
+          optionButtons.forEach((button) => {
+            button.disabled = true;
+          });
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'پاسخ صحیح ثبت شد';
+          }
+          showCopyToast('تبریک! پاسخ شما صحیح بود.');
+          return;
+        }
+
+        renderWhereIsResult({
+          isCorrect: false,
+          message: payload?.message || 'پاسخ ثبت شد. می‌توانید دوباره تلاش کنید.'
+        });
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'تلاش دوباره';
+        }
       } catch (error) {
         console.error('submit where-is answer failed:', error);
-        showCopyToast(error.message || 'خطا در ثبت پاسخ. لطفاً دوباره تلاش کنید.');
-      } finally {
+        renderWhereIsResult({
+          isCorrect: false,
+          message: error.message || 'خطا در ثبت پاسخ. لطفاً دوباره تلاش کنید.'
+        });
         if (submitButton) {
           submitButton.disabled = false;
           submitButton.textContent = 'ثبت پاسخ';
@@ -5076,8 +5166,7 @@
         title: 'اینجا کجاست؟',
         subtitle: 'حدس بزن و اعتبار بگیر',
         fomoBadge: 'فقط تا امشب ⏱️',
-        fixedAmount: 5000,
-        rewardText: '۵,۰۰۰ تومان',
+        rewardText: 'جایزه پس از پاسخ صحیح',
         onclick: 'showWhereIsMission()',
         order: 0
       },
