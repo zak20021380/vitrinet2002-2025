@@ -1806,6 +1806,34 @@
   </div>
 
   <!-- پیام موفقیت کپی -->
+  <!-- مودال نیاز به ورود برای ماموریت‌ها -->
+  <div class="mission-auth-modal-overlay" id="missionAuthModalOverlay" aria-hidden="true">
+    <div class="mission-auth-modal" role="dialog" aria-modal="true" aria-labelledby="missionAuthModalTitle">
+      <button type="button" class="mission-auth-modal-close" id="missionAuthModalClose" aria-label="بستن">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="mission-auth-modal-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="3"></rect>
+          <path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+          <circle cx="12" cy="16" r="1.5"></circle>
+        </svg>
+      </div>
+
+      <h3 class="mission-auth-modal-title" id="missionAuthModalTitle">برای شروع ماموریت‌ها ابتدا وارد حساب شوید</h3>
+      <p class="mission-auth-modal-desc">بعد از ورود، می‌توانید ماموریت‌های پول‌ساز را انجام دهید و جایزه بگیرید.</p>
+
+      <div class="mission-auth-modal-actions">
+        <a href="/login.html" class="mission-auth-modal-btn primary" id="missionAuthLoginBtn">ورود به حساب</a>
+        <button type="button" class="mission-auth-modal-btn ghost" id="missionAuthDismissBtn">بعداً</button>
+      </div>
+    </div>
+  </div>
+
   <div class="mission-copy-toast" id="missionCopyToast">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"></polyline>
@@ -2200,6 +2228,82 @@
     // مودال جزئیات ماموریت‌ها
     // ═══════════════════════════════════════════════════════════════
     
+    let missionAuthCheckPromise = null;
+
+    function getMissionLoginUrl() {
+      const redirectTarget = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      return `/login.html?redirect=${encodeURIComponent(redirectTarget)}`;
+    }
+
+    function closeMissionAuthModal() {
+      const overlay = document.getElementById('missionAuthModalOverlay');
+      if (!overlay || !overlay.classList.contains('active')) return false;
+      const prevOverflow = overlay.dataset.prevOverflow || '';
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = prevOverflow;
+      delete overlay.dataset.prevOverflow;
+      return true;
+    }
+
+    function setupMissionAuthModalListeners() {
+      const overlay = document.getElementById('missionAuthModalOverlay');
+      if (!overlay || overlay.dataset.bound === 'true') return;
+
+      const closeBtn = document.getElementById('missionAuthModalClose');
+      const dismissBtn = document.getElementById('missionAuthDismissBtn');
+
+      if (closeBtn) closeBtn.onclick = closeMissionAuthModal;
+      if (dismissBtn) dismissBtn.onclick = closeMissionAuthModal;
+
+      overlay.onclick = (event) => {
+        if (event.target === overlay) {
+          closeMissionAuthModal();
+        }
+      };
+
+      overlay.dataset.bound = 'true';
+    }
+
+    function showMissionAuthModal() {
+      const overlay = document.getElementById('missionAuthModalOverlay');
+      if (!overlay) {
+        window.location.href = getMissionLoginUrl();
+        return;
+      }
+
+      setupMissionAuthModalListeners();
+
+      const loginBtn = document.getElementById('missionAuthLoginBtn');
+      if (loginBtn) {
+        loginBtn.setAttribute('href', getMissionLoginUrl());
+      }
+
+      overlay.dataset.prevOverflow = document.body.style.overflow || '';
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      if (loginBtn) loginBtn.focus();
+    }
+
+    async function ensureMissionAuth() {
+      if (profileState.isAuthenticated) return true;
+      if (missionAuthCheckPromise) return missionAuthCheckPromise;
+
+      missionAuthCheckPromise = (async () => {
+        try {
+          await updateSidebarUser();
+        } catch (error) {
+          console.warn('Mission auth check failed:', error);
+        }
+        return Boolean(profileState.isAuthenticated);
+      })();
+
+      const result = await missionAuthCheckPromise;
+      missionAuthCheckPromise = null;
+      return result;
+    }
+
     // دریافت کد معرف کاربر
     async function getUserReferralCode() {
       // اگر قبلاً گرفته شده، برگردون
@@ -2232,6 +2336,13 @@
       const data = missionData[type];
       if (!data) return;
 
+      const isAuthorized = await ensureMissionAuth();
+      if (!isAuthorized) {
+        showMissionAuthModal();
+        return;
+      }
+
+      closeMissionAuthModal();
       currentMissionType = type;
 
       const overlay = document.getElementById('missionModalOverlay');
@@ -2924,6 +3035,7 @@
     // بستن با Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (closeMissionAuthModal()) return;
         if (closeAnyInviteRulesModal()) return;
         closeMissionModal();
       }
