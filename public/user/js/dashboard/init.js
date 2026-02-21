@@ -2304,6 +2304,82 @@
       return result;
     }
 
+    const WHERE_IS_QUIZ_API_BASE = `${API_BASE}/where-is-quiz`;
+    let whereIsQuizFetchPromise = null;
+    let whereIsQuizCache = null;
+
+    function normaliseWhereIsQuiz(quiz) {
+      const source = quiz && typeof quiz === 'object' ? quiz : {};
+      const options = Array.isArray(source.options)
+        ? source.options
+            .map((item) => {
+              const id = String(item?.id || '').trim().toLowerCase();
+              if (!['a', 'b', 'c', 'd'].includes(id)) return null;
+              return { id, text: String(item?.text || '').trim() };
+            })
+            .filter(Boolean)
+        : [];
+
+      const orderedOptions = ['a', 'b', 'c', 'd'].map((id) => {
+        const found = options.find((option) => option.id === id);
+        return found || { id, text: '' };
+      });
+
+      return {
+        title: String(source.title || missionData.whereIs.title || 'اینجا کجاست؟').trim() || 'اینجا کجاست؟',
+        subtitle: String(source.subtitle || missionData.whereIs.subtitle || '').trim(),
+        imageUrl: String(source.imageUrl || missionData.whereIs.quizImage || '/assets/images/shop-placeholder.svg').trim() || '/assets/images/shop-placeholder.svg',
+        options: orderedOptions
+      };
+    }
+
+    function applyWhereIsQuizToMission(quiz) {
+      if (!quiz || !missionData || !missionData.whereIs) return;
+      missionData.whereIs.title = quiz.title || missionData.whereIs.title || 'اینجا کجاست؟';
+      missionData.whereIs.subtitle = quiz.subtitle || missionData.whereIs.subtitle || '';
+      missionData.whereIs.quizImage = quiz.imageUrl || missionData.whereIs.quizImage || '/assets/images/shop-placeholder.svg';
+      missionData.whereIs.options = Array.isArray(quiz.options) && quiz.options.length === 4
+        ? quiz.options.map((item) => ({ id: item.id, text: item.text || '' }))
+        : missionData.whereIs.options;
+    }
+
+    async function fetchWhereIsQuiz(force = false) {
+      if (!force && whereIsQuizCache) return whereIsQuizCache;
+      if (!force && whereIsQuizFetchPromise) return whereIsQuizFetchPromise;
+
+      whereIsQuizFetchPromise = fetch(`${WHERE_IS_QUIZ_API_BASE}/public`, {
+        credentials: 'include'
+      })
+        .then(async (response) => {
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || !payload?.success) {
+            throw new Error(payload?.message || 'Failed to fetch where-is quiz');
+          }
+
+          if (!payload.active || !payload.quiz) {
+            whereIsQuizCache = { active: false, quiz: null };
+            return whereIsQuizCache;
+          }
+
+          const quiz = normaliseWhereIsQuiz(payload.quiz);
+          applyWhereIsQuizToMission(quiz);
+          whereIsQuizCache = { active: true, quiz };
+          return whereIsQuizCache;
+        })
+        .catch((error) => {
+          console.warn('where-is quiz fetch failed, fallback to local data:', error);
+          const fallbackQuiz = normaliseWhereIsQuiz(missionData?.whereIs || {});
+          applyWhereIsQuizToMission(fallbackQuiz);
+          whereIsQuizCache = { active: true, quiz: fallbackQuiz, fallback: true };
+          return whereIsQuizCache;
+        })
+        .finally(() => {
+          whereIsQuizFetchPromise = null;
+        });
+
+      return whereIsQuizFetchPromise;
+    }
+
     // دریافت کد معرف کاربر
     async function getUserReferralCode() {
       // اگر قبلاً گرفته شده، برگردون
@@ -2340,6 +2416,15 @@
       if (!isAuthorized) {
         showMissionAuthModal();
         return;
+      }
+
+      if (type === 'whereIs') {
+        const whereIsResult = await fetchWhereIsQuiz(true);
+        if (!whereIsResult?.active || !whereIsResult?.quiz) {
+          showCopyToast('در حال حاضر سوال فعالی برای این بخش منتشر نشده است.');
+          return;
+        }
+        applyWhereIsQuizToMission(whereIsResult.quiz);
       }
 
       closeMissionAuthModal();
@@ -2512,19 +2597,19 @@
           <button
             type="button"
             class="where-is-option"
-            data-option-id="${option.id}"
-            onclick="selectWhereIsOption('${option.id}')"
+            data-option-id="${escapeHtml(option.id)}"
+            onclick="selectWhereIsOption('${escapeHtml(option.id)}')"
           >
             <span class="where-is-option-index">${index + 1}</span>
-            <span class="where-is-option-text">${option.text}</span>
+            <span class="where-is-option-text">${escapeHtml(option.text)}</span>
           </button>
         `).join('');
 
         bodyContent.innerHTML = `
           <div class="where-is-sheet">
-            <p class="where-is-subtitle">${data.subtitle || ''}</p>
+            <p class="where-is-subtitle">${escapeHtml(data.subtitle || '')}</p>
             <figure class="where-is-image-wrap">
-              <img src="${data.quizImage || '/assets/images/shop-placeholder.svg'}" alt="تصویر فروشگاه" class="where-is-image" loading="lazy" />
+              <img src="${escapeHtml(data.quizImage || '/assets/images/shop-placeholder.svg')}" alt="تصویر فروشگاه" class="where-is-image" loading="lazy" />
             </figure>
             <div class="where-is-options" id="whereIsOptions">
               ${optionsHTML}
@@ -3086,10 +3171,37 @@
       }
     }
 
-    function submitWhereIsAnswer() {
+    async function submitWhereIsAnswer() {
       if (!whereIsSelectedOptionId) return;
-      showCopyToast('پاسخ شما ثبت شد. نتیجه تا پایان امشب اعلام می‌شود.');
-      closeMissionModal();
+      const submitButton = document.getElementById('whereIsSubmitBtn');
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'در حال ثبت...';
+      }
+
+      try {
+        const response = await fetch(`${WHERE_IS_QUIZ_API_BASE}/submit`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ optionId: whereIsSelectedOptionId })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success === false) {
+          throw new Error(payload?.message || 'ثبت پاسخ انجام نشد.');
+        }
+
+        showCopyToast(payload?.message || 'پاسخ شما ثبت شد.');
+        closeMissionModal();
+      } catch (error) {
+        console.error('submit where-is answer failed:', error);
+        showCopyToast(error.message || 'خطا در ثبت پاسخ. لطفاً دوباره تلاش کنید.');
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'ثبت پاسخ';
+        }
+      }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -5071,6 +5183,7 @@
 
       // Simplified Where-Is card matching other mission cards
       if (missionId === 'user-where-is') {
+        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : (config.subtitle || 'حدس بزن و ببر');
         return `
           <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
             ${completedBadge}
@@ -5085,7 +5198,7 @@
               ${rewardText}
             </div>
             <p class="mission-title">اینجا کجاست؟</p>
-            <p class="mission-subtitle">${isCompleted ? 'انجام شد' : 'حدس بزن و ببر'}</p>
+            <p class="mission-subtitle">${whereIsCardSubtitle}</p>
             <div class="mission-arrow">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -5126,6 +5239,14 @@
       missionsScroll.innerHTML = generateSkeletonCards(missionCardCount);
 
       try {
+        const whereIsState = await fetchWhereIsQuiz();
+        if (missionCardConfigs['user-where-is']) {
+          const resolvedSubtitle = whereIsState?.quiz?.subtitle
+            || missionData?.whereIs?.subtitle
+            || 'حدس بزن و اعتبار بگیر';
+          missionCardConfigs['user-where-is'].subtitle = resolvedSubtitle;
+        }
+
         const res = await fetch('/api/missions/users', {
           credentials: 'include'
         });
@@ -5182,6 +5303,10 @@
 
     // Fallback rendering with static data
     function renderFallbackMissions(container) {
+      if (missionCardConfigs['user-where-is']) {
+        missionCardConfigs['user-where-is'].subtitle = missionData?.whereIs?.subtitle || 'حدس بزن و اعتبار بگیر';
+      }
+
       const cards = Object.entries(missionCardConfigs)
         .sort((a, b) => a[1].order - b[1].order)
         .map(([missionId, config]) => {

@@ -104,6 +104,7 @@ app.use('/api/reports', require('./routes/report'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/loyalty', require('./routes/loyalty'));
 app.use('/api/rewards', require('./routes/rewardCampaign'));
+app.use('/api', require('./routes/whereIsQuiz'));
 app.use('/api/streak', require('./routes/streak'));
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/rank', require('./routes/rank'));

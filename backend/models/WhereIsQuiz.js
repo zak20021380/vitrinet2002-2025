@@ -1,0 +1,80 @@
+const mongoose = require('mongoose');
+
+const QUIZ_OPTION_IDS = ['a', 'b', 'c', 'd'];
+
+const quizOptionSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      enum: QUIZ_OPTION_IDS
+    },
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 160
+    }
+  },
+  { _id: false }
+);
+
+const whereIsQuizSchema = new mongoose.Schema(
+  {
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      default: 'default'
+    },
+    title: {
+      type: String,
+      trim: true,
+      default: 'اینجا کجاست؟'
+    },
+    subtitle: {
+      type: String,
+      trim: true,
+      default: 'حدس بزن و جایزه ببر'
+    },
+    imageUrl: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    options: {
+      type: [quizOptionSchema],
+      default: () => [
+        { id: 'a', text: 'گزینه اول' },
+        { id: 'b', text: 'گزینه دوم' },
+        { id: 'c', text: 'گزینه سوم' },
+        { id: 'd', text: 'گزینه چهارم' }
+      ],
+      validate: {
+        validator(value) {
+          return Array.isArray(value)
+            && value.length === 4
+            && value.every((item, index) => item && item.id === QUIZ_OPTION_IDS[index] && item.text);
+        },
+        message: 'Quiz must contain exactly 4 ordered options (a, b, c, d).'
+      }
+    },
+    correctOptionId: {
+      type: String,
+      required: true,
+      enum: QUIZ_OPTION_IDS,
+      default: 'a'
+    },
+    active: {
+      type: Boolean,
+      default: false
+    },
+    updatedAt: {
+      type: Date,
+      default: null
+    }
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model('WhereIsQuiz', whereIsQuizSchema);

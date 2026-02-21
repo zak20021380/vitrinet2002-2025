@@ -12683,6 +12683,233 @@ const missionsState = {
   currentValues: {}
 };
 
+const WHERE_IS_QUIZ_ADMIN_API_BASE = `${ADMIN_API_BASE}/where-is-quiz/admin`;
+const whereIsQuizAdminForm = document.getElementById('whereIsAdminForm');
+const whereIsQuizImageInput = document.getElementById('whereIsQuizImageInput');
+const whereIsQuizImagePreview = document.getElementById('whereIsQuizImagePreview');
+const whereIsQuizSubtitleInput = document.getElementById('whereIsQuizSubtitleInput');
+const whereIsQuizActiveInput = document.getElementById('whereIsQuizActiveInput');
+const whereIsQuizOptionAInput = document.getElementById('whereIsQuizOptionA');
+const whereIsQuizOptionBInput = document.getElementById('whereIsQuizOptionB');
+const whereIsQuizOptionCInput = document.getElementById('whereIsQuizOptionC');
+const whereIsQuizOptionDInput = document.getElementById('whereIsQuizOptionD');
+const whereIsQuizStatusBadge = document.getElementById('whereIsAdminStatusBadge');
+const whereIsQuizMessageEl = document.getElementById('whereIsAdminMessage');
+const whereIsQuizSubmitBtn = document.getElementById('whereIsAdminSubmitBtn');
+
+const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
+  title: 'اینجا کجاست؟',
+  subtitle: 'حدس بزن و جایزه ببر',
+  imageUrl: '/assets/images/shop-placeholder.svg',
+  options: [
+    { id: 'a', text: '' },
+    { id: 'b', text: '' },
+    { id: 'c', text: '' },
+    { id: 'd', text: '' }
+  ],
+  correctOptionId: 'a',
+  active: true,
+  updatedAt: null
+};
+
+let whereIsQuizAdminState = { ...DEFAULT_WHERE_IS_ADMIN_QUIZ };
+let whereIsQuizManagerInitialised = false;
+
+function normaliseWhereIsAdminQuiz(raw) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const options = Array.isArray(source.options)
+    ? source.options
+        .map((item) => {
+          const id = String(item?.id || '').trim().toLowerCase();
+          if (!['a', 'b', 'c', 'd'].includes(id)) return null;
+          return { id, text: String(item?.text || '').trim() };
+        })
+        .filter(Boolean)
+    : [];
+
+  const orderedOptions = ['a', 'b', 'c', 'd'].map((id) => {
+    const found = options.find((option) => option.id === id);
+    return found || { id, text: '' };
+  });
+
+  const correctOptionId = String(source.correctOptionId || 'a').trim().toLowerCase();
+
+  return {
+    title: String(source.title || DEFAULT_WHERE_IS_ADMIN_QUIZ.title).trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.title,
+    subtitle: String(source.subtitle || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle).trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle,
+    imageUrl: String(source.imageUrl || '').trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.imageUrl,
+    options: orderedOptions,
+    correctOptionId: ['a', 'b', 'c', 'd'].includes(correctOptionId) ? correctOptionId : 'a',
+    active: source.active !== undefined ? Boolean(source.active) : true,
+    updatedAt: source.updatedAt || null
+  };
+}
+
+function setWhereIsQuizMessage(message = '', type = 'info') {
+  if (!whereIsQuizMessageEl) return;
+  whereIsQuizMessageEl.textContent = message;
+  whereIsQuizMessageEl.classList.remove('is-error');
+  if (type === 'error') {
+    whereIsQuizMessageEl.classList.add('is-error');
+  }
+}
+
+function setWhereIsQuizStatusBadge(quiz) {
+  if (!whereIsQuizStatusBadge) return;
+  const isActive = Boolean(quiz?.active);
+  const timeLabel = quiz?.updatedAt ? formatDateTime(quiz.updatedAt) : 'بدون بروزرسانی';
+  whereIsQuizStatusBadge.classList.remove('is-active', 'is-inactive');
+  whereIsQuizStatusBadge.classList.add(isActive ? 'is-active' : 'is-inactive');
+  whereIsQuizStatusBadge.textContent = isActive ? `فعال • ${timeLabel}` : `غیرفعال • ${timeLabel}`;
+}
+
+function setWhereIsQuizPreviewImage(src) {
+  if (!whereIsQuizImagePreview) return;
+  whereIsQuizImagePreview.src = toAbsoluteMediaUrl(src || DEFAULT_WHERE_IS_ADMIN_QUIZ.imageUrl, DEFAULT_WHERE_IS_ADMIN_QUIZ.imageUrl);
+}
+
+function populateWhereIsQuizForm(quiz) {
+  if (!whereIsQuizAdminForm) return;
+  const source = normaliseWhereIsAdminQuiz(quiz);
+  whereIsQuizAdminState = source;
+  if (whereIsQuizSubtitleInput) whereIsQuizSubtitleInput.value = source.subtitle || '';
+  if (whereIsQuizActiveInput) whereIsQuizActiveInput.checked = Boolean(source.active);
+  if (whereIsQuizOptionAInput) whereIsQuizOptionAInput.value = source.options.find((item) => item.id === 'a')?.text || '';
+  if (whereIsQuizOptionBInput) whereIsQuizOptionBInput.value = source.options.find((item) => item.id === 'b')?.text || '';
+  if (whereIsQuizOptionCInput) whereIsQuizOptionCInput.value = source.options.find((item) => item.id === 'c')?.text || '';
+  if (whereIsQuizOptionDInput) whereIsQuizOptionDInput.value = source.options.find((item) => item.id === 'd')?.text || '';
+
+  const correctInput = whereIsQuizAdminForm.querySelector(`input[name="whereIsQuizCorrectOption"][value="${source.correctOptionId}"]`);
+  if (correctInput) {
+    correctInput.checked = true;
+  }
+  setWhereIsQuizPreviewImage(source.imageUrl);
+  setWhereIsQuizStatusBadge(source);
+}
+
+function collectWhereIsQuizFormData() {
+  const formData = new FormData();
+  const optionA = whereIsQuizOptionAInput?.value?.trim() || '';
+  const optionB = whereIsQuizOptionBInput?.value?.trim() || '';
+  const optionC = whereIsQuizOptionCInput?.value?.trim() || '';
+  const optionD = whereIsQuizOptionDInput?.value?.trim() || '';
+
+  if (!optionA || !optionB || !optionC || !optionD) {
+    throw new Error('لطفاً متن هر ۴ گزینه را وارد کنید.');
+  }
+
+  const correctOption = whereIsQuizAdminForm?.querySelector('input[name="whereIsQuizCorrectOption"]:checked')?.value;
+  if (!correctOption || !['a', 'b', 'c', 'd'].includes(correctOption)) {
+    throw new Error('لطفاً گزینه صحیح را مشخص کنید.');
+  }
+
+  formData.append('subtitle', whereIsQuizSubtitleInput?.value?.trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle);
+  formData.append('active', String(Boolean(whereIsQuizActiveInput?.checked)));
+  formData.append('correctOptionId', correctOption);
+  formData.append('optionA', optionA);
+  formData.append('optionB', optionB);
+  formData.append('optionC', optionC);
+  formData.append('optionD', optionD);
+
+  const file = whereIsQuizImageInput?.files?.[0];
+  if (file) {
+    formData.append('image', file);
+  }
+
+  return formData;
+}
+
+async function fetchWhereIsQuizAdmin() {
+  const response = await fetch(WHERE_IS_QUIZ_ADMIN_API_BASE, {
+    credentials: 'include'
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.message || 'دریافت اطلاعات مسابقه انجام نشد.');
+  }
+  const quiz = normaliseWhereIsAdminQuiz(payload.quiz);
+  whereIsQuizAdminState = quiz;
+  return quiz;
+}
+
+async function saveWhereIsQuizAdmin(formData) {
+  const response = await fetch(WHERE_IS_QUIZ_ADMIN_API_BASE, {
+    method: 'PUT',
+    credentials: 'include',
+    body: formData
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.message || 'ذخیره سوال انجام نشد.');
+  }
+  const quiz = normaliseWhereIsAdminQuiz(payload.quiz);
+  whereIsQuizAdminState = quiz;
+  return payload;
+}
+
+function handleWhereIsQuizImagePreview(event) {
+  const file = event.target?.files?.[0];
+  if (!file) {
+    setWhereIsQuizPreviewImage(whereIsQuizAdminState.imageUrl);
+    return;
+  }
+  const previewUrl = URL.createObjectURL(file);
+  setWhereIsQuizPreviewImage(previewUrl);
+}
+
+async function handleWhereIsQuizFormSubmit(event) {
+  event.preventDefault();
+  if (!whereIsQuizAdminForm) return;
+
+  setWhereIsQuizMessage('در حال ذخیره و انتشار...', 'info');
+  const initialButtonHtml = whereIsQuizSubmitBtn ? whereIsQuizSubmitBtn.innerHTML : '';
+  if (whereIsQuizSubmitBtn) {
+    whereIsQuizSubmitBtn.disabled = true;
+    whereIsQuizSubmitBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> در حال ذخیره...';
+  }
+
+  try {
+    const formData = collectWhereIsQuizFormData();
+    const payload = await saveWhereIsQuizAdmin(formData);
+    populateWhereIsQuizForm(payload.quiz);
+    if (whereIsQuizImageInput) whereIsQuizImageInput.value = '';
+    setWhereIsQuizMessage(payload.message || 'سوال با موفقیت ذخیره شد.', 'info');
+  } catch (error) {
+    console.error('save where-is quiz failed:', error);
+    setWhereIsQuizMessage(error.message || 'خطا در ذخیره سوال.', 'error');
+  } finally {
+    if (whereIsQuizSubmitBtn) {
+      whereIsQuizSubmitBtn.disabled = false;
+      whereIsQuizSubmitBtn.innerHTML = initialButtonHtml || '<i class="ri-send-plane-2-line" aria-hidden="true"></i> ذخیره و ارسال';
+    }
+  }
+}
+
+async function ensureWhereIsQuizManagerLoaded() {
+  if (!whereIsQuizAdminForm) return;
+  try {
+    const quiz = await fetchWhereIsQuizAdmin();
+    populateWhereIsQuizForm(quiz);
+    setWhereIsQuizMessage('');
+  } catch (error) {
+    console.error('fetch where-is quiz failed:', error);
+    setWhereIsQuizMessage(error.message || 'خطا در دریافت اطلاعات سوال.', 'error');
+  }
+}
+
+function initWhereIsQuizManager() {
+  if (!whereIsQuizAdminForm) return;
+  if (!whereIsQuizManagerInitialised) {
+    whereIsQuizManagerInitialised = true;
+    whereIsQuizAdminForm.addEventListener('submit', (event) => {
+      handleWhereIsQuizFormSubmit(event).catch((error) => console.error(error));
+    });
+    whereIsQuizImageInput?.addEventListener('change', handleWhereIsQuizImagePreview);
+  }
+
+  ensureWhereIsQuizManagerLoaded().catch((error) => console.error(error));
+}
+
 function initMissionsPanel() {
   const panel = document.getElementById('missions-panel');
   if (!panel) return;
@@ -12716,8 +12943,8 @@ function initMissionsPanel() {
   });
 
   // Track changes on inputs and toggles
-  const inputs = panel.querySelectorAll('input[type="number"]');
-  const toggles = panel.querySelectorAll('input[type="checkbox"]');
+  const inputs = panel.querySelectorAll('.mission-card input[type="number"]');
+  const toggles = panel.querySelectorAll('.mission-card input[type="checkbox"]');
 
   // Store initial values
   inputs.forEach(input => {
@@ -12750,6 +12977,7 @@ function initMissionsPanel() {
 
   // Load settings from backend API
   loadMissionsFromAPI();
+  initWhereIsQuizManager();
 }
 
 function checkMissionsChanges() {
@@ -12925,8 +13153,8 @@ async function saveMissionsSettings() {
     
     // Also save to localStorage as backup
     const localSettings = {};
-    const inputs = panel.querySelectorAll('input[type="number"]');
-    const toggles = panel.querySelectorAll('input[type="checkbox"]');
+    const inputs = panel.querySelectorAll('.mission-card input[type="number"]');
+    const toggles = panel.querySelectorAll('.mission-card input[type="checkbox"]');
     
     inputs.forEach(input => {
       localSettings[input.id] = input.value;
