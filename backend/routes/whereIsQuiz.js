@@ -68,6 +68,22 @@ function normaliseOptionsFromBody(body = {}) {
   }));
 }
 
+function normaliseCorrectOptionDetails(input = {}) {
+  return {
+    description: String(input?.description || '').trim().slice(0, 1200),
+    link: String(input?.link || '').trim().slice(0, 500),
+    address: String(input?.address || '').trim().slice(0, 320)
+  };
+}
+
+function normaliseCorrectOptionDetailsFromBody(body = {}) {
+  return normaliseCorrectOptionDetails({
+    description: body?.correctOptionDescription,
+    link: body?.correctOptionLink,
+    address: body?.correctOptionAddress
+  });
+}
+
 function normaliseStoredRewardToman(input, fallback = DEFAULT_REWARD_TOMAN) {
   const numeric = Number(input);
   if (!Number.isFinite(numeric)) return fallback;
@@ -85,7 +101,10 @@ function parseRewardTomanFromRequest(input) {
   return rounded;
 }
 
-function toClientQuiz(doc, { includeAnswer = false, includeReward = false } = {}) {
+function toClientQuiz(
+  doc,
+  { includeAnswer = false, includeReward = false, includeCorrectOptionDetails = false } = {}
+) {
   if (!doc) {
     const payload = {
       title: 'اینجا کجاست؟',
@@ -97,6 +116,9 @@ function toClientQuiz(doc, { includeAnswer = false, includeReward = false } = {}
     };
     if (includeReward) {
       payload.rewardToman = DEFAULT_REWARD_TOMAN;
+    }
+    if (includeCorrectOptionDetails) {
+      payload.correctOptionDetails = normaliseCorrectOptionDetails();
     }
     return payload;
   }
@@ -135,6 +157,10 @@ function toClientQuiz(doc, { includeAnswer = false, includeReward = false } = {}
     payload.correctOptionId = OPTION_IDS.includes(String(doc.correctOptionId || '').toLowerCase())
       ? String(doc.correctOptionId).toLowerCase()
       : 'a';
+  }
+
+  if (includeCorrectOptionDetails) {
+    payload.correctOptionDetails = normaliseCorrectOptionDetails(doc.correctOptionDetails || {});
   }
 
   return payload;
@@ -217,13 +243,24 @@ router.post('/where-is-quiz/submit', auth('user'), async (req, res, next) => {
       return res.status(400).json({ message: 'گزینه انتخاب شده برای سوال فعلی معتبر نیست.' });
     }
 
-    const correctOptionId = String(quiz.correctOptionId || '').trim().toLowerCase();
+    const storedCorrectOptionId = String(quiz.correctOptionId || '').trim().toLowerCase();
+    const correctOptionId = OPTION_IDS.includes(storedCorrectOptionId) ? storedCorrectOptionId : 'a';
     const isCorrect = selectedOptionId === correctOptionId;
     const rewardToman = normaliseStoredRewardToman(quiz.rewardToman, DEFAULT_REWARD_TOMAN);
+    const correctOption = Array.isArray(quiz.options)
+      ? quiz.options.find((item) => String(item?.id || '').trim().toLowerCase() === correctOptionId)
+      : null;
+    const correctOptionText = String(correctOption?.text || '').trim();
+    const correctOptionDetails = normaliseCorrectOptionDetails(quiz.correctOptionDetails || {});
 
     const responsePayload = {
       success: true,
       isCorrect,
+      correctOption: {
+        id: correctOptionId,
+        text: correctOptionText
+      },
+      correctOptionDetails,
       message: isCorrect
         ? 'پاسخ شما صحیح بود. تبریک!'
         : 'پاسخ شما ثبت شد.'
@@ -242,7 +279,11 @@ router.get('/where-is-quiz/admin', auth('admin'), async (req, res, next) => {
     const quiz = await getOrCreateQuiz();
     return res.json({
       success: true,
-      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
+      quiz: toClientQuiz(quiz, {
+        includeAnswer: true,
+        includeReward: true,
+        includeCorrectOptionDetails: true
+      })
     });
   } catch (error) {
     return next(error);
@@ -265,7 +306,11 @@ router.patch('/where-is-quiz/admin/status', auth('admin'), async (req, res, next
       message: quiz.active
         ? 'وضعیت انتشار با موفقیت فعال شد.'
         : 'وضعیت انتشار با موفقیت غیرفعال شد.',
-      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
+      quiz: toClientQuiz(quiz, {
+        includeAnswer: true,
+        includeReward: true,
+        includeCorrectOptionDetails: true
+      })
     });
   } catch (error) {
     return next(error);
@@ -291,6 +336,7 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
       await cleanupTempUpload(req.file);
       return res.status(400).json({ message: 'مبلغ جایزه باید عددی صفر یا بیشتر باشد.' });
     }
+    const correctOptionDetails = normaliseCorrectOptionDetailsFromBody(req.body);
 
     const quiz = await getOrCreateQuiz();
     const previousImageUrl = quiz.imageUrl || '';
@@ -302,6 +348,7 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
     quiz.subtitle = String(req.body?.subtitle || '').trim() || 'حدس بزن و جایزه ببر';
     quiz.options = options;
     quiz.correctOptionId = correctOptionId;
+    quiz.correctOptionDetails = correctOptionDetails;
     quiz.rewardToman = rewardToman;
     quiz.active = parseBoolean(req.body?.active, true);
     quiz.imageUrl = nextImageUrl;
@@ -316,7 +363,11 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
     return res.json({
       success: true,
       message: 'سوال «اینجا کجاست؟» با موفقیت ذخیره شد.',
-      quiz: toClientQuiz(quiz, { includeAnswer: true, includeReward: true })
+      quiz: toClientQuiz(quiz, {
+        includeAnswer: true,
+        includeReward: true,
+        includeCorrectOptionDetails: true
+      })
     });
   } catch (error) {
     await cleanupTempUpload(req.file);

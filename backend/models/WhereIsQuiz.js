@@ -19,6 +19,30 @@ const quizOptionSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const correctOptionDetailsSchema = new mongoose.Schema(
+  {
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1200,
+      default: ''
+    },
+    link: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: ''
+    },
+    address: {
+      type: String,
+      trim: true,
+      maxlength: 320,
+      default: ''
+    }
+  },
+  { _id: false }
+);
+
 const whereIsQuizSchema = new mongoose.Schema(
   {
     slug: {
@@ -64,6 +88,14 @@ const whereIsQuizSchema = new mongoose.Schema(
       required: true,
       enum: QUIZ_OPTION_IDS,
       default: 'a'
+    },
+    correctOptionDetails: {
+      type: correctOptionDetailsSchema,
+      default: () => ({
+        description: '',
+        link: '',
+        address: ''
+      })
     },
     rewardToman: {
       type: Number,

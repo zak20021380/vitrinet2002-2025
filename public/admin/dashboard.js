@@ -12695,6 +12695,9 @@ const whereIsQuizOptionAInput = document.getElementById('whereIsQuizOptionA');
 const whereIsQuizOptionBInput = document.getElementById('whereIsQuizOptionB');
 const whereIsQuizOptionCInput = document.getElementById('whereIsQuizOptionC');
 const whereIsQuizOptionDInput = document.getElementById('whereIsQuizOptionD');
+const whereIsQuizCorrectDescriptionInput = document.getElementById('whereIsQuizCorrectDescriptionInput');
+const whereIsQuizCorrectAddressInput = document.getElementById('whereIsQuizCorrectAddressInput');
+const whereIsQuizCorrectLinkInput = document.getElementById('whereIsQuizCorrectLinkInput');
 const whereIsQuizStatusBadge = document.getElementById('whereIsAdminStatusBadge');
 const whereIsQuizMessageEl = document.getElementById('whereIsAdminMessage');
 const whereIsQuizSubmitBtn = document.getElementById('whereIsAdminSubmitBtn');
@@ -12710,6 +12713,11 @@ const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
     { id: 'c', text: '' },
     { id: 'd', text: '' }
   ],
+  correctOptionDetails: {
+    description: '',
+    address: '',
+    link: ''
+  },
   correctOptionId: 'a',
   active: true,
   updatedAt: null
@@ -12718,6 +12726,15 @@ const DEFAULT_WHERE_IS_ADMIN_QUIZ = {
 let whereIsQuizAdminState = { ...DEFAULT_WHERE_IS_ADMIN_QUIZ };
 let whereIsQuizManagerInitialised = false;
 let whereIsQuizStatusToggleInFlight = false;
+
+function normaliseWhereIsCorrectOptionDetails(raw) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  return {
+    description: String(source.description || '').trim().slice(0, 1200),
+    address: String(source.address || '').trim().slice(0, 320),
+    link: String(source.link || '').trim().slice(0, 500)
+  };
+}
 
 function normaliseWhereIsAdminQuiz(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
@@ -12741,6 +12758,7 @@ function normaliseWhereIsAdminQuiz(raw) {
   const rewardToman = Number.isFinite(rewardValue) && rewardValue >= 0
     ? Math.round(rewardValue)
     : DEFAULT_WHERE_IS_ADMIN_QUIZ.rewardToman;
+  const correctOptionDetails = normaliseWhereIsCorrectOptionDetails(source.correctOptionDetails);
 
   return {
     title: String(source.title || DEFAULT_WHERE_IS_ADMIN_QUIZ.title).trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.title,
@@ -12748,6 +12766,7 @@ function normaliseWhereIsAdminQuiz(raw) {
     rewardToman,
     imageUrl: String(source.imageUrl || '').trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.imageUrl,
     options: orderedOptions,
+    correctOptionDetails,
     correctOptionId: ['a', 'b', 'c', 'd'].includes(correctOptionId) ? correctOptionId : 'a',
     active: source.active !== undefined ? Boolean(source.active) : true,
     updatedAt: source.updatedAt || null
@@ -12788,6 +12807,9 @@ function populateWhereIsQuizForm(quiz) {
   if (whereIsQuizOptionBInput) whereIsQuizOptionBInput.value = source.options.find((item) => item.id === 'b')?.text || '';
   if (whereIsQuizOptionCInput) whereIsQuizOptionCInput.value = source.options.find((item) => item.id === 'c')?.text || '';
   if (whereIsQuizOptionDInput) whereIsQuizOptionDInput.value = source.options.find((item) => item.id === 'd')?.text || '';
+  if (whereIsQuizCorrectDescriptionInput) whereIsQuizCorrectDescriptionInput.value = source.correctOptionDetails?.description || '';
+  if (whereIsQuizCorrectAddressInput) whereIsQuizCorrectAddressInput.value = source.correctOptionDetails?.address || '';
+  if (whereIsQuizCorrectLinkInput) whereIsQuizCorrectLinkInput.value = source.correctOptionDetails?.link || '';
 
   const correctInput = whereIsQuizAdminForm.querySelector(`input[name="whereIsQuizCorrectOption"][value="${source.correctOptionId}"]`);
   if (correctInput) {
@@ -12803,6 +12825,9 @@ function collectWhereIsQuizFormData() {
   const optionB = whereIsQuizOptionBInput?.value?.trim() || '';
   const optionC = whereIsQuizOptionCInput?.value?.trim() || '';
   const optionD = whereIsQuizOptionDInput?.value?.trim() || '';
+  const correctOptionDescription = whereIsQuizCorrectDescriptionInput?.value?.trim() || '';
+  const correctOptionAddress = whereIsQuizCorrectAddressInput?.value?.trim() || '';
+  const correctOptionLink = whereIsQuizCorrectLinkInput?.value?.trim() || '';
 
   if (!optionA || !optionB || !optionC || !optionD) {
     throw new Error('لطفاً متن هر ۴ گزینه را وارد کنید.');
@@ -12820,10 +12845,23 @@ function collectWhereIsQuizFormData() {
   }
   const rewardToman = Math.round(rewardNumber);
 
+  if (correctOptionDescription.length > 1200) {
+    throw new Error('توضیحات گزینه صحیح نباید بیشتر از 1200 کاراکتر باشد.');
+  }
+  if (correctOptionAddress.length > 320) {
+    throw new Error('آدرس گزینه صحیح نباید بیشتر از 320 کاراکتر باشد.');
+  }
+  if (correctOptionLink.length > 500) {
+    throw new Error('لینک گزینه صحیح نباید بیشتر از 500 کاراکتر باشد.');
+  }
+
   formData.append('subtitle', whereIsQuizSubtitleInput?.value?.trim() || DEFAULT_WHERE_IS_ADMIN_QUIZ.subtitle);
   formData.append('rewardToman', String(rewardToman));
   formData.append('active', String(Boolean(whereIsQuizActiveInput?.checked)));
   formData.append('correctOptionId', correctOption);
+  formData.append('correctOptionDescription', correctOptionDescription);
+  formData.append('correctOptionAddress', correctOptionAddress);
+  formData.append('correctOptionLink', correctOptionLink);
   formData.append('optionA', optionA);
   formData.append('optionB', optionB);
   formData.append('optionC', optionC);

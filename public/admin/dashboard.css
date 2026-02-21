@@ -10689,7 +10689,8 @@ tr:last-child td {
 }
 
 .where-is-admin-field input[type="text"],
-.where-is-admin-field input[type="number"] {
+.where-is-admin-field input[type="number"],
+.where-is-admin-field textarea {
   width: 100%;
   border: 1.5px solid #dbe3ee;
   border-radius: 12px;
@@ -10701,10 +10702,17 @@ tr:last-child td {
 }
 
 .where-is-admin-field input[type="text"]:focus,
-.where-is-admin-field input[type="number"]:focus {
+.where-is-admin-field input[type="number"]:focus,
+.where-is-admin-field textarea:focus {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.where-is-admin-field textarea {
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.7;
 }
 
 .where-is-admin-field input[type="file"] {
@@ -10756,6 +10764,24 @@ tr:last-child td {
   border-radius: 14px;
   background: #ffffff;
   padding: 0.8rem 0.8rem 0.45rem;
+}
+
+.where-is-admin-answer-details {
+  grid-column: 1 / -1;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f9fffd 100%);
+  padding: 0.8rem;
+}
+
+.where-is-admin-answer-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 0.85rem;
+}
+
+.where-is-admin-answer-details-grid .where-is-admin-field:last-child {
+  grid-column: 1 / -1;
 }
 
 .where-is-admin-options__title {
@@ -11240,6 +11266,14 @@ tr:last-child td {
 
   .where-is-admin-correct-option {
     justify-content: flex-start;
+  }
+
+  .where-is-admin-answer-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .where-is-admin-answer-details-grid .where-is-admin-field:last-child {
+    grid-column: auto;
   }
 
   .where-is-admin-actions {

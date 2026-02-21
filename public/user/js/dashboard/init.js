@@ -3185,7 +3185,136 @@
       return `${safeAmount.toLocaleString('fa-IR')} تومان`;
     }
 
-    function renderWhereIsResult({ isCorrect = false, message = '', rewardToman = 0 } = {}) {
+    function normaliseWhereIsCorrectOption(option) {
+      const source = option && typeof option === 'object' ? option : {};
+      const id = String(source.id || '').trim().toLowerCase();
+      return {
+        id: ['a', 'b', 'c', 'd'].includes(id) ? id : '',
+        text: String(source.text || '').trim()
+      };
+    }
+
+    function normaliseWhereIsCorrectOptionDetails(details) {
+      const source = details && typeof details === 'object' ? details : {};
+      return {
+        description: String(source.description || '').trim(),
+        address: String(source.address || '').trim(),
+        link: String(source.link || '').trim()
+      };
+    }
+
+    function resolveWhereIsCorrectOptionText(optionId = '') {
+      const id = String(optionId || '').trim().toLowerCase();
+      if (!['a', 'b', 'c', 'd'].includes(id)) return '';
+      const options = Array.isArray(missionData?.whereIs?.options) ? missionData.whereIs.options : [];
+      const found = options.find((item) => String(item?.id || '').trim().toLowerCase() === id);
+      return String(found?.text || '').trim();
+    }
+
+    function toWhereIsSafeExternalLink(rawLink = '') {
+      const value = String(rawLink || '').trim();
+      if (!value) return '';
+      const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+      try {
+        const parsed = new URL(candidate);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+        return parsed.toString();
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function clearWhereIsAnswerHighlights() {
+      const optionButtons = Array.from(document.querySelectorAll('.where-is-option'));
+      optionButtons.forEach((button) => {
+        button.classList.remove('is-correct-answer', 'is-wrong-choice');
+      });
+    }
+
+    function highlightWhereIsAnswerOptions({ correctOptionId = '', selectedOptionId = '' } = {}) {
+      const normalisedCorrectId = String(correctOptionId || '').trim().toLowerCase();
+      const normalisedSelectedId = String(selectedOptionId || '').trim().toLowerCase();
+      const optionButtons = Array.from(document.querySelectorAll('.where-is-option'));
+      optionButtons.forEach((button) => {
+        const buttonId = String(button.dataset.optionId || '').trim().toLowerCase();
+        button.classList.toggle('is-correct-answer', Boolean(normalisedCorrectId) && buttonId === normalisedCorrectId);
+        button.classList.toggle(
+          'is-wrong-choice',
+          Boolean(normalisedSelectedId)
+            && Boolean(normalisedCorrectId)
+            && buttonId === normalisedSelectedId
+            && normalisedSelectedId !== normalisedCorrectId
+        );
+      });
+    }
+
+    function buildWhereIsCorrectInfoMarkup({ correctOption = null, correctOptionDetails = null } = {}) {
+      const option = normaliseWhereIsCorrectOption(correctOption);
+      const details = normaliseWhereIsCorrectOptionDetails(correctOptionDetails);
+      const optionText = option.text || resolveWhereIsCorrectOptionText(option.id) || '';
+      const safeLink = toWhereIsSafeExternalLink(details.link);
+      const fallbackLinkLabel = String(details.link || '').trim();
+
+      if (!optionText && !details.description && !details.address && !details.link) {
+        return '';
+      }
+
+      const rows = [];
+      if (optionText) {
+        rows.push(`
+          <div class="where-is-correct-info-row">
+            <span class="where-is-correct-info-label">گزینه صحیح</span>
+            <strong class="where-is-correct-info-value">${escapeHtml(optionText)}</strong>
+          </div>
+        `);
+      }
+      if (details.description) {
+        rows.push(`
+          <div class="where-is-correct-info-row">
+            <span class="where-is-correct-info-label">توضیحات</span>
+            <span class="where-is-correct-info-value">${escapeHtml(details.description)}</span>
+          </div>
+        `);
+      }
+      if (details.address) {
+        rows.push(`
+          <div class="where-is-correct-info-row">
+            <span class="where-is-correct-info-label">آدرس</span>
+            <span class="where-is-correct-info-value">${escapeHtml(details.address)}</span>
+          </div>
+        `);
+      }
+      if (safeLink) {
+        rows.push(`
+          <div class="where-is-correct-info-row">
+            <span class="where-is-correct-info-label">لینک</span>
+            <a href="${escapeHtml(safeLink)}" class="where-is-correct-info-link" target="_blank" rel="noopener noreferrer">مشاهده لینک</a>
+          </div>
+        `);
+      } else if (fallbackLinkLabel) {
+        rows.push(`
+          <div class="where-is-correct-info-row">
+            <span class="where-is-correct-info-label">لینک</span>
+            <span class="where-is-correct-info-value">${escapeHtml(fallbackLinkLabel)}</span>
+          </div>
+        `);
+      }
+
+      return `
+        <div class="where-is-correct-info">
+          <p class="where-is-correct-info-title">اطلاعات گزینه صحیح</p>
+          ${rows.join('')}
+        </div>
+      `;
+    }
+
+    function renderWhereIsResult({
+      isCorrect = false,
+      message = '',
+      rewardToman = 0,
+      correctOption = null,
+      correctOptionDetails = null
+    } = {}) {
       const resultEl = document.getElementById('whereIsResult');
       const rewardBadge = document.getElementById('missionModalReward');
       if (!resultEl) return;
@@ -3193,6 +3322,7 @@
       if (!message && !isCorrect) {
         resultEl.classList.remove('is-visible', 'is-correct', 'is-error');
         resultEl.innerHTML = '';
+        clearWhereIsAnswerHighlights();
         if (rewardBadge) {
           rewardBadge.style.display = 'none';
           rewardBadge.textContent = '';
@@ -3200,6 +3330,7 @@
         return;
       }
 
+      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
       if (isCorrect) {
         const rewardLabel = formatWhereIsRewardLabel(rewardToman);
         resultEl.classList.remove('is-error');
@@ -3207,6 +3338,7 @@
         resultEl.innerHTML = `
           <p class="where-is-result-title">پاسخ صحیح بود</p>
           <p class="where-is-result-text">${escapeHtml(message || 'آفرین! پاسخ شما درست است.')}</p>
+          ${correctInfoMarkup}
           <p class="where-is-result-reward">جایزه این سوال: <strong>${escapeHtml(rewardLabel)}</strong></p>
         `;
         if (rewardBadge) {
@@ -3218,7 +3350,12 @@
 
       resultEl.classList.remove('is-correct');
       resultEl.classList.add('is-visible', 'is-error');
-      resultEl.innerHTML = `<p class="where-is-result-text">${escapeHtml(message || 'پاسخ ثبت شد. دوباره تلاش کنید.')}</p>`;
+      const errorTitle = correctInfoMarkup ? 'پاسخ صحیح را ببینید' : 'نتیجه ثبت پاسخ';
+      resultEl.innerHTML = `
+        <p class="where-is-result-title">${errorTitle}</p>
+        <p class="where-is-result-text">${escapeHtml(message || 'پاسخ ثبت شد.')}</p>
+        ${correctInfoMarkup}
+      `;
       if (rewardBadge) {
         rewardBadge.style.display = 'none';
         rewardBadge.textContent = '';
@@ -3231,6 +3368,7 @@
       options.forEach((option) => {
         option.classList.toggle('is-selected', option.dataset.optionId === optionId);
       });
+      clearWhereIsAnswerHighlights();
 
       renderWhereIsResult();
 
@@ -3262,6 +3400,17 @@
           throw new Error(payload?.message || 'ثبت پاسخ انجام نشد.');
         }
 
+        const payloadCorrectOption = normaliseWhereIsCorrectOption(payload?.correctOption);
+        const resolvedCorrectOption = {
+          id: payloadCorrectOption.id,
+          text: payloadCorrectOption.text || resolveWhereIsCorrectOptionText(payloadCorrectOption.id)
+        };
+        const resolvedCorrectOptionDetails = normaliseWhereIsCorrectOptionDetails(payload?.correctOptionDetails);
+        highlightWhereIsAnswerOptions({
+          correctOptionId: resolvedCorrectOption.id,
+          selectedOptionId: whereIsSelectedOptionId
+        });
+
         if (payload?.isCorrect) {
           const rewardToman = Number.isFinite(Number(payload?.rewardToman)) && Number(payload?.rewardToman) >= 0
             ? Math.round(Number(payload.rewardToman))
@@ -3270,7 +3419,9 @@
           renderWhereIsResult({
             isCorrect: true,
             message: payload?.message || 'پاسخ شما صحیح بود.',
-            rewardToman
+            rewardToman,
+            correctOption: resolvedCorrectOption,
+            correctOptionDetails: resolvedCorrectOptionDetails
           });
           optionButtons.forEach((button) => {
             button.disabled = true;
@@ -3285,11 +3436,13 @@
 
         renderWhereIsResult({
           isCorrect: false,
-          message: payload?.message || 'پاسخ ثبت شد. می‌توانید دوباره تلاش کنید.'
+          message: payload?.message || 'پاسخ ثبت شد.',
+          correctOption: resolvedCorrectOption,
+          correctOptionDetails: resolvedCorrectOptionDetails
         });
         if (submitButton) {
           submitButton.disabled = false;
-          submitButton.textContent = 'تلاش دوباره';
+          submitButton.textContent = 'ارسال پاسخ دیگر';
         }
       } catch (error) {
         console.error('submit where-is answer failed:', error);
