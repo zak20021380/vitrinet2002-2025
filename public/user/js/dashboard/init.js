@@ -5069,32 +5069,27 @@
       const subtitleHtml = config.subtitle ? `<p class="mission-subtitle">${config.subtitle}</p>` : '';
       const rewardText = config.rewardText || `${formattedAmount} تومان`;
 
-      // Dedicated RTL flex layout for Where-Is mission card (no absolute-positioned content)
+      // Simplified Where-Is card matching other mission cards
       if (missionId === 'user-where-is') {
         return `
-          <div class="${cardClasses} where-is-card !p-0 !min-h-[140px]" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}" dir="rtl">
-            <div class="where-is-card-layout">
-              <div class="where-is-header-row">
-                <span class="where-is-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
-                    <path d="M12 14V8"/>
-                    <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/>
-                  </svg>
-                </span>
-                <span class="where-is-chip ${isCompleted ? 'is-completed' : ''}">${isCompleted ? 'انجام شد' : 'امشب فعال'}</span>
-              </div>
-              <p class="where-is-reward">${rewardText}</p>
-              <p class="where-is-title">اینجا کجاست؟</p>
-
-              <div class="where-is-card-foot">
-                <p class="where-is-hint">حدس بزن و اعتبار بگیر</p>
-                <span class="where-is-cta" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 18l-6-6 6-6"></path>
-                  </svg>
-                </span>
-              </div>
+          <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
+            ${completedBadge}
+            <div class="mission-reward">
+              <span class="mission-reward-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                  <path d="M12 14V8"/>
+                  <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/>
+                </svg>
+              </span>
+              ${rewardText}
+            </div>
+            <p class="mission-title">اینجا کجاست؟</p>
+            <p class="mission-subtitle">${isCompleted ? 'انجام شد' : 'حدس بزن و ببر'}</p>
+            <div class="mission-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </div>
           </div>
         `;
