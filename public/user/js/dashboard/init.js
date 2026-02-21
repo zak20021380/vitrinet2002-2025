@@ -2603,6 +2603,10 @@
         actions.innerHTML = '';
 
         const options = Array.isArray(data.options) ? data.options : [];
+        const rewardAmount = Number.isFinite(Number(data.rewardToman)) && Number(data.rewardToman) >= 0
+          ? Math.round(Number(data.rewardToman))
+          : Math.round(Number(missionData?.whereIs?.rewardToman) || 0);
+        const rewardLabel = formatWhereIsRewardLabel(rewardAmount);
         const optionsHTML = options.map((option, index) => `
           <button
             type="button"
@@ -2617,7 +2621,13 @@
 
         bodyContent.innerHTML = `
           <div class="where-is-sheet">
-            <p class="where-is-subtitle">${escapeHtml(data.subtitle || '')}</p>
+            <div class="where-is-meta">
+              <p class="where-is-subtitle">${escapeHtml(data.subtitle || '')}</p>
+              <div class="where-is-reward-pill" aria-label="مبلغ جایزه">
+                <span class="where-is-reward-pill-label">جایزه این سوال</span>
+                <strong>${escapeHtml(rewardLabel)}</strong>
+              </div>
+            </div>
             <figure class="where-is-image-wrap">
               <img src="${escapeHtml(data.quizImage || '/assets/images/shop-placeholder.svg')}" alt="تصویر فروشگاه" class="where-is-image" loading="lazy" />
             </figure>
