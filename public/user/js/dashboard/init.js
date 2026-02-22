@@ -5327,9 +5327,9 @@
         style: 'where-is',
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1" fill="currentColor"/><path d="M12 14V8"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>`,
         title: 'اینجا کجاست؟',
-        subtitle: 'حدس بزن و اعتبار بگیر',
+        subtitle: 'حدس بزن و جایزه بگیر...',
         fomoBadge: 'فقط تا امشب ⏱️',
-        rewardText: 'جایزه پس از پاسخ صحیح',
+        rewardText: 'جایزه پاسخ درست',
         onclick: 'showWhereIsMission()',
         order: 0
       },
@@ -5435,7 +5435,7 @@
 
       // Simplified Where-Is card matching other mission cards
       if (missionId === 'user-where-is') {
-        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : (config.subtitle || 'حدس بزن و ببر');
+        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : 'حدس بزن و جایزه بگیر...';
         return `
           <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
             ${completedBadge}
@@ -5494,10 +5494,7 @@
       try {
         whereIsState = await fetchWhereIsQuiz();
         if (missionCardConfigs['user-where-is']) {
-          const resolvedSubtitle = whereIsState?.quiz?.subtitle
-            || missionData?.whereIs?.subtitle
-            || 'حدس بزن و اعتبار بگیر';
-          missionCardConfigs['user-where-is'].subtitle = resolvedSubtitle;
+          missionCardConfigs['user-where-is'].subtitle = 'حدس بزن و جایزه بگیر...';
         }
 
         const res = await fetch('/api/missions/users', {
