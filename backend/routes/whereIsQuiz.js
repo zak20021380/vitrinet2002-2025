@@ -219,7 +219,7 @@ router.get('/where-is-quiz/public', async (req, res, next) => {
     return res.json({
       success: true,
       active: true,
-      quiz: toClientQuiz(quiz)
+      quiz: toClientQuiz(quiz, { includeReward: true })
     });
   } catch (error) {
     return next(error);

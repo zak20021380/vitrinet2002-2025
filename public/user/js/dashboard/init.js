@@ -5327,9 +5327,8 @@
         style: 'where-is',
         icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1" fill="currentColor"/><path d="M12 14V8"/><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/></svg>`,
         title: 'اینجا کجاست؟',
-        subtitle: 'حدس بزن و جایزه بگیر...',
         fomoBadge: 'فقط تا امشب ⏱️',
-        rewardText: 'جایزه پاسخ درست',
+        fixedAmount: 5000,
         onclick: 'showWhereIsMission()',
         order: 0
       },
@@ -5435,10 +5434,10 @@
 
       // Simplified Where-Is card matching other mission cards
       if (missionId === 'user-where-is') {
-        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : 'حدس بزن و جایزه بگیر';
         return `
           <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
             ${completedBadge}
+            ${fomoBadge}
             <div class="mission-reward">
               <span class="mission-reward-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5450,7 +5449,6 @@
               ${rewardText}
             </div>
             <p class="mission-title">اینجا کجاست؟</p>
-            <p class="mission-subtitle">${whereIsCardSubtitle}</p>
             <div class="mission-arrow">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -5494,7 +5492,10 @@
       try {
         whereIsState = await fetchWhereIsQuiz();
         if (missionCardConfigs['user-where-is']) {
-          missionCardConfigs['user-where-is'].subtitle = 'حدس بزن و جایزه بگیر...';
+          // Update reward amount from API if available
+          if (whereIsState?.quiz?.rewardToman) {
+            missionCardConfigs['user-where-is'].fixedAmount = whereIsState.quiz.rewardToman;
+          }
         }
 
         const res = await fetch('/api/missions/users', {
