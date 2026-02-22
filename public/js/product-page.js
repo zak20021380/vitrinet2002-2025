@@ -3236,7 +3236,14 @@
     loaded: false,
     hintDismissed: false,
     affordanceBound: false,
-    resizeRaf: null
+    resizeRaf: null,
+    hoverBound: false,
+    hoverActive: false,
+    hoverRaf: null,
+    hoverVelocity: 0,
+    hoverTargetVelocity: 0,
+    hoverLastTimestamp: 0,
+    hoverNormToRawSign: 1
   };
 
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -3302,6 +3309,214 @@
     }
 
     return Math.max(0, Math.min(maxScroll - rawScrollLeft, maxScroll));
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function canUseHoverAutoScroll() {
+    if (typeof window.matchMedia !== 'function') return false;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const supportsFineHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    return supportsFineHover && !prefersReducedMotion;
+  }
+
+  function detectNormToRawSign() {
+    if (!dom.scroll) return 1;
+
+    const maxScroll = Math.max(0, dom.scroll.scrollWidth - dom.scroll.clientWidth);
+    if (maxScroll < 2) return 1;
+
+    const initialRaw = dom.scroll.scrollLeft;
+    const initialNormalized = getNormalizedScrollLeft(dom.scroll);
+
+    dom.scroll.scrollBy({ left: 1, behavior: 'auto' });
+    const plusDelta = getNormalizedScrollLeft(dom.scroll) - initialNormalized;
+    dom.scroll.scrollLeft = initialRaw;
+
+    if (Math.abs(plusDelta) > 0.01) {
+      return plusDelta > 0 ? 1 : -1;
+    }
+
+    dom.scroll.scrollBy({ left: -1, behavior: 'auto' });
+    const minusDelta = getNormalizedScrollLeft(dom.scroll) - initialNormalized;
+    dom.scroll.scrollLeft = initialRaw;
+
+    if (Math.abs(minusDelta) > 0.01) {
+      return minusDelta > 0 ? -1 : 1;
+    }
+
+    return 1;
+  }
+
+  function setHoverDirectionVisual(direction) {
+    if (!dom.scroll) return;
+
+    dom.scroll.classList.toggle('is-hover-auto', Boolean(direction));
+    dom.scroll.classList.toggle('is-hover-scroll-left', direction === 'left');
+    dom.scroll.classList.toggle('is-hover-scroll-right', direction === 'right');
+
+    if (dom.scrollWrap) {
+      if (direction) {
+        dom.scrollWrap.dataset.hoverDirection = direction;
+      } else {
+        delete dom.scrollWrap.dataset.hoverDirection;
+      }
+    }
+  }
+
+  function stopHoverAutoScroll({ resetVelocity = true } = {}) {
+    state.hoverActive = false;
+    state.hoverTargetVelocity = 0;
+    state.hoverLastTimestamp = 0;
+
+    if (resetVelocity) {
+      state.hoverVelocity = 0;
+    }
+
+    if (state.hoverRaf) {
+      cancelAnimationFrame(state.hoverRaf);
+      state.hoverRaf = null;
+    }
+
+    setHoverDirectionVisual('');
+  }
+
+  function runHoverAutoScroll(timestamp) {
+    state.hoverRaf = null;
+
+    if (!state.hoverActive || !dom.scroll || !dom.section) return;
+
+    const maxScroll = Math.max(0, dom.scroll.scrollWidth - dom.scroll.clientWidth);
+    if (maxScroll <= 12) {
+      stopHoverAutoScroll();
+      updateScrollAffordance();
+      return;
+    }
+
+    const dt = state.hoverLastTimestamp ? Math.min(48, timestamp - state.hoverLastTimestamp) : 16.7;
+    state.hoverLastTimestamp = timestamp;
+
+    const blend = 1 - Math.exp(-dt / 85);
+    state.hoverVelocity += (state.hoverTargetVelocity - state.hoverVelocity) * blend;
+
+    if (Math.abs(state.hoverVelocity) < 2 && Math.abs(state.hoverTargetVelocity) < 2) {
+      state.hoverVelocity = 0;
+    }
+
+    if (Math.abs(state.hoverVelocity) > 0) {
+      const current = getNormalizedScrollLeft(dom.scroll);
+      const atStart = current <= 0.8;
+      const atEnd = (maxScroll - current) <= 0.8;
+
+      if ((atStart && state.hoverVelocity < 0) || (atEnd && state.hoverVelocity > 0)) {
+        state.hoverVelocity = 0;
+      } else {
+        const rawDelta = state.hoverVelocity * (dt / 1000) * state.hoverNormToRawSign;
+        dom.scroll.scrollBy({ left: rawDelta, behavior: 'auto' });
+        updateScrollAffordance();
+      }
+    }
+
+    if (state.hoverActive && (Math.abs(state.hoverVelocity) > 0.4 || Math.abs(state.hoverTargetVelocity) > 0.4)) {
+      state.hoverRaf = requestAnimationFrame(runHoverAutoScroll);
+    }
+  }
+
+  function ensureHoverAutoScrollLoop() {
+    if (!state.hoverActive || state.hoverRaf) return;
+    state.hoverRaf = requestAnimationFrame(runHoverAutoScroll);
+  }
+
+  function updateHoverTargetVelocity(clientX) {
+    if (!dom.scroll) return;
+
+    const maxScroll = Math.max(0, dom.scroll.scrollWidth - dom.scroll.clientWidth);
+    if (maxScroll <= 12) {
+      state.hoverTargetVelocity = 0;
+      setHoverDirectionVisual('');
+      return;
+    }
+
+    const rect = dom.scroll.getBoundingClientRect();
+    if (!rect.width) {
+      state.hoverTargetVelocity = 0;
+      setHoverDirectionVisual('');
+      return;
+    }
+
+    const pointerX = clamp(clientX - rect.left, 0, rect.width);
+    const edgeZone = clamp(rect.width * 0.27, 64, 180);
+
+    const leftEdgeRatio = clamp((edgeZone - pointerX) / edgeZone, 0, 1);
+    const rightEdgeRatio = clamp((pointerX - (rect.width - edgeZone)) / edgeZone, 0, 1);
+    const dominantRatio = Math.max(leftEdgeRatio, rightEdgeRatio);
+
+    if (dominantRatio < 0.08) {
+      state.hoverTargetVelocity = 0;
+      setHoverDirectionVisual('');
+      return;
+    }
+
+    const easedRatio = Math.pow(dominantRatio, 1.35);
+    const minSpeed = 90;
+    const maxSpeed = 940;
+    const speed = minSpeed + (maxSpeed - minSpeed) * easedRatio;
+    const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
+
+    if (leftEdgeRatio > rightEdgeRatio) {
+      state.hoverTargetVelocity = isRtl ? speed : -speed;
+      setHoverDirectionVisual('left');
+    } else {
+      state.hoverTargetVelocity = isRtl ? -speed : speed;
+      setHoverDirectionVisual('right');
+    }
+  }
+
+  function handleHoverPointerMove(event) {
+    if (!event || event.pointerType !== 'mouse' || !canUseHoverAutoScroll()) return;
+    if (!dom.section || dom.section.hidden) return;
+
+    if (!state.hoverActive) {
+      state.hoverNormToRawSign = detectNormToRawSign();
+    }
+    state.hoverActive = true;
+    updateHoverTargetVelocity(event.clientX);
+
+    if (Math.abs(state.hoverTargetVelocity) > 0.2 || Math.abs(state.hoverVelocity) > 0.2) {
+      ensureHoverAutoScrollLoop();
+    }
+  }
+
+  function handleHoverPointerLeave(event) {
+    if (event && event.pointerType && event.pointerType !== 'mouse') return;
+    stopHoverAutoScroll();
+  }
+
+  function bindHoverAutoScroll() {
+    if (!dom.scroll || state.hoverBound || !canUseHoverAutoScroll()) return;
+
+    dom.scroll.addEventListener('pointerenter', handleHoverPointerMove, { passive: true });
+    dom.scroll.addEventListener('pointermove', handleHoverPointerMove, { passive: true });
+    dom.scroll.addEventListener('pointerleave', handleHoverPointerLeave, { passive: true });
+    dom.scroll.addEventListener('pointercancel', handleHoverPointerLeave, { passive: true });
+
+    dom.scroll.addEventListener('touchstart', () => stopHoverAutoScroll(), { passive: true });
+    dom.scroll.addEventListener('wheel', () => {
+      state.hoverVelocity = 0;
+      state.hoverTargetVelocity = 0;
+      setHoverDirectionVisual('');
+    }, { passive: true });
+
+    window.addEventListener('blur', () => stopHoverAutoScroll(), { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopHoverAutoScroll();
+      }
+    });
+
+    state.hoverBound = true;
   }
 
   function updateScrollAffordance() {
@@ -3467,6 +3682,7 @@
 
     dom.scroll.innerHTML = '';
     state.hintDismissed = false;
+    stopHoverAutoScroll();
 
     products.forEach((product, index) => {
       const card = createProductCard(product, index);
@@ -3481,11 +3697,15 @@
       dom.viewAllLink.href = `/all-products.html?category=${encodeURIComponent(state.category)}`;
     }
 
-    requestAnimationFrame(updateScrollAffordance);
+    requestAnimationFrame(() => {
+      updateScrollAffordance();
+      state.hoverNormToRawSign = detectNormToRawSign();
+    });
   }
 
   function init() {
     bindScrollAffordance();
+    bindHoverAutoScroll();
 
     // Listen for product data from main product page
     document.addEventListener('product:updated', (event) => {
