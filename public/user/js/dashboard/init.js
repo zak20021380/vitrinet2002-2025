@@ -2305,8 +2305,82 @@
     }
 
     const WHERE_IS_QUIZ_API_BASE = `${API_BASE}/where-is-quiz`;
+    const WHERE_IS_ANSWER_STATE_STORAGE_KEY = 'vitrinet_where_is_answer_state_v1';
     let whereIsQuizFetchPromise = null;
     let whereIsQuizCache = null;
+    let whereIsCurrentQuizVersion = '';
+    let whereIsAnsweredCurrentQuiz = false;
+
+    function getWhereIsAnswerStorageUserKey() {
+      const raw = String(profileState?.user?.phone || 'guest').trim();
+      return raw || 'guest';
+    }
+
+    function buildWhereIsQuizVersionKey(quiz = {}) {
+      const source = quiz && typeof quiz === 'object' ? quiz : {};
+      const optionKey = Array.isArray(source.options)
+        ? source.options
+            .map((item) => {
+              const id = String(item?.id || '').trim().toLowerCase();
+              const text = String(item?.text || '').trim().toLowerCase();
+              return `${id}:${text}`;
+            })
+            .join('|')
+        : '';
+      const idPart = String(source.id || '').trim().toLowerCase();
+      const updatedPart = String(source.updatedAt || '').trim().toLowerCase();
+      const imagePart = String(source.imageUrl || '').trim().toLowerCase();
+      const titlePart = String(source.title || '').trim().toLowerCase();
+      const rewardPart = String(source.rewardToman ?? '').trim();
+      return [idPart, updatedPart, imagePart, titlePart, optionKey, rewardPart].join('::');
+    }
+
+    function readWhereIsAnswerState() {
+      try {
+        const raw = localStorage.getItem(WHERE_IS_ANSWER_STATE_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return null;
+        return {
+          quizVersion: String(parsed.quizVersion || '').trim(),
+          userKey: String(parsed.userKey || '').trim() || 'guest',
+          answeredAt: Number(parsed.answeredAt) || 0
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function hasAnsweredWhereIsQuiz(quizVersion = '') {
+      const version = String(quizVersion || '').trim();
+      if (!version) return false;
+      const state = readWhereIsAnswerState();
+      if (!state) return false;
+      return state.quizVersion === version && state.userKey === getWhereIsAnswerStorageUserKey();
+    }
+
+    function markWhereIsQuizAsAnswered(quizVersion = '') {
+      const version = String(quizVersion || '').trim();
+      if (!version) return;
+      const payload = {
+        quizVersion: version,
+        userKey: getWhereIsAnswerStorageUserKey(),
+        answeredAt: Date.now()
+      };
+      try {
+        localStorage.setItem(WHERE_IS_ANSWER_STATE_STORAGE_KEY, JSON.stringify(payload));
+      } catch (error) {
+        // Ignore storage write failures (private mode/quota).
+      }
+      whereIsAnsweredCurrentQuiz = true;
+    }
+
+    function syncWhereIsQuizAnswerState(quiz = null) {
+      const version = buildWhereIsQuizVersionKey(quiz || {});
+      whereIsCurrentQuizVersion = version;
+      whereIsAnsweredCurrentQuiz = hasAnsweredWhereIsQuiz(version);
+      return whereIsAnsweredCurrentQuiz;
+    }
 
     function normaliseWhereIsQuiz(quiz) {
       const source = quiz && typeof quiz === 'object' ? quiz : {};
@@ -2331,6 +2405,8 @@
         : 0;
 
       return {
+        id: String(source.id || '').trim(),
+        updatedAt: String(source.updatedAt || '').trim(),
         title: String(source.title || missionData.whereIs.title || 'اینجا کجاست؟').trim() || 'اینجا کجاست؟',
         subtitle: String(source.subtitle || missionData.whereIs.subtitle || '').trim(),
         imageUrl: String(source.imageUrl || missionData.whereIs.quizImage || '/assets/images/shop-placeholder.svg').trim() || '/assets/images/shop-placeholder.svg',
@@ -2367,20 +2443,24 @@
           }
 
           if (!payload.active || !payload.quiz) {
+            whereIsCurrentQuizVersion = '';
+            whereIsAnsweredCurrentQuiz = false;
             whereIsQuizCache = { active: false, quiz: null };
             return whereIsQuizCache;
           }
 
           const quiz = normaliseWhereIsQuiz(payload.quiz);
           applyWhereIsQuizToMission(quiz);
-          whereIsQuizCache = { active: true, quiz };
+          const userAnswered = syncWhereIsQuizAnswerState(quiz);
+          whereIsQuizCache = { active: true, quiz, userAnswered };
           return whereIsQuizCache;
         })
         .catch((error) => {
           console.warn('where-is quiz fetch failed, fallback to local data:', error);
           const fallbackQuiz = normaliseWhereIsQuiz(missionData?.whereIs || {});
           applyWhereIsQuizToMission(fallbackQuiz);
-          whereIsQuizCache = { active: true, quiz: fallbackQuiz, fallback: true };
+          const userAnswered = syncWhereIsQuizAnswerState(fallbackQuiz);
+          whereIsQuizCache = { active: true, quiz: fallbackQuiz, fallback: true, userAnswered };
           return whereIsQuizCache;
         })
         .finally(() => {
@@ -2422,6 +2502,7 @@
       const data = missionData[type];
       if (!data) return;
       closeWhereIsSuccessModal({ immediate: true });
+      let whereIsShouldShowWaitState = false;
 
       const isAuthorized = await ensureMissionAuth();
       if (!isAuthorized) {
@@ -2436,6 +2517,7 @@
           return;
         }
         applyWhereIsQuizToMission(whereIsResult.quiz);
+        whereIsShouldShowWaitState = Boolean(whereIsResult?.userAnswered || whereIsAnsweredCurrentQuiz);
       }
 
       closeMissionAuthModal();
@@ -2608,44 +2690,77 @@
           ? Math.round(Number(data.rewardToman))
           : Math.round(Number(missionData?.whereIs?.rewardToman) || 0);
         const rewardLabel = formatWhereIsRewardLabel(rewardAmount);
-        const optionsHTML = options.map((option, index) => `
-          <button
-            type="button"
-            class="where-is-option"
-            data-option-id="${escapeHtml(option.id)}"
-            onclick="selectWhereIsOption('${escapeHtml(option.id)}')"
-          >
-            <span class="where-is-option-index">${index + 1}</span>
-            <span class="where-is-option-text">${escapeHtml(option.text)}</span>
-          </button>
-        `).join('');
+        const quizImageUrl = data.quizImage || '/assets/images/shop-placeholder.svg';
 
-        bodyContent.innerHTML = `
-          <div class="where-is-sheet">
-            <div class="where-is-meta">
-              <p class="where-is-subtitle">${escapeHtml(data.subtitle || '')}</p>
-              <div class="where-is-reward-pill" aria-label="مبلغ جایزه">
-                <span class="where-is-reward-pill-label">جایزه این سوال</span>
+        if (whereIsShouldShowWaitState) {
+          bodyContent.innerHTML = `
+            <div class="where-is-wait-state">
+              <div class="where-is-wait-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>\u067e\u0627\u0633\u062e \u0634\u0645\u0627 \u062b\u0628\u062a \u0634\u062f</span>
+              </div>
+
+              <figure class="where-is-wait-image-wrap">
+                <img src="${escapeHtml(quizImageUrl)}" alt="\u062a\u0635\u0648\u06cc\u0631 \u0633\u0648\u0627\u0644" class="where-is-wait-image" loading="lazy" />
+              </figure>
+
+              <div class="where-is-wait-copy">
+                <h3 class="where-is-wait-title">\u0634\u0645\u0627 \u067e\u0627\u0633\u062e \u0627\u06cc\u0646 \u0633\u0648\u0627\u0644 \u0631\u0627 \u0627\u0631\u0633\u0627\u0644 \u06a9\u0631\u062f\u0647\u200c\u0627\u06cc\u062f</h3>
+                <p class="where-is-wait-text">\u0644\u0637\u0641\u0627\u064b \u0628\u0631\u0627\u06cc \u0633\u0648\u0627\u0644 \u0628\u0639\u062f\u06cc \u0645\u0646\u062a\u0638\u0631 \u0628\u0645\u0627\u0646\u06cc\u062f. \u0628\u0647\u200c\u0645\u062d\u0636 \u0627\u0646\u062a\u0634\u0627\u0631 \u0633\u0648\u0627\u0644 \u062c\u062f\u06cc\u062f\u060c \u0627\u0632 \u0647\u0645\u06cc\u0646 \u06a9\u0627\u0631\u062a \u0645\u06cc\u200c\u062a\u0648\u0627\u0646\u06cc\u062f \u0634\u0631\u06a9\u062a \u06a9\u0646\u06cc\u062f.</p>
+              </div>
+
+              <div class="where-is-wait-reward-pill" aria-label="\u0645\u0628\u0644\u063a \u062c\u0627\u06cc\u0632\u0647 \u0633\u0648\u0627\u0644">
+                <span>\u062c\u0627\u06cc\u0632\u0647 \u0627\u06cc\u0646 \u0633\u0648\u0627\u0644</span>
                 <strong>${escapeHtml(rewardLabel)}</strong>
               </div>
-            </div>
-            <figure class="where-is-image-wrap">
-              <img src="${escapeHtml(data.quizImage || '/assets/images/shop-placeholder.svg')}" alt="تصویر فروشگاه" class="where-is-image" loading="lazy" />
-            </figure>
-            <div class="where-is-options" id="whereIsOptions">
-              ${optionsHTML}
-            </div>
-            <div class="where-is-result" id="whereIsResult"></div>
-            <div class="where-is-submit-wrap">
-              <button type="button" class="where-is-submit-btn" id="whereIsSubmitBtn" onclick="submitWhereIsAnswer()" disabled>
-                ثبت پاسخ
-              </button>
-              <button type="button" class="where-is-close-btn" onclick="closeMissionModal()">
-                بستن
+
+              <button type="button" class="where-is-close-btn where-is-wait-close-btn" onclick="closeMissionModal()">
+                \u0645\u062a\u0648\u062c\u0647 \u0634\u062f\u0645
               </button>
             </div>
-          </div>
-        `;
+          `;
+        } else {
+          const optionsHTML = options.map((option, index) => `
+            <button
+              type="button"
+              class="where-is-option"
+              data-option-id="${escapeHtml(option.id)}"
+              onclick="selectWhereIsOption('${escapeHtml(option.id)}')"
+            >
+              <span class="where-is-option-index">${index + 1}</span>
+              <span class="where-is-option-text">${escapeHtml(option.text)}</span>
+            </button>
+          `).join('');
+
+          bodyContent.innerHTML = `
+            <div class="where-is-sheet">
+              <div class="where-is-meta">
+                <p class="where-is-subtitle">${escapeHtml(data.subtitle || '')}</p>
+                <div class="where-is-reward-pill" aria-label="\u0645\u0628\u0644\u063a \u062c\u0627\u06cc\u0632\u0647">
+                  <span class="where-is-reward-pill-label">\u062c\u0627\u06cc\u0632\u0647 \u0627\u06cc\u0646 \u0633\u0648\u0627\u0644</span>
+                  <strong>${escapeHtml(rewardLabel)}</strong>
+                </div>
+              </div>
+              <figure class="where-is-image-wrap">
+                <img src="${escapeHtml(quizImageUrl)}" alt="\u062a\u0635\u0648\u06cc\u0631 \u0641\u0631\u0648\u0634\u06af\u0627\u0647" class="where-is-image" loading="lazy" />
+              </figure>
+              <div class="where-is-options" id="whereIsOptions">
+                ${optionsHTML}
+              </div>
+              <div class="where-is-result" id="whereIsResult"></div>
+              <div class="where-is-submit-wrap">
+                <button type="button" class="where-is-submit-btn" id="whereIsSubmitBtn" onclick="submitWhereIsAnswer()" disabled>
+                  \u062b\u0628\u062a \u067e\u0627\u0633\u062e
+                </button>
+                <button type="button" class="where-is-close-btn" onclick="closeMissionModal()">
+                  \u0628\u0633\u062a\u0646
+                </button>
+              </div>
+            </div>
+          `;
+        }
       } else if (data.isExploreModal) {
         // مودال پاساژگردی آنلاین - طراحی پریمیوم V4
         reward.style.cssText = 'display: none !important;';
@@ -3523,6 +3638,10 @@
           correctOptionId: resolvedCorrectOption.id,
           selectedOptionId: whereIsSelectedOptionId
         });
+        markWhereIsQuizAsAnswered(whereIsCurrentQuizVersion);
+        if (whereIsQuizCache?.active) {
+          whereIsQuizCache = { ...whereIsQuizCache, userAnswered: true };
+        }
 
         if (payload?.isCorrect) {
           const rewardToman = Number.isFinite(Number(payload?.rewardToman)) && Number(payload?.rewardToman) >= 0
@@ -3549,14 +3668,18 @@
 
         renderWhereIsResult({
           isCorrect: false,
-          message: payload?.message || 'پاسخ ثبت شد.',
+          message: payload?.message || '\u067e\u0627\u0633\u062e \u062b\u0628\u062a \u0634\u062f.',
           correctOption: resolvedCorrectOption,
           correctOptionDetails: resolvedCorrectOptionDetails
         });
+        optionButtons.forEach((button) => {
+          button.disabled = true;
+        });
         if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'ارسال پاسخ دیگر';
+          submitButton.disabled = true;
+          submitButton.textContent = '\u067e\u0627\u0633\u062e \u062b\u0628\u062a \u0634\u062f';
         }
+        showCopyToast('\u067e\u0627\u0633\u062e \u0634\u0645\u0627 \u062b\u0628\u062a \u0634\u062f. \u0628\u0631\u0627\u06cc \u0633\u0648\u0627\u0644 \u0628\u0639\u062f\u06cc \u0645\u0646\u062a\u0638\u0631 \u0628\u0645\u0627\u0646\u06cc\u062f.');
       } catch (error) {
         console.error('submit where-is answer failed:', error);
         renderWhereIsResult({
