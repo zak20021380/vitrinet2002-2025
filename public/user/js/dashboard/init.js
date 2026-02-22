@@ -2640,6 +2640,9 @@
               <button type="button" class="where-is-submit-btn" id="whereIsSubmitBtn" onclick="submitWhereIsAnswer()" disabled>
                 ثبت پاسخ
               </button>
+              <button type="button" class="where-is-close-btn" onclick="closeMissionModal()">
+                بستن
+              </button>
             </div>
           </div>
         `;
@@ -3251,12 +3254,22 @@
       });
     }
 
-    function buildWhereIsCorrectInfoMarkup({ correctOption = null, correctOptionDetails = null } = {}) {
+    function buildWhereIsCorrectInfoMarkup({
+      correctOption = null,
+      correctOptionDetails = null,
+      useStorePageLinkLabels = false
+    } = {}) {
       const option = normaliseWhereIsCorrectOption(correctOption);
       const details = normaliseWhereIsCorrectOptionDetails(correctOptionDetails);
       const optionText = option.text || resolveWhereIsCorrectOptionText(option.id) || '';
       const safeLink = toWhereIsSafeExternalLink(details.link);
       const fallbackLinkLabel = String(details.link || '').trim();
+      const linkFieldLabel = useStorePageLinkLabels
+        ? '\u0644\u06CC\u0646\u06A9 \u0641\u0631\u0648\u0634\u06AF\u0627\u0647'
+        : '\u0644\u06CC\u0646\u06A9';
+      const linkActionLabel = useStorePageLinkLabels
+        ? '\u0645\u0634\u0627\u0647\u062F\u0647 \u0635\u0641\u062D\u0647 \u0641\u0631\u0648\u0634\u06AF\u0627\u0647'
+        : '\u0645\u0634\u0627\u0647\u062F\u0647 \u0644\u06CC\u0646\u06A9';
 
       if (!optionText && !details.description && !details.address && !details.link) {
         return '';
@@ -3290,14 +3303,14 @@
       if (safeLink) {
         rows.push(`
           <div class="where-is-correct-info-row">
-            <span class="where-is-correct-info-label">لینک</span>
-            <a href="${escapeHtml(safeLink)}" class="where-is-correct-info-link" target="_blank" rel="noopener noreferrer">مشاهده لینک</a>
+            <span class="where-is-correct-info-label">${linkFieldLabel}</span>
+            <a href="${escapeHtml(safeLink)}" class="where-is-correct-info-link" target="_blank" rel="noopener noreferrer">${linkActionLabel}</a>
           </div>
         `);
       } else if (fallbackLinkLabel) {
         rows.push(`
           <div class="where-is-correct-info-row">
-            <span class="where-is-correct-info-label">لینک</span>
+            <span class="where-is-correct-info-label">${linkFieldLabel}</span>
             <span class="where-is-correct-info-value">${escapeHtml(fallbackLinkLabel)}</span>
           </div>
         `);
@@ -3340,7 +3353,11 @@
 
       const rewardLabel = formatWhereIsRewardLabel(rewardToman);
       const successMessage = escapeHtml(message || '\u0622\u0641\u0631\u06CC\u0646! \u067E\u0627\u0633\u062E \u0634\u0645\u0627 \u062F\u0631\u0633\u062A \u0627\u0633\u062A.');
-      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
+      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({
+        correctOption,
+        correctOptionDetails,
+        useStorePageLinkLabels: true
+      });
       const quizImageUrl = String(
         missionData?.whereIs?.quizImage
         || document.querySelector('.where-is-image')?.getAttribute('src')
