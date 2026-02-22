@@ -2118,44 +2118,65 @@
 .where-is-submit-wrap {
   position: sticky;
   bottom: 0;
-  padding-top: 0.8rem;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.38rem);
-  background: linear-gradient(180deg, rgba(248, 251, 255, 0.1) 0%, #ffffff 24%);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  padding-top: 1rem;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0) 0%, rgba(255, 255, 255, 0.95) 15%, #ffffff 35%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .where-is-submit-btn {
   width: 100%;
   border: none;
-  border-radius: 1.02rem;
-  padding: 0.98rem 1rem;
-  background: linear-gradient(135deg, #0284c7 0%, #2563eb 56%, #1d4ed8 100%);
+  border-radius: 1.15rem;
+  padding: 1.1rem 1.25rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
   color: #ffffff;
-  font-size: 0.96rem;
+  font-size: 1rem;
   font-weight: 900;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   box-shadow:
-    0 16px 30px rgba(37, 99, 235, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.24) inset;
+    0 18px 36px rgba(16, 185, 129, 0.38),
+    0 8px 16px rgba(5, 150, 105, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .where-is-submit-btn::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.26) 50%, rgba(255, 255, 255, 0) 70%);
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 70%);
   transform: translateX(-120%);
-  transition: transform 0.42s ease;
+  transition: transform 0.5s ease;
+}
+
+.where-is-submit-btn::after {
+  content: '✓';
+  position: absolute;
+  right: 1.25rem;
+  font-size: 1.1rem;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s ease;
 }
 
 .where-is-submit-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 20px 34px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 22px 44px rgba(16, 185, 129, 0.45),
+    0 10px 20px rgba(5, 150, 105, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
 }
 
 .where-is-submit-btn:hover::before {
@@ -2163,45 +2184,94 @@
 }
 
 .where-is-submit-btn:active {
-  transform: translateY(0) scale(0.985);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 12px 24px rgba(16, 185, 129, 0.35),
+    0 4px 8px rgba(5, 150, 105, 0.2);
 }
 
 .where-is-submit-btn:disabled {
-  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-  box-shadow: none;
-  opacity: 0.92;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  box-shadow: 
+    0 8px 16px rgba(148, 163, 184, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  opacity: 0.85;
   cursor: not-allowed;
+  transform: none;
+}
+
+.where-is-submit-btn:disabled::before {
+  display: none;
 }
 
 .where-is-close-btn {
   width: 100%;
-  border: 2px solid rgba(148, 163, 184, 0.25);
-  border-radius: 1.02rem;
-  padding: 0.98rem 1rem;
-  background: #f8fafc;
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  border-radius: 1.15rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   color: #64748b;
-  font-size: 0.96rem;
+  font-size: 0.95rem;
   font-weight: 800;
   letter-spacing: 0.01em;
   cursor: pointer;
-  margin-top: 0.75rem;
-  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 
+    0 4px 12px rgba(148, 163, 184, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.where-is-close-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.05) 0%, rgba(148, 163, 184, 0.08) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.where-is-close-btn::after {
+  content: '×';
+  position: absolute;
+  right: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 300;
+  opacity: 0;
+  transform: scale(0.5) rotate(-90deg);
+  transition: all 0.3s ease;
 }
 
 .where-is-close-btn:hover {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   color: #475569;
-  border-color: rgba(148, 163, 184, 0.4);
+  border-color: rgba(100, 116, 139, 0.4);
   transform: translateY(-1px);
+  box-shadow: 
+    0 8px 20px rgba(148, 163, 184, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+.where-is-close-btn:hover::before {
+  opacity: 1;
 }
 
 .where-is-close-btn:active {
   transform: scale(0.98);
+  box-shadow: 
+    0 2px 8px rgba(148, 163, 184, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
 }
 
-.where-is-close-btn:focus-visible {
-  outline: 3px solid rgba(14, 165, 233, 0.6);
-  outline-offset: 2px;
+.where-is-close-btn:focus-visible,
+.where-is-submit-btn:focus-visible {
+  outline: 3px solid rgba(14, 165, 233, 0.5);
+  outline-offset: 3px;
 }
 
 
@@ -2252,17 +2322,31 @@
     font-size: 0.82rem;
   }
 
+  .where-is-submit-wrap {
+    padding-top: 0.85rem;
+    gap: 0.65rem;
+  }
+
   .where-is-submit-btn {
-    border-radius: 0.9rem;
-    padding: 0.9rem 0.9rem;
-    font-size: 0.92rem;
+    border-radius: 1rem;
+    padding: 1rem 1.1rem;
+    font-size: 0.95rem;
+  }
+
+  .where-is-submit-btn::after {
+    right: 1.1rem;
+    font-size: 1rem;
   }
 
   .where-is-close-btn {
-    border-radius: 0.9rem;
-    padding: 0.9rem 0.9rem;
-    font-size: 0.92rem;
-    margin-top: 0.65rem;
+    border-radius: 1rem;
+    padding: 0.95rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .where-is-close-btn::after {
+    right: 1.1rem;
+    font-size: 1.3rem;
   }
 }
 
