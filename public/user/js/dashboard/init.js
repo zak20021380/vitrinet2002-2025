@@ -3341,6 +3341,11 @@
       const rewardLabel = formatWhereIsRewardLabel(rewardToman);
       const successMessage = escapeHtml(message || '\u0622\u0641\u0631\u06CC\u0646! \u067E\u0627\u0633\u062E \u0634\u0645\u0627 \u062F\u0631\u0633\u062A \u0627\u0633\u062A.');
       const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
+      const quizImageUrl = String(
+        missionData?.whereIs?.quizImage
+        || document.querySelector('.where-is-image')?.getAttribute('src')
+        || '/assets/images/shop-placeholder.svg'
+      ).trim() || '/assets/images/shop-placeholder.svg';
 
       const modal = document.createElement('div');
       modal.id = 'whereIsSuccessModal';
@@ -3364,6 +3369,10 @@
 
             <h3 class="where-is-success-title" id="whereIsSuccessTitle">\u067E\u0627\u0633\u062E \u0635\u062D\u06CC\u062D \u0628\u0648\u062F</h3>
             <p class="where-is-success-text">${successMessage}</p>
+
+            <figure class="where-is-success-image-wrap">
+              <img src="${escapeHtml(quizImageUrl)}" alt="\u062A\u0635\u0648\u06CC\u0631 \u0633\u0648\u0627\u0644" class="where-is-success-image" loading="lazy" />
+            </figure>
 
             <div class="where-is-success-reward" aria-label="\u062C\u0627\u06CC\u0632\u0647 \u0627\u06CC\u0646 \u0633\u0648\u0627\u0644">
               <span>\u062C\u0627\u06CC\u0632\u0647 \u0627\u06CC\u0646 \u0633\u0648\u0627\u0644</span>
