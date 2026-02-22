@@ -3225,13 +3225,18 @@
   const dom = {
     section: document.getElementById('similarProductsSection'),
     scroll: document.getElementById('similarProductsScroll'),
+    scrollWrap: document.getElementById('similarProductsScrollWrap'),
+    hint: document.getElementById('similarProductsHint'),
     viewAllLink: document.getElementById('similarProductsViewAll')
   };
 
   const state = {
     productId: null,
     category: null,
-    loaded: false
+    loaded: false,
+    hintDismissed: false,
+    affordanceBound: false,
+    resizeRaf: null
   };
 
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -3281,11 +3286,71 @@
     return `http://localhost:5000/uploads/${trimmed}`;
   }
 
+  function getNormalizedScrollLeft(element) {
+    if (!element) return 0;
+
+    const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
+    const rawScrollLeft = element.scrollLeft;
+    const isRtl = getComputedStyle(element).direction === 'rtl';
+
+    if (!isRtl) {
+      return Math.max(0, Math.min(rawScrollLeft, maxScroll));
+    }
+
+    if (rawScrollLeft < 0) {
+      return Math.max(0, Math.min(-rawScrollLeft, maxScroll));
+    }
+
+    return Math.max(0, Math.min(maxScroll - rawScrollLeft, maxScroll));
+  }
+
+  function updateScrollAffordance() {
+    if (!dom.scroll || !dom.section) return;
+
+    const maxScroll = Math.max(0, dom.scroll.scrollWidth - dom.scroll.clientWidth);
+    const canScroll = maxScroll > 12;
+    const current = getNormalizedScrollLeft(dom.scroll);
+    const atStart = current <= 8;
+    const atEnd = (maxScroll - current) <= 8;
+
+    if (current > 18) {
+      state.hintDismissed = true;
+    }
+
+    dom.section.classList.toggle('similar-products--can-scroll', canScroll);
+
+    if (dom.scrollWrap) {
+      dom.scrollWrap.classList.toggle('is-at-start', !canScroll || atStart);
+      dom.scrollWrap.classList.toggle('is-at-end', !canScroll || atEnd);
+    }
+
+    if (dom.hint) {
+      dom.hint.hidden = !canScroll || state.hintDismissed || !atStart;
+    }
+  }
+
+  function bindScrollAffordance() {
+    if (!dom.scroll || state.affordanceBound) return;
+
+    dom.scroll.addEventListener('scroll', updateScrollAffordance, { passive: true });
+    window.addEventListener('resize', () => {
+      if (state.resizeRaf) {
+        cancelAnimationFrame(state.resizeRaf);
+      }
+      state.resizeRaf = requestAnimationFrame(() => {
+        state.resizeRaf = null;
+        updateScrollAffordance();
+      });
+    }, { passive: true });
+
+    state.affordanceBound = true;
+  }
+
   function createProductCard(product, index) {
     const card = document.createElement('a');
     // CRITICAL: flex-shrink-0 + fixed width for horizontal scroll to work on mobile
-    card.className = 'flex-shrink-0 snap-center bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-200 no-underline';
-    card.style.cssText = 'width: 160px; min-width: 160px; flex-shrink: 0;';
+    card.className = 'flex-shrink-0 snap-start bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 no-underline';
+    card.style.cssText = 'width: clamp(132px, 34vw, 152px); min-width: clamp(132px, 34vw, 152px); flex-shrink: 0;';
     card.href = `/product.html?id=${encodeURIComponent(product._id || product.id)}`;
 
     // Safely resolve image URL - handle Base64, URLs, and filenames
@@ -3320,19 +3385,19 @@
       const createdDate = new Date(product.createdAt);
       const daysSinceCreated = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
       if (daysSinceCreated < 7) {
-        newBadgeHtml = '<span class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10">جدید</span>';
+        newBadgeHtml = '<span class="absolute top-1.5 right-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-sm z-10">جدید</span>';
       }
     }
 
     let discountBadgeHtml = '';
     if (hasDiscount) {
       const discountPercent = Math.round(((product.price - product.discountPrice) / product.price) * 100);
-      discountBadgeHtml = `<span class="absolute top-2 left-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm z-10">${persianNumberFormatter.format(discountPercent)}٪</span>`;
+      discountBadgeHtml = `<span class="absolute top-1.5 left-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-sm z-10">${persianNumberFormatter.format(discountPercent)}٪</span>`;
     }
 
     let originalPriceHtml = '';
     if (hasDiscount) {
-      originalPriceHtml = `<span class="text-[11px] text-gray-400 line-through">${formatPrice(product.price)}</span>`;
+      originalPriceHtml = `<span class="text-[10px] text-gray-400 line-through">${formatPrice(product.price)}</span>`;
     }
 
     // Safely escape title
@@ -3345,19 +3410,19 @@
         ${newBadgeHtml}
         ${discountBadgeHtml}
       </div>
-      <div class="p-2.5 flex flex-col gap-1">
-        <h3 class="text-[13px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0" style="min-height: 2.4em;">${safeTitle}</h3>
+      <div class="p-2 flex flex-col gap-1">
+        <h3 class="text-[12px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0" style="min-height: 2.25em;">${safeTitle}</h3>
         ${safeShopName ? `
-          <div class="flex items-center gap-1 text-[11px] text-gray-400 truncate">
+          <div class="flex items-center gap-1 text-[10px] text-gray-400 truncate">
             <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class="truncate">${safeShopName}</span>
           </div>
         ` : ''}
-        <div class="mt-auto pt-1.5 flex flex-col">
+        <div class="mt-auto pt-1 flex flex-col">
           ${originalPriceHtml}
-          <span class="text-[14px] font-extrabold text-emerald-600">${formatPrice(displayPrice)} <span class="text-[11px] font-semibold text-gray-500">تومان</span></span>
+          <span class="text-[13px] font-extrabold text-emerald-600">${formatPrice(displayPrice)} <span class="text-[10px] font-semibold text-gray-500">تومان</span></span>
         </div>
       </div>
     `;
@@ -3401,6 +3466,7 @@
     if (!dom.scroll || !dom.section) return;
 
     dom.scroll.innerHTML = '';
+    state.hintDismissed = false;
 
     products.forEach((product, index) => {
       const card = createProductCard(product, index);
@@ -3414,9 +3480,13 @@
     if (dom.viewAllLink && state.category) {
       dom.viewAllLink.href = `/all-products.html?category=${encodeURIComponent(state.category)}`;
     }
+
+    requestAnimationFrame(updateScrollAffordance);
   }
 
   function init() {
+    bindScrollAffordance();
+
     // Listen for product data from main product page
     document.addEventListener('product:updated', (event) => {
       const detail = event?.detail?.state || {};

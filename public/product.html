@@ -4307,6 +4307,106 @@
       overflow: hidden;
     }
 
+    #similarProductsSection .similar-products-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.38rem;
+      margin: 0 1rem 0.6rem;
+      padding: 0.34rem 0.72rem;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      white-space: nowrap;
+    }
+
+    #similarProductsSection .similar-products-hint[hidden] {
+      display: none !important;
+    }
+
+    #similarProductsSection .similar-products-hint__arrows {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      animation: similar-products-hint-pulse 1.55s ease-in-out infinite;
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap {
+      position: relative;
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap::before,
+    #similarProductsSection .similar-products-scroll-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 24px;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap::before {
+      inset-inline-start: 0;
+      background: linear-gradient(to left, rgba(245, 247, 251, 0), rgba(245, 247, 251, 0.95));
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap::after {
+      inset-inline-end: 0;
+      background: linear-gradient(to right, rgba(245, 247, 251, 0), rgba(245, 247, 251, 0.95));
+    }
+
+    #similarProductsSection.similar-products--can-scroll .similar-products-scroll-wrap::before,
+    #similarProductsSection.similar-products--can-scroll .similar-products-scroll-wrap::after {
+      opacity: 1;
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap.is-at-start::before {
+      opacity: 0 !important;
+    }
+
+    #similarProductsSection .similar-products-scroll-wrap.is-at-end::after {
+      opacity: 0 !important;
+    }
+
+    #similarProductsSection .similar-products-scroll {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: 1rem;
+      touch-action: pan-x;
+      overscroll-behavior-inline: contain;
+    }
+
+    #similarProductsSection .similar-products-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    @keyframes similar-products-hint-pulse {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      50% {
+        transform: translateX(-3px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      #similarProductsSection .similar-products-hint {
+        margin-bottom: 0.5rem;
+        font-size: 0.69rem;
+      }
+    }
+
     /* ========== End Similar Products ========== */
 
     /* ========== Premium Product Tags System V2 ========== */
@@ -5481,16 +5581,20 @@
                 </svg>
               </a>
             </div>
+            <p class="similar-products-hint" id="similarProductsHint" hidden>
+              <span class="similar-products-hint__arrows" aria-hidden="true">
+                <i class="ri-arrow-left-s-line"></i>
+                <i class="ri-arrow-right-s-line"></i>
+              </span>
+              <span>برای دیدن موارد بیشتر، افقی اسکرول کنید</span>
+            </p>
             <!-- Scrolling Container - Isolated horizontal scroll -->
-            <div class="flex overflow-x-auto snap-x snap-mandatory px-4 gap-4 pb-2" id="similarProductsScroll"
-              style="-webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;">
-              <!-- Cards will be injected here by JS -->
+            <div class="similar-products-scroll-wrap is-at-start" id="similarProductsScrollWrap">
+              <div class="flex overflow-x-auto px-4 gap-3 pb-2 similar-products-scroll" id="similarProductsScroll"
+                aria-label="لیست محصولات مشابه">
+                <!-- Cards will be injected here by JS -->
+              </div>
             </div>
-            <style>
-              #similarProductsScroll::-webkit-scrollbar {
-                display: none;
-              }
-            </style>
           </section>
 
         </div>
