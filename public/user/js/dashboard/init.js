@@ -2421,6 +2421,7 @@
     async function showMissionModal(type) {
       const data = missionData[type];
       if (!data) return;
+      closeWhereIsSuccessModal({ immediate: true });
 
       const isAuthorized = await ensureMissionAuth();
       if (!isAuthorized) {
@@ -2938,6 +2939,7 @@
       overlay.classList.remove('active');
       overlay.classList.remove('where-is-mode');
       overlay.setAttribute('aria-hidden', 'true');
+      closeWhereIsSuccessModal({ immediate: true });
       closeAnyInviteRulesModal();
       document.body.style.overflow = '';
       currentMissionType = null;
@@ -3141,6 +3143,7 @@
     // بستن با Escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (closeWhereIsSuccessModal()) return;
         if (closeMissionAuthModal()) return;
         if (closeAnyInviteRulesModal()) return;
         closeMissionModal();
@@ -3308,6 +3311,87 @@
       `;
     }
 
+    function closeWhereIsSuccessModal({ immediate = false } = {}) {
+      const modal = document.getElementById('whereIsSuccessModal');
+      if (!modal) return false;
+
+      if (immediate) {
+        modal.remove();
+        return true;
+      }
+
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      window.setTimeout(() => {
+        if (modal.isConnected) {
+          modal.remove();
+        }
+      }, 220);
+      return true;
+    }
+
+    function showWhereIsSuccessModal({
+      message = '',
+      rewardToman = 0,
+      correctOption = null,
+      correctOptionDetails = null
+    } = {}) {
+      closeWhereIsSuccessModal({ immediate: true });
+
+      const rewardLabel = formatWhereIsRewardLabel(rewardToman);
+      const successMessage = escapeHtml(message || '\u0622\u0641\u0631\u06CC\u0646! \u067E\u0627\u0633\u062E \u0634\u0645\u0627 \u062F\u0631\u0633\u062A \u0627\u0633\u062A.');
+      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
+
+      const modal = document.createElement('div');
+      modal.id = 'whereIsSuccessModal';
+      modal.className = 'where-is-success-overlay';
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <div class="where-is-success-card" role="dialog" aria-modal="true" aria-labelledby="whereIsSuccessTitle">
+          <button type="button" class="where-is-success-close" onclick="closeWhereIsSuccessModal()" aria-label="\u0628\u0633\u062A\u0646">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18"></path>
+              <path d="M6 6l12 12"></path>
+            </svg>
+          </button>
+
+          <div class="where-is-success-content">
+            <div class="where-is-success-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"></path>
+              </svg>
+            </div>
+
+            <h3 class="where-is-success-title" id="whereIsSuccessTitle">\u067E\u0627\u0633\u062E \u0635\u062D\u06CC\u062D \u0628\u0648\u062F</h3>
+            <p class="where-is-success-text">${successMessage}</p>
+
+            <div class="where-is-success-reward" aria-label="\u062C\u0627\u06CC\u0632\u0647 \u0627\u06CC\u0646 \u0633\u0648\u0627\u0644">
+              <span>\u062C\u0627\u06CC\u0632\u0647 \u0627\u06CC\u0646 \u0633\u0648\u0627\u0644</span>
+              <strong>${escapeHtml(rewardLabel)}</strong>
+            </div>
+
+            ${correctInfoMarkup}
+
+            <button type="button" class="where-is-success-btn" onclick="closeWhereIsSuccessModal()">
+              \u0645\u062A\u0648\u062C\u0647 \u0634\u062F\u0645
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeWhereIsSuccessModal();
+        }
+      });
+    }
+
     function renderWhereIsResult({
       isCorrect = false,
       message = '',
@@ -3320,6 +3404,7 @@
       if (!resultEl) return;
 
       if (!message && !isCorrect) {
+        closeWhereIsSuccessModal({ immediate: true });
         resultEl.classList.remove('is-visible', 'is-correct', 'is-error');
         resultEl.innerHTML = '';
         clearWhereIsAnswerHighlights();
@@ -3330,30 +3415,32 @@
         return;
       }
 
-      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
       if (isCorrect) {
-        const rewardLabel = formatWhereIsRewardLabel(rewardToman);
-        resultEl.classList.remove('is-error');
-        resultEl.classList.add('is-visible', 'is-correct');
-        resultEl.innerHTML = `
-          <p class="where-is-result-title">پاسخ صحیح بود</p>
-          <p class="where-is-result-text">${escapeHtml(message || 'آفرین! پاسخ شما درست است.')}</p>
-          ${correctInfoMarkup}
-          <p class="where-is-result-reward">جایزه این سوال: <strong>${escapeHtml(rewardLabel)}</strong></p>
-        `;
+        resultEl.classList.remove('is-visible', 'is-correct', 'is-error');
+        resultEl.innerHTML = '';
+        showWhereIsSuccessModal({
+          message,
+          rewardToman,
+          correctOption,
+          correctOptionDetails
+        });
         if (rewardBadge) {
-          rewardBadge.style.display = '';
-          rewardBadge.textContent = rewardLabel;
+          rewardBadge.style.display = 'none';
+          rewardBadge.textContent = '';
         }
         return;
       }
 
+      closeWhereIsSuccessModal({ immediate: true });
+      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
       resultEl.classList.remove('is-correct');
       resultEl.classList.add('is-visible', 'is-error');
-      const errorTitle = correctInfoMarkup ? 'پاسخ صحیح را ببینید' : 'نتیجه ثبت پاسخ';
+      const errorTitle = correctInfoMarkup
+        ? '\u067E\u0627\u0633\u062E \u0635\u062D\u06CC\u062D \u0631\u0627 \u0628\u0628\u06CC\u0646\u06CC\u062F'
+        : '\u0646\u062A\u06CC\u062C\u0647 \u062B\u0628\u062A \u067E\u0627\u0633\u062E';
       resultEl.innerHTML = `
         <p class="where-is-result-title">${errorTitle}</p>
-        <p class="where-is-result-text">${escapeHtml(message || 'پاسخ ثبت شد.')}</p>
+        <p class="where-is-result-text">${escapeHtml(message || '\u067E\u0627\u0633\u062E \u062B\u0628\u062A \u0634\u062F.')}</p>
         ${correctInfoMarkup}
       `;
       if (rewardBadge) {
@@ -3609,6 +3696,7 @@
     window.handleMissionAction = handleMissionAction;
     window.selectWhereIsOption = selectWhereIsOption;
     window.submitWhereIsAnswer = submitWhereIsAnswer;
+    window.closeWhereIsSuccessModal = closeWhereIsSuccessModal;
     window.openInviteRulesModal = openInviteRulesModal;
     window.closeInviteRulesModal = closeInviteRulesModal;
     window.closeInviteRulesModalOnOverlay = closeInviteRulesModalOnOverlay;
