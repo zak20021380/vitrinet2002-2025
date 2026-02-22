@@ -3058,6 +3058,7 @@
       overlay.classList.remove('where-is-mode');
       overlay.setAttribute('aria-hidden', 'true');
       closeWhereIsSuccessModal({ immediate: true });
+      closeWhereIsWrongAnswerModal({ immediate: true });
       closeAnyInviteRulesModal();
       document.body.style.overflow = '';
       currentMissionType = null;
@@ -3262,6 +3263,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (closeWhereIsSuccessModal()) return;
+        if (closeWhereIsWrongAnswerModal()) return;
         if (closeMissionAuthModal()) return;
         if (closeAnyInviteRulesModal()) return;
         closeMissionModal();
@@ -3458,6 +3460,94 @@
       return true;
     }
 
+    function closeWhereIsWrongAnswerModal({ immediate = false } = {}) {
+      const modal = document.getElementById('whereIsWrongAnswerModal');
+      if (!modal) return false;
+
+      if (immediate) {
+        modal.remove();
+        return true;
+      }
+
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      window.setTimeout(() => {
+        if (modal.isConnected) {
+          modal.remove();
+        }
+      }, 220);
+      return true;
+    }
+
+    function showWhereIsWrongAnswerModal({
+      message = '',
+      correctOption = null,
+      correctOptionDetails = null
+    } = {}) {
+      closeWhereIsWrongAnswerModal({ immediate: true });
+
+      const errorMessage = escapeHtml(message || '\u067e\u0627\u0633\u062e \u0634\u0645\u0627 \u0627\u0634\u062a\u0628\u0627\u0647 \u0628\u0648\u062f.');
+      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({
+        correctOption,
+        correctOptionDetails,
+        useStorePageLinkLabels: true
+      });
+      const quizImageUrl = String(
+        missionData?.whereIs?.quizImage
+        || document.querySelector('.where-is-image')?.getAttribute('src')
+        || '/assets/images/shop-placeholder.svg'
+      ).trim() || '/assets/images/shop-placeholder.svg';
+
+      const modal = document.createElement('div');
+      modal.id = 'whereIsWrongAnswerModal';
+      modal.className = 'where-is-wrong-overlay';
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <div class="where-is-wrong-card" role="dialog" aria-modal="true" aria-labelledby="whereIsWrongTitle">
+          <button type="button" class="where-is-wrong-close" onclick="closeWhereIsWrongAnswerModal()" aria-label="\u0628\u0633\u062a\u0646">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18"></path>
+              <path d="M6 6l12 12"></path>
+            </svg>
+          </button>
+
+          <div class="where-is-wrong-content">
+            <div class="where-is-wrong-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18"></path>
+                <path d="M6 6l12 12"></path>
+              </svg>
+            </div>
+
+            <h3 class="where-is-wrong-title" id="whereIsWrongTitle">\u067e\u0627\u0633\u062e \u0627\u0634\u062a\u0628\u0627\u0647 \u0628\u0648\u062f</h3>
+            <p class="where-is-wrong-text">${errorMessage}</p>
+
+            <figure class="where-is-wrong-image-wrap">
+              <img src="${escapeHtml(quizImageUrl)}" alt="\u062a\u0635\u0648\u06cc\u0631 \u0633\u0648\u0627\u0644" class="where-is-wrong-image" loading="lazy" />
+            </figure>
+
+            ${correctInfoMarkup ? `<div class="where-is-wrong-info-wrap">${correctInfoMarkup}</div>` : ''}
+
+            <button type="button" class="where-is-wrong-btn" onclick="closeWhereIsWrongAnswerModal()">
+              \u0645\u062a\u0648\u062c\u0647 \u0634\u062f\u0645
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      requestAnimationFrame(() => {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeWhereIsWrongAnswerModal();
+        }
+      });
+    }
+
     function showWhereIsSuccessModal({
       message = '',
       rewardToman = 0,
@@ -3573,21 +3663,18 @@
       }
 
       closeWhereIsSuccessModal({ immediate: true });
-      const correctInfoMarkup = buildWhereIsCorrectInfoMarkup({ correctOption, correctOptionDetails });
-      resultEl.classList.remove('is-correct');
-      resultEl.classList.add('is-visible', 'is-error');
-      const errorTitle = correctInfoMarkup
-        ? '\u067E\u0627\u0633\u062E \u0635\u062D\u06CC\u062D \u0631\u0627 \u0628\u0628\u06CC\u0646\u06CC\u062F'
-        : '\u0646\u062A\u06CC\u062C\u0647 \u062B\u0628\u062A \u067E\u0627\u0633\u062E';
-      resultEl.innerHTML = `
-        <p class="where-is-result-title">${errorTitle}</p>
-        <p class="where-is-result-text">${escapeHtml(message || '\u067E\u0627\u0633\u062E \u062B\u0628\u062A \u0634\u062F.')}</p>
-        ${correctInfoMarkup}
-      `;
+      closeWhereIsWrongAnswerModal({ immediate: true });
+      resultEl.classList.remove('is-visible', 'is-correct', 'is-error');
+      resultEl.innerHTML = '';
       if (rewardBadge) {
         rewardBadge.style.display = 'none';
         rewardBadge.textContent = '';
       }
+      showWhereIsWrongAnswerModal({
+        message,
+        correctOption,
+        correctOptionDetails
+      });
     }
 
     function selectWhereIsOption(optionId) {
@@ -3846,6 +3933,7 @@
     window.selectWhereIsOption = selectWhereIsOption;
     window.submitWhereIsAnswer = submitWhereIsAnswer;
     window.closeWhereIsSuccessModal = closeWhereIsSuccessModal;
+    window.closeWhereIsWrongAnswerModal = closeWhereIsWrongAnswerModal;
     window.openInviteRulesModal = openInviteRulesModal;
     window.closeInviteRulesModal = closeInviteRulesModal;
     window.closeInviteRulesModalOnOverlay = closeInviteRulesModalOnOverlay;
