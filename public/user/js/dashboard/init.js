@@ -5435,7 +5435,7 @@
 
       // Simplified Where-Is card matching other mission cards
       if (missionId === 'user-where-is') {
-        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : 'حدس بزن و جایزه بگیر...';
+        const whereIsCardSubtitle = isCompleted ? 'انجام شد' : 'حدس بزن و جایزه بگیر';
         return `
           <div class="${cardClasses}" id="${config.htmlId}" ${clickHandler} data-mission-id="${missionId}" data-order="${config.order}">
             ${completedBadge}
