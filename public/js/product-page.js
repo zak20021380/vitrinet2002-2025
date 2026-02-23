@@ -3326,10 +3326,7 @@
   }
 
   function canUseHoverAutoScroll() {
-    if (typeof window.matchMedia !== 'function') return false;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const supportsFineHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    return supportsFineHover && !prefersReducedMotion;
+    return false;
   }
 
   function detectNormToRawSign() {
@@ -3365,8 +3362,16 @@
   }
 
   function getArrowScrollStep() {
-    if (!dom.scroll) return 320;
-    return clamp(dom.scroll.clientWidth * 0.8, 240, 560);
+    if (!dom.scroll) return 0;
+
+    const firstCard = dom.scroll.querySelector('.similar-product-card');
+    if (!firstCard) return 0;
+
+    const cardWidth = firstCard.getBoundingClientRect().width;
+    const scrollStyle = getComputedStyle(dom.scroll);
+    const gapValue = parseFloat(scrollStyle.columnGap || scrollStyle.gap || '0') || 0;
+
+    return cardWidth + gapValue;
   }
 
   function scrollByNormalizedDelta(delta, behavior = 'smooth') {
@@ -3382,13 +3387,26 @@
     if (!dom.scroll) return;
 
     const step = getArrowScrollStep();
-    const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
-    const normalizedDelta = direction === 'left'
-      ? (isRtl ? step : -step)
-      : (isRtl ? -step : step);
+    if (step <= 0) return;
+    const normalizedDelta = direction === 'left' ? -step : step;
 
     scrollByNormalizedDelta(normalizedDelta, 'smooth');
     requestAnimationFrame(updateScrollAffordance);
+  }
+
+  function bindDesktopWheelLock() {
+    if (state.desktopInputBound || !dom.scrollWrap) return;
+
+    dom.scrollWrap.addEventListener('wheel', (event) => {
+      if (!isDesktopViewport()) return;
+
+      const hasHorizontalIntent = event.shiftKey || Math.abs(event.deltaX) > 0.5;
+      if (!hasHorizontalIntent) return;
+
+      event.preventDefault();
+    }, { passive: false });
+
+    state.desktopInputBound = true;
   }
 
   function bindDesktopPointerInput() {
@@ -3858,9 +3876,8 @@
 
   function init() {
     bindScrollAffordance();
-    bindHoverAutoScroll();
     bindArrowNavigation();
-    bindDesktopPointerInput();
+    bindDesktopWheelLock();
 
     // Listen for product data from main product page
     document.addEventListener('product:updated', (event) => {
