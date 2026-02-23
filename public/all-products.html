@@ -2530,6 +2530,8 @@
     const HOMEPAGE_SECTIONS_API_BASE = '/api/homepage-sections';
     const HOMEPAGE_SECTION_ID_PARAM = 'sectionId';
     const HOMEPAGE_SECTION_TITLE_PARAM = 'sectionTitle';
+    const CATEGORY_QUERY_PARAM_KEYS = ['category', 'cat'];
+    const SUBCATEGORY_QUERY_PARAM_KEYS = ['subcategory', 'subCategory', 'sub_category'];
 
     const categories = [
       "همه محصولات", "پوشاک", "خوراک", "خدمات", "دیجیتال", "زیبایی",
@@ -2573,7 +2575,29 @@
       };
     }
 
+    function getFirstNonEmptyQueryParam(params, keys) {
+      if (!(params instanceof URLSearchParams) || !Array.isArray(keys)) return '';
+      for (const key of keys) {
+        const value = String(params.get(key) || '').trim();
+        if (value) return value;
+      }
+      return '';
+    }
+
+    function getInitialCategoryFilterRequest() {
+      const params = new URLSearchParams(window.location.search || '');
+      const category = getFirstNonEmptyQueryParam(params, CATEGORY_QUERY_PARAM_KEYS);
+      const subcategory = getFirstNonEmptyQueryParam(params, SUBCATEGORY_QUERY_PARAM_KEYS);
+      if (!category && !subcategory) return null;
+      return {
+        category,
+        subcategory
+      };
+    }
+
     const homepageSectionContext = getHomepageSectionContext();
+    const initialCategoryFilterRequest = getInitialCategoryFilterRequest();
+    let shouldApplyInitialCategoryFilter = Boolean(initialCategoryFilterRequest);
 
     function normalizeSectionCardImage(image) {
       const value = String(image || '').trim();
@@ -2850,6 +2874,104 @@
       return (typeof value === 'string') ? value.trim() : '';
     }
 
+    function normalizeCategoryMatchValue(value) {
+      return normalizeTextValue(value)
+        .replace(/[\u064A\u0649]/g, '\u06CC')
+        .replace(/\u0643/g, '\u06A9')
+        .replace(/\u200C/g, ' ')
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+    }
+
+    function splitCategoryPathValue(value) {
+      const raw = normalizeTextValue(value);
+      if (!raw) return null;
+
+      const separators = ['/', '|', '>', '\\'];
+      for (const separator of separators) {
+        if (!raw.includes(separator)) continue;
+
+        const parts = raw
+          .split(separator)
+          .map(part => normalizeTextValue(part))
+          .filter(Boolean);
+
+        if (parts.length < 2) continue;
+        return {
+          category: parts[0],
+          subcategory: parts.slice(1).join(' / ')
+        };
+      }
+      return null;
+    }
+
+    function resolveCategorySelectionFromRequest(request) {
+      if (!request || typeof request !== 'object') return null;
+
+      const requestedCategoryRaw = normalizeTextValue(request.category);
+      const requestedSubcategoryRaw = normalizeTextValue(request.subcategory);
+      const parsedPath = requestedCategoryRaw ? splitCategoryPathValue(requestedCategoryRaw) : null;
+
+      const requestedCategory = parsedPath ? parsedPath.category : requestedCategoryRaw;
+      const requestedSubcategory = requestedSubcategoryRaw || (parsedPath ? parsedPath.subcategory : '');
+
+      const normalizedCategory = normalizeCategoryMatchValue(requestedCategory);
+      const normalizedSubcategory = normalizeCategoryMatchValue(requestedSubcategory);
+
+      const availableCategories = (Array.isArray(categoryTree) ? categoryTree : [])
+        .filter(entry => normalizeTextValue(entry?.name) && entry.name !== DEFAULT_CATEGORY_LABEL);
+
+      if (!availableCategories.length) return null;
+
+      const findCategoryByNormalizedName = normalizedName => {
+        if (!normalizedName) return null;
+        return availableCategories.find(entry => normalizeCategoryMatchValue(entry.name) === normalizedName) || null;
+      };
+
+      const findSubcategoryMatch = (entry, normalizedName) => {
+        if (!entry || !normalizedName) return '';
+        const subcategories = Array.isArray(entry.subcategories) ? entry.subcategories : [];
+        return subcategories.find(sub => normalizeCategoryMatchValue(sub) === normalizedName) || '';
+      };
+
+      const directCategoryMatch = findCategoryByNormalizedName(normalizedCategory);
+      if (directCategoryMatch) {
+        const matchedSubcategory = findSubcategoryMatch(directCategoryMatch, normalizedSubcategory);
+        return {
+          category: directCategoryMatch.name,
+          subcategory: matchedSubcategory || ''
+        };
+      }
+
+      // Allow linking with subcategory value directly in category param.
+      if (normalizedCategory) {
+        for (const entry of availableCategories) {
+          const matchedSub = findSubcategoryMatch(entry, normalizedCategory);
+          if (matchedSub) {
+            return {
+              category: entry.name,
+              subcategory: matchedSub
+            };
+          }
+        }
+      }
+
+      // Allow linking with explicit subcategory query even if category is missing or not normalized.
+      if (normalizedSubcategory) {
+        for (const entry of availableCategories) {
+          const matchedSub = findSubcategoryMatch(entry, normalizedSubcategory);
+          if (matchedSub) {
+            return {
+              category: entry.name,
+              subcategory: matchedSub
+            };
+          }
+        }
+      }
+
+      return null;
+    }
+
     function getPrimaryCategoryFromProduct(product) {
       const candidates = [
         product?.category,
@@ -3091,6 +3213,19 @@
 
     function refreshCategoryDropdowns() {
       categoryTree = buildCategoryTreeFromProducts(allProducts);
+
+      if (shouldApplyInitialCategoryFilter && initialCategoryFilterRequest) {
+        const initialSelection = resolveCategorySelectionFromRequest(initialCategoryFilterRequest);
+        if (initialSelection) {
+          currentCategory = initialSelection.category || DEFAULT_CATEGORY_LABEL;
+          currentSubcategory = initialSelection.subcategory || '';
+          activeDesktopCategoryPanel = currentCategory;
+          shouldApplyInitialCategoryFilter = false;
+        } else if (Array.isArray(allProducts) && allProducts.length > 0) {
+          shouldApplyInitialCategoryFilter = false;
+        }
+      }
+
       const categoryNames = new Set(categoryTree.map(entry => entry.name));
 
       if (!categoryNames.has(currentCategory)) {
