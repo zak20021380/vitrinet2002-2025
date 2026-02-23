@@ -3303,6 +3303,42 @@
     return `http://localhost:5000/uploads/${trimmed}`;
   }
 
+  let cachedRtlScrollType = null;
+
+  function detectRtlScrollType() {
+    if (cachedRtlScrollType) return cachedRtlScrollType;
+    if (!document || !document.body) {
+      cachedRtlScrollType = 'default';
+      return cachedRtlScrollType;
+    }
+
+    const probe = document.createElement('div');
+    const probeChild = document.createElement('div');
+
+    probe.dir = 'rtl';
+    probe.style.width = '4px';
+    probe.style.height = '1px';
+    probe.style.overflow = 'scroll';
+    probe.style.position = 'absolute';
+    probe.style.top = '-9999px';
+    probe.style.visibility = 'hidden';
+
+    probeChild.style.width = '8px';
+    probeChild.style.height = '1px';
+    probe.appendChild(probeChild);
+    document.body.appendChild(probe);
+
+    if (probe.scrollLeft > 0) {
+      cachedRtlScrollType = 'reverse';
+    } else {
+      probe.scrollLeft = 1;
+      cachedRtlScrollType = probe.scrollLeft === 0 ? 'negative' : 'default';
+    }
+
+    probe.remove();
+    return cachedRtlScrollType;
+  }
+
   function getNormalizedScrollLeft(element) {
     if (!element) return 0;
 
@@ -3319,6 +3355,27 @@
     }
 
     return Math.max(0, Math.min(maxScroll - rawScrollLeft, maxScroll));
+  }
+
+  function getDesktopArrowNormalizedScrollLeft(element) {
+    if (!element) return 0;
+
+    const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth);
+    const rawScrollLeft = element.scrollLeft;
+    const isRtl = getComputedStyle(element).direction === 'rtl';
+
+    if (!isRtl) {
+      return Math.max(0, Math.min(rawScrollLeft, maxScroll));
+    }
+
+    const rtlType = detectRtlScrollType();
+    if (rtlType === 'negative') {
+      return Math.max(0, Math.min(-rawScrollLeft, maxScroll));
+    }
+    if (rtlType === 'reverse') {
+      return Math.max(0, Math.min(maxScroll - rawScrollLeft, maxScroll));
+    }
+    return Math.max(0, Math.min(rawScrollLeft, maxScroll));
   }
 
   function clamp(value, min, max) {
@@ -3678,8 +3735,8 @@
     if (state.navBound) return;
     if (!dom.navLeft || !dom.navRight) return;
 
-    dom.navLeft.addEventListener('click', () => handleArrowNavigation('left'));
-    dom.navRight.addEventListener('click', () => handleArrowNavigation('right'));
+    dom.navLeft.addEventListener('click', () => handleArrowNavigation('right'));
+    dom.navRight.addEventListener('click', () => handleArrowNavigation('left'));
     state.navBound = true;
   }
 
@@ -3709,9 +3766,14 @@
 
     const isDesktop = isDesktopViewport();
     const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
-    const atLeftEdge = isRtl ? atEnd : atStart;
-    const atRightEdge = isRtl ? atStart : atEnd;
-    const showDesktopArrows = canScroll && isDesktop;
+    const arrowCurrent = getDesktopArrowNormalizedScrollLeft(dom.scroll);
+    const arrowEpsilon = 2;
+    const arrowCanScroll = maxScroll > arrowEpsilon;
+    const arrowAtStart = arrowCurrent <= arrowEpsilon;
+    const arrowAtEnd = (maxScroll - arrowCurrent) <= arrowEpsilon;
+    const atLeftEdge = isRtl ? arrowAtEnd : arrowAtStart;
+    const atRightEdge = isRtl ? arrowAtStart : arrowAtEnd;
+    const showDesktopArrows = arrowCanScroll && isDesktop;
 
     if (dom.navLeft) {
       dom.navLeft.hidden = !showDesktopArrows;
