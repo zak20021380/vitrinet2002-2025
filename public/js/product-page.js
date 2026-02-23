@@ -3818,7 +3818,7 @@
   function createProductCard(product, index) {
     const card = document.createElement('a');
     // CRITICAL: flex-shrink-0 + fixed width for horizontal scroll to work on mobile
-    card.className = 'similar-product-card flex-shrink-0 snap-start bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 no-underline';
+    card.className = 'similar-product-card flex-shrink-0 snap-start bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 transition-all duration-200 no-underline';
     card.href = `/product.html?id=${encodeURIComponent(product._id || product.id)}`;
 
     // Safely resolve image URL - handle Base64, URLs, and filenames
@@ -3873,24 +3873,24 @@
     const safeShopName = shopName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     card.innerHTML = `
-      <div class="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden similar-product-card__media">
+      <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden similar-product-card__media">
         <img class="w-full h-full object-cover similar-product-card__image" src="${imageUrl}" alt="${safeTitle}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
         ${newBadgeHtml}
         ${discountBadgeHtml}
       </div>
-      <div class="p-2 flex flex-col gap-1 similar-product-card__body">
-        <h3 class="text-[12px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0 similar-product-card__title" style="min-height: 2.25em;">${safeTitle}</h3>
+      <div class="flex flex-col similar-product-card__body">
+        <h3 class="font-bold text-gray-800 text-right m-0 similar-product-card__title">${safeTitle}</h3>
         ${safeShopName ? `
-          <div class="flex items-center gap-1 text-[10px] text-gray-400 truncate similar-product-card__seller">
+          <div class="flex items-center gap-1 text-gray-400 similar-product-card__seller">
             <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="truncate">${safeShopName}</span>
+            <span>${safeShopName}</span>
           </div>
         ` : ''}
-        <div class="mt-auto pt-1 flex flex-col">
+        <div class="similar-product-card__meta">
           ${originalPriceHtml}
-          <span class="text-[13px] font-extrabold text-emerald-600 similar-product-card__price">${formatPrice(displayPrice)} <span class="text-[10px] font-semibold text-gray-500">تومان</span></span>
+          <span class="similar-product-card__price">${formatPrice(displayPrice)} <span>تومان</span></span>
           <span class="similar-product-card__cta" aria-hidden="true">
             مشاهده
             <svg class="similar-product-card__cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
