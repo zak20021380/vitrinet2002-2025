@@ -1,5 +1,6 @@
 const Notification = require('../models/notification');
 const SupportTicket = require('../models/SupportTicket');
+const User = require('../models/user');
 
 // لیست اعلان‌های کاربر
 exports.list = async (req, res) => {
@@ -108,5 +109,78 @@ exports.createNotification = async (userId, message, options = {}) => {
     await Notification.create(payload);
   } catch (err) {
     console.error('Failed to create notification', err);
+  }
+};
+
+// متد کمکی برای ایجاد اعلان گروهی کاربران (batch insert)
+exports.createNotificationForAllUsers = async (message, options = {}) => {
+  try {
+    const text = String(message || '').trim();
+    if (!text) return 0;
+
+    const query = {
+      role: 'user',
+      deleted: { $ne: true }
+    };
+
+    if (options.userFilter && typeof options.userFilter === 'object') {
+      Object.assign(query, options.userFilter);
+    }
+
+    const batchSize = 500;
+    const title = options.title ? String(options.title).trim() : '';
+    const type = options.type ? String(options.type).trim() : '';
+    let createdCount = 0;
+    let batchUserIds = [];
+
+    const cursor = User.find(query).select('_id').lean().cursor();
+
+    for await (const user of cursor) {
+      if (!user?._id) continue;
+      batchUserIds.push(user._id);
+
+      if (batchUserIds.length < batchSize) continue;
+
+      const now = new Date();
+      const docs = batchUserIds.map((userId) => {
+        const payload = {
+          userId,
+          message: text,
+          read: false,
+          createdAt: now,
+          updatedAt: now
+        };
+        if (title) payload.title = title;
+        if (type) payload.type = type;
+        return payload;
+      });
+
+      await Notification.insertMany(docs, { ordered: false });
+      createdCount += docs.length;
+      batchUserIds = [];
+    }
+
+    if (batchUserIds.length > 0) {
+      const now = new Date();
+      const docs = batchUserIds.map((userId) => {
+        const payload = {
+          userId,
+          message: text,
+          read: false,
+          createdAt: now,
+          updatedAt: now
+        };
+        if (title) payload.title = title;
+        if (type) payload.type = type;
+        return payload;
+      });
+      await Notification.insertMany(docs, { ordered: false });
+      createdCount += docs.length;
+    }
+
+    return createdCount;
+  } catch (err) {
+    console.error('Failed to create bulk user notifications', err);
+    return 0;
   }
 };

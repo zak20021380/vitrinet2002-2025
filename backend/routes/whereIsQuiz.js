@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const auth = require('../middlewares/authMiddleware');
 const WhereIsQuiz = require('../models/WhereIsQuiz');
+const { createNotificationForAllUsers } = require('../controllers/notificationController');
 
 const router = express.Router();
 
@@ -99,6 +100,47 @@ function parseRewardTomanFromRequest(input) {
   const rounded = Math.round(numeric);
   if (rounded < 0) return null;
   return rounded;
+}
+
+function buildQuizContentSignature(input = {}) {
+  const source = input && typeof input === 'object' ? input : {};
+  const subtitle = String(source.subtitle || '').trim();
+  const imageUrl = String(source.imageUrl || '').trim();
+  const rewardToman = normaliseStoredRewardToman(source.rewardToman, DEFAULT_REWARD_TOMAN);
+  const correctOptionId = OPTION_IDS.includes(String(source.correctOptionId || '').trim().toLowerCase())
+    ? String(source.correctOptionId).trim().toLowerCase()
+    : 'a';
+  const correctOptionDetails = normaliseCorrectOptionDetails(source.correctOptionDetails || {});
+
+  const optionsSource = Array.isArray(source.options) ? source.options : [];
+  const options = OPTION_IDS.map((id) => {
+    const found = optionsSource.find((item) => String(item?.id || '').trim().toLowerCase() === id);
+    return {
+      id,
+      text: String(found?.text || '').trim()
+    };
+  });
+
+  return JSON.stringify({
+    subtitle,
+    imageUrl,
+    rewardToman,
+    correctOptionId,
+    correctOptionDetails,
+    options
+  });
+}
+
+async function notifyWhereIsQuizPublished({ rewardToman }) {
+  const safeReward = normaliseStoredRewardToman(rewardToman, DEFAULT_REWARD_TOMAN);
+  const formattedReward = safeReward.toLocaleString('fa-IR');
+  const title = 'مسابقه جدید «اینجا کجاست؟»';
+  const message = `یک کوییز جدید در ماموریت‌های پولساز فعال شد. جایزه این مرحله ${formattedReward} تومان است.`;
+
+  return createNotificationForAllUsers(message, {
+    title,
+    type: 'where_is_quiz'
+  });
 }
 
 function toClientQuiz(
@@ -297,9 +339,14 @@ router.patch('/where-is-quiz/admin/status', auth('admin'), async (req, res, next
     }
 
     const quiz = await getOrCreateQuiz();
+    const wasActive = Boolean(quiz.active);
     quiz.active = parseBoolean(req.body?.active, Boolean(quiz.active));
     quiz.updatedAt = new Date();
     await quiz.save();
+
+    if (!wasActive && quiz.active) {
+      await notifyWhereIsQuizPublished({ rewardToman: quiz.rewardToman });
+    }
 
     return res.json({
       success: true,
@@ -369,18 +416,33 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
     const correctOptionDetails = normaliseCorrectOptionDetailsFromBody(req.body);
 
     const quiz = await getOrCreateQuiz();
+    const wasActive = Boolean(quiz.active);
+    const previousSignature = buildQuizContentSignature(quiz);
+
     const previousImageUrl = quiz.imageUrl || '';
     const nextImageUrl = req.file
       ? `/uploads/where-is-quiz/${req.file.filename}`
       : previousImageUrl;
+    const nextSubtitle = String(req.body?.subtitle || '').trim() || 'حدس بزن و جایزه ببر';
+    const nextActive = parseBoolean(req.body?.active, true);
+
+    const nextSignature = buildQuizContentSignature({
+      subtitle: nextSubtitle,
+      imageUrl: nextImageUrl,
+      options,
+      correctOptionId,
+      correctOptionDetails,
+      rewardToman
+    });
+    const isNewOrUpdatedQuiz = nextActive && (!wasActive || previousSignature !== nextSignature);
 
     quiz.title = 'اینجا کجاست؟';
-    quiz.subtitle = String(req.body?.subtitle || '').trim() || 'حدس بزن و جایزه ببر';
+    quiz.subtitle = nextSubtitle;
     quiz.options = options;
     quiz.correctOptionId = correctOptionId;
     quiz.correctOptionDetails = correctOptionDetails;
     quiz.rewardToman = rewardToman;
-    quiz.active = parseBoolean(req.body?.active, true);
+    quiz.active = nextActive;
     quiz.imageUrl = nextImageUrl;
     quiz.updatedAt = new Date();
 
@@ -388,6 +450,10 @@ router.put('/where-is-quiz/admin', auth('admin'), uploadQuizImage, async (req, r
 
     if (req.file && previousImageUrl && previousImageUrl !== nextImageUrl) {
       await cleanupStoredImage(previousImageUrl);
+    }
+
+    if (isNewOrUpdatedQuiz) {
+      await notifyWhereIsQuizPublished({ rewardToman: quiz.rewardToman });
     }
 
     return res.json({
