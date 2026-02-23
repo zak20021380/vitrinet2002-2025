@@ -135,7 +135,7 @@ async function notifyWhereIsQuizPublished({ rewardToman }) {
   const safeReward = normaliseStoredRewardToman(rewardToman, DEFAULT_REWARD_TOMAN);
   const formattedReward = safeReward.toLocaleString('fa-IR');
   const title = 'مسابقه جدید «اینجا کجاست؟»';
-  const message = `یک کوییز جدید در ماموریت‌های پولساز فعال شد. جایزه این مرحله ${formattedReward} تومان است.`;
+  const message = `کوییز جدید فعال شد. برای شرکت، در بخش «ماموریت‌های پولساز»، کارت «اینجا کجاست؟» را باز کنید. جایزه این مرحله ${formattedReward} تومان است.`;
 
   return createNotificationForAllUsers(message, {
     title,
