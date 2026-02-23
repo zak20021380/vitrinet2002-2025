@@ -3364,12 +3364,16 @@
   function getArrowScrollStep() {
     if (!dom.scroll) return 0;
 
-    const firstCard = dom.scroll.querySelector('.similar-product-card');
+    const firstCard = dom.scroll.querySelector('.similar-product-card') || dom.scroll.firstElementChild;
     if (!firstCard) return 0;
 
-    const cardWidth = firstCard.getBoundingClientRect().width;
+    const cardRect = firstCard.getBoundingClientRect();
+    const cardWidth = cardRect.width || firstCard.clientWidth || firstCard.offsetWidth;
     const scrollStyle = getComputedStyle(dom.scroll);
-    const gapValue = parseFloat(scrollStyle.columnGap || scrollStyle.gap || '0') || 0;
+    const gapToken = (scrollStyle.columnGap && scrollStyle.columnGap !== 'normal')
+      ? scrollStyle.columnGap
+      : scrollStyle.gap;
+    const gapValue = Number.parseFloat(gapToken || '0') || 0;
 
     return cardWidth + gapValue;
   }
@@ -3388,10 +3392,14 @@
 
     const step = getArrowScrollStep();
     if (step <= 0) return;
-    const normalizedDelta = direction === 'left' ? -step : step;
+    const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
+    const rawDelta = direction === 'left'
+      ? (isRtl ? step : -step)
+      : (isRtl ? -step : step);
 
-    scrollByNormalizedDelta(normalizedDelta, 'smooth');
+    dom.scroll.scrollBy({ left: rawDelta, behavior: 'smooth' });
     requestAnimationFrame(updateScrollAffordance);
+    setTimeout(updateScrollAffordance, 260);
   }
 
   function bindDesktopWheelLock() {
