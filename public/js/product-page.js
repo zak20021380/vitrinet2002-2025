@@ -3226,6 +3226,8 @@
     section: document.getElementById('similarProductsSection'),
     scroll: document.getElementById('similarProductsScroll'),
     scrollWrap: document.getElementById('similarProductsScrollWrap'),
+    navLeft: document.getElementById('similarProductsNavLeft'),
+    navRight: document.getElementById('similarProductsNavRight'),
     hint: document.getElementById('similarProductsHint'),
     viewAllLink: document.getElementById('similarProductsViewAll')
   };
@@ -3236,6 +3238,7 @@
     loaded: false,
     hintDismissed: false,
     affordanceBound: false,
+    navBound: false,
     resizeRaf: null,
     hoverBound: false,
     hoverActive: false,
@@ -3348,6 +3351,37 @@
     }
 
     return 1;
+  }
+
+  function isDesktopViewport() {
+    return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
+  }
+
+  function getArrowScrollStep() {
+    if (!dom.scroll) return 320;
+    return clamp(dom.scroll.clientWidth * 0.8, 240, 560);
+  }
+
+  function scrollByNormalizedDelta(delta, behavior = 'smooth') {
+    if (!dom.scroll || !delta) return;
+    state.hoverNormToRawSign = detectNormToRawSign();
+    dom.scroll.scrollBy({
+      left: delta * state.hoverNormToRawSign,
+      behavior
+    });
+  }
+
+  function handleArrowNavigation(direction) {
+    if (!dom.scroll) return;
+
+    const step = getArrowScrollStep();
+    const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
+    const normalizedDelta = direction === 'left'
+      ? (isRtl ? step : -step)
+      : (isRtl ? -step : step);
+
+    scrollByNormalizedDelta(normalizedDelta, 'smooth');
+    requestAnimationFrame(updateScrollAffordance);
   }
 
   function setHoverDirectionVisual(direction) {
@@ -3519,6 +3553,15 @@
     state.hoverBound = true;
   }
 
+  function bindArrowNavigation() {
+    if (state.navBound) return;
+    if (!dom.navLeft || !dom.navRight) return;
+
+    dom.navLeft.addEventListener('click', () => handleArrowNavigation('left'));
+    dom.navRight.addEventListener('click', () => handleArrowNavigation('right'));
+    state.navBound = true;
+  }
+
   function updateScrollAffordance() {
     if (!dom.scroll || !dom.section) return;
 
@@ -3542,6 +3585,22 @@
     if (dom.hint) {
       dom.hint.hidden = !canScroll || state.hintDismissed || !atStart;
     }
+
+    const isDesktop = isDesktopViewport();
+    const isRtl = getComputedStyle(dom.scroll).direction === 'rtl';
+    const atLeftEdge = isRtl ? atEnd : atStart;
+    const atRightEdge = isRtl ? atStart : atEnd;
+    const showDesktopArrows = canScroll && isDesktop;
+
+    if (dom.navLeft) {
+      dom.navLeft.hidden = !showDesktopArrows;
+      dom.navLeft.disabled = !showDesktopArrows || atLeftEdge;
+    }
+
+    if (dom.navRight) {
+      dom.navRight.hidden = !showDesktopArrows;
+      dom.navRight.disabled = !showDesktopArrows || atRightEdge;
+    }
   }
 
   function bindScrollAffordance() {
@@ -3564,8 +3623,7 @@
   function createProductCard(product, index) {
     const card = document.createElement('a');
     // CRITICAL: flex-shrink-0 + fixed width for horizontal scroll to work on mobile
-    card.className = 'flex-shrink-0 snap-start bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 no-underline';
-    card.style.cssText = 'width: clamp(132px, 34vw, 152px); min-width: clamp(132px, 34vw, 152px); flex-shrink: 0;';
+    card.className = 'similar-product-card flex-shrink-0 snap-start bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 no-underline';
     card.href = `/product.html?id=${encodeURIComponent(product._id || product.id)}`;
 
     // Safely resolve image URL - handle Base64, URLs, and filenames
@@ -3612,7 +3670,7 @@
 
     let originalPriceHtml = '';
     if (hasDiscount) {
-      originalPriceHtml = `<span class="text-[10px] text-gray-400 line-through">${formatPrice(product.price)}</span>`;
+      originalPriceHtml = `<span class="text-[10px] text-gray-400 line-through similar-product-card__original-price">${formatPrice(product.price)}</span>`;
     }
 
     // Safely escape title
@@ -3625,10 +3683,10 @@
         ${newBadgeHtml}
         ${discountBadgeHtml}
       </div>
-      <div class="p-2 flex flex-col gap-1">
-        <h3 class="text-[12px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0" style="min-height: 2.25em;">${safeTitle}</h3>
+      <div class="p-2 flex flex-col gap-1 similar-product-card__body">
+        <h3 class="text-[12px] font-bold text-gray-800 leading-tight line-clamp-2 text-right m-0 similar-product-card__title" style="min-height: 2.25em;">${safeTitle}</h3>
         ${safeShopName ? `
-          <div class="flex items-center gap-1 text-[10px] text-gray-400 truncate">
+          <div class="flex items-center gap-1 text-[10px] text-gray-400 truncate similar-product-card__seller">
             <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -3637,7 +3695,7 @@
         ` : ''}
         <div class="mt-auto pt-1 flex flex-col">
           ${originalPriceHtml}
-          <span class="text-[13px] font-extrabold text-emerald-600">${formatPrice(displayPrice)} <span class="text-[10px] font-semibold text-gray-500">تومان</span></span>
+          <span class="text-[13px] font-extrabold text-emerald-600 similar-product-card__price">${formatPrice(displayPrice)} <span class="text-[10px] font-semibold text-gray-500">تومان</span></span>
         </div>
       </div>
     `;
@@ -3706,6 +3764,7 @@
   function init() {
     bindScrollAffordance();
     bindHoverAutoScroll();
+    bindArrowNavigation();
 
     // Listen for product data from main product page
     document.addEventListener('product:updated', (event) => {
