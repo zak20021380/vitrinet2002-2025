@@ -3475,6 +3475,11 @@
       return true;
     }
 
+    function handleWhereIsResultAcknowledge() {
+      closeMissionModal();
+      showSection('dashboard');
+    }
+
     function showWhereIsWrongAnswerModal({
       message = '',
       correctOption = null,
@@ -3524,7 +3529,7 @@
 
             ${correctInfoMarkup ? `<div class="where-is-wrong-info-wrap">${correctInfoMarkup}</div>` : ''}
 
-            <button type="button" class="where-is-wrong-btn" onclick="closeWhereIsWrongAnswerModal()">
+            <button type="button" class="where-is-wrong-btn" onclick="handleWhereIsResultAcknowledge()">
               \u0645\u062a\u0648\u062c\u0647 \u0634\u062f\u0645
             </button>
           </div>
@@ -3599,7 +3604,7 @@
 
             ${correctInfoMarkup}
 
-            <button type="button" class="where-is-success-btn" onclick="closeWhereIsSuccessModal()">
+            <button type="button" class="where-is-success-btn" onclick="handleWhereIsResultAcknowledge()">
               \u0645\u062A\u0648\u062C\u0647 \u0634\u062F\u0645
             </button>
           </div>
@@ -3930,6 +3935,7 @@
     window.submitWhereIsAnswer = submitWhereIsAnswer;
     window.closeWhereIsSuccessModal = closeWhereIsSuccessModal;
     window.closeWhereIsWrongAnswerModal = closeWhereIsWrongAnswerModal;
+    window.handleWhereIsResultAcknowledge = handleWhereIsResultAcknowledge;
     window.openInviteRulesModal = openInviteRulesModal;
     window.closeInviteRulesModal = closeInviteRulesModal;
     window.closeInviteRulesModalOnOverlay = closeInviteRulesModalOnOverlay;
