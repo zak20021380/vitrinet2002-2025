@@ -3891,6 +3891,13 @@
         <div class="mt-auto pt-1 flex flex-col">
           ${originalPriceHtml}
           <span class="text-[13px] font-extrabold text-emerald-600 similar-product-card__price">${formatPrice(displayPrice)} <span class="text-[10px] font-semibold text-gray-500">تومان</span></span>
+          <span class="similar-product-card__cta" aria-hidden="true">
+            مشاهده
+            <svg class="similar-product-card__cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </div>
       </div>
     `;
