@@ -1735,10 +1735,6 @@
           <span id="streakCheckinText">ثبت ورود امروز</span>
         </button>
 
-        <!-- دکمه بستن -->
-        <button type="button" class="streak-popup-dismiss" id="streakPopupDismiss">
-          بعداً یادآوری کن
-        </button>
       </div>
     </div>
   </div>
