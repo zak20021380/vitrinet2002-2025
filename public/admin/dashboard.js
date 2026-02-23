@@ -861,6 +861,404 @@ function getHomepageCardImageUrl(path) {
   return toAbsoluteMediaUrl(raw, '');
 }
 
+const HOMEPAGE_CARD_LINK_HINT_DEFAULT = 'با وارد کردن لینک محصول، فیلدهای کارت به‌صورت خودکار تکمیل می‌شود.';
+const HOMEPAGE_PRODUCT_ID_EXACT_REGEX = /^[a-f0-9]{24}$/i;
+const HOMEPAGE_PRODUCT_ID_FUZZY_REGEX = /([a-f0-9]{24})/i;
+const HOMEPAGE_CARD_AUTOFILL_DEBOUNCE_MS = 450;
+const homepageCardAutofillTimers = new WeakMap();
+const homepageCardProductCache = new Map();
+let homepageCardProductsPrefetchPromise = null;
+
+function setHomepageCardLinkHint(form, message, type = 'info') {
+  if (!form) return;
+  const hintEl = form.querySelector('[data-role="card-link-hint"]');
+  if (!hintEl) return;
+
+  if (!message) {
+    hintEl.textContent = '';
+    hintEl.style.color = '';
+    return;
+  }
+
+  const palette = {
+    success: '#166534',
+    error: '#b91c1c',
+    info: '#0369a1'
+  };
+  hintEl.textContent = message;
+  hintEl.style.color = palette[type] || palette.info;
+}
+
+function clearHomepageCardAutofillTimer(form) {
+  if (!form) return;
+  const timer = homepageCardAutofillTimers.get(form);
+  if (timer) {
+    clearTimeout(timer);
+    homepageCardAutofillTimers.delete(form);
+  }
+}
+
+function setHomepageCardAutoImageValue(form, imagePath = '') {
+  if (!form) return;
+  const imageUrlInput = form.querySelector('[data-field="image-url"]');
+  if (!imageUrlInput) return;
+  imageUrlInput.value = String(imagePath || '').trim();
+}
+
+function clearHomepageCardAutofillState(form) {
+  if (!form) return;
+  clearHomepageCardAutofillTimer(form);
+  setHomepageCardAutoImageValue(form, '');
+  delete form.dataset.autofillProductId;
+  delete form.dataset.autofillLinkValue;
+  delete form.dataset.autofillRequestId;
+  setHomepageCardLinkHint(form, HOMEPAGE_CARD_LINK_HINT_DEFAULT, 'info');
+}
+
+function buildHomepageProductPageLink(productId) {
+  const id = String(productId || '').trim();
+  if (!id) return '';
+  return `/product.html?id=${encodeURIComponent(id)}`;
+}
+
+function parseHomepageProductLink(rawLink = '') {
+  const value = String(rawLink || '').trim();
+  if (!value) {
+    return { productId: '', normalizedLink: '', shouldNormalize: false };
+  }
+
+  if (HOMEPAGE_PRODUCT_ID_EXACT_REGEX.test(value)) {
+    return {
+      productId: value,
+      normalizedLink: buildHomepageProductPageLink(value),
+      shouldNormalize: true
+    };
+  }
+
+  let parsedUrl = null;
+  try {
+    parsedUrl = new URL(value, typeof location !== 'undefined' ? location.origin : ADMIN_API_ORIGIN);
+  } catch (_err) {
+    parsedUrl = null;
+  }
+
+  if (parsedUrl) {
+    const queryKeys = ['id', 'productId', 'pid', 'itemId'];
+    for (const key of queryKeys) {
+      const queryValue = String(parsedUrl.searchParams.get(key) || '').trim();
+      if (HOMEPAGE_PRODUCT_ID_EXACT_REGEX.test(queryValue)) {
+        const isProductPagePath = /\/product\.html$/i.test(parsedUrl.pathname || '');
+        return {
+          productId: queryValue,
+          normalizedLink: isProductPagePath ? value : buildHomepageProductPageLink(queryValue),
+          shouldNormalize: !isProductPagePath
+        };
+      }
+    }
+
+    const pathMatch = (parsedUrl.pathname || '').match(/\/(?:api\/)?products\/([a-f0-9]{24})(?:\/|$)/i)
+      || (parsedUrl.pathname || '').match(/\/product\/([a-f0-9]{24})(?:\/|$)/i);
+    if (pathMatch?.[1]) {
+      return {
+        productId: pathMatch[1],
+        normalizedLink: buildHomepageProductPageLink(pathMatch[1]),
+        shouldNormalize: true
+      };
+    }
+  }
+
+  const fuzzyMatch = value.match(HOMEPAGE_PRODUCT_ID_FUZZY_REGEX);
+  if (fuzzyMatch?.[1]) {
+    return {
+      productId: fuzzyMatch[1],
+      normalizedLink: buildHomepageProductPageLink(fuzzyMatch[1]),
+      shouldNormalize: true
+    };
+  }
+
+  return { productId: '', normalizedLink: value, shouldNormalize: false };
+}
+
+function findProductByIdInCollection(productId, collection = []) {
+  const targetId = String(productId || '').trim();
+  if (!targetId || !Array.isArray(collection)) return null;
+  return collection.find((item) => {
+    const id = toIdString(item?._id || item?.id);
+    return id && id === targetId;
+  }) || null;
+}
+
+async function ensureHomepageCardProductPool() {
+  if (Array.isArray(productsList) && productsList.length) {
+    return productsList;
+  }
+
+  if (!homepageCardProductsPrefetchPromise) {
+    homepageCardProductsPrefetchPromise = fetchProducts()
+      .then((list) => {
+        if (Array.isArray(list) && list.length) {
+          productsList = list;
+        }
+        return Array.isArray(productsList) ? productsList : [];
+      })
+      .catch((err) => {
+        console.warn('ensureHomepageCardProductPool failed:', err);
+        return Array.isArray(productsList) ? productsList : [];
+      })
+      .finally(() => {
+        homepageCardProductsPrefetchPromise = null;
+      });
+  }
+
+  return homepageCardProductsPrefetchPromise;
+}
+
+async function resolveProductForHomepageCard(productId) {
+  const id = String(productId || '').trim();
+  if (!id || !HOMEPAGE_PRODUCT_ID_EXACT_REGEX.test(id)) {
+    throw new Error('شناسه محصول معتبر نیست.');
+  }
+
+  const cached = homepageCardProductCache.get(id);
+  if (cached && typeof cached === 'object') {
+    return cached;
+  }
+
+  const localMatch = findProductByIdInCollection(id, productsList);
+  if (localMatch) {
+    homepageCardProductCache.set(id, localMatch);
+    return localMatch;
+  }
+
+  await ensureHomepageCardProductPool();
+  const refreshedLocalMatch = findProductByIdInCollection(id, productsList);
+  if (refreshedLocalMatch) {
+    homepageCardProductCache.set(id, refreshedLocalMatch);
+    return refreshedLocalMatch;
+  }
+
+  const res = await fetch(`${ADMIN_API_BASE}/products/${encodeURIComponent(id)}`, {
+    credentials: 'include'
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload?.message || 'دریافت اطلاعات محصول انجام نشد.');
+  }
+
+  const product = (payload && typeof payload === 'object' && payload.product && typeof payload.product === 'object')
+    ? payload.product
+    : payload;
+  if (!product || typeof product !== 'object') {
+    throw new Error('پاسخ محصول معتبر نیست.');
+  }
+
+  const resolvedId = toIdString(product._id || product.id || id) || id;
+  homepageCardProductCache.set(resolvedId, product);
+  homepageCardProductCache.set(id, product);
+  if (!findProductByIdInCollection(resolvedId, productsList)) {
+    productsList.push(product);
+  }
+  return product;
+}
+
+function resolveHomepageCardPriceFromProduct(product = {}) {
+  const discountPrice = Number(product.discountPrice);
+  const regularPrice = Number(product.price);
+  if (Boolean(product.discountActive) && Number.isFinite(discountPrice) && discountPrice >= 0) {
+    return discountPrice;
+  }
+  if (Number.isFinite(regularPrice) && regularPrice >= 0) {
+    return regularPrice;
+  }
+  if (Number.isFinite(discountPrice) && discountPrice >= 0) {
+    return discountPrice;
+  }
+  return NaN;
+}
+
+function resolveHomepageCardCategoryFromProduct(product = {}) {
+  const rawCategory = product.category
+    || product.categoryName
+    || product.sellerCategory
+    || product.seller?.category
+    || product.sellerId?.category
+    || '';
+  return String(extractCategoryLabel(rawCategory) || rawCategory || '').trim();
+}
+
+function resolveHomepageCardLocationFromProduct(product = {}) {
+  const seller = product?.seller && typeof product.seller === 'object'
+    ? product.seller
+    : (product?.sellerId && typeof product.sellerId === 'object' ? product.sellerId : null);
+
+  const directLocation = String(product.sellerLocation || product.location || '').trim();
+  if (directLocation) return directLocation;
+
+  const sellerLocation = String(seller?.address || seller?.city || '').trim();
+  if (sellerLocation) return sellerLocation;
+
+  if (typeof findShopForProduct === 'function') {
+    const shop = findShopForProduct({
+      ...product,
+      sellerId: toIdString(product?.sellerId?._id || product?.sellerId || product?.seller?._id || product?.seller?.id || ''),
+      shopurl: product?.shopurl || product?.shopUrl || seller?.shopurl || seller?.shopUrl || ''
+    });
+    const locationFromShop = String(shop?.address || shop?.shopAddress || shop?.city || '').trim();
+    if (locationFromShop) return locationFromShop;
+  }
+
+  return '';
+}
+
+function resolveHomepageCardImageFromProduct(product = {}) {
+  const directImage = String(product.image || '').trim();
+  if (directImage) return directImage;
+
+  const images = Array.isArray(product.images) ? product.images : [];
+  if (!images.length) return '';
+
+  const mainImageIndex = Number(product.mainImageIndex);
+  const idx = Number.isInteger(mainImageIndex) ? mainImageIndex : 0;
+  const selected = String(images[idx] || images[0] || '').trim();
+  if (!selected) return '';
+
+  if (/^(https?:|data:)/i.test(selected) || selected.startsWith('/')) {
+    return selected;
+  }
+  return `/${selected.replace(/^\/+/, '')}`;
+}
+
+function mapProductToHomepageCardFields(product = {}) {
+  const productId = toIdString(product._id || product.id || '');
+  return {
+    productId,
+    title: String(product.title || product.name || '').trim(),
+    category: resolveHomepageCardCategoryFromProduct(product),
+    price: resolveHomepageCardPriceFromProduct(product),
+    location: resolveHomepageCardLocationFromProduct(product),
+    image: resolveHomepageCardImageFromProduct(product),
+    canonicalLink: buildHomepageProductPageLink(productId)
+  };
+}
+
+function applyHomepageCardAutofill(form, payload = {}, { linkValue = '' } = {}) {
+  if (!form || !payload) return;
+
+  const titleInput = form.querySelector('[data-field="title"]');
+  const categoryInput = form.querySelector('[data-field="category"]');
+  const priceInput = form.querySelector('[data-field="price"]');
+  const locationInput = form.querySelector('[data-field="location"]');
+  const linkInput = form.querySelector('[data-field="link"]');
+  const imageInput = form.querySelector('[data-field="image"]');
+  const imageHintEl = form.querySelector('[data-role="card-image-hint"]');
+
+  if (titleInput && payload.title) {
+    titleInput.value = payload.title;
+  }
+  if (categoryInput && payload.category) {
+    categoryInput.value = payload.category;
+  }
+  if (priceInput && Number.isFinite(payload.price)) {
+    priceInput.value = String(Math.max(0, Math.round(payload.price)));
+  }
+  if (locationInput && payload.location) {
+    locationInput.value = payload.location;
+  }
+
+  if (linkInput && linkValue) {
+    linkInput.value = linkValue;
+  }
+
+  setHomepageCardAutoImageValue(form, payload.image || '');
+
+  if (imageHintEl && !(imageInput?.files?.[0])) {
+    const imageUrl = getHomepageCardImageUrl(payload.image || '');
+    imageHintEl.innerHTML = imageUrl
+      ? `تصویر محصول انتخاب شد: <a href="${escapeHtml(imageUrl)}" target="_blank" rel="noopener">مشاهده تصویر</a>`
+      : 'تصویر اختیاری است — در صورت عدم انتخاب، تصویر پیش‌فرض استفاده می‌شود.';
+  }
+}
+
+async function autofillHomepageCardFromLink(form, { showInvalidError = false } = {}) {
+  if (!form) return;
+  const linkInput = form.querySelector('[data-field="link"]');
+  if (!linkInput) return;
+
+  const rawLink = String(linkInput.value || '').trim();
+  if (!rawLink) {
+    clearHomepageCardAutofillState(form);
+    setHomepageCardFormMessage(form, '');
+    return;
+  }
+
+  const parsed = parseHomepageProductLink(rawLink);
+  if (!parsed.productId) {
+    setHomepageCardAutoImageValue(form, '');
+    if (showInvalidError) {
+      setHomepageCardLinkHint(form, 'شناسه محصول از لینک استخراج نشد.', 'error');
+      setHomepageCardFormMessage(form, 'لینک محصول معتبر نیست. فرمت پیشنهادی: product.html?id=PRODUCT_ID', 'error');
+    } else {
+      setHomepageCardLinkHint(form, HOMEPAGE_CARD_LINK_HINT_DEFAULT, 'info');
+      setHomepageCardFormMessage(form, '');
+    }
+    return;
+  }
+
+  if (
+    form.dataset.autofillProductId === parsed.productId
+    && form.dataset.autofillLinkValue === rawLink
+  ) {
+    return;
+  }
+
+  const requestId = String((Number(form.dataset.autofillRequestId || 0) || 0) + 1);
+  form.dataset.autofillRequestId = requestId;
+  setHomepageCardLinkHint(form, 'در حال واکشی اطلاعات محصول...', 'info');
+
+  try {
+    const product = await resolveProductForHomepageCard(parsed.productId);
+    if (form.dataset.autofillRequestId !== requestId) return;
+
+    const payload = mapProductToHomepageCardFields(product);
+    if (!payload.title || !payload.category || !payload.location || !Number.isFinite(payload.price)) {
+      throw new Error('بعضی فیلدهای ضروری محصول کامل نیست. لطفا اطلاعات کارت را دستی تکمیل کنید.');
+    }
+
+    const nextLinkValue = parsed.shouldNormalize
+      ? (parsed.normalizedLink || payload.canonicalLink || rawLink)
+      : rawLink;
+
+    applyHomepageCardAutofill(form, payload, { linkValue: nextLinkValue });
+    form.dataset.autofillProductId = parsed.productId;
+    form.dataset.autofillLinkValue = String(nextLinkValue || rawLink).trim();
+
+    setHomepageCardLinkHint(form, 'اطلاعات کارت از محصول لینک‌شده تکمیل شد.', 'success');
+    setHomepageCardFormMessage(form, `اطلاعات کارت از محصول «${payload.title}» تکمیل شد.`, 'success');
+  } catch (error) {
+    if (form.dataset.autofillRequestId !== requestId) return;
+    console.warn('homepage card link autofill failed:', error);
+    setHomepageCardAutoImageValue(form, '');
+    setHomepageCardLinkHint(form, 'واکشی اطلاعات محصول ناموفق بود.', 'error');
+    if (showInvalidError) {
+      setHomepageCardFormMessage(form, error?.message || 'تکمیل خودکار اطلاعات محصول انجام نشد.', 'error');
+    }
+  }
+}
+
+function scheduleHomepageCardAutofill(form, { immediate = false, showInvalidError = false } = {}) {
+  if (!form) return;
+  clearHomepageCardAutofillTimer(form);
+  if (immediate) {
+    void autofillHomepageCardFromLink(form, { showInvalidError });
+    return;
+  }
+  const timer = setTimeout(() => {
+    homepageCardAutofillTimers.delete(form);
+    void autofillHomepageCardFromLink(form, { showInvalidError });
+  }, HOMEPAGE_CARD_AUTOFILL_DEBOUNCE_MS);
+  homepageCardAutofillTimers.set(form, timer);
+}
+
 function getHomepageCardFormBySection(sectionId) {
   if (!sectionId) return null;
   return document.querySelector(`form[data-homepage-card-form="${sectionId}"]`);
@@ -935,6 +1333,7 @@ function setHomepageCardFormMessage(form, message, type = 'info') {
 function resetHomepageCardForm(sectionId) {
   const form = getHomepageCardFormBySection(sectionId);
   if (!form) return;
+  clearHomepageCardAutofillState(form);
   form.reset();
   const idInput = form.querySelector('[data-field="card-id"]');
   if (idInput) idInput.value = '';
@@ -949,6 +1348,7 @@ function fillHomepageCardForm(sectionId, card) {
   const form = getHomepageCardFormBySection(sectionId);
   if (!form || !card) return;
 
+  clearHomepageCardAutofillTimer(form);
   const idInput = form.querySelector('[data-field="card-id"]');
   const titleInput = form.querySelector('[data-field="title"]');
   const categoryInput = form.querySelector('[data-field="category"]');
@@ -965,6 +1365,17 @@ function fillHomepageCardForm(sectionId, card) {
   if (locationInput) locationInput.value = card.location || '';
   if (linkInput) linkInput.value = card.link || '';
   if (orderInput) orderInput.value = Math.max(1, Number(card.displayOrder) || 1);
+  setHomepageCardAutoImageValue(form, '');
+  setHomepageCardLinkHint(form, HOMEPAGE_CARD_LINK_HINT_DEFAULT, 'info');
+
+  const parsedLink = parseHomepageProductLink(card.link || '');
+  if (parsedLink.productId) {
+    form.dataset.autofillProductId = parsedLink.productId;
+    form.dataset.autofillLinkValue = String(card.link || '').trim();
+  } else {
+    delete form.dataset.autofillProductId;
+    delete form.dataset.autofillLinkValue;
+  }
   if (hintEl) {
     const src = getHomepageCardImageUrl(card.image);
     hintEl.innerHTML = src
@@ -987,6 +1398,7 @@ async function saveHomepageCardFromForm(form) {
   const link = String(form.querySelector('[data-field="link"]')?.value || '').trim();
   const displayOrderRaw = String(form.querySelector('[data-field="display-order"]')?.value || '').trim();
   const priceRaw = String(form.querySelector('[data-field="price"]')?.value || '').trim();
+  const autoImageValue = String(form.querySelector('[data-field="image-url"]')?.value || '').trim();
   const imageInput = form.querySelector('[data-field="image"]');
   const imageFile = imageInput?.files?.[0] || null;
   const price = Number(priceRaw);
@@ -1022,6 +1434,8 @@ async function saveHomepageCardFromForm(form) {
   }
   if (imageFile) {
     formData.set('image', imageFile);
+  } else if (autoImageValue) {
+    formData.set('image', autoImageValue);
   }
 
   const isEdit = Boolean(cardId);
@@ -1315,6 +1729,8 @@ function renderHomepageSections() {
             <div>
               <label>لینک (اختیاری)</label>
               <input type="text" data-field="link" placeholder="https://... or /path" />
+              <input type="hidden" data-field="image-url" />
+              <small data-role="card-link-hint">با وارد کردن لینک محصول، فیلدهای کارت به‌صورت خودکار تکمیل می‌شود.</small>
             </div>
             <div>
               <label>تصویر کارت *</label>
@@ -1390,6 +1806,22 @@ function bindHomepageSectionManager() {
       event.preventDefault();
       await saveHomepageCardFromForm(cardForm);
     });
+
+    listEl.addEventListener('input', (event) => {
+      const linkInput = event.target.closest('input[data-field="link"]');
+      if (!linkInput) return;
+      const cardForm = linkInput.closest('form[data-homepage-card-form]');
+      if (!cardForm) return;
+      scheduleHomepageCardAutofill(cardForm, { showInvalidError: false });
+    });
+
+    listEl.addEventListener('blur', (event) => {
+      const linkInput = event.target.closest('input[data-field="link"]');
+      if (!linkInput) return;
+      const cardForm = linkInput.closest('form[data-homepage-card-form]');
+      if (!cardForm) return;
+      scheduleHomepageCardAutofill(cardForm, { immediate: true, showInvalidError: true });
+    }, true);
 
     listEl.addEventListener('click', (event) => {
       const actionBtn = event.target.closest('button[data-action]');
