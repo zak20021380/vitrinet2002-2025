@@ -3239,6 +3239,7 @@
     hintDismissed: false,
     affordanceBound: false,
     navBound: false,
+    desktopInputBound: false,
     resizeRaf: null,
     hoverBound: false,
     hoverActive: false,
@@ -3246,7 +3247,13 @@
     hoverVelocity: 0,
     hoverTargetVelocity: 0,
     hoverLastTimestamp: 0,
-    hoverNormToRawSign: 1
+    hoverNormToRawSign: 1,
+    dragActive: false,
+    dragPointerId: null,
+    dragStartX: 0,
+    dragStartNormalized: 0,
+    dragMoved: false,
+    dragSuppressClickUntil: 0
   };
 
   const persianNumberFormatter = new Intl.NumberFormat('fa-IR');
@@ -3382,6 +3389,94 @@
 
     scrollByNormalizedDelta(normalizedDelta, 'smooth');
     requestAnimationFrame(updateScrollAffordance);
+  }
+
+  function bindDesktopPointerInput() {
+    if (state.desktopInputBound || !dom.scroll || !dom.scrollWrap) return;
+
+    const onPointerDown = (event) => {
+      if (!isDesktopViewport()) return;
+      if (!event || event.button !== 0 || event.pointerType !== 'mouse') return;
+      if (event.target && event.target.closest('.similar-products-nav')) return;
+
+      state.dragActive = true;
+      state.dragPointerId = event.pointerId;
+      state.dragStartX = event.clientX;
+      state.dragStartNormalized = getNormalizedScrollLeft(dom.scroll);
+      state.dragMoved = false;
+
+      dom.scrollWrap.classList.add('is-pointer-dragging');
+      try {
+        dom.scrollWrap.setPointerCapture(event.pointerId);
+      } catch (_) {
+        // no-op
+      }
+      event.preventDefault();
+    };
+
+    const onPointerMove = (event) => {
+      if (!state.dragActive || event.pointerId !== state.dragPointerId) return;
+
+      const deltaX = event.clientX - state.dragStartX;
+      if (Math.abs(deltaX) > 3) {
+        state.dragMoved = true;
+      }
+
+      const targetNormalized = state.dragStartNormalized - deltaX;
+      const maxScroll = Math.max(0, dom.scroll.scrollWidth - dom.scroll.clientWidth);
+      const clampedTarget = clamp(targetNormalized, 0, maxScroll);
+      const current = getNormalizedScrollLeft(dom.scroll);
+      const normalizedDelta = clampedTarget - current;
+
+      if (Math.abs(normalizedDelta) > 0.2) {
+        scrollByNormalizedDelta(normalizedDelta, 'auto');
+        updateScrollAffordance();
+      }
+      event.preventDefault();
+    };
+
+    const endPointerDrag = (event) => {
+      if (!state.dragActive) return;
+      if (event && event.pointerId !== state.dragPointerId) return;
+
+      if (state.dragMoved) {
+        state.dragSuppressClickUntil = Date.now() + 180;
+      }
+
+      state.dragActive = false;
+      state.dragPointerId = null;
+      state.dragMoved = false;
+      dom.scrollWrap.classList.remove('is-pointer-dragging');
+    };
+
+    const onWheel = (event) => {
+      if (!isDesktopViewport()) return;
+      if (!event || !dom.scroll) return;
+
+      const absX = Math.abs(event.deltaX);
+      const absY = Math.abs(event.deltaY);
+      if (absX < 0.5 && absY < 0.5) return;
+
+      const rawDelta = absX > absY ? event.deltaX : event.deltaY;
+      dom.scroll.scrollBy({ left: rawDelta, behavior: 'auto' });
+      updateScrollAffordance();
+      event.preventDefault();
+    };
+
+    dom.scrollWrap.addEventListener('pointerdown', onPointerDown, { passive: false });
+    dom.scrollWrap.addEventListener('pointermove', onPointerMove, { passive: false });
+    dom.scrollWrap.addEventListener('pointerup', endPointerDrag, { passive: true });
+    dom.scrollWrap.addEventListener('pointercancel', endPointerDrag, { passive: true });
+    dom.scrollWrap.addEventListener('mouseleave', () => endPointerDrag(null), { passive: true });
+    dom.scrollWrap.addEventListener('wheel', onWheel, { passive: false });
+    dom.scroll.addEventListener('click', (event) => {
+      if (Date.now() < state.dragSuppressClickUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, { capture: true });
+
+    state.desktopInputBound = true;
   }
 
   function setHoverDirectionVisual(direction) {
@@ -3678,8 +3773,8 @@
     const safeShopName = shopName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     card.innerHTML = `
-      <div class="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        <img class="w-full h-full object-cover" src="${imageUrl}" alt="${safeTitle}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
+      <div class="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden similar-product-card__media">
+        <img class="w-full h-full object-cover similar-product-card__image" src="${imageUrl}" alt="${safeTitle}" loading="lazy" onerror="this.src='/assets/images/placeholder-product.svg'">
         ${newBadgeHtml}
         ${discountBadgeHtml}
       </div>
@@ -3765,6 +3860,7 @@
     bindScrollAffordance();
     bindHoverAutoScroll();
     bindArrowNavigation();
+    bindDesktopPointerInput();
 
     // Listen for product data from main product page
     document.addEventListener('product:updated', (event) => {
