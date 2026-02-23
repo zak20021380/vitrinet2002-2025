@@ -4429,11 +4429,6 @@
       display: none !important;
     }
 
-    #similarProductsSection .similar-products-nav i {
-      font-size: 2rem;
-      line-height: 1;
-    }
-
     #similarProductsSection .similar-products-nav:hover:not(:disabled) {
       transform: translateY(-50%) scale(1.06);
       color: #1d4ed8;
@@ -4525,6 +4520,62 @@
 
       #similarProductsSection .similar-products-nav {
         display: inline-flex;
+        top: clamp(92px, 30%, 138px);
+        width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        color: #fff;
+        background: rgba(2, 6, 23, 0.48);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.3);
+      }
+
+      #similarProductsSection .similar-products-nav svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        display: block;
+        pointer-events: none;
+      }
+
+      @supports ((-webkit-backdrop-filter: blur(6px)) or (backdrop-filter: blur(6px))) {
+        #similarProductsSection .similar-products-nav {
+          background: rgba(2, 6, 23, 0.4);
+          -webkit-backdrop-filter: blur(8px) saturate(120%);
+          backdrop-filter: blur(8px) saturate(120%);
+        }
+      }
+
+      #similarProductsSection .similar-products-nav--left {
+        left: 0.95rem;
+      }
+
+      #similarProductsSection .similar-products-nav--right {
+        right: 0.95rem;
+      }
+
+      #similarProductsSection .similar-products-nav:hover:not(:disabled) {
+        transform: translateY(calc(-50% - 1px)) scale(1.05);
+        color: #fff;
+        background: rgba(2, 6, 23, 0.58);
+        box-shadow: 0 14px 30px rgba(2, 6, 23, 0.34);
+      }
+
+      #similarProductsSection .similar-products-nav:active:not(:disabled) {
+        transform: translateY(-50%) scale(0.97);
+        background: rgba(2, 6, 23, 0.62);
+      }
+
+      #similarProductsSection .similar-products-nav:disabled {
+        opacity: 0.34;
+        cursor: default;
+        pointer-events: none;
+        box-shadow: none;
+      }
+
+      #similarProductsSection .similar-products-nav:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.78);
+        outline-offset: 2px;
+        border-radius: 999px;
       }
 
       #similarProductsSection .similar-product-card {
@@ -5774,10 +5825,14 @@
         <!-- Scrolling Container - Isolated horizontal scroll -->
         <div class="similar-products-scroll-wrap is-at-start" id="similarProductsScrollWrap">
           <button type="button" class="similar-products-nav similar-products-nav--left" id="similarProductsNavLeft" aria-label="Scroll left" hidden>
-            <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </button>
           <button type="button" class="similar-products-nav similar-products-nav--right" id="similarProductsNavRight" aria-label="Scroll right" hidden>
-            <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </button>
           <div class="flex overflow-x-auto px-4 gap-3 pb-2 similar-products-scroll" id="similarProductsScroll"
             aria-label="لیست محصولات مشابه">
