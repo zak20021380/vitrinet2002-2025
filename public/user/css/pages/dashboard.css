@@ -445,14 +445,23 @@
     @media (max-width: 480px) {
       .streak-popup-overlay {
         padding: 0;
-        align-items: flex-end;
+        align-items: stretch;
+        justify-content: stretch;
+        overflow-x: hidden;
       }
 
       .streak-popup {
-        max-width: 100%;
-        border-radius: 1.25rem 1.25rem 0 0;
-        max-height: 92vh;
+        width: 100vw;
+        max-width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+        margin: 0;
+        border-radius: 0;
+        overflow-x: hidden;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       .streak-popup-overlay.active .streak-popup {
@@ -484,6 +493,7 @@
 
       .streak-popup-body {
         padding: 0 1.25rem 1.5rem;
+        overflow-x: hidden;
       }
 
       .streak-counter-card {
@@ -511,8 +521,14 @@
       }
 
       .streak-popup-week {
+        width: 100%;
         padding: 0.875rem;
         gap: 0.35rem;
+        overflow-x: hidden;
+      }
+
+      .streak-popup-day {
+        min-width: 0;
       }
 
       .streak-popup-day-dot {
@@ -528,6 +544,10 @@
 
       .streak-popup-day-name {
         font-size: 0.65rem;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .streak-popup-checkin-btn {
