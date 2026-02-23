@@ -6595,7 +6595,7 @@
           streakCheckinBtn.classList.remove('active');
           streakCheckinBtn.classList.add('done');
           streakCheckinText.textContent = 'امروز ثبت شده';
-          streakCheckinBtn.disabled = true;
+          streakCheckinBtn.disabled = false;
           if (streakMiniSubtitle) {
             streakMiniSubtitle.textContent = 'امروز ثبت شده';
             streakMiniSubtitle.classList.add('checked');
@@ -6949,7 +6949,15 @@
     function setupStreakWalletEvents() {
       const checkinBtn = document.getElementById('streakCheckinBtn');
       if (checkinBtn) {
-        checkinBtn.addEventListener('click', doCheckIn);
+        checkinBtn.addEventListener('click', () => {
+          if (checkinBtn.classList.contains('done') || (streakData && streakData.checkedInToday)) {
+            hideStreakPopup();
+            const miniBanner = document.getElementById('streakMiniBanner');
+            if (miniBanner) miniBanner.classList.add('visible');
+            return;
+          }
+          doCheckIn();
+        });
       }
 
       const viewAllBtn = document.getElementById('viewAllTransactions');
