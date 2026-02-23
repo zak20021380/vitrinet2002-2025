@@ -3735,8 +3735,20 @@
     if (state.navBound) return;
     if (!dom.navLeft || !dom.navRight) return;
 
-    dom.navLeft.addEventListener('click', () => handleArrowNavigation('right'));
-    dom.navRight.addEventListener('click', () => handleArrowNavigation('left'));
+    dom.navLeft.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!isDesktopViewport() || dom.navLeft.disabled) return;
+      handleArrowNavigation('right');
+    });
+
+    dom.navRight.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!isDesktopViewport() || dom.navRight.disabled) return;
+      handleArrowNavigation('left');
+    });
+
     state.navBound = true;
   }
 
