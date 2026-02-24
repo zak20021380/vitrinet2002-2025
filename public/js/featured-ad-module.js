@@ -318,11 +318,14 @@
     state.isVisible = true;
   }
 
-  function hideModule() {
+  function hideModule({ clear = true } = {}) {
     const module = getModuleElement();
     if (!module) return;
 
     module.classList.remove('is-visible');
+    if (clear) {
+      module.innerHTML = '';
+    }
     state.isVisible = false;
   }
 
@@ -376,9 +379,7 @@
     if (getImpressionCount() >= CONFIG.MAX_IMPRESSIONS_PER_SESSION) return;
 
     const module = createModuleElement();
-    
-    module.innerHTML = renderLoadingState();
-    showModule();
+    if (!module) return;
 
     try {
       const ads = await fetchAds();
@@ -392,6 +393,7 @@
       state.adIndex = 0;
 
       module.innerHTML = renderAdCard(state.currentAd);
+      showModule();
       
       trackImpression(state.currentAd._id || state.currentAd.id);
       incrementImpressionCount();

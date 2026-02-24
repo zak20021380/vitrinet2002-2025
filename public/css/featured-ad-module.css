@@ -13,15 +13,19 @@
   position: relative;
   width: 100%;
   max-width: 520px;
-  margin: 14px auto 0;
+  margin: 0 auto;
   padding: 0 2px;
+  max-height: 0;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease, max-height 0.24s ease, margin-top 0.22s ease;
   pointer-events: none;
 }
 
 .featured-ad-module.is-visible {
+  margin-top: 8px;
+  max-height: 360px;
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -323,12 +327,16 @@
 
 .featured-ad-module::after {
   content: '';
-  display: block;
+  display: none;
   width: 50%;
   max-width: 180px;
   height: 1px;
   margin: 14px auto 0;
   background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.25) 50%, transparent 100%);
+}
+
+.featured-ad-module.is-visible::after {
+  display: block;
 }
 
 .featured-ad-divider {
@@ -360,8 +368,11 @@
 
 @media (max-width: 639px) {
   .featured-ad-module {
-    margin-top: 12px;
     max-width: 100%;
+  }
+
+  .featured-ad-module.is-visible {
+    margin-top: 8px;
   }
 
   .featured-ad-card {
@@ -484,8 +495,8 @@
    ============================================ */
 
 @media (min-width: 640px) {
-  .featured-ad-module {
-    margin-top: 16px;
+  .featured-ad-module.is-visible {
+    margin-top: 10px;
   }
 
   .featured-ad-card {
