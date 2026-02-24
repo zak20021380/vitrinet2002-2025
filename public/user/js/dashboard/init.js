@@ -6553,9 +6553,22 @@
       const streakMiniNumber = document.getElementById('streakMiniNumber');
       const streakMiniSubtitle = document.getElementById('streakMiniSubtitle');
       const streakPopupDismiss = document.getElementById('streakPopupDismiss');
+      const streakPopupSubtitle = document.querySelector('.streak-popup-subtitle');
+      const dailyRewardRaw = Number(streakData?.rewards?.daily);
+      const dailyRewardAmount = Number.isFinite(dailyRewardRaw) && dailyRewardRaw > 0
+        ? Math.round(dailyRewardRaw)
+        : 0;
+      const formattedDailyReward = dailyRewardAmount > 0
+        ? dailyRewardAmount.toLocaleString('fa-IR')
+        : '';
 
       if (streakNumber) streakNumber.textContent = streakData.currentStreak || 0;
       if (streakMiniNumber) streakMiniNumber.textContent = streakData.currentStreak || 0;
+      if (streakPopupSubtitle) {
+        streakPopupSubtitle.textContent = dailyRewardAmount > 0
+          ? `هر روز وارد شو، ${formattedDailyReward} تومان بگیر`
+          : 'هر روز وارد شو و استریکت را حفظ کن';
+      }
       
       const streakLevelText = document.getElementById('streakLevelText');
       if (streakLevelText && streakData.level) {
@@ -6607,7 +6620,9 @@
           streakCheckinText.textContent = 'ثبت ورود امروز';
           streakCheckinBtn.disabled = false;
           if (streakMiniSubtitle) {
-            streakMiniSubtitle.textContent = 'برای دریافت امتیاز کلیک کنید';
+            streakMiniSubtitle.textContent = dailyRewardAmount > 0
+              ? `برای دریافت ${formattedDailyReward} تومان کلیک کنید`
+              : 'برای ثبت ورود امروز کلیک کنید';
             streakMiniSubtitle.classList.remove('checked');
           }
           if (streakPopupDismiss) streakPopupDismiss.textContent = 'بعداً یادآوری کن';

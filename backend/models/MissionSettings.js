@@ -82,6 +82,7 @@ missionSettingSchema.statics.getDefaults = function() {
     // User missions
     { missionId: 'user-register', category: 'users', title: 'ثبت‌نام کاربر جدید', description: 'پاداش برای هر کاربر جدید که ثبت‌نام می‌کند', amount: 5000, isActive: true, icon: 'ri-user-add-line', cardStyle: 'register', order: 1 },
     { missionId: 'user-app-install', category: 'users', title: 'نصب اپلیکیشن', description: 'پاداش برای نصب اپلیکیشن موبایل', amount: 10000, isActive: true, icon: 'ri-smartphone-line', cardStyle: 'install-app', order: 2 },
+    { missionId: 'user-daily-login', category: 'users', title: 'ورود روزانه', description: 'پاداش برای هر ورود روزانه کاربر در داشبورد', amount: 100, isActive: true, icon: 'ri-calendar-check-line', cardStyle: 'streak', order: 7 },
     { missionId: 'user-profile-complete', category: 'users', title: 'تکمیل پروفایل', description: 'پاداش برای تکمیل اطلاعات پروفایل', amount: 3000, isActive: true, icon: 'ri-profile-line', cardStyle: 'profile', order: 3 },
     { missionId: 'user-referral', category: 'users', title: 'دعوت دوستان', description: 'پاداش برای هر دوست دعوت‌شده که ثبت‌نام کند', amount: 15000, isActive: true, icon: 'ri-user-shared-line', cardStyle: 'invite', order: 4 },
     { missionId: 'user-book-appointment', category: 'users', title: 'رزرو نوبت', description: 'پاداش برای اولین رزرو نوبت آنلاین', amount: 5000, isActive: true, icon: 'ri-calendar-check-line', cardStyle: 'booking', order: 5 },
@@ -105,13 +106,25 @@ missionSettingSchema.statics.getDefaults = function() {
   ];
 };
 
-// Initialize default missions if collection is empty
+// Ensure default missions exist (without overriding saved admin settings)
 missionSettingSchema.statics.initializeDefaults = async function() {
-  const count = await this.countDocuments();
-  if (count === 0) {
-    const defaults = this.getDefaults();
-    await this.insertMany(defaults);
-    console.log('✅ Mission settings initialized with defaults');
+  const defaults = this.getDefaults();
+  const existingMissionIds = await this.distinct('missionId');
+  const existingSet = new Set(existingMissionIds.map((id) => String(id)));
+  const missingDefaults = defaults.filter((mission) => !existingSet.has(String(mission.missionId)));
+
+  if (missingDefaults.length === 0) return;
+
+  try {
+    await this.insertMany(missingDefaults, { ordered: false });
+    console.log(`✅ Mission settings initialized/updated (${missingDefaults.length} new defaults added)`);
+  } catch (error) {
+    const duplicateInsert =
+      error?.code === 11000
+      || (Array.isArray(error?.writeErrors) && error.writeErrors.every((item) => item?.code === 11000));
+    if (!duplicateInsert) {
+      throw error;
+    }
   }
 };
 

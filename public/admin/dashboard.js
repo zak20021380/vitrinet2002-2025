@@ -13608,6 +13608,7 @@ function checkMissionsChanges() {
 const missionIdMap = {
   'mission-user-register': 'user-register',
   'mission-user-app-install': 'user-app-install',
+  'mission-user-daily-login': 'user-daily-login',
   'mission-user-profile-complete': 'user-profile-complete',
   'mission-user-referral': 'user-referral',
   'mission-user-first-purchase': 'user-first-purchase',
