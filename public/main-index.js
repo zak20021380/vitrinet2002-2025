@@ -669,6 +669,7 @@ const searchElements = {
   input: document.getElementById('mainSearchInput'),
   submitBtn: document.getElementById('smartSearchSubmit'),
   smartExample: document.getElementById('smartExampleText'),
+  smartExampleText: document.querySelector('#smartExampleText .hero-smart-example__text'),
   panel: document.getElementById('searchResultsPanel'),
   container: document.getElementById('searchResultsContainer'),
   status: document.getElementById('searchStatusText'),
@@ -695,6 +696,8 @@ const searchUiState = {
   smartExampleIndex: 0,
   rotationTimer: null,
   transitionTimer: null,
+  smartExampleSession: 0,
+  smartExampleRunning: false,
   defaultPlaceholder: searchElements.input?.getAttribute('placeholder') || 'جستجوی مغازه، محصول یا برند...',
   smartExamples: [
     'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
@@ -1219,36 +1222,45 @@ function clearSmartExampleTimers() {
   }
 }
 
-function clearSmartExampleRotationTimer() {
-  if (!searchUiState.rotationTimer) return;
-  clearTimeout(searchUiState.rotationTimer);
-  searchUiState.rotationTimer = null;
-}
-
 function shouldShowSmartExample() {
   return Boolean(searchUiState.smartMode && searchElements.input && !searchElements.input.value.trim());
-}
-
-function adjustSmartExampleHeight() {
-  if (!searchElements.shell || !searchElements.smartExample) return;
-  if (!shouldShowSmartExample()) {
-    searchElements.shell.style.removeProperty('--smart-example-height');
-    return;
-  }
-
-  const textHeight = Math.ceil(searchElements.smartExample.scrollHeight || 0);
-  const calculatedHeight = Math.max(40, textHeight + 10);
-  searchElements.shell.style.setProperty('--smart-example-height', `${calculatedHeight}px`);
 }
 
 function setSmartExampleVisibility(visible) {
   if (!searchElements.shell || !searchElements.smartExample) return;
   searchElements.shell.classList.toggle('smart-example-visible', visible);
-  if (!visible) {
-    searchElements.shell.style.removeProperty('--smart-example-height');
-  } else {
-    adjustSmartExampleHeight();
+}
+
+function setSmartExampleAnimationState({ typing = false, clearing = false } = {}) {
+  if (!searchElements.smartExample) return;
+  searchElements.smartExample.classList.toggle('is-typing', typing);
+  searchElements.smartExample.classList.toggle('is-clearing', clearing);
+}
+
+function setSmartExampleText(value) {
+  if (!searchElements.smartExample) return;
+  if (searchElements.smartExampleText) {
+    searchElements.smartExampleText.textContent = value;
+    return;
   }
+  searchElements.smartExample.textContent = value;
+}
+
+function randomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getTypingDelay(char) {
+  if (!char) return randomBetween(70, 105);
+  if (/[.,!?،؛:]/.test(char)) return randomBetween(145, 220);
+  if (/\s/.test(char)) return randomBetween(95, 145);
+  return randomBetween(52, 110);
+}
+
+function getDeletingDelay(char) {
+  if (!char) return randomBetween(28, 44);
+  if (/\s/.test(char)) return randomBetween(22, 38);
+  return randomBetween(18, 34);
 }
 
 function getCurrentSmartExample() {
@@ -1258,64 +1270,117 @@ function getCurrentSmartExample() {
   return examples[index] || '';
 }
 
-function renderSmartExample({ animate = false } = {}) {
-  if (!searchElements.smartExample) return;
-  const nextText = getCurrentSmartExample();
-  const exampleEl = searchElements.smartExample;
+function advanceSmartExampleIndex() {
+  const total = searchUiState.smartExamples.length || 1;
+  searchUiState.smartExampleIndex = (searchUiState.smartExampleIndex + 1) % total;
+}
 
-  if (!animate) {
-    exampleEl.classList.remove('is-fading');
-    exampleEl.textContent = nextText;
-    adjustSmartExampleHeight();
+function runSmartExampleErase(sessionId, fullText) {
+  if (sessionId !== searchUiState.smartExampleSession) {
+    return;
+  }
+  if (!shouldShowSmartExample()) {
+    stopSmartExamples();
     return;
   }
 
-  exampleEl.classList.add('is-fading');
-  if (searchUiState.transitionTimer) {
-    clearTimeout(searchUiState.transitionTimer);
-  }
-  searchUiState.transitionTimer = setTimeout(() => {
-    exampleEl.textContent = nextText;
-    exampleEl.classList.remove('is-fading');
-    adjustSmartExampleHeight();
-    searchUiState.transitionTimer = null;
-  }, 140);
-}
+  setSmartExampleAnimationState({ typing: false, clearing: true });
+  let index = fullText.length;
 
-function queueSmartExampleRotation() {
-  clearSmartExampleRotationTimer();
-  if (!shouldShowSmartExample()) return;
-
-  searchUiState.rotationTimer = setTimeout(() => {
-    if (!shouldShowSmartExample()) {
-      clearSmartExampleTimers();
+  const eraseStep = () => {
+    if (sessionId !== searchUiState.smartExampleSession) {
       return;
     }
-    const total = searchUiState.smartExamples.length || 1;
-    searchUiState.smartExampleIndex = (searchUiState.smartExampleIndex + 1) % total;
-    renderSmartExample({ animate: true });
-    queueSmartExampleRotation();
-  }, 3200);
+    if (!shouldShowSmartExample()) {
+      stopSmartExamples();
+      return;
+    }
+
+    if (index > 0) {
+      index -= 1;
+      setSmartExampleText(fullText.slice(0, index));
+      searchUiState.transitionTimer = setTimeout(() => eraseStep(), getDeletingDelay(fullText.charAt(index)));
+      return;
+    }
+
+    setSmartExampleAnimationState({ typing: false, clearing: false });
+    advanceSmartExampleIndex();
+    searchUiState.rotationTimer = setTimeout(() => runSmartExampleTypewriter(sessionId), randomBetween(180, 360));
+  };
+
+  eraseStep();
 }
 
-function startSmartExamples() {
+function runSmartExampleTypewriter(sessionId) {
+  if (sessionId !== searchUiState.smartExampleSession) {
+    return;
+  }
+  if (!shouldShowSmartExample()) {
+    stopSmartExamples();
+    return;
+  }
+
+  const fullText = getCurrentSmartExample();
+  if (!fullText) {
+    stopSmartExamples();
+    return;
+  }
+
+  setSmartExampleVisibility(true);
+  setSmartExampleAnimationState({ typing: true, clearing: false });
+  setSmartExampleText('');
+
+  let index = 0;
+  const typeStep = () => {
+    if (sessionId !== searchUiState.smartExampleSession) {
+      return;
+    }
+    if (!shouldShowSmartExample()) {
+      stopSmartExamples();
+      return;
+    }
+
+    if (index < fullText.length) {
+      index += 1;
+      setSmartExampleText(fullText.slice(0, index));
+      searchUiState.transitionTimer = setTimeout(() => typeStep(), getTypingDelay(fullText.charAt(index - 1)));
+      return;
+    }
+
+    setSmartExampleAnimationState({ typing: false, clearing: false });
+    searchUiState.rotationTimer = setTimeout(() => runSmartExampleErase(sessionId, fullText), randomBetween(900, 1400));
+  };
+
+  typeStep();
+}
+
+function startSmartExamples({ resetIndex = false } = {}) {
   if (!searchElements.input || !searchElements.smartExample) return;
-  searchUiState.smartExampleIndex = 0;
-  renderSmartExample();
-  setSmartExampleVisibility(shouldShowSmartExample());
-  queueSmartExampleRotation();
+  if (resetIndex) {
+    searchUiState.smartExampleIndex = 0;
+  }
+  if (!shouldShowSmartExample()) {
+    stopSmartExamples();
+    return;
+  }
+  if (searchUiState.smartExampleRunning) return;
+  clearSmartExampleTimers();
+  setSmartExampleVisibility(true);
+  searchUiState.smartExampleRunning = true;
+  searchUiState.smartExampleSession += 1;
+  runSmartExampleTypewriter(searchUiState.smartExampleSession);
 }
 
 function stopSmartExamples({ reset = false } = {}) {
   clearSmartExampleTimers();
+  searchUiState.smartExampleSession += 1;
+  searchUiState.smartExampleRunning = false;
   if (reset) {
     searchUiState.smartExampleIndex = 0;
   }
+  setSmartExampleAnimationState({ typing: false, clearing: false });
   setSmartExampleVisibility(false);
-  if (searchElements.smartExample) {
-    searchElements.smartExample.classList.remove('is-fading');
-    searchElements.smartExample.textContent = '';
-  }
+  setSmartExampleText('');
 }
 
 function applySmartMode(enabled, { focusInput = false } = {}) {
@@ -1335,7 +1400,7 @@ function applySmartMode(enabled, { focusInput = false } = {}) {
 
   if (isEnabled) {
     searchElements.input.setAttribute('placeholder', '');
-    startSmartExamples();
+    startSmartExamples({ resetIndex: true });
   } else {
     stopSmartExamples({ reset: true });
     searchElements.input.setAttribute('placeholder', searchUiState.defaultPlaceholder);
@@ -1352,11 +1417,6 @@ function attachSmartModeToggle() {
   searchElements.smartToggle.addEventListener('click', () => {
     applySmartMode(!searchUiState.smartMode, { focusInput: true });
   });
-  window.addEventListener('resize', () => {
-    if (searchUiState.smartMode) {
-      adjustSmartExampleHeight();
-    }
-  });
 }
 
 function attachSearchEvents() {
@@ -1372,11 +1432,9 @@ function attachSearchEvents() {
   searchElements.input.addEventListener('input', (event) => {
     const value = event.target.value;
     if (searchUiState.smartMode && value.length) {
-      clearSmartExampleTimers();
-      setSmartExampleVisibility(false);
+      stopSmartExamples();
     } else if (searchUiState.smartMode && !value.length) {
-      setSmartExampleVisibility(true);
-      queueSmartExampleRotation();
+      startSmartExamples();
     }
     scheduleSearch(value);
   });
