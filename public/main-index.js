@@ -665,13 +665,15 @@ const SEARCH_API_BASE = (() => {
 })();
 const searchElements = {
   form: document.getElementById('searchForm'),
+  shell: document.querySelector('.hero-search-unified'),
   input: document.getElementById('mainSearchInput'),
   panel: document.getElementById('searchResultsPanel'),
   container: document.getElementById('searchResultsContainer'),
   status: document.getElementById('searchStatusText'),
   queryLabel: document.getElementById('searchQueryLabel'),
   closeBtn: document.getElementById('closeSearchPanel'),
-  refreshBtn: document.getElementById('refreshSearchBtn')
+  refreshBtn: document.getElementById('refreshSearchBtn'),
+  smartToggle: document.getElementById('smartModeToggle')
 };
 
 const MAX_VISIBLE_SEARCH_RESULTS = 5;
@@ -684,6 +686,13 @@ const searchState = {
   summary: { shops: 0, products: 0, centers: 0, categories: 0 },
   trending: { shops: [], products: [], centers: [], categories: [] },
   lastUpdated: null
+};
+
+const searchUiState = {
+  smartMode: false,
+  placeholderTimer: null,
+  defaultPlaceholder: searchElements.input?.getAttribute('placeholder') || 'جستجوی مغازه، محصول یا برند...',
+  smartPlaceholder: 'مثلا نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن'
 };
 
 const typeOrder = { shop: 0, product: 1, center: 2, category: 3 };
@@ -1191,6 +1200,54 @@ function scheduleSearch(query) {
   searchDebounce = setTimeout(() => handleSearch(query), 280);
 }
 
+function setSearchPlaceholderWithTransition(nextPlaceholder) {
+  if (!searchElements.input || !nextPlaceholder) return;
+  const current = searchElements.input.getAttribute('placeholder') || '';
+  if (current === nextPlaceholder) return;
+
+  if (searchUiState.placeholderTimer) {
+    clearTimeout(searchUiState.placeholderTimer);
+    searchUiState.placeholderTimer = null;
+  }
+
+  searchElements.input.classList.add('is-placeholder-switch');
+  searchUiState.placeholderTimer = setTimeout(() => {
+    searchElements.input.setAttribute('placeholder', nextPlaceholder);
+    requestAnimationFrame(() => {
+      searchElements.input?.classList.remove('is-placeholder-switch');
+    });
+    searchUiState.placeholderTimer = null;
+  }, 100);
+}
+
+function applySmartMode(enabled, { focusInput = false } = {}) {
+  if (!searchElements.shell || !searchElements.smartToggle || !searchElements.input) return;
+
+  const isEnabled = Boolean(enabled);
+  searchUiState.smartMode = isEnabled;
+
+  searchElements.shell.classList.toggle('smart-mode', isEnabled);
+  searchElements.form?.classList.toggle('smart-mode', isEnabled);
+  searchElements.smartToggle.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+  searchElements.smartToggle.setAttribute('aria-label', isEnabled ? 'غیرفعال‌سازی حالت هوشمند' : 'فعال‌سازی حالت هوشمند');
+  searchElements.smartToggle.title = isEnabled ? 'خروج از حالت هوشمند' : 'حالت هوشمند';
+
+  const placeholder = isEnabled ? searchUiState.smartPlaceholder : searchUiState.defaultPlaceholder;
+  setSearchPlaceholderWithTransition(placeholder);
+
+  if (focusInput) {
+    searchElements.input.focus({ preventScroll: true });
+  }
+}
+
+function attachSmartModeToggle() {
+  if (!searchElements.smartToggle || !searchElements.shell || !searchElements.input) return;
+  applySmartMode(false);
+  searchElements.smartToggle.addEventListener('click', () => {
+    applySmartMode(!searchUiState.smartMode, { focusInput: true });
+  });
+}
+
 function attachSearchEvents() {
   if (!searchElements.input || !searchElements.form) return;
 
@@ -1245,6 +1302,7 @@ function attachSearchEvents() {
 }
 
 attachSearchEvents();
+attachSmartModeToggle();
 
 
 // -----------------------------
