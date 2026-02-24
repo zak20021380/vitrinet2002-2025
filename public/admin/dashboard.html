@@ -32,6 +32,158 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="dashboard.css">
   <script src="/nav-active.js" defer></script>
+  <style>
+    .smart-search-admin {
+      margin-bottom: 1.4rem;
+      border-radius: 24px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.96));
+      box-shadow: 0 18px 40px rgba(15, 118, 110, 0.12);
+      padding: clamp(1rem, 1.7vw, 1.5rem);
+    }
+
+    .smart-search-admin__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .smart-search-admin__title {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .smart-search-admin__title i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    .smart-search-admin__hint {
+      margin: 0.35rem 0 0;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .smart-search-admin__status {
+      border-radius: 999px;
+      padding: 0.28rem 0.95rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .smart-search-admin__status.is-active {
+      color: #065f46;
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.28);
+    }
+
+    .smart-search-admin__status.is-inactive {
+      color: #b91c1c;
+      background: rgba(248, 113, 113, 0.14);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .smart-search-admin__form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+    }
+
+    .smart-search-admin__switch {
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 0.8rem 0.95rem;
+    }
+
+    .smart-search-admin__switch strong {
+      color: #0f172a;
+    }
+
+    .smart-search-admin__switch p {
+      margin: 0.2rem 0 0;
+      color: #64748b;
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .smart-search-admin__examples {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .smart-search-admin__field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+    }
+
+    .smart-search-admin__field label {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .smart-search-admin__field input {
+      border-radius: 14px;
+      border: 1.4px solid rgba(148, 163, 184, 0.34);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.7rem 0.85rem;
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .smart-search-admin__field input:focus {
+      outline: none;
+      border-color: rgba(14, 165, 233, 0.55);
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    }
+
+    .smart-search-admin__actions {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .smart-search-admin__message {
+      min-height: 1.15rem;
+      margin: 0;
+      font-size: 0.89rem;
+      color: #64748b;
+    }
+
+    .smart-search-admin__message.is-success {
+      color: #047857;
+    }
+
+    .smart-search-admin__message.is-error {
+      color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+      .smart-search-admin__switch {
+        align-items: flex-start;
+      }
+
+      .smart-search-admin__actions .reward-admin-btn {
+        width: 100%;
+      }
+    }
+  </style>
 
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 <!--
@@ -119,6 +271,54 @@
         <div><div class="num" id="products-total">0</div><div class="label">تعداد محصولات</div></div>
       </div>
     </div>
+
+    <section class="smart-search-admin" aria-labelledby="smart-search-admin-title">
+      <div class="smart-search-admin__header">
+        <div>
+          <h3 class="smart-search-admin__title" id="smart-search-admin-title">
+            <i class="ri-magic-line" aria-hidden="true"></i>
+            جستجوی هوشمند
+          </h3>
+          <p class="smart-search-admin__hint">کنترل سراسری و نمونه‌جملات انیمیشن جستجو در صفحه اصلی</p>
+        </div>
+        <span id="smartSearchAdminStatus" class="smart-search-admin__status is-active">فعال</span>
+      </div>
+
+      <form id="smartSearchAdminForm" class="smart-search-admin__form" autocomplete="off">
+        <div class="smart-search-admin__switch">
+          <label class="switch">
+            <input type="checkbox" id="smartSearchEnabledInput" checked>
+            <span class="switch-slider"></span>
+          </label>
+          <div>
+            <strong>فعال‌سازی سراسری جستجوی هوشمند</strong>
+            <p>اگر غیرفعال شود، آیکن هوشمند در صفحه اصلی یک پیام موقت عدم دسترسی نمایش می‌دهد.</p>
+          </div>
+        </div>
+
+        <div class="smart-search-admin__examples">
+          <div class="smart-search-admin__field">
+            <label for="smartSearchExample1">مثال ۱</label>
+            <input type="text" id="smartSearchExample1" maxlength="160" placeholder="مثلاً نزدیک‌ترین فروشگاه کیف چرمی را پیدا کن" required>
+          </div>
+          <div class="smart-search-admin__field">
+            <label for="smartSearchExample2">مثال ۲</label>
+            <input type="text" id="smartSearchExample2" maxlength="160" placeholder="مثلاً برای مقایسه قیمت گوشی یک پیشنهاد بده" required>
+          </div>
+          <div class="smart-search-admin__field">
+            <label for="smartSearchExample3">مثال ۳ (اختیاری)</label>
+            <input type="text" id="smartSearchExample3" maxlength="160" placeholder="مثلاً مرکز خرید با پارکینگ نزدیک پیدا کن">
+          </div>
+        </div>
+
+        <div class="smart-search-admin__actions">
+          <button type="submit" class="reward-admin-btn primary">ذخیره تنظیمات</button>
+          <button type="button" id="smartSearchAdminReset" class="reward-admin-btn ghost">بازنشانی</button>
+        </div>
+        <p id="smartSearchAdminMessage" class="smart-search-admin__message" role="status"></p>
+      </form>
+    </section>
+
     <div id="dashboard-dynamic-chart-wrap"></div>
   </div>
 
@@ -2592,6 +2792,141 @@
   });
 </script>
 -->
+
+<script>
+  (function () {
+    const SMART_SEARCH_STORAGE_KEY = 'vitrinet.smartSearch.settings.v1';
+    const SMART_SEARCH_DEFAULTS = {
+      enabled: true,
+      examples: [
+        'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
+        'یک مغازه برای مقایسه قیمت گوشی در سنندج پیشنهاد بده',
+        'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
+      ]
+    };
+
+    function normalizeExample(text) {
+      return String(text || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function normalizeExamples(examples) {
+      if (!Array.isArray(examples)) return [];
+      return examples
+        .map(normalizeExample)
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+
+    function normalizeSettings(raw) {
+      const source = raw && typeof raw === 'object' ? raw : {};
+      const examples = normalizeExamples(source.examples);
+      return {
+        enabled: source.enabled !== false,
+        examples: examples.length >= 2 ? examples : SMART_SEARCH_DEFAULTS.examples.slice()
+      };
+    }
+
+    function loadSettings() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(SMART_SEARCH_STORAGE_KEY) || '{}');
+        return normalizeSettings(parsed);
+      } catch (error) {
+        return normalizeSettings({});
+      }
+    }
+
+    function saveSettings(settings) {
+      const normalized = normalizeSettings(settings);
+      localStorage.setItem(SMART_SEARCH_STORAGE_KEY, JSON.stringify({
+        enabled: normalized.enabled,
+        examples: normalized.examples,
+        updatedAt: new Date().toISOString()
+      }));
+      return normalized;
+    }
+
+    function initSmartSearchAdminPanel() {
+      const form = document.getElementById('smartSearchAdminForm');
+      if (!form) return;
+
+      const enabledInput = document.getElementById('smartSearchEnabledInput');
+      const statusChip = document.getElementById('smartSearchAdminStatus');
+      const resetBtn = document.getElementById('smartSearchAdminReset');
+      const messageBox = document.getElementById('smartSearchAdminMessage');
+      const exampleInputs = [
+        document.getElementById('smartSearchExample1'),
+        document.getElementById('smartSearchExample2'),
+        document.getElementById('smartSearchExample3')
+      ].filter(Boolean);
+
+      function setStatus(enabled) {
+        if (!statusChip) return;
+        statusChip.textContent = enabled ? 'فعال' : 'غیرفعال';
+        statusChip.classList.toggle('is-active', enabled);
+        statusChip.classList.toggle('is-inactive', !enabled);
+      }
+
+      function setMessage(text, type) {
+        if (!messageBox) return;
+        messageBox.textContent = text || '';
+        messageBox.classList.remove('is-success', 'is-error');
+        if (type === 'success') messageBox.classList.add('is-success');
+        if (type === 'error') messageBox.classList.add('is-error');
+      }
+
+      function applyToForm(settings) {
+        if (enabledInput) enabledInput.checked = settings.enabled;
+        setStatus(settings.enabled);
+        exampleInputs.forEach((input, index) => {
+          input.value = settings.examples[index] || '';
+        });
+      }
+
+      function collectFromForm() {
+        const examples = normalizeExamples(exampleInputs.map((input) => input.value));
+        if (examples.length < 2) {
+          setMessage('حداقل دو مثال وارد کنید.', 'error');
+          return null;
+        }
+        return {
+          enabled: Boolean(enabledInput && enabledInput.checked),
+          examples
+        };
+      }
+
+      const initialSettings = loadSettings();
+      applyToForm(initialSettings);
+      setMessage('');
+
+      if (enabledInput) {
+        enabledInput.addEventListener('change', () => {
+          setStatus(enabledInput.checked);
+        });
+      }
+
+      exampleInputs.forEach((input) => {
+        input.addEventListener('input', () => setMessage(''));
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const values = collectFromForm();
+        if (!values) return;
+        const saved = saveSettings(values);
+        applyToForm(saved);
+        setMessage('تنظیمات جستجوی هوشمند ذخیره شد.', 'success');
+      });
+
+      resetBtn?.addEventListener('click', () => {
+        const currentSettings = loadSettings();
+        applyToForm(currentSettings);
+        setMessage('مقادیر ذخیره‌شده بازیابی شد.');
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initSmartSearchAdminPanel);
+  })();
+</script>
 
 </body>
 </html>

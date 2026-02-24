@@ -24,6 +24,149 @@
   <script src="js/featured-ad-module.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <script src="/nav-active.js" defer></script>
+  <style>
+    body.smart-search-modal-open {
+      overflow: hidden;
+      padding-right: var(--smart-search-scrollbar, 0px);
+    }
+
+    .hero-ai-toggle.smart-search-disabled-by-admin {
+      opacity: 0.72;
+      filter: saturate(0.6);
+    }
+
+    .smart-search-unavailable-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(7px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
+    }
+
+    .smart-search-unavailable-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .smart-search-unavailable-modal__dialog {
+      width: min(100%, 440px);
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.3);
+      padding: 1.25rem 1.2rem 1.1rem;
+      transform: translateY(8px) scale(0.98);
+      transition: transform 0.24s ease;
+    }
+
+    .smart-search-unavailable-modal.is-open .smart-search-unavailable-modal__dialog {
+      transform: translateY(0) scale(1);
+    }
+
+    .smart-search-unavailable-modal__head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .smart-search-unavailable-modal__badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 14px;
+      background: linear-gradient(130deg, rgba(14, 165, 233, 0.2), rgba(16, 185, 129, 0.2));
+      color: #047857;
+      box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.2);
+      flex-shrink: 0;
+    }
+
+    .smart-search-unavailable-modal__close {
+      border: none;
+      background: transparent;
+      color: #64748b;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 10px;
+      font-size: 1.35rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .smart-search-unavailable-modal__close:hover,
+    .smart-search-unavailable-modal__close:focus-visible {
+      background: rgba(148, 163, 184, 0.16);
+      color: #0f172a;
+      outline: none;
+    }
+
+    .smart-search-unavailable-modal__title {
+      margin: 0.95rem 0 0.35rem;
+      font-size: 1.07rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.65;
+    }
+
+    .smart-search-unavailable-modal__text {
+      margin: 0;
+      color: #475569;
+      font-size: 0.93rem;
+      line-height: 1.9;
+    }
+
+    .smart-search-unavailable-modal__actions {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .smart-search-unavailable-modal__btn {
+      border: 1px solid rgba(14, 165, 233, 0.28);
+      background: linear-gradient(120deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.1));
+      color: #0f766e;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 0.58rem 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .smart-search-unavailable-modal__btn:hover,
+    .smart-search-unavailable-modal__btn:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(14, 165, 233, 0.18);
+      background: linear-gradient(120deg, rgba(14, 165, 233, 0.14), rgba(16, 185, 129, 0.16));
+    }
+
+    @media (max-width: 640px) {
+      .smart-search-unavailable-modal {
+        align-items: flex-end;
+        padding: 0.8rem;
+      }
+
+      .smart-search-unavailable-modal__dialog {
+        width: 100%;
+        border-radius: 20px;
+        padding: 1rem;
+      }
+    }
+  </style>
 
   <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
   <!--
@@ -957,6 +1100,243 @@
     class="w-full bg-gradient-to-tr from-[#f8fafc] via-[#e0fdfa] to-[#d4fbe8] border-t mt-16 px-2 pt-6 pb-3 text-center text-[15px] text-gray-500 rounded-t-[1.7rem] shadow-lg font-bold tracking-wide">
     © 2025 ویترینت | همه حقوق محفوظ است.
   </footer>
+
+  <div id="smartSearchUnavailableModal" class="smart-search-unavailable-modal" aria-hidden="true">
+    <div class="smart-search-unavailable-modal__dialog" role="dialog" aria-modal="true"
+      aria-labelledby="smartSearchUnavailableTitle" aria-describedby="smartSearchUnavailableDesc">
+      <div class="smart-search-unavailable-modal__head">
+        <span class="smart-search-unavailable-modal__badge" aria-hidden="true">
+          <i class="ri-error-warning-line"></i>
+        </span>
+        <button type="button" id="smartSearchUnavailableClose" class="smart-search-unavailable-modal__close"
+          aria-label="بستن">
+          ×
+        </button>
+      </div>
+      <h3 id="smartSearchUnavailableTitle" class="smart-search-unavailable-modal__title">
+        جستجوی هوشمند موقتاً در دسترس نیست
+      </h3>
+      <p id="smartSearchUnavailableDesc" class="smart-search-unavailable-modal__text">
+        این قابلیت در حال حاضر توسط مدیریت غیرفعال شده است. لطفاً کمی بعد دوباره بررسی کنید.
+      </p>
+      <div class="smart-search-unavailable-modal__actions">
+        <button type="button" id="smartSearchUnavailableAcknowledge" class="smart-search-unavailable-modal__btn">
+          متوجه شدم
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const SMART_SEARCH_STORAGE_KEY = 'vitrinet.smartSearch.settings.v1';
+      const SMART_SEARCH_DEFAULTS = {
+        enabled: true,
+        examples: [
+          'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
+          'یک مغازه برای مقایسه قیمت گوشی در سنندج پیشنهاد بده',
+          'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
+        ]
+      };
+
+      let currentSettings = null;
+      let smartToggleButton = null;
+      let modalBackdrop = null;
+      let modalCloseButton = null;
+      let modalAcknowledgeButton = null;
+      let modalLastFocus = null;
+
+      function normalizeExample(text) {
+        return String(text || '').trim().replace(/\s+/g, ' ');
+      }
+
+      function normalizeExamples(examples) {
+        if (!Array.isArray(examples)) return [];
+        return examples
+          .map(normalizeExample)
+          .filter(Boolean)
+          .slice(0, 3);
+      }
+
+      function normalizeSettings(raw) {
+        const source = raw && typeof raw === 'object' ? raw : {};
+        const examples = normalizeExamples(source.examples);
+        return {
+          enabled: source.enabled !== false,
+          examples: examples.length >= 2 ? examples : SMART_SEARCH_DEFAULTS.examples.slice()
+        };
+      }
+
+      function readSettings() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(SMART_SEARCH_STORAGE_KEY) || '{}');
+          return normalizeSettings(raw);
+        } catch (error) {
+          return normalizeSettings({});
+        }
+      }
+
+      function lockBodyScroll() {
+        const width = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+        document.body.style.setProperty('--smart-search-scrollbar', `${width}px`);
+        document.body.classList.add('smart-search-modal-open');
+      }
+
+      function unlockBodyScroll() {
+        document.body.classList.remove('smart-search-modal-open');
+        document.body.style.removeProperty('--smart-search-scrollbar');
+      }
+
+      function openUnavailableModal() {
+        if (!modalBackdrop || modalBackdrop.classList.contains('is-open')) return;
+        modalLastFocus = document.activeElement;
+        modalBackdrop.classList.add('is-open');
+        modalBackdrop.setAttribute('aria-hidden', 'false');
+        lockBodyScroll();
+        setTimeout(() => {
+          if (modalCloseButton) {
+            modalCloseButton.focus({ preventScroll: true });
+          }
+        }, 20);
+      }
+
+      function closeUnavailableModal() {
+        if (!modalBackdrop || !modalBackdrop.classList.contains('is-open')) return;
+        modalBackdrop.classList.remove('is-open');
+        modalBackdrop.setAttribute('aria-hidden', 'true');
+        unlockBodyScroll();
+        if (modalLastFocus && typeof modalLastFocus.focus === 'function') {
+          modalLastFocus.focus({ preventScroll: true });
+        }
+      }
+
+      function syncSmartExamples(examples, attempt) {
+        const tryCount = Number(attempt) || 0;
+        try {
+          if (typeof searchUiState !== 'undefined' && searchUiState && Array.isArray(searchUiState.smartExamples)) {
+            searchUiState.smartExamples = examples.slice();
+            searchUiState.smartExampleIndex = 0;
+
+            const input = document.getElementById('mainSearchInput');
+            const hasInput = Boolean(input && input.value.trim());
+            if (searchUiState.smartMode && !hasInput && typeof stopSmartExamples === 'function' && typeof startSmartExamples === 'function') {
+              stopSmartExamples({ reset: true });
+              startSmartExamples({ resetIndex: true });
+            }
+            return;
+          }
+        } catch (error) {
+          console.warn('smart example sync failed:', error);
+        }
+
+        if (tryCount < 20) {
+          setTimeout(() => syncSmartExamples(examples, tryCount + 1), 120);
+        }
+      }
+
+      function forceSmartModeOff() {
+        try {
+          if (typeof applySmartMode === 'function') {
+            applySmartMode(false);
+            return;
+          }
+        } catch (error) {
+          console.warn('applySmartMode fallback:', error);
+        }
+
+        const shell = document.querySelector('.hero-search-unified');
+        const form = document.getElementById('searchForm');
+        const input = document.getElementById('mainSearchInput');
+        const smartExample = document.getElementById('smartExampleText');
+
+        if (shell) {
+          shell.classList.remove('smart-mode');
+          shell.classList.remove('smart-example-visible');
+        }
+        if (form) {
+          form.classList.remove('smart-mode');
+        }
+        if (input) {
+          input.setAttribute('placeholder', 'جستجوی مغازه، محصول یا برند...');
+        }
+        if (smartExample) {
+          smartExample.classList.remove('is-typing');
+          smartExample.classList.remove('is-clearing');
+          const textNode = smartExample.querySelector('.hero-smart-example__text');
+          if (textNode) textNode.textContent = '';
+        }
+        if (smartToggleButton) {
+          smartToggleButton.setAttribute('aria-pressed', 'false');
+        }
+      }
+
+      function applySettings(settings) {
+        const normalized = normalizeSettings(settings);
+        currentSettings = normalized;
+
+        syncSmartExamples(normalized.examples, 0);
+
+        if (smartToggleButton) {
+          smartToggleButton.classList.toggle('smart-search-disabled-by-admin', !normalized.enabled);
+          smartToggleButton.setAttribute('aria-disabled', normalized.enabled ? 'false' : 'true');
+          smartToggleButton.title = normalized.enabled ? 'حالت هوشمند' : 'جستجوی هوشمند موقتاً غیرفعال است';
+        }
+
+        if (!normalized.enabled) {
+          forceSmartModeOff();
+        } else {
+          closeUnavailableModal();
+        }
+      }
+
+      function attachDisabledSmartSearchGuard() {
+        if (!smartToggleButton) return;
+        smartToggleButton.addEventListener('click', (event) => {
+          if (!currentSettings || currentSettings.enabled) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          openUnavailableModal();
+        }, true);
+      }
+
+      function bindModalEvents() {
+        if (!modalBackdrop) return;
+
+        modalBackdrop.addEventListener('click', (event) => {
+          if (event.target === modalBackdrop) {
+            closeUnavailableModal();
+          }
+        });
+
+        modalCloseButton?.addEventListener('click', () => closeUnavailableModal());
+        modalAcknowledgeButton?.addEventListener('click', () => closeUnavailableModal());
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && modalBackdrop.classList.contains('is-open')) {
+            closeUnavailableModal();
+          }
+        });
+      }
+
+      function initSmartSearchStateBridge() {
+        smartToggleButton = document.getElementById('smartModeToggle');
+        modalBackdrop = document.getElementById('smartSearchUnavailableModal');
+        modalCloseButton = document.getElementById('smartSearchUnavailableClose');
+        modalAcknowledgeButton = document.getElementById('smartSearchUnavailableAcknowledge');
+
+        bindModalEvents();
+        attachDisabledSmartSearchGuard();
+        applySettings(readSettings());
+
+        window.addEventListener('storage', (event) => {
+          if (event.key !== SMART_SEARCH_STORAGE_KEY) return;
+          applySettings(readSettings());
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', initSmartSearchStateBridge);
+    })();
+  </script>
 
 
   <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
