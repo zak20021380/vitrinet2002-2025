@@ -4779,6 +4779,9 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
 .hero-search-unified.smart-mode {
   max-width: 546px;
+  height: auto;
+  min-height: calc(var(--smart-example-height, 44px) + 14px);
+  align-items: stretch;
   border-color: rgba(16, 185, 129, 0.4);
   background: linear-gradient(180deg, #ffffff 0%, #f7fffc 100%);
   box-shadow:
@@ -4792,15 +4795,6 @@ body.hide-mobile-nav .mobile-bottom-nav {
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
-}
-
-.hero-search-unified.smart-mode .hero-city-chip {
-  min-width: 68px;
-  padding: 0 10px;
-}
-
-.hero-search-unified.smart-mode .hero-search-divider {
-  margin: 0 3px;
 }
 
 /* City Selector Chip - Leading element in RTL */
@@ -4855,8 +4849,17 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 /* Unified Search Input */
+.hero-search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
 .hero-search-input--unified {
   flex: 1;
+  width: 100%;
   height: 40px;
   padding: 0 12px;
   border: none;
@@ -4867,7 +4870,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
   color: #1e293b;
   text-align: right;
   min-width: 0;
-  transition: padding 0.22s ease, color 0.18s ease, letter-spacing 0.18s ease;
+  transition: padding 0.22s ease, color 0.18s ease, letter-spacing 0.18s ease, opacity 0.2s ease;
 }
 
 .hero-search-input--unified::placeholder {
@@ -4882,10 +4885,40 @@ body.hide-mobile-nav .mobile-bottom-nav {
 }
 
 .hero-search-unified.smart-mode .hero-search-input--unified {
-  padding-right: 14px;
-  padding-left: 16px;
+  height: auto;
+  min-height: var(--smart-example-height, 44px);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 12px;
+  padding-left: 12px;
   color: #0f172a;
   letter-spacing: 0.1px;
+}
+
+.hero-smart-example {
+  position: absolute;
+  right: 12px;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: clamp(11px, 2.9vw, 14px);
+  line-height: 1.45;
+  text-align: right;
+  pointer-events: none;
+  opacity: 0;
+  white-space: normal;
+  transition: opacity 0.2s ease, transform 0.22s ease;
+}
+
+.hero-search-unified.smart-example-visible .hero-smart-example {
+  opacity: 1;
+}
+
+.hero-smart-example.is-fading {
+  opacity: 0;
+  transform: translateY(calc(-50% + 2px));
 }
 
 .hero-ai-toggle {
@@ -5016,6 +5049,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
   .hero-search-unified.smart-mode {
     max-width: 100%;
+    height: auto;
+    min-height: calc(var(--smart-example-height, 42px) + 12px);
   }
 
   .hero-city-chip {
@@ -5043,6 +5078,21 @@ body.hide-mobile-nav .mobile-bottom-nav {
     height: 38px;
     padding: 0 10px;
     font-size: 13px;
+  }
+
+  .hero-search-unified.smart-mode .hero-search-input--unified {
+    min-height: var(--smart-example-height, 42px);
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .hero-smart-example {
+    right: 10px;
+    left: 10px;
+    font-size: clamp(10.5px, 3.3vw, 13px);
+    line-height: 1.4;
   }
 
   .hero-ai-toggle {
@@ -5105,6 +5155,25 @@ body.hide-mobile-nav .mobile-bottom-nav {
     font-size: 12px;
   }
 
+  .hero-search-unified.smart-mode {
+    min-height: calc(var(--smart-example-height, 40px) + 12px);
+  }
+
+  .hero-search-unified.smart-mode .hero-search-input--unified {
+    min-height: var(--smart-example-height, 40px);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .hero-smart-example {
+    right: 8px;
+    left: 8px;
+    font-size: clamp(10px, 3.6vw, 12px);
+    line-height: 1.38;
+  }
+
   .hero-ai-toggle {
     width: 32px;
     height: 32px;
@@ -5143,6 +5212,8 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
   .hero-search-unified.smart-mode {
     max-width: 568px;
+    height: auto;
+    min-height: calc(var(--smart-example-height, 48px) + 14px);
   }
 
   .hero-search-results-shell {
@@ -5174,6 +5245,18 @@ body.hide-mobile-nav .mobile-bottom-nav {
     height: 42px;
     padding: 0 14px;
     font-size: 15px;
+  }
+
+  .hero-search-unified.smart-mode .hero-search-input--unified {
+    min-height: var(--smart-example-height, 48px);
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+
+  .hero-smart-example {
+    right: 14px;
+    left: 14px;
+    font-size: clamp(12px, 1.2vw, 15px);
   }
 
   .hero-ai-toggle {

@@ -668,6 +668,7 @@ const searchElements = {
   shell: document.querySelector('.hero-search-unified'),
   input: document.getElementById('mainSearchInput'),
   submitBtn: document.getElementById('smartSearchSubmit'),
+  smartExample: document.getElementById('smartExampleText'),
   panel: document.getElementById('searchResultsPanel'),
   container: document.getElementById('searchResultsContainer'),
   status: document.getElementById('searchStatusText'),
@@ -691,10 +692,15 @@ const searchState = {
 
 const searchUiState = {
   smartMode: false,
-  typingTimer: null,
-  typingToken: 0,
+  smartExampleIndex: 0,
+  rotationTimer: null,
+  transitionTimer: null,
   defaultPlaceholder: searchElements.input?.getAttribute('placeholder') || 'جستجوی مغازه، محصول یا برند...',
-  smartPlaceholder: 'مثلا نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن'
+  smartExamples: [
+    'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
+    'یک مغازه برای مقایسه قیمت گوشی در سنندج پیشنهاد بده',
+    'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
+  ]
 };
 
 const typeOrder = { shop: 0, product: 1, center: 2, category: 3 };
@@ -1202,63 +1208,114 @@ function scheduleSearch(query) {
   searchDebounce = setTimeout(() => handleSearch(query), 280);
 }
 
-function stopSmartTypewriter(placeholderAfterStop = null) {
-  if (searchUiState.typingTimer) {
-    clearTimeout(searchUiState.typingTimer);
-    searchUiState.typingTimer = null;
+function clearSmartExampleTimers() {
+  if (searchUiState.rotationTimer) {
+    clearTimeout(searchUiState.rotationTimer);
+    searchUiState.rotationTimer = null;
   }
-  searchUiState.typingToken += 1;
-
-  if (placeholderAfterStop !== null && searchElements.input) {
-    searchElements.input.setAttribute('placeholder', placeholderAfterStop);
+  if (searchUiState.transitionTimer) {
+    clearTimeout(searchUiState.transitionTimer);
+    searchUiState.transitionTimer = null;
   }
 }
 
-function getTypewriterDelay(previousChar) {
-  let delay = 24 + Math.random() * 36;
-  if (/\s/.test(previousChar)) delay += 12 + Math.random() * 26;
-  if (/[.!?،؛,:]/.test(previousChar)) delay += 80 + Math.random() * 110;
-  return delay;
+function clearSmartExampleRotationTimer() {
+  if (!searchUiState.rotationTimer) return;
+  clearTimeout(searchUiState.rotationTimer);
+  searchUiState.rotationTimer = null;
 }
 
-function runSmartTypewriter() {
-  if (!searchElements.input) return;
-  const text = searchUiState.smartPlaceholder;
-  if (!text) return;
+function shouldShowSmartExample() {
+  return Boolean(searchUiState.smartMode && searchElements.input && !searchElements.input.value.trim());
+}
 
-  stopSmartTypewriter('');
-
-  if (searchElements.input.value.trim()) {
-    searchElements.input.setAttribute('placeholder', text);
+function adjustSmartExampleHeight() {
+  if (!searchElements.shell || !searchElements.smartExample) return;
+  if (!shouldShowSmartExample()) {
+    searchElements.shell.style.removeProperty('--smart-example-height');
     return;
   }
 
-  const token = searchUiState.typingToken;
-  let index = 0;
+  const textHeight = Math.ceil(searchElements.smartExample.scrollHeight || 0);
+  const calculatedHeight = Math.max(40, textHeight + 10);
+  searchElements.shell.style.setProperty('--smart-example-height', `${calculatedHeight}px`);
+}
 
-  const tick = () => {
-    if (!searchElements.input) return;
-    if (token !== searchUiState.typingToken) return;
-    if (!searchUiState.smartMode) return;
+function setSmartExampleVisibility(visible) {
+  if (!searchElements.shell || !searchElements.smartExample) return;
+  searchElements.shell.classList.toggle('smart-example-visible', visible);
+  if (!visible) {
+    searchElements.shell.style.removeProperty('--smart-example-height');
+  } else {
+    adjustSmartExampleHeight();
+  }
+}
 
-    // User started typing: stop animation immediately and keep current UI state.
-    if (searchElements.input.value.length > 0) {
-      stopSmartTypewriter();
+function getCurrentSmartExample() {
+  const examples = searchUiState.smartExamples;
+  if (!Array.isArray(examples) || !examples.length) return '';
+  const index = Math.max(0, Math.min(searchUiState.smartExampleIndex, examples.length - 1));
+  return examples[index] || '';
+}
+
+function renderSmartExample({ animate = false } = {}) {
+  if (!searchElements.smartExample) return;
+  const nextText = getCurrentSmartExample();
+  const exampleEl = searchElements.smartExample;
+
+  if (!animate) {
+    exampleEl.classList.remove('is-fading');
+    exampleEl.textContent = nextText;
+    adjustSmartExampleHeight();
+    return;
+  }
+
+  exampleEl.classList.add('is-fading');
+  if (searchUiState.transitionTimer) {
+    clearTimeout(searchUiState.transitionTimer);
+  }
+  searchUiState.transitionTimer = setTimeout(() => {
+    exampleEl.textContent = nextText;
+    exampleEl.classList.remove('is-fading');
+    adjustSmartExampleHeight();
+    searchUiState.transitionTimer = null;
+  }, 140);
+}
+
+function queueSmartExampleRotation() {
+  clearSmartExampleRotationTimer();
+  if (!shouldShowSmartExample()) return;
+
+  searchUiState.rotationTimer = setTimeout(() => {
+    if (!shouldShowSmartExample()) {
+      clearSmartExampleTimers();
       return;
     }
+    const total = searchUiState.smartExamples.length || 1;
+    searchUiState.smartExampleIndex = (searchUiState.smartExampleIndex + 1) % total;
+    renderSmartExample({ animate: true });
+    queueSmartExampleRotation();
+  }, 3200);
+}
 
-    if (index >= text.length) {
-      searchUiState.typingTimer = null;
-      return;
-    }
+function startSmartExamples() {
+  if (!searchElements.input || !searchElements.smartExample) return;
+  searchUiState.smartExampleIndex = 0;
+  renderSmartExample();
+  setSmartExampleVisibility(shouldShowSmartExample());
+  queueSmartExampleRotation();
+}
 
-    index += 1;
-    searchElements.input.setAttribute('placeholder', text.slice(0, index));
-    const previousChar = text[index - 1] || '';
-    searchUiState.typingTimer = setTimeout(tick, getTypewriterDelay(previousChar));
-  };
-
-  searchUiState.typingTimer = setTimeout(tick, 90);
+function stopSmartExamples({ reset = false } = {}) {
+  clearSmartExampleTimers();
+  if (reset) {
+    searchUiState.smartExampleIndex = 0;
+  }
+  setSmartExampleVisibility(false);
+  if (searchElements.smartExample) {
+    searchElements.smartExample.classList.remove('is-fading');
+    searchElements.smartExample.textContent = '';
+  }
 }
 
 function applySmartMode(enabled, { focusInput = false } = {}) {
@@ -1277,9 +1334,11 @@ function applySmartMode(enabled, { focusInput = false } = {}) {
   }
 
   if (isEnabled) {
-    runSmartTypewriter();
+    searchElements.input.setAttribute('placeholder', '');
+    startSmartExamples();
   } else {
-    stopSmartTypewriter(searchUiState.defaultPlaceholder);
+    stopSmartExamples({ reset: true });
+    searchElements.input.setAttribute('placeholder', searchUiState.defaultPlaceholder);
   }
 
   if (focusInput) {
@@ -1292,6 +1351,11 @@ function attachSmartModeToggle() {
   applySmartMode(false);
   searchElements.smartToggle.addEventListener('click', () => {
     applySmartMode(!searchUiState.smartMode, { focusInput: true });
+  });
+  window.addEventListener('resize', () => {
+    if (searchUiState.smartMode) {
+      adjustSmartExampleHeight();
+    }
   });
 }
 
@@ -1308,10 +1372,11 @@ function attachSearchEvents() {
   searchElements.input.addEventListener('input', (event) => {
     const value = event.target.value;
     if (searchUiState.smartMode && value.length) {
-      stopSmartTypewriter();
-    }
-    if (searchUiState.smartMode && !value.length && !searchUiState.typingTimer) {
-      searchElements.input.setAttribute('placeholder', searchUiState.smartPlaceholder);
+      clearSmartExampleTimers();
+      setSmartExampleVisibility(false);
+    } else if (searchUiState.smartMode && !value.length) {
+      setSmartExampleVisibility(true);
+      queueSmartExampleRotation();
     }
     scheduleSearch(value);
   });
