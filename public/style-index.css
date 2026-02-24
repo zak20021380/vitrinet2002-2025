@@ -4875,10 +4875,6 @@ body.hide-mobile-nav .mobile-bottom-nav {
   outline: none;
 }
 
-.hero-search-input--unified.is-placeholder-switch::placeholder {
-  opacity: 0;
-}
-
 .hero-search-unified.smart-mode .hero-search-input--unified {
   padding-right: 14px;
   padding-left: 16px;
@@ -4940,6 +4936,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
 /* Unified Submit Button */
 .hero-submit-btn--unified {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4951,7 +4948,28 @@ body.hide-mobile-nav .mobile-bottom-nav {
   color: #ffffff;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+
+.hero-submit-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.22s ease, transform 0.24s ease;
+  pointer-events: none;
+}
+
+.hero-submit-icon--search {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.hero-submit-icon--ai {
+  opacity: 0;
+  transform: translateY(4px) scale(0.88);
 }
 
 .hero-submit-btn--unified:hover {
@@ -4961,6 +4979,23 @@ body.hide-mobile-nav .mobile-bottom-nav {
 
 .hero-submit-btn--unified:active {
   transform: scale(0.98);
+}
+
+.hero-search-unified.smart-mode .hero-submit-btn--unified {
+  box-shadow:
+    0 2px 8px rgba(16, 185, 129, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  filter: saturate(1.05);
+}
+
+.hero-search-unified.smart-mode .hero-submit-icon--search {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.9);
+}
+
+.hero-search-unified.smart-mode .hero-submit-icon--ai {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 /* === MOBILE RESPONSIVE (360-430px) === */
@@ -5022,7 +5057,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
     border-radius: 7px;
   }
 
-  .hero-submit-btn--unified svg {
+  .hero-submit-icon svg {
     width: 18px;
     height: 18px;
   }
@@ -5086,7 +5121,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
     border-radius: 6px;
   }
 
-  .hero-submit-btn--unified svg {
+  .hero-submit-icon svg {
     width: 16px;
     height: 16px;
   }
@@ -5148,7 +5183,7 @@ body.hide-mobile-nav .mobile-bottom-nav {
     border-radius: 9px;
   }
 
-  .hero-submit-btn--unified svg {
+  .hero-submit-icon svg {
     width: 20px;
     height: 20px;
   }

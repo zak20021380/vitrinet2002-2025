@@ -667,6 +667,7 @@ const searchElements = {
   form: document.getElementById('searchForm'),
   shell: document.querySelector('.hero-search-unified'),
   input: document.getElementById('mainSearchInput'),
+  submitBtn: document.getElementById('smartSearchSubmit'),
   panel: document.getElementById('searchResultsPanel'),
   container: document.getElementById('searchResultsContainer'),
   status: document.getElementById('searchStatusText'),
@@ -690,7 +691,8 @@ const searchState = {
 
 const searchUiState = {
   smartMode: false,
-  placeholderTimer: null,
+  typingTimer: null,
+  typingToken: 0,
   defaultPlaceholder: searchElements.input?.getAttribute('placeholder') || 'جستجوی مغازه، محصول یا برند...',
   smartPlaceholder: 'مثلا نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن'
 };
@@ -1200,24 +1202,63 @@ function scheduleSearch(query) {
   searchDebounce = setTimeout(() => handleSearch(query), 280);
 }
 
-function setSearchPlaceholderWithTransition(nextPlaceholder) {
-  if (!searchElements.input || !nextPlaceholder) return;
-  const current = searchElements.input.getAttribute('placeholder') || '';
-  if (current === nextPlaceholder) return;
+function stopSmartTypewriter(placeholderAfterStop = null) {
+  if (searchUiState.typingTimer) {
+    clearTimeout(searchUiState.typingTimer);
+    searchUiState.typingTimer = null;
+  }
+  searchUiState.typingToken += 1;
 
-  if (searchUiState.placeholderTimer) {
-    clearTimeout(searchUiState.placeholderTimer);
-    searchUiState.placeholderTimer = null;
+  if (placeholderAfterStop !== null && searchElements.input) {
+    searchElements.input.setAttribute('placeholder', placeholderAfterStop);
+  }
+}
+
+function getTypewriterDelay(previousChar) {
+  let delay = 24 + Math.random() * 36;
+  if (/\s/.test(previousChar)) delay += 12 + Math.random() * 26;
+  if (/[.!?،؛,:]/.test(previousChar)) delay += 80 + Math.random() * 110;
+  return delay;
+}
+
+function runSmartTypewriter() {
+  if (!searchElements.input) return;
+  const text = searchUiState.smartPlaceholder;
+  if (!text) return;
+
+  stopSmartTypewriter('');
+
+  if (searchElements.input.value.trim()) {
+    searchElements.input.setAttribute('placeholder', text);
+    return;
   }
 
-  searchElements.input.classList.add('is-placeholder-switch');
-  searchUiState.placeholderTimer = setTimeout(() => {
-    searchElements.input.setAttribute('placeholder', nextPlaceholder);
-    requestAnimationFrame(() => {
-      searchElements.input?.classList.remove('is-placeholder-switch');
-    });
-    searchUiState.placeholderTimer = null;
-  }, 100);
+  const token = searchUiState.typingToken;
+  let index = 0;
+
+  const tick = () => {
+    if (!searchElements.input) return;
+    if (token !== searchUiState.typingToken) return;
+    if (!searchUiState.smartMode) return;
+
+    // User started typing: stop animation immediately and keep current UI state.
+    if (searchElements.input.value.length > 0) {
+      stopSmartTypewriter();
+      return;
+    }
+
+    if (index >= text.length) {
+      searchUiState.typingTimer = null;
+      return;
+    }
+
+    index += 1;
+    searchElements.input.setAttribute('placeholder', text.slice(0, index));
+    const previousChar = text[index - 1] || '';
+    searchUiState.typingTimer = setTimeout(tick, getTypewriterDelay(previousChar));
+  };
+
+  searchUiState.typingTimer = setTimeout(tick, 90);
 }
 
 function applySmartMode(enabled, { focusInput = false } = {}) {
@@ -1231,9 +1272,15 @@ function applySmartMode(enabled, { focusInput = false } = {}) {
   searchElements.smartToggle.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
   searchElements.smartToggle.setAttribute('aria-label', isEnabled ? 'غیرفعال‌سازی حالت هوشمند' : 'فعال‌سازی حالت هوشمند');
   searchElements.smartToggle.title = isEnabled ? 'خروج از حالت هوشمند' : 'حالت هوشمند';
+  if (searchElements.submitBtn) {
+    searchElements.submitBtn.setAttribute('aria-label', isEnabled ? 'جستجوی هوشمند' : 'جستجو');
+  }
 
-  const placeholder = isEnabled ? searchUiState.smartPlaceholder : searchUiState.defaultPlaceholder;
-  setSearchPlaceholderWithTransition(placeholder);
+  if (isEnabled) {
+    runSmartTypewriter();
+  } else {
+    stopSmartTypewriter(searchUiState.defaultPlaceholder);
+  }
 
   if (focusInput) {
     searchElements.input.focus({ preventScroll: true });
@@ -1260,6 +1307,12 @@ function attachSearchEvents() {
 
   searchElements.input.addEventListener('input', (event) => {
     const value = event.target.value;
+    if (searchUiState.smartMode && value.length) {
+      stopSmartTypewriter();
+    }
+    if (searchUiState.smartMode && !value.length && !searchUiState.typingTimer) {
+      searchElements.input.setAttribute('placeholder', searchUiState.smartPlaceholder);
+    }
     scheduleSearch(value);
   });
 
