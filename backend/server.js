@@ -11,6 +11,7 @@ const planRoutes   = require('./routes/plans');
 const adPlanRoutes = require('./routes/adPlans');
 const paymentRoutes = require('./routes/payment');
 const settingsRoutes = require('./routes/settings');
+const smartSearchRoutes = require('./routes/smartSearch');
 const accountantRoutes = require('./routes/accountant');
 const categoryRoutes = require('./routes/categoryRoutes');
 const securityRoutes = require('./routes/security');
@@ -92,6 +93,7 @@ app.use('/api/shopping-centers', require('./routes/shoppingCenter'));
 app.use('/api/shop-appearances', require('./routes/shopAppearance'));
 app.use('/api/payment', paymentRoutes);  // روت‌های پرداخت
 app.use('/api/settings', settingsRoutes);
+app.use('/api/smart-search', smartSearchRoutes);
 app.use('/api/accountant', accountantRoutes);
 app.use('/api/security', securityRoutes);
 

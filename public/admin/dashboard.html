@@ -2795,7 +2795,7 @@
 
 <script>
   (function () {
-    const SMART_SEARCH_STORAGE_KEY = 'vitrinet.smartSearch.settings.v1';
+    const SMART_SEARCH_API_URL = `${window.location.origin.replace(/\/$/, '')}/api/smart-search`;
     const SMART_SEARCH_DEFAULTS = {
       enabled: true,
       examples: [
@@ -2804,6 +2804,11 @@
         'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
       ]
     };
+    const SMART_SEARCH_EXAMPLE_MIN = 2;
+    const SMART_SEARCH_EXAMPLE_MAX = 3;
+
+    let latestServerSettings = normalizeSettings(SMART_SEARCH_DEFAULTS);
+    let loadPromise = null;
 
     function normalizeExample(text) {
       return String(text || '').trim().replace(/\s+/g, ' ');
@@ -2814,7 +2819,7 @@
       return examples
         .map(normalizeExample)
         .filter(Boolean)
-        .slice(0, 3);
+        .slice(0, SMART_SEARCH_EXAMPLE_MAX);
     }
 
     function normalizeSettings(raw) {
@@ -2822,27 +2827,86 @@
       const examples = normalizeExamples(source.examples);
       return {
         enabled: source.enabled !== false,
-        examples: examples.length >= 2 ? examples : SMART_SEARCH_DEFAULTS.examples.slice()
+        examples:
+          examples.length >= SMART_SEARCH_EXAMPLE_MIN && examples.length <= SMART_SEARCH_EXAMPLE_MAX
+            ? examples
+            : SMART_SEARCH_DEFAULTS.examples.slice()
       };
     }
 
-    function loadSettings() {
+    function readCookie(name) {
+      const escapedName = String(name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escapedName}=([^;]+)`));
+      return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function getAuthToken() {
+      const cookieToken = readCookie('admin_token') || readCookie('access_token');
+      if (cookieToken) return cookieToken;
       try {
-        const parsed = JSON.parse(localStorage.getItem(SMART_SEARCH_STORAGE_KEY) || '{}');
-        return normalizeSettings(parsed);
-      } catch (error) {
-        return normalizeSettings({});
+        return (
+          localStorage.getItem('admin_token') ||
+          localStorage.getItem('adminToken') ||
+          localStorage.getItem('access_token') ||
+          localStorage.getItem('token') ||
+          ''
+        );
+      } catch {
+        return '';
       }
     }
 
-    function saveSettings(settings) {
-      const normalized = normalizeSettings(settings);
-      localStorage.setItem(SMART_SEARCH_STORAGE_KEY, JSON.stringify({
-        enabled: normalized.enabled,
-        examples: normalized.examples,
-        updatedAt: new Date().toISOString()
-      }));
-      return normalized;
+    function extractMessage(payload, fallback) {
+      if (payload && typeof payload.message === 'string' && payload.message.trim()) {
+        return payload.message.trim();
+      }
+      return fallback;
+    }
+
+    async function fetchSettingsFromServer(force = false) {
+      if (loadPromise && !force) return loadPromise;
+
+      loadPromise = fetch(SMART_SEARCH_API_URL, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store'
+      })
+        .then(async (res) => {
+          const payload = await res.json().catch(() => null);
+          if (!res.ok) {
+            throw new Error(extractMessage(payload, 'خطا در دریافت تنظیمات جستجوی هوشمند.'));
+          }
+          return normalizeSettings(payload || {});
+        })
+        .finally(() => {
+          loadPromise = null;
+        });
+
+      return loadPromise;
+    }
+
+    async function saveSettingsToServer(settings) {
+      const token = getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+
+      const res = await fetch(SMART_SEARCH_API_URL, {
+        method: 'PUT',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify(normalizeSettings(settings))
+      });
+
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(extractMessage(payload, 'ذخیره تنظیمات انجام نشد.'));
+      }
+
+      return normalizeSettings(payload || {});
     }
 
     function initSmartSearchAdminPanel() {
@@ -2853,6 +2917,7 @@
       const statusChip = document.getElementById('smartSearchAdminStatus');
       const resetBtn = document.getElementById('smartSearchAdminReset');
       const messageBox = document.getElementById('smartSearchAdminMessage');
+      const submitButton = form.querySelector('button[type="submit"]');
       const exampleInputs = [
         document.getElementById('smartSearchExample1'),
         document.getElementById('smartSearchExample2'),
@@ -2874,6 +2939,12 @@
         if (type === 'error') messageBox.classList.add('is-error');
       }
 
+      function setBusy(isBusy) {
+        const busy = Boolean(isBusy);
+        if (submitButton) submitButton.disabled = busy;
+        if (resetBtn) resetBtn.disabled = busy;
+      }
+
       function applyToForm(settings) {
         if (enabledInput) enabledInput.checked = settings.enabled;
         setStatus(settings.enabled);
@@ -2884,8 +2955,12 @@
 
       function collectFromForm() {
         const examples = normalizeExamples(exampleInputs.map((input) => input.value));
-        if (examples.length < 2) {
+        if (examples.length < SMART_SEARCH_EXAMPLE_MIN) {
           setMessage('حداقل دو مثال وارد کنید.', 'error');
+          return null;
+        }
+        if (examples.length > SMART_SEARCH_EXAMPLE_MAX) {
+          setMessage('حداکثر سه مثال قابل ذخیره است.', 'error');
           return null;
         }
         return {
@@ -2894,13 +2969,10 @@
         };
       }
 
-      const initialSettings = loadSettings();
-      applyToForm(initialSettings);
-      setMessage('');
-
       if (enabledInput) {
         enabledInput.addEventListener('change', () => {
           setStatus(enabledInput.checked);
+          setMessage('');
         });
       }
 
@@ -2908,20 +2980,47 @@
         input.addEventListener('input', () => setMessage(''));
       });
 
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const values = collectFromForm();
         if (!values) return;
-        const saved = saveSettings(values);
-        applyToForm(saved);
-        setMessage('تنظیمات جستجوی هوشمند ذخیره شد.', 'success');
+
+        setBusy(true);
+        setMessage('در حال ذخیره تنظیمات...', '');
+
+        try {
+          const saved = await saveSettingsToServer(values);
+          latestServerSettings = saved;
+          applyToForm(saved);
+          setMessage('تنظیمات جستجوی هوشمند ذخیره شد.', 'success');
+        } catch (error) {
+          setMessage(error.message || 'ذخیره تنظیمات انجام نشد.', 'error');
+        } finally {
+          setBusy(false);
+        }
       });
 
       resetBtn?.addEventListener('click', () => {
-        const currentSettings = loadSettings();
-        applyToForm(currentSettings);
-        setMessage('مقادیر ذخیره‌شده بازیابی شد.');
+        applyToForm(latestServerSettings);
+        setMessage('آخرین تنظیمات دریافت‌شده از سرور بازیابی شد.', 'success');
       });
+
+      setBusy(true);
+      setMessage('در حال دریافت تنظیمات...', '');
+
+      fetchSettingsFromServer(true)
+        .then((settings) => {
+          latestServerSettings = settings;
+          applyToForm(settings);
+          setMessage('');
+        })
+        .catch((error) => {
+          applyToForm(latestServerSettings);
+          setMessage(error.message || 'امکان دریافت تنظیمات وجود ندارد.', 'error');
+        })
+        .finally(() => {
+          setBusy(false);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', initSmartSearchAdminPanel);

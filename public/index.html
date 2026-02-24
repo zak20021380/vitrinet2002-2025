@@ -119,7 +119,7 @@
     .smart-search-unavailable-modal__head {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       gap: 0.85rem;
     }
 
@@ -1158,16 +1158,12 @@
         <span class="smart-search-unavailable-modal__badge" aria-hidden="true">
           <i class="ri-error-warning-line"></i>
         </span>
-        <button type="button" id="smartSearchUnavailableClose" class="smart-search-unavailable-modal__close"
-          aria-label="بستن">
-          ×
-        </button>
-      </div>
+        </div>
       <h3 id="smartSearchUnavailableTitle" class="smart-search-unavailable-modal__title">
-        جستجوی هوشمند موقتاً در دسترس نیست
+        جستجوی هوشمند موقتاً غیرفعال است.
       </h3>
       <p id="smartSearchUnavailableDesc" class="smart-search-unavailable-modal__text">
-        این قابلیت در حال حاضر توسط مدیریت غیرفعال شده است. لطفاً کمی بعد دوباره بررسی کنید.
+        این قابلیت فعلاً توسط مدیریت غیرفعال شده است.
       </p>
       <div class="smart-search-unavailable-modal__actions">
         <button type="button" id="smartSearchUnavailableAcknowledge" class="smart-search-unavailable-modal__btn">
@@ -1178,215 +1174,263 @@
   </div>
 
   <script>
-    (function () {
-      const SMART_SEARCH_STORAGE_KEY = 'vitrinet.smartSearch.settings.v1';
-      const SMART_SEARCH_DEFAULTS = {
-        enabled: true,
-        examples: [
-          'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
-          'یک مغازه برای مقایسه قیمت گوشی در سنندج پیشنهاد بده',
-          'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
-        ]
+  (function () {
+    const SMART_SEARCH_API_URL = `${window.location.origin.replace(/\/$/, '')}/api/smart-search`;
+    const SMART_SEARCH_DEFAULTS = {
+      enabled: true,
+      examples: [
+        'نزدیک‌ترین فروشگاهی که کیف چرمی با ارسال فوری دارد را پیدا کن',
+        'یک مغازه برای مقایسه قیمت گوشی در سنندج پیشنهاد بده',
+        'مرکز خریدی با تنوع کفش ورزشی و پارکینگ نزدیک پیدا کن'
+      ]
+    };
+
+    let smartSearchSettingsCache = null;
+    let smartSearchSettingsPromise = null;
+
+    let settingsReady = false;
+    let currentSettings = null;
+    let smartToggleButton = null;
+    let modalBackdrop = null;
+    let modalAcknowledgeButton = null;
+    let modalLastFocus = null;
+
+    function normalizeExample(text) {
+      return String(text || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function normalizeExamples(examples) {
+      if (!Array.isArray(examples)) return [];
+      return examples
+        .map(normalizeExample)
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+
+    function normalizeSettings(raw) {
+      const source = raw && typeof raw === 'object' ? raw : {};
+      const examples = normalizeExamples(source.examples);
+      return {
+        enabled: source.enabled !== false,
+        examples: examples.length >= 2 ? examples : SMART_SEARCH_DEFAULTS.examples.slice()
       };
+    }
 
-      let currentSettings = null;
-      let smartToggleButton = null;
-      let modalBackdrop = null;
-      let modalCloseButton = null;
-      let modalAcknowledgeButton = null;
-      let modalLastFocus = null;
+    function extractMessage(payload, fallback) {
+      if (payload && typeof payload.message === 'string' && payload.message.trim()) {
+        return payload.message.trim();
+      }
+      return fallback;
+    }
 
-      function normalizeExample(text) {
-        return String(text || '').trim().replace(/\s+/g, ' ');
+    async function getSmartSearchSettings(force = false) {
+      if (smartSearchSettingsCache && !force) {
+        return smartSearchSettingsCache;
       }
 
-      function normalizeExamples(examples) {
-        if (!Array.isArray(examples)) return [];
-        return examples
-          .map(normalizeExample)
-          .filter(Boolean)
-          .slice(0, 3);
+      if (smartSearchSettingsPromise && !force) {
+        return smartSearchSettingsPromise;
       }
 
-      function normalizeSettings(raw) {
-        const source = raw && typeof raw === 'object' ? raw : {};
-        const examples = normalizeExamples(source.examples);
-        return {
-          enabled: source.enabled !== false,
-          examples: examples.length >= 2 ? examples : SMART_SEARCH_DEFAULTS.examples.slice()
-        };
-      }
-
-      function readSettings() {
-        try {
-          const raw = JSON.parse(localStorage.getItem(SMART_SEARCH_STORAGE_KEY) || '{}');
-          return normalizeSettings(raw);
-        } catch (error) {
-          return normalizeSettings({});
-        }
-      }
-
-      function lockBodyScroll() {
-        const width = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-        document.body.style.setProperty('--smart-search-scrollbar', `${width}px`);
-        document.body.classList.add('smart-search-modal-open');
-      }
-
-      function unlockBodyScroll() {
-        document.body.classList.remove('smart-search-modal-open');
-        document.body.style.removeProperty('--smart-search-scrollbar');
-      }
-
-      function openUnavailableModal() {
-        if (!modalBackdrop || modalBackdrop.classList.contains('is-open')) return;
-        modalLastFocus = document.activeElement;
-        modalBackdrop.classList.add('is-open');
-        modalBackdrop.setAttribute('aria-hidden', 'false');
-        lockBodyScroll();
-        setTimeout(() => {
-          if (modalCloseButton) {
-            modalCloseButton.focus({ preventScroll: true });
+      smartSearchSettingsPromise = fetch(SMART_SEARCH_API_URL, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store'
+      })
+        .then(async (res) => {
+          const payload = await res.json().catch(() => null);
+          if (!res.ok) {
+            throw new Error(extractMessage(payload, 'خطا در دریافت تنظیمات جستجوی هوشمند.'));
           }
-        }, 20);
+          const normalized = normalizeSettings(payload || {});
+          smartSearchSettingsCache = normalized;
+          return normalized;
+        })
+        .finally(() => {
+          smartSearchSettingsPromise = null;
+        });
+
+      return smartSearchSettingsPromise;
+    }
+
+    function lockBodyScroll() {
+      const width = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+      document.body.style.setProperty('--smart-search-scrollbar', `${width}px`);
+      document.body.classList.add('smart-search-modal-open');
+    }
+
+    function unlockBodyScroll() {
+      document.body.classList.remove('smart-search-modal-open');
+      document.body.style.removeProperty('--smart-search-scrollbar');
+    }
+
+    function openUnavailableModal() {
+      if (!modalBackdrop || modalBackdrop.classList.contains('is-open')) return;
+      modalLastFocus = document.activeElement;
+      modalBackdrop.classList.add('is-open');
+      modalBackdrop.setAttribute('aria-hidden', 'false');
+      lockBodyScroll();
+      setTimeout(() => {
+        modalAcknowledgeButton?.focus({ preventScroll: true });
+      }, 20);
+    }
+
+    function closeUnavailableModal() {
+      if (!modalBackdrop || !modalBackdrop.classList.contains('is-open')) return;
+      modalBackdrop.classList.remove('is-open');
+      modalBackdrop.setAttribute('aria-hidden', 'true');
+      unlockBodyScroll();
+      if (modalLastFocus && typeof modalLastFocus.focus === 'function') {
+        modalLastFocus.focus({ preventScroll: true });
       }
+    }
 
-      function closeUnavailableModal() {
-        if (!modalBackdrop || !modalBackdrop.classList.contains('is-open')) return;
-        modalBackdrop.classList.remove('is-open');
-        modalBackdrop.setAttribute('aria-hidden', 'true');
-        unlockBodyScroll();
-        if (modalLastFocus && typeof modalLastFocus.focus === 'function') {
-          modalLastFocus.focus({ preventScroll: true });
-        }
-      }
+    function syncSmartExamples(examples, attempt) {
+      const tryCount = Number(attempt) || 0;
+      try {
+        if (typeof searchUiState !== 'undefined' && searchUiState && Array.isArray(searchUiState.smartExamples)) {
+          searchUiState.smartExamples = examples.slice();
+          searchUiState.smartExampleIndex = 0;
 
-      function syncSmartExamples(examples, attempt) {
-        const tryCount = Number(attempt) || 0;
-        try {
-          if (typeof searchUiState !== 'undefined' && searchUiState && Array.isArray(searchUiState.smartExamples)) {
-            searchUiState.smartExamples = examples.slice();
-            searchUiState.smartExampleIndex = 0;
-
-            const input = document.getElementById('mainSearchInput');
-            const hasInput = Boolean(input && input.value.trim());
-            if (searchUiState.smartMode && !hasInput && typeof stopSmartExamples === 'function' && typeof startSmartExamples === 'function') {
-              stopSmartExamples({ reset: true });
-              startSmartExamples({ resetIndex: true });
-            }
-            return;
+          const input = document.getElementById('mainSearchInput');
+          const hasInput = Boolean(input && input.value.trim());
+          if (searchUiState.smartMode && !hasInput && typeof stopSmartExamples === 'function' && typeof startSmartExamples === 'function') {
+            stopSmartExamples({ reset: true });
+            startSmartExamples({ resetIndex: true });
           }
-        } catch (error) {
-          console.warn('smart example sync failed:', error);
+          return;
         }
-
-        if (tryCount < 20) {
-          setTimeout(() => syncSmartExamples(examples, tryCount + 1), 120);
-        }
+      } catch (error) {
+        console.warn('smart example sync failed:', error);
       }
 
-      function forceSmartModeOff() {
-        try {
-          if (typeof applySmartMode === 'function') {
-            applySmartMode(false);
-            return;
-          }
-        } catch (error) {
-          console.warn('applySmartMode fallback:', error);
-        }
+      if (tryCount < 20) {
+        setTimeout(() => syncSmartExamples(examples, tryCount + 1), 120);
+      }
+    }
 
-        const shell = document.querySelector('.hero-search-unified');
-        const form = document.getElementById('searchForm');
-        const input = document.getElementById('mainSearchInput');
-        const smartExample = document.getElementById('smartExampleText');
-
-        if (shell) {
-          shell.classList.remove('smart-mode');
-          shell.classList.remove('smart-example-visible');
+    function forceSmartModeOff() {
+      try {
+        if (typeof applySmartMode === 'function') {
+          applySmartMode(false);
+          return;
         }
-        if (form) {
-          form.classList.remove('smart-mode');
-        }
-        if (input) {
-          input.setAttribute('placeholder', 'جستجوی مغازه، محصول یا برند...');
-        }
-        if (smartExample) {
-          smartExample.classList.remove('is-typing');
-          smartExample.classList.remove('is-clearing');
-          const textNode = smartExample.querySelector('.hero-smart-example__text');
-          if (textNode) textNode.textContent = '';
-        }
-        if (smartToggleButton) {
-          smartToggleButton.setAttribute('aria-pressed', 'false');
-        }
+      } catch (error) {
+        console.warn('applySmartMode fallback:', error);
       }
 
-      function applySettings(settings) {
-        const normalized = normalizeSettings(settings);
-        currentSettings = normalized;
+      const shell = document.querySelector('.hero-search-unified');
+      const form = document.getElementById('searchForm');
+      const input = document.getElementById('mainSearchInput');
+      const smartExample = document.getElementById('smartExampleText');
 
-        syncSmartExamples(normalized.examples, 0);
+      if (shell) {
+        shell.classList.remove('smart-mode');
+        shell.classList.remove('smart-example-visible');
+      }
+      if (form) {
+        form.classList.remove('smart-mode');
+      }
+      if (input) {
+        input.setAttribute('placeholder', 'جستجوی مغازه، محصول یا برند...');
+      }
+      if (smartExample) {
+        smartExample.classList.remove('is-typing');
+        smartExample.classList.remove('is-clearing');
+        const textNode = smartExample.querySelector('.hero-smart-example__text');
+        if (textNode) textNode.textContent = '';
+      }
+      if (smartToggleButton) {
+        smartToggleButton.setAttribute('aria-pressed', 'false');
+      }
+    }
 
-        if (smartToggleButton) {
-          smartToggleButton.classList.toggle('smart-search-disabled-by-admin', !normalized.enabled);
-          smartToggleButton.setAttribute('aria-disabled', normalized.enabled ? 'false' : 'true');
-          smartToggleButton.title = normalized.enabled ? 'حالت هوشمند' : 'جستجوی هوشمند موقتاً غیرفعال است';
-        }
+    function applyLoadingState(isLoading) {
+      if (!smartToggleButton) return;
+      const loading = Boolean(isLoading);
+      smartToggleButton.setAttribute('aria-busy', loading ? 'true' : 'false');
+      smartToggleButton.dataset.settingsLoading = loading ? 'true' : 'false';
 
-        if (!normalized.enabled) {
-          forceSmartModeOff();
-        } else {
-          closeUnavailableModal();
-        }
+      if (loading) {
+        smartToggleButton.classList.add('smart-search-disabled-by-admin');
+        smartToggleButton.setAttribute('aria-disabled', 'true');
+        smartToggleButton.title = 'در حال بارگذاری تنظیمات جستجوی هوشمند...';
+      }
+    }
+
+    function applySettings(settings) {
+      const normalized = normalizeSettings(settings);
+      currentSettings = normalized;
+      settingsReady = true;
+
+      syncSmartExamples(normalized.examples, 0);
+
+      if (smartToggleButton) {
+        smartToggleButton.classList.toggle('smart-search-disabled-by-admin', !normalized.enabled);
+        smartToggleButton.setAttribute('aria-disabled', normalized.enabled ? 'false' : 'true');
+        smartToggleButton.title = normalized.enabled ? 'حالت هوشمند' : 'جستجوی هوشمند موقتاً غیرفعال است.';
       }
 
-      function attachDisabledSmartSearchGuard() {
-        if (!smartToggleButton) return;
-        smartToggleButton.addEventListener('click', (event) => {
-          if (!currentSettings || currentSettings.enabled) return;
+      if (!normalized.enabled) {
+        forceSmartModeOff();
+      } else {
+        closeUnavailableModal();
+      }
+    }
+
+    function attachDisabledSmartSearchGuard() {
+      if (!smartToggleButton) return;
+      smartToggleButton.addEventListener('click', (event) => {
+        if (!settingsReady) {
           event.preventDefault();
           event.stopImmediatePropagation();
-          openUnavailableModal();
-        }, true);
+          return;
+        }
+
+        if (!currentSettings || currentSettings.enabled) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openUnavailableModal();
+      }, true);
+    }
+
+    function bindModalEvents() {
+      modalAcknowledgeButton?.addEventListener('click', () => closeUnavailableModal());
+    }
+
+    async function initSettings() {
+      applyLoadingState(true);
+      try {
+        const settings = await getSmartSearchSettings();
+        applySettings(settings);
+      } catch (error) {
+        console.warn('smart search settings fetch failed:', error);
+        const fallback = normalizeSettings(smartSearchSettingsCache || SMART_SEARCH_DEFAULTS);
+        smartSearchSettingsCache = fallback;
+        applySettings(fallback);
+      } finally {
+        applyLoadingState(false);
       }
+    }
 
-      function bindModalEvents() {
-        if (!modalBackdrop) return;
+    function initSmartSearchStateBridge() {
+      smartToggleButton = document.getElementById('smartModeToggle');
+      modalBackdrop = document.getElementById('smartSearchUnavailableModal');
+      modalAcknowledgeButton = document.getElementById('smartSearchUnavailableAcknowledge');
 
-        modalBackdrop.addEventListener('click', (event) => {
-          if (event.target === modalBackdrop) {
-            closeUnavailableModal();
-          }
-        });
+      bindModalEvents();
+      attachDisabledSmartSearchGuard();
+      initSettings();
+    }
 
-        modalCloseButton?.addEventListener('click', () => closeUnavailableModal());
-        modalAcknowledgeButton?.addEventListener('click', () => closeUnavailableModal());
-
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape' && modalBackdrop.classList.contains('is-open')) {
-            closeUnavailableModal();
-          }
-        });
-      }
-
-      function initSmartSearchStateBridge() {
-        smartToggleButton = document.getElementById('smartModeToggle');
-        modalBackdrop = document.getElementById('smartSearchUnavailableModal');
-        modalCloseButton = document.getElementById('smartSearchUnavailableClose');
-        modalAcknowledgeButton = document.getElementById('smartSearchUnavailableAcknowledge');
-
-        bindModalEvents();
-        attachDisabledSmartSearchGuard();
-        applySettings(readSettings());
-
-        window.addEventListener('storage', (event) => {
-          if (event.key !== SMART_SEARCH_STORAGE_KEY) return;
-          applySettings(readSettings());
-        });
-      }
-
+    if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initSmartSearchStateBridge);
-    })();
-  </script>
+    } else {
+      initSmartSearchStateBridge();
+    }
+  })();
+</script>
 
 
   <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
