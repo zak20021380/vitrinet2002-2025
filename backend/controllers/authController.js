@@ -435,6 +435,66 @@ async function generateUniqueReferralCode() {
   return `VT${timestamp}`.slice(0, 8);
 }
 
+const USER_OTP_CODE = '12345';
+const USER_OTP_TTL_MS = 5 * 60 * 1000;
+const USER_OTP_REQUEST_SUCCESS_MESSAGE = 'کد تایید پیامک شد.';
+
+function applyUserOtpChallenge(user) {
+  user.otp = USER_OTP_CODE;
+  user.otpExpire = new Date(Date.now() + USER_OTP_TTL_MS);
+}
+
+function hydrateExistingUserForOtp(user, phone, { termsAccepted } = {}) {
+  user.phone = phone;
+  user.mobile = user.mobile || phone;
+
+  if (termsAccepted === true && !user.termsAcceptedAt) {
+    user.termsAcceptedAt = new Date();
+  }
+}
+
+async function prepareUserForOtp(phone, { termsAccepted } = {}) {
+  let user = await findUserByPhone(phone);
+
+  if (!user) {
+    user = new User({
+      phone,
+      mobile: phone,
+      referralCode: await generateUniqueReferralCode(),
+      termsAcceptedAt: termsAccepted === true ? new Date() : null
+    });
+  } else {
+    hydrateExistingUserForOtp(user, phone, { termsAccepted });
+    if (!user.referralCode) {
+      user.referralCode = await generateUniqueReferralCode();
+    }
+  }
+
+  applyUserOtpChallenge(user);
+
+  try {
+    await user.save();
+    return user;
+  } catch (err) {
+    if (err?.code !== 11000) {
+      throw err;
+    }
+
+    const existingUser = await findUserByPhone(phone);
+    if (!existingUser) {
+      throw err;
+    }
+
+    hydrateExistingUserForOtp(existingUser, phone, { termsAccepted });
+    if (!existingUser.referralCode) {
+      existingUser.referralCode = await generateUniqueReferralCode();
+    }
+    applyUserOtpChallenge(existingUser);
+    await existingUser.save();
+    return existingUser;
+  }
+}
+
 // ----------- ثبت‌نام کاربر ----------- 
 // ----------- ثبت‌نام کاربر -----------
 exports.registerUser = async (req, res) => {
@@ -458,34 +518,11 @@ exports.registerUser = async (req, res) => {
 
     await ensurePhoneAllowed(phone);
 
-    let user = await findUserByPhone(phone);
-    const isNewUser = !user;
+    const user = await prepareUserForOtp(phone, { termsAccepted });
 
-    if (!user) {
-      user = new User({
-        phone,
-        mobile: phone,
-        referralCode: await generateUniqueReferralCode(),
-        termsAcceptedAt: termsAccepted === true ? new Date() : null
-      });
-    } else {
-      user.phone = phone;
-      user.mobile = user.mobile || phone;
-      if (!user.referralCode) {
-        user.referralCode = await generateUniqueReferralCode();
-      }
-      if (termsAccepted === true && !user.termsAcceptedAt) {
-        user.termsAcceptedAt = new Date();
-      }
-    }
-
-    user.otp = '12345';
-    user.otpExpire = new Date(Date.now() + 5 * 60 * 1000);
-    await user.save();
-
-    return res.status(isNewUser ? 201 : 200).json({
+    return res.status(200).json({
       success: true,
-      message: 'کد تایید پیامک شد.',
+      message: USER_OTP_REQUEST_SUCCESS_MESSAGE,
       phone: user.phone
     });
   } catch (err) {
@@ -520,12 +557,9 @@ exports.verifyUserOtp = async (req, res) => {
 
     await ensurePhoneAllowed(phone);
 
-    const user = await findUserByPhone(phone);
+    let user = await findUserByPhone(phone);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'کاربری با این شماره یافت نشد.'
-      });
+      user = await prepareUserForOtp(phone);
     }
 
     const storedOtp = typeof user.otp === 'string' ? user.otp.trim() : '';
