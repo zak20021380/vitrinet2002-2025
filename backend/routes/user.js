@@ -55,12 +55,33 @@ router.get('/profile', auth('user'), async (req, res) => {
 // POST/PUT /api/user/profile
 // ذخیره یا به‌روزرسانی اطلاعات پروفایل کاربر
 // ───────────────────────────────
+function normalizeIranianPhone(value = '') {
+  const digits = String(value || '')
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/\D/g, '');
+
+  if (!digits) return '';
+  if (digits.length === 11 && digits.startsWith('0')) return digits;
+  if (digits.length === 10 && digits.startsWith('9')) return `0${digits}`;
+  if (digits.length === 12 && digits.startsWith('98')) return `0${digits.slice(2)}`;
+  if (digits.length === 14 && digits.startsWith('0098')) return `0${digits.slice(4)}`;
+  return '';
+}
+
 async function saveProfile(req, res) {
   try {
-    const { name, phone } = req.body || {};
+    const body = req.body || {};
+    const hasName = Object.prototype.hasOwnProperty.call(body, 'name');
+    const hasFirstName = Object.prototype.hasOwnProperty.call(body, 'firstname')
+      || Object.prototype.hasOwnProperty.call(body, 'firstName');
+    const hasLastName = Object.prototype.hasOwnProperty.call(body, 'lastname')
+      || Object.prototype.hasOwnProperty.call(body, 'lastName');
+    const hasPhone = Object.prototype.hasOwnProperty.call(body, 'phone');
+    const hasCity = Object.prototype.hasOwnProperty.call(body, 'city');
 
-    if (!name || !phone) {
-      return res.status(400).json({ message: 'نام و شماره تماس الزامی است' });
+    if (!hasName && !hasFirstName && !hasLastName && !hasPhone && !hasCity) {
+      return res.status(400).json({ message: 'اطلاعاتی برای ذخیره ارسال نشده است' });
     }
 
     const userId = req.user && req.user.id;
@@ -68,28 +89,71 @@ async function saveProfile(req, res) {
       return res.status(401).json({ message: 'احراز هویت انجام نشده' });
     }
 
-    // بررسی عدم تکراری بودن شماره
-    const exists = await User.findOne({ phone, _id: { $ne: userId } });
-    if (exists) {
-      return res.status(409).json({ message: 'این شماره قبلاً استفاده شده است' });
-    }
-
-    const parts = name.trim().split(/\s+/);
-    const firstname = parts.shift();
-    const lastname = parts.length ? parts.join(' ') : firstname;
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'کاربر پیدا نشد' });
     }
 
-    user.firstname = firstname;
-    user.lastname  = lastname;
-    user.phone     = phone;
+    if (hasPhone) {
+      const rawPhone = String(body.phone || '').trim();
+      const normalizedPhone = normalizeIranianPhone(rawPhone);
+      if (!normalizedPhone) {
+        return res.status(400).json({ message: 'شماره موبایل معتبر نیست.' });
+      }
+
+      const phoneVariants = new Set([
+        normalizedPhone,
+        normalizedPhone.slice(1),
+        `+98${normalizedPhone.slice(1)}`,
+        `98${normalizedPhone.slice(1)}`
+      ]);
+
+      const exists = await User.findOne({
+        phone: { $in: Array.from(phoneVariants) },
+        _id: { $ne: userId }
+      });
+      if (exists) {
+        return res.status(409).json({ message: 'این شماره قبلاً استفاده شده است' });
+      }
+
+      user.phone = normalizedPhone;
+      user.mobile = user.mobile || normalizedPhone;
+    }
+
+    if (hasName) {
+      const name = String(body.name || '').trim();
+      if (name) {
+        const parts = name.split(/\s+/);
+        const firstname = parts.shift() || '';
+        const lastname = parts.length ? parts.join(' ') : firstname;
+        user.firstname = firstname;
+        user.lastname = lastname;
+      }
+    }
+
+    if (hasFirstName) {
+      user.firstname = String(body.firstname ?? body.firstName ?? '').trim();
+    }
+
+    if (hasLastName) {
+      user.lastname = String(body.lastname ?? body.lastName ?? '').trim();
+    }
+
+    if (hasCity) {
+      user.city = String(body.city || '').trim();
+    }
+
     user.lastVisit = new Date();
 
     user.activityLog = user.activityLog || [];
-    user.activityLog.push({ action: 'PROFILE_UPDATE', meta: { name, phone } });
+    user.activityLog.push({
+      action: 'PROFILE_UPDATE',
+      meta: {
+        name: `${user.firstname || ''} ${user.lastname || ''}`.trim(),
+        phone: user.phone || '',
+        city: user.city || ''
+      }
+    });
     if (user.activityLog.length > 20) {
       user.activityLog = user.activityLog.slice(-20);
     }
@@ -98,8 +162,11 @@ async function saveProfile(req, res) {
 
     res.json({
       message: 'پروفایل با موفقیت ذخیره شد',
-      name: `${user.firstname} ${user.lastname}`.trim(),
-      phone: user.phone
+      name: `${user.firstname || ''} ${user.lastname || ''}`.trim(),
+      firstname: user.firstname || '',
+      lastname: user.lastname || '',
+      city: user.city || '',
+      phone: user.phone || ''
     });
   } catch (err) {
     console.error('profile save error:', err);

@@ -100,43 +100,34 @@
     © 2025 <span class="text-[#10b981] font-bold">Vitrinet</span> - همه حقوق محفوظ است.
   </footer>
 <script>
-  // گرفتن فقط phone از query string
+  const API_ORIGIN = window.location.origin.includes('localhost')
+    ? 'http://localhost:5000'
+    : window.location.origin;
+
   function getQueryParam(name) {
     const url = new URL(window.location.href);
-    return url.searchParams.get(name) || "";
+    return url.searchParams.get(name) || '';
   }
-  let phone = getQueryParam("phone");
+
+  function toEnglishDigits(value = '') {
+    return String(value || '')
+      .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+      .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+  }
+
+  function normalizePhone(value = '') {
+    const digits = toEnglishDigits(value).replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('0')) return digits;
+    if (digits.length === 10 && digits.startsWith('9')) return `0${digits}`;
+    if (digits.length === 12 && digits.startsWith('98')) return `0${digits.slice(2)}`;
+    if (digits.length === 14 && digits.startsWith('0098')) return `0${digits.slice(4)}`;
+    return '';
+  }
+
+  const sessionPhone = sessionStorage.getItem('signup_phone') || '';
+  const phone = normalizePhone(getQueryParam('phone') || sessionPhone);
   if (!phone) {
-    window.location.href = "register.html";
-  }
-
-  // اگر پسورد تو session نبود، یک مقدار تستی ست کن (برای راحتی تست)
-  const SafeSS = window.SafeSS || {
-    setJSON(key, value) {
-      try {
-        sessionStorage.setItem(key, JSON.stringify(value));
-        return true;
-      } catch (e) {
-        console.warn('SafeSS setJSON failed', e);
-        return false;
-      }
-    },
-    getJSON(key, fallback = null) {
-      try {
-        const raw = sessionStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-      } catch (e) {
-        console.warn('SafeSS getJSON failed', e);
-        return fallback;
-      }
-    }
-  };
-  if (!window.SafeSS) {
-    window.SafeSS = SafeSS;
-  }
-
-  if (!SafeSS.getJSON('signup_pwd')) { // SafeSS
-    SafeSS.setJSON('signup_pwd', 'testpassword'); // SafeSS
+    window.location.href = 'register.html';
   }
 
   const digits = Array.from(document.querySelectorAll('.input-digit'));
@@ -176,66 +167,93 @@
     if (!filled) errorText.classList.add('hidden');
   }
 
-  // ثبت و اعتبارسنجی کد فقط با مقدار 12345
-  form.addEventListener('submit', function(e) {
+  function showError(message) {
+    errorText.innerText = message;
+    errorText.classList.remove('hidden');
+  }
+
+  form.addEventListener('submit', async function(e) {
     e.preventDefault();
     const code = digits.map(d => d.value).join('');
     if (!/^\d{5}$/.test(code)) {
-      errorText.innerText = "کد وارد شده معتبر نیست!";
-      errorText.classList.remove('hidden');
+      showError('کد وارد شده معتبر نیست!');
       return;
     }
 
-    if (code === "12345") {
-      // پسورد موقع ثبت‌نام باید تو sessionStorage باشه (حتی اگر نبود، بالا مقداردهی کردیم)
-      const password = SafeSS.getJSON('signup_pwd'); // SafeSS
-      // ذخیره اطلاعات کاربر ساختگی تو localStorage
-      localStorage.setItem('token', 'fake-user-token');
-      localStorage.setItem('user', JSON.stringify({
-        phone: phone,
-        name: 'کاربر ویترینت'
-      }));
-      sessionStorage.removeItem('signup_pwd');
+    btn.disabled = true;
+
+    try {
+      const verifyResponse = await fetch(`${API_ORIGIN}/api/auth/verify-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ phone, code })
+      });
+
+      const verifyResult = await verifyResponse.json().catch(() => ({}));
+      if (!verifyResponse.ok || !verifyResult.success) {
+        showError(verifyResult.message || 'کد تایید اشتباه است!');
+        btnCheck();
+        return;
+      }
+
+      localStorage.setItem('token', verifyResult.token || '');
+      localStorage.setItem('user', JSON.stringify(verifyResult.user || { phone }));
       sessionStorage.removeItem('signup_phone');
+
       successMsg.classList.remove('hidden');
       goDashboardBtn.onclick = function() {
-        window.location.href = "user/dashboard.html";
+        window.location.href = 'user/dashboard.html';
       };
-    } else {
-      errorText.innerText = "کد تایید اشتباه است!";
-      errorText.classList.remove('hidden');
+    } catch (error) {
+      showError('مشکل ارتباط با سرور!');
+      btnCheck();
     }
   });
 
-  // تایمر ارسال مجدد کد
-  let seconds = 60, timerEl = document.getElementById('timer');
-  let timer = setInterval(() => {
-    seconds--;
-    timerEl.innerText = seconds;
-    if(seconds <= 0){
-      clearInterval(timer);
-      timerEl.innerHTML = `<a href="#" onclick="resendCode(event)" class="text-[#0ea5e9] font-extrabold underline">ارسال مجدد</a>`;
-    }
-  }, 1000);
+  const timerEl = document.getElementById('timer');
+  let seconds = 60;
+  let timer = null;
 
-  window.resendCode = function(e){
-    e.preventDefault();
-    timerEl.innerText = "60";
+  function startTimer() {
+    clearInterval(timer);
     seconds = 60;
-    errorText.classList.add('hidden');
-    digits.forEach(d=>d.value="");
-    digits[0].focus();
-    btnCheck();
+    timerEl.innerText = seconds;
     timer = setInterval(() => {
       seconds--;
       timerEl.innerText = seconds;
-      if(seconds <= 0){
+      if (seconds <= 0) {
         clearInterval(timer);
         timerEl.innerHTML = `<a href="#" onclick="resendCode(event)" class="text-[#0ea5e9] font-extrabold underline">ارسال مجدد</a>`;
       }
     }, 1000);
-    // اینجا درخواست ارسال مجدد کد رو بزن (در حالت دمو لازم نیست)
   }
+
+  window.resendCode = async function(e){
+    e.preventDefault();
+    try {
+      const resendResponse = await fetch(`${API_ORIGIN}/api/auth/register-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const resendResult = await resendResponse.json().catch(() => ({}));
+      if (!resendResponse.ok || !resendResult.success) {
+        showError(resendResult.message || 'ارسال مجدد با خطا مواجه شد.');
+        return;
+      }
+
+      errorText.classList.add('hidden');
+      digits.forEach(d => d.value = '');
+      digits[0].focus();
+      btnCheck();
+      startTimer();
+    } catch {
+      showError('مشکل ارتباط با سرور!');
+    }
+  };
+
+  startTimer();
 </script>
 
 <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->

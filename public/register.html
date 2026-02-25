@@ -187,6 +187,14 @@
       transform: translateY(0);
     }
 
+    .brand-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      filter: none !important;
+      box-shadow: none;
+    }
+
     .primary-text {
       color: #10b981;
     }
@@ -343,68 +351,25 @@
         <p class="text-gray-600 text-sm mt-2">به جامعه ویترینت خوش آمدید</p>
       </div>
       <form id="signupForm" class="space-y-5" autocomplete="off" novalidate>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[15px] font-bold mb-1 text-gray-700">نام</label>
-            <input name="firstname" type="text"
-              class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition"
-              placeholder="مثلاً امیرحسین" required />
-            <div class="err-text hidden"></div>
-          </div>
-          <div>
-            <label class="block text-[15px] font-bold mb-1 text-gray-700">نام خانوادگی</label>
-            <input name="lastname" type="text"
-              class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition"
-              placeholder="مثلاً کریمی" required />
-            <div class="err-text hidden"></div>
-          </div>
-        </div>
         <div>
           <label class="block text-[15px] font-bold mb-1 text-gray-700">شماره موبایل</label>
-          <input name="phone" type="tel"
+          <input id="phoneInput" name="phone" type="tel"
             class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition"
-            placeholder="مثلاً 09121234567" inputmode="tel" autocomplete="tel" required />
+            placeholder="مثلاً 09121234567" inputmode="numeric" autocomplete="tel-national" dir="ltr" maxlength="11"
+            autofocus required />
           <div class="err-text hidden"></div>
         </div>
-        <div>
-          <label class="block text-[15px] font-bold mb-1 text-gray-700">شهر محل سکونت</label>
-          <input id="cityfield" type="text" value="سنندج" readonly tabindex="-1"
-            class="w-full border rounded-xl p-3 text-base bg-gray-50 text-gray-500 shadow-sm transition cursor-not-allowed select-none opacity-90"
-            style="pointer-events:auto;" />
-        </div>
-        <div>
-          <label class="block text-[15px] font-bold mb-1 text-gray-700">کد معرف <span
-              class="text-gray-400 font-normal text-xs">(اختیاری)</span></label>
-          <input name="referral_code" type="text"
-            class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition"
-            placeholder="اگر کد معرف دارید وارد کنید" />
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[15px] font-bold mb-1 text-gray-700">رمز عبور</label>
-            <input name="password" type="password"
-              class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#0ea5e9]/30 bg-white/90 shadow-sm transition"
-              placeholder="رمز عبور ایمن وارد کنید" autocomplete="new-password" required />
-            <div class="err-text hidden"></div>
-          </div>
-          <div>
-            <label class="block text-[15px] font-bold mb-1 text-gray-700">تکرار رمز عبور</label>
-            <input name="password2" type="password"
-              class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#0ea5e9]/30 bg-white/90 shadow-sm transition"
-              placeholder="تکرار رمز عبور" autocomplete="new-password" required />
-            <div class="err-text hidden"></div>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 text-sm mt-1">
-          <input type="checkbox" id="terms" required class="accent-[#10b981] w-4 h-4 rounded border-gray-300" />
-          <label for="terms" class="select-none text-gray-700">
+        <div class="flex items-start gap-2 text-sm mt-1">
+          <input type="checkbox" id="terms" required class="accent-[#10b981] w-4 h-4 rounded border-gray-300 mt-1" />
+          <label for="terms" class="select-none text-gray-700 leading-7">
             <span>قوانین و مقررات ویترینت را می‌پذیرم.</span>
             <a href="terms.html" class="text-[#0ea5e9] font-extrabold hover:underline ml-1">مطالعه قوانین</a>
           </label>
         </div>
         <div class="text-center mt-8">
-          <button type="submit"
-            class="brand-btn py-3 px-8 rounded-xl font-bold text-lg shadow-md hover:scale-[1.03] transition-all duration-200">ثبت‌نام</button>
+          <button id="requestOtpBtn" type="submit" disabled
+            class="brand-btn py-3 px-8 rounded-xl font-bold text-lg shadow-md hover:scale-[1.03] transition-all duration-200 w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">درخواست
+            کد تایید</button>
         </div>
       </form>
       <div class="text-center text-sm text-gray-600 mt-8">
@@ -424,16 +389,63 @@
   </footer>
 
   <script>
-    // toast
-    const toast = document.getElementById('toast');
-    const cityField = document.getElementById('cityfield');
-    cityField.addEventListener('click', function (e) {
-      toast.innerText = "ویترینت فعلا فقط در سنندج فعال است.";
-      toast.classList.add('active');
-      setTimeout(() => toast.classList.remove('active'), 2000);
+    const API_ORIGIN = window.location.origin.includes('localhost')
+      ? 'http://localhost:5000'
+      : window.location.origin;
+
+    const form = document.getElementById('signupForm');
+    const phoneInput = document.getElementById('phoneInput');
+    const termsInput = document.getElementById('terms');
+    const submitBtn = document.getElementById('requestOtpBtn');
+
+    function toEnglishDigits(value = '') {
+      return String(value || '')
+        .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+        .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+    }
+
+    function normalizePhone(value = '') {
+      const digits = toEnglishDigits(value).replace(/\D/g, '');
+      if (digits.length === 11 && digits.startsWith('0')) return digits;
+      if (digits.length === 10 && digits.startsWith('9')) return `0${digits}`;
+      if (digits.length === 12 && digits.startsWith('98')) return `0${digits.slice(2)}`;
+      if (digits.length === 14 && digits.startsWith('0098')) return `0${digits.slice(4)}`;
+      return digits.slice(0, 11);
+    }
+
+    function isValidPhone(value = '') {
+      return /^09\d{9}$/.test(normalizePhone(value));
+    }
+
+    function clearError(input) {
+      input.classList.remove('input-error');
+      const err = input.parentNode.querySelector('.err-text');
+      if (err) {
+        err.classList.add('hidden');
+      }
+    }
+
+    function setError(input, msg) {
+      input.classList.add('input-error');
+      const err = input.parentNode.querySelector('.err-text');
+      if (err) {
+        err.innerText = msg;
+        err.classList.remove('hidden');
+      }
+    }
+
+    function setButtonState() {
+      submitBtn.disabled = !(isValidPhone(phoneInput.value) && termsInput.checked);
+    }
+
+    phoneInput.addEventListener('input', () => {
+      phoneInput.value = toEnglishDigits(phoneInput.value).replace(/\D/g, '').slice(0, 11);
+      clearError(phoneInput);
+      setButtonState();
     });
 
-    // ===== PRE-FILL FROM URL PARAMS (from booking flow) =====
+    termsInput.addEventListener('change', setButtonState);
+
     (function preFillFromURL() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -441,7 +453,6 @@
         const nameParam = urlParams.get('name');
 
         if (phoneParam || nameParam) {
-          // Show message about booking
           const formSection = document.querySelector('section.glass');
           if (formSection && !document.getElementById('booking-message')) {
             const message = document.createElement('div');
@@ -453,116 +464,62 @@
         }
 
         if (phoneParam) {
-          const phoneInput = document.querySelector('input[name="phone"]');
-          if (phoneInput) {
-            phoneInput.value = decodeURIComponent(phoneParam);
-          }
-        }
-
-        if (nameParam) {
-          const decodedName = decodeURIComponent(nameParam);
-          const nameParts = decodedName.trim().split(' ');
-
-          const firstnameInput = document.querySelector('input[name="firstname"]');
-          const lastnameInput = document.querySelector('input[name="lastname"]');
-
-          if (firstnameInput && nameParts.length > 0) {
-            firstnameInput.value = nameParts[0];
-          }
-
-          if (lastnameInput && nameParts.length > 1) {
-            lastnameInput.value = nameParts.slice(1).join(' ');
-          }
+          phoneInput.value = normalizePhone(decodeURIComponent(phoneParam));
         }
       } catch (err) {
         console.warn('URL param pre-fill failed:', err);
       }
+      setButtonState();
     })();
 
-    // فرم اعتبارسنجی ساده و فارسی
-    // فرم اعتبارسنجی ساده و فارسی
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      let valid = true;
-      this.querySelectorAll('input').forEach(inp => {
-        inp.classList.remove('input-error');
-        let err = inp.parentNode.querySelector('.err-text');
-        if (err) err.classList.add('hidden');
-      });
 
-      let fn = this.firstname, ln = this.lastname, phone = this.phone, pass = this.password, pass2 = this.password2;
-      if (!fn.value.trim()) {
-        setError(fn, 'لطفا نام خود را وارد کنید');
-        valid = false;
-      }
-      if (!ln.value.trim()) {
-        setError(ln, 'لطفا نام خانوادگی خود را وارد کنید');
-        valid = false;
+      clearError(phoneInput);
+
+      const phone = normalizePhone(phoneInput.value);
+      if (!/^09\d{9}$/.test(phone)) {
+        setError(phoneInput, 'شماره موبایل معتبر وارد کنید');
+        setButtonState();
+        return;
       }
 
-      // کد معرف
-      let referralCode = this.querySelector('input[name="referral_code"]').value.trim();
-
-      if (!/^09\d{9}$/.test(phone.value)) {
-        setError(phone, 'شماره موبایل معتبر وارد کنید');
-        valid = false;
-      }
-      if (!pass.value) {
-        setError(pass, 'رمز عبور را وارد کنید');
-        valid = false;
-      } else if (pass.value.length < 8) {
-        setError(pass, 'رمز عبور باید حداقل ۸ کاراکتر باشد');
-        valid = false;
-      }
-      if (!pass2.value) {
-        setError(pass2, 'تکرار رمز عبور را وارد کنید');
-        valid = false;
-      } else if (pass.value !== pass2.value) {
-        setError(pass2, 'رمزهای عبور یکسان نیستند');
-        valid = false;
-      }
-      let terms = this.terms;
-      if (!terms.checked) {
-        alert("لطفا قوانین و مقررات را بپذیرید.");
-        valid = false;
+      if (!termsInput.checked) {
+        alert('لطفا قوانین و مقررات را بپذیرید.');
+        setButtonState();
+        return;
       }
 
-      if (valid) {
-        // ارسال اطلاعات ثبت‌نام به سرور (API جدید)
-        fetch("http://localhost:5000/api/auth/register-user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+      const originalBtnText = submitBtn.innerText;
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'در حال ارسال...';
+
+      try {
+        const response = await fetch(`${API_ORIGIN}/api/auth/register-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstname: fn.value,
-            lastname: ln.value,
-            phone: phone.value,
-            referralCode: referralCode,
-            password: pass.value
+            phone,
+            termsAccepted: true
           })
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              // بعد از موفقیت ثبت‌نام، هدایت به صفحه وریفای
-              window.location.href = "verify-user.html?phone=" + encodeURIComponent(phone.value);
-            } else {
-              alert(data.message || "خطا در ثبت‌نام");
-            }
-          })
-          .catch(() => alert("ارتباط با سرور برقرار نشد!"));
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+          setError(phoneInput, data.message || 'خطا در ثبت‌نام');
+          setButtonState();
+          return;
+        }
+
+        sessionStorage.setItem('signup_phone', phone);
+        window.location.href = `verify-user.html?phone=${encodeURIComponent(phone)}`;
+      } catch {
+        alert('ارتباط با سرور برقرار نشد!');
+        setButtonState();
+      } finally {
+        submitBtn.innerText = originalBtnText;
       }
     });
-
-
-    function setError(input, msg) {
-      input.classList.add('input-error');
-      let err = input.parentNode.querySelector('.err-text');
-      if (err) {
-        err.innerText = msg;
-        err.classList.remove('hidden');
-      }
-    }
-
   </script>
 
   <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->

@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  firstname: { type: String, required: true },
-  lastname: { type: String, required: true },
+  firstname: { type: String, default: '' },
+  lastname: { type: String, default: '' },
+  city: { type: String, default: '' },
+  mobile: { type: String, default: '' },
   phone: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, default: null },
+  otp: { type: String, default: null },
+  otpExpire: { type: Date, default: null },
+  termsAcceptedAt: { type: Date, default: null },
   role: { type: String, default: 'user' },
   referralCode: { type: String, unique: true, sparse: true }, // کد معرف یکتای کاربر
   referredBy: { type: String }, // کد معرفی که با آن ثبت‌نام کرده

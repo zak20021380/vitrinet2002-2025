@@ -8,9 +8,60 @@ const Admin = require('../models/admin'); // اگه مدل جدا داری
 const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لیست سیاه
 const { buildPhoneCandidates } = require('../utils/phone');
 
+const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+
+function toEnglishDigits(value = '') {
+  return String(value || '')
+    .replace(/[۰-۹]/g, (d) => String(PERSIAN_DIGITS.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
+}
+
+function normalizeIranianPhone(value) {
+  const digits = toEnglishDigits(value).replace(/\D/g, '');
+  if (!digits) return '';
+
+  if (digits.length === 11 && digits.startsWith('0')) return digits;
+  if (digits.length === 10 && digits.startsWith('9')) return `0${digits}`;
+  if (digits.length === 12 && digits.startsWith('98')) return `0${digits.slice(2)}`;
+  if (digits.length === 14 && digits.startsWith('0098')) return `0${digits.slice(4)}`;
+
+  return '';
+}
+
+function validateIranianPhone(phone) {
+  return /^09\d{9}$/.test(normalizeIranianPhone(phone));
+}
+
+function buildUserPhoneCandidates(rawPhone) {
+  const normalized = normalizeIranianPhone(rawPhone);
+  const set = new Set(buildPhoneCandidates(rawPhone));
+
+  if (normalized) {
+    const stripped = normalized.slice(1);
+    set.add(normalized);
+    set.add(stripped);
+    set.add(`+98${stripped}`);
+    set.add(`98${stripped}`);
+  }
+
+  return Array.from(set).filter(Boolean);
+}
+
+async function findUserByPhone(rawPhone, { includeDeleted = false } = {}) {
+  const candidates = buildUserPhoneCandidates(rawPhone);
+  if (!candidates.length) return null;
+
+  const query = { phone: { $in: candidates } };
+  if (!includeDeleted) {
+    query.deleted = { $ne: true };
+  }
+  return User.findOne(query);
+}
+
 // ⬇︎ تابع کمکی؛ بیرون از هر متد export باشد تا همه بتوانند استفاده کنند
 async function ensurePhoneAllowed(phone) {
-  const phoneCandidates = buildPhoneCandidates(phone);
+  const phoneCandidates = buildUserPhoneCandidates(phone);
 
   if (phoneCandidates.length) {
     /* اگر در لیست سیاه باشد */
@@ -23,6 +74,67 @@ async function ensurePhoneAllowed(phone) {
       throw new Error('این حساب کاربری حذف و مسدود شده است.');
     }
   }
+}
+
+function issueUserSession(res, user) {
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: 'user',
+      userType: user.userType || 'both',
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.cookie('user_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
+  return token;
+}
+
+async function linkLegacyBookingsToUser(user, phone) {
+  const Booking = require('../models/booking');
+
+  const phoneCandidates = buildUserPhoneCandidates(phone);
+  if (!phoneCandidates.length) return;
+
+  const oldBookings = await Booking.find({
+    customerPhone: { $in: phoneCandidates },
+    $or: [
+      { userId: { $exists: false } },
+      { userId: null }
+    ]
+  });
+
+  if (!oldBookings.length) return;
+
+  await Booking.updateMany(
+    {
+      customerPhone: { $in: phoneCandidates },
+      $or: [
+        { userId: { $exists: false } },
+        { userId: null }
+      ]
+    },
+    {
+      $set: { userId: user._id }
+    }
+  );
+
+  const bookingIds = oldBookings.map((booking) => booking._id);
+  user.bookings = bookingIds;
+
+  if (oldBookings.length > 0 && (!user.userType || user.userType === 'product')) {
+    user.userType = user.userType === 'product' ? 'both' : 'service';
+  }
+
+  await user.save();
 }
 
 
@@ -297,10 +409,6 @@ exports.verifyCode = async (req, res) => {
   }
 };
 
-function validateIranianPhone(phone) {
-  return /^(\+98|0)?9\d{9}$/.test(phone);
-}
-
 // ----------- تولید کد معرف یکتا -----------
 async function generateUniqueReferralCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // بدون حروف مشابه (O, 0, I, 1)
@@ -331,120 +439,146 @@ async function generateUniqueReferralCode() {
 // ----------- ثبت‌نام کاربر -----------
 exports.registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, phone, password, referralCode } = req.body;
+    const { phone: rawPhone, termsAccepted } = req.body || {};
+    const phone = normalizeIranianPhone(rawPhone);
 
-    /* اعتبارسنجى اولیه */
-    if (
-      !firstname || !lastname || !phone || !password ||
-      firstname.length < 2 || lastname.length < 2 ||
-      password.length < 5 || !validateIranianPhone(phone)
-    ) {
+    if (!phone || !validateIranianPhone(phone)) {
       return res.status(400).json({
         success: false,
-        message: 'اطلاعات وارد شده معتبر نیست.'
+        message: 'شماره موبایل معتبر وارد کنید.'
       });
     }
 
-    /* ⬅︎ جلوگیرى از ثبت‌نام شماره‌هاى مسدود یا حسابِ حذف‌شده */
+    if (termsAccepted !== undefined && termsAccepted !== true) {
+      return res.status(400).json({
+        success: false,
+        message: 'لطفا قوانین و مقررات را بپذیرید.'
+      });
+    }
+
     await ensurePhoneAllowed(phone);
 
-    /* جلوگیرى از تکرار شماره در میان کاربران فعال */
-    const exists = await User.findOne({ phone, deleted: { $ne: true } });
-    if (exists) {
-      return res.status(400).json({
-        success: false,
-        message: 'این شماره قبلاً ثبت شده.'
+    let user = await findUserByPhone(phone);
+    const isNewUser = !user;
+
+    if (!user) {
+      user = new User({
+        phone,
+        mobile: phone,
+        referralCode: await generateUniqueReferralCode(),
+        termsAcceptedAt: termsAccepted === true ? new Date() : null
       });
+    } else {
+      user.phone = phone;
+      user.mobile = user.mobile || phone;
+      if (!user.referralCode) {
+        user.referralCode = await generateUniqueReferralCode();
+      }
+      if (termsAccepted === true && !user.termsAcceptedAt) {
+        user.termsAcceptedAt = new Date();
+      }
     }
 
-    /* هش کردن رمز عبور */
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    /* تولید کد معرف یکتا برای کاربر جدید */
-    const userReferralCode = await generateUniqueReferralCode();
-
-    /* ایجاد و ذخیره کاربر */
-    const user = new User({
-      firstname: firstname.trim(),
-      lastname: lastname.trim(),
-      phone,
-      referralCode: userReferralCode, // کد معرف یکتای کاربر
-      referredBy: referralCode || null, // کد معرفی که با آن ثبت‌نام کرده (اختیاری)
-      password: hashedPassword
-    });
+    user.otp = '12345';
+    user.otpExpire = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
-    // TODO: پس از فعال‌سازی PostHog این خط را از حالت توضیح خارج کنید | TODO: Uncomment after enabling PostHog
-    // const { trackUserRegistered } = require('../utils/posthog-tracking');
-    // await trackUserRegistered(user);
 
-    // ===== LINK OLD BOOKINGS TO NEW USER =====
-    try {
-      const Booking = require('../models/booking');
-      const { buildPhoneCandidates } = require('../utils/phone');
-
-      // Get all phone variations
-      const phoneCandidates = buildPhoneCandidates(phone);
-
-      // Find all bookings with this phone that don't have a userId yet
-      const oldBookings = await Booking.find({
-        customerPhone: { $in: phoneCandidates },
-        $or: [
-          { userId: { $exists: false } },
-          { userId: null }
-        ]
-      });
-
-      if (oldBookings.length > 0) {
-        // Link old bookings to new user
-
-        // Update all old bookings with the new userId
-        await Booking.updateMany(
-          {
-            customerPhone: { $in: phoneCandidates },
-            $or: [
-              { userId: { $exists: false } },
-              { userId: null }
-            ]
-          },
-          {
-            $set: { userId: user._id }
-          }
-        );
-
-        // Add booking IDs to user's bookings array
-        const bookingIds = oldBookings.map(b => b._id);
-        user.bookings = bookingIds;
-
-        // Update userType based on booking history
-        if (oldBookings.length > 0 && (!user.userType || user.userType === 'product')) {
-          user.userType = user.userType === 'product' ? 'both' : 'service';
-        }
-
-        await user.save();
-      }
-    } catch (linkErr) {
-      // Non-critical error - silently continue
-    }
-
-    return res.status(201).json({
+    return res.status(isNewUser ? 201 : 200).json({
       success: true,
-      message: 'ثبت‌نام با موفقیت انجام شد.',
-      user: {
-        id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        phone: user.phone
-      }
+      message: 'کد تایید پیامک شد.',
+      phone: user.phone
     });
-
   } catch (err) {
     console.error('registerUser ERROR:', err);
-    /* اگر پیام خطا مربوط به مسدود بودن شماره است → 403 */
     const code = /مسدود/.test(err.message) ? 403 : 500;
     return res.status(code).json({
       success: false,
       message: err.message || 'خطای سرور. لطفا بعدا تلاش کنید.'
+    });
+  }
+};
+
+exports.verifyUserOtp = async (req, res) => {
+  try {
+    const { phone: rawPhone, code: rawCode } = req.body || {};
+    const phone = normalizeIranianPhone(rawPhone);
+    const code = toEnglishDigits(rawCode || '').replace(/\D/g, '');
+
+    if (!phone || !validateIranianPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'شماره موبایل معتبر وارد کنید.'
+      });
+    }
+
+    if (!/^\d{5}$/.test(code)) {
+      return res.status(400).json({
+        success: false,
+        message: 'کد وارد شده معتبر نیست!'
+      });
+    }
+
+    await ensurePhoneAllowed(phone);
+
+    const user = await findUserByPhone(phone);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'کاربری با این شماره یافت نشد.'
+      });
+    }
+
+    const storedOtp = typeof user.otp === 'string' ? user.otp.trim() : '';
+    if (
+      storedOtp !== code ||
+      !user.otpExpire ||
+      user.otpExpire < new Date()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'کد تایید اشتباه است یا منقضی شده.'
+      });
+    }
+
+    user.phone = phone;
+    user.mobile = user.mobile || phone;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    if (!user.referralCode) {
+      user.referralCode = await generateUniqueReferralCode();
+    }
+    await user.save();
+
+    try {
+      await linkLegacyBookingsToUser(user, phone);
+    } catch {
+      // Non-critical error - silently continue
+    }
+
+    const token = issueUserSession(res, user);
+
+    return res.status(200).json({
+      success: true,
+      message: 'ورود با موفقیت انجام شد.',
+      token,
+      user: {
+        id: user._id,
+        firstname: user.firstname || '',
+        lastname: user.lastname || '',
+        city: user.city || '',
+        phone: user.phone
+      }
+    });
+  } catch (err) {
+    if (/مسدود/.test(err.message)) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'شما مسدود شده‌اید و امکان ورود ندارید.' });
+    }
+    console.error('verifyUserOtp ERROR:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'خطای سرور در تایید.'
     });
   }
 };
@@ -458,10 +592,11 @@ exports.registerUser = async (req, res) => {
 // controllers/authController.js
 exports.loginUser = async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { phone: rawPhone, password } = req.body || {};
+    const phone = normalizeIranianPhone(rawPhone);
 
     /* ۱) ولیدیشن اولیه */
-    if (!phone || !password) {
+    if (!phone || !password || !validateIranianPhone(phone)) {
       return res.status(400).json({
         success: false,
         message: 'شماره و رمز الزامی است.'
@@ -472,7 +607,7 @@ exports.loginUser = async (req, res) => {
     await ensurePhoneAllowed(phone);
 
     /* ۳) پیدا کردن کاربری که حذف نشده باشد */
-    const user = await User.findOne({ phone, deleted: { $ne: true } });
+    const user = await findUserByPhone(phone);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -481,6 +616,13 @@ exports.loginUser = async (req, res) => {
     }
 
     /* ۴) تطابق رمز عبور */
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: 'برای این شماره، ورود با کد تایید انجام می‌شود.'
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
@@ -489,29 +631,8 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    /* ۵) تولید JWT */
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: 'user',
-        userType: user.userType || 'both',
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // Token created successfully - no sensitive data logged
-
-    /* ۶) ست‌کردن کوکی Http‑Only برای کاربر
-          در محیط توسعه (HTTP) →  secure=false , sameSite='lax'
-          در محیط Production (HTTPS) → secure=true , sameSite='none' برای کراس‌سایت */
-    res.cookie('user_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',  // روی HTTPS باید true باشد
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000                // ۷ روز
-    });
+    /* ۵) تولید JWT و ست کوکی */
+    const token = issueUserSession(res, user);
 
     /* ۷) پاسخ نهایی */
     return res.status(200).json({
@@ -520,8 +641,8 @@ exports.loginUser = async (req, res) => {
       token,
       user: {
         id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
+        firstname: user.firstname || '',
+        lastname: user.lastname || '',
         phone: user.phone
       }
     });
@@ -565,6 +686,8 @@ exports.getCurrentUser = async (req, res) => {
     const userObj = user.toObject();
     userObj.id = userObj._id; // برای هماهنگی با فرانت
     delete userObj.password;
+    delete userObj.otp;
+    delete userObj.otpExpire;
 
     return res.json({ success: true, user: userObj });
   } catch (err) {

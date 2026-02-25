@@ -10,6 +10,7 @@ const {
   verifyCode,
   getCurrentUser,
   registerUser,
+  verifyUserOtp,
   loginUser
 } = require('../controllers/authController');
 const authMiddleware = require('../middlewares/authMiddleware'); // ← اضافه شد!
@@ -45,10 +46,13 @@ router.get('/getCurrentSeller', authMiddleware('seller'), getCurrentSeller);
 // ۴) تایید کد پیامک
 router.post('/verify', verifyCode);
 
-// ۵) ثبت‌نام کاربر عادی
+// ۵) درخواست کد تایید برای ثبت‌نام/ورود کاربر عادی (فقط با شماره موبایل)
 router.post('/register-user', registerUser);
 
-// ۶) ورود کاربر عادی با محدودیت ضد Brute-Force
+// ۶) تایید کد کاربر عادی و ایجاد سشن
+router.post('/verify-user', verifyUserOtp);
+
+// ۷) ورود کاربر عادی با رمز (برای حساب‌های قدیمی) با محدودیت ضد Brute-Force
 router.post('/login-user', loginLimiter, loginUser);
 // در routes/auth.js قبل از module.exports
 router.get('/me', authMiddleware('seller'), getCurrentSeller);
