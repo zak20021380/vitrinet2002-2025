@@ -17,13 +17,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg-base: #f5f7fa;
+      --bg-soft: #eef2f7;
+      --surface: #ffffff;
+      --surface-border: #e5e7eb;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --brand: #10b981;
+      --brand-blue: #0ea5e9;
+      --brand-dark: #059669;
+      --brand-blue-dark: #0284c7;
+      --brand-soft: rgba(16, 185, 129, 0.14);
+      --focus-ring: rgba(16, 185, 129, 0.2);
+    }
+
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
+      background: linear-gradient(180deg, var(--bg-base) 0%, #fbfcfe 100%);
       min-height: 100vh;
       position: relative;
+      color: var(--text-primary);
     }
 
     body::before {
@@ -33,175 +48,151 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(148, 163, 184, 0.12) 0%, transparent 38%),
+        radial-gradient(circle at 85% 92%, rgba(203, 213, 225, 0.2) 0%, transparent 42%);
       pointer-events: none;
       z-index: 0;
     }
 
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
     .glass {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2),
-        0 4px 16px rgba(14, 165, 233, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      border-radius: 2rem;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      width: 100%;
+      max-width: 460px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 18px;
+      box-shadow: 0 20px 45px -24px rgba(15, 23, 42, 0.28);
     }
 
     header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 4px 30px rgba(16, 185, 129, 0.15),
-        0 2px 12px rgba(14, 165, 233, 0.1),
-        inset 0 -1px 0 rgba(16, 185, 129, 0.1);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--surface-border);
+      box-shadow: 0 6px 22px -18px rgba(17, 24, 39, 0.5);
     }
 
-    header:hover {
-      box-shadow: 0 6px 40px rgba(16, 185, 129, 0.2),
-        0 3px 16px rgba(14, 165, 233, 0.15);
+    header::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      left: 0;
+      bottom: -1px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.5) 30%, rgba(14, 165, 233, 0.5) 70%, rgba(14, 165, 233, 0) 100%);
     }
 
     .logo-container {
-      position: relative;
-      padding: 0.5rem;
-      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.15);
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .logo-container:hover {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
     }
 
     .brand-text {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: var(--brand-dark);
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-blue) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      position: relative;
-      display: inline-block;
-    }
-
-    .brand-text::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
-      border-radius: 2px;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-
-    .logo-container:hover .brand-text::after {
-      transform: scaleX(1);
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
 
     nav a {
-      position: relative;
-      padding: 0.5rem 1rem;
-      border-radius: 0.75rem;
-      font-weight: 700;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-    }
-
-    nav a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      border-radius: 0.75rem;
-      z-index: -1;
+      color: var(--text-secondary) !important;
+      padding: 0.35rem 0.55rem;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: color 0.2s ease, background-color 0.2s ease;
     }
 
     nav a:hover {
-      color: white !important;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      color: var(--brand-blue-dark) !important;
+      background: rgba(14, 165, 233, 0.1);
     }
 
-    nav a:hover::before {
-      opacity: 1;
+    .nav-link-accent {
+      color: var(--brand-dark) !important;
+      background: rgba(16, 185, 129, 0.09);
     }
 
     .brand-btn {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      color: #fff !important;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .brand-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
       width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .brand-btn:hover::before {
-      left: 100%;
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-blue) 100%);
+      color: #fff !important;
+      font-weight: 700;
+      box-shadow: 0 12px 24px -14px rgba(14, 165, 233, 0.55);
+      transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
     }
 
     .brand-btn:hover {
-      filter: brightness(1.1);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(16, 185, 129, 0.5);
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-blue-dark) 100%);
+      box-shadow: 0 14px 26px -14px rgba(2, 132, 199, 0.62);
     }
 
     .brand-btn:active {
-      transform: translateY(0);
+      transform: translateY(1px);
+      box-shadow: 0 10px 18px -14px rgba(2, 132, 199, 0.72);
     }
 
     .brand-btn:disabled {
-      opacity: 0.6;
+      background: linear-gradient(135deg, #cbd5e1 0%, #dbe3ec 100%);
+      color: #64748b !important;
       cursor: not-allowed;
-      transform: none !important;
-      filter: none !important;
       box-shadow: none;
     }
 
-    .primary-text {
-      color: #10b981;
+    .form-title {
+      color: var(--text-primary);
+      font-size: clamp(1.6rem, 2.2vw, 2rem);
+      line-height: 1.55;
+      letter-spacing: -0.02em;
     }
 
-    ::placeholder {
-      color: #a0aec0;
+    .form-subtitle {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .form-label {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .phone-input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0.65rem 0.85rem;
+      font-size: 1rem;
+      color: var(--text-primary);
+      background: #fff;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: plaintext;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .phone-input::placeholder {
+      direction: ltr;
+      text-align: left;
+      color: #9ca3af;
       font-weight: 500;
+    }
+
+    .phone-input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px var(--focus-ring);
     }
 
     .hide-scrollbar::-webkit-scrollbar {
@@ -225,16 +216,64 @@
       font-weight: 600;
     }
 
-    input:not([readonly]):focus {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+    .terms-row {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background-color 0.18s ease;
     }
 
-    label {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .terms-row:hover {
+      background: #f8fafc;
+    }
+
+    .terms-checkbox {
+      width: 1rem;
+      height: 1rem;
+      margin-top: 0.25rem;
+      accent-color: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .terms-copy {
+      color: var(--text-muted);
+      line-height: 2;
+    }
+
+    .terms-link {
+      color: var(--brand-dark);
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .terms-link:hover {
+      color: var(--brand-blue-dark);
+      text-decoration: underline;
+    }
+
+    .seller-entry-link {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.83rem;
+      color: var(--brand-dark);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 999px;
+      padding: 0.34rem 0.78rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .seller-entry-link:hover {
+      color: var(--brand-blue-dark);
+      border-color: rgba(14, 165, 233, 0.3);
+      background: rgba(14, 165, 233, 0.1);
     }
 
     #toast {
@@ -242,17 +281,17 @@
       top: 50%;
       right: 50%;
       transform: translate(50%, -50%);
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      background: var(--brand);
       color: #fff;
       font-weight: bold;
       font-size: 15px;
       padding: 16px 36px;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 40px rgba(16, 185, 129, 0.4);
+      border-radius: 1rem;
+      box-shadow: 0 10px 24px -16px rgba(16, 185, 129, 0.9);
       opacity: 0;
       z-index: 9999;
       pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 0.2s ease, transform 0.2s ease;
       min-width: 200px;
       text-align: center;
       line-height: 2.1;
@@ -261,40 +300,40 @@
     #toast.active {
       opacity: 1;
       pointer-events: auto;
-      transform: translate(50%, -50%) scale(1.05);
+      transform: translate(50%, -50%) scale(1.02);
+    }
+
+    .page-footer {
+      margin-top: 3rem;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      text-align: center;
+      font-size: 0.79rem;
+      padding: 1.1rem 0.85rem;
+      background: rgba(255, 255, 255, 0.7);
+      position: relative;
+      z-index: 10;
+    }
+
+    .page-footer span {
+      color: var(--text-secondary);
+      font-weight: 800;
     }
 
     @media (max-width:640px) {
-      header .text-lg {
-        font-size: 16px !important;
-      }
-
-      header .md\:text-2xl {
-        font-size: 18px !important;
-      }
-
-      header .gap-4 {
-        gap: 9px !important;
-      }
-
-      header .px-6 {
-        padding-left: 0.9rem !important;
-        padding-right: 0.9rem !important;
-      }
-
-      header .py-3 {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-      }
-
-      main {
-        margin-top: 94px !important;
+      header {
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
       }
 
       #toast {
         font-size: 13px;
         padding: 12px 16px;
         min-width: 120px;
+      }
+
+      .glass {
+        border-radius: 16px;
       }
     }
   </style>
@@ -320,71 +359,71 @@
 
 </head>
 
-<body class="text-gray-800 overflow-x-hidden">
+<body class="overflow-x-hidden">
 
   <!-- Toast -->
   <div id="toast">ویترینت فعلا فقط در سنندج فعال است.</div>
 
   <!-- Header شیشه‌ای و ریسپانسیو با استایل بهبود یافته -->
-  <header class="fixed top-0 inset-x-0 z-20 border-b shadow flex items-center justify-between px-6 py-4">
-    <a href="index.html" class="logo-container flex items-center gap-3 select-none shrink-0">
-      <img src="assets/images/logo.svg" alt="ویترینت" class="w-11 h-11 sm:w-12 sm:h-12 hidden sm:block"
+  <header class="fixed top-0 inset-x-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3">
+    <a href="index.html" class="logo-container select-none shrink-0">
+      <img src="assets/images/logo.svg" alt="ویترینت" class="w-9 h-9 sm:w-10 sm:h-10 hidden sm:block"
         onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
-      <span class="brand-text font-extrabold text-xl md:text-3xl"
+      <span class="brand-text text-xl md:text-2xl"
         style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
-      <span class="brand-text font-extrabold text-xl md:text-3xl sm:hidden block"
+      <span class="brand-text text-xl sm:hidden block"
         style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
     </a>
-    <nav class="flex items-center gap-3 text-base flex-shrink-0">
-      <a href="index.html" class="text-gray-700">خانه</a>
-      <a href="login.html" class="text-gray-700">ورود</a>
+    <nav class="flex items-center gap-2 text-sm sm:text-base flex-shrink-0">
+      <a href="index.html">خانه</a>
+      <a href="login.html" class="nav-link-accent">ورود</a>
     </nav>
   </header>
 
   <!-- فرم ثبت‌نام کاربر -->
-  <main class="max-w-xl mx-auto mt-40 mb-10 px-2 sm:px-0 relative z-10">
-    <section class="glass border rounded-2xl shadow-2xl p-8 sm:p-10">
-      <div class="text-center mb-8">
+  <main class="relative z-10 min-h-[calc(100vh-170px)] flex items-center justify-center px-4 pt-28 pb-10">
+    <section class="glass p-7 sm:p-9">
+      <div class="text-center mb-9">
         <h2
-          class="text-3xl sm:text-4xl font-black bg-gradient-to-l from-[#10b981] to-[#0ea5e9] text-transparent bg-clip-text mb-2 tracking-tight">
+          class="form-title font-black mb-2">
           ثبت‌نام در ویترینت</h2>
-        <p class="text-gray-600 text-sm mt-2">به جامعه ویترینت خوش آمدید</p>
+        <p class="form-subtitle mt-2">به جامعه ویترینت خوش آمدید</p>
       </div>
-      <form id="signupForm" class="space-y-5" autocomplete="off" novalidate>
+      <form id="signupForm" class="space-y-6" autocomplete="off" novalidate>
         <div>
-          <label class="block text-[15px] font-bold mb-1 text-gray-700">شماره موبایل</label>
+          <label class="form-label block">شماره موبایل</label>
           <input id="phoneInput" name="phone" type="tel"
-            class="w-full border rounded-xl p-3 text-base focus:ring-2 focus:ring-[#10b981]/30 bg-white/90 shadow-sm transition"
-            placeholder="مثلاً 09121234567" inputmode="numeric" autocomplete="tel-national" dir="ltr" maxlength="11"
+            class="phone-input"
+            placeholder="09xxxxxxxxx" inputmode="numeric" autocomplete="tel-national" dir="ltr" maxlength="11"
             autofocus required />
           <div class="err-text hidden"></div>
         </div>
-        <div class="flex items-start gap-2 text-sm mt-1">
-          <input type="checkbox" id="terms" required class="accent-[#10b981] w-4 h-4 rounded border-gray-300 mt-1" />
-          <label for="terms" class="select-none text-gray-700 leading-7">
+        <div id="termsRow" class="terms-row text-sm mt-1">
+          <input type="checkbox" id="terms" required class="terms-checkbox" />
+          <label class="terms-copy select-none leading-7">
             <span>قوانین و مقررات ویترینت را می‌پذیرم.</span>
-            <a href="terms.html" class="text-[#0ea5e9] font-extrabold hover:underline ml-1">مطالعه قوانین</a>
+            <a href="terms.html" class="terms-link font-extrabold ml-1">مطالعه قوانین</a>
           </label>
         </div>
-        <div class="text-center mt-8">
+        <div class="mt-6">
           <button id="requestOtpBtn" type="submit" disabled
-            class="brand-btn py-3 px-8 rounded-xl font-bold text-lg shadow-md hover:scale-[1.03] transition-all duration-200 w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">درخواست
+            class="brand-btn text-base sm:text-lg">درخواست
             کد تایید</button>
         </div>
       </form>
-      <div class="text-center text-sm text-gray-600 mt-8">
+      <div class="text-center text-sm text-gray-500 mt-8">
         قبلاً ثبت‌نام کردی؟
-        <a href="login.html" class="text-[#0ea5e9] hover:underline font-extrabold">ورود</a>
+        <a href="login.html" class="terms-link hover:underline font-extrabold">ورود</a>
+      </div>
+      <div class="text-center mt-3">
+        <a href="/seller/login.html" class="seller-entry-link">ورود فروشندگان</a>
       </div>
     </section>
   </main>
 
   <!-- فوتر شیک و جمع و جور -->
-  <footer
-    class="mt-20 bg-white/80 backdrop-filter backdrop-blur-lg border-t border-gray-200 text-center text-xs sm:text-sm text-gray-500 py-6 rounded-t-3xl relative z-10"
-    style="box-shadow: 0 -4px 20px rgba(16, 185, 129, 0.1);">
-    © 2025 <span class="font-extrabold"
-      style="background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Vitrinet</span>
+  <footer class="page-footer">
+    © 2025 <span>Vitrinet</span>
     - همه حقوق محفوظ است.
   </footer>
 
@@ -396,6 +435,7 @@
     const form = document.getElementById('signupForm');
     const phoneInput = document.getElementById('phoneInput');
     const termsInput = document.getElementById('terms');
+    const termsRow = document.getElementById('termsRow');
     const submitBtn = document.getElementById('requestOtpBtn');
 
     function toEnglishDigits(value = '') {
@@ -444,6 +484,12 @@
       setButtonState();
     });
 
+    termsRow?.addEventListener('click', (event) => {
+      if (event.target.closest('a') || event.target === termsInput) return;
+      termsInput.checked = !termsInput.checked;
+      setButtonState();
+    });
+
     termsInput.addEventListener('change', setButtonState);
 
     (function preFillFromURL() {
@@ -457,7 +503,7 @@
           if (formSection && !document.getElementById('booking-message')) {
             const message = document.createElement('div');
             message.id = 'booking-message';
-            message.style.cssText = 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center; border: 2px solid rgba(16, 185, 129, 0.2);';
+            message.style.cssText = 'background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 20px; text-align: center; border: 1px solid #d1fae5;';
             message.innerHTML = '<p style="color: #374151; font-size: 14px; font-weight: 600; margin: 0;">با ساخت حساب، رزرو اخیر شما نیز ثبت خواهد شد ✓</p>';
             formSection.insertBefore(message, formSection.querySelector('form'));
           }
