@@ -1397,6 +1397,18 @@
 
     function bindModalEvents() {
       modalAcknowledgeButton?.addEventListener('click', () => closeUnavailableModal());
+
+      modalBackdrop?.addEventListener('click', (event) => {
+        if (event.target === modalBackdrop) {
+          closeUnavailableModal();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if ((event.key === 'Escape' || event.key === 'Esc') && modalBackdrop?.classList.contains('is-open')) {
+          closeUnavailableModal();
+        }
+      });
     }
 
     async function initSettings() {
