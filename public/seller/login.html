@@ -1,497 +1,111 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="3;url=/login.html" />
   <title>ورود فروشنده | ویترینت</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --brand-primary: #10b981;
+      --brand-secondary: #0ea5e9;
+      --text-primary: #0f172a;
+      --text-muted: #64748b;
+      --surface: rgba(255, 255, 255, 0.96);
+      --line-soft: rgba(148, 163, 184, 0.24);
+      --shadow-main: 0 18px 45px -22px rgba(15, 23, 42, 0.35), 0 10px 24px -22px rgba(14, 165, 233, 0.55);
+      --shadow-focus: 0 0 0 4px rgba(14, 165, 233, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
-      min-height: 100dvh;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      font-family: 'Vazirmatn', sans-serif;
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(16, 185, 129, 0.14), transparent 42%),
+        radial-gradient(circle at 85% 12%, rgba(14, 165, 233, 0.16), transparent 38%),
+        linear-gradient(145deg, #effaf6 0%, #f7fafc 48%, #ecf8ff 100%);
     }
-    .login-main {
-      flex: 1 1 auto;
-      width: min(100%, 36rem);
-      margin-inline: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.45rem 0.65rem 0.6rem;
-    }
-    .glass {
-      background: rgba(255,255,255,0.95);
-      box-shadow: 0 10px 38px #10b98118, 0 2px 10px #0ea5e915;
-      border-radius: 1.7rem;
-      backdrop-filter: blur(14px);
-      margin-top: 0;
+
+    .card {
       width: 100%;
-      max-width: 34rem;
-      padding: clamp(1rem, 1.95vh, 1.8rem) !important;
-    }
-    .login-brand {
-      font-size: clamp(1.35rem, 2.3vw, 1.9rem);
-      margin-bottom: 0.45rem;
-    }
-    .login-title {
-      font-size: clamp(1.15rem, 2.2vw, 1.8rem);
-      margin-bottom: 0.95rem;
-      line-height: 1.35;
-    }
-    #login-form > * + * {
-      margin-top: 1rem !important;
-    }
-    #login-form label {
-      margin-bottom: 0.35rem !important;
-    }
-    #login-form input {
-      padding-top: 0.62rem;
-      padding-bottom: 0.62rem;
-    }
-    .form-helper-row {
-      margin-top: 0.45rem !important;
-      flex-wrap: wrap;
-      gap: 0.3rem 0.75rem;
-    }
-    .seller-register-box {
-      margin-top: 1.2rem;
-      padding-top: 1.2rem;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .seller-register-copy {
-      color: #64748b;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    .seller-register-copy svg {
-      display: none;
-    }
-    .seller-register-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-      padding: 0;
-      background: none;
-      color: #0ea5e9;
-      font-size: 0.875rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-    .seller-register-link:hover {
-      color: #10b981;
-      text-decoration: underline;
-    }
-    .footer-compact {
-      margin-top: 0 !important;
-      padding: 0.42rem 0.5rem !important;
-      font-size: 0.72rem;
-      background: rgba(255, 255, 255, 0.86);
-    }
-    .brand-btn {
-      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
-      color: #fff !important;
-      font-weight: bold;
-      border-radius: 1.2rem;
-      transition: all .16s;
-      box-shadow: 0 2px 12px #10b98120;
-    }
-    .brand-btn:hover { filter: brightness(1.1);}
-    .fadein { animation: fadein .65s;}
-    @keyframes fadein {
-      from { opacity: 0; transform: translateY(32px);}
-      to   { opacity: 1; transform: translateY(0);}
-    }
-    .header-logo {
-      font-weight: bold;
-      font-size: 2rem;
-      background: linear-gradient(90deg,#10b981 40%,#0ea5e9 70%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      letter-spacing:1.4px;
-      margin-bottom: 1.1rem;
+      max-width: 28rem;
+      border-radius: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--line-soft);
+      box-shadow: var(--shadow-main);
       text-align: center;
-      display: block;
-      text-decoration: none;
+      padding: 1.4rem 1.2rem;
     }
-    .header-nav{transition:max-height .3s ease,padding .3s ease;}
-    /* استایل مودال جدید */
-    .modal-bg {
-      background: rgba(22,22,22,0.20);
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100;
-      transition: background 0.2s;
-    }
-    .modal-content {
-      background: white;
-      border-radius: 1.5rem;
-      box-shadow: 0 18px 48px #10b9811a;
-      padding: 2.1rem 1.6rem 1.4rem 1.6rem;
-      max-width: 350px; width: 95vw;
-      text-align: center;
-      animation: fadein .36s;
-      position: relative;
-    }
-    .modal-content h3 {
-      font-size: 1.2rem;
-      color: #0ea5e9;
-      font-weight: 900;
-      margin-bottom: 8px;
-      letter-spacing: -.3px;
-    }
-    .modal-content p {
-      color: #64748b;
-      font-size: 0.98rem;
-      margin-bottom: 16px;
-    }
-    .modal-content input {
-      direction: ltr;
-      text-align: left;
-    }
-    .modal-close-x {
-      position: absolute;
-      left: 1.1rem;
-      top: 1.1rem;
-      color: #a0aec0;
-      background: none;
-      border: none;
-      font-size: 1.7rem;
-      line-height: 1;
-      cursor: pointer;
-      transition: color .14s;
-    }
-    .modal-close-x:hover { color: #0ea5e9;}
-    .info-box {
-      background: #ecfeff;
-      color: #0369a1;
-      font-size: 0.88rem;
-      border-radius: 1rem;
-      padding: 0.75rem 1rem;
-      line-height: 1.9;
-    }
-    .success-box {
-      background: #ecfdf5;
-      color: #0f766e;
-      font-size: 0.88rem;
-      border-radius: 1rem;
-      padding: 0.75rem 1rem;
-      line-height: 1.9;
-    }
-    .otp-input {
-      letter-spacing: 0.45rem;
-      text-align: center;
-      font-size: 1.4rem;
+
+    .logo {
+      margin: 0 0 0.35rem;
+      font-size: 1.45rem;
       font-weight: 800;
-      direction: ltr;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #0f172a 0%, #0b3f66 60%, #0ea5e9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
     }
-    .otp-helper button {
-      color: #0ea5e9;
+
+    .message {
+      margin: 0;
+      font-size: 0.98rem;
       font-weight: 700;
+      color: var(--text-muted);
     }
-    .otp-helper button:hover {
-      color: #10b981;
-    }
-    .cta-register-btn {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      color: white;
-      font-weight: 700;
-      padding: 0.6rem 1.4rem;
-      border-radius: 0.9rem;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
-      transition: all 0.3s ease;
+
+    .redirect-link {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      font-size: 0.95rem;
-    }
-    .cta-register-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
-    }
-    .cta-register-btn svg {
-      width: 1.1rem;
-      height: 1.1rem;
-    }
-    .mobile-cta-btn {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      color: white;
-      font-weight: 700;
-      padding: 0.5rem 1rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
-      font-size: 0.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      transition: all 0.3s ease;
-    }
-    .mobile-cta-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-    }
-    .mobile-cta-btn svg {
-      width: 0.95rem;
-      height: 0.95rem;
-    }
-    .hamburger-btn {
-      display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
-      width: 2.5rem;
-      height: 2.5rem;
-      background: rgba(16, 185, 129, 0.08);
-      border-radius: 0.65rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      padding: 0.5rem;
+      margin-top: 1rem;
+      min-height: 2.7rem;
+      padding: 0.62rem 1.15rem;
+      border-radius: 0.85rem;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      background: linear-gradient(92deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+      box-shadow: 0 12px 24px -16px rgba(14, 165, 233, 0.9);
+      transition: transform 0.16s ease, filter 0.2s ease, box-shadow 0.2s ease;
     }
-    .hamburger-btn:hover {
-      background: rgba(16, 185, 129, 0.15);
+
+    .redirect-link:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 14px 28px -16px rgba(16, 185, 129, 0.88);
     }
-    .hamburger-btn span {
-      display: block;
-      width: 1.3rem;
-      height: 2.5px;
-      background: #10b981;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-    .hamburger-btn span:not(:last-child) {
-      margin-bottom: 4px;
-    }
-    @media (max-height: 760px) {
-      .login-main {
-        padding-top: 0.3rem;
-        padding-bottom: 0.35rem;
-      }
-      .login-brand {
-        margin-bottom: 0.24rem;
-        font-size: 1.2rem;
-      }
-      .login-title {
-        margin-bottom: 0.6rem;
-        font-size: 1.03rem;
-      }
-      #login-form > * + * {
-        margin-top: 0.68rem !important;
-      }
-      #login-form input {
-        padding-top: 0.46rem;
-        padding-bottom: 0.46rem;
-      }
-      .seller-register-box {
-        margin-top: 0.5rem;
-        padding: 0.5rem 0.66rem;
-      }
-      .footer-compact {
-        padding: 0.26rem 0.4rem !important;
-      }
-    }
-    @media (max-height: 690px) {
-      .login-brand { display: none; }
-      .form-helper-row span { display: none; }
-    }
-    @media (max-width: 640px) {
-      .login-main {padding-inline: 0.4rem;}
-      .glass {padding: .9rem .62rem !important;}
-      .header-logo {font-size: 1.4rem;}
-      .header-nav {max-height:0; padding-top:0; padding-bottom:0; overflow:hidden;}
-      #nav-toggle:checked + .header-nav {max-height:12rem; padding-top:.5rem; padding-bottom:.5rem;}
-      .modal-content {padding: 1.3rem .5rem 1rem .5rem;}
-      .seller-register-box {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
+
+    .redirect-link:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
     }
   </style>
-  <script src="/nav-active.js" defer></script>
-
-<!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
-<!--
-<script>
-  (function () {
-    var config = window.POSTHOG_CONFIG || { enabled: false, apiKey: 'phc_YOUR_KEY_HERE', apiHost: 'https://analytics.vitreenet.ir' };
-    if (!config.enabled) {
-      return; // فعال نیست | Not enabled yet
-    }
-    try {
-      (function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")),p.type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js";(r=t.getElementsByTagName("script")[0]),r.parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:u=e,u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==u._i&&(e+="."+u._i),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"};n="capture identify alias people.set people.set_once people.unset people.increment people.append people.union people.remove people.clear_opt_out_outcome register register_once unregister opt_out_capturing opt_in_capturing has_opted_out_capturing reset isFeatureEnabled onFeatureFlags reloadFeatureFlags group".split(" ");for(o=0;o<n.length;o++)g(u,n[o]);e._i.push([i,s,a])},e.__SV=1.1)})(document, window.posthog || []);
-      window.posthog.init(config.apiKey, { api_host: config.apiHost, capture_pageview: true, advanced_disable_decide: true });
-    } catch (error) {
-      console.warn('PostHog init failed (preview mode):', error);
-    }
-  })();
-</script>
--->
-
 </head>
-<body class="text-gray-800">
-
-  <!-- هدر شیشه‌ای -->
-  <header class="w-full bg-white/90 shadow-sm backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row items-center sm:justify-between gap-y-2">
-      <div class="flex items-center justify-between w-full sm:w-auto">
-        <a href="../index.html" class="header-logo font-bold text-[1.55rem] sm:text-[1.9rem] md:text-[2.05rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent" style="letter-spacing:1.7px;">ویترینت</a>
-        <div class="flex items-center gap-2 sm:hidden">
-          <a href="../post.html" class="mobile-cta-btn">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            ثبت فروشگاه
-          </a>
-          <label for="nav-toggle" class="hamburger-btn">
-            <span></span>
-            <span></span>
-            <span></span>
-          </label>
-        </div>
-        <label for="nav-toggle" class="hidden text-gray-700 text-2xl cursor-pointer p-2">&#9776;</label>
-      </div>
-      <input type="checkbox" id="nav-toggle" class="hidden peer">
-      <nav class="header-nav flex flex-col sm:flex-row items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto text-[0.9rem] sm:text-base">
-        <a href="../index.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#10b981] font-bold transition">خانه</a>
-        <a href="categories.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#0ea5e9] font-bold transition">دسته‌بندی</a>
-        <a href="../login.html" class="block px-3 py-2 sm:px-3 sm:py-0 text-gray-700 hover:text-[#0ea5e9] font-bold transition">ورود کاربر</a>
-        <a href="../post.html" class="cta-register-btn">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          ثبت فروشگاه
-        </a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- فرم ورود -->
-  <main class="login-main">
-    <section class="glass border rounded-2xl shadow-2xl w-full fadein" id="login-section">
-      <a href="../index.html" class="header-logo login-brand">ویترینت</a>
-      <h2 class="font-extrabold text-[#10b981] text-center login-title">ورود به حساب فروشنده</h2>
-      <form id="login-form" class="space-y-6" autocomplete="on" novalidate>
-        <div>
-          <label class="block text-sm font-bold mb-1" for="phone">شماره موبایل <span class="text-red-500">*</span></label>
-          <input type="text" id="phone" maxlength="11" inputmode="numeric"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
-            placeholder="09121234567" required />
-        </div>
-        <div>
-          <label class="block text-sm font-bold mb-1" for="password">رمز عبور <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <input type="password" id="password"
-              class="w-full p-3 pl-10 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
-              placeholder="رمز عبور" required autocomplete="current-password" />
-            <button type="button" id="toggle-password"
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-              <svg id="eye-open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              <svg id="eye-closed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">ورود</button>
-        <div class="form-helper-row flex justify-center items-center mt-2">
-          <button type="button" id="forgot-btn" class="text-sm text-[#0ea5e9] hover:text-[#10b981] font-semibold transition hover:underline">
-            رمز عبور را فراموش کرده‌اید؟
-          </button>
-        </div>
-        <div id="error-message" class="text-red-500 text-center text-sm mt-1 min-h-[22px]"></div>
-      </form>
-      <div class="seller-register-box">
-        <span class="seller-register-copy">فروشنده جدید هستید؟</span>
-        <a href="../post.html" class="seller-register-link">ثبت‌نام کنید</a>
-      </div>
-    </section>
+<body>
+  <main class="card">
+    <h1 class="logo">ویترینت</h1>
+    <p class="message">در حال انتقال به صفحه ورود…</p>
+    <a class="redirect-link" href="/login.html">رفتن به صفحه ورود</a>
   </main>
 
-  <!-- Modal: فراموشی رمز عبور -->
-  <div id="modal-bg" class="modal-bg hidden">
-    <div class="modal-content">
-      <button type="button" class="modal-close-x" id="modal-close" title="بستن">&times;</button>
-      <h3>بازیابی رمز عبور</h3>
-      <p id="forgot-description" class="leading-relaxed text-sm sm:text-base">شماره موبایل خود را وارد کنید تا کد تأیید برایتان ارسال شود.</p>
-      <form id="forgot-form" class="space-y-4">
-        <div id="forgot-step-phone" class="space-y-3">
-          <input type="text" id="forgot-phone" maxlength="11" inputmode="numeric"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 text-left ltr"
-            placeholder="مثلاً 09123456789" required />
-        </div>
-        <div id="forgot-step-otp" class="space-y-3 hidden">
-          <div class="text-sm text-gray-600 leading-relaxed">
-            کد ۴ رقمی ارسال‌شده به شمارهٔ <span id="otp-phone" class="font-semibold text-gray-900"></span> را وارد کنید.
-          </div>
-          <input type="text" id="forgot-otp" maxlength="4" inputmode="numeric"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50 otp-input"
-            placeholder="----" />
-          <div class="flex items-center justify-between text-[0.7rem] sm:text-xs text-gray-500 otp-helper">
-            <button type="button" id="otp-edit" class="transition">ویرایش شماره</button>
-            <button type="button" id="otp-resend" class="transition">ارسال مجدد کد</button>
-          </div>
-        </div>
-        <div id="forgot-step-reset" class="space-y-3 hidden">
-          <div>
-            <input type="password" id="new-password"
-              class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
-              placeholder="رمز عبور جدید" />
-          </div>
-          <div>
-            <input type="password" id="confirm-password"
-              class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-gray-50"
-              placeholder="تکرار رمز عبور" />
-          </div>
-        </div>
-        <div id="forgot-info" class="info-box text-xs sm:text-sm hidden"></div>
-        <div id="forgot-success" class="success-box text-xs sm:text-sm hidden"></div>
-        <div id="forgot-error" class="text-red-500 text-xs min-h-[22px]"></div>
-        <button type="submit" id="forgot-submit" class="brand-btn text-white py-3 px-5 rounded-xl font-bold text-base w-full">ارسال کد تأیید</button>
-        <button type="button" id="modal-cancel" class="w-full text-gray-500 mt-1 font-bold hover:text-[#0ea5e9] transition">انصراف</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- فوتر -->
-  <footer class="footer-compact bg-white border-t text-center text-sm text-gray-500 py-4">
-    © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
-  </footer>
-
-<script src="api-client.js"></script>
-<script src="./assets/js/login.js"></script>
-
-
-<!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
-<!--
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const safeCapture = window.safePosthogCapture || function () {};
-    // تلاش برای ورود فروشنده | Seller login attempt
-    // const sellerLoginForm = document.querySelector('form');
-    // sellerLoginForm?.addEventListener('submit', function () {
-    //   safeCapture('seller_login', { context: 'seller-auth' });
-    // });
-  });
-</script>
--->
-
+  <script>
+    setTimeout(function () {
+      window.location.replace('/login.html');
+    }, 700);
+  </script>
 </body>
 </html>
-
