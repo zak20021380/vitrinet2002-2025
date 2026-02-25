@@ -26,6 +26,28 @@ if (!window.SafeSS) {
   window.SafeSS = SafeSS;
 }
 
+const API_ORIGIN = window.location.origin.includes('localhost')
+  ? 'http://localhost:5000'
+  : window.location.origin;
+const SESSION_MARKER = 'cookie-session';
+let csrfTokenCache = '';
+
+async function getAuthCsrfToken() {
+  if (csrfTokenCache) return csrfTokenCache;
+
+  const response = await fetch(`${API_ORIGIN}/api/auth/csrf-token`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data?.csrfToken) {
+    throw new Error('CSRF_TOKEN_MISSING');
+  }
+
+  csrfTokenCache = data.csrfToken;
+  return csrfTokenCache;
+}
+
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault();
   const phone = document.getElementById('mobile').value.trim();
@@ -34,10 +56,13 @@ document.getElementById('loginForm').addEventListener('submit', async function (
   const forgotLink = document.getElementById('forgot-link');
 
   try {
-    const res = await fetch('/api/auth/login-user', {
+    const csrfToken = await getAuthCsrfToken();
+    const res = await fetch(`${API_ORIGIN}/api/auth/login-user`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest'
       },
       credentials: 'include',
       body: JSON.stringify({ phone, password })
@@ -46,19 +71,12 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
 
-    console.log('✅ Login response received:', data);
-    console.log('Token from server:', data.token ? 'EXISTS' : 'MISSING');
-    console.log('User from server:', data.user);
-
     // Clear old data
     localStorage.clear();
 
-    // Save new token and user
-    localStorage.setItem('token', data.token);
+    // Session is maintained in HttpOnly cookie. Keep a marker for legacy checks.
+    localStorage.setItem('token', data.token || SESSION_MARKER);
     localStorage.setItem('user', JSON.stringify(data.user));
-
-    console.log('💾 Token saved to localStorage');
-    console.log('Saved token:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED');
 
     const back = SafeSS.getJSON('afterLoginReturn');
     if (back) {

@@ -162,6 +162,25 @@ const CATEGORY_API_URL = `${API_ORIGIN}/api/categories`;
 const CATEGORY_CACHE_KEY = 'post.categories.cache';
 const SERVICE_CACHE_KEY = 'post.serviceSubcategories.cache';
 const CATEGORY_CACHE_TTL_MS = 1000 * 60 * 30; // 30 دقیقه
+const SESSION_MARKER = 'cookie-session';
+let authCsrfToken = '';
+
+function getAuthCsrfToken() {
+  if (authCsrfToken) return Promise.resolve(authCsrfToken);
+
+  return fetch(`${API_ORIGIN}/api/auth/csrf-token`, {
+    method: 'GET',
+    credentials: 'include'
+  })
+    .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok || !data?.csrfToken) {
+        throw new Error('CSRF_TOKEN_MISSING');
+      }
+      authCsrfToken = data.csrfToken;
+      return authCsrfToken;
+    });
+}
 
 // لیست دسته‌های خدماتی برای تشخیص نوع حساب کاربری
 const SERVICE_CATEGORIES = ["خدمات", "زیبایی", "تالار و مجالس", "خودرو", "ورزشی"];
@@ -905,13 +924,17 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
   btn.disabled = true;
   btn.innerText = "در حال ارسال...";
 
-  fetch(`${API_ORIGIN}/api/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  })
+  getAuthCsrfToken()
+    .then((csrfToken) => fetch(`${API_ORIGIN}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    }))
     .then(res => res.json())
     .then(result => {
       btn.disabled = false;
@@ -966,11 +989,17 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
     return false;
   }
 
-  fetch(`${API_ORIGIN}/api/auth/verify`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ shopurl, phone, code })
-  })
+  getAuthCsrfToken()
+    .then((csrfToken) => fetch(`${API_ORIGIN}/api/auth/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: 'include',
+      body: JSON.stringify({ shopurl, phone, code })
+    }))
     .then(res => res.json())
     .then(result => {
       if (result.success) {
@@ -982,16 +1011,22 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
           return;
         }
         // درخواست لاگین به سرور
-        fetch(`${API_ORIGIN}/api/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone, password })
-        })
+        getAuthCsrfToken()
+          .then((csrfToken) => fetch(`${API_ORIGIN}/api/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: 'include',
+            body: JSON.stringify({ phone, password })
+          }))
           .then(res2 => res2.json())
           .then(loginRes => {
             if (loginRes.success && loginRes.seller) {
               // توکن و اطلاعات رو ذخیره کن (در صورت نیاز)
-              localStorage.setItem('token', loginRes.token);
+              localStorage.setItem('token', loginRes.token || SESSION_MARKER);
               localStorage.setItem('seller', JSON.stringify(loginRes.seller));
               // sessionStorage رو پاک کن
               sessionStorage.removeItem('signup_pwd');

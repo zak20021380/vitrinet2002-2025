@@ -103,6 +103,24 @@
   const API_ORIGIN = window.location.origin.includes('localhost')
     ? 'http://localhost:5000'
     : window.location.origin;
+  const SESSION_MARKER = 'cookie-session';
+  let authCsrfToken = '';
+
+  async function getAuthCsrfToken() {
+    if (authCsrfToken) return authCsrfToken;
+
+    const response = await fetch(`${API_ORIGIN}/api/auth/csrf-token`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.csrfToken) {
+      throw new Error('CSRF_TOKEN_MISSING');
+    }
+
+    authCsrfToken = data.csrfToken;
+    return authCsrfToken;
+  }
 
   function getQueryParam(name) {
     const url = new URL(window.location.href);
@@ -183,9 +201,14 @@
     btn.disabled = true;
 
     try {
+      const csrfToken = await getAuthCsrfToken();
       const verifyResponse = await fetch(`${API_ORIGIN}/api/auth/verify-user`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         credentials: 'include',
         body: JSON.stringify({ phone, code })
       });
@@ -197,7 +220,7 @@
         return;
       }
 
-      localStorage.setItem('token', verifyResult.token || '');
+      localStorage.setItem('token', verifyResult.token || SESSION_MARKER);
       localStorage.setItem('user', JSON.stringify(verifyResult.user || { phone }));
       sessionStorage.removeItem('signup_phone');
 
@@ -232,9 +255,15 @@
   window.resendCode = async function(e){
     e.preventDefault();
     try {
+      const csrfToken = await getAuthCsrfToken();
       const resendResponse = await fetch(`${API_ORIGIN}/api/auth/register-user`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
         body: JSON.stringify({ phone })
       });
       const resendResult = await resendResponse.json().catch(() => ({}));

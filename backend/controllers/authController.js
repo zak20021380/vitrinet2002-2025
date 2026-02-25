@@ -1,6 +1,7 @@
 const Seller = require('../models/Seller');
 const ShopAppearance = require('../models/ShopAppearance');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'vitrinet_secret_key';
 const User = require('../models/user');
@@ -10,6 +11,134 @@ const { buildPhoneCandidates } = require('../utils/phone');
 
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const OTP_LENGTH = 5;
+const OTP_TTL_MS = 3 * 60 * 1000;
+const USER_OTP_REQUEST_SUCCESS_MESSAGE = 'کد تایید پیامک شد.';
+const USER_OTP_VERIFY_FAILURE_MESSAGE = 'کد تایید اشتباه است یا منقضی شده.';
+const OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || JWT_SECRET;
+const USER_ACCESS_TOKEN_TTL = '15m';
+const USER_ACCESS_TOKEN_MAX_AGE_MS = 15 * 60 * 1000;
+const USER_REFRESH_TOKEN_TTL = '7d';
+const USER_REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const SELLER_ACCESS_TOKEN_TTL = '7d';
+const SELLER_ACCESS_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const SELLER_REFRESH_TOKEN_TTL = '14d';
+const SELLER_REFRESH_TOKEN_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
+const USER_SESSION_MARKER = 'cookie-session';
+const OTP_REQUEST_WINDOW_MS = 10 * 60 * 1000;
+const OTP_REQUEST_MAX_PER_WINDOW = 5;
+const OTP_REQUEST_MIN_INTERVAL_MS = 30 * 1000;
+const OTP_VERIFY_LOCKOUT_THRESHOLD = 5;
+const OTP_VERIFY_LOCKOUT_MS = 10 * 60 * 1000;
+const OTP_VERIFY_BACKOFF_BASE_MS = 1000;
+const OTP_VERIFY_BACKOFF_MAX_MS = 60 * 1000;
+const otpRequestState = new Map();
+const otpVerifyState = new Map();
+
+function getSecureCookieFlag(req) {
+  if (process.env.NODE_ENV === 'production') return true;
+  if (req?.secure) return true;
+  return false;
+}
+
+function getCookieBaseOptions(req) {
+  return {
+    httpOnly: true,
+    secure: getSecureCookieFlag(req),
+    sameSite: 'strict',
+    path: '/'
+  };
+}
+
+function issueUserSession(req, res, user) {
+  const sessionId = crypto.randomBytes(24).toString('hex');
+
+  const accessToken = jwt.sign(
+    {
+      id: user._id,
+      role: 'user',
+      userType: user.userType || 'both',
+      sid: sessionId,
+      type: 'access'
+    },
+    JWT_SECRET,
+    { expiresIn: USER_ACCESS_TOKEN_TTL }
+  );
+
+  const refreshToken = jwt.sign(
+    {
+      id: user._id,
+      role: 'user',
+      userType: user.userType || 'both',
+      sid: sessionId,
+      type: 'refresh'
+    },
+    JWT_SECRET,
+    { expiresIn: USER_REFRESH_TOKEN_TTL }
+  );
+
+  const cookieBase = getCookieBaseOptions(req);
+
+  res.cookie('user_token', accessToken, {
+    ...cookieBase,
+    maxAge: USER_ACCESS_TOKEN_MAX_AGE_MS
+  });
+  res.cookie('user_refresh_token', refreshToken, {
+    ...cookieBase,
+    maxAge: USER_REFRESH_TOKEN_MAX_AGE_MS
+  });
+  res.cookie('user_session_id', sessionId, {
+    ...cookieBase,
+    maxAge: USER_REFRESH_TOKEN_MAX_AGE_MS
+  });
+
+  return USER_SESSION_MARKER;
+}
+
+function issueSellerSession(req, res, seller) {
+  const sessionId = crypto.randomBytes(24).toString('hex');
+
+  const accessToken = jwt.sign(
+    {
+      id: seller._id.toString(),
+      role: 'seller',
+      userType: seller.userType || 'both',
+      sid: sessionId,
+      type: 'access'
+    },
+    JWT_SECRET,
+    { expiresIn: SELLER_ACCESS_TOKEN_TTL }
+  );
+
+  const refreshToken = jwt.sign(
+    {
+      id: seller._id.toString(),
+      role: 'seller',
+      userType: seller.userType || 'both',
+      sid: sessionId,
+      type: 'refresh'
+    },
+    JWT_SECRET,
+    { expiresIn: SELLER_REFRESH_TOKEN_TTL }
+  );
+
+  const cookieBase = getCookieBaseOptions(req);
+
+  res.cookie('seller_token', accessToken, {
+    ...cookieBase,
+    maxAge: SELLER_ACCESS_TOKEN_MAX_AGE_MS
+  });
+  res.cookie('seller_refresh_token', refreshToken, {
+    ...cookieBase,
+    maxAge: SELLER_REFRESH_TOKEN_MAX_AGE_MS
+  });
+  res.cookie('seller_session_id', sessionId, {
+    ...cookieBase,
+    maxAge: SELLER_REFRESH_TOKEN_MAX_AGE_MS
+  });
+
+  return USER_SESSION_MARKER;
+}
 
 function toEnglishDigits(value = '') {
   return String(value || '')
@@ -31,6 +160,122 @@ function normalizeIranianPhone(value) {
 
 function validateIranianPhone(phone) {
   return /^09\d{9}$/.test(normalizeIranianPhone(phone));
+}
+
+function normalizeStrictIranianPhone(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (!/^[0-9۰-۹٠-٩+\-\s()]+$/.test(raw)) return '';
+  return normalizeIranianPhone(raw);
+}
+
+function normalizeStrictOtp(value) {
+  const raw = String(value || '').trim();
+  if (!raw || !/^[0-9۰-۹٠-٩\s]+$/.test(raw)) return '';
+  const digits = toEnglishDigits(raw).replace(/\s+/g, '');
+  return /^\d{5}$/.test(digits) ? digits : '';
+}
+
+function generateOtpCode() {
+  const max = 10 ** OTP_LENGTH;
+  return crypto.randomInt(0, max).toString().padStart(OTP_LENGTH, '0');
+}
+
+function hashOtp(code) {
+  return crypto
+    .createHmac('sha256', OTP_HASH_SECRET)
+    .update(String(code))
+    .digest('hex');
+}
+
+const DUMMY_OTP_HASH = hashOtp('00000');
+
+function timingSafeStringEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left || ''), 'utf8');
+  const rightBuffer = Buffer.from(String(right || ''), 'utf8');
+  const len = Math.max(leftBuffer.length, rightBuffer.length, 1);
+  const leftPadded = Buffer.alloc(len);
+  const rightPadded = Buffer.alloc(len);
+  leftBuffer.copy(leftPadded);
+  rightBuffer.copy(rightPadded);
+  const equal = crypto.timingSafeEqual(leftPadded, rightPadded);
+  return equal && leftBuffer.length === rightBuffer.length;
+}
+
+function isOtpHashMatch(storedHash, otpCode) {
+  const expectedHash = typeof storedHash === 'string' && storedHash ? storedHash : DUMMY_OTP_HASH;
+  const incomingHash = hashOtp(otpCode);
+  const equal = timingSafeStringEqual(expectedHash, incomingHash);
+  return Boolean(storedHash) && equal;
+}
+
+function consumeOtpRequestAllowance(phone) {
+  const now = Date.now();
+  const state = otpRequestState.get(phone) || {
+    count: 0,
+    windowStart: now,
+    nextAllowedAt: 0
+  };
+
+  if (now - state.windowStart > OTP_REQUEST_WINDOW_MS) {
+    state.count = 0;
+    state.windowStart = now;
+    state.nextAllowedAt = 0;
+  }
+
+  if (state.nextAllowedAt > now) {
+    otpRequestState.set(phone, state);
+    return false;
+  }
+
+  if (state.count >= OTP_REQUEST_MAX_PER_WINDOW) {
+    state.nextAllowedAt = now + OTP_REQUEST_MIN_INTERVAL_MS;
+    otpRequestState.set(phone, state);
+    return false;
+  }
+
+  state.count += 1;
+  state.nextAllowedAt = now + OTP_REQUEST_MIN_INTERVAL_MS;
+  otpRequestState.set(phone, state);
+  return true;
+}
+
+function isOtpVerifyAllowed(key) {
+  const state = otpVerifyState.get(key);
+  if (!state) return true;
+
+  const now = Date.now();
+  if (state.lockUntil > now) return false;
+  if (state.nextAllowedAt > now) return false;
+  return true;
+}
+
+function registerOtpVerifyFailure(key) {
+  const now = Date.now();
+  const state = otpVerifyState.get(key) || {
+    failedAttempts: 0,
+    nextAllowedAt: 0,
+    lockUntil: 0
+  };
+
+  state.failedAttempts += 1;
+  const backoff = Math.min(
+    OTP_VERIFY_BACKOFF_BASE_MS * (2 ** (state.failedAttempts - 1)),
+    OTP_VERIFY_BACKOFF_MAX_MS
+  );
+  state.nextAllowedAt = now + backoff;
+
+  if (state.failedAttempts >= OTP_VERIFY_LOCKOUT_THRESHOLD) {
+    state.lockUntil = now + OTP_VERIFY_LOCKOUT_MS;
+    state.failedAttempts = 0;
+    state.nextAllowedAt = state.lockUntil;
+  }
+
+  otpVerifyState.set(key, state);
+}
+
+function clearOtpVerifyState(key) {
+  otpVerifyState.delete(key);
 }
 
 function buildUserPhoneCandidates(rawPhone) {
@@ -74,28 +319,6 @@ async function ensurePhoneAllowed(phone) {
       throw new Error('این حساب کاربری حذف و مسدود شده است.');
     }
   }
-}
-
-function issueUserSession(res, user) {
-  const token = jwt.sign(
-    {
-      id: user._id,
-      role: 'user',
-      userType: user.userType || 'both',
-    },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  res.cookie('user_token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-  return token;
 }
 
 async function linkLegacyBookingsToUser(user, phone) {
@@ -170,11 +393,9 @@ exports.adminLogin = async (req, res) => {
 
 
 
+    const cookieBase = getCookieBaseOptions(req);
     res.cookie('admin_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',                          // فقط تو پروداکشن Secure=true باشه
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',      // در توسعه Lax باشه تا cookie ذخیره شود
-      path: '/',
+      ...cookieBase,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -183,8 +404,7 @@ exports.adminLogin = async (req, res) => {
     // ۵) پاسخ JSON
     return res.json({
       success: true,
-      message: 'ورود ادمین موفق بود.',
-      token
+      message: 'ورود ادمین موفق بود.'
     });
 
   } catch (err) {
@@ -201,7 +421,7 @@ exports.register = async (req, res) => {
       lastname,
       storename,
       shopurl,
-      phone,
+      phone: rawPhone,
       category,
       subcategory,
       address,
@@ -210,11 +430,27 @@ exports.register = async (req, res) => {
       password,
     } = req.body;
 
+    const phone = normalizeStrictIranianPhone(rawPhone);
+    if (!phone || !validateIranianPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'شماره موبایل معتبر وارد کنید.'
+      });
+    }
+
+    if (!consumeOtpRequestAllowance(`seller:${phone}`)) {
+      return res.status(429).json({
+        success: false,
+        message: 'درخواست بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید.'
+      });
+    }
+
     await ensurePhoneAllowed(phone);
 
     // چک تکراری نبودن فروشنده
+    const phoneCandidates = buildPhoneCandidates(phone);
     const exists = await Seller.findOne({
-      $or: [{ shopurl }, { phone }],
+      $or: [{ shopurl }, { phone: { $in: phoneCandidates } }],
     });
     if (exists) {
       return res.status(400).json({
@@ -226,9 +462,9 @@ exports.register = async (req, res) => {
     // هش کردن رمز عبور
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ساخت OTP و زمان انقضا (۵ دقیقه)
-    const otp = "12345"; // فقط برای تست! هر بار ثبت‌نام همین رو بزنه
-    const otpExpire = new Date(Date.now() + 5 * 60 * 1000);
+    // ساخت OTP و زمان انقضا (۳ دقیقه)
+    const otp = hashOtp(generateOtpCode());
+    const otpExpire = new Date(Date.now() + OTP_TTL_MS);
 
     // ساخت و ذخیره فروشنده جدید
     const seller = new Seller({
@@ -293,36 +529,26 @@ exports.register = async (req, res) => {
 // controllers/authController.js
 exports.login = async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { phone: rawPhone, password } = req.body || {};
+    const phone = normalizeStrictIranianPhone(rawPhone);
+
+    if (!phone || !password || !validateIranianPhone(phone)) {
+      return res.status(400).json({ success: false, message: 'شماره و رمز الزامی است.' });
+    }
+
     await ensurePhoneAllowed(phone);
 
     // بارگذاری صریح password
-    const seller = await Seller.findOne({ phone }).select('+password');
+    const phoneCandidates = buildPhoneCandidates(phone);
+    const seller = await Seller.findOne({ phone: { $in: phoneCandidates } }).select('+password');
     if (!seller) return res.status(404).json({ success: false, message: 'فروشنده‌ای با این شماره یافت نشد.' });
 
     // مقایسه رمز
     const isMatch = await bcrypt.compare(password, seller.password);
     if (!isMatch) return res.status(401).json({ success: false, message: 'رمز اشتباه است.' });
 
-    // JWT
-    const token = jwt.sign(
-      {
-        id: seller._id.toString(),
-        role: 'seller',
-        userType: seller.userType || 'both',
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // کوکی HttpOnly — همین‌جا تغییر می‌دهیم:
-    res.cookie('seller_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // صدور نشست امن (توکن فقط در کوکی HttpOnly)
+    issueSellerSession(req, res, seller);
 
     // آماده‌سازی پاسخ بدون password
     seller.password = undefined;
@@ -330,7 +556,7 @@ exports.login = async (req, res) => {
     return res.json({
       success: true,
       message: 'ورود با موفقیت انجام شد.',
-      token,
+      token: USER_SESSION_MARKER,
       seller: {
         id: seller._id,
         firstname: seller.firstname,
@@ -364,39 +590,44 @@ exports.login = async (req, res) => {
 exports.verifyCode = async (req, res) => {
   try {
     const rawShopurl = typeof req.body.shopurl === 'string' ? req.body.shopurl.trim().toLowerCase() : '';
-    const rawPhone = typeof req.body.phone === 'string' ? req.body.phone.replace(/\s+/g, '').trim() : '';
-    const rawCode = typeof req.body.code === 'string' ? req.body.code.trim() : '';
+    const hasPhoneInput = req.body?.phone !== undefined && req.body?.phone !== null && String(req.body?.phone).trim() !== '';
+    const phone = hasPhoneInput ? normalizeStrictIranianPhone(req.body.phone) : '';
+    const code = normalizeStrictOtp(req.body?.code);
 
-    if (!rawCode) {
-      return res.status(400).json({ success: false, message: 'کد تایید ارسال نشده است.' });
+    if (!code) {
+      return res.status(400).json({ success: false, message: 'کد وارد شده معتبر نیست!' });
+    }
+
+    if (hasPhoneInput && !phone) {
+      return res.status(400).json({ success: false, message: 'شماره موبایل معتبر وارد کنید.' });
     }
 
     const query = {};
     if (rawShopurl) query.shopurl = rawShopurl;
-    if (rawPhone) query.phone = rawPhone;
+    if (phone) query.phone = phone;
 
     if (!Object.keys(query).length) {
       return res.status(400).json({ success: false, message: 'اطلاعات ناقص ارسال شده.' });
     }
 
-    // پیدا کردن فروشنده با توجه به اطلاعات موجود
-    const seller = await Seller.findOne(query);
-    if (!seller) {
-      return res.status(404).json({ success: false, message: 'فروشنده یافت نشد.' });
+    const verifyKey = phone ? `seller:${phone}` : `seller:shopurl:${rawShopurl}`;
+    if (!isOtpVerifyAllowed(verifyKey)) {
+      return res.status(400).json({ success: false, message: USER_OTP_VERIFY_FAILURE_MESSAGE });
     }
 
-    const sellerOtp = typeof seller.otp === 'string' ? seller.otp.trim() : '';
+    // پیدا کردن فروشنده با توجه به اطلاعات موجود
+    const seller = await Seller.findOne(query);
+    const otpMatches = isOtpHashMatch(seller?.otp, code);
+    const otpNotExpired = Boolean(seller?.otpExpire && seller.otpExpire >= new Date());
 
-    // چک کد تایید و انقضا
-    if (
-      sellerOtp !== rawCode ||
-      !seller.otpExpire ||
-      seller.otpExpire < new Date()
-    ) {
-      return res.status(400).json({ success: false, message: 'کد تایید اشتباه است یا منقضی شده.' });
+    // anti-enumeration: پاسخ خطا برای تمام شکست‌ها یکسان است
+    if (!seller || !otpMatches || !otpNotExpired) {
+      registerOtpVerifyFailure(verifyKey);
+      return res.status(400).json({ success: false, message: USER_OTP_VERIFY_FAILURE_MESSAGE });
     }
 
     // بعد از تایید، otp رو حذف کن (امن‌تره)
+    clearOtpVerifyState(verifyKey);
     seller.otp = undefined;
     seller.otpExpire = undefined;
     await seller.save();
@@ -435,13 +666,9 @@ async function generateUniqueReferralCode() {
   return `VT${timestamp}`.slice(0, 8);
 }
 
-const USER_OTP_CODE = '12345';
-const USER_OTP_TTL_MS = 5 * 60 * 1000;
-const USER_OTP_REQUEST_SUCCESS_MESSAGE = 'کد تایید پیامک شد.';
-
 function applyUserOtpChallenge(user) {
-  user.otp = USER_OTP_CODE;
-  user.otpExpire = new Date(Date.now() + USER_OTP_TTL_MS);
+  user.otp = hashOtp(generateOtpCode());
+  user.otpExpire = new Date(Date.now() + OTP_TTL_MS);
 }
 
 function hydrateExistingUserForOtp(user, phone, { termsAccepted } = {}) {
@@ -500,7 +727,7 @@ async function prepareUserForOtp(phone, { termsAccepted } = {}) {
 exports.registerUser = async (req, res) => {
   try {
     const { phone: rawPhone, termsAccepted } = req.body || {};
-    const phone = normalizeIranianPhone(rawPhone);
+    const phone = normalizeStrictIranianPhone(rawPhone);
 
     if (!phone || !validateIranianPhone(phone)) {
       return res.status(400).json({
@@ -516,21 +743,28 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    await ensurePhoneAllowed(phone);
-
-    const user = await prepareUserForOtp(phone, { termsAccepted });
+    const canIssueOtp = consumeOtpRequestAllowance(`user:${phone}`);
+    if (canIssueOtp) {
+      try {
+        await ensurePhoneAllowed(phone);
+        await prepareUserForOtp(phone, { termsAccepted });
+      } catch (err) {
+        // Anti-enumeration: پاسخ همیشه یکسان بماند
+        if (!/مسدود/.test(err?.message || '')) {
+          console.error('registerUser OTP issue error:', err);
+        }
+      }
+    }
 
     return res.status(200).json({
       success: true,
-      message: USER_OTP_REQUEST_SUCCESS_MESSAGE,
-      phone: user.phone
+      message: USER_OTP_REQUEST_SUCCESS_MESSAGE
     });
   } catch (err) {
     console.error('registerUser ERROR:', err);
-    const code = /مسدود/.test(err.message) ? 403 : 500;
-    return res.status(code).json({
-      success: false,
-      message: err.message || 'خطای سرور. لطفا بعدا تلاش کنید.'
+    return res.status(200).json({
+      success: true,
+      message: USER_OTP_REQUEST_SUCCESS_MESSAGE
     });
   }
 };
@@ -538,8 +772,8 @@ exports.registerUser = async (req, res) => {
 exports.verifyUserOtp = async (req, res) => {
   try {
     const { phone: rawPhone, code: rawCode } = req.body || {};
-    const phone = normalizeIranianPhone(rawPhone);
-    const code = toEnglishDigits(rawCode || '').replace(/\D/g, '');
+    const phone = normalizeStrictIranianPhone(rawPhone);
+    const code = normalizeStrictOtp(rawCode);
 
     if (!phone || !validateIranianPhone(phone)) {
       return res.status(400).json({
@@ -548,32 +782,42 @@ exports.verifyUserOtp = async (req, res) => {
       });
     }
 
-    if (!/^\d{5}$/.test(code)) {
+    if (!code) {
       return res.status(400).json({
         success: false,
         message: 'کد وارد شده معتبر نیست!'
       });
     }
 
-    await ensurePhoneAllowed(phone);
+    const verifyKey = `user:${phone}`;
 
-    let user = await findUserByPhone(phone);
-    if (!user) {
-      user = await prepareUserForOtp(phone);
-    }
-
-    const storedOtp = typeof user.otp === 'string' ? user.otp.trim() : '';
-    if (
-      storedOtp !== code ||
-      !user.otpExpire ||
-      user.otpExpire < new Date()
-    ) {
+    if (!isOtpVerifyAllowed(verifyKey)) {
       return res.status(400).json({
         success: false,
-        message: 'کد تایید اشتباه است یا منقضی شده.'
+        message: USER_OTP_VERIFY_FAILURE_MESSAGE
       });
     }
 
+    let isPhoneAllowed = true;
+    try {
+      await ensurePhoneAllowed(phone);
+    } catch {
+      isPhoneAllowed = false;
+    }
+
+    const user = await findUserByPhone(phone);
+    const otpMatches = isOtpHashMatch(user?.otp, code);
+    const otpNotExpired = Boolean(user?.otpExpire && user.otpExpire >= new Date());
+
+    if (!isPhoneAllowed || !user || !otpMatches || !otpNotExpired) {
+      registerOtpVerifyFailure(verifyKey);
+      return res.status(400).json({
+        success: false,
+        message: USER_OTP_VERIFY_FAILURE_MESSAGE
+      });
+    }
+
+    clearOtpVerifyState(verifyKey);
     user.phone = phone;
     user.mobile = user.mobile || phone;
     user.otp = undefined;
@@ -589,12 +833,12 @@ exports.verifyUserOtp = async (req, res) => {
       // Non-critical error - silently continue
     }
 
-    const token = issueUserSession(res, user);
+    issueUserSession(req, res, user);
 
     return res.status(200).json({
       success: true,
       message: 'ورود با موفقیت انجام شد.',
-      token,
+      token: USER_SESSION_MARKER,
       user: {
         id: user._id,
         firstname: user.firstname || '',
@@ -604,11 +848,6 @@ exports.verifyUserOtp = async (req, res) => {
       }
     });
   } catch (err) {
-    if (/مسدود/.test(err.message)) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'شما مسدود شده‌اید و امکان ورود ندارید.' });
-    }
     console.error('verifyUserOtp ERROR:', err);
     return res.status(500).json({
       success: false,
@@ -627,7 +866,7 @@ exports.verifyUserOtp = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { phone: rawPhone, password } = req.body || {};
-    const phone = normalizeIranianPhone(rawPhone);
+    const phone = normalizeStrictIranianPhone(rawPhone);
 
     /* ۱) ولیدیشن اولیه */
     if (!phone || !password || !validateIranianPhone(phone)) {
@@ -666,13 +905,13 @@ exports.loginUser = async (req, res) => {
     }
 
     /* ۵) تولید JWT و ست کوکی */
-    const token = issueUserSession(res, user);
+    issueUserSession(req, res, user);
 
     /* ۷) پاسخ نهایی */
     return res.status(200).json({
       success: true,
       message: 'ورود با موفقیت انجام شد.',
-      token,
+      token: USER_SESSION_MARKER,
       user: {
         id: user._id,
         firstname: user.firstname || '',
@@ -692,6 +931,35 @@ exports.loginUser = async (req, res) => {
       success: false,
       message: 'خطای سرور در ورود کاربر.'
     });
+  }
+};
+
+exports.refreshUserSession = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.user_refresh_token;
+    if (!refreshToken) {
+      return res.status(401).json({ success: false, message: 'نشست کاربر نامعتبر است.' });
+    }
+
+    const payload = jwt.verify(refreshToken, JWT_SECRET);
+    if (payload?.role !== 'user' || payload?.type !== 'refresh' || !payload?.id) {
+      return res.status(401).json({ success: false, message: 'نشست کاربر نامعتبر است.' });
+    }
+
+    const user = await User.findById(payload.id);
+    if (!user || user.deleted) {
+      return res.status(401).json({ success: false, message: 'نشست کاربر نامعتبر است.' });
+    }
+
+    issueUserSession(req, res, user);
+
+    return res.status(200).json({
+      success: true,
+      message: 'نشست کاربر تمدید شد.',
+      token: USER_SESSION_MARKER
+    });
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'نشست کاربر نامعتبر است.' });
   }
 };
 

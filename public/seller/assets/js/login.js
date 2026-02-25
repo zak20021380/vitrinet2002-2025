@@ -7,6 +7,23 @@ const API = window.VITRINET_API || {
     return init;
   }
 };
+const SESSION_MARKER = 'cookie-session';
+let authCsrfToken = '';
+
+async function getAuthCsrfToken() {
+  if (authCsrfToken) return authCsrfToken;
+
+  const response = await fetch(API.buildUrl('/api/auth/csrf-token'), API.ensureCredentials({
+    method: 'GET'
+  }));
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data?.csrfToken) {
+    throw new Error('CSRF_TOKEN_MISSING');
+  }
+
+  authCsrfToken = data.csrfToken;
+  return authCsrfToken;
+}
 
 // --- المان‌های صفحه ---
 const phoneInput = document.getElementById('phone');
@@ -64,10 +81,15 @@ form.addEventListener('submit', async e => {
   }
 
   try {
+    const csrfToken = await getAuthCsrfToken();
     const res = await fetch(API.buildUrl('/api/auth/login'), {
       method: 'POST',
       ...API.ensureCredentials({
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
       }),
       body: JSON.stringify({ phone, password })
     });
@@ -76,10 +98,8 @@ form.addEventListener('submit', async e => {
     if (!res.ok) {
       errorBox.textContent = data.message || 'ورود ناموفق بود.';
     } else {
-      if (data?.token) {
-        localStorage.setItem('seller_token', data.token);
-        localStorage.setItem('token', data.token);
-      }
+      localStorage.setItem('seller_token', data?.token || SESSION_MARKER);
+      localStorage.setItem('token', data?.token || SESSION_MARKER);
       if (data?.seller) {
         localStorage.setItem('seller', JSON.stringify(data.seller));
       }

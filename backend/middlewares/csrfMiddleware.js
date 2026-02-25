@@ -60,7 +60,12 @@ function validateCsrfToken(fullToken) {
     .digest('hex');
   
   // Timing-safe comparison
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+  if (signatureBuffer.length !== expectedBuffer.length) {
+    return { valid: false, reason: 'INVALID_SIGNATURE' };
+  }
+  if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) {
     return { valid: false, reason: 'INVALID_SIGNATURE' };
   }
   

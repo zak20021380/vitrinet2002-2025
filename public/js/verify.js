@@ -4,6 +4,24 @@
   const API_ORIGIN = window.location.origin.includes('localhost')
     ? 'http://localhost:5000'
     : window.location.origin;
+  const SESSION_MARKER = 'cookie-session';
+  let authCsrfToken = '';
+
+  async function getAuthCsrfToken() {
+    if (authCsrfToken) return authCsrfToken;
+
+    const response = await fetch(`${API_ORIGIN}/api/auth/csrf-token`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.csrfToken) {
+      throw new Error('CSRF_TOKEN_MISSING');
+    }
+
+    authCsrfToken = data.csrfToken;
+    return authCsrfToken;
+  }
 
   const SafeSS = window.SafeSS || {
     setJSON(key, value) {
@@ -107,9 +125,15 @@
     }
 
     try {
+      const csrfToken = await getAuthCsrfToken();
       const verifyResponse = await fetch(`${API_ORIGIN}/api/auth/verify`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
         body: JSON.stringify({ shopurl, phone, code })
       });
 
@@ -130,9 +154,15 @@
     }
 
     try {
+      const csrfToken = await getAuthCsrfToken();
       const loginResponse = await fetch(`${API_ORIGIN}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
         body: JSON.stringify({ phone, password })
       });
 
@@ -149,7 +179,7 @@
   });
 
   function handleSuccessfulLogin(loginResult) {
-    localStorage.setItem('token', loginResult.token);
+    localStorage.setItem('token', loginResult.token || SESSION_MARKER);
     localStorage.setItem('seller', JSON.stringify(loginResult.seller));
 
     sessionStorage.removeItem('signup_pwd');

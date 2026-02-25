@@ -63,43 +63,68 @@ const hasSellerAccess = (payload) => {
   return false;
 };
 
+const PLACEHOLDER_TOKENS = new Set(['cookie-session', 'null', 'undefined', '']);
+
+const normalizeTokenCandidate = (token) => {
+  if (token == null) return null;
+  const value = String(token).trim();
+  if (!value) return null;
+  if (PLACEHOLDER_TOKENS.has(value.toLowerCase())) return null;
+  return value;
+};
+
+const getCookieToken = (req, requiredRole) => {
+  if (!req.cookies) return null;
+  if (requiredRole === 'admin') {
+    return req.cookies.admin_token || req.cookies.access_token || null;
+  }
+  if (requiredRole === 'seller') {
+    return req.cookies.seller_token || req.cookies.user_token || null;
+  }
+  if (requiredRole === 'user') {
+    return req.cookies.user_token || null;
+  }
+  return req.cookies.seller_token || req.cookies.user_token || req.cookies.admin_token || null;
+};
+
 /**
  * تابع اصلی میدل‌ور
  */
 const createAuthMiddleware = (requiredRole = null) => {
   return async (req, res, next) => {
-    let token = null;
+    const authHeader = req.headers.authorization;
+    const headerToken = authHeader?.startsWith('Bearer ')
+      ? normalizeTokenCandidate(authHeader.slice(7))
+      : null;
+    const cookieToken = normalizeTokenCandidate(getCookieToken(req, requiredRole));
 
-    // ۱) دریافت توکن از هدر
-    if (req.headers.authorization?.startsWith('Bearer ')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
+    const tokenCandidates = [];
+    if (headerToken) tokenCandidates.push(headerToken);
+    if (cookieToken && cookieToken !== headerToken) tokenCandidates.push(cookieToken);
 
-    // ۲) دریافت توکن از کوکی
-    if (!token && req.cookies) {
-      if (requiredRole === 'admin') {
-        token = req.cookies.admin_token || req.cookies.access_token;
-      } else if (requiredRole === 'seller') {
-        // برای مسیرهای فروشنده، هم seller_token و هم user_token رو چک کن
-        // چون کاربران با userType=both میتونن از هر دو توکن استفاده کنن
-        token = req.cookies.seller_token || req.cookies.user_token;
-      } else if (requiredRole === 'user') {
-        token = req.cookies.user_token;
-      }
-      if (!token && !requiredRole) {
-        token = req.cookies.seller_token || req.cookies.user_token || req.cookies.admin_token;
-      }
-    }
-
-    // ۳) اگر توکن نیست -> 401
-    if (!token) {
+    // ۱) اگر توکن نیست -> 401
+    if (!tokenCandidates.length) {
       return res.status(401).json({ message: 'لطفا وارد حساب خود شوید.' });
     }
 
+    let payload = null;
+    let lastVerifyError = null;
+    for (const tokenCandidate of tokenCandidates) {
+      try {
+        payload = jwt.verify(tokenCandidate, JWT_SECRET);
+        break;
+      } catch (err) {
+        lastVerifyError = err;
+      }
+    }
+
+    if (!payload) {
+      console.error('🔐 [AuthMiddleware] Token Error:', lastVerifyError?.message || 'Invalid token');
+      return res.status(401).json({ message: 'توکن نامعتبر است.' });
+    }
+
     try {
-      // ۴) اعتبارسنجی توکن
-      const payload = jwt.verify(token, JWT_SECRET);
-      
+      // ۲) اعتبارسنجی نقش‌ها
       const payloadRole = normalizeRole(payload.role);
       const requiredRoleNormalized = normalizeRole(requiredRole);
       
