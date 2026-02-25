@@ -11,14 +11,109 @@
     body {
       font-family: 'Vazirmatn', sans-serif;
       background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
-      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .login-main {
+      flex: 1 1 auto;
+      width: min(100%, 36rem);
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 0.65rem 0.6rem;
     }
     .glass {
       background: rgba(255,255,255,0.95);
       box-shadow: 0 10px 38px #10b98118, 0 2px 10px #0ea5e915;
       border-radius: 1.7rem;
       backdrop-filter: blur(14px);
-      margin-top: 42px;
+      margin-top: 0;
+      width: 100%;
+      max-width: 34rem;
+      padding: clamp(1rem, 1.95vh, 1.8rem) !important;
+    }
+    .login-brand {
+      font-size: clamp(1.35rem, 2.3vw, 1.9rem);
+      margin-bottom: 0.45rem;
+    }
+    .login-title {
+      font-size: clamp(1.15rem, 2.2vw, 1.8rem);
+      margin-bottom: 0.95rem;
+      line-height: 1.35;
+    }
+    #login-form > * + * {
+      margin-top: 1rem !important;
+    }
+    #login-form label {
+      margin-bottom: 0.35rem !important;
+    }
+    #login-form input {
+      padding-top: 0.62rem;
+      padding-bottom: 0.62rem;
+    }
+    .form-helper-row {
+      margin-top: 0.45rem !important;
+      flex-wrap: wrap;
+      gap: 0.3rem 0.75rem;
+    }
+    .seller-register-box {
+      margin-top: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid #c4f0e0;
+      background:
+        linear-gradient(95deg, rgba(236, 253, 245, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%);
+      padding: 0.7rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+    }
+    .seller-register-copy {
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
+      color: #0f766e;
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .seller-register-copy svg {
+      width: 1rem;
+      height: 1rem;
+      color: #0ea5e9;
+      flex-shrink: 0;
+    }
+    .seller-register-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      white-space: nowrap;
+      padding: 0.4rem 0.78rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 5px 14px rgba(14, 165, 233, 0.22);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    .seller-register-link:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+      box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+    }
+    .footer-compact {
+      margin-top: 0 !important;
+      padding: 0.42rem 0.5rem !important;
+      font-size: 0.72rem;
+      background: rgba(255, 255, 255, 0.86);
     }
     .brand-btn {
       background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
@@ -194,12 +289,52 @@
     .hamburger-btn span:not(:last-child) {
       margin-bottom: 4px;
     }
+    @media (max-height: 760px) {
+      .login-main {
+        padding-top: 0.3rem;
+        padding-bottom: 0.35rem;
+      }
+      .login-brand {
+        margin-bottom: 0.24rem;
+        font-size: 1.2rem;
+      }
+      .login-title {
+        margin-bottom: 0.6rem;
+        font-size: 1.03rem;
+      }
+      #login-form > * + * {
+        margin-top: 0.68rem !important;
+      }
+      #login-form input {
+        padding-top: 0.46rem;
+        padding-bottom: 0.46rem;
+      }
+      .seller-register-box {
+        margin-top: 0.5rem;
+        padding: 0.5rem 0.66rem;
+      }
+      .footer-compact {
+        padding: 0.26rem 0.4rem !important;
+      }
+    }
+    @media (max-height: 690px) {
+      .login-brand { display: none; }
+      .form-helper-row span { display: none; }
+    }
     @media (max-width: 640px) {
-      .glass {padding: 1.1rem .6rem !important;}
+      .login-main {padding-inline: 0.4rem;}
+      .glass {padding: .9rem .62rem !important;}
       .header-logo {font-size: 1.4rem;}
       .header-nav {max-height:0; padding-top:0; padding-bottom:0; overflow:hidden;}
       #nav-toggle:checked + .header-nav {max-height:12rem; padding-top:.5rem; padding-bottom:.5rem;}
       .modal-content {padding: 1.3rem .5rem 1rem .5rem;}
+      .seller-register-box {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .seller-register-link {
+        width: 100%;
+      }
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -261,10 +396,10 @@
   </header>
 
   <!-- فرم ورود -->
-  <main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:36px;">
-    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10 w-full fadein" id="login-section">
-      <a href="../index.html" class="header-logo">ویترینت</a>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-[#10b981] mb-7 text-center">ورود به حساب فروشنده</h2>
+  <main class="login-main">
+    <section class="glass border rounded-2xl shadow-2xl w-full fadein" id="login-section">
+      <a href="../index.html" class="header-logo login-brand">ویترینت</a>
+      <h2 class="font-extrabold text-[#10b981] text-center login-title">ورود به حساب فروشنده</h2>
       <form id="login-form" class="space-y-6" autocomplete="on" novalidate>
         <div>
           <label class="block text-sm font-bold mb-1" for="phone">شماره موبایل <span class="text-red-500">*</span></label>
@@ -293,7 +428,7 @@
           </div>
         </div>
         <button type="submit" class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">ورود</button>
-        <div class="flex flex-row-reverse justify-between items-center mt-2">
+        <div class="form-helper-row flex flex-row-reverse justify-between items-center mt-2">
           <button type="button" id="forgot-btn" class="flex items-center gap-1 text-xs text-[#0ea5e9] underline hover:text-[#10b981] font-bold transition">
             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m0 4a9 9 0 1 0-9-9m9 13a4 4 0 0 1-4-4h8a4 4 0 0 1-4 4z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             فراموشی رمز عبور؟
@@ -302,9 +437,14 @@
         </div>
         <div id="error-message" class="text-red-500 text-center text-sm mt-1 min-h-[22px]"></div>
       </form>
-      <div class="text-center text-sm mt-3">
-        <span>فروشنده جدید هستید؟ </span>
-        <a href="../post.html" class="text-[#0ea5e9] underline hover:text-[#10b981] font-bold">ساخت حساب فروشندگی</a>
+      <div class="seller-register-box">
+        <div class="seller-register-copy">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v6m3-3h-6M5 19a4 4 0 100-8 4 4 0 000 8zm0 0h8" />
+          </svg>
+          <span>فروشنده جدید هستید؟</span>
+        </div>
+        <a href="../post.html" class="seller-register-link">ساخت حساب فروشندگی</a>
       </div>
     </section>
   </main>
@@ -355,7 +495,7 @@
   </div>
 
   <!-- فوتر -->
-  <footer class="mt-20 bg-white border-t text-center text-sm text-gray-500 py-4">
+  <footer class="footer-compact bg-white border-t text-center text-sm text-gray-500 py-4">
     © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
   </footer>
 
@@ -379,3 +519,4 @@
 
 </body>
 </html>
+
