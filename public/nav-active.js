@@ -226,6 +226,8 @@
       matches: [
         '/login.html',
         'login.html',
+        '/seller/login.html',
+        'seller/login.html',
         '/register.html',
         'register.html',
         '/verify.html',
@@ -738,8 +740,11 @@
     if (!body) return null;
 
     const currentPath = getCurrentPath();
+    const isSellerLoginPage =
+      currentPath === '/seller/login.html' ||
+      currentPath.endsWith('/seller/login.html');
     const disableNav =
-      currentPath.startsWith('/seller/') ||
+      (currentPath.startsWith('/seller/') && !isSellerLoginPage) ||
       currentPath.startsWith('/hesabketab/');
 
     if (disableNav) {
