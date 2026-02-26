@@ -17,9 +17,24 @@ const {
   unblockSeller
 } = require('../controllers/sellerController');
 const Seller = require('../models/Seller');
+const ShopAppearance = require('../models/ShopAppearance');
 const authMiddleware = require('../middlewares/authMiddleware');
 const mongoose = require('mongoose');   
 const Chat = require('../models/chat');
+
+const SHOP_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SHOP_SLUG_MIN_LENGTH = 3;
+const SHOP_SLUG_MAX_LENGTH = 40;
+
+function normalizeShopSlug(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 // ثبت‌نام فروشنده
 router.post('/register', registerSeller);
 
@@ -45,7 +60,7 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
 router.put('/me', authMiddleware('seller'), async (req, res) => {
   try {
     const sellerId = req.user.id || req.user._id;
-    const { phone, address, storename } = req.body;
+    const { phone, address, storename, shopurl: rawShopurl } = req.body;
     
     // اعتبارسنجی نام کسب‌وکار
     if (storename !== undefined) {
@@ -75,6 +90,41 @@ router.put('/me', authMiddleware('seller'), async (req, res) => {
         });
       }
     }
+
+    let normalizedShopurl = '';
+    if (rawShopurl !== undefined) {
+      normalizedShopurl = normalizeShopSlug(rawShopurl);
+      if (!normalizedShopurl) {
+        return res.status(400).json({
+          success: false,
+          message: 'آدرس فروشگاه معتبر نیست.'
+        });
+      }
+      if (normalizedShopurl.length < SHOP_SLUG_MIN_LENGTH || normalizedShopurl.length > SHOP_SLUG_MAX_LENGTH) {
+        return res.status(400).json({
+          success: false,
+          message: `آدرس فروشگاه باید بین ${SHOP_SLUG_MIN_LENGTH} تا ${SHOP_SLUG_MAX_LENGTH} کاراکتر باشد.`
+        });
+      }
+      if (!SHOP_SLUG_REGEX.test(normalizedShopurl)) {
+        return res.status(400).json({
+          success: false,
+          message: 'آدرس فروشگاه فقط می‌تواند شامل حروف انگلیسی کوچک، عدد و خط تیره باشد.'
+        });
+      }
+
+      const [existingSeller, existingAppearance] = await Promise.all([
+        Seller.findOne({ shopurl: normalizedShopurl, _id: { $ne: sellerId } }).select('_id').lean(),
+        ShopAppearance.findOne({ customUrl: normalizedShopurl, sellerId: { $ne: sellerId } }).select('_id').lean()
+      ]);
+
+      if (existingSeller || existingAppearance) {
+        return res.status(409).json({
+          success: false,
+          message: 'این آدرس فروشگاه قبلاً ثبت شده است.'
+        });
+      }
+    }
     
     // ساخت آبجکت به‌روزرسانی
     const updateData = {};
@@ -86,6 +136,9 @@ router.put('/me', authMiddleware('seller'), async (req, res) => {
     }
     if (storename !== undefined) {
       updateData.storename = String(storename).trim();
+    }
+    if (rawShopurl !== undefined) {
+      updateData.shopurl = normalizedShopurl;
     }
     
     if (Object.keys(updateData).length === 0) {
@@ -109,6 +162,26 @@ router.put('/me', authMiddleware('seller'), async (req, res) => {
         message: 'فروشنده پیدا نشد!' 
       });
     }
+
+    if (rawShopurl !== undefined) {
+      await ShopAppearance.findOneAndUpdate(
+        { sellerId: seller._id },
+        {
+          $set: {
+            customUrl: seller.shopurl,
+            shopPhone: seller.phone || '',
+            shopAddress: seller.address || '',
+            shopLogoText: seller.storename || ''
+          },
+          $setOnInsert: {
+            sellerId: seller._id,
+            shopStatus: 'open',
+            slides: []
+          }
+        },
+        { upsert: true, setDefaultsOnInsert: true }
+      );
+    }
     
     res.json({ 
       success: true, 
@@ -117,10 +190,17 @@ router.put('/me', authMiddleware('seller'), async (req, res) => {
         id: seller._id,
         phone: seller.phone,
         address: seller.address,
-        storename: seller.storename
+        storename: seller.storename,
+        shopurl: seller.shopurl
       }
     });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'این آدرس فروشگاه قبلاً ثبت شده است.'
+      });
+    }
     console.error('update /me error', err);
     res.status(500).json({ 
       success: false, 

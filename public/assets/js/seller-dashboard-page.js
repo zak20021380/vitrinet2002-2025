@@ -161,6 +161,156 @@ async function fetchCurrentSeller() {
 }
 
 // ————————— تابع دریافت تعداد پیام‌های خوانده‌نشده —————————
+const SELLER_SHOP_SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SELLER_SHOP_SLUG_MIN_LENGTH = 3;
+const SELLER_SHOP_SLUG_MAX_LENGTH = 40;
+const SELLER_SHOP_DOMAIN = 'vitrinet.ir';
+
+function normalizeSellerShopSlug(value = '') {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function validateSellerShopSlug(slug = '') {
+  if (!slug) {
+    return 'آدرس فروشگاه الزامی است.';
+  }
+  if (slug.length < SELLER_SHOP_SLUG_MIN_LENGTH || slug.length > SELLER_SHOP_SLUG_MAX_LENGTH) {
+    return `آدرس فروشگاه باید بین ${SELLER_SHOP_SLUG_MIN_LENGTH} تا ${SELLER_SHOP_SLUG_MAX_LENGTH} کاراکتر باشد.`;
+  }
+  if (!SELLER_SHOP_SLUG_REGEX.test(slug)) {
+    return 'آدرس فروشگاه فقط می‌تواند شامل حروف انگلیسی کوچک، عدد و خط تیره باشد.';
+  }
+  return '';
+}
+
+function initSellerSettingsSection() {
+  const form = document.getElementById('sellerSettingsForm');
+  const slugInput = document.getElementById('sellerSettingsShopurl');
+  const previewEl = document.getElementById('sellerSettingsPreview');
+  const errorEl = document.getElementById('sellerSettingsError');
+  const successEl = document.getElementById('sellerSettingsSuccess');
+  const saveBtn = document.getElementById('sellerSettingsSaveBtn');
+
+  if (!form || !slugInput || !previewEl || !saveBtn || form.dataset.bound === '1') {
+    return;
+  }
+
+  const defaultBtnText = saveBtn.textContent;
+  let currentSlug = normalizeSellerShopSlug(window.seller?.shopurl || window.seller?.shopUrl || '');
+
+  const updatePreview = (slug = '') => {
+    previewEl.textContent = `${SELLER_SHOP_DOMAIN}/${slug || ''}`;
+  };
+  const clearMessages = () => {
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+    if (successEl) {
+      successEl.textContent = '';
+      successEl.classList.add('hidden');
+    }
+  };
+  const showError = (message) => {
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+  };
+  const showSuccess = (message) => {
+    if (!successEl) return;
+    successEl.textContent = message;
+    successEl.classList.remove('hidden');
+  };
+  const setSaving = (isSaving) => {
+    saveBtn.disabled = isSaving;
+    saveBtn.textContent = isSaving ? 'در حال ذخیره...' : defaultBtnText;
+  };
+
+  slugInput.value = currentSlug;
+  updatePreview(currentSlug);
+
+  slugInput.addEventListener('input', () => {
+    const normalized = normalizeSellerShopSlug(slugInput.value);
+    if (slugInput.value !== normalized) {
+      slugInput.value = normalized;
+    }
+    updatePreview(normalized);
+    clearMessages();
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearMessages();
+
+    const slug = normalizeSellerShopSlug(slugInput.value);
+    slugInput.value = slug;
+    updatePreview(slug);
+
+    const validationError = validateSellerShopSlug(slug);
+    if (validationError) {
+      showError(validationError);
+      slugInput.focus();
+      return;
+    }
+
+    if (!window.seller?.id && !window.seller?._id) {
+      showError('شناسه فروشنده پیدا نشد. لطفاً دوباره وارد شوید.');
+      return;
+    }
+
+    if (slug === currentSlug) {
+      showSuccess('آدرس فروشگاه تغییری نکرده است.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await apiFetch('/api/seller/me', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopurl: slug })
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'ذخیره آدرس فروشگاه انجام نشد.');
+      }
+
+      const updatedSlug = normalizeSellerShopSlug(result?.seller?.shopurl || slug);
+      currentSlug = updatedSlug;
+      slugInput.value = updatedSlug;
+      updatePreview(updatedSlug);
+
+      const nextSeller = {
+        ...(window.seller || {}),
+        ...(result?.seller || {}),
+        shopurl: updatedSlug,
+        shopUrl: updatedSlug
+      };
+      if (!nextSeller.id && nextSeller._id) {
+        nextSeller.id = nextSeller._id;
+      }
+
+      window.seller = nextSeller;
+      localStorage.setItem('seller', JSON.stringify(nextSeller));
+
+      showSuccess('آدرس فروشگاه با موفقیت ذخیره شد.');
+    } catch (error) {
+      showError(error?.message || 'خطا در ذخیره آدرس فروشگاه.');
+    } finally {
+      setSaving(false);
+    }
+  });
+
+  form.dataset.bound = '1';
+}
+
 async function fetchUnreadCount() {
   try {
     if (!window.seller?.id) return 0;
@@ -387,6 +537,7 @@ function startMessagePolling() {
 
     // ۱) دریافت فروشنده
     window.seller = await fetchCurrentSeller();
+    initSellerSettingsSection();
     console.log('🚀 seller object:', window.seller);
     document.dispatchEvent(new CustomEvent('seller:ready', { detail: { seller: window.seller } }));
 

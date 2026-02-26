@@ -413,6 +413,33 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
+const AUTO_SHOP_MIN = 1000;
+const AUTO_SHOP_MAX = 10000; // crypto.randomInt upper bound is exclusive
+const AUTO_SHOP_PREFIX = 'shop';
+const AUTO_SHOP_MAX_ATTEMPTS = 120;
+
+function buildAutoShopSlug() {
+  return `${AUTO_SHOP_PREFIX}-${crypto.randomInt(AUTO_SHOP_MIN, AUTO_SHOP_MAX)}`;
+}
+
+async function isShopSlugAvailable(slug) {
+  const [sellerExists, appearanceExists] = await Promise.all([
+    Seller.exists({ shopurl: slug }),
+    ShopAppearance.exists({ customUrl: slug })
+  ]);
+  return !sellerExists && !appearanceExists;
+}
+
+async function generateUniqueAutoShopSlug() {
+  for (let attempt = 0; attempt < AUTO_SHOP_MAX_ATTEMPTS; attempt += 1) {
+    const slug = buildAutoShopSlug();
+    if (await isShopSlugAvailable(slug)) {
+      return slug;
+    }
+  }
+  throw new Error('AUTO_SHOPURL_GENERATION_FAILED');
+}
+
 // ثبت‌نام فروشنده با ذخیره OTP در دیتابیس
 exports.register = async (req, res) => {
   try {
@@ -420,7 +447,6 @@ exports.register = async (req, res) => {
       firstname,
       lastname,
       storename,
-      shopurl,
       phone: rawPhone,
       category,
       subcategory,
@@ -449,13 +475,11 @@ exports.register = async (req, res) => {
 
     // چک تکراری نبودن فروشنده
     const phoneCandidates = buildPhoneCandidates(phone);
-    const exists = await Seller.findOne({
-      $or: [{ shopurl }, { phone: { $in: phoneCandidates } }],
-    });
+    const exists = await Seller.findOne({ phone: { $in: phoneCandidates } });
     if (exists) {
       return res.status(400).json({
         success: false,
-        message: 'این شماره تلفن یا آدرس فروشگاه قبلاً ثبت شده.',
+        message: 'این شماره تلفن قبلاً ثبت شده.',
       });
     }
 
@@ -466,31 +490,51 @@ exports.register = async (req, res) => {
     const otp = hashOtp(generateOtpCode());
     const otpExpire = new Date(Date.now() + OTP_TTL_MS);
 
-    // ساخت و ذخیره فروشنده جدید
-    const seller = new Seller({
-      firstname,
-      lastname,
-      storename,
-      shopurl,
-      phone,
-      category,
-      subcategory,
-      address,
-      address,
-      desc,
-      referralCode,
-      password: hashedPassword,
-      otp,
-      otpExpire,
-    });
+    // ساخت و ذخیره فروشنده جدید با آدرس خودکار فروشگاه
+    let seller = null;
+    let generatedShopurl = '';
+    let lastShopurlError = null;
 
-    await seller.save();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      generatedShopurl = await generateUniqueAutoShopSlug();
+      const candidateSeller = new Seller({
+        firstname,
+        lastname,
+        storename,
+        shopurl: generatedShopurl,
+        phone,
+        category,
+        subcategory,
+        address,
+        desc,
+        referralCode,
+        password: hashedPassword,
+        otp,
+        otpExpire,
+      });
+
+      try {
+        seller = await candidateSeller.save();
+        lastShopurlError = null;
+        break;
+      } catch (saveErr) {
+        if (saveErr?.code === 11000 && saveErr?.keyPattern?.shopurl) {
+          lastShopurlError = saveErr;
+          continue;
+        }
+        throw saveErr;
+      }
+    }
+
+    if (!seller) {
+      throw lastShopurlError || new Error('AUTO_SHOPURL_SAVE_FAILED');
+    }
 
     // ساخت ظاهر فروشگاه (ShopAppearance)
     try {
       await ShopAppearance.create({
         sellerId: seller._id,
-        customUrl: shopurl,
+        customUrl: generatedShopurl,
         shopPhone: phone,
         shopAddress: address,
         shopLogoText: storename,
@@ -511,6 +555,12 @@ exports.register = async (req, res) => {
     });
 
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'این شماره تلفن قبلاً ثبت شده.',
+      });
+    }
     console.error('❌ Error in register:', err);
     res.status(500).json({
       success: false,

@@ -72,23 +72,6 @@ document.querySelectorAll('.nav-links a').forEach(link => {
   });
 });
 
-// نمایش لحظه‌ای آدرس فروشگاه
-document.getElementById("shopurl").addEventListener("input", function (e) {
-  let val = this.value.trim();
-  // فقط حروف کوچک و عدد؛ بیشتر از 10 کاراکتر اجازه وارد کردن نده
-  let cleaned = val.replace(/[^a-z0-9]/g, '').slice(0, 10);
-  if (val !== cleaned) {
-    this.value = cleaned;
-  }
-  let prev = document.getElementById("address-preview");
-  if (cleaned.length > 0) {
-    prev.innerText = "آدرس فروشگاه شما: vitreenet.ir/" + cleaned;
-  } else {
-    prev.innerText = "آدرس فروشگاه شما: vitreenet.ir/shopgol";
-  }
-  document.getElementById("shopurl-hint").classList.add("hidden");
-});
-
 // Password visibility toggles
 const passwordIcons = {
   show: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" /><circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle></svg>`,
@@ -137,7 +120,6 @@ document.querySelectorAll('[data-only-persian="true"]').forEach(element => {
   ["pass1", "pass-hint"],
   ["pass2", "pass-hint"],
   ["storename", "storename-hint"],
-  ["shopurl", "shopurl-hint"],
   ["phone", "phone-hint"],
   ["category", "category-hint"],
   ["address", "address-hint"],
@@ -742,29 +724,6 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     storenameHint.classList.add("hidden");
   }
 
-  // آدرس فروشگاه
-  const shopurlInput = document.getElementById("shopurl");
-  const shopurl = shopurlInput.value.trim();
-  const shopurlHint = document.getElementById("shopurl-hint");
-  if (shopurl.length < 4) {
-    shopurlHint.innerText = "آدرس فروشگاه باید حداقل ۴ کاراکتر باشد.";
-    shopurlHint.classList.remove("hidden");
-    hasError = true;
-    rememberErrorElement(shopurlInput);
-  } else if (shopurl.length > 10) {
-    shopurlHint.innerText = "آدرس فروشگاه نباید بیشتر از ۱۰ کاراکتر باشد.";
-    shopurlHint.classList.remove("hidden");
-    hasError = true;
-    rememberErrorElement(shopurlInput);
-  } else if (!/^[a-z0-9]+$/.test(shopurl)) {
-    shopurlHint.innerText = "آدرس فقط می‌تواند شامل حروف انگلیسی کوچک و عدد باشد. از فاصله و کاراکترهای خاص مثل # یا ! استفاده نکنید.";
-    shopurlHint.classList.remove("hidden");
-    hasError = true;
-    rememberErrorElement(shopurlInput);
-  } else {
-    shopurlHint.classList.add("hidden");
-  }
-
   // شماره موبایل
   const phoneInput = document.getElementById("phone");
   const phone = phoneInput.value.trim();
@@ -909,7 +868,6 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     firstname: firstname,
     lastname: lastname,
     storename: storename,
-    shopurl: shopurl,
     phone: phone,
     category: category,
     subcategory: subcategory,
@@ -940,7 +898,6 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
       btn.disabled = false;
       btn.innerText = "ثبت فروشگاه";
       if (result.success) {
-        localStorage.setItem('shopurl', data.shopurl);
         SafeSS.setJSON('signup_pwd', data.password); // SafeSS
 
         // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
@@ -948,7 +905,7 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
         SafeSS.setJSON('signup_category', data.category); // SafeSS
         SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
 
-        window.location.href = "verify.html?shopurl=" + encodeURIComponent(data.shopurl) + "&phone=" + encodeURIComponent(data.phone);
+        window.location.href = "verify.html?phone=" + encodeURIComponent(data.phone);
       }
 
       else {
@@ -967,10 +924,7 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
 
 // مرحله تأیید شماره موبایل
 function showVerifySection(phone) {
-  // مقدار shopurl رو از localStorage بخون
-  var shopurl = localStorage.getItem('shopurl');
-  // ریدایرکت به صفحه verify.html با پارامتر
-  window.location.href = `verify.html?shopurl=${encodeURIComponent(shopurl)}&phone=${encodeURIComponent(phone)}`;
+  window.location.href = `verify.html?phone=${encodeURIComponent(phone)}`;
 }
 
 
@@ -998,7 +952,7 @@ document.getElementById("verify-form").addEventListener("submit", function (e) {
         "X-Requested-With": "XMLHttpRequest"
       },
       credentials: 'include',
-      body: JSON.stringify({ shopurl, phone, code })
+      body: JSON.stringify(shopurl ? { shopurl, phone, code } : { phone, code })
     }))
     .then(res => res.json())
     .then(result => {

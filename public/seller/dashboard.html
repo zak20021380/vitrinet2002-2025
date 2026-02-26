@@ -8129,6 +8129,12 @@
           </div>
           <span class="sidebar-menu-item__text">ارتقا</span>
         </button>
+        <button class="sidebar-menu-item" data-section="settings">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--blue">
+            <i class="ri-settings-3-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">تنظیمات</span>
+        </button>
         <button class="sidebar-menu-item" data-section="guide">
           <div class="sidebar-menu-item__icon">
             <i class="ri-question-fill"></i>
@@ -8254,6 +8260,14 @@
             <path d="M12 2l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5.5 7.5-1L12 2z" stroke="#f59e0b" stroke-width="2"/>
         </svg>
         <span>ارتقا</span>
+    </button>
+
+    <button class="sidebar-link" id="menu-settings" data-section="settings" aria-label="تنظیمات">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+        <path d="M12 8.75a3.25 3.25 0 100 6.5 3.25 3.25 0 000-6.5z" stroke="#0ea5e9" stroke-width="2"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>تنظیمات</span>
     </button>
 
     <button class="sidebar-link" id="menu-guide" data-section="guide" aria-label="راهنمای استفاده">
@@ -8538,12 +8552,41 @@
     <!-- تنظیمات -->
     <section id="section-settings" style="display:none">
       <h2 class="text-2xl md:text-3xl font-extrabold text-[#fb923c] text-center mb-3">تنظیمات فروشنده</h2>
-      <div class="panel-card mx-auto w-full sm:w-auto">
-        <ul class="shopinfo-list">
-          <li>تغییر رمز عبور</li>
-          <li>مدیریت اعلان‌ها</li>
-          <li>حذف حساب کاربری</li>
-        </ul>
+      <div class="panel-card mx-auto w-full max-w-2xl">
+        <form id="sellerSettingsForm" class="space-y-4" autocomplete="off" novalidate>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <label for="sellerSettingsShopurl" class="block text-sm font-bold text-slate-700 mb-2">
+              آدرس فروشگاه
+            </label>
+            <div class="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-[#10b981]/30">
+              <span class="text-sm text-slate-500 whitespace-nowrap">vitrinet.ir/</span>
+              <input
+                id="sellerSettingsShopurl"
+                name="shopurl"
+                type="text"
+                class="w-full border-0 bg-transparent p-0 text-left ltr text-slate-800 focus:outline-none"
+                dir="ltr"
+                maxlength="40"
+                placeholder="shop-1234"
+                inputmode="text"
+                autocomplete="off"
+              />
+            </div>
+            <p class="mt-2 text-xs text-slate-500">
+              فقط از حروف انگلیسی کوچک، عدد و خط تیره استفاده کنید.
+            </p>
+            <p class="mt-1 text-xs text-slate-500" id="sellerSettingsPreview">vitrinet.ir/</p>
+            <p class="mt-2 text-xs text-red-500 hidden" id="sellerSettingsError"></p>
+            <p class="mt-2 text-xs text-emerald-600 hidden" id="sellerSettingsSuccess"></p>
+          </div>
+          <button
+            id="sellerSettingsSaveBtn"
+            type="submit"
+            class="w-full rounded-2xl bg-[#10b981] px-5 py-3 text-white font-extrabold transition hover:bg-[#0ea5e9] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            ذخیره آدرس فروشگاه
+          </button>
+        </form>
       </div>
     </section>
 

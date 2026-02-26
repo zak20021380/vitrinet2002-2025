@@ -54,7 +54,7 @@
   const shopurl = getQueryParam('shopurl');
   const phone = getQueryParam('phone');
 
-  if (!shopurl) {
+  if (!phone) {
     window.location.href = 'post.html';
     return;
   }
@@ -134,7 +134,7 @@
           'X-Requested-With': 'XMLHttpRequest'
         },
         credentials: 'include',
-        body: JSON.stringify({ shopurl, phone, code })
+        body: JSON.stringify(shopurl ? { shopurl, phone, code } : { phone, code })
       });
 
       const verifyResult = await verifyResponse.json();
