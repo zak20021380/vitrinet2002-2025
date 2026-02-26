@@ -18,84 +18,111 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-base: #f5f7fa;
-      --bg-soft: #eef2f7;
+      --bg-base: #fafbfc;
       --surface: #ffffff;
-      --surface-border: #e5e7eb;
-      --text-primary: #111827;
-      --text-secondary: #4b5563;
-      --text-muted: #6b7280;
-      --brand: #10b981;
-      --brand-blue: #0ea5e9;
-      --brand-dark: #059669;
-      --brand-blue-dark: #0284c7;
-      --brand-soft: rgba(16, 185, 129, 0.14);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
       --brand-primary: #0ea5e9;
       --brand-primary-dark: #0284c7;
-      --focus-ring: rgba(14, 165, 233, 0.22);
+      --brand-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+      --focus-ring: rgba(14, 165, 233, 0.15);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
     }
 
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(180deg, var(--bg-base) 0%, #fbfcfe 100%);
+      background: radial-gradient(ellipse at top, #f0f9ff 0%, #fafbfc 50%, #ffffff 100%);
       min-height: 100vh;
-      position: relative;
       color: var(--text-primary);
+      position: relative;
+      overflow-x: hidden;
     }
 
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:
-        radial-gradient(circle at 15% 10%, rgba(148, 163, 184, 0.12) 0%, transparent 38%),
-        radial-gradient(circle at 85% 92%, rgba(203, 213, 225, 0.2) 0%, transparent 42%);
+      top: -50%;
+      right: -20%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
       pointer-events: none;
       z-index: 0;
     }
 
-    .glass {
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -40%;
+      left: -15%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Card Container */
+    .signup-card {
       width: 100%;
       max-width: 460px;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 18px;
-      box-shadow: 0 20px 45px -24px rgba(15, 23, 42, 0.28);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 24px;
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+        0 20px 60px -15px rgba(15, 23, 42, 0.12),
+        0 10px 30px -10px rgba(14, 165, 233, 0.08);
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
     }
 
-    header {
-      background: rgba(255, 255, 255, 0.86);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--surface-border);
-      box-shadow: 0 6px 22px -18px rgba(17, 24, 39, 0.5);
-    }
-
-    header::after {
+    .signup-card::before {
       content: '';
       position: absolute;
-      right: 0;
+      top: 0;
       left: 0;
-      bottom: -1px;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.5) 30%, rgba(14, 165, 233, 0.5) 70%, rgba(14, 165, 233, 0) 100%);
+      right: 0;
+      height: 4px;
+      background: var(--brand-gradient);
+      opacity: 0.8;
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
 
     .logo-container {
       display: flex;
       align-items: center;
       gap: 0.65rem;
-      padding: 0.35rem 0.65rem;
-      border-radius: 12px;
-      border: 1px solid rgba(16, 185, 129, 0.15);
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+      padding: 0.4rem 0.75rem;
+      border-radius: 14px;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+      transition: all 0.2s ease;
+    }
+
+    .logo-container:hover {
+      border-color: rgba(14, 165, 233, 0.3);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%);
+      transform: translateY(-1px);
     }
 
     .brand-text {
-      color: var(--brand-dark);
-      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-blue) 100%);
+      background: var(--brand-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -105,181 +132,308 @@
 
     nav a {
       color: var(--text-secondary) !important;
-      padding: 0.35rem 0.55rem;
-      border-radius: 10px;
+      padding: 0.4rem 0.65rem;
+      border-radius: 12px;
       font-weight: 600;
-      transition: color 0.2s ease, background-color 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
 
     nav a:hover {
       color: var(--brand-primary-dark) !important;
-      background: rgba(14, 165, 233, 0.1);
+      background: rgba(14, 165, 233, 0.08);
+      transform: translateY(-1px);
     }
 
     .nav-link-accent {
       color: var(--brand-primary-dark) !important;
-      background: rgba(14, 165, 233, 0.12);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(6, 182, 212, 0.1) 100%);
     }
 
-    .brand-btn {
-      width: 100%;
-      height: 44px;
-      border: none;
-      border-radius: 12px;
-      background: var(--brand-primary);
-      color: #fff !important;
-      font-weight: 700;
-      box-shadow: 0 12px 22px -14px rgba(14, 165, 233, 0.65);
-      transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .brand-btn:hover {
-      background: var(--brand-primary-dark);
-      box-shadow: 0 14px 26px -14px rgba(2, 132, 199, 0.62);
-    }
-
-    .brand-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 10px 18px -14px rgba(2, 132, 199, 0.72);
-    }
-
-    .brand-btn:disabled {
-      background: linear-gradient(135deg, #cbd5e1 0%, #dbe3ec 100%);
-      color: #64748b !important;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .form-title {
+    /* Typography */
+    .page-title {
       color: var(--text-primary);
-      font-size: clamp(1.35rem, 1.9vw, 1.72rem);
-      line-height: 1.45;
-      letter-spacing: -0.02em;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .form-subtitle {
+    .page-subtitle {
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+      font-weight: 500;
+    }
+
+    /* Form Elements */
+    .form-section {
+      margin-bottom: 24px;
     }
 
     .form-label {
-      font-size: 0.94rem;
+      display: block;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
     }
 
     .phone-input {
       width: 100%;
-      height: 44px;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      padding: 0.55rem 0.8rem;
-      font-size: 1rem;
+      height: 52px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 0 18px;
+      font-size: 16px;
       color: var(--text-primary);
-      background: #fff;
+      background: #ffffff;
       direction: ltr;
       text-align: left;
-      unicode-bidi: plaintext;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      font-weight: 500;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
 
     .phone-input::placeholder {
-      direction: ltr;
-      text-align: left;
-      color: #9ca3af;
-      font-weight: 500;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .phone-input:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
     }
 
     .phone-input:focus {
       outline: none;
       border-color: var(--brand-primary);
-      box-shadow: 0 0 0 4px var(--focus-ring);
-    }
-
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .hide-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      box-shadow: 
+        0 0 0 4px var(--focus-ring),
+        0 4px 8px 0 rgba(14, 165, 233, 0.1);
+      transform: translateY(-1px);
     }
 
     .input-error {
       border-color: #ef4444 !important;
       background-color: #fef2f2 !important;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
     }
 
     .err-text {
       color: #ef4444;
       font-size: 13px;
-      margin-top: 0.3rem;
+      margin-top: 8px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .terms-row {
+    /* Primary Button */
+    .primary-btn {
       width: 100%;
+      height: 54px;
+      border: none;
+      border-radius: 14px;
+      background: var(--brand-gradient);
+      color: #fff !important;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 4px 12px rgba(14, 165, 233, 0.35),
+        0 2px 4px rgba(14, 165, 233, 0.2);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: -0.01em;
+    }
+
+    .primary-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .primary-btn:hover:not(:disabled)::before {
+      opacity: 1;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+        0 8px 20px rgba(14, 165, 233, 0.4),
+        0 4px 8px rgba(14, 165, 233, 0.25);
+    }
+
+    .primary-btn:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .primary-btn:disabled {
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      color: #94a3b8 !important;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Terms Checkbox */
+    .terms-row {
       display: flex;
       align-items: flex-start;
-      gap: 0.65rem;
+      gap: 12px;
+      padding: 14px 16px;
       border-radius: 12px;
-      padding: 0.5rem 0.7rem;
-      color: var(--text-muted);
       cursor: pointer;
-      transition: background-color 0.18s ease;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
     }
 
     .terms-row:hover {
       background: #f8fafc;
+      border-color: #e2e8f0;
     }
 
     .terms-checkbox {
-      width: 1rem;
-      height: 1rem;
-      margin-top: 0.18rem;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
       accent-color: var(--brand-primary);
+      cursor: pointer;
       flex-shrink: 0;
+      border-radius: 6px;
     }
 
     .terms-copy {
       color: var(--text-muted);
-      line-height: 1.65;
+      font-size: 14px;
+      line-height: 1.7;
+      font-weight: 500;
     }
 
     .terms-link {
       color: var(--brand-primary);
       font-weight: 700;
       text-decoration: none;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid transparent;
     }
 
     .terms-link:hover {
       color: var(--brand-primary-dark);
-      text-decoration: underline;
+      border-bottom-color: var(--brand-primary-dark);
     }
 
+    /* Secondary Links Section */
+    .secondary-links {
+      margin-top: 32px;
+      padding-top: 28px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+    }
 
+    .link-row {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
 
+    .text-link {
+      color: var(--brand-primary);
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid transparent;
+      padding-bottom: 1px;
+    }
+
+    .text-link:hover {
+      color: var(--brand-primary-dark);
+      border-bottom-color: var(--brand-primary-dark);
+    }
+
+    .seller-link-section {
+      margin-top: 18px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .seller-link-section:hover {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+    }
+
+    .seller-link-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .seller-link {
+      display: inline-block;
+      color: var(--brand-primary);
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+      padding-bottom: 2px;
+    }
+
+    .seller-link:hover {
+      color: var(--brand-primary-dark);
+      border-bottom-color: var(--brand-primary-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Toast */
     #toast {
       position: fixed;
       top: 50%;
       right: 50%;
       transform: translate(50%, -50%);
-      background: var(--brand-primary);
+      background: var(--brand-gradient);
       color: #fff;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 15px;
-      padding: 16px 36px;
-      border-radius: 1rem;
-      box-shadow: 0 10px 24px -16px rgba(14, 165, 233, 0.9);
+      padding: 18px 36px;
+      border-radius: 16px;
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 12px 32px rgba(14, 165, 233, 0.4);
       opacity: 0;
       z-index: 9999;
       pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      min-width: 200px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-align: center;
-      line-height: 2.1;
     }
 
     #toast.active {
@@ -288,16 +442,14 @@
       transform: translate(50%, -50%) scale(1.02);
     }
 
+    /* Footer */
     .page-footer {
-      margin-top: 3rem;
-      border-top: 1px solid #e5e7eb;
-      color: #6b7280;
+      margin-top: 56px;
+      padding: 24px;
       text-align: center;
-      font-size: 0.79rem;
-      padding: 1.1rem 0.85rem;
-      background: rgba(255, 255, 255, 0.7);
-      position: relative;
-      z-index: 10;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
     }
 
     .page-footer span {
@@ -305,21 +457,53 @@
       font-weight: 800;
     }
 
-    @media (max-width:640px) {
+    /* Responsive */
+    @media (max-width: 640px) {
+      .signup-card {
+        padding: 36px 28px;
+        border-radius: 20px;
+        max-width: 100%;
+      }
+
+      .page-title {
+        font-size: 28px;
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        margin-bottom: 32px;
+      }
+
+      .phone-input {
+        height: 50px;
+        font-size: 15px;
+      }
+
+      .primary-btn {
+        height: 52px;
+        font-size: 15px;
+      }
+
       header {
         padding-top: 0.45rem !important;
         padding-bottom: 0.45rem !important;
       }
+    }
 
-      #toast {
-        font-size: 13px;
-        padding: 12px 16px;
-        min-width: 120px;
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
       }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-      .glass {
-        border-radius: 14px;
-      }
+    .signup-card {
+      animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -367,38 +551,69 @@
 
   <!-- فرم ثبت‌نام کاربر -->
   <main class="relative z-10 min-h-[calc(100vh-92px)] flex items-center justify-center px-4 pt-[74px] pb-4">
-    <section class="glass p-5 sm:p-6">
-      <div class="text-center mb-5">
-        <h2
-          class="form-title font-black mb-2">
-          ثبت‌نام در ویترینت</h2>
-        <p class="form-subtitle mt-2">به جامعه ویترینت خوش آمدید</p>
+    <section class="signup-card">
+      <!-- Title & Subtitle -->
+      <div class="text-center">
+        <h1 class="page-title">ثبت‌نام</h1>
+        <p class="page-subtitle">شماره موبایل خود را برای ادامه وارد کنید</p>
       </div>
-      <form id="signupForm" class="space-y-4" autocomplete="off" novalidate>
-        <div>
-          <label class="form-label block">شماره موبایل</label>
-          <input id="phoneInput" name="phone" type="tel"
+
+      <!-- Form -->
+      <form id="signupForm" autocomplete="off" novalidate>
+        <!-- Phone Input -->
+        <div class="form-section">
+          <label class="form-label" for="phoneInput">شماره موبایل</label>
+          <input 
+            id="phoneInput" 
+            name="phone" 
+            type="tel"
             class="phone-input"
-            placeholder="09xxxxxxxxx" inputmode="numeric" autocomplete="tel-national" dir="ltr" maxlength="11"
-            autofocus required />
+            placeholder="09xxxxxxxxx" 
+            inputmode="numeric" 
+            autocomplete="tel-national" 
+            dir="ltr" 
+            maxlength="11"
+            autofocus 
+            required 
+          />
           <div class="err-text hidden"></div>
         </div>
-        <div id="termsRow" class="terms-row text-sm mt-1">
+
+        <!-- Terms Checkbox -->
+        <div id="termsRow" class="terms-row">
           <input type="checkbox" id="terms" required class="terms-checkbox" />
-          <label class="terms-copy select-none leading-7">
-            <span>قوانین و مقررات ویترینت را می‌پذیرم.</span>
-            <a href="terms.html" class="terms-link font-extrabold ml-1">مطالعه قوانین</a>
+          <label class="terms-copy select-none">
+            <span>قوانین و مقررات ویترینت را می‌پذیرم. </span>
+            <a href="terms.html" class="terms-link">مطالعه قوانین</a>
           </label>
         </div>
-        <div class="mt-4">
-          <button id="requestOtpBtn" type="submit" disabled
-            class="brand-btn text-base sm:text-lg">درخواست
-            کد تایید</button>
+
+        <!-- Primary CTA Button -->
+        <div class="form-section">
+          <button 
+            id="requestOtpBtn" 
+            type="submit" 
+            disabled
+            class="primary-btn"
+          >
+            درخواست کد تایید
+          </button>
         </div>
       </form>
-      <div class="text-center text-sm text-gray-500 mt-4">
-        قبلاً ثبت‌نام کردی؟
-        <a href="login.html" class="terms-link hover:underline font-extrabold">ورود</a>
+
+      <!-- Secondary Links -->
+      <div class="secondary-links">
+        <!-- Login Link -->
+        <div class="link-row">
+          قبلاً ثبت‌نام کرده‌اید؟
+          <a href="login.html" class="text-link">ورود</a>
+        </div>
+
+        <!-- Seller Signup Link -->
+        <div class="seller-link-section">
+          <div class="seller-link-label">می‌خواهید فروش را شروع کنید؟</div>
+          <a href="seller-register.html" class="seller-link">ثبت‌نام به عنوان فروشنده</a>
+        </div>
       </div>
     </section>
   </main>
