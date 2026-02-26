@@ -96,6 +96,17 @@ document.querySelectorAll('.password-toggle').forEach(btn => {
 const PERSIAN_TEXT_REGEX = /^[\u0600-\u06FF\u06F0-\u06F9\s\u200c.,\-]+$/;
 const ENGLISH_CHARS_REGEX = /[A-Za-z0-9]/g;
 const isPersianText = value => PERSIAN_TEXT_REGEX.test(value);
+const SELLER_NAME_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF\s]+$/;
+const SELLER_NAME_SANITIZE_REGEX = /[^\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF\s]/g;
+const SELLER_STORE_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s]+$/;
+const SELLER_STORE_SANITIZE_REGEX = /[^\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s]/g;
+const PHONE_NORMALIZED_REGEX = /^09\d{9}$/;
+const PHONE_SANITIZE_REGEX = /[^\d]/g;
+const SELLER_NAME_ERROR_TEXT = 'نام باید فقط شامل حروف فارسی باشد';
+const STORE_NAME_ERROR_TEXT = 'نام فروشگاه نباید خالی باشد';
+const PHONE_ERROR_TEXT = 'شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود';
+const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
 document.querySelectorAll('[data-only-persian="true"]').forEach(element => {
   element.addEventListener('input', () => {
@@ -129,11 +140,15 @@ document.querySelectorAll('[data-only-persian="true"]').forEach(element => {
   let el = document.getElementById(pair[0]);
   if (el) {
     el.addEventListener("input", function () {
-      document.getElementById(pair[1]).classList.add("hidden");
+      const hint = document.getElementById(pair[1]);
+      if (hint) hint.classList.add("hidden");
+      updateSignupSubmitState();
     });
     if (["category", "rules"].includes(pair[0])) {
       el.addEventListener("change", function () {
-        document.getElementById(pair[1]).classList.add("hidden");
+        const hint = document.getElementById(pair[1]);
+        if (hint) hint.classList.add("hidden");
+        updateSignupSubmitState();
       });
     }
   }
@@ -425,11 +440,13 @@ function renderCategoryOptions(list = []) {
       categorySelect.dataset.selectedId = currentOption?.dataset.id || '';
       categorySelect.dataset.selectedName = currentOption?.value || '';
       updateServiceChipsForSelection();
+      updateSignupSubmitState();
     });
     categorySelect.dataset.bound = 'true';
   }
 
   updateServiceChipsForSelection();
+  updateSignupSubmitState();
 }
 
 function highlightServiceChip(value = '') {
@@ -475,6 +492,7 @@ function handleSubcategorySelection(value = '') {
   subcategoryValidationActive = false;
   const hasItems = subcatWrapper ? subcatWrapper.dataset.hasItems === 'true' : false;
   setSubcategoryRequiredState({ hasItems, selectedValue: cleaned });
+  updateSignupSubmitState();
 }
 
 function renderServiceChips(list = []) {
@@ -645,6 +663,7 @@ if (categorySelect) {
     if (hint) {
       hint.classList.add('hidden');
     }
+    updateSignupSubmitState();
   });
 }
 
@@ -661,83 +680,295 @@ categorySelect.addEventListener('change', function () {
   this.size = 1;
   this.classList.remove('open');
   this.blur();
+  updateSignupSubmitState();
 });
 
 // اعتبارسنجی و ارسال فرم ثبت فروشگاه
-document.getElementById("signup-form").addEventListener("submit", function (e) {
-  e.preventDefault(); // همیشه ابتدا قرار بگیره تا فرم ارسال نشه تا بررسی کامل شه
+function toEnglishDigits(value = '') {
+  return String(value || '')
+    .replace(/[۰-۹]/g, (digit) => String(PERSIAN_DIGITS.indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String(ARABIC_DIGITS.indexOf(digit)));
+}
+
+function normalizeText(value) {
+  return String(value || '').trim();
+}
+
+function sanitizeByRegex(value, regex, maxLength) {
+  let nextValue = String(value || '').replace(regex, '');
+  if (typeof maxLength === 'number' && maxLength > -1) {
+    nextValue = nextValue.slice(0, maxLength);
+  }
+  return nextValue;
+}
+
+function sanitizeNameValue(value) {
+  return sanitizeByRegex(value, SELLER_NAME_SANITIZE_REGEX, 50);
+}
+
+function sanitizeStoreValue(value) {
+  return sanitizeByRegex(value, SELLER_STORE_SANITIZE_REGEX, 80);
+}
+
+function sanitizePhoneValue(value) {
+  return toEnglishDigits(value).replace(PHONE_SANITIZE_REGEX, '').slice(0, 11);
+}
+
+function validateNameField(inputId, hintId, { showError = true, applyTrim = false } = {}) {
+  const input = document.getElementById(inputId);
+  const hint = document.getElementById(hintId);
+  if (!input || !hint) return { valid: false, value: '' };
+
+  const cleaned = sanitizeNameValue(input.value);
+  if (cleaned !== input.value) {
+    input.value = cleaned;
+  }
+  const normalized = normalizeText(cleaned);
+  if (applyTrim) input.value = normalized;
+
+  const isValid = normalized.length >= 2
+    && normalized.length <= 50
+    && SELLER_NAME_ALLOWED_REGEX.test(normalized);
+
+  if (isValid) {
+    hint.classList.add('hidden');
+  } else if (showError) {
+    hint.innerText = SELLER_NAME_ERROR_TEXT;
+    hint.classList.remove('hidden');
+  }
+
+  return { valid: isValid, value: normalized, element: input };
+}
+
+function validateStoreField({ showError = true, applyTrim = false } = {}) {
+  const input = document.getElementById('storename');
+  const hint = document.getElementById('storename-hint');
+  if (!input || !hint) return { valid: false, value: '' };
+
+  const cleaned = sanitizeStoreValue(input.value);
+  if (cleaned !== input.value) {
+    input.value = cleaned;
+  }
+  const normalized = normalizeText(cleaned);
+  if (applyTrim) input.value = normalized;
+
+  const isValid = normalized.length >= 2
+    && normalized.length <= 80
+    && SELLER_STORE_ALLOWED_REGEX.test(normalized);
+
+  if (isValid) {
+    hint.classList.add('hidden');
+  } else if (showError) {
+    hint.innerText = STORE_NAME_ERROR_TEXT;
+    hint.classList.remove('hidden');
+  }
+
+  return { valid: isValid, value: normalized, element: input };
+}
+
+function validatePhoneField({ showError = true, applyTrim = false } = {}) {
+  const input = document.getElementById('phone');
+  const hint = document.getElementById('phone-hint');
+  if (!input || !hint) return { valid: false, value: '' };
+
+  const normalized = sanitizePhoneValue(input.value);
+  if (applyTrim || normalized !== input.value) {
+    input.value = normalized;
+  }
+
+  const isValid = PHONE_NORMALIZED_REGEX.test(normalized);
+  if (isValid) {
+    hint.classList.add('hidden');
+  } else if (showError) {
+    hint.innerText = PHONE_ERROR_TEXT;
+    hint.classList.remove('hidden');
+  }
+
+  return { valid: isValid, value: normalized, element: input };
+}
+
+function isPasswordValid(pass1, pass2) {
+  if (pass1.length < 8) return false;
+  if (!/[a-zA-Z]/.test(pass1)) return false;
+  if (!/\d/.test(pass1)) return false;
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pass1)) return false;
+  if (pass1 !== pass2) return false;
+  return true;
+}
+
+function shouldRequireSubcategory() {
+  return Boolean(subcatWrapper && subcatWrapper.dataset.hasItems === 'true');
+}
+
+function isSubcategorySelected() {
+  if (!shouldRequireSubcategory()) return true;
+  return Boolean(subcatInput && String(subcatInput.value || '').trim());
+}
+
+function isSignupFormReady() {
+  const categorySelectInput = document.getElementById('category');
+  const addressInput = document.getElementById('address');
+  const descInput = document.getElementById('desc');
+  const pass1Input = document.getElementById('pass1');
+  const pass2Input = document.getElementById('pass2');
+  const rulesInput = document.getElementById('rules');
+
+  const firstnameValid = validateNameField('firstname', 'firstname-hint', { showError: false }).valid;
+  const lastnameValid = validateNameField('lastname', 'lastname-hint', { showError: false }).valid;
+  const storenameValid = validateStoreField({ showError: false }).valid;
+  const phoneValid = validatePhoneField({ showError: false }).valid;
+  const categoryValid = Boolean(categorySelectInput && categorySelectInput.value);
+  const subcategoryValid = isSubcategorySelected();
+  const addressValue = addressInput ? normalizeText(addressInput.value) : '';
+  const addressValid = Boolean(addressValue) && isPersianText(addressValue);
+  const descValue = descInput ? normalizeText(descInput.value) : '';
+  const descValid = !descValue || isPersianText(descValue);
+  const pass1 = pass1Input ? pass1Input.value : '';
+  const pass2 = pass2Input ? pass2Input.value : '';
+  const rulesValid = Boolean(rulesInput && rulesInput.checked);
+
+  return firstnameValid
+    && lastnameValid
+    && storenameValid
+    && phoneValid
+    && categoryValid
+    && subcategoryValid
+    && addressValid
+    && descValid
+    && isPasswordValid(pass1, pass2)
+    && rulesValid;
+}
+
+var isSubmittingSignup = false;
+
+function updateSignupSubmitState() {
+  const signupFormElement = document.getElementById('signup-form');
+  if (!signupFormElement) return;
+  const submitButton = signupFormElement.querySelector("button[type='submit']");
+  if (!submitButton) return;
+  if (isSubmittingSignup) {
+    submitButton.disabled = true;
+    return;
+  }
+  submitButton.disabled = !isSignupFormReady();
+}
+
+function restrictKeypress(event, allowedRegex) {
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  if (!event.key || event.key.length !== 1) return;
+  if (!allowedRegex.test(event.key)) {
+    event.preventDefault();
+  }
+}
+
+const SELLER_NAME_KEYPRESS_REGEX = /[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF\s]/;
+const SELLER_STORE_KEYPRESS_REGEX = /[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s]/;
+const PHONE_KEYPRESS_REGEX = /[0-9\u06F0-\u06F9\u0660-\u0669]/;
+
+const firstnameInput = document.getElementById('firstname');
+const lastnameInput = document.getElementById('lastname');
+const storenameInput = document.getElementById('storename');
+const phoneInput = document.getElementById('phone');
+const signupForm = document.getElementById('signup-form');
+
+if (firstnameInput) {
+  firstnameInput.addEventListener('keypress', (event) => restrictKeypress(event, SELLER_NAME_KEYPRESS_REGEX));
+  firstnameInput.addEventListener('input', () => {
+    const cleaned = sanitizeNameValue(firstnameInput.value);
+    if (cleaned !== firstnameInput.value) firstnameInput.value = cleaned;
+    updateSignupSubmitState();
+  });
+  firstnameInput.addEventListener('blur', () => {
+    validateNameField('firstname', 'firstname-hint', { showError: true, applyTrim: true });
+    updateSignupSubmitState();
+  });
+}
+
+if (lastnameInput) {
+  lastnameInput.addEventListener('keypress', (event) => restrictKeypress(event, SELLER_NAME_KEYPRESS_REGEX));
+  lastnameInput.addEventListener('input', () => {
+    const cleaned = sanitizeNameValue(lastnameInput.value);
+    if (cleaned !== lastnameInput.value) lastnameInput.value = cleaned;
+    updateSignupSubmitState();
+  });
+  lastnameInput.addEventListener('blur', () => {
+    validateNameField('lastname', 'lastname-hint', { showError: true, applyTrim: true });
+    updateSignupSubmitState();
+  });
+}
+
+if (storenameInput) {
+  storenameInput.addEventListener('keypress', (event) => restrictKeypress(event, SELLER_STORE_KEYPRESS_REGEX));
+  storenameInput.addEventListener('input', () => {
+    const cleaned = sanitizeStoreValue(storenameInput.value);
+    if (cleaned !== storenameInput.value) storenameInput.value = cleaned;
+    updateSignupSubmitState();
+  });
+  storenameInput.addEventListener('blur', () => {
+    validateStoreField({ showError: true, applyTrim: true });
+    updateSignupSubmitState();
+  });
+}
+
+if (phoneInput) {
+  phoneInput.setAttribute('maxlength', '11');
+  phoneInput.addEventListener('keypress', (event) => restrictKeypress(event, PHONE_KEYPRESS_REGEX));
+  phoneInput.addEventListener('input', () => {
+    const cleaned = sanitizePhoneValue(phoneInput.value);
+    if (cleaned !== phoneInput.value) phoneInput.value = cleaned;
+    updateSignupSubmitState();
+  });
+  phoneInput.addEventListener('blur', () => {
+    validatePhoneField({ showError: true, applyTrim: true });
+    updateSignupSubmitState();
+  });
+}
+
+if (signupForm) {
+  signupForm.addEventListener('change', updateSignupSubmitState);
+}
+
+updateSignupSubmitState();
+
+signupForm.addEventListener("submit", function (e) {
+  e.preventDefault();
 
   let hasError = false;
   let firstErrorElement = null;
-  const rememberErrorElement = element => {
+  const rememberErrorElement = (element) => {
     if (!firstErrorElement && element) {
       firstErrorElement = element;
     }
   };
 
-  // نام فروشنده
-  const firstnameInput = document.getElementById("firstname");
-  const firstname = firstnameInput.value.trim();
-  const firstnameHint = document.getElementById("firstname-hint");
-  if (!firstname) {
-    firstnameHint.innerText = "لطفاً نام فروشنده را وارد کنید.";
-    firstnameHint.classList.remove("hidden");
+  const firstnameResult = validateNameField('firstname', 'firstname-hint', { showError: true, applyTrim: true });
+  if (!firstnameResult.valid) {
     hasError = true;
-    rememberErrorElement(firstnameInput);
-  } else if (!isPersianText(firstname)) {
-    firstnameHint.innerText = "نام فروشنده باید فقط با حروف فارسی نوشته شود.";
-    firstnameHint.classList.remove("hidden");
-    hasError = true;
-    rememberErrorElement(firstnameInput);
-  } else {
-    firstnameHint.classList.add("hidden");
+    rememberErrorElement(firstnameResult.element);
   }
+  const firstname = firstnameResult.value;
 
-  // نام خانوادگی فروشنده
-  const lastnameInput = document.getElementById("lastname");
-  const lastname = lastnameInput.value.trim();
-  const lastnameHint = document.getElementById("lastname-hint");
-  if (!lastname) {
-    lastnameHint.innerText = "لطفاً نام خانوادگی فروشنده را وارد کنید.";
-    lastnameHint.classList.remove("hidden");
+  const lastnameResult = validateNameField('lastname', 'lastname-hint', { showError: true, applyTrim: true });
+  if (!lastnameResult.valid) {
     hasError = true;
-    rememberErrorElement(lastnameInput);
-  } else if (!isPersianText(lastname)) {
-    lastnameHint.innerText = "نام خانوادگی باید فقط با حروف فارسی نوشته شود.";
-    lastnameHint.classList.remove("hidden");
-    hasError = true;
-    rememberErrorElement(lastnameInput);
-  } else {
-    lastnameHint.classList.add("hidden");
+    rememberErrorElement(lastnameResult.element);
   }
+  const lastname = lastnameResult.value;
 
-  // نام فروشگاه
-  const storenameInput = document.getElementById("storename");
-  const storename = storenameInput.value.trim();
-  const storenameHint = document.getElementById("storename-hint");
-  if (!storename) {
-    storenameHint.innerText = "لطفاً نام فروشگاه را وارد کنید.";
-    storenameHint.classList.remove("hidden");
+  const storenameResult = validateStoreField({ showError: true, applyTrim: true });
+  if (!storenameResult.valid) {
     hasError = true;
-    rememberErrorElement(storenameInput);
-  } else {
-    storenameHint.classList.add("hidden");
+    rememberErrorElement(storenameResult.element);
   }
+  const storename = storenameResult.value;
 
-  // شماره موبایل
-  const phoneInput = document.getElementById("phone");
-  const phone = phoneInput.value.trim();
-  const phoneHint = document.getElementById("phone-hint");
-  if (!/^09\d{9}$/.test(phone)) {
-    phoneHint.innerText = "شماره موبایل را به صورت صحیح و کامل وارد کنید (مثلاً 09123456789).";
-    phoneHint.classList.remove("hidden");
+  const phoneResult = validatePhoneField({ showError: true, applyTrim: true });
+  if (!phoneResult.valid) {
     hasError = true;
-    rememberErrorElement(phoneInput);
-  } else {
-    phoneHint.classList.add("hidden");
+    rememberErrorElement(phoneResult.element);
   }
+  const phone = phoneResult.value;
 
-  // دسته‌بندی
   const categorySelectInput = document.getElementById("category");
   const category = categorySelectInput.value;
   const categoryHint = document.getElementById("category-hint");
@@ -750,11 +981,9 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     categoryHint.classList.add("hidden");
   }
 
-  // زیر گروه در صورت نیاز
   let subcategory = "";
-  const shouldSelectSubcategory = subcatWrapper && subcatWrapper.dataset.hasItems === 'true';
-  if (shouldSelectSubcategory) {
-    subcategory = subcatInput ? (subcatInput.value || '').trim() : '';
+  if (shouldRequireSubcategory()) {
+    subcategory = subcatInput ? String(subcatInput.value || '').trim() : '';
     if (!subcategory) {
       subcategoryValidationActive = true;
       setSubcategoryRequiredState({ hasItems: true, selectedValue: '' });
@@ -769,9 +998,9 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     setSubcategoryRequiredState({ hasItems: false, selectedValue: '' });
   }
 
-  // آدرس دقیق
   const addressInput = document.getElementById("address");
-  const address = addressInput.value.trim();
+  const address = normalizeText(addressInput.value);
+  addressInput.value = address;
   const addressHint = document.getElementById("address-hint");
   if (!address) {
     addressHint.innerText = "لطفاً آدرس دقیق فروشگاه را وارد کنید.";
@@ -787,10 +1016,10 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     addressHint.classList.add("hidden");
   }
 
-  // توضیحات فروشگاه
   const descInput = document.getElementById("desc");
   const descHint = document.getElementById("desc-hint");
-  const descValue = descInput ? descInput.value.trim() : "";
+  const descValue = descInput ? normalizeText(descInput.value) : "";
+  if (descInput) descInput.value = descValue;
   if (descValue && !isPersianText(descValue)) {
     if (descHint) {
       descHint.innerText = "توضیحات باید فقط با حروف فارسی نوشته شود.";
@@ -802,11 +1031,10 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     descHint.classList.add("hidden");
   }
 
-  // کد معرف
   const referralInput = document.getElementById("referral_code");
-  const referralCode = referralInput ? referralInput.value.trim() : "";
+  const referralCode = referralInput ? normalizeText(referralInput.value) : "";
+  if (referralInput) referralInput.value = referralCode;
 
-  // رمز عبور
   const pass1Input = document.getElementById("pass1");
   const pass2Input = document.getElementById("pass2");
   const pass1 = pass1Input.value;
@@ -841,7 +1069,6 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     passHint.classList.add("hidden");
   }
 
-  // قوانین سایت
   const rules = document.getElementById("rules");
   const rulesHint = document.getElementById("rules-hint");
   if (!rules.checked) {
@@ -853,7 +1080,6 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     rulesHint.classList.add("hidden");
   }
 
-  // اگر حتی یکی از خطاها وجود داشت، اجازه ارسال فرم نده
   if (hasError) {
     if (firstErrorElement) {
       firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -861,24 +1087,25 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
         firstErrorElement.focus({ preventScroll: true });
       }
     }
+    updateSignupSubmitState();
     return;
   }
-  // ساخت داده‌ها برای ارسال به بک‌اند
+
   const data = {
-    firstname: firstname,
-    lastname: lastname,
-    storename: storename,
-    phone: phone,
-    category: category,
-    subcategory: subcategory,
-    address: address,
+    firstname,
+    lastname,
+    storename,
+    phone,
+    category,
+    subcategory,
+    address,
     desc: descValue,
-    referralCode: referralCode,
+    referralCode,
     password: pass1,
   };
 
-  // غیر فعال کردن دکمه ثبت تا پاسخ بیاد
-  let btn = this.querySelector("button[type='submit']");
+  const btn = this.querySelector("button[type='submit']");
+  isSubmittingSignup = true;
   btn.disabled = true;
   btn.innerText = "در حال ارسال...";
 
@@ -895,34 +1122,26 @@ document.getElementById("signup-form").addEventListener("submit", function (e) {
     }))
     .then(res => res.json())
     .then(result => {
-      btn.disabled = false;
       btn.innerText = "ثبت فروشگاه";
       if (result.success) {
-        SafeSS.setJSON('signup_pwd', data.password); // SafeSS
-
-        // ✅ اضافه‌شدن نقش و دسته برای تعیین پنل بعد از وریفای
-        // توجه: SERVICE_CATEGORIES بالاتر در همین فایل تعریف شده.
-        SafeSS.setJSON('signup_category', data.category); // SafeSS
-        SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller'); // SafeSS
-
+        SafeSS.setJSON('signup_pwd', data.password);
+        SafeSS.setJSON('signup_category', data.category);
+        SafeSS.setJSON('signup_role', SERVICE_CATEGORIES.includes(data.category) ? 'service' : 'seller');
         window.location.href = "verify.html?phone=" + encodeURIComponent(data.phone);
+        return;
       }
-
-      else {
-        alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
-      }
+      isSubmittingSignup = false;
+      updateSignupSubmitState();
+      alert("خطا در ثبت‌نام: " + (result.message || "لطفاً دوباره تلاش کنید"));
     })
     .catch(err => {
-      btn.disabled = false;
+      isSubmittingSignup = false;
       btn.innerText = "ثبت فروشگاه";
+      updateSignupSubmitState();
       console.error("Error:", err);
       alert("مشکلی در ارتباط با سرور پیش آمد.");
     });
-
-
 });
-
-// مرحله تأیید شماره موبایل
 function showVerifySection(phone) {
   window.location.href = `verify.html?phone=${encodeURIComponent(phone)}`;
 }

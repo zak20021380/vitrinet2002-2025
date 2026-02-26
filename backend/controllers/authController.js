@@ -170,6 +170,34 @@ function normalizeStrictIranianPhone(value) {
   return normalizeIranianPhone(raw);
 }
 
+const SELLER_NAME_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF\s]+$/;
+const SELLER_STORE_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s]+$/;
+
+function normalizeSellerText(value) {
+  return String(value || '').trim();
+}
+
+function isValidSellerName(value) {
+  const normalized = normalizeSellerText(value);
+  return normalized.length >= 2
+    && normalized.length <= 50
+    && SELLER_NAME_ALLOWED_REGEX.test(normalized);
+}
+
+function isValidSellerStoreName(value) {
+  const normalized = normalizeSellerText(value);
+  return normalized.length >= 2
+    && normalized.length <= 80
+    && SELLER_STORE_ALLOWED_REGEX.test(normalized);
+}
+
+function normalizeSellerRegistrationPhone(value) {
+  const raw = String(value || '').trim();
+  if (!raw || !/^[0-9۰-۹٠-٩]{11}$/.test(raw)) return '';
+  const normalized = toEnglishDigits(raw);
+  return /^09\d{9}$/.test(normalized) ? normalized : '';
+}
+
 function normalizeStrictOtp(value) {
   const raw = String(value || '').trim();
   if (!raw || !/^[0-9۰-۹٠-٩\s]+$/.test(raw)) return '';
@@ -461,7 +489,28 @@ exports.register = async (req, res) => {
       password,
     } = req.body;
 
-    const phone = normalizeStrictIranianPhone(rawPhone);
+    const normalizedFirstname = normalizeSellerText(firstname);
+    const normalizedLastname = normalizeSellerText(lastname);
+    const normalizedStorename = normalizeSellerText(storename);
+    const normalizedAddress = normalizeSellerText(address);
+    const normalizedDesc = normalizeSellerText(desc);
+    const normalizedReferralCode = normalizeSellerText(referralCode);
+
+    if (!isValidSellerName(normalizedFirstname) || !isValidSellerName(normalizedLastname)) {
+      return res.status(400).json({
+        success: false,
+        message: 'نام و نام خانوادگی باید فقط شامل حروف فارسی و بین ۲ تا ۵۰ کاراکتر باشد.'
+      });
+    }
+
+    if (!isValidSellerStoreName(normalizedStorename)) {
+      return res.status(400).json({
+        success: false,
+        message: 'نام فروشگاه باید شامل حروف فارسی، عدد و فاصله و بین ۲ تا ۸۰ کاراکتر باشد.'
+      });
+    }
+
+    const phone = normalizeSellerRegistrationPhone(rawPhone);
     if (!phone || !validateIranianPhone(phone)) {
       return res.status(400).json({
         success: false,
@@ -503,16 +552,16 @@ exports.register = async (req, res) => {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       generatedShopurl = await generateUniqueAutoShopSlug();
       const candidateSeller = new Seller({
-        firstname,
-        lastname,
-        storename,
+        firstname: normalizedFirstname,
+        lastname: normalizedLastname,
+        storename: normalizedStorename,
         shopurl: generatedShopurl,
         phone,
         category,
         subcategory,
-        address,
-        desc,
-        referralCode,
+        address: normalizedAddress,
+        desc: normalizedDesc,
+        referralCode: normalizedReferralCode,
         password: hashedPassword,
         otp,
         otpExpire,
@@ -541,8 +590,8 @@ exports.register = async (req, res) => {
         sellerId: seller._id,
         customUrl: generatedShopurl,
         shopPhone: phone,
-        shopAddress: address,
-        shopLogoText: storename,
+        shopAddress: normalizedAddress,
+        shopLogoText: normalizedStorename,
         shopStatus: 'open',
         slides: [],
       });
@@ -1099,4 +1148,3 @@ exports.getCurrentSeller = async (req, res) => {
     res.status(403).json({ success: false, message: 'دسترسی غیرمجاز یا توکن منقضی شده.' });
   }
 };
-
