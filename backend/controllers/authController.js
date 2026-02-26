@@ -34,6 +34,7 @@ const OTP_VERIFY_BACKOFF_BASE_MS = 1000;
 const OTP_VERIFY_BACKOFF_MAX_MS = 60 * 1000;
 const otpRequestState = new Map();
 const otpVerifyState = new Map();
+const DEV_STATIC_OTP = '12345';
 
 function getSecureCookieFlag(req) {
   if (process.env.NODE_ENV === 'production') return true;
@@ -177,6 +178,10 @@ function normalizeStrictOtp(value) {
 }
 
 function generateOtpCode() {
+  // Dev-only shortcut for local testing. Do not use in production.
+  if (process.env.NODE_ENV !== 'production') {
+    return DEV_STATIC_OTP;
+  }
   const max = 10 ** OTP_LENGTH;
   return crypto.randomInt(0, max).toString().padStart(OTP_LENGTH, '0');
 }
