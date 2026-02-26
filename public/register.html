@@ -15,7 +15,8 @@
   <title>ثبت‌نام کاربر - ویترینت</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800;900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
   <style>
     :root {
       --bg-base: #fafbfc;
@@ -73,7 +74,7 @@
     /* Registration Form Component */
     .register-main {
       min-height: calc(100dvh - 120px) !important;
-      padding-top: 70px !important;
+      padding-top: 90px !important;
       padding-bottom: 6px !important;
     }
 
@@ -105,36 +106,165 @@
 
     /* Header */
     header {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(148, 163, 184, 0.12);
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
 
-    .logo-container {
-      display: flex;
+    /* Vitreenet Brand Logo Styles */
+    .vitreenet-brand {
+      display: inline-flex;
       align-items: center;
-      gap: 0.65rem;
-      padding: 0.4rem 0.75rem;
+      gap: 0.75rem;
+      padding: 0.35rem 0.65rem;
       border-radius: 14px;
-      border: 1px solid rgba(14, 165, 233, 0.2);
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
-      transition: all 0.2s ease;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .logo-container:hover {
-      border-color: rgba(14, 165, 233, 0.3);
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%);
+    .vitreenet-brand:hover {
       transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
     }
 
-    .brand-text {
-      background: var(--brand-gradient);
+    .vitreenet-brand__mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .vitreenet-brand__mark svg {
+      width: 46px;
+      height: 46px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .vitreenet-brand:hover .vitreenet-brand__mark svg {
+      transform: rotate(-7deg) scale(1.04);
+    }
+
+    .vitreenet-brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      line-height: 1;
+    }
+
+    .vitreenet-brand__title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      position: relative;
+    }
+
+    .vitreenet-brand__title::after {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 6px;
+      background: linear-gradient(90deg, #0ea5e9, #10b981);
+      border-radius: 3px;
+      margin-top: 2px;
+    }
+
+    .vitreenet-brand__subtitle {
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    @media (max-width: 640px) {
+      .vitreenet-brand {
+        gap: 0.55rem;
+        padding: 0.1rem 0.2rem;
+      }
+
+      .vitreenet-brand__mark svg {
+        width: 36px;
+        height: 36px;
+      }
+
+      .vitreenet-brand__title {
+        font-size: 1.1rem;
+        letter-spacing: 0.08em;
+      }
+
+      .vitreenet-brand__title::after {
+        width: 22px;
+        height: 5px;
+      }
+
+      .vitreenet-brand__subtitle {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .vitreenet-brand {
+        gap: 0.4rem;
+      }
+
+      .vitreenet-brand__subtitle {
+        display: none;
+      }
+
+      .vitreenet-brand__title {
+        font-size: 1.05rem;
+      }
+    }
+
+    /* City Badge */
+    .city-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #10b981E6 70%, #0ea5e9E6);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .city-badge svg {
+      margin-left: 0.25rem;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+
+    .city-badge span {
+      font-weight: 700;
+      color: white;
+      font-size: 0.75rem;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (min-width: 640px) {
+      .city-badge {
+        padding: 0.5rem 0.875rem;
+      }
+
+      .city-badge span {
+        font-size: 0.8125rem;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .city-badge {
+        padding: 0.625rem 1rem;
+      }
+
+      .city-badge span {
+        font-size: 0.875rem;
+      }
     }
 
     nav a {
@@ -580,23 +710,61 @@
   <div id="toast">ویترینت فعلا فقط در سنندج فعال است.</div>
 
   <!-- Header شیشه‌ای و ریسپانسیو با استایل بهبود یافته -->
-  <header class="fixed top-0 inset-x-0 z-20 flex items-center justify-between px-4 sm:px-6 py-2">
-    <a href="index.html" class="logo-container select-none shrink-0">
-      <img src="assets/images/logo.svg" alt="ویترینت" class="w-8 h-8 sm:w-9 sm:h-9 hidden sm:block"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
-      <span class="brand-text text-xl md:text-2xl"
-        style="display:none; font-family:'Poppins',sans-serif;">Vitrinet</span>
-      <span class="brand-text text-xl sm:hidden block"
-        style="font-family:'Vazirmatn',sans-serif;">ویترینت</span>
-    </a>
-    <nav class="flex items-center gap-1.5 text-sm sm:text-base flex-shrink-0">
-      <a href="index.html">خانه</a>
-      <a href="login.html" class="nav-link-accent">ورود</a>
-    </nav>
+  <header class="w-full bg-white/95 shadow-md backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-row items-center justify-between px-4 sm:px-6 py-3 md:py-3.5 gap-3">
+      <!-- لوگو و انتخاب شهر -->
+      <div class="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <!-- لوگوی جدید ویترینت -->
+        <a href="index.html" class="vitreenet-brand" aria-label="ویترینت">
+          <span class="vitreenet-brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="presentation">
+              <defs>
+                <linearGradient id="vtMarkGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#0ea5e9" />
+                  <stop offset="55%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="#0fb67f" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="22" fill="url(#vtMarkGradient)" />
+              <g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 16 L18 32 L26 16" />
+                <path d="M31 32 L31 16 L39 32 L39 16" />
+              </g>
+            </svg>
+          </span>
+          <span class="vitreenet-brand__text">
+            <span class="vitreenet-brand__title">Vitreenet</span>
+            <span class="vitreenet-brand__subtitle">ویترینت</span>
+          </span>
+        </a>
+
+        <!-- بج شهر - نمایش در دسکتاپ و موبایل -->
+        <div class="city-badge">
+          <svg width="18" height="18" fill="none" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="city-icon" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+              fill="url(#city-icon)" />
+          </svg>
+          <span>سنندج</span>
+        </div>
+      </div>
+
+      <!-- منو -->
+      <nav class="flex items-center gap-1.5 text-sm sm:text-base flex-shrink-0">
+        <a href="index.html">خانه</a>
+        <a href="login.html" class="nav-link-accent">ورود</a>
+      </nav>
+    </div>
   </header>
 
   <!-- فرم ثبت‌نام کاربر -->
-  <main class="register-main relative z-10 min-h-[calc(100vh-92px)] flex items-center justify-center px-4 pt-[74px] pb-4">
+  <main class="register-main relative z-10 min-h-[calc(100vh-92px)] flex items-center justify-center px-4 pt-[90px] pb-4">
     <section class="signup-card">
       <!-- Title & Subtitle -->
       <div class="text-center">
@@ -658,7 +826,7 @@
         <!-- Seller Signup Link -->
         <div class="seller-link-section">
           <div class="seller-link-label">می‌خواهید فروش را شروع کنید؟</div>
-          <a href="seller-register.html" class="seller-link">ثبت‌نام به عنوان فروشنده</a>
+          <a href="post.html" class="seller-link">ثبت‌نام به عنوان فروشنده</a>
         </div>
       </div>
     </section>
