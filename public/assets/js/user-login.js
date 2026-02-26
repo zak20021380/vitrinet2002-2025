@@ -32,6 +32,50 @@ const API_ORIGIN = window.location.origin.includes('localhost')
 const SESSION_MARKER = 'cookie-session';
 let csrfTokenCache = '';
 
+const loginForm = document.getElementById('loginForm');
+const errorMsg = document.getElementById('error-message');
+const forgotLink = document.getElementById('forgot-link');
+
+function clearInlineLoginError() {
+  if (!errorMsg) return;
+  errorMsg.innerText = '';
+  errorMsg.classList.add('hidden');
+}
+
+function normalizeInlineLoginError(rawMessage) {
+  const message = String(rawMessage || '').trim();
+
+  const isOtpLoginNotice = /برای\s*این\s*شماره.*ورود\s*با\s*کد\s*تایید\s*انجام\s*می.?شود/.test(message);
+  if (isOtpLoginNotice) return '';
+
+  const wrongPasswordPatterns = [
+    /رمز\s*عبور\s*(اشتباه|نادرست|غلط)/,
+    /رمز\s*(اشتباه|نادرست|غلط)/,
+    /wrong\s*password/i,
+    /incorrect\s*password/i,
+    /invalid\s*password/i,
+    /password.*(wrong|incorrect|invalid)/i,
+    /(wrong|incorrect|invalid).*(password)/i
+  ];
+
+  const wrongOtpPatterns = [
+    /کد\s*(تایید|تأیید|یکبارمصرف|یک[\s‌-]*بار[\s‌-]*مصرف)\s*(اشتباه|نادرست|غلط)/,
+    /otp.*(wrong|incorrect|invalid|expired)/i,
+    /(wrong|incorrect|invalid|expired).*(otp|verification\s*code)/i,
+    /(verification\s*code|code).*(wrong|incorrect|invalid|expired)/i
+  ];
+
+  if (wrongPasswordPatterns.some((pattern) => pattern.test(message))) {
+    return 'رمز عبور اشتباه است';
+  }
+
+  if (wrongOtpPatterns.some((pattern) => pattern.test(message))) {
+    return 'کد تایید اشتباه است';
+  }
+
+  return message || 'خطا در ورود!';
+}
+
 async function getAuthCsrfToken() {
   if (csrfTokenCache) return csrfTokenCache;
 
@@ -48,12 +92,10 @@ async function getAuthCsrfToken() {
   return csrfTokenCache;
 }
 
-document.getElementById('loginForm').addEventListener('submit', async function (e) {
+loginForm.addEventListener('submit', async function (e) {
   e.preventDefault();
   const phone = document.getElementById('mobile').value.trim();
   const password = document.getElementById('password').value.trim();
-  const errorMsg = document.getElementById('error-message');
-  const forgotLink = document.getElementById('forgot-link');
 
   try {
     const csrfToken = await getAuthCsrfToken();
@@ -88,11 +130,18 @@ document.getElementById('loginForm').addEventListener('submit', async function (
       window.location.href = redirectUrl || '/user/dashboard.html';
     }
   } catch (err) {
-    errorMsg.innerText = err.message || 'خطا در ورود!';
-    errorMsg.classList.remove('hidden');
+    const message = normalizeInlineLoginError(err.message);
+    if (!message) {
+      clearInlineLoginError();
+    } else {
+      errorMsg.innerText = message;
+      errorMsg.classList.remove('hidden');
+    }
     forgotLink.classList.remove('hidden');
   }
 });
+
+loginForm.addEventListener('input', clearInlineLoginError);
 
 // 👁 نمایش/مخفی‌کردن رمز عبور
 document.getElementById('togglePassword').addEventListener('click', function () {
