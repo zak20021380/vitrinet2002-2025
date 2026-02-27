@@ -168,7 +168,7 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 mongoose.set('strictQuery', true);
-mongoose.set('sanitizeFilter', true);
+mongoose.set('sanitizeFilter', false);
 
 mongoose.connect(MONGO_URI)
   .then(() => {
