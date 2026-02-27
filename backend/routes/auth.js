@@ -28,6 +28,17 @@ const loginLimiter = rateLimit({
   legacyHeaders: false
 });
 
+const signupSubmissionIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    success: false,
+    message: 'تعداد تلاش ثبت‌نام بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 const otpRequestIpLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 20,
@@ -62,7 +73,7 @@ router.use((req, res, next) => {
 router.get('/csrf-token', getCsrfTokenHandler);
 
 // ۱) ثبت‌نام فروشنده
-router.post('/register', authCsrfProtection, otpRequestIpLimiter, register);
+router.post('/register', authCsrfProtection, signupSubmissionIpLimiter, otpRequestIpLimiter, register);
 
 // ۲) ورود فروشنده
 //    — توصیه می‌شود داخل کنترلر پس از تولید JWT، آن را در کوکی httpOnly ست کنید.

@@ -1,5 +1,6 @@
 const Seller = require('../models/Seller');
 const ShopAppearance = require('../models/ShopAppearance');
+const Category = require('../models/Category');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -172,23 +173,147 @@ function normalizeStrictIranianPhone(value) {
 
 const SELLER_NAME_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF\s]+$/;
 const SELLER_STORE_ALLOWED_REGEX = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06D5\u06E5-\u06E6\u06EE-\u06EF\u06FA-\u06FC\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s]+$/;
+const SELLER_CATEGORY_ALLOWED_REGEX = /^[\u0600-\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s()\-،,.]{2,60}$/;
+const SELLER_ADDRESS_ALLOWED_REGEX = /^[\u0600-\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s.,،\-\/]{5,200}$/;
+const SELLER_DESCRIPTION_ALLOWED_REGEX = /^[\u0600-\u06FF0-9\u06F0-\u06F9\u0660-\u0669\s.,،\-!?()]{0,500}$/;
+const REFERRAL_CODE_ALLOWED_REGEX = /^[A-Za-z0-9_-]{4,32}$/;
+const PASSWORD_POLICY_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[^\s]{8,64}$/;
+const PASSWORD_BCRYPT_MAX_LENGTH = 64;
 
-function normalizeSellerText(value) {
-  return String(value || '').trim();
+function normalizeSellerText(value, { maxLength = 0 } = {}) {
+  const raw = typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+  let normalized = raw
+    .normalize('NFKC')
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (maxLength > 0) {
+    normalized = normalized.slice(0, maxLength);
+  }
+
+  return normalized;
 }
 
 function isValidSellerName(value) {
-  const normalized = normalizeSellerText(value);
+  const normalized = normalizeSellerText(value, { maxLength: 50 });
   return normalized.length >= 2
     && normalized.length <= 50
     && SELLER_NAME_ALLOWED_REGEX.test(normalized);
 }
 
 function isValidSellerStoreName(value) {
-  const normalized = normalizeSellerText(value);
+  const normalized = normalizeSellerText(value, { maxLength: 80 });
   return normalized.length >= 2
     && normalized.length <= 80
     && SELLER_STORE_ALLOWED_REGEX.test(normalized);
+}
+
+function normalizeSellerCategory(value) {
+  return normalizeSellerText(value, { maxLength: 60 });
+}
+
+function isValidSellerCategory(value) {
+  const normalized = normalizeSellerCategory(value);
+  return SELLER_CATEGORY_ALLOWED_REGEX.test(normalized);
+}
+
+function normalizeSellerAddress(value) {
+  return normalizeSellerText(value, { maxLength: 200 });
+}
+
+function isValidSellerAddress(value) {
+  const normalized = normalizeSellerAddress(value);
+  return SELLER_ADDRESS_ALLOWED_REGEX.test(normalized);
+}
+
+function normalizeSellerDescription(value) {
+  return normalizeSellerText(value, { maxLength: 500 });
+}
+
+function isValidSellerDescription(value) {
+  const normalized = normalizeSellerDescription(value);
+  return SELLER_DESCRIPTION_ALLOWED_REGEX.test(normalized);
+}
+
+function normalizeReferralCode(value) {
+  const normalized = normalizeSellerText(value, { maxLength: 32 });
+  return normalized.replace(/\s+/g, '');
+}
+
+function isValidReferralCode(value) {
+  if (!value) return true;
+  return REFERRAL_CODE_ALLOWED_REGEX.test(value);
+}
+
+function isStrongPassword(value) {
+  if (typeof value !== 'string') return false;
+  if (value.length > PASSWORD_BCRYPT_MAX_LENGTH) return false;
+  return PASSWORD_POLICY_REGEX.test(value);
+}
+
+function slugifyCategoryName(value = '') {
+  return normalizeSellerCategory(value)
+    .replace(/\s+/g, '-')
+    .replace(/[\u200c\u200f\u202a-\u202e]/g, '')
+    .toLowerCase();
+}
+
+async function validateCategoryAndSubcategoryPair(category, subcategory) {
+  const hasCategories = await Category.exists({ type: 'category' });
+  if (!hasCategories) {
+    return {
+      valid: true,
+      normalizedCategory: category,
+      normalizedSubcategory: subcategory || ''
+    };
+  }
+
+  const categorySlug = slugifyCategoryName(category);
+  const matchedCategory = await Category.findOne({
+    type: 'category',
+    slug: categorySlug
+  }).select('name _id').lean();
+
+  if (!matchedCategory) {
+    return { valid: false, message: 'دسته‌بندی انتخابی معتبر نیست.' };
+  }
+
+  const serviceSubcategories = await Category.find({
+    type: 'service-subcategory',
+    $or: [
+      { parentCategory: matchedCategory._id },
+      { parentName: matchedCategory.name }
+    ]
+  }).select('name slug').lean();
+
+  if (!serviceSubcategories.length) {
+    if (subcategory) {
+      return { valid: false, message: 'برای این دسته‌بندی نیازی به زیرگروه نیست.' };
+    }
+    return {
+      valid: true,
+      normalizedCategory: matchedCategory.name,
+      normalizedSubcategory: ''
+    };
+  }
+
+  if (!subcategory) {
+    return { valid: false, message: 'انتخاب زیرگروه الزامی است.' };
+  }
+
+  const subcategorySlug = slugifyCategoryName(subcategory);
+  const matchedSubcategory = serviceSubcategories.find((item) => item.slug === subcategorySlug);
+
+  if (!matchedSubcategory) {
+    return { valid: false, message: 'زیرگروه انتخابی معتبر نیست.' };
+  }
+
+  return {
+    valid: true,
+    normalizedCategory: matchedCategory.name,
+    normalizedSubcategory: matchedSubcategory.name
+  };
 }
 
 function normalizeSellerRegistrationPhone(value) {
@@ -199,7 +324,7 @@ function normalizeSellerRegistrationPhone(value) {
 }
 
 function normalizeStrictOtp(value) {
-  const raw = String(value || '').trim();
+  const raw = normalizeSellerText(value, { maxLength: OTP_LENGTH + 4 });
   if (!raw || !/^[0-9۰-۹٠-٩\s]+$/.test(raw)) return '';
   const digits = toEnglishDigits(raw).replace(/\s+/g, '');
   return /^\d{5}$/.test(digits) ? digits : '';
@@ -489,12 +614,14 @@ exports.register = async (req, res) => {
       password,
     } = req.body;
 
-    const normalizedFirstname = normalizeSellerText(firstname);
-    const normalizedLastname = normalizeSellerText(lastname);
-    const normalizedStorename = normalizeSellerText(storename);
-    const normalizedAddress = normalizeSellerText(address);
-    const normalizedDesc = normalizeSellerText(desc);
-    const normalizedReferralCode = normalizeSellerText(referralCode);
+    const normalizedFirstname = normalizeSellerText(firstname, { maxLength: 50 });
+    const normalizedLastname = normalizeSellerText(lastname, { maxLength: 50 });
+    const normalizedStorename = normalizeSellerText(storename, { maxLength: 80 });
+    const normalizedCategoryInput = normalizeSellerCategory(category);
+    const normalizedSubcategoryInput = normalizeSellerCategory(subcategory);
+    const normalizedAddress = normalizeSellerAddress(address);
+    const normalizedDesc = normalizeSellerDescription(desc);
+    const normalizedReferralCode = normalizeReferralCode(referralCode);
 
     if (!isValidSellerName(normalizedFirstname) || !isValidSellerName(normalizedLastname)) {
       return res.status(400).json({
@@ -510,6 +637,48 @@ exports.register = async (req, res) => {
       });
     }
 
+    if (!isValidSellerCategory(normalizedCategoryInput)) {
+      return res.status(400).json({
+        success: false,
+        message: 'دسته‌بندی معتبر وارد کنید.'
+      });
+    }
+
+    if (normalizedSubcategoryInput && !isValidSellerCategory(normalizedSubcategoryInput)) {
+      return res.status(400).json({
+        success: false,
+        message: 'زیرگروه واردشده معتبر نیست.'
+      });
+    }
+
+    if (!isValidSellerAddress(normalizedAddress)) {
+      return res.status(400).json({
+        success: false,
+        message: 'آدرس معتبر و حداقل ۵ کاراکتر وارد کنید.'
+      });
+    }
+
+    if (!isValidSellerDescription(normalizedDesc)) {
+      return res.status(400).json({
+        success: false,
+        message: 'توضیحات واردشده معتبر نیست.'
+      });
+    }
+
+    if (!isValidReferralCode(normalizedReferralCode)) {
+      return res.status(400).json({
+        success: false,
+        message: 'کد معرف معتبر نیست.'
+      });
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'رمز عبور باید حداقل ۸ کاراکتر و شامل حرف انگلیسی، عدد و نماد باشد.'
+      });
+    }
+
     const phone = normalizeSellerRegistrationPhone(rawPhone);
     if (!phone || !validateIranianPhone(phone)) {
       return res.status(400).json({
@@ -517,6 +686,20 @@ exports.register = async (req, res) => {
         message: 'شماره موبایل معتبر وارد کنید.'
       });
     }
+
+    const categoryValidation = await validateCategoryAndSubcategoryPair(
+      normalizedCategoryInput,
+      normalizedSubcategoryInput
+    );
+    if (!categoryValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: categoryValidation.message
+      });
+    }
+
+    const normalizedCategory = categoryValidation.normalizedCategory;
+    const normalizedSubcategory = categoryValidation.normalizedSubcategory;
 
     if (!consumeOtpRequestAllowance(`seller:${phone}`)) {
       return res.status(429).json({
@@ -557,8 +740,8 @@ exports.register = async (req, res) => {
         storename: normalizedStorename,
         shopurl: generatedShopurl,
         phone,
-        category,
-        subcategory,
+        category: normalizedCategory,
+        subcategory: normalizedSubcategory,
         address: normalizedAddress,
         desc: normalizedDesc,
         referralCode: normalizedReferralCode,
@@ -635,8 +818,8 @@ exports.login = async (req, res) => {
   try {
     const { phone: rawPhone, password } = req.body || {};
     const phone = normalizeStrictIranianPhone(rawPhone);
-
-    if (!phone || !password || !validateIranianPhone(phone)) {
+    const normalizedPassword = typeof password === 'string' ? password : '';
+    if (!phone || !normalizedPassword || normalizedPassword.length > PASSWORD_BCRYPT_MAX_LENGTH || !validateIranianPhone(phone)) {
       return res.status(400).json({ success: false, message: 'شماره و رمز الزامی است.' });
     }
 
@@ -648,7 +831,7 @@ exports.login = async (req, res) => {
     if (!seller) return res.status(404).json({ success: false, message: 'فروشنده‌ای با این شماره یافت نشد.' });
 
     // مقایسه رمز
-    const isMatch = await bcrypt.compare(password, seller.password);
+    const isMatch = await bcrypt.compare(normalizedPassword, seller.password);
     if (!isMatch) return res.status(401).json({ success: false, message: 'رمز اشتباه است.' });
 
     // صدور نشست امن (توکن فقط در کوکی HttpOnly)
@@ -873,6 +1056,13 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+
+// ----------- ورود حرفه‌ای کاربر ----------- 
+// ----------- ورود کاربر فقط با JWT در JSON (بدون کوکی) ----------- 
+// ----------- ورود کاربر و ست‌کردن کوکی Http-Only -----------
+// ----------- ورود کاربر -----------
+// controllers/authController.js
+// controllers/authController.js
 exports.verifyUserOtp = async (req, res) => {
   try {
     const { phone: rawPhone, code: rawCode } = req.body || {};
@@ -959,21 +1149,14 @@ exports.verifyUserOtp = async (req, res) => {
     });
   }
 };
-
-
-// ----------- ورود حرفه‌ای کاربر ----------- 
-// ----------- ورود کاربر فقط با JWT در JSON (بدون کوکی) ----------- 
-// ----------- ورود کاربر و ست‌کردن کوکی Http-Only -----------
-// ----------- ورود کاربر -----------
-// controllers/authController.js
-// controllers/authController.js
 exports.loginUser = async (req, res) => {
   try {
     const { phone: rawPhone, password } = req.body || {};
     const phone = normalizeStrictIranianPhone(rawPhone);
+    const normalizedPassword = typeof password === 'string' ? password : '';
 
     /* ۱) ولیدیشن اولیه */
-    if (!phone || !password || !validateIranianPhone(phone)) {
+    if (!phone || !normalizedPassword || normalizedPassword.length > PASSWORD_BCRYPT_MAX_LENGTH || !validateIranianPhone(phone)) {
       return res.status(400).json({
         success: false,
         message: 'شماره و رمز الزامی است.'
@@ -1000,7 +1183,7 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(normalizedPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({
         success: false,

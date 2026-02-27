@@ -24,16 +24,60 @@ const path = require('path');
 const dailyVisitRoutes = require('./routes/dailyVisitRoutes');
 const { startAdCleanupScheduler } = require('./utils/adCleanupScheduler');
 const { startSellerSubscriptionEnforcer } = require('./utils/sellerSubscriptionEnforcer');
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
+
+function getRequestHost(req) {
+  const host = req.hostname || req.headers.host || '';
+  return String(host).split(':')[0].toLowerCase();
+}
+
+function isLocalHostRequest(req) {
+  return LOCAL_HOSTNAMES.has(getRequestHost(req));
+}
+
+function isSecureRequest(req) {
+  if (req.secure) return true;
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  if (typeof forwardedProto === 'string') {
+    return forwardedProto.split(',')[0].trim().toLowerCase() === 'https';
+  }
+  return false;
+}
 
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
+app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  if (isLocalHostRequest(req) || isSecureRequest(req)) {
+    return next();
+  }
+
+  const host = req.headers.host;
+  if (!host) {
+    return res.status(400).json({ message: 'Insecure request blocked.' });
+  }
+
+  return res.redirect(308, `https://${host}${req.originalUrl}`);
+});
+
+app.use((req, res, next) => {
+  if (!isLocalHostRequest(req)) {
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  }
+  next();
+});
 
 // Updated CORS configuration to allow multiple origins (including file:// access during local testing)
 const allowedOrigins = [
   'http://localhost:5173',
+  'https://localhost:5173',
   'http://localhost:5000',
+  'https://localhost:5000',
   'http://localhost:3000',
+  'https://localhost:3000',
   'http://127.0.0.1:5500',
+  'https://127.0.0.1:5500',
   'null'
 ];
 
@@ -123,6 +167,8 @@ app.get('/', (req, res) => {
 // ------------------- Database & Server -------------------
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
+mongoose.set('strictQuery', true);
+mongoose.set('sanitizeFilter', true);
 
 mongoose.connect(MONGO_URI)
   .then(() => {

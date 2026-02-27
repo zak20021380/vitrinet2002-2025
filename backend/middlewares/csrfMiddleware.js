@@ -78,6 +78,14 @@ function validateCsrfToken(fullToken) {
   return { valid: true };
 }
 
+function timingSafeTokenMatch(left, right) {
+  if (typeof left !== 'string' || typeof right !== 'string') return false;
+  const leftBuffer = Buffer.from(left, 'utf8');
+  const rightBuffer = Buffer.from(right, 'utf8');
+  if (leftBuffer.length !== rightBuffer.length) return false;
+  return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
 /**
  * CSRF Protection Middleware
  * Uses Double Submit Cookie pattern
@@ -103,37 +111,61 @@ function csrfProtection(options = {}) {
 
     // Check X-Requested-With header (additional protection)
     const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
-
     // In strict mode, both tokens must exist and match
     if (strictMode) {
-      if (!headerToken) {
-        // Only log in development
-        if (isDev) console.warn('🔐 [CSRF] Missing header token:', req.method, req.originalUrl);
+      if (!headerToken || !cookieToken) {
+        if (isDev) console.warn('[CSRF] Missing CSRF token:', req.method, req.originalUrl);
         return res.status(403).json({
           success: false,
-          message: 'توکن امنیتی یافت نشد. لطفاً صفحه را رفرش کنید.',
+          message: 'Missing CSRF token. Please refresh the page.',
           code: 'CSRF_TOKEN_MISSING'
+        });
+      }
+
+      if (!timingSafeTokenMatch(headerToken, cookieToken)) {
+        if (isDev) console.warn('[CSRF] Header/Cookie mismatch:', req.method, req.originalUrl);
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid CSRF token. Please refresh the page.',
+          code: 'CSRF_TOKEN_MISMATCH'
+        });
+      }
+
+      if (!isAjax) {
+        if (isDev) console.warn('[CSRF] Missing X-Requested-With header:', req.method, req.originalUrl);
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid security request.',
+          code: 'CSRF_AJAX_REQUIRED'
         });
       }
     }
 
-    // Validate the header token if present
+    // Validate header token
     if (headerToken) {
-      const validation = validateCsrfToken(headerToken);
-      
-      if (!validation.valid) {
-        if (strictMode) {
-          if (isDev) console.warn('🔐 [CSRF] Invalid token:', validation.reason, req.originalUrl);
-          return res.status(403).json({
-            success: false,
-            message: 'توکن امنیتی نامعتبر است. لطفاً صفحه را رفرش کنید.',
-            code: 'CSRF_TOKEN_INVALID'
-          });
-        }
-        // Non-strict mode: silently continue
+      const headerValidation = validateCsrfToken(headerToken);
+      if (!headerValidation.valid && strictMode) {
+        if (isDev) console.warn('[CSRF] Invalid header token:', headerValidation.reason, req.originalUrl);
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid CSRF token. Please refresh the page.',
+          code: 'CSRF_TOKEN_INVALID'
+        });
       }
     }
 
+    // Validate cookie token in strict mode
+    if (cookieToken) {
+      const cookieValidation = validateCsrfToken(cookieToken);
+      if (!cookieValidation.valid && strictMode) {
+        if (isDev) console.warn('[CSRF] Invalid cookie token:', cookieValidation.reason, req.originalUrl);
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid CSRF token. Please refresh the page.',
+          code: 'CSRF_COOKIE_INVALID'
+        });
+      }
+    }
     // Origin/Referer check for additional security
     const origin = req.headers.origin;
     const referer = req.headers.referer;
@@ -146,7 +178,7 @@ function csrfProtection(options = {}) {
           : (referer ? new URL(referer).host : null);
         
         if (sourceHost && sourceHost !== host) {
-          if (isDev) console.warn('🔐 [CSRF] Origin mismatch:', { sourceHost, host });
+          if (isDev) console.warn('[CSRF] Origin mismatch:', { sourceHost, host });
           if (strictMode) {
             return res.status(403).json({
               success: false,
@@ -218,3 +250,4 @@ module.exports = {
   validateCsrfToken,
   COOKIE_NAME
 };
+
