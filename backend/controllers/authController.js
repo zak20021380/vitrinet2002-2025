@@ -1187,7 +1187,7 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'رمز عبور اشتباه است.'
+        message: 'شماره موبایل یا رمز عبور اشتباه است'
       });
     }
 

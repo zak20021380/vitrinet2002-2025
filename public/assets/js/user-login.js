@@ -44,9 +44,11 @@ function clearInlineLoginError() {
 
 function normalizeInlineLoginError(rawMessage) {
   const message = String(rawMessage || '').trim();
+  const genericCredentialsMessage = 'شماره موبایل یا رمز عبور اشتباه است';
 
   const isOtpLoginNotice = /برای\s*این\s*شماره.*ورود\s*با\s*کد\s*تایید\s*انجام\s*می.?شود/.test(message);
   if (isOtpLoginNotice) return '';
+  if (message.includes(genericCredentialsMessage)) return genericCredentialsMessage;
 
   const wrongPasswordPatterns = [
     /رمز\s*عبور\s*(اشتباه|نادرست|غلط)/,
@@ -66,7 +68,7 @@ function normalizeInlineLoginError(rawMessage) {
   ];
 
   if (wrongPasswordPatterns.some((pattern) => pattern.test(message))) {
-    return 'رمز عبور اشتباه است';
+    return genericCredentialsMessage;
   }
 
   if (wrongOtpPatterns.some((pattern) => pattern.test(message))) {
