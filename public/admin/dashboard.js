@@ -1141,6 +1141,33 @@ function mapProductToHomepageCardFields(product = {}) {
   };
 }
 
+function renderHomepageCardCategoryOptions(selectedCategory = '') {
+  const selected = String(selectedCategory || '').trim();
+  const options = [];
+  const seen = new Set();
+
+  const addOption = (value, { label = value, selected: isSelected = false, disabled = false } = {}) => {
+    const normalized = String(value || '').trim();
+    if (!normalized || seen.has(normalized)) return;
+    seen.add(normalized);
+    options.push(`<option value="${escapeHtml(normalized)}"${isSelected ? ' selected' : ''}${disabled ? ' disabled' : ''}>${escapeHtml(label)}</option>`);
+  };
+
+  addOption('__placeholder__', { label: 'دسته را انتخاب کنید', selected: !selected, disabled: true });
+
+  categoryManagerState.categories.forEach((item) => {
+    const label = String(item?.name || '').trim();
+    if (!label) return;
+    addOption(label, { selected: selected === label });
+  });
+
+  if (selected && !seen.has(selected)) {
+    addOption(selected, { selected: true });
+  }
+
+  return options.join('');
+}
+
 function applyHomepageCardAutofill(form, payload = {}, { linkValue = '' } = {}) {
   if (!form || !payload) return;
 
@@ -1712,7 +1739,9 @@ function renderHomepageSections() {
             </div>
             <div>
               <label>دسته *</label>
-              <input type="text" data-field="category" required placeholder="مثلا: پوشاک" />
+              <select data-field="category" required>
+                ${renderHomepageCardCategoryOptions('')}
+              </select>
             </div>
           </div>
           <div class="homepage-card-form__row">
