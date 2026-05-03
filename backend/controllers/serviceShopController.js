@@ -2824,6 +2824,8 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
     name: normaliseText(source.name || source.storename || source.ownerName || shopUrl || 'خدمات'),
     shopUrl,
     phone,
+    address: normaliseText(source.address || source.shopAddress || ''),
+    city: normaliseText(source.city || ''),
     imageUrl: resolveSimilarImage(source, activeAd),
     categoryName: normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات'),
     shortInfo: buildSimilarShortInfo(source),
@@ -2902,7 +2904,7 @@ exports.getSimilarPublicShops = async (req, res) => {
 
     const [shops, legacySellers] = await Promise.all([
       ServiceShop.find(shopMatch)
-        .select('name shopUrl category subcategories tags description city ownerPhone coverImage gallery isPremium isFeatured isBookable bookingSettings highlightServices analytics legacySellerId updatedAt createdAt')
+        .select('name shopUrl category subcategories tags description address city ownerPhone coverImage gallery isPremium isFeatured isBookable bookingSettings highlightServices analytics legacySellerId updatedAt createdAt')
         .sort({ isFeatured: -1, isPremium: -1, 'analytics.ratingAverage': -1, 'analytics.ratingCount': -1, updatedAt: -1 })
         .limit(30)
         .lean(),
@@ -3001,6 +3003,7 @@ exports.getSimilarPublicShops = async (req, res) => {
         name: seller.storename,
         shopUrl: seller.shopurl,
         phone: seller.phone,
+        address: seller.address,
         coverImage: appearanceMap.get(sellerId)?.coverImage || seller.boardImage || '',
         boardImage: seller.boardImage,
         category: seller.subcategory || seller.category,

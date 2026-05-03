@@ -4027,6 +4027,8 @@ window.addEventListener('load', () => {
     return res.json();
   }
 
+  let similarServicesItems = [];
+
   function similarServiceCardTemplate(item = {}) {
     const requestUrl = item.requestUrl || (item.shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(item.shopUrl)}` : '#');
     const phone = normalizeCategoryText(item.phone || '');
@@ -4067,13 +4069,91 @@ window.addEventListener('load', () => {
           <a class="similar-service-card__action similar-service-card__action--primary" href="${escapeHtml(requestUrl)}">
             درخواست
           </a>
-          <a class="similar-service-card__action similar-service-card__action--secondary"
-             href="${phone ? `tel:${escapeHtml(phone)}` : '#'}"
-             ${phone ? '' : 'aria-disabled="true" tabindex="-1"'}>
+          <button class="similar-service-card__action similar-service-card__action--secondary"
+             type="button"
+             data-similar-contact-id="${escapeHtml(String(item.id || ''))}"
+             ${phone ? '' : 'aria-disabled="true" disabled'}>
             تماس
-          </a>
+          </button>
         </div>
       </article>`;
+  }
+
+  function setSimilarContactText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text || '—';
+  }
+
+  function closeSimilarContactModal() {
+    const modal = document.getElementById('similar-contact-modal');
+    if (!modal) return;
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('similar-contact-open');
+  }
+
+  function openSimilarContactModal(item = {}) {
+    const modal = document.getElementById('similar-contact-modal');
+    if (!modal) return;
+
+    const image = document.getElementById('similar-contact-image');
+    const call = document.getElementById('similar-contact-call');
+    const view = document.getElementById('similar-contact-view');
+    const phone = normalizeCategoryText(item.phone || '');
+    const address = normalizeCategoryText(item.address || item.city || '');
+    const requestUrl = item.requestUrl || (item.shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(item.shopUrl)}` : '#');
+
+    if (image) {
+      image.src = item.imageUrl || '/assets/images/shop-placeholder.svg';
+      image.alt = item.name || 'کسب‌وکار مشابه';
+    }
+
+    setSimilarContactText('similar-contact-title', item.name || 'اطلاعات تماس');
+    setSimilarContactText('similar-contact-category', item.categoryName || 'خدمات');
+    setSimilarContactText('similar-contact-info', item.shortInfo || item.categoryName || 'خدمات مشابه');
+    setSimilarContactText('similar-contact-phone', phone || 'شماره تماس ثبت نشده');
+    setSimilarContactText('similar-contact-address', address || 'آدرس ثبت نشده');
+
+    if (call) {
+      call.href = phone ? `tel:${phone}` : '#';
+      call.setAttribute('aria-disabled', phone ? 'false' : 'true');
+      call.classList.toggle('is-disabled', !phone);
+    }
+
+    if (view) {
+      view.href = requestUrl;
+    }
+
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('similar-contact-open');
+  }
+
+  function bindSimilarContactModal() {
+    const section = document.getElementById('similar-services-ad');
+    if (!section || section.dataset.contactModalBound === 'true') return;
+    section.dataset.contactModalBound = 'true';
+
+    section.addEventListener('click', (event) => {
+      const contactBtn = event.target.closest('[data-similar-contact-id]');
+      if (contactBtn) {
+        event.preventDefault();
+        if (contactBtn.disabled || contactBtn.getAttribute('aria-disabled') === 'true') return;
+        const id = contactBtn.dataset.similarContactId || '';
+        const item = similarServicesItems.find(entry => String(entry.id || '') === id);
+        if (item) openSimilarContactModal(item);
+        return;
+      }
+
+      if (event.target.closest('[data-similar-contact-close]')) {
+        event.preventDefault();
+        closeSimilarContactModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeSimilarContactModal();
+    });
   }
 
   async function loadSimilarServices({ seller = {}, services = [], shopurl = '', sellerId = '' } = {}) {
@@ -4081,9 +4161,11 @@ window.addEventListener('load', () => {
     const list = document.getElementById('similar-services-list');
     const categoryEl = document.getElementById('similar-services-category');
     if (!section || !list) return;
+    bindSimilarContactModal();
 
     const category = resolveSimilarServiceCategory(seller, services);
     if (!category) {
+      similarServicesItems = [];
       section.hidden = true;
       return;
     }
@@ -4092,6 +4174,7 @@ window.addEventListener('load', () => {
       const data = await apiGetSimilarServices({ category, shopurl, sellerId });
       const items = Array.isArray(data?.items) ? data.items.slice(0, 5) : [];
       if (items.length < 3) {
+        similarServicesItems = [];
         section.hidden = true;
         list.innerHTML = '';
         return;
@@ -4100,10 +4183,12 @@ window.addEventListener('load', () => {
       if (categoryEl) {
         categoryEl.textContent = category;
       }
-      list.innerHTML = items.map(similarServiceCardTemplate).join('');
+      similarServicesItems = items;
+      list.innerHTML = similarServicesItems.map(similarServiceCardTemplate).join('');
       section.hidden = false;
     } catch (err) {
       console.warn('loadSimilarServices failed:', err);
+      similarServicesItems = [];
       section.hidden = true;
       list.innerHTML = '';
     }
