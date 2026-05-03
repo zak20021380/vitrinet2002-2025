@@ -5,6 +5,7 @@ const customerCtrl = require('../controllers/serviceShopCustomerController');
 const serviceShopCtrl = require('../controllers/serviceShopController');
 
 router.get('/showcase', serviceShopCtrl.getPublicShowcase);
+router.get('/similar', serviceShopCtrl.getSimilarPublicShops);
 router.get('/status/by-shopurl/:shopUrl', serviceShopCtrl.getPublicModerationStatusBySlug);
 router.get('/status/by-seller/:sellerId', serviceShopCtrl.getPublicModerationStatusBySeller);
 router.get('/:sellerId/bookings/summary', serviceShopCtrl.getPublicBookingSummary);

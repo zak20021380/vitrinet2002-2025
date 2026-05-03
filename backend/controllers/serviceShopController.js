@@ -2768,6 +2768,244 @@ exports.removeServiceShop = async (req, res) => {
 
 const normaliseText = (value = '') => String(value || '').replace(/\s+/g, ' ').trim();
 
+const resolveSimilarOfferText = (services = [], ad = null) => {
+  const offerPattern = /(تخفیف|رایگان|مشاوره|آفر|offer|discount|free)/i;
+  const fromService = services.find((service) => {
+    const tags = Array.isArray(service?.tags) ? service.tags : [];
+    const text = [service?.badge, service?.title, service?.desc, ...tags].join(' ');
+    return offerPattern.test(text);
+  });
+
+  if (fromService?.badge) return normaliseText(fromService.badge).slice(0, 42);
+  if (fromService?.title && offerPattern.test(fromService.title)) return normaliseText(fromService.title).slice(0, 42);
+
+  const adText = normaliseText(ad?.adText || ad?.adTitle || '');
+  return offerPattern.test(adText) ? adText.slice(0, 42) : '';
+};
+
+const buildSimilarShortInfo = (source = {}) => {
+  const highlights = Array.isArray(source.highlightServices) ? source.highlightServices.filter(Boolean) : [];
+  if (highlights.length) return highlights.slice(0, 2).join('، ');
+  if (source.description) return normaliseText(source.description).slice(0, 86);
+  if (source.city) return source.city;
+  return source.categoryName || source.category || 'خدمات';
+};
+
+const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCategory = '' } = {}) => {
+  const shopUrl = normaliseText(source.shopUrl || source.shopurl || '');
+  const phone = normaliseText(source.ownerPhone || source.phone || '');
+  const isPromoted = !!(source.isFeatured || source.isPremium || activeAd);
+  const isAvailableNow = source.isBookable !== false && (
+    source?.bookingSettings?.enabled === true
+    || services.some((service) => service?.isBookable !== false)
+    || !!source.isBookable
+  );
+
+  return {
+    id: String(source._id || source.id || source.legacySellerId || shopUrl || ''),
+    sellerId: source.sellerId ? String(source.sellerId) : (source.legacySellerId ? String(source.legacySellerId) : ''),
+    name: normaliseText(source.name || source.storename || source.ownerName || shopUrl || 'خدمات'),
+    shopUrl,
+    phone,
+    categoryName: normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات'),
+    shortInfo: buildSimilarShortInfo(source),
+    isPromoted,
+    isPremium: !!source.isPremium,
+    isFeatured: !!source.isFeatured,
+    isAvailableNow,
+    offerText: resolveSimilarOfferText(services, activeAd),
+    requestUrl: shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(shopUrl)}` : '',
+    rating: Number(source?.analytics?.ratingAverage ?? source.rating ?? 0) || 0,
+    reviewCount: Number(source?.analytics?.ratingCount ?? source.reviewCount ?? 0) || 0,
+    stats: {
+      totalBookings: Number(source?.analytics?.totalBookings || source?.stats?.totalBookings || 0)
+    }
+  };
+};
+
+const sortSimilarCards = (a, b) => {
+  if (Number(b.isPromoted) !== Number(a.isPromoted)) return Number(b.isPromoted) - Number(a.isPromoted);
+  if (Number(b.offerText ? 1 : 0) !== Number(a.offerText ? 1 : 0)) return Number(b.offerText ? 1 : 0) - Number(a.offerText ? 1 : 0);
+  if (Number(b.isAvailableNow) !== Number(a.isAvailableNow)) return Number(b.isAvailableNow) - Number(a.isAvailableNow);
+  if (b.rating !== a.rating) return b.rating - a.rating;
+  if (b.reviewCount !== a.reviewCount) return b.reviewCount - a.reviewCount;
+  return (b.stats?.totalBookings || 0) - (a.stats?.totalBookings || 0);
+};
+
+exports.getSimilarPublicShops = async (req, res) => {
+  try {
+    const category = normaliseText(req.query?.category || req.query?.categoryName || '');
+    const excludeShopUrl = normaliseText(req.query?.excludeShopUrl || req.query?.shopUrl || '').toLowerCase();
+    const excludeSellerId = mongoose.Types.ObjectId.isValid(req.query?.excludeSellerId)
+      ? String(req.query.excludeSellerId)
+      : '';
+    const rawLimit = Number(req.query?.limit);
+    const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(rawLimit, 3), 5) : 5;
+
+    if (!category) {
+      return res.json({ items: [], meta: { category: '', total: 0, generatedAt: new Date().toISOString() } });
+    }
+
+    const categoryRegex = new RegExp(escapeRegExp(category), 'i');
+    const shopCategoryMatch = {
+      $or: [
+        { category: { $regex: categoryRegex } },
+        { subcategories: { $elemMatch: { $regex: categoryRegex } } },
+        { tags: { $elemMatch: { $regex: categoryRegex } } }
+      ]
+    };
+
+    const shopMatch = {
+      status: 'approved',
+      isVisible: true,
+      'adminModeration.isBlocked': { $ne: true },
+      ...shopCategoryMatch
+    };
+
+    if (excludeShopUrl) {
+      shopMatch.shopUrl = { $ne: excludeShopUrl };
+    }
+    if (excludeSellerId) {
+      shopMatch.legacySellerId = { $ne: new mongoose.Types.ObjectId(excludeSellerId) };
+    }
+
+    const legacyMatch = {
+      blockedByAdmin: { $ne: true },
+      $or: [
+        { category: { $regex: categoryRegex } },
+        { subcategory: { $regex: categoryRegex } }
+      ]
+    };
+
+    const legacyAnd = [];
+    if (excludeShopUrl) legacyAnd.push({ shopurl: { $ne: excludeShopUrl } });
+    if (excludeSellerId) legacyAnd.push({ _id: { $ne: new mongoose.Types.ObjectId(excludeSellerId) } });
+    if (legacyAnd.length) legacyMatch.$and = legacyAnd;
+
+    const [shops, legacySellers] = await Promise.all([
+      ServiceShop.find(shopMatch)
+        .select('name shopUrl category subcategories tags description city ownerPhone isPremium isFeatured isBookable bookingSettings highlightServices analytics legacySellerId updatedAt createdAt')
+        .sort({ isFeatured: -1, isPremium: -1, 'analytics.ratingAverage': -1, 'analytics.ratingCount': -1, updatedAt: -1 })
+        .limit(30)
+        .lean(),
+      Seller.find(legacyMatch)
+        .select('storename shopurl phone category subcategory desc city address isPremium premiumUntil updatedAt createdAt')
+        .sort({ isPremium: -1, updatedAt: -1 })
+        .limit(30)
+        .lean()
+    ]);
+
+    const sellerIds = new Set();
+    shops.forEach((shop) => {
+      if (shop.legacySellerId && mongoose.Types.ObjectId.isValid(shop.legacySellerId)) {
+        sellerIds.add(String(shop.legacySellerId));
+      }
+    });
+    legacySellers.forEach((seller) => {
+      if (seller._id && mongoose.Types.ObjectId.isValid(seller._id)) {
+        sellerIds.add(String(seller._id));
+      }
+    });
+
+    const sellerObjectIds = Array.from(sellerIds)
+      .filter((id) => mongoose.Types.ObjectId.isValid(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    const [services, adOrders] = sellerObjectIds.length
+      ? await Promise.all([
+        SellerService.find({ sellerId: { $in: sellerObjectIds }, isActive: true })
+          .select('sellerId title desc tags badge isBookable price')
+          .sort({ createdAt: -1 })
+          .lean(),
+        AdOrder.find({
+          sellerId: { $in: sellerObjectIds },
+          status: { $in: ['approved', 'paid'] },
+          $or: [
+            { expiresAt: { $exists: false } },
+            { expiresAt: null },
+            { expiresAt: { $gte: new Date() } }
+          ]
+        })
+          .select('sellerId adTitle adText planSlug expiresAt createdAt')
+          .sort({ createdAt: -1 })
+          .lean()
+      ])
+      : [[], []];
+
+    const serviceMap = new Map();
+    services.forEach((service) => {
+      const key = String(service.sellerId);
+      if (!serviceMap.has(key)) serviceMap.set(key, []);
+      serviceMap.get(key).push(service);
+    });
+
+    const adMap = new Map();
+    adOrders.forEach((ad) => {
+      const key = String(ad.sellerId);
+      if (!adMap.has(key)) adMap.set(key, ad);
+    });
+
+    const cards = [];
+    const seen = new Set();
+
+    shops.forEach((shop) => {
+      const sellerId = shop.legacySellerId ? String(shop.legacySellerId) : '';
+      const card = toSimilarCard(shop, {
+        services: sellerId ? (serviceMap.get(sellerId) || []) : [],
+        activeAd: sellerId ? adMap.get(sellerId) : null,
+        fallbackCategory: category
+      });
+      const dedupeKey = card.shopUrl ? `url:${card.shopUrl.toLowerCase()}` : `id:${card.id}`;
+      if (!card.shopUrl || seen.has(dedupeKey)) return;
+      seen.add(dedupeKey);
+      cards.push(card);
+    });
+
+    legacySellers.forEach((seller) => {
+      const sellerId = String(seller._id);
+      const card = toSimilarCard({
+        _id: seller._id,
+        sellerId,
+        name: seller.storename,
+        shopUrl: seller.shopurl,
+        phone: seller.phone,
+        category: seller.subcategory || seller.category,
+        description: seller.desc,
+        city: seller.city || extractCity(seller.address),
+        isPremium: !!seller.isPremium,
+        isBookable: true,
+        highlightServices: (serviceMap.get(sellerId) || []).map((service) => normaliseText(service.title)).filter(Boolean).slice(0, 3),
+        updatedAt: seller.updatedAt,
+        createdAt: seller.createdAt
+      }, {
+        services: serviceMap.get(sellerId) || [],
+        activeAd: adMap.get(sellerId),
+        fallbackCategory: category
+      });
+      const dedupeKey = card.shopUrl ? `url:${card.shopUrl.toLowerCase()}` : `seller:${sellerId}`;
+      if (!card.shopUrl || seen.has(dedupeKey)) return;
+      seen.add(dedupeKey);
+      cards.push(card);
+    });
+
+    const items = cards
+      .sort(sortSimilarCards)
+      .slice(0, limit);
+
+    return res.json({
+      items,
+      meta: {
+        category,
+        total: items.length,
+        generatedAt: new Date().toISOString()
+      }
+    });
+  } catch (err) {
+    console.error('serviceShops.getSimilarPublicShops error:', err);
+    return res.status(500).json({ message: 'خطا در دریافت خدمات مشابه.' });
+  }
+};
+
 exports.getPublicShowcase = async (req, res) => {
   try {
     const limitRaw = Number(req.query?.limit);

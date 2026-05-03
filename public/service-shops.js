@@ -3993,6 +3993,104 @@ window.addEventListener('load', () => {
     return res.json();
   }
 
+  const escapeHtml = (value = '') => String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  const normalizeCategoryText = (value = '') => String(value || '').replace(/\s+/g, ' ').trim();
+
+  function resolveSimilarServiceCategory(seller = {}, services = []) {
+    const activeServices = Array.isArray(services) ? services.filter(Boolean) : [];
+    const serviceCategory = activeServices
+      .map(item => normalizeCategoryText(item.subcategory || item.category || ''))
+      .find(Boolean);
+    return serviceCategory
+      || normalizeCategoryText(seller.subcategory || '')
+      || normalizeCategoryText(seller.category || '')
+      || '';
+  }
+
+  async function apiGetSimilarServices({ category, shopurl, sellerId }) {
+    const params = new URLSearchParams();
+    params.set('category', category);
+    params.set('limit', '5');
+    if (shopurl) params.set('excludeShopUrl', shopurl);
+    if (sellerId) params.set('excludeSellerId', sellerId);
+
+    const res = await fetch(`${API_ROOT}/api/service-shops/similar?${params.toString()}`, {
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  function similarServiceCardTemplate(item = {}) {
+    const requestUrl = item.requestUrl || (item.shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(item.shopUrl)}` : '#');
+    const phone = normalizeCategoryText(item.phone || '');
+    const safeName = escapeHtml(item.name || 'خدمات');
+    const safeInfo = escapeHtml(item.shortInfo || item.categoryName || 'خدمات مشابه');
+    const safeOffer = escapeHtml(item.offerText || '');
+
+    return `
+      <article class="similar-service-card">
+        <div class="similar-service-card__top">
+          <div class="similar-service-card__badges">
+            ${item.isPromoted ? '<span class="similar-service-card__badge similar-service-card__badge--suggested">پیشنهادی</span>' : ''}
+            ${safeOffer ? `<span class="similar-service-card__badge similar-service-card__badge--offer">${safeOffer}</span>` : ''}
+            ${item.isAvailableNow ? '<span class="similar-service-card__badge similar-service-card__badge--available">آماده پذیرش</span>' : ''}
+          </div>
+          <h4 class="similar-service-card__name" title="${safeName}">${safeName}</h4>
+          <p class="similar-service-card__info">${safeInfo}</p>
+        </div>
+        <div class="similar-service-card__actions">
+          <a class="similar-service-card__action similar-service-card__action--primary" href="${escapeHtml(requestUrl)}">
+            درخواست
+          </a>
+          <a class="similar-service-card__action similar-service-card__action--secondary"
+             href="${phone ? `tel:${escapeHtml(phone)}` : '#'}"
+             ${phone ? '' : 'aria-disabled="true" tabindex="-1"'}>
+            تماس
+          </a>
+        </div>
+      </article>`;
+  }
+
+  async function loadSimilarServices({ seller = {}, services = [], shopurl = '', sellerId = '' } = {}) {
+    const section = document.getElementById('similar-services-ad');
+    const list = document.getElementById('similar-services-list');
+    const categoryEl = document.getElementById('similar-services-category');
+    if (!section || !list) return;
+
+    const category = resolveSimilarServiceCategory(seller, services);
+    if (!category) {
+      section.hidden = true;
+      return;
+    }
+
+    try {
+      const data = await apiGetSimilarServices({ category, shopurl, sellerId });
+      const items = Array.isArray(data?.items) ? data.items.slice(0, 5) : [];
+      if (items.length < 3) {
+        section.hidden = true;
+        list.innerHTML = '';
+        return;
+      }
+
+      if (categoryEl) {
+        categoryEl.textContent = category;
+      }
+      list.innerHTML = items.map(similarServiceCardTemplate).join('');
+      section.hidden = false;
+    } catch (err) {
+      console.warn('loadSimilarServices failed:', err);
+      section.hidden = true;
+      list.innerHTML = '';
+    }
+  }
+
 function updateSellerProfile(seller) {
   // Helper function to create brief address
   const getBriefAddress = (fullAddress) => {
@@ -4340,6 +4438,12 @@ async function renderAll() {
     }
     
     renderList();
+    loadSimilarServices({
+      seller,
+      services: data.items || [],
+      shopurl,
+      sellerId: resolvedSellerId
+    });
     document.dispatchEvent(new CustomEvent('services:loaded', { detail: data.items || [] }));
   } catch (err) {
     console.error('Load public services failed', err);
