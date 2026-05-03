@@ -2791,6 +2791,23 @@ const buildSimilarShortInfo = (source = {}) => {
   return source.categoryName || source.category || 'خدمات';
 };
 
+const resolveSimilarImage = (source = {}, activeAd = null) => {
+  const galleryImage = Array.isArray(source.gallery)
+    ? source.gallery.map(normaliseText).find(Boolean)
+    : '';
+  const image = normaliseText(
+    source.coverImage
+    || galleryImage
+    || source.boardImage
+    || activeAd?.bannerImage
+    || ''
+  );
+  if (!image || /^data:|^https?:\/\//i.test(image) || image.startsWith('/')) {
+    return image;
+  }
+  return image.startsWith('uploads/') ? `/${image}` : image;
+};
+
 const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCategory = '' } = {}) => {
   const shopUrl = normaliseText(source.shopUrl || source.shopurl || '');
   const phone = normaliseText(source.ownerPhone || source.phone || '');
@@ -2807,6 +2824,7 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
     name: normaliseText(source.name || source.storename || source.ownerName || shopUrl || 'خدمات'),
     shopUrl,
     phone,
+    imageUrl: resolveSimilarImage(source, activeAd),
     categoryName: normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات'),
     shortInfo: buildSimilarShortInfo(source),
     isPromoted,
@@ -2884,12 +2902,12 @@ exports.getSimilarPublicShops = async (req, res) => {
 
     const [shops, legacySellers] = await Promise.all([
       ServiceShop.find(shopMatch)
-        .select('name shopUrl category subcategories tags description city ownerPhone isPremium isFeatured isBookable bookingSettings highlightServices analytics legacySellerId updatedAt createdAt')
+        .select('name shopUrl category subcategories tags description city ownerPhone coverImage gallery isPremium isFeatured isBookable bookingSettings highlightServices analytics legacySellerId updatedAt createdAt')
         .sort({ isFeatured: -1, isPremium: -1, 'analytics.ratingAverage': -1, 'analytics.ratingCount': -1, updatedAt: -1 })
         .limit(30)
         .lean(),
       Seller.find(legacyMatch)
-        .select('storename shopurl phone category subcategory desc city address isPremium premiumUntil updatedAt createdAt')
+        .select('storename shopurl phone category subcategory desc city address boardImage isPremium premiumUntil updatedAt createdAt')
         .sort({ isPremium: -1, updatedAt: -1 })
         .limit(30)
         .lean()
@@ -2911,7 +2929,7 @@ exports.getSimilarPublicShops = async (req, res) => {
       .filter((id) => mongoose.Types.ObjectId.isValid(id))
       .map((id) => new mongoose.Types.ObjectId(id));
 
-    const [services, adOrders] = sellerObjectIds.length
+    const [services, adOrders, appearances] = sellerObjectIds.length
       ? await Promise.all([
         SellerService.find({ sellerId: { $in: sellerObjectIds }, isActive: true })
           .select('sellerId title desc tags badge isBookable price')
@@ -2926,11 +2944,14 @@ exports.getSimilarPublicShops = async (req, res) => {
             { expiresAt: { $gte: new Date() } }
           ]
         })
-          .select('sellerId adTitle adText planSlug expiresAt createdAt')
+          .select('sellerId adTitle adText bannerImage planSlug expiresAt createdAt')
           .sort({ createdAt: -1 })
+          .lean(),
+        ShopAppearance.find({ sellerId: { $in: sellerObjectIds } })
+          .select('sellerId shopLogo footerImage slides')
           .lean()
       ])
-      : [[], []];
+      : [[], [], []];
 
     const serviceMap = new Map();
     services.forEach((service) => {
@@ -2943,6 +2964,17 @@ exports.getSimilarPublicShops = async (req, res) => {
     adOrders.forEach((ad) => {
       const key = String(ad.sellerId);
       if (!adMap.has(key)) adMap.set(key, ad);
+    });
+
+    const appearanceMap = new Map();
+    appearances.forEach((appearance) => {
+      if (!appearance?.sellerId) return;
+      const slideImage = Array.isArray(appearance.slides)
+        ? appearance.slides.map((slide) => normaliseText(slide?.img)).find(Boolean)
+        : '';
+      appearanceMap.set(String(appearance.sellerId), {
+        coverImage: normaliseText(appearance.footerImage || slideImage || appearance.shopLogo || '')
+      });
     });
 
     const cards = [];
@@ -2969,6 +3001,8 @@ exports.getSimilarPublicShops = async (req, res) => {
         name: seller.storename,
         shopUrl: seller.shopurl,
         phone: seller.phone,
+        coverImage: appearanceMap.get(sellerId)?.coverImage || seller.boardImage || '',
+        boardImage: seller.boardImage,
         category: seller.subcategory || seller.category,
         description: seller.desc,
         city: seller.city || extractCity(seller.address),

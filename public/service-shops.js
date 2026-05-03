@@ -4033,16 +4033,34 @@ window.addEventListener('load', () => {
     const safeName = escapeHtml(item.name || 'خدمات');
     const safeInfo = escapeHtml(item.shortInfo || item.categoryName || 'خدمات مشابه');
     const safeOffer = escapeHtml(item.offerText || '');
+    const safeCategory = escapeHtml(item.categoryName || 'خدمات');
+    const safeImage = escapeHtml(item.imageUrl || '/assets/images/shop-placeholder.svg');
+    const rating = Number(item.rating || 0);
+    const reviewCount = Number(item.reviewCount || 0);
+    const hasRating = rating > 0;
 
     return `
       <article class="similar-service-card">
+        <a class="similar-service-card__media" href="${escapeHtml(requestUrl)}" aria-label="مشاهده ${safeName}">
+          <img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"
+               onerror="this.src='/assets/images/shop-placeholder.svg'">
+          <span class="similar-service-card__category">${safeCategory}</span>
+        </a>
         <div class="similar-service-card__top">
           <div class="similar-service-card__badges">
             ${item.isPromoted ? '<span class="similar-service-card__badge similar-service-card__badge--suggested">پیشنهادی</span>' : ''}
             ${safeOffer ? `<span class="similar-service-card__badge similar-service-card__badge--offer">${safeOffer}</span>` : ''}
             ${item.isAvailableNow ? '<span class="similar-service-card__badge similar-service-card__badge--available">آماده پذیرش</span>' : ''}
           </div>
-          <h4 class="similar-service-card__name" title="${safeName}">${safeName}</h4>
+          <div class="similar-service-card__title-row">
+            <h4 class="similar-service-card__name" title="${safeName}">${safeName}</h4>
+            ${hasRating ? `
+              <span class="similar-service-card__rating" aria-label="امتیاز ${rating.toFixed(1)}">
+                <i class="fas fa-star"></i>
+                ${rating.toLocaleString('fa-IR', { maximumFractionDigits: 1 })}
+                ${reviewCount ? `<small>(${toFa(reviewCount)})</small>` : ''}
+              </span>` : ''}
+          </div>
           <p class="similar-service-card__info">${safeInfo}</p>
         </div>
         <div class="similar-service-card__actions">
