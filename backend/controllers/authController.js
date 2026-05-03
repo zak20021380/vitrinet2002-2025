@@ -1169,9 +1169,9 @@ exports.loginUser = async (req, res) => {
     /* ۳) پیدا کردن کاربری که حذف نشده باشد */
     const user = await findUserByPhone(phone);
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
-        message: 'کاربری با این شماره یافت نشد.'
+        message: 'شماره موبایل یا رمز عبور اشتباه است'
       });
     }
 
@@ -1179,7 +1179,7 @@ exports.loginUser = async (req, res) => {
     if (!user.password) {
       return res.status(401).json({
         success: false,
-        message: 'برای این شماره، ورود با کد تایید انجام می‌شود.'
+        message: 'شماره موبایل یا رمز عبور اشتباه است'
       });
     }
 
