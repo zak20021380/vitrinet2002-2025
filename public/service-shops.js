@@ -4036,6 +4036,12 @@ window.addEventListener('load', () => {
     const safeInfo = escapeHtml(item.shortInfo || item.categoryName || 'خدمات مشابه');
     const safeOffer = escapeHtml(item.offerText || '');
     const safeCategory = escapeHtml(item.categoryName || 'خدمات');
+    const subcategoryText = normalizeCategoryText(
+      item.subcategoryName
+      || (Array.isArray(item.subcategories) ? item.subcategories.find(Boolean) : '')
+      || ''
+    );
+    const safeSubcategory = escapeHtml(subcategoryText || 'خدمات عمومی');
     const safeImage = escapeHtml(item.imageUrl || '/assets/images/shop-placeholder.svg');
     const rating = Number(item.rating || 0);
     const reviewCount = Number(item.reviewCount || 0);
@@ -4062,6 +4068,11 @@ window.addEventListener('load', () => {
                 ${rating.toLocaleString('fa-IR', { maximumFractionDigits: 1 })}
                 ${reviewCount ? `<small>(${toFa(reviewCount)})</small>` : ''}
               </span>` : ''}
+          </div>
+          <div class="similar-service-card__subcategory" title="${safeSubcategory}" aria-label="زیرگروه ${safeSubcategory}">
+            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            <span>زیرگروه</span>
+            <strong>${safeSubcategory}</strong>
           </div>
           <p class="similar-service-card__info">${safeInfo}</p>
         </div>

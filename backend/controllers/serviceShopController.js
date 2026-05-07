@@ -2791,6 +2791,27 @@ const buildSimilarShortInfo = (source = {}) => {
   return source.categoryName || source.category || 'خدمات';
 };
 
+const resolveSimilarSubcategories = (source = {}, services = [], categoryName = '') => {
+  const values = [
+    ...(Array.isArray(source.subcategories) ? source.subcategories : []),
+    ...parseLegacyList(source.subcategory),
+    ...(Array.isArray(services) ? services.map((service) => service?.subcategory || service?.category || '') : [])
+  ];
+  const category = normaliseText(categoryName);
+  const seen = new Set();
+
+  return values
+    .map(normaliseText)
+    .filter((value) => value && value !== category)
+    .filter((value) => {
+      const key = value.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
+};
+
 const resolveSimilarImage = (source = {}, activeAd = null) => {
   const galleryImage = Array.isArray(source.gallery)
     ? source.gallery.map(normaliseText).find(Boolean)
@@ -2812,6 +2833,11 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
   const shopUrl = normaliseText(source.shopUrl || source.shopurl || '');
   const phone = normaliseText(source.ownerPhone || source.phone || '');
   const isPromoted = !!(source.isFeatured || source.isPremium || activeAd);
+  const categoryName = normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات');
+  const resolvedSubcategories = resolveSimilarSubcategories(source, services, categoryName);
+  const subcategories = resolvedSubcategories.length
+    ? resolvedSubcategories
+    : (categoryName && categoryName !== 'خدمات' ? [categoryName] : []);
   const isAvailableNow = source.isBookable !== false && (
     source?.bookingSettings?.enabled === true
     || services.some((service) => service?.isBookable !== false)
@@ -2827,7 +2853,9 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
     address: normaliseText(source.address || source.shopAddress || ''),
     city: normaliseText(source.city || ''),
     imageUrl: resolveSimilarImage(source, activeAd),
-    categoryName: normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات'),
+    categoryName,
+    subcategoryName: subcategories[0] || '',
+    subcategories,
     shortInfo: buildSimilarShortInfo(source),
     isPromoted,
     isPremium: !!source.isPremium,
@@ -3006,7 +3034,8 @@ exports.getSimilarPublicShops = async (req, res) => {
         address: seller.address,
         coverImage: appearanceMap.get(sellerId)?.coverImage || seller.boardImage || '',
         boardImage: seller.boardImage,
-        category: seller.subcategory || seller.category,
+        category: seller.category || category || 'خدمات',
+        subcategories: parseLegacyList(seller.subcategory),
         description: seller.desc,
         city: seller.city || extractCity(seller.address),
         isPremium: !!seller.isPremium,
