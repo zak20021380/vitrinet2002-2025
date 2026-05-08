@@ -2534,12 +2534,44 @@ function getShopSlug() {
   let last = path[path.length - 1] || '';
   if (last.endsWith('.html')) last = last.replace('.html', '');
   // اگر shops یا shop.html بود و آخرش اسلاگ نبود، خالی برگردون
-  if (['shops', 'shop', 'shop.html'].includes(last)) return '';
+  if (['shops', 'shop', 'shop.html'].includes(last)) {
+    return getStoredSellerField('shopurl') || getStoredSellerField('shopUrl') || '';
+  }
   return last;
+}
+
+function getStoredSellerField(field) {
+  try {
+    const seller = JSON.parse(localStorage.getItem('seller') || '{}');
+    return typeof seller?.[field] === 'string' ? seller[field].trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+function getShopSellerId() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return (
+    urlParams.get('sellerId') ||
+    urlParams.get('id') ||
+    getStoredSellerField('_id') ||
+    getStoredSellerField('id') ||
+    ''
+  ).trim();
+}
+
+function normalizeSellerId(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'object') {
+    return String(value._id || value.id || value.$oid || '').trim();
+  }
+  return String(value).trim();
 }
 
 // ← این متغیر رو در بالای اسکریپت تعریف می‌کنیم
 let currentSellerId = null;
+const SHOP_API_BASE = (window.__API_BASE__ || window.API_BASE || 'http://localhost:5000').replace(/\/$/, '');
 
 const customerUpdateChannel = typeof BroadcastChannel !== 'undefined'
   ? new BroadcastChannel('seller-customer-updates')
@@ -2567,6 +2599,7 @@ function emitCustomerAdded({ totalCustomers } = {}) {
 }
 
 const slug = getShopSlug();
+const sellerIdParam = getShopSellerId();
 
 // نمایش تعداد مشتریان در همه المان‌های مربوطه
 function setCustomerCount(countValue = 0) {
@@ -2758,7 +2791,7 @@ async function loadShopStories(sellerId) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/api/seller/stories/public/${sellerId}`);
+    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${sellerId}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) {
       throw new Error(data.message || 'امکان بارگذاری استوری‌ها وجود ندارد.');
@@ -2797,7 +2830,7 @@ async function trackStoryView(story) {
   } catch {}
 
   try {
-    const res = await fetch(`${API_BASE}/api/seller/stories/public/${storyId}/view`, { method: 'POST' });
+    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${storyId}/view`, { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.story) {
       Object.assign(story, data.story);
@@ -2906,7 +2939,7 @@ async function reactToCurrentStory() {
   react?.classList.add('is-reacted');
 
   try {
-    const res = await fetch(`${API_BASE}/api/seller/stories/public/${storyId}/reaction`, { method: 'POST' });
+    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${storyId}/reaction`, { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.story) {
       Object.assign(story, data.story);
@@ -2920,17 +2953,20 @@ async function reactToCurrentStory() {
 
 // ======== لود داده و داینامیک‌سازی کل اطلاعات فروشگاه ========
 async function loadShopData() {
-  if (!slug) {
+  if (!slug && !sellerIdParam) {
     renderStoriesEmpty();
     return;
   }
   try {
-    const res = await fetch(`http://localhost:5000/api/shopAppearance/url/${slug}`);
+    const shopEndpoint = slug
+      ? `${SHOP_API_BASE}/api/shopAppearance/url/${encodeURIComponent(slug)}`
+      : `${SHOP_API_BASE}/api/shopAppearance/${encodeURIComponent(sellerIdParam)}`;
+    const res = await fetch(shopEndpoint);
     if (!res.ok) throw new Error('فروشگاه یافت نشد!');
     const data = await res.json();
 
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
-    currentSellerId = data.sellerId;
+    currentSellerId = normalizeSellerId(data.sellerId) || sellerIdParam;
     loadShopStories(currentSellerId);
 
     // لوگو و نام فروشگاه
@@ -2976,7 +3012,7 @@ async function loadShopData() {
     document.getElementById('rating-count').textContent = ratingCount.toLocaleString();
 
     try {
-      const favRes = await fetch(`${API_BASE}/api/favorite-shops/count/${currentSellerId}`);
+      const favRes = await fetch(`${SHOP_API_BASE}/api/favorite-shops/count/${currentSellerId}`);
       if (favRes.ok) {
         const { count: favCount = 0 } = await favRes.json();
         setCustomerCount(favCount);
@@ -2994,7 +3030,9 @@ async function loadShopData() {
     setDynamicSEO(data);
 
     // محصولات را جدا بگیر
-    loadShopProducts(slug);
+    const resolvedSlug = slug || data.customUrl || data.shopurl || '';
+    if (resolvedSlug) loadShopProducts(resolvedSlug);
+    else renderProducts([]);
 
   } catch (e) {
     console.error(e);
@@ -3014,7 +3052,7 @@ async function loadShopData() {
 // ======== گرفتن و رندر محصولات فروشگاه بر اساس shopurl ========
 async function loadShopProducts(shopurl) {
   try {
-    const res = await fetch(`http://localhost:5000/api/products/shop/${shopurl}`);
+    const res = await fetch(`${SHOP_API_BASE}/api/products/shop/${shopurl}`);
     const products = await res.json();
     renderProducts(products);
   } catch (err) {
