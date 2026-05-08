@@ -8141,7 +8141,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
+}
+
+.story-card__media img {
+  position: absolute;
+  inset: 0;
 }
 
 .story-upload-preview::after,
@@ -8223,6 +8229,121 @@
   color: #dc2626;
 }
 
+.story-success-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  direction: rtl;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .38);
+  backdrop-filter: blur(10px);
+}
+
+.story-success-popup.is-visible {
+  display: flex;
+}
+
+.story-success-popup__card {
+  width: min(420px, 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 28px 24px 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(16, 185, 129, .18);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(14, 165, 233, .18), transparent 32%),
+    linear-gradient(145deg, #ffffff, #f0fdfa);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, .24);
+  text-align: center;
+  transform: translateY(14px) scale(.96);
+  opacity: 0;
+  transition: transform .24s ease, opacity .24s ease;
+}
+
+.story-success-popup.is-visible .story-success-popup__card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.story-success-popup__close {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  color: #64748b;
+  background: rgba(255, 255, 255, .78);
+  cursor: pointer;
+  transition: transform .2s ease, color .2s ease, background .2s ease;
+}
+
+.story-success-popup__close:hover,
+.story-success-popup__close:focus-visible {
+  color: #0f766e;
+  background: #fff;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.story-success-popup__icon {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px;
+  border-radius: 26px;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  box-shadow: 0 18px 34px rgba(16, 185, 129, .28);
+  font-size: 36px;
+}
+
+.story-success-popup__title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.story-success-popup__text {
+  margin: 10px auto 20px;
+  max-width: 310px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.9;
+}
+
+.story-success-popup__action {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(14, 165, 233, .22);
+}
+
+.story-success-popup__action:hover,
+.story-success-popup__action:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+}
+
 .story-cooldown {
   display: none;
   align-items: center;
@@ -8242,6 +8363,8 @@
 }
 
 .story-card {
+  width: min(320px, 100%);
+  margin-inline: auto;
   overflow: hidden;
   border-radius: 24px;
   background: #0f172a;
@@ -8251,8 +8374,12 @@
 
 .story-card__media {
   position: relative;
-  min-height: 470px;
-  aspect-ratio: 9 / 16;
+  width: 100%;
+  height: 420px;
+  min-height: 0;
+  aspect-ratio: auto;
+  max-height: none;
+  overflow: hidden;
   background: linear-gradient(135deg, #0f172a, #334155);
 }
 
@@ -8341,7 +8468,9 @@
 .story-loading {
   display: grid;
   place-items: center;
-  min-height: 470px;
+  min-height: 520px;
+  width: min(360px, 100%);
+  margin-inline: auto;
   padding: 28px;
   text-align: center;
   border-radius: 24px;
@@ -8423,7 +8552,18 @@
     width: min(106px, calc(100% - 32px));
   }
 
-  .story-card__media,
+  .story-card,
+  .story-empty,
+  .story-loading {
+    width: min(300px, 100%);
+  }
+
+  .story-card__media {
+    height: 340px;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
   .story-empty,
   .story-loading {
     min-height: 420px;
@@ -8431,6 +8571,20 @@
 
   .story-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .story-success-popup {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .story-success-popup__card {
+    padding: 26px 18px 18px;
+    border-radius: 24px;
+  }
+
+  .story-success-popup__title {
+    font-size: 20px;
   }
 }
 
@@ -9462,6 +9616,25 @@
     </div>
   </section>
 
+  <div class="story-success-popup" id="storySuccessPopup" role="dialog" aria-modal="true" aria-labelledby="storySuccessTitle" aria-describedby="storySuccessText" aria-hidden="true">
+    <div class="story-success-popup__card" role="document" tabindex="-1">
+      <button class="story-success-popup__close" id="storySuccessClose" type="button" aria-label="بستن پیام موفقیت">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+      <div class="story-success-popup__icon" aria-hidden="true">
+        <i class="ri-checkbox-circle-fill"></i>
+      </div>
+      <h3 class="story-success-popup__title" id="storySuccessTitle">استوری با موفقیت منتشر شد</h3>
+      <p class="story-success-popup__text" id="storySuccessText">
+        استوری شما ثبت شد و تا ۲۴ ساعت برای کاربران نمایش داده می‌شود.
+      </p>
+      <button class="story-success-popup__action" id="storySuccessOk" type="button">
+        متوجه شدم
+        <i class="ri-arrow-left-line" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
   <div class="add-discount-modal" id="addDiscountModal" role="dialog" aria-modal="true" aria-labelledby="addDiscountTitle" aria-describedby="addDiscountDesc">
     <div class="add-discount-modal__card" tabindex="-1">
       <button class="add-discount-modal__close" type="button" data-add-discount-close aria-label="بستن پنجره افزودن کالا">
@@ -10104,7 +10277,8 @@
       previewUrl: '',
       cooldownEndsAt: 0,
       story: null,
-      tickTimer: null
+      tickTimer: null,
+      successTimer: null
     };
 
     function cacheElements() {
@@ -10114,7 +10288,8 @@
         'storyPreviewImage', 'storyCaptionInput', 'storyCaptionCount', 'storySubmitBtn',
         'storyFeedback', 'storyLoadingState', 'storyEmptyState', 'storyCard',
         'storyCardImage', 'storyCardCaption', 'storyExpirationText', 'storyViewsCount',
-        'storyLikesCount', 'storyProgressBar'
+        'storyLikesCount', 'storyProgressBar', 'storySuccessPopup', 'storySuccessClose',
+        'storySuccessOk'
       ].forEach((id) => { els[id] = document.getElementById(id); });
     }
 
@@ -10169,6 +10344,23 @@
       if (!els.storyStatusPill) return;
       els.storyStatusPill.innerHTML = `<i class="${mode === 'cooldown' ? 'ri-time-line' : 'ri-checkbox-circle-line'}" aria-hidden="true"></i>${text}`;
       els.storyStatusPill.classList.toggle('cooldown', mode === 'cooldown');
+    }
+
+    function closeStorySuccessPopup() {
+      if (!els.storySuccessPopup) return;
+      window.clearTimeout(state.successTimer);
+      state.successTimer = null;
+      els.storySuccessPopup.classList.remove('is-visible');
+      els.storySuccessPopup.setAttribute('aria-hidden', 'true');
+    }
+
+    function showStorySuccessPopup() {
+      if (!els.storySuccessPopup) return;
+      window.clearTimeout(state.successTimer);
+      els.storySuccessPopup.classList.add('is-visible');
+      els.storySuccessPopup.setAttribute('aria-hidden', 'false');
+      els.storySuccessPopup.querySelector('.story-success-popup__card')?.focus({ preventScroll: true });
+      state.successTimer = window.setTimeout(closeStorySuccessPopup, 5200);
     }
 
     function clearPreview() {
@@ -10360,6 +10552,7 @@
         updateCooldown();
         renderStory();
         showFeedback('استوری منتشر شد.');
+        showStorySuccessPopup();
       } catch (error) {
         showFeedback(error.message || 'امکان انتشار استوری وجود ندارد.', 'error');
       } finally {
@@ -10382,6 +10575,16 @@
         }
       });
       els.storyUploadForm.addEventListener('submit', submitStory);
+      els.storySuccessClose?.addEventListener('click', closeStorySuccessPopup);
+      els.storySuccessOk?.addEventListener('click', closeStorySuccessPopup);
+      els.storySuccessPopup?.addEventListener('click', (event) => {
+        if (event.target === els.storySuccessPopup) closeStorySuccessPopup();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && els.storySuccessPopup?.classList.contains('is-visible')) {
+          closeStorySuccessPopup();
+        }
+      });
 
       document.querySelectorAll('[data-section="stories"]').forEach((node) => {
         node.addEventListener('click', () => loadStories());

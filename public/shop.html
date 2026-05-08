@@ -735,6 +735,718 @@ body {
   .slider-dot { width: 6px; height: 6px; }
 }
 
+.shop-stories {
+  width: min(95%, 1280px);
+  margin: 1.15rem auto 0;
+  direction: rtl;
+}
+
+.stories-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(247,250,254,0.96));
+  border: 1px solid rgba(124, 131, 253, 0.13);
+  box-shadow: 0 16px 42px rgba(28, 44, 90, 0.09);
+  padding: 1rem;
+}
+
+.stories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .85rem;
+}
+
+.stories-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.stories-subtitle {
+  margin: .2rem 0 0;
+  color: #64748b;
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.stories-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  flex: 0 0 auto;
+  padding: .45rem .72rem;
+  border-radius: 999px;
+  background: rgba(82,183,136,0.1);
+  border: 1px solid rgba(82,183,136,0.18);
+  color: #16815a;
+  font-size: .8rem;
+  font-weight: 900;
+}
+
+.stories-live-pill::before {
+  content: "";
+  width: .48rem;
+  height: .48rem;
+  border-radius: 999px;
+  background: #52b788;
+  box-shadow: 0 0 0 5px rgba(82,183,136,0.13);
+}
+
+.stories-content {
+  min-height: 170px;
+}
+
+.stories-loading {
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  gap: .9rem;
+  align-items: stretch;
+}
+
+.stories-skeleton-thumb,
+.stories-skeleton-line {
+  border-radius: 16px;
+  background: linear-gradient(90deg, #eef2ff 0%, #f8fafc 45%, #eef2ff 100%);
+  background-size: 220% 100%;
+  animation: storiesShimmer 1.2s linear infinite;
+}
+
+.stories-skeleton-thumb { min-height: 170px; }
+
+.stories-skeleton-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .7rem;
+}
+
+.stories-skeleton-line { height: 18px; }
+.stories-skeleton-line.short { width: 55%; }
+
+.stories-list {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.story-feature-card,
+.story-thumb,
+.stories-empty {
+  border: 1px solid rgba(124, 131, 253, 0.13);
+  background: #fff;
+}
+
+.story-feature-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 315px;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgba(35, 41, 70, 0.1);
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.story-feature-media {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #eef2ff, #ecfdf5);
+}
+
+.story-feature-media img,
+.story-thumb-media img,
+.story-viewer-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.story-feature-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15,23,42,.78), rgba(15,23,42,.18) 55%, rgba(15,23,42,.05));
+}
+
+.story-media-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  color: #64748b;
+  font-weight: 900;
+  background: linear-gradient(135deg, #eef2ff, #ecfdf5);
+}
+
+.media-failed .story-media-fallback { display: grid; }
+.media-failed img { display: none; }
+
+.story-feature-body {
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  padding: 1rem;
+  color: #fff;
+}
+
+.story-caption {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  line-height: 1.65;
+  font-weight: 800;
+  text-shadow: 0 2px 14px rgba(0,0,0,.24);
+}
+
+.story-meta-row,
+.story-stats {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  flex-wrap: wrap;
+}
+
+.story-expiry-chip,
+.story-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .38rem;
+  border-radius: 999px;
+  padding: .38rem .62rem;
+  font-size: .78rem;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.story-expiry-chip {
+  background: rgba(255,255,255,.17);
+  border: 1px solid rgba(255,255,255,.24);
+  color: #fff;
+}
+
+.story-stat-chip {
+  background: rgba(255,255,255,.92);
+  color: var(--text);
+  border: 1px solid rgba(124, 131, 253, .12);
+}
+
+.story-age-progress {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  left: .75rem;
+  height: 4px;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.35);
+}
+
+.story-age-progress span {
+  display: block;
+  width: var(--story-age-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fff, #a7f3d0);
+}
+
+.story-thumb-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: .75rem;
+  align-content: start;
+}
+
+.story-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-width: 0;
+  padding: .45rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.story-thumb:hover,
+.story-thumb:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(124, 131, 253, .38);
+  box-shadow: 0 12px 26px rgba(35, 41, 70, .1);
+  outline: none;
+}
+
+.story-thumb-media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #eef2ff;
+}
+
+.story-thumb-title {
+  margin: 0;
+  color: #475569;
+  font-size: .78rem;
+  font-weight: 800;
+  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stories-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 178px;
+  border-radius: 18px;
+  padding: 1.25rem;
+  text-align: right;
+  background: linear-gradient(135deg, #fff, #f8fafc);
+}
+
+.stories-empty-icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--primary);
+  background: rgba(124,131,253,.09);
+}
+
+.stories-empty h3 {
+  margin: 0 0 .25rem;
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 900;
+}
+
+.stories-empty p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.story-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 13, 30, .76);
+  backdrop-filter: blur(14px);
+}
+
+.story-viewer.is-open {
+  display: flex;
+  animation: storyBackdropIn .18s ease both;
+}
+
+.story-viewer-card {
+  position: relative;
+  width: min(420px, 100%);
+  height: min(760px, calc(100vh - 2rem));
+  overflow: hidden;
+  border-radius: 22px;
+  background: #0f172a;
+  box-shadow: 0 24px 80px rgba(0,0,0,.42);
+  animation: storyCardIn .24s cubic-bezier(.2,.8,.2,1) both;
+  touch-action: pan-y;
+}
+
+.story-viewer-media,
+.story-viewer-media img {
+  position: absolute;
+  inset: 0;
+}
+
+.story-viewer-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.78), transparent 46%, rgba(0,0,0,.42));
+}
+
+.story-viewer-top {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  left: .75rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.story-viewer-progress {
+  display: flex;
+  gap: .28rem;
+  direction: ltr;
+}
+
+.story-viewer-progress span {
+  flex: 1 1 0;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.34);
+}
+
+.story-viewer-progress span::after {
+  content: "";
+  display: block;
+  width: var(--viewer-progress, 0%);
+  height: 100%;
+  background: #fff;
+  border-radius: inherit;
+}
+
+.story-viewer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+}
+
+.story-viewer-close,
+.story-viewer-react,
+.story-viewer-nav {
+  border: none;
+  color: #fff;
+  background: rgba(255,255,255,.16);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.story-viewer-close,
+.story-viewer-react {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+}
+
+.story-viewer-react.is-reacted {
+  background: rgba(255, 103, 130, .86);
+}
+
+.story-viewer-bottom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 5rem 1rem 1rem;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0,0,0,.82), transparent);
+}
+
+.story-viewer-caption {
+  margin: 0;
+  max-height: 7.2em;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+  font-weight: 800;
+}
+
+.story-viewer-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
+.story-viewer-nav.prev { right: .8rem; }
+.story-viewer-nav.next { left: .8rem; }
+
+@keyframes storiesShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes storyBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes storyCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 760px) {
+  .stories-shell { padding: .85rem; border-radius: 16px; }
+  .stories-header { align-items: flex-start; }
+  .stories-list { grid-template-columns: 1fr; }
+  .story-feature-card { min-height: 420px; }
+  .story-thumb-rail {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: .15rem;
+    scroll-snap-type: x mandatory;
+  }
+  .story-thumb {
+    flex: 0 0 92px;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .shop-stories { width: min(95%, 100%); margin-top: .9rem; }
+  .stories-title { font-size: 1.05rem; }
+  .stories-subtitle { font-size: .78rem; }
+  .stories-live-pill { padding: .38rem .56rem; font-size: .72rem; }
+  .story-feature-card { min-height: 390px; border-radius: 16px; }
+  .stories-empty { min-height: 150px; align-items: flex-start; }
+  .story-viewer { padding: 0; }
+  .story-viewer-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+  .story-viewer-nav { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-viewer.is-open,
+  .story-viewer-card,
+  .stories-skeleton-thumb,
+  .stories-skeleton-line {
+    animation: none;
+  }
+}
+
+/* Compact shop-profile stories rail */
+.shop-stories {
+  margin: .75rem auto .65rem;
+}
+
+.stories-shell {
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0 .35rem;
+  overflow: visible;
+}
+
+.stories-header {
+  margin-bottom: .55rem;
+  padding: 0 .15rem;
+}
+
+.stories-title {
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.stories-subtitle {
+  font-size: .78rem;
+  margin-top: .1rem;
+}
+
+.stories-live-pill {
+  padding: .34rem .58rem;
+  font-size: .72rem;
+  background: rgba(124,131,253,.08);
+  border-color: rgba(124,131,253,.14);
+  color: var(--primary);
+}
+
+.stories-live-pill::before {
+  width: .42rem;
+  height: .42rem;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(124,131,253,.1);
+}
+
+.stories-content {
+  min-height: 0;
+}
+
+.stories-loading {
+  display: flex;
+  gap: .7rem;
+  overflow: hidden;
+  padding: .15rem .1rem .2rem;
+}
+
+.stories-loading::before,
+.stories-loading::after,
+.stories-skeleton-thumb {
+  content: "";
+  flex: 0 0 68px;
+  width: 68px;
+  min-height: 68px;
+  height: 68px;
+  border-radius: 999px;
+  border: 2px solid rgba(124,131,253,.13);
+  box-shadow: none;
+}
+
+.stories-skeleton-copy,
+.stories-skeleton-line {
+  display: none;
+}
+
+.stories-list,
+.story-thumb-rail {
+  display: flex;
+  gap: .8rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: .15rem .1rem .25rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.stories-list::-webkit-scrollbar,
+.story-thumb-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.story-thumb {
+  flex: 0 0 78px;
+  width: 78px;
+  min-width: 78px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  align-items: center;
+  text-align: center;
+  scroll-snap-align: start;
+}
+
+.story-thumb:hover,
+.story-thumb:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+.story-thumb-media {
+  width: 68px;
+  height: 68px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  padding: 3px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary), #52b788 55%, var(--secondary));
+  box-shadow: 0 8px 22px rgba(35,41,70,.11);
+}
+
+.story-thumb-media img,
+.story-thumb-media .story-media-fallback {
+  border-radius: 999px;
+}
+
+.story-thumb-title {
+  width: 100%;
+  color: #475569;
+  font-size: .72rem;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.story-thumb-stats {
+  display: flex;
+  justify-content: center;
+  gap: .28rem;
+  color: #94a3b8;
+  font-size: .66rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.story-thumb-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: .14rem;
+  white-space: nowrap;
+}
+
+.stories-empty {
+  justify-content: flex-start;
+  min-height: 0;
+  gap: .55rem;
+  padding: .55rem .7rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,.64);
+  border: 1px dashed rgba(124,131,253,.18);
+  box-shadow: none;
+}
+
+.stories-empty-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  font-size: .78rem;
+}
+
+.stories-empty h3 {
+  margin: 0;
+  font-size: .83rem;
+}
+
+.stories-empty p {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .shop-stories { margin-top: .55rem; }
+  .stories-shell { padding: 0; }
+  .stories-header { padding: 0 .25rem; }
+  .stories-list,
+  .story-thumb-rail,
+  .stories-loading {
+    padding-inline: .25rem;
+  }
+  .story-thumb { flex-basis: 72px; width: 72px; min-width: 72px; }
+  .story-thumb-media { width: 64px; height: 64px; }
+}
+
+@media (max-width: 520px) {
+  .shop-stories { width: min(95%, 100%); }
+  .stories-title { font-size: .94rem; }
+  .stories-subtitle { font-size: .72rem; }
+  .stories-live-pill { font-size: .68rem; }
+}
+
 
 
 
@@ -1562,6 +2274,28 @@ body {
 
 
 
+<section class="shop-stories" id="shopStoriesSection" aria-labelledby="shopStoriesTitle">
+  <div class="stories-shell">
+    <div class="stories-header">
+      <div>
+        <h2 class="stories-title" id="shopStoriesTitle">استوری فروشگاه</h2>
+        <p class="stories-subtitle" id="shopStoriesSubtitle">تازه‌ترین حال‌وهوای این فروشگاه</p>
+      </div>
+      <span class="stories-live-pill" id="shopStoriesState">در حال بارگذاری</span>
+    </div>
+    <div class="stories-content" id="shopStoriesContent" aria-live="polite">
+      <div class="stories-loading">
+        <div class="stories-skeleton-thumb"></div>
+        <div class="stories-skeleton-copy">
+          <div class="stories-skeleton-line"></div>
+          <div class="stories-skeleton-line short"></div>
+          <div class="stories-skeleton-line"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
   <!-- Hero Slider -->
 <section class="max-w-[95%] mx-auto hero-slider mt-4 relative" aria-label="اسلایدر تبلیغاتی" id="heroSliderSection">
   <!-- اسلایدها اینجا به صورت داینامیک اضافه می‌شوند -->
@@ -1573,6 +2307,40 @@ body {
     <svg class="w-4 h-4" fill="none" stroke="var(--text)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
   </button>
 </section>
+
+<div class="story-viewer" id="storyViewer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="storyViewerCaption">
+  <div class="story-viewer-card" id="storyViewerCard" role="document">
+    <div class="story-viewer-media" id="storyViewerMedia">
+      <img id="storyViewerImage" alt="تصویر استوری">
+      <div class="story-media-fallback">تصویر در دسترس نیست</div>
+    </div>
+    <div class="story-viewer-top">
+      <div class="story-viewer-progress" id="storyViewerProgress"></div>
+      <div class="story-viewer-actions">
+        <button class="story-viewer-react" id="storyViewerReact" type="button" aria-label="واکنش به استوری">
+          <i class="fas fa-heart" aria-hidden="true"></i>
+        </button>
+        <button class="story-viewer-close" id="storyViewerClose" type="button" aria-label="بستن استوری">
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <button class="story-viewer-nav prev" id="storyViewerPrev" type="button" aria-label="استوری قبلی">
+      <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    </button>
+    <button class="story-viewer-nav next" id="storyViewerNext" type="button" aria-label="استوری بعدی">
+      <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    </button>
+    <div class="story-viewer-bottom">
+      <p class="story-viewer-caption" id="storyViewerCaption"></p>
+      <div class="story-meta-row">
+        <span class="story-expiry-chip" id="storyViewerExpiry">فعال</span>
+        <span class="story-stat-chip"><i class="fas fa-eye" aria-hidden="true"></i><span id="storyViewerViews">۰</span></span>
+        <span class="story-stat-chip"><i class="fas fa-heart" aria-hidden="true"></i><span id="storyViewerLikes">۰</span></span>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- محصولات -->
 <section id="products" class="max-w-[95%] mx-auto mt-6 px-4">
@@ -1808,9 +2576,354 @@ function setCustomerCount(countValue = 0) {
   });
 }
 
+const STORY_VIEW_DURATION_MS = 6500;
+const shopStoriesState = {
+  stories: [],
+  activeIndex: 0,
+  viewerTimer: null,
+  viewerStartedAt: 0,
+  viewerTouchX: null,
+  countdownTimer: null
+};
+
+function getStoryId(story) {
+  return story && String(story.id || story._id || '');
+}
+
+function normalizeStoryImageUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  if (/^https?:\/\//i.test(url) || url.startsWith('data:')) return url;
+  return url.startsWith('/') ? url : `/${url}`;
+}
+
+function formatStoryCount(value) {
+  const safeValue = Number(value || 0);
+  return Number.isFinite(safeValue) ? safeValue.toLocaleString('fa-IR') : '۰';
+}
+
+function getStoryRemainingMs(story) {
+  const expiresAt = story?.expiresAt ? new Date(story.expiresAt).getTime() : 0;
+  if (!expiresAt) return 0;
+  return Math.max(0, expiresAt - Date.now());
+}
+
+function getStoryExpiryText(story) {
+  if (!story || story.status === 'expired' || getStoryRemainingMs(story) <= 0) {
+    return 'منقضی شده';
+  }
+
+  const remaining = getStoryRemainingMs(story);
+  const hours = Math.floor(remaining / 3600000);
+  const minutes = Math.max(0, Math.floor((remaining % 3600000) / 60000));
+  if (hours > 0) return `${formatStoryCount(hours)} ساعت و ${formatStoryCount(minutes)} دقیقه مانده`;
+  return `${formatStoryCount(Math.max(1, minutes))} دقیقه مانده`;
+}
+
+function getStoryAgeProgress(story) {
+  if (typeof story?.progress === 'number') {
+    return Math.min(100, Math.max(0, story.progress));
+  }
+
+  const createdAt = story?.createdAt ? new Date(story.createdAt).getTime() : 0;
+  const expiresAt = story?.expiresAt ? new Date(story.expiresAt).getTime() : 0;
+  if (!createdAt || !expiresAt || expiresAt <= createdAt) return 0;
+  return Math.min(100, Math.max(0, ((Date.now() - createdAt) / (expiresAt - createdAt)) * 100));
+}
+
+function setShopStoriesStateLabel(text, mode = 'active') {
+  const stateEl = document.getElementById('shopStoriesState');
+  if (!stateEl) return;
+  stateEl.textContent = text;
+  stateEl.style.background = mode === 'empty' ? 'rgba(100,116,139,0.08)' : '';
+  stateEl.style.borderColor = mode === 'empty' ? 'rgba(100,116,139,0.14)' : '';
+  stateEl.style.color = mode === 'empty' ? '#64748b' : '';
+}
+
+function markStoryMediaFallback(container) {
+  if (!container) return;
+  container.classList.add('media-failed');
+}
+
+function createStoryImage(src, alt, fallbackContainer) {
+  const img = document.createElement('img');
+  img.alt = alt || 'تصویر استوری';
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.addEventListener('error', () => markStoryMediaFallback(fallbackContainer));
+  if (src) {
+    img.src = src;
+  } else {
+    requestAnimationFrame(() => markStoryMediaFallback(fallbackContainer));
+  }
+  return img;
+}
+
+function renderStoriesEmpty(message = 'هنوز استوری فعالی نیست', detail = '') {
+  const content = document.getElementById('shopStoriesContent');
+  if (!content) return;
+  setShopStoriesStateLabel('بدون استوری', 'empty');
+  content.innerHTML = '';
+
+  const empty = document.createElement('div');
+  empty.className = 'stories-empty';
+  empty.innerHTML = `
+    <div class="stories-empty-icon" aria-hidden="true"><i class="fas fa-circle-play"></i></div>
+    <div>
+      <h3></h3>
+      <p></p>
+    </div>
+  `;
+  empty.querySelector('h3').textContent = message;
+  empty.querySelector('p').textContent = detail;
+  content.appendChild(empty);
+}
+
+function refreshStoryTimeLabels() {
+  document.querySelectorAll('[data-story-expiry-index]').forEach((node) => {
+    const story = shopStoriesState.stories[Number(node.dataset.storyExpiryIndex)];
+    node.textContent = getStoryExpiryText(story);
+  });
+
+  document.querySelectorAll('[data-story-progress-index]').forEach((node) => {
+    const story = shopStoriesState.stories[Number(node.dataset.storyProgressIndex)];
+    node.style.setProperty('--story-age-progress', `${getStoryAgeProgress(story)}%`);
+  });
+
+  const viewerExpiry = document.getElementById('storyViewerExpiry');
+  if (viewerExpiry && document.getElementById('storyViewer')?.classList.contains('is-open')) {
+    viewerExpiry.textContent = getStoryExpiryText(shopStoriesState.stories[shopStoriesState.activeIndex]);
+  }
+}
+
+function renderShopStories(stories = []) {
+  const content = document.getElementById('shopStoriesContent');
+  if (!content) return;
+
+  const activeStories = stories.filter((story) => story && story.status !== 'expired' && getStoryRemainingMs(story) > 0);
+  shopStoriesState.stories = activeStories;
+
+  if (!activeStories.length) {
+    renderStoriesEmpty();
+    return;
+  }
+
+  setShopStoriesStateLabel(`${formatStoryCount(activeStories.length)} استوری فعال`);
+  content.innerHTML = '';
+
+  const list = document.createElement('div');
+  list.className = 'stories-list';
+
+  activeStories.forEach((story, index) => {
+    const thumb = document.createElement('button');
+    thumb.type = 'button';
+    thumb.className = 'story-thumb';
+    thumb.setAttribute('aria-label', `مشاهده استوری ${formatStoryCount(index + 1)}`);
+    thumb.title = getStoryExpiryText(story);
+
+    const media = document.createElement('div');
+    media.className = 'story-thumb-media';
+    media.appendChild(createStoryImage(normalizeStoryImageUrl(story.imageUrl), story.caption || 'تصویر استوری', media));
+    const fallback = document.createElement('div');
+    fallback.className = 'story-media-fallback';
+    fallback.textContent = 'بدون تصویر';
+    media.appendChild(fallback);
+
+    const title = document.createElement('p');
+    title.className = 'story-thumb-title';
+    title.textContent = story.caption || getStoryExpiryText(story);
+
+    const stats = document.createElement('div');
+    stats.className = 'story-thumb-stats';
+    stats.innerHTML = `
+      <span><i class="fas fa-eye" aria-hidden="true"></i>${formatStoryCount(story.viewsCount)}</span>
+      <span><i class="fas fa-heart" aria-hidden="true"></i>${formatStoryCount(story.likesCount)}</span>
+    `;
+
+    thumb.append(media, title, stats);
+    thumb.addEventListener('click', () => openStoryViewer(index));
+    list.appendChild(thumb);
+  });
+
+  content.appendChild(list);
+
+  clearInterval(shopStoriesState.countdownTimer);
+  shopStoriesState.countdownTimer = window.setInterval(refreshStoryTimeLabels, 30000);
+}
+
+async function loadShopStories(sellerId) {
+  const content = document.getElementById('shopStoriesContent');
+  if (!sellerId || !content) {
+    renderStoriesEmpty();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/seller/stories/public/${sellerId}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'امکان بارگذاری استوری‌ها وجود ندارد.');
+    }
+    renderShopStories(Array.isArray(data.stories) ? data.stories : []);
+  } catch (error) {
+    console.warn('بارگذاری استوری ناموفق بود:', error);
+    renderStoriesEmpty('استوری‌ها در دسترس نیستند');
+  }
+}
+
+function updateViewerProgress() {
+  const progressEl = document.getElementById('storyViewerProgress');
+  if (!progressEl) return;
+
+  const elapsed = Date.now() - shopStoriesState.viewerStartedAt;
+  const currentProgress = Math.min(100, Math.max(0, (elapsed / STORY_VIEW_DURATION_MS) * 100));
+  Array.from(progressEl.children).forEach((bar, index) => {
+    const value = index < shopStoriesState.activeIndex ? 100 : index > shopStoriesState.activeIndex ? 0 : currentProgress;
+    bar.style.setProperty('--viewer-progress', `${value}%`);
+  });
+
+  if (elapsed >= STORY_VIEW_DURATION_MS) {
+    showNextStory();
+  }
+}
+
+async function trackStoryView(story) {
+  const storyId = getStoryId(story);
+  if (!storyId) return;
+
+  const storageKey = `shop-story-viewed:${storyId}`;
+  try {
+    if (localStorage.getItem(storageKey)) return;
+    localStorage.setItem(storageKey, '1');
+  } catch {}
+
+  try {
+    const res = await fetch(`${API_BASE}/api/seller/stories/public/${storyId}/view`, { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.story) {
+      Object.assign(story, data.story);
+      updateViewerMetrics(story);
+      renderShopStories(shopStoriesState.stories);
+    }
+  } catch (error) {
+    console.warn('ثبت بازدید استوری ناموفق بود:', error);
+  }
+}
+
+function updateViewerMetrics(story) {
+  const views = document.getElementById('storyViewerViews');
+  const likes = document.getElementById('storyViewerLikes');
+  const expiry = document.getElementById('storyViewerExpiry');
+  if (views) views.textContent = formatStoryCount(story?.viewsCount);
+  if (likes) likes.textContent = formatStoryCount(story?.likesCount);
+  if (expiry) expiry.textContent = getStoryExpiryText(story);
+}
+
+function renderViewerStory(index) {
+  const stories = shopStoriesState.stories;
+  const story = stories[index];
+  if (!story) return closeStoryViewer();
+
+  shopStoriesState.activeIndex = index;
+  shopStoriesState.viewerStartedAt = Date.now();
+
+  const image = document.getElementById('storyViewerImage');
+  const media = document.getElementById('storyViewerMedia');
+  const caption = document.getElementById('storyViewerCaption');
+  const progress = document.getElementById('storyViewerProgress');
+  const react = document.getElementById('storyViewerReact');
+  const storyId = getStoryId(story);
+
+  media?.classList.remove('media-failed');
+  if (image) {
+    image.removeAttribute('src');
+    image.onerror = () => markStoryMediaFallback(media);
+    const src = normalizeStoryImageUrl(story.imageUrl);
+    if (src) image.src = src;
+    else markStoryMediaFallback(media);
+  }
+  if (caption) caption.textContent = story.caption || 'استوری جدید این فروشگاه';
+  if (progress) {
+    progress.innerHTML = '';
+    stories.forEach(() => progress.appendChild(document.createElement('span')));
+  }
+  if (react) {
+    let reacted = false;
+    try { reacted = Boolean(localStorage.getItem(`shop-story-reacted:${storyId}`)); } catch {}
+    react.classList.toggle('is-reacted', reacted);
+  }
+
+  updateViewerMetrics(story);
+  clearInterval(shopStoriesState.viewerTimer);
+  shopStoriesState.viewerTimer = window.setInterval(updateViewerProgress, 90);
+  updateViewerProgress();
+  trackStoryView(story);
+}
+
+function openStoryViewer(index = 0) {
+  if (!shopStoriesState.stories.length) return;
+  const viewer = document.getElementById('storyViewer');
+  if (!viewer) return;
+
+  viewer.classList.add('is-open');
+  viewer.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  renderViewerStory(index);
+}
+
+function closeStoryViewer() {
+  const viewer = document.getElementById('storyViewer');
+  if (!viewer) return;
+  viewer.classList.remove('is-open');
+  viewer.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  clearInterval(shopStoriesState.viewerTimer);
+}
+
+function showNextStory() {
+  if (shopStoriesState.activeIndex < shopStoriesState.stories.length - 1) {
+    renderViewerStory(shopStoriesState.activeIndex + 1);
+  } else {
+    closeStoryViewer();
+  }
+}
+
+function showPrevStory() {
+  renderViewerStory(Math.max(0, shopStoriesState.activeIndex - 1));
+}
+
+async function reactToCurrentStory() {
+  const story = shopStoriesState.stories[shopStoriesState.activeIndex];
+  const storyId = getStoryId(story);
+  if (!storyId) return;
+
+  const storageKey = `shop-story-reacted:${storyId}`;
+  try {
+    if (localStorage.getItem(storageKey)) return;
+    localStorage.setItem(storageKey, '1');
+  } catch {}
+
+  const react = document.getElementById('storyViewerReact');
+  react?.classList.add('is-reacted');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/seller/stories/public/${storyId}/reaction`, { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.story) {
+      Object.assign(story, data.story);
+      updateViewerMetrics(story);
+      renderShopStories(shopStoriesState.stories);
+    }
+  } catch (error) {
+    console.warn('ثبت واکنش استوری ناموفق بود:', error);
+  }
+}
+
 // ======== لود داده و داینامیک‌سازی کل اطلاعات فروشگاه ========
 async function loadShopData() {
-  if (!slug) return;
+  if (!slug) {
+    renderStoriesEmpty();
+    return;
+  }
   try {
     const res = await fetch(`http://localhost:5000/api/shopAppearance/url/${slug}`);
     if (!res.ok) throw new Error('فروشگاه یافت نشد!');
@@ -1818,6 +2931,7 @@ async function loadShopData() {
 
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
     currentSellerId = data.sellerId;
+    loadShopStories(currentSellerId);
 
     // لوگو و نام فروشگاه
     document.querySelectorAll('.logo-txt').forEach(el =>
@@ -1884,6 +2998,7 @@ async function loadShopData() {
 
   } catch (e) {
     console.error(e);
+    renderStoriesEmpty();
     document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
     document.getElementById('currentShopName').textContent = 'نام فروشگاه';
     setDynamicSEO({
@@ -2072,6 +3187,36 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (scrollTopBtn)
     scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  document.getElementById('storyViewerClose')?.addEventListener('click', closeStoryViewer);
+  document.getElementById('storyViewerNext')?.addEventListener('click', showNextStory);
+  document.getElementById('storyViewerPrev')?.addEventListener('click', showPrevStory);
+  document.getElementById('storyViewerReact')?.addEventListener('click', reactToCurrentStory);
+
+  const storyViewer = document.getElementById('storyViewer');
+  const storyViewerCard = document.getElementById('storyViewerCard');
+  storyViewer?.addEventListener('click', (event) => {
+    if (event.target === storyViewer) closeStoryViewer();
+  });
+  storyViewerCard?.addEventListener('touchstart', (event) => {
+    shopStoriesState.viewerTouchX = event.changedTouches?.[0]?.clientX ?? null;
+  }, { passive: true });
+  storyViewerCard?.addEventListener('touchend', (event) => {
+    if (shopStoriesState.viewerTouchX === null) return;
+    const endX = event.changedTouches?.[0]?.clientX ?? shopStoriesState.viewerTouchX;
+    const deltaX = endX - shopStoriesState.viewerTouchX;
+    shopStoriesState.viewerTouchX = null;
+    if (Math.abs(deltaX) < 45) return;
+    if (deltaX > 0) showPrevStory();
+    else showNextStory();
+  }, { passive: true });
+
+  document.addEventListener('keydown', (event) => {
+    if (!storyViewer?.classList.contains('is-open')) return;
+    if (event.key === 'Escape') closeStoryViewer();
+    if (event.key === 'ArrowLeft') showNextStory();
+    if (event.key === 'ArrowRight') showPrevStory();
+  });
 });
 
 

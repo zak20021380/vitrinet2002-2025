@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const SellerStory = require('../models/SellerStory');
@@ -94,6 +95,26 @@ async function buildStoryState(sellerId) {
   };
 }
 
+async function buildPublicStoryState(sellerId) {
+  const now = new Date();
+  await expireOldStories(sellerId, now);
+
+  const [activeStories, latestStory] = await Promise.all([
+    SellerStory.find({ seller: sellerId, status: 'active', expiresAt: { $gt: now } })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .lean(),
+    SellerStory.findOne({ seller: sellerId }).sort({ createdAt: -1 }).lean()
+  ]);
+
+  return {
+    success: true,
+    stories: activeStories.map((story) => serializeStory(story, now)),
+    story: serializeStory(activeStories[0] || null, now),
+    latestStory: serializeStory(latestStory, now)
+  };
+}
+
 function removeUploadedFile(file) {
   if (!file?.path) return;
   fs.unlink(file.path, (error) => {
@@ -102,6 +123,70 @@ function removeUploadedFile(file) {
     }
   });
 }
+
+router.get('/public/:sellerId', async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ success: false, message: 'Invalid seller id.' });
+    }
+
+    return res.json(await buildPublicStoryState(sellerId));
+  } catch (error) {
+    console.error('Failed to load public seller stories:', error);
+    return res.status(500).json({ success: false, message: 'Could not load story data.' });
+  }
+});
+
+router.post('/public/:storyId/view', async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const now = new Date();
+    const story = await SellerStory.findOneAndUpdate(
+      { _id: storyId, status: 'active', expiresAt: { $gt: now } },
+      { $inc: { viewsCount: 1 } },
+      { new: true }
+    ).lean();
+
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story is not active.' });
+    }
+
+    return res.json({ success: true, story: serializeStory(story, now) });
+  } catch (error) {
+    console.error('Failed to track story view:', error);
+    return res.status(500).json({ success: false, message: 'Could not track story view.' });
+  }
+});
+
+router.post('/public/:storyId/reaction', async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const now = new Date();
+    const story = await SellerStory.findOneAndUpdate(
+      { _id: storyId, status: 'active', expiresAt: { $gt: now } },
+      { $inc: { likesCount: 1 } },
+      { new: true }
+    ).lean();
+
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story is not active.' });
+    }
+
+    return res.json({ success: true, story: serializeStory(story, now) });
+  } catch (error) {
+    console.error('Failed to react to story:', error);
+    return res.status(500).json({ success: false, message: 'Could not react to story.' });
+  }
+});
 
 router.get('/me', authMiddleware('seller'), async (req, res) => {
   try {
