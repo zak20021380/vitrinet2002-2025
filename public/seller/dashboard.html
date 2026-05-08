@@ -8082,11 +8082,12 @@
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 270px;
+  height: 270px;
   border: 1.5px dashed rgba(14, 165, 233, .34);
   border-radius: 22px;
   background: linear-gradient(145deg, #f8fafc, #f0fdfa);
   cursor: pointer;
+  overflow: hidden;
   transition: transform .2s ease, border-color .2s ease, background .2s ease;
 }
 
@@ -8125,7 +8126,8 @@
 }
 
 .story-upload-preview {
-  width: min(210px, 76%);
+  width: min(134px, calc(100% - 32px));
+  height: calc(100% - 32px);
   aspect-ratio: 9 / 16;
   position: relative;
   overflow: hidden;
@@ -8414,7 +8416,11 @@
   }
 
   .story-upload-drop {
-    min-height: 220px;
+    height: 220px;
+  }
+
+  .story-upload-preview {
+    width: min(106px, calc(100% - 32px));
   }
 
   .story-card__media,
@@ -8561,7 +8567,7 @@
           <div class="sidebar-menu-item__icon sidebar-menu-item__icon--purple">
             <i class="ri-slideshow-4-fill"></i>
           </div>
-          <span class="sidebar-menu-item__text">Stories</span>
+          <span class="sidebar-menu-item__text">استوری‌ها</span>
         </button>
       </div>
 
@@ -8695,9 +8701,9 @@
       <span>مدیریت نظرات</span>
       <span class="sidebar-menu-badge" id="desktopReviewsBadge" style="display: none;">0</span>
     </button>
-    <button class="sidebar-link" id="menu-stories" data-section="stories" aria-label="Stories">
+    <button class="sidebar-link" id="menu-stories" data-section="stories" aria-label="استوری‌ها">
       <i class="ri-slideshow-4-line" aria-hidden="true"></i>
-      <span>Stories</span>
+      <span>استوری‌ها</span>
     </button>
     <button class="sidebar-link" id="menu-content" data-section="content" aria-label="مدیریت ظاهر فروشگاه">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
@@ -9349,16 +9355,16 @@
         <div>
           <span class="stories-hero__eyebrow">
             <i class="ri-slideshow-4-line" aria-hidden="true"></i>
-            Stories
+            استوری فروشگاه
           </span>
-          <h2 class="stories-hero__title">Stories</h2>
+          <h2 class="stories-hero__title">استوری‌ها</h2>
           <p class="stories-hero__copy">
-            Post one lightweight story every 24 hours with an image and short caption. Active stories expire automatically after 24 hours.
+            هر ۲۴ ساعت یک استوری با تصویر و کپشن کوتاه منتشر کنید. استوری‌های فعال پس از ۲۴ ساعت به‌صورت خودکار منقضی می‌شوند.
           </p>
         </div>
         <span class="stories-status-pill" id="storyStatusPill">
           <i class="ri-loader-4-line" aria-hidden="true"></i>
-          Loading
+          در حال بارگذاری
         </span>
       </header>
 
@@ -9368,13 +9374,13 @@
             <div class="story-panel__heading">
               <h3 class="story-panel__title" id="storyUploadTitle">
                 <span class="story-panel__icon"><i class="ri-add-circle-line" aria-hidden="true"></i></span>
-                New story
+                استوری جدید
               </h3>
             </div>
 
             <div class="story-cooldown" id="storyCooldownPanel" role="status" aria-live="polite">
               <i class="ri-time-line" aria-hidden="true"></i>
-              <span>Next story in <strong id="storyCooldownTimer">--:--:--</strong></span>
+              <span>استوری بعدی تا <strong id="storyCooldownTimer">--:--:--</strong></span>
             </div>
 
             <form id="storyUploadForm" autocomplete="off" novalidate>
@@ -9382,23 +9388,23 @@
                 <input id="storyImageInput" name="image" type="file" accept="image/*" hidden>
                 <div class="story-upload-empty" id="storyUploadEmpty">
                   <i class="ri-image-add-line" aria-hidden="true"></i>
-                  <strong>Choose story image</strong>
-                  <span>Vertical images look best. Max 5MB.</span>
+                  <strong>تصویر استوری را انتخاب کنید</strong>
+                  <span>تصویر عمودی بهتر نمایش داده می‌شود. حداکثر ۵ مگابایت.</span>
                 </div>
                 <div class="story-upload-preview" id="storyUploadPreview" style="display:none;">
-                  <img id="storyPreviewImage" alt="Story preview">
+                  <img id="storyPreviewImage" alt="پیش‌نمایش استوری">
                 </div>
               </label>
 
-              <textarea id="storyCaptionInput" class="story-caption-input" maxlength="140" placeholder="Short caption..." aria-label="Story caption"></textarea>
+              <textarea id="storyCaptionInput" class="story-caption-input" maxlength="140" placeholder="کپشن کوتاه..." aria-label="کپشن استوری"></textarea>
               <div class="story-form-meta">
-                <span>One story per 24 hours</span>
-                <span><strong id="storyCaptionCount">0</strong>/140</span>
+                <span>هر ۲۴ ساعت یک استوری</span>
+                <span><strong id="storyCaptionCount">۰</strong>/۱۴۰</span>
               </div>
 
               <button type="submit" class="story-submit-btn" id="storySubmitBtn" disabled>
                 <i class="ri-send-plane-line" aria-hidden="true"></i>
-                Publish story
+                انتشار استوری
               </button>
               <div class="story-feedback" id="storyFeedback" role="status" aria-live="polite"></div>
             </form>
@@ -9409,28 +9415,28 @@
           <div class="story-panel__heading">
             <h3 class="story-panel__title" id="currentStoryTitle">
               <span class="story-panel__icon"><i class="ri-eye-line" aria-hidden="true"></i></span>
-              Current story
+              استوری فعلی
             </h3>
           </div>
 
           <div class="story-loading" id="storyLoadingState" aria-live="polite">
             <div>
               <div class="story-skeleton"></div>
-              <p class="mt-4 text-sm font-bold text-slate-500">Loading story status...</p>
+              <p class="mt-4 text-sm font-bold text-slate-500">در حال دریافت وضعیت استوری...</p>
             </div>
           </div>
 
           <div class="story-empty" id="storyEmptyState" style="display:none;">
             <div>
               <div class="story-empty__icon"><i class="ri-slideshow-4-line" aria-hidden="true"></i></div>
-              <h3>No story yet</h3>
-              <p>Your latest story preview, views, likes, and expiration countdown will appear here.</p>
+              <h3>هنوز استوری ندارید</h3>
+              <p>پیش‌نمایش آخرین استوری، بازدیدها، پسندها و زمان باقی‌مانده اینجا نمایش داده می‌شود.</p>
             </div>
           </div>
 
           <article class="story-card" id="storyCard" style="display:none;">
             <div class="story-card__media">
-              <img id="storyCardImage" alt="Published story">
+              <img id="storyCardImage" alt="استوری منتشرشده">
               <div class="story-card__progress"><span id="storyProgressBar"></span></div>
               <div class="story-card__overlay">
                 <p class="story-card__caption" id="storyCardCaption"></p>
@@ -9442,12 +9448,12 @@
             </div>
             <div class="story-metrics">
               <div class="story-metric">
-                <span><i class="ri-eye-line" aria-hidden="true"></i> Total views</span>
-                <strong id="storyViewsCount">0</strong>
+                <span><i class="ri-eye-line" aria-hidden="true"></i> بازدید کل</span>
+                <strong id="storyViewsCount">۰</strong>
               </div>
               <div class="story-metric">
-                <span><i class="ri-heart-3-line" aria-hidden="true"></i> Total likes</span>
-                <strong id="storyLikesCount">0</strong>
+                <span><i class="ri-heart-3-line" aria-hidden="true"></i> پسند کل</span>
+                <strong id="storyLikesCount">۰</strong>
               </div>
             </div>
           </article>
@@ -10122,8 +10128,12 @@
       return init.credentials === undefined ? { ...init, credentials: 'include' } : init;
     }
 
+    function toPersianDigits(value) {
+      return String(value).replace(/\d/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
+    }
+
     function formatCount(value) {
-      return Number(value || 0).toLocaleString('en-US');
+      return Number(value || 0).toLocaleString('fa-IR');
     }
 
     function formatDuration(ms) {
@@ -10131,7 +10141,22 @@
       const hours = String(Math.floor(total / 3600)).padStart(2, '0');
       const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
       const seconds = String(total % 60).padStart(2, '0');
-      return `${hours}:${minutes}:${seconds}`;
+      return toPersianDigits(`${hours}:${minutes}:${seconds}`);
+    }
+
+    function localizeStoryError(message, fallback) {
+      const normalized = String(message || '').trim();
+      const messages = {
+        'Seller authentication is required.': 'برای مدیریت استوری، ابتدا وارد حساب فروشنده شوید.',
+        'Could not load story data.': 'امکان بارگذاری اطلاعات استوری وجود ندارد.',
+        'Only image files are allowed.': 'لطفا فقط فایل تصویر انتخاب کنید.',
+        'Image must be smaller than 5MB.': 'حجم تصویر باید کمتر از ۵ مگابایت باشد.',
+        'Could not upload story image.': 'امکان بارگذاری تصویر استوری وجود ندارد.',
+        'Story image is required.': 'تصویر استوری الزامی است.',
+        'Only one story can be posted every 24 hours.': 'در هر ۲۴ ساعت فقط یک استوری می‌توانید منتشر کنید.',
+        'Could not publish story.': 'امکان انتشار استوری وجود ندارد.'
+      };
+      return messages[normalized] || fallback;
     }
 
     function showFeedback(message, type) {
@@ -10165,8 +10190,8 @@
       if (els.storySubmitBtn) {
         els.storySubmitBtn.disabled = disabled;
         els.storySubmitBtn.innerHTML = state.uploading
-          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> Publishing...'
-          : '<i class="ri-send-plane-line" aria-hidden="true"></i> Publish story';
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال انتشار...'
+          : '<i class="ri-send-plane-line" aria-hidden="true"></i> انتشار استوری';
       }
       if (els.storyImageInput) els.storyImageInput.disabled = state.uploading || !state.canPost;
       if (els.storyCaptionInput) els.storyCaptionInput.disabled = state.uploading || !state.canPost;
@@ -10178,11 +10203,11 @@
       if (remaining > 0) {
         if (els.storyCooldownPanel) els.storyCooldownPanel.classList.add('is-visible');
         if (els.storyCooldownTimer) els.storyCooldownTimer.textContent = formatDuration(remaining);
-        setStatus(`Next in ${formatDuration(remaining)}`, 'cooldown');
+        setStatus(`استوری بعدی تا ${formatDuration(remaining)}`, 'cooldown');
       } else {
         state.cooldownEndsAt = 0;
         if (els.storyCooldownPanel) els.storyCooldownPanel.classList.remove('is-visible');
-        setStatus('Ready to post', 'ready');
+        setStatus('آماده انتشار', 'ready');
       }
       refreshSubmitState();
     }
@@ -10200,8 +10225,8 @@
         els.storyProgressBar.style.setProperty('--story-progress', `${progress}%`);
       }
       els.storyExpirationText.innerHTML = isActive
-        ? `<i class="ri-time-line" aria-hidden="true"></i> Expires in ${formatDuration(remaining)}`
-        : '<i class="ri-checkbox-circle-line" aria-hidden="true"></i> Expired';
+        ? `<i class="ri-time-line" aria-hidden="true"></i> انقضا تا ${formatDuration(remaining)}`
+        : '<i class="ri-checkbox-circle-line" aria-hidden="true"></i> منقضی شده';
     }
 
     function startTicker() {
@@ -10232,7 +10257,7 @@
       if (els.storyEmptyState) els.storyEmptyState.style.display = 'none';
       if (els.storyCard) els.storyCard.style.display = '';
       if (els.storyCardImage) els.storyCardImage.src = story.imageUrl;
-      if (els.storyCardCaption) els.storyCardCaption.textContent = story.caption || 'No caption';
+      if (els.storyCardCaption) els.storyCardCaption.textContent = story.caption || 'بدون کپشن';
       if (els.storyViewsCount) els.storyViewsCount.textContent = formatCount(story.viewsCount);
       if (els.storyLikesCount) els.storyLikesCount.textContent = formatCount(story.likesCount);
       updateStoryCountdown();
@@ -10247,7 +10272,7 @@
         const res = await fetch(buildApiUrl('/api/seller/stories/me'), withCredentials());
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.success === false) {
-          throw new Error(data.message || 'Could not load Stories.');
+          throw new Error(localizeStoryError(data.message, 'امکان بارگذاری استوری‌ها وجود ندارد.'));
         }
         state.story = data.story || data.latestStory || null;
         state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
@@ -10261,8 +10286,8 @@
         showLoading(false);
         state.story = null;
         renderStory();
-        showFeedback(error.message || 'Could not load Stories.', 'error');
-        setStatus('Unavailable', 'cooldown');
+        showFeedback(error.message || 'امکان بارگذاری استوری‌ها وجود ندارد.', 'error');
+        setStatus('در دسترس نیست', 'cooldown');
       } finally {
         state.loading = false;
       }
@@ -10276,12 +10301,12 @@
         return;
       }
       if (!file.type || !file.type.startsWith('image/')) {
-        showFeedback('Please choose an image file.', 'error');
+        showFeedback('لطفا یک فایل تصویر انتخاب کنید.', 'error');
         refreshSubmitState();
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        showFeedback('Image must be smaller than 5MB.', 'error');
+        showFeedback('حجم تصویر باید کمتر از ۵ مگابایت باشد.', 'error');
         refreshSubmitState();
         return;
       }
@@ -10298,11 +10323,11 @@
       updateCooldown();
       if (state.uploading) return;
       if (!state.canPost) {
-        showFeedback('A new story can be posted after the cooldown ends.', 'error');
+        showFeedback('پس از پایان زمان انتظار می‌توانید استوری جدید منتشر کنید.', 'error');
         return;
       }
       if (!state.selectedFile) {
-        showFeedback('Choose an image before publishing.', 'error');
+        showFeedback('قبل از انتشار، تصویر استوری را انتخاب کنید.', 'error');
         return;
       }
 
@@ -10324,19 +10349,19 @@
             state.cooldownEndsAt = new Date(data.nextAvailableAt).getTime();
             updateCooldown();
           }
-          throw new Error(data.message || 'Could not publish story.');
+          throw new Error(localizeStoryError(data.message, 'امکان انتشار استوری وجود ندارد.'));
         }
 
         state.story = data.story || null;
         state.cooldownEndsAt = data.nextAvailableAt ? new Date(data.nextAvailableAt).getTime() : Date.now() + DAY_MS;
         if (els.storyCaptionInput) els.storyCaptionInput.value = '';
-        if (els.storyCaptionCount) els.storyCaptionCount.textContent = '0';
+        if (els.storyCaptionCount) els.storyCaptionCount.textContent = '۰';
         clearPreview();
         updateCooldown();
         renderStory();
-        showFeedback('Story published.');
+        showFeedback('استوری منتشر شد.');
       } catch (error) {
-        showFeedback(error.message || 'Could not publish story.', 'error');
+        showFeedback(error.message || 'امکان انتشار استوری وجود ندارد.', 'error');
       } finally {
         state.uploading = false;
         refreshSubmitState();
@@ -10353,7 +10378,7 @@
       });
       els.storyCaptionInput?.addEventListener('input', () => {
         if (els.storyCaptionCount) {
-          els.storyCaptionCount.textContent = String((els.storyCaptionInput.value || '').length);
+          els.storyCaptionCount.textContent = toPersianDigits((els.storyCaptionInput.value || '').length);
         }
       });
       els.storyUploadForm.addEventListener('submit', submitStory);
