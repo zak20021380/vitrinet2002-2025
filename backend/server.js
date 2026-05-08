@@ -108,6 +108,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/products', require('./routes/products'));
+app.use('/api/seller/stories', require('./routes/sellerStories'));
 app.use('/api/seller', sellerRoutes);
 app.use('/api/sellers', require('./routes/seller'));
 app.use('/api/seller-services', require('./routes/sellerServicesRoutes'));

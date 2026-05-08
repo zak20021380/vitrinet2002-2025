@@ -7957,6 +7957,477 @@
   color: #6ee7b7;
 }
 
+.story-dashboard-shell {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  animation: stories-rise .32s ease both;
+}
+
+@keyframes stories-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stories-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 1px solid rgba(14, 165, 233, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.stories-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0ea5e9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.stories-hero__title {
+  margin: 8px 0 6px;
+  color: #0f172a;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.stories-hero__copy {
+  max-width: 650px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.stories-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, .18);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stories-status-pill.cooldown {
+  background: #fff7ed;
+  border-color: rgba(251, 146, 60, .24);
+  color: #c2410c;
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(320px, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.story-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, .18);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 16px 45px rgba(15, 23, 42, .07);
+}
+
+.story-panel__body {
+  padding: 18px;
+}
+
+.story-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.story-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.story-panel__icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  box-shadow: 0 10px 20px rgba(14, 165, 233, .2);
+}
+
+.story-upload-drop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 270px;
+  border: 1.5px dashed rgba(14, 165, 233, .34);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #f8fafc, #f0fdfa);
+  cursor: pointer;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.story-upload-drop:hover,
+.story-upload-drop:focus-within {
+  transform: translateY(-2px);
+  border-color: #10b981;
+  background: linear-gradient(145deg, #ffffff, #ecfdf5);
+}
+
+.story-upload-drop.is-disabled {
+  cursor: not-allowed;
+  opacity: .62;
+  filter: grayscale(.15);
+}
+
+.story-upload-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  color: #475569;
+  padding: 24px;
+}
+
+.story-upload-empty i {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #0ea5e9;
+  background: #e0f2fe;
+  font-size: 28px;
+}
+
+.story-upload-preview {
+  width: min(210px, 76%);
+  aspect-ratio: 9 / 16;
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, .2);
+  background: #0f172a;
+}
+
+.story-upload-preview img,
+.story-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.story-upload-preview::after,
+.story-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(15, 23, 42, .72));
+  pointer-events: none;
+}
+
+.story-caption-input {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.7;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.story-caption-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, .12);
+}
+
+.story-form-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 14px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.story-submit-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  font-weight: 900;
+  box-shadow: 0 14px 30px rgba(14, 165, 233, .2);
+  transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease;
+}
+
+.story-submit-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(14, 165, 233, .25);
+}
+
+.story-submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+  box-shadow: none;
+}
+
+.story-feedback {
+  min-height: 22px;
+  margin-top: 12px;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.story-feedback.error {
+  color: #dc2626;
+}
+
+.story-cooldown {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff7ed;
+  border: 1px solid rgba(251, 146, 60, .2);
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.story-cooldown.is-visible {
+  display: flex;
+}
+
+.story-card {
+  overflow: hidden;
+  border-radius: 24px;
+  background: #0f172a;
+  color: #fff;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, .18);
+}
+
+.story-card__media {
+  position: relative;
+  min-height: 470px;
+  aspect-ratio: 9 / 16;
+  background: linear-gradient(135deg, #0f172a, #334155);
+}
+
+.story-card__progress {
+  position: absolute;
+  top: 12px;
+  inset-inline: 12px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .28);
+  z-index: 2;
+  overflow: hidden;
+}
+
+.story-card__progress span {
+  display: block;
+  height: 100%;
+  width: var(--story-progress, 0%);
+  border-radius: inherit;
+  background: #fff;
+  transition: width .4s ease;
+}
+
+.story-card__overlay {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 22px;
+}
+
+.story-card__caption {
+  margin: 0 0 14px;
+  color: #f8fafc;
+  font-size: 15px;
+  line-height: 1.8;
+  font-weight: 700;
+}
+
+.story-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .16);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.story-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  color: #0f172a;
+}
+
+.story-metric {
+  padding: 13px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.story-metric span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.story-metric strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.story-empty,
+.story-loading {
+  display: grid;
+  place-items: center;
+  min-height: 470px;
+  padding: 28px;
+  text-align: center;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, .18);
+  background: rgba(255, 255, 255, .88);
+}
+
+.story-empty__icon {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border-radius: 24px;
+  color: #0ea5e9;
+  background: #e0f2fe;
+  font-size: 32px;
+}
+
+.story-empty h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.story-empty p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.story-skeleton {
+  width: min(230px, 70vw);
+  aspect-ratio: 9 / 16;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0);
+  background-size: 220% 100%;
+  animation: story-shimmer 1.2s linear infinite;
+}
+
+@keyframes story-shimmer {
+  from { background-position: 0 0; }
+  to { background-position: -220% 0; }
+}
+
+@media (max-width: 900px) {
+  .stories-hero {
+    flex-direction: column;
+    border-radius: 20px;
+  }
+
+  .stories-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .story-dashboard-shell {
+    padding-inline: 0;
+  }
+
+  .stories-hero,
+  .story-panel {
+    border-radius: 18px;
+  }
+
+  .stories-hero,
+  .story-panel__body {
+    padding: 16px;
+  }
+
+  .story-upload-drop {
+    min-height: 220px;
+  }
+
+  .story-card__media,
+  .story-empty,
+  .story-loading {
+    min-height: 420px;
+  }
+
+  .story-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
   <script src="/nav-active.js" defer></script>
 
@@ -8085,6 +8556,12 @@
           </div>
           <span class="sidebar-menu-item__text">مدیریت نظرات</span>
           <span class="sidebar-menu-item__badge sidebar-menu-badge" id="sidebarReviewsBadge" style="display: none;">0</span>
+        </button>
+        <button class="sidebar-menu-item" data-section="stories">
+          <div class="sidebar-menu-item__icon sidebar-menu-item__icon--purple">
+            <i class="ri-slideshow-4-fill"></i>
+          </div>
+          <span class="sidebar-menu-item__text">Stories</span>
         </button>
       </div>
 
@@ -8217,6 +8694,10 @@
       </svg>
       <span>مدیریت نظرات</span>
       <span class="sidebar-menu-badge" id="desktopReviewsBadge" style="display: none;">0</span>
+    </button>
+    <button class="sidebar-link" id="menu-stories" data-section="stories" aria-label="Stories">
+      <i class="ri-slideshow-4-line" aria-hidden="true"></i>
+      <span>Stories</span>
     </button>
     <button class="sidebar-link" id="menu-content" data-section="content" aria-label="مدیریت ظاهر فروشگاه">
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
@@ -8862,6 +9343,119 @@
     <div id="reviewsManagementSection"></div>
   </section>
 
+  <section id="section-stories" style="display:none;">
+    <div class="story-dashboard-shell">
+      <header class="stories-hero">
+        <div>
+          <span class="stories-hero__eyebrow">
+            <i class="ri-slideshow-4-line" aria-hidden="true"></i>
+            Stories
+          </span>
+          <h2 class="stories-hero__title">Stories</h2>
+          <p class="stories-hero__copy">
+            Post one lightweight story every 24 hours with an image and short caption. Active stories expire automatically after 24 hours.
+          </p>
+        </div>
+        <span class="stories-status-pill" id="storyStatusPill">
+          <i class="ri-loader-4-line" aria-hidden="true"></i>
+          Loading
+        </span>
+      </header>
+
+      <div class="stories-grid">
+        <section class="story-panel" aria-labelledby="storyUploadTitle">
+          <div class="story-panel__body">
+            <div class="story-panel__heading">
+              <h3 class="story-panel__title" id="storyUploadTitle">
+                <span class="story-panel__icon"><i class="ri-add-circle-line" aria-hidden="true"></i></span>
+                New story
+              </h3>
+            </div>
+
+            <div class="story-cooldown" id="storyCooldownPanel" role="status" aria-live="polite">
+              <i class="ri-time-line" aria-hidden="true"></i>
+              <span>Next story in <strong id="storyCooldownTimer">--:--:--</strong></span>
+            </div>
+
+            <form id="storyUploadForm" autocomplete="off" novalidate>
+              <label class="story-upload-drop" id="storyUploadDrop" for="storyImageInput">
+                <input id="storyImageInput" name="image" type="file" accept="image/*" hidden>
+                <div class="story-upload-empty" id="storyUploadEmpty">
+                  <i class="ri-image-add-line" aria-hidden="true"></i>
+                  <strong>Choose story image</strong>
+                  <span>Vertical images look best. Max 5MB.</span>
+                </div>
+                <div class="story-upload-preview" id="storyUploadPreview" style="display:none;">
+                  <img id="storyPreviewImage" alt="Story preview">
+                </div>
+              </label>
+
+              <textarea id="storyCaptionInput" class="story-caption-input" maxlength="140" placeholder="Short caption..." aria-label="Story caption"></textarea>
+              <div class="story-form-meta">
+                <span>One story per 24 hours</span>
+                <span><strong id="storyCaptionCount">0</strong>/140</span>
+              </div>
+
+              <button type="submit" class="story-submit-btn" id="storySubmitBtn" disabled>
+                <i class="ri-send-plane-line" aria-hidden="true"></i>
+                Publish story
+              </button>
+              <div class="story-feedback" id="storyFeedback" role="status" aria-live="polite"></div>
+            </form>
+          </div>
+        </section>
+
+        <section aria-labelledby="currentStoryTitle">
+          <div class="story-panel__heading">
+            <h3 class="story-panel__title" id="currentStoryTitle">
+              <span class="story-panel__icon"><i class="ri-eye-line" aria-hidden="true"></i></span>
+              Current story
+            </h3>
+          </div>
+
+          <div class="story-loading" id="storyLoadingState" aria-live="polite">
+            <div>
+              <div class="story-skeleton"></div>
+              <p class="mt-4 text-sm font-bold text-slate-500">Loading story status...</p>
+            </div>
+          </div>
+
+          <div class="story-empty" id="storyEmptyState" style="display:none;">
+            <div>
+              <div class="story-empty__icon"><i class="ri-slideshow-4-line" aria-hidden="true"></i></div>
+              <h3>No story yet</h3>
+              <p>Your latest story preview, views, likes, and expiration countdown will appear here.</p>
+            </div>
+          </div>
+
+          <article class="story-card" id="storyCard" style="display:none;">
+            <div class="story-card__media">
+              <img id="storyCardImage" alt="Published story">
+              <div class="story-card__progress"><span id="storyProgressBar"></span></div>
+              <div class="story-card__overlay">
+                <p class="story-card__caption" id="storyCardCaption"></p>
+                <span class="story-card__status" id="storyExpirationText">
+                  <i class="ri-time-line" aria-hidden="true"></i>
+                  --
+                </span>
+              </div>
+            </div>
+            <div class="story-metrics">
+              <div class="story-metric">
+                <span><i class="ri-eye-line" aria-hidden="true"></i> Total views</span>
+                <strong id="storyViewsCount">0</strong>
+              </div>
+              <div class="story-metric">
+                <span><i class="ri-heart-3-line" aria-hidden="true"></i> Total likes</span>
+                <strong id="storyLikesCount">0</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </div>
+  </section>
+
   <div class="add-discount-modal" id="addDiscountModal" role="dialog" aria-modal="true" aria-labelledby="addDiscountTitle" aria-describedby="addDiscountDesc">
     <div class="add-discount-modal__card" tabindex="-1">
       <button class="add-discount-modal__close" type="button" data-add-discount-close aria-label="بستن پنجره افزودن کالا">
@@ -9486,6 +10080,308 @@
       showSection(initialSection);
     } else {
       showSection('visit');
+    }
+  })();
+</script>
+
+<script>
+  (function () {
+    const apiClient = window.VITRINET_API;
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const els = {};
+    const state = {
+      loaded: false,
+      loading: false,
+      uploading: false,
+      canPost: false,
+      selectedFile: null,
+      previewUrl: '',
+      cooldownEndsAt: 0,
+      story: null,
+      tickTimer: null
+    };
+
+    function cacheElements() {
+      [
+        'storyStatusPill', 'storyCooldownPanel', 'storyCooldownTimer', 'storyUploadForm',
+        'storyUploadDrop', 'storyImageInput', 'storyUploadEmpty', 'storyUploadPreview',
+        'storyPreviewImage', 'storyCaptionInput', 'storyCaptionCount', 'storySubmitBtn',
+        'storyFeedback', 'storyLoadingState', 'storyEmptyState', 'storyCard',
+        'storyCardImage', 'storyCardCaption', 'storyExpirationText', 'storyViewsCount',
+        'storyLikesCount', 'storyProgressBar'
+      ].forEach((id) => { els[id] = document.getElementById(id); });
+    }
+
+    function buildApiUrl(path) {
+      if (apiClient?.buildUrl) return apiClient.buildUrl(path);
+      return path;
+    }
+
+    function withCredentials(init = {}) {
+      if (apiClient?.ensureCredentials) return apiClient.ensureCredentials(init);
+      return init.credentials === undefined ? { ...init, credentials: 'include' } : init;
+    }
+
+    function formatCount(value) {
+      return Number(value || 0).toLocaleString('en-US');
+    }
+
+    function formatDuration(ms) {
+      const total = Math.max(0, Math.floor(ms / 1000));
+      const hours = String(Math.floor(total / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+      const seconds = String(total % 60).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function showFeedback(message, type) {
+      if (!els.storyFeedback) return;
+      els.storyFeedback.textContent = message || '';
+      els.storyFeedback.classList.toggle('error', type === 'error');
+    }
+
+    function setStatus(text, mode) {
+      if (!els.storyStatusPill) return;
+      els.storyStatusPill.innerHTML = `<i class="${mode === 'cooldown' ? 'ri-time-line' : 'ri-checkbox-circle-line'}" aria-hidden="true"></i>${text}`;
+      els.storyStatusPill.classList.toggle('cooldown', mode === 'cooldown');
+    }
+
+    function clearPreview() {
+      if (state.previewUrl) {
+        URL.revokeObjectURL(state.previewUrl);
+      }
+      state.previewUrl = '';
+      state.selectedFile = null;
+      if (els.storyImageInput) els.storyImageInput.value = '';
+      if (els.storyPreviewImage) els.storyPreviewImage.removeAttribute('src');
+      if (els.storyUploadPreview) els.storyUploadPreview.style.display = 'none';
+      if (els.storyUploadEmpty) els.storyUploadEmpty.style.display = '';
+    }
+
+    function refreshSubmitState() {
+      const cooldownRemaining = state.cooldownEndsAt ? Math.max(0, state.cooldownEndsAt - Date.now()) : 0;
+      state.canPost = cooldownRemaining <= 0;
+      const disabled = state.uploading || !state.canPost || !state.selectedFile;
+      if (els.storySubmitBtn) {
+        els.storySubmitBtn.disabled = disabled;
+        els.storySubmitBtn.innerHTML = state.uploading
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> Publishing...'
+          : '<i class="ri-send-plane-line" aria-hidden="true"></i> Publish story';
+      }
+      if (els.storyImageInput) els.storyImageInput.disabled = state.uploading || !state.canPost;
+      if (els.storyCaptionInput) els.storyCaptionInput.disabled = state.uploading || !state.canPost;
+      if (els.storyUploadDrop) els.storyUploadDrop.classList.toggle('is-disabled', !state.canPost || state.uploading);
+    }
+
+    function updateCooldown() {
+      const remaining = state.cooldownEndsAt ? Math.max(0, state.cooldownEndsAt - Date.now()) : 0;
+      if (remaining > 0) {
+        if (els.storyCooldownPanel) els.storyCooldownPanel.classList.add('is-visible');
+        if (els.storyCooldownTimer) els.storyCooldownTimer.textContent = formatDuration(remaining);
+        setStatus(`Next in ${formatDuration(remaining)}`, 'cooldown');
+      } else {
+        state.cooldownEndsAt = 0;
+        if (els.storyCooldownPanel) els.storyCooldownPanel.classList.remove('is-visible');
+        setStatus('Ready to post', 'ready');
+      }
+      refreshSubmitState();
+    }
+
+    function updateStoryCountdown() {
+      const story = state.story;
+      if (!story || !els.storyExpirationText) return;
+      const expiresAt = story.expiresAt ? new Date(story.expiresAt).getTime() : 0;
+      const createdAt = story.createdAt ? new Date(story.createdAt).getTime() : 0;
+      const remaining = expiresAt ? Math.max(0, expiresAt - Date.now()) : 0;
+      const isActive = story.status !== 'expired' && remaining > 0;
+      const elapsed = createdAt ? Math.max(0, Date.now() - createdAt) : 0;
+      const progress = isActive ? Math.min(100, Math.max(0, (elapsed / DAY_MS) * 100)) : 100;
+      if (els.storyProgressBar) {
+        els.storyProgressBar.style.setProperty('--story-progress', `${progress}%`);
+      }
+      els.storyExpirationText.innerHTML = isActive
+        ? `<i class="ri-time-line" aria-hidden="true"></i> Expires in ${formatDuration(remaining)}`
+        : '<i class="ri-checkbox-circle-line" aria-hidden="true"></i> Expired';
+    }
+
+    function startTicker() {
+      if (state.tickTimer) return;
+      state.tickTimer = window.setInterval(() => {
+        updateCooldown();
+        updateStoryCountdown();
+      }, 1000);
+    }
+
+    function showLoading(isLoading) {
+      if (els.storyLoadingState) els.storyLoadingState.style.display = isLoading ? '' : 'none';
+      if (isLoading) {
+        if (els.storyEmptyState) els.storyEmptyState.style.display = 'none';
+        if (els.storyCard) els.storyCard.style.display = 'none';
+      }
+    }
+
+    function renderStory() {
+      showLoading(false);
+      const story = state.story;
+      if (!story?.imageUrl) {
+        if (els.storyEmptyState) els.storyEmptyState.style.display = '';
+        if (els.storyCard) els.storyCard.style.display = 'none';
+        return;
+      }
+
+      if (els.storyEmptyState) els.storyEmptyState.style.display = 'none';
+      if (els.storyCard) els.storyCard.style.display = '';
+      if (els.storyCardImage) els.storyCardImage.src = story.imageUrl;
+      if (els.storyCardCaption) els.storyCardCaption.textContent = story.caption || 'No caption';
+      if (els.storyViewsCount) els.storyViewsCount.textContent = formatCount(story.viewsCount);
+      if (els.storyLikesCount) els.storyLikesCount.textContent = formatCount(story.likesCount);
+      updateStoryCountdown();
+    }
+
+    async function loadStories(force = false) {
+      if (state.loading || (state.loaded && !force)) return;
+      state.loading = true;
+      showLoading(true);
+      showFeedback('');
+      try {
+        const res = await fetch(buildApiUrl('/api/seller/stories/me'), withCredentials());
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          throw new Error(data.message || 'Could not load Stories.');
+        }
+        state.story = data.story || data.latestStory || null;
+        state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
+          ? new Date(data.nextAvailableAt).getTime()
+          : 0;
+        state.loaded = true;
+        updateCooldown();
+        renderStory();
+        startTicker();
+      } catch (error) {
+        showLoading(false);
+        state.story = null;
+        renderStory();
+        showFeedback(error.message || 'Could not load Stories.', 'error');
+        setStatus('Unavailable', 'cooldown');
+      } finally {
+        state.loading = false;
+      }
+    }
+
+    function handleFileChange(file) {
+      showFeedback('');
+      clearPreview();
+      if (!file) {
+        refreshSubmitState();
+        return;
+      }
+      if (!file.type || !file.type.startsWith('image/')) {
+        showFeedback('Please choose an image file.', 'error');
+        refreshSubmitState();
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showFeedback('Image must be smaller than 5MB.', 'error');
+        refreshSubmitState();
+        return;
+      }
+      state.selectedFile = file;
+      state.previewUrl = URL.createObjectURL(file);
+      if (els.storyPreviewImage) els.storyPreviewImage.src = state.previewUrl;
+      if (els.storyUploadPreview) els.storyUploadPreview.style.display = '';
+      if (els.storyUploadEmpty) els.storyUploadEmpty.style.display = 'none';
+      refreshSubmitState();
+    }
+
+    async function submitStory(event) {
+      event.preventDefault();
+      updateCooldown();
+      if (state.uploading) return;
+      if (!state.canPost) {
+        showFeedback('A new story can be posted after the cooldown ends.', 'error');
+        return;
+      }
+      if (!state.selectedFile) {
+        showFeedback('Choose an image before publishing.', 'error');
+        return;
+      }
+
+      state.uploading = true;
+      refreshSubmitState();
+      showFeedback('');
+      const formData = new FormData();
+      formData.append('image', state.selectedFile);
+      formData.append('caption', (els.storyCaptionInput?.value || '').trim().slice(0, 140));
+
+      try {
+        const res = await fetch(buildApiUrl('/api/seller/stories'), withCredentials({
+          method: 'POST',
+          body: formData
+        }));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          if (data.nextAvailableAt) {
+            state.cooldownEndsAt = new Date(data.nextAvailableAt).getTime();
+            updateCooldown();
+          }
+          throw new Error(data.message || 'Could not publish story.');
+        }
+
+        state.story = data.story || null;
+        state.cooldownEndsAt = data.nextAvailableAt ? new Date(data.nextAvailableAt).getTime() : Date.now() + DAY_MS;
+        if (els.storyCaptionInput) els.storyCaptionInput.value = '';
+        if (els.storyCaptionCount) els.storyCaptionCount.textContent = '0';
+        clearPreview();
+        updateCooldown();
+        renderStory();
+        showFeedback('Story published.');
+      } catch (error) {
+        showFeedback(error.message || 'Could not publish story.', 'error');
+      } finally {
+        state.uploading = false;
+        refreshSubmitState();
+      }
+    }
+
+    function bind() {
+      cacheElements();
+      if (!els.storyUploadForm || els.storyUploadForm.dataset.bound === '1') return;
+      els.storyUploadForm.dataset.bound = '1';
+
+      els.storyImageInput?.addEventListener('change', (event) => {
+        handleFileChange(event.target.files?.[0] || null);
+      });
+      els.storyCaptionInput?.addEventListener('input', () => {
+        if (els.storyCaptionCount) {
+          els.storyCaptionCount.textContent = String((els.storyCaptionInput.value || '').length);
+        }
+      });
+      els.storyUploadForm.addEventListener('submit', submitStory);
+
+      document.querySelectorAll('[data-section="stories"]').forEach((node) => {
+        node.addEventListener('click', () => loadStories());
+      });
+
+      document.addEventListener('seller:ready', () => {
+        if (document.getElementById('section-stories')?.style.display !== 'none') {
+          loadStories(true);
+        }
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('section') === 'stories') {
+        loadStories(true);
+      } else {
+        updateCooldown();
+        showLoading(false);
+        renderStory();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bind);
+    } else {
+      bind();
     }
   })();
 </script>

@@ -887,7 +887,7 @@ function showSection(section) {
   const allSections = [
     "visit", "notif", "msg", "profile", "settings", "add", "upgrade",
     "products", "content", "seo", "guide", "register-visit", "performance",
-    "discounts", "reviews"
+    "discounts", "reviews", "stories"
   ];
   allSections.forEach(s => {
     const btn = document.getElementById('menu-' + s);
