@@ -8159,27 +8159,6 @@
   pointer-events: none;
 }
 
-.story-caption-input {
-  width: 100%;
-  min-height: 92px;
-  resize: vertical;
-  margin-top: 14px;
-  padding: 13px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  background: #fff;
-  color: #0f172a;
-  font-size: 14px;
-  line-height: 1.7;
-  outline: none;
-  transition: border-color .2s ease, box-shadow .2s ease;
-}
-
-.story-caption-input:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, .12);
-}
-
 .story-form-meta {
   display: flex;
   justify-content: space-between;
@@ -9548,7 +9527,7 @@
           </span>
           <h2 class="stories-hero__title">استوری‌ها</h2>
           <p class="stories-hero__copy">
-            هر ۲۴ ساعت یک استوری با تصویر و کپشن کوتاه منتشر کنید. استوری‌های فعال پس از ۲۴ ساعت به‌صورت خودکار منقضی می‌شوند.
+            هر ۲۴ ساعت یک استوری تصویری منتشر کنید. استوری‌های فعال پس از ۲۴ ساعت به‌صورت خودکار منقضی می‌شوند.
           </p>
         </div>
         <span class="stories-status-pill" id="storyStatusPill">
@@ -9585,10 +9564,8 @@
                 </div>
               </label>
 
-              <textarea id="storyCaptionInput" class="story-caption-input" maxlength="140" placeholder="کپشن کوتاه..." aria-label="کپشن استوری"></textarea>
               <div class="story-form-meta">
                 <span>هر ۲۴ ساعت یک استوری</span>
-                <span><strong id="storyCaptionCount">۰</strong>/۱۴۰</span>
               </div>
 
               <button type="submit" class="story-submit-btn" id="storySubmitBtn" disabled>
@@ -10327,7 +10304,7 @@
       [
         'storyStatusPill', 'storyCooldownPanel', 'storyCooldownTimer', 'storyUploadForm',
         'storyUploadDrop', 'storyImageInput', 'storyUploadEmpty', 'storyUploadPreview',
-        'storyPreviewImage', 'storyCaptionInput', 'storyCaptionCount', 'storySubmitBtn',
+        'storyPreviewImage', 'storySubmitBtn',
         'storyFeedback', 'storyLoadingState', 'storyEmptyState', 'storyCard',
         'storyCardImage', 'storyCardCaption', 'storyExpirationText', 'storyViewsCount',
         'storyLikesCount', 'storyProgressBar', 'storySuccessPopup', 'storySuccessClose',
@@ -10431,7 +10408,6 @@
           : '<i class="ri-send-plane-line" aria-hidden="true"></i> انتشار استوری';
       }
       if (els.storyImageInput) els.storyImageInput.disabled = state.uploading || !state.canPost;
-      if (els.storyCaptionInput) els.storyCaptionInput.disabled = state.uploading || !state.canPost;
       if (els.storyUploadDrop) els.storyUploadDrop.classList.toggle('is-disabled', !state.canPost || state.uploading);
       if (els.storyDeleteBtn) {
         const hasActiveStory = state.story?.id && state.story?.status === 'active';
@@ -10502,7 +10478,11 @@
       if (els.storyEmptyState) els.storyEmptyState.style.display = 'none';
       if (els.storyCard) els.storyCard.style.display = '';
       if (els.storyCardImage) els.storyCardImage.src = story.imageUrl;
-      if (els.storyCardCaption) els.storyCardCaption.textContent = story.caption || 'بدون کپشن';
+      if (els.storyCardCaption) {
+        const caption = String(story.caption || '').trim();
+        els.storyCardCaption.textContent = caption;
+        els.storyCardCaption.style.display = caption ? '' : 'none';
+      }
       if (els.storyViewsCount) els.storyViewsCount.textContent = formatCount(story.viewsCount);
       if (els.storyLikesCount) els.storyLikesCount.textContent = formatCount(story.likesCount);
       updateStoryCountdown();
@@ -10582,7 +10562,6 @@
       showFeedback('');
       const formData = new FormData();
       formData.append('image', state.selectedFile);
-      formData.append('caption', (els.storyCaptionInput?.value || '').trim().slice(0, 140));
 
       try {
         const res = await fetch(buildApiUrl('/api/seller/stories'), withCredentials({
@@ -10600,8 +10579,6 @@
 
         state.story = data.story || null;
         state.cooldownEndsAt = data.nextAvailableAt ? new Date(data.nextAvailableAt).getTime() : Date.now() + DAY_MS;
-        if (els.storyCaptionInput) els.storyCaptionInput.value = '';
-        if (els.storyCaptionCount) els.storyCaptionCount.textContent = '۰';
         clearPreview();
         updateCooldown();
         renderStory();
@@ -10656,11 +10633,6 @@
 
       els.storyImageInput?.addEventListener('change', (event) => {
         handleFileChange(event.target.files?.[0] || null);
-      });
-      els.storyCaptionInput?.addEventListener('input', () => {
-        if (els.storyCaptionCount) {
-          els.storyCaptionCount.textContent = toPersianDigits((els.storyCaptionInput.value || '').length);
-        }
       });
       els.storyUploadForm.addEventListener('submit', submitStory);
       els.storyDeleteBtn?.addEventListener('click', deleteCurrentStory);
