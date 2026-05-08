@@ -4029,6 +4029,124 @@ window.addEventListener('load', () => {
 
   let similarServicesItems = [];
 
+  function getActiveStory(item = {}) {
+    const story = item.activeStory || item.story || null;
+    if (!story || story.status === 'expired' || story.status === 'deleted') return null;
+    const imageUrl = normalizeCategoryText(story.imageUrl || '');
+    const id = normalizeCategoryText(story.id || story._id || '');
+    return imageUrl && id ? { ...story, id, imageUrl } : null;
+  }
+
+  function buildSimilarStoryIndicator(item = {}, label = '') {
+    const story = getActiveStory(item);
+    if (!story) return '';
+    const safeLabel = escapeHtml(label || item.name || 'فروشگاه');
+    return `
+      <button type="button"
+              class="similar-story-indicator"
+              data-story-indicator
+              data-story-id="${escapeHtml(story.id)}"
+              data-story-image="${escapeHtml(story.imageUrl)}"
+              data-story-caption="${escapeHtml(story.caption || '')}"
+              aria-label="مشاهده استوری ${safeLabel}">
+        <img src="${escapeHtml(story.imageUrl)}" alt="" loading="lazy" decoding="async">
+      </button>`;
+  }
+
+  function ensureStoryViewer() {
+    let modal = document.getElementById('storyViewerModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'storyViewerModal';
+    modal.className = 'story-viewer-modal';
+    modal.setAttribute('aria-hidden', 'true');
+    modal.innerHTML = `
+      <div class="story-viewer-shell" role="dialog" aria-modal="true">
+        <button type="button" class="story-viewer-close" data-story-close aria-label="بستن">×</button>
+        <img id="storyViewerImage" alt="">
+        <div id="storyViewerCaption" class="story-viewer-caption"></div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal || event.target.closest('[data-story-close]')) {
+        closeStoryViewer();
+      }
+    });
+    return modal;
+  }
+
+  function closeStoryViewer() {
+    const modal = document.getElementById('storyViewerModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function openStoryViewer(story = {}) {
+    if (!story.id || !story.imageUrl) return;
+    const modal = ensureStoryViewer();
+    const image = document.getElementById('storyViewerImage');
+    const caption = document.getElementById('storyViewerCaption');
+    if (image) image.src = story.imageUrl;
+    if (caption) caption.textContent = story.caption || '';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(story.id)}/view`, {
+      method: 'POST',
+      credentials: 'include'
+    }).catch(() => {});
+  }
+
+  function bindStoryIndicatorClicks() {
+    if (document.documentElement.dataset.storyIndicatorBound === 'true') return;
+    document.documentElement.dataset.storyIndicatorBound = 'true';
+    document.addEventListener('click', (event) => {
+      const storyBtn = event.target.closest('[data-story-indicator]');
+      if (!storyBtn) return;
+      event.preventDefault();
+      event.stopPropagation();
+      openStoryViewer({
+        id: storyBtn.dataset.storyId,
+        imageUrl: storyBtn.dataset.storyImage,
+        caption: storyBtn.dataset.storyCaption || ''
+      });
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeStoryViewer();
+    });
+  }
+
+  async function loadCurrentSellerStory(sellerId, seller = {}) {
+    const slot = document.getElementById('biz-story-slot');
+    if (!slot || !sellerId) return;
+    bindStoryIndicatorClicks();
+    slot.innerHTML = '';
+    try {
+      const res = await fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(sellerId)}`, {
+        credentials: 'include'
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const story = getActiveStory({ activeStory: data?.story });
+      if (!story) return;
+      const label = seller?.storename || seller?.name || '';
+      slot.innerHTML = `
+        <button type="button"
+                class="service-hero-story-indicator"
+                data-story-indicator
+                data-story-id="${escapeHtml(story.id)}"
+                data-story-image="${escapeHtml(story.imageUrl)}"
+                data-story-caption="${escapeHtml(story.caption || '')}"
+                aria-label="مشاهده استوری ${escapeHtml(label || 'فروشگاه')}">
+          <img src="${escapeHtml(story.imageUrl)}" alt="" loading="lazy" decoding="async">
+        </button>`;
+    } catch (err) {
+      console.warn('loadCurrentSellerStory failed:', err);
+    }
+  }
+
   function similarServiceCardTemplate(item = {}) {
     const requestUrl = item.requestUrl || (item.shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(item.shopUrl)}` : '#');
     const phone = normalizeCategoryText(item.phone || '');
@@ -4046,6 +4164,7 @@ window.addEventListener('load', () => {
     const rating = Number(item.rating || 0);
     const reviewCount = Number(item.reviewCount || 0);
     const hasRating = rating > 0;
+    const storyMarkup = buildSimilarStoryIndicator(item, item.name);
 
     return `
       <article class="similar-service-card">
@@ -4061,7 +4180,10 @@ window.addEventListener('load', () => {
             ${item.isAvailableNow ? '<span class="similar-service-card__badge similar-service-card__badge--available">آماده پذیرش</span>' : ''}
           </div>
           <div class="similar-service-card__title-row">
-            <h4 class="similar-service-card__name" title="${safeName}">${safeName}</h4>
+            <div class="similar-service-card__title-main">
+              <h4 class="similar-service-card__name" title="${safeName}">${safeName}</h4>
+              ${storyMarkup}
+            </div>
             ${hasRating ? `
               <span class="similar-service-card__rating" aria-label="امتیاز ${rating.toFixed(1)}">
                 <i class="fas fa-star"></i>
@@ -4144,8 +4266,21 @@ window.addEventListener('load', () => {
     const section = document.getElementById('similar-services-ad');
     if (!section || section.dataset.contactModalBound === 'true') return;
     section.dataset.contactModalBound = 'true';
+    bindStoryIndicatorClicks();
 
     section.addEventListener('click', (event) => {
+      const storyBtn = event.target.closest('[data-story-indicator]');
+      if (storyBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        openStoryViewer({
+          id: storyBtn.dataset.storyId,
+          imageUrl: storyBtn.dataset.storyImage,
+          caption: storyBtn.dataset.storyCaption || ''
+        });
+        return;
+      }
+
       const contactBtn = event.target.closest('[data-similar-contact-id]');
       if (contactBtn) {
         event.preventDefault();
@@ -4163,7 +4298,10 @@ window.addEventListener('load', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeSimilarContactModal();
+      if (event.key === 'Escape') {
+        closeSimilarContactModal();
+        closeStoryViewer();
+      }
     });
   }
 
@@ -4548,6 +4686,7 @@ async function renderAll() {
 
     if (resolvedSellerId) {
       loadBookingSummary(resolvedSellerId);
+      loadCurrentSellerStory(resolvedSellerId, seller);
       await loadFooterImage(resolvedSellerId);
     }
     

@@ -7,6 +7,7 @@ const Booking = require('../models/booking');
 const ServiceShopCustomer = require('../models/serviceShopCustomer');
 const BookingAvailability = require('../models/booking-availability');
 const SellerPortfolio = require('../models/seller-portfolio');
+const SellerStory = require('../models/SellerStory');
 const Product = require('../models/product');
 const SellerPlan = require('../models/sellerPlan');
 const AdOrder = require('../models/AdOrder');
@@ -2861,6 +2862,7 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
     isPremium: !!source.isPremium,
     isFeatured: !!source.isFeatured,
     isAvailableNow,
+    activeStory: source.activeStory || null,
     offerText: resolveSimilarOfferText(services, activeAd),
     requestUrl: shopUrl ? `/service-shops.html?shopurl=${encodeURIComponent(shopUrl)}` : '',
     rating: Number(source?.analytics?.ratingAverage ?? source.rating ?? 0) || 0,
@@ -2944,9 +2946,13 @@ exports.getSimilarPublicShops = async (req, res) => {
     ]);
 
     const sellerIds = new Set();
+    const sellerByShopUrl = new Map();
+    const fallbackUrls = [];
     shops.forEach((shop) => {
       if (shop.legacySellerId && mongoose.Types.ObjectId.isValid(shop.legacySellerId)) {
         sellerIds.add(String(shop.legacySellerId));
+      } else if (shop.shopUrl) {
+        fallbackUrls.push(String(shop.shopUrl).trim().toLowerCase());
       }
     });
     legacySellers.forEach((seller) => {
@@ -2955,11 +2961,23 @@ exports.getSimilarPublicShops = async (req, res) => {
       }
     });
 
+    if (fallbackUrls.length) {
+      const fallbackSellers = await Seller.find({ shopurl: { $in: fallbackUrls } })
+        .select('_id shopurl')
+        .lean();
+      fallbackSellers.forEach((seller) => {
+        if (!seller?._id || !seller?.shopurl) return;
+        const sellerId = String(seller._id);
+        sellerIds.add(sellerId);
+        sellerByShopUrl.set(String(seller.shopurl).trim().toLowerCase(), sellerId);
+      });
+    }
+
     const sellerObjectIds = Array.from(sellerIds)
       .filter((id) => mongoose.Types.ObjectId.isValid(id))
       .map((id) => new mongoose.Types.ObjectId(id));
 
-    const [services, adOrders, appearances] = sellerObjectIds.length
+    const [services, adOrders, appearances, activeStories] = sellerObjectIds.length
       ? await Promise.all([
         SellerService.find({ sellerId: { $in: sellerObjectIds }, isActive: true })
           .select('sellerId title desc tags badge isBookable price')
@@ -2979,9 +2997,13 @@ exports.getSimilarPublicShops = async (req, res) => {
           .lean(),
         ShopAppearance.find({ sellerId: { $in: sellerObjectIds } })
           .select('sellerId shopLogo footerImage slides')
+          .lean(),
+        SellerStory.find({ seller: { $in: sellerObjectIds }, status: 'active', expiresAt: { $gt: new Date() } })
+          .select('seller imageUrl caption createdAt expiresAt')
+          .sort({ createdAt: -1 })
           .lean()
       ])
-      : [[], [], []];
+      : [[], [], [], []];
 
     const serviceMap = new Map();
     services.forEach((service) => {
@@ -3007,16 +3029,34 @@ exports.getSimilarPublicShops = async (req, res) => {
       });
     });
 
+    const storyMap = new Map();
+    activeStories.forEach((story) => {
+      const key = String(story.seller || '');
+      if (!key || storyMap.has(key)) return;
+      storyMap.set(key, {
+        id: String(story._id),
+        imageUrl: normaliseText(story.imageUrl),
+        caption: normaliseText(story.caption),
+        createdAt: story.createdAt,
+        expiresAt: story.expiresAt
+      });
+    });
+
     const cards = [];
     const seen = new Set();
 
     shops.forEach((shop) => {
-      const sellerId = shop.legacySellerId ? String(shop.legacySellerId) : '';
+      const sellerId = shop.legacySellerId
+        ? String(shop.legacySellerId)
+        : sellerByShopUrl.get(String(shop.shopUrl || '').trim().toLowerCase()) || '';
       const card = toSimilarCard(shop, {
         services: sellerId ? (serviceMap.get(sellerId) || []) : [],
         activeAd: sellerId ? adMap.get(sellerId) : null,
         fallbackCategory: category
       });
+      if (sellerId && storyMap.has(sellerId)) {
+        card.activeStory = storyMap.get(sellerId);
+      }
       const dedupeKey = card.shopUrl ? `url:${card.shopUrl.toLowerCase()}` : `id:${card.id}`;
       if (!card.shopUrl || seen.has(dedupeKey)) return;
       seen.add(dedupeKey);
@@ -3040,6 +3080,7 @@ exports.getSimilarPublicShops = async (req, res) => {
         city: seller.city || extractCity(seller.address),
         isPremium: !!seller.isPremium,
         isBookable: true,
+        activeStory: storyMap.get(sellerId) || null,
         highlightServices: (serviceMap.get(sellerId) || []).map((service) => normaliseText(service.title)).filter(Boolean).slice(0, 3),
         updatedAt: seller.updatedAt,
         createdAt: seller.createdAt
@@ -3198,25 +3239,32 @@ exports.getPublicShowcase = async (req, res) => {
       .map((id) => new mongoose.Types.ObjectId(id));
 
     let portfolioMap = new Map();
+    let activeStoryMap = new Map();
     if (sellerIdList.length) {
-      const aggregated = await SellerPortfolio.aggregate([
-        { $match: { sellerId: { $in: sellerIdList }, isActive: true } },
-        { $sort: { order: 1, createdAt: -1 } },
-        {
-          $group: {
-            _id: '$sellerId',
-            items: {
-              $push: {
-                _id: '$_id',
-                title: '$title',
-                description: '$description',
-                image: '$image',
-                likeCount: { $ifNull: ['$likeCount', 0] }
+      const [aggregated, activeStories] = await Promise.all([
+        SellerPortfolio.aggregate([
+          { $match: { sellerId: { $in: sellerIdList }, isActive: true } },
+          { $sort: { order: 1, createdAt: -1 } },
+          {
+            $group: {
+              _id: '$sellerId',
+              items: {
+                $push: {
+                  _id: '$_id',
+                  title: '$title',
+                  description: '$description',
+                  image: '$image',
+                  likeCount: { $ifNull: ['$likeCount', 0] }
+                }
               }
             }
-          }
-        },
-        { $project: { items: { $slice: ['$items', 6] } } }
+          },
+          { $project: { items: { $slice: ['$items', 6] } } }
+        ]),
+        SellerStory.find({ seller: { $in: sellerIdList }, status: 'active', expiresAt: { $gt: new Date() } })
+          .select('seller imageUrl caption createdAt expiresAt')
+          .sort({ createdAt: -1 })
+          .lean()
       ]);
 
       portfolioMap = new Map(
@@ -3231,6 +3279,18 @@ exports.getPublicShowcase = async (req, res) => {
           }))
         ])
       );
+
+      activeStories.forEach((story) => {
+        const key = String(story.seller || '');
+        if (!key || activeStoryMap.has(key)) return;
+        activeStoryMap.set(key, {
+          id: String(story._id),
+          imageUrl: normaliseText(story.imageUrl),
+          caption: normaliseText(story.caption),
+          createdAt: story.createdAt,
+          expiresAt: story.expiresAt
+        });
+      });
     }
 
     const items = shops.map((shop) => {
@@ -3250,6 +3310,7 @@ exports.getPublicShowcase = async (req, res) => {
 
       return {
         id: shop._id.toString(),
+        sellerId,
         name: shop.name,
         shopUrl: shop.shopUrl,
         categoryName: mainCategory,
@@ -3263,6 +3324,7 @@ exports.getPublicShowcase = async (req, res) => {
         reviewCount,
         isPremium: !!shop.isPremium,
         isFeatured: !!shop.isFeatured,
+        activeStory: sellerId ? (activeStoryMap.get(sellerId) || null) : null,
         isBookable: !!shop.isBookable,
         instantConfirmation: !!shop?.bookingSettings?.instantConfirmation,
         coverImage: shop.coverImage || (portfolioPreview[0]?.image || ''),

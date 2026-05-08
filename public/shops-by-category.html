@@ -793,6 +793,160 @@
 
     .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
 
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      min-width: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-title-row h3 {
+      min-width: 0;
+      margin: 0;
+    }
+
+    .story-indicator {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 999px;
+      border: 0;
+      padding: 2px;
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      box-shadow: 0 7px 18px rgba(15, 23, 42, 0.13);
+      cursor: pointer;
+      flex: 0 0 auto;
+      touch-action: manipulation;
+    }
+
+    .story-indicator::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: conic-gradient(from 0deg, #f59e0b, #ec4899, #8b5cf6, #06b6d4, #f59e0b);
+      animation: storyRingSpin 4.5s linear infinite;
+      z-index: 0;
+    }
+
+    .story-indicator img {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      object-fit: cover;
+      border: 2px solid #fff;
+      background: #f8fafc;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .story-indicator:focus-visible {
+      outline: 3px solid rgba(14, 165, 233, 0.25);
+      outline-offset: 3px;
+    }
+
+    @keyframes storyRingSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .story-viewer-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.76);
+      backdrop-filter: blur(10px);
+    }
+
+    .story-viewer-modal.is-open {
+      display: flex;
+    }
+
+    .story-viewer-shell {
+      position: relative;
+      width: min(92vw, 390px);
+      aspect-ratio: 9 / 16;
+      max-height: 88vh;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #020617;
+      box-shadow: 0 24px 70px rgba(2, 6, 23, 0.42);
+    }
+
+    .story-viewer-shell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .story-viewer-close {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(15, 23, 42, 0.55);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .story-viewer-caption {
+      position: absolute;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      padding: 3.8rem 1rem 1rem;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      line-height: 1.9;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.72), transparent);
+      text-shadow: 0 2px 10px rgba(2, 6, 23, 0.55);
+    }
+
+    .story-viewer-caption:empty {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .card-title-row {
+        gap: 0.45rem;
+      }
+      .story-indicator {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+      }
+      .story-viewer-modal {
+        padding: 0;
+      }
+      .story-viewer-shell {
+        width: 100vw;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+      }
+    }
+
     .card-btn {
       margin-top: auto;
       width: 100%;
@@ -2152,6 +2306,7 @@
               : [];
             serviceShopList = (serviceData.items || []).map(item => ({
               id: item._id || item.id,
+              sellerId: item.sellerId || '',
               storename: item.name || '',
               category: item.categoryName || 'خدمات',
               subcategory: (item.subcategories && item.subcategories[0]) || '',
@@ -2160,6 +2315,7 @@
               city: item.city || '',
               desc: item.description || '',
               image: item.coverImage || '',
+              activeStory: item.activeStory || null,
               shopType: 'service'
             }));
           }
@@ -2622,6 +2778,7 @@
         const address = shop.address || 'آدرس ثبت نشده';
         const badge = shop.subcategory || shop.category || 'عمومی';
         const profileLink = resolveProfileLink(shop);
+        const storyMarkup = buildStoryIndicator(shop, shopName);
 
         // Determine button text based on shop type
         const isServiceShop = shop.shopType === 'service' || shop.category === 'خدمات' || (shop.category && shop.category.includes('خدمات'));
@@ -2645,8 +2802,9 @@
               ${premiumBadge}
             </div>
             <div class="card-body">
-              <div class="flex justify-between items-start mb-1">
+              <div class="card-title-row">
                  <h3 class="font-black text-lg text-slate-800 group-hover:text-emerald-600 transition-colors line-clamp-1">${shopName}</h3>
+                 ${storyMarkup}
               </div>
               <div class="flex items-center gap-1 mb-4">
                   <p class="text-xs font-bold text-slate-500 line-clamp-1">${address}</p>
@@ -2714,6 +2872,92 @@
         const firstChar = name.trim().charAt(0).toUpperCase();
         return firstChar;
       }
+
+      function getActiveStory(shop) {
+        const story = shop?.activeStory || shop?.story || null;
+        if (!story || story.status === 'expired' || story.status === 'deleted') return null;
+        const imageUrl = String(story.imageUrl || '').trim();
+        const id = String(story.id || story._id || '').trim();
+        return imageUrl && id ? { ...story, id, imageUrl } : null;
+      }
+
+      function buildStoryIndicator(shop, label) {
+        const story = getActiveStory(shop);
+        if (!story) return '';
+        const safeLabel = escapeHtml(label || 'فروشگاه');
+        return `
+          <button type="button"
+                  class="story-indicator"
+                  data-story-indicator
+                  data-story-id="${escapeHtml(story.id)}"
+                  data-story-image="${escapeHtml(story.imageUrl)}"
+                  data-story-caption="${escapeHtml(story.caption || '')}"
+                  aria-label="مشاهده استوری ${safeLabel}">
+            <img src="${escapeHtml(story.imageUrl)}" alt="" loading="lazy" decoding="async">
+          </button>`;
+      }
+
+      function ensureStoryViewer() {
+        let modal = document.getElementById('storyViewerModal');
+        if (modal) return modal;
+        modal = document.createElement('div');
+        modal.id = 'storyViewerModal';
+        modal.className = 'story-viewer-modal';
+        modal.setAttribute('aria-hidden', 'true');
+        modal.innerHTML = `
+          <div class="story-viewer-shell" role="dialog" aria-modal="true">
+            <button type="button" class="story-viewer-close" data-story-close aria-label="بستن">×</button>
+            <img id="storyViewerImage" alt="">
+            <div id="storyViewerCaption" class="story-viewer-caption"></div>
+          </div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal || event.target.closest('[data-story-close]')) {
+            closeStoryViewer();
+          }
+        });
+        return modal;
+      }
+
+      function closeStoryViewer() {
+        const modal = document.getElementById('storyViewerModal');
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      function openStoryViewer(story) {
+        if (!story?.id || !story?.imageUrl) return;
+        const modal = ensureStoryViewer();
+        const image = document.getElementById('storyViewerImage');
+        const caption = document.getElementById('storyViewerCaption');
+        if (image) image.src = story.imageUrl;
+        if (caption) caption.textContent = story.caption || '';
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        fetch(`/api/seller/stories/public/${encodeURIComponent(story.id)}/view`, {
+          method: 'POST',
+          credentials: 'include'
+        }).catch(() => {});
+      }
+
+      document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-story-indicator]');
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        openStoryViewer({
+          id: button.dataset.storyId,
+          imageUrl: button.dataset.storyImage,
+          caption: button.dataset.storyCaption || ''
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeStoryViewer();
+      });
 
       // Modal Functions Global
 window.openPortfolioModal = function (shopId, portfolioId = '') {
