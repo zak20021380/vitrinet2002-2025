@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vitrinet_secret_key';
 const User = require('../models/user');
 const Admin = require('../models/admin'); // اگه مدل جدا داری
 const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لیست سیاه
-const { buildPhoneCandidates } = require('../utils/phone');
+const { buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
 
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
@@ -26,6 +26,7 @@ const SELLER_ACCESS_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SELLER_REFRESH_TOKEN_TTL = '14d';
 const SELLER_REFRESH_TOKEN_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
 const USER_SESSION_MARKER = 'cookie-session';
+const GENERIC_LOGIN_FAILURE_MESSAGE = 'شماره موبایل یا رمز عبور اشتباه است';
 const OTP_REQUEST_WINDOW_MS = 10 * 60 * 1000;
 const OTP_REQUEST_MAX_PER_WINDOW = 5;
 const OTP_REQUEST_MIN_INTERVAL_MS = 30 * 1000;
@@ -451,15 +452,87 @@ function buildUserPhoneCandidates(rawPhone) {
   return Array.from(set).filter(Boolean);
 }
 
-async function findUserByPhone(rawPhone, { includeDeleted = false } = {}) {
+function buildPhoneLookupQuery(rawPhone) {
   const candidates = buildUserPhoneCandidates(rawPhone);
-  if (!candidates.length) return null;
+  const clauses = [];
 
-  const query = { phone: { $in: candidates } };
+  if (candidates.length) {
+    clauses.push({ phone: { $in: candidates } });
+  }
+
+  const regex = buildDigitInsensitiveRegex(rawPhone, { allowSeparators: true });
+  if (regex) {
+    clauses.push({ phone: { $regex: regex } });
+  }
+
+  if (!clauses.length) return null;
+  return clauses.length === 1 ? clauses[0] : { $or: clauses };
+}
+
+function maskPhoneForLog(phone) {
+  const normalized = normalizeIranianPhone(phone);
+  if (!normalized || normalized.length < 4) return '[invalid-phone]';
+  return `${normalized.slice(0, 4)}***${normalized.slice(-2)}`;
+}
+
+function logAuthEvent(event, details = {}, level = 'info') {
+  const payload = {
+    event,
+    ...details,
+    at: new Date().toISOString()
+  };
+  const logger = console[level] || console.info;
+  logger('[auth]', payload);
+}
+
+function buildPasswordCandidates(password) {
+  if (typeof password !== 'string') return [];
+
+  const candidates = new Set();
+  const raw = password;
+  const trimmed = raw.trim();
+  const normalized = raw.normalize('NFKC');
+  const normalizedTrimmed = normalized.trim();
+
+  for (const candidate of [raw, trimmed, normalized, normalizedTrimmed]) {
+    if (candidate && candidate.length <= PASSWORD_BCRYPT_MAX_LENGTH) {
+      candidates.add(candidate);
+    }
+  }
+
+  return Array.from(candidates);
+}
+
+async function comparePasswordCandidates(password, hashedPassword) {
+  if (!hashedPassword) return false;
+
+  const candidates = buildPasswordCandidates(password);
+  if (!candidates.length) return false;
+
+  for (const candidate of candidates) {
+    if (await bcrypt.compare(candidate, hashedPassword)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function findUserByPhone(rawPhone, { includeDeleted = false } = {}) {
+  const phoneQuery = buildPhoneLookupQuery(rawPhone);
+  if (!phoneQuery) return null;
+
+  const query = { ...phoneQuery };
   if (!includeDeleted) {
     query.deleted = { $ne: true };
   }
   return User.findOne(query);
+}
+
+async function findSellerByPhoneForLogin(rawPhone) {
+  const phoneQuery = buildPhoneLookupQuery(rawPhone);
+  if (!phoneQuery) return null;
+  return Seller.findOne(phoneQuery).select('+password');
 }
 
 // ⬇︎ تابع کمکی؛ بیرون از هر متد export باشد تا همه بتوانند استفاده کنند
@@ -818,21 +891,28 @@ exports.login = async (req, res) => {
   try {
     const { phone: rawPhone, password } = req.body || {};
     const phone = normalizeStrictIranianPhone(rawPhone);
-    const normalizedPassword = typeof password === 'string' ? password : '';
-    if (!phone || !normalizedPassword || normalizedPassword.length > PASSWORD_BCRYPT_MAX_LENGTH || !validateIranianPhone(phone)) {
+    const passwordCandidates = buildPasswordCandidates(password);
+    const logPhone = maskPhoneForLog(rawPhone);
+    if (!phone || !passwordCandidates.length || !validateIranianPhone(phone)) {
+      logAuthEvent('seller_login_rejected_validation', { phone: logPhone }, 'warn');
       return res.status(400).json({ success: false, message: 'شماره و رمز الزامی است.' });
     }
 
     await ensurePhoneAllowed(phone);
 
     // بارگذاری صریح password
-    const phoneCandidates = buildPhoneCandidates(phone);
-    const seller = await Seller.findOne({ phone: { $in: phoneCandidates } }).select('+password');
-    if (!seller) return res.status(404).json({ success: false, message: 'فروشنده‌ای با این شماره یافت نشد.' });
+    const seller = await findSellerByPhoneForLogin(phone);
+    if (!seller) {
+      logAuthEvent('seller_login_account_not_found', { phone: logPhone }, 'warn');
+      return res.status(404).json({ success: false, message: 'فروشنده‌ای با این شماره یافت نشد.' });
+    }
 
     // مقایسه رمز
-    const isMatch = await bcrypt.compare(normalizedPassword, seller.password);
-    if (!isMatch) return res.status(401).json({ success: false, message: 'رمز اشتباه است.' });
+    const isMatch = await comparePasswordCandidates(password, seller.password);
+    if (!isMatch) {
+      logAuthEvent('seller_login_password_mismatch', { phone: logPhone, sellerId: seller._id.toString() }, 'warn');
+      return res.status(401).json({ success: false, message: 'رمز اشتباه است.' });
+    }
 
     // صدور نشست امن (توکن فقط در کوکی HttpOnly)
     issueSellerSession(req, res, seller);
@@ -840,10 +920,14 @@ exports.login = async (req, res) => {
     // آماده‌سازی پاسخ بدون password
     seller.password = undefined;
 
+    logAuthEvent('seller_login_success', { phone: logPhone, sellerId: seller._id.toString() });
+
     return res.json({
       success: true,
       message: 'ورود با موفقیت انجام شد.',
       token: USER_SESSION_MARKER,
+      accountType: 'seller',
+      redirectTo: seller.category === 'خدمات' ? '/service-seller-panel/s-seller-panel.html' : '/seller/dashboard.html',
       seller: {
         id: seller._id,
         firstname: seller.firstname,
@@ -1153,10 +1237,12 @@ exports.loginUser = async (req, res) => {
   try {
     const { phone: rawPhone, password } = req.body || {};
     const phone = normalizeStrictIranianPhone(rawPhone);
-    const normalizedPassword = typeof password === 'string' ? password : '';
+    const passwordCandidates = buildPasswordCandidates(password);
+    const logPhone = maskPhoneForLog(rawPhone);
 
     /* ۱) ولیدیشن اولیه */
-    if (!phone || !normalizedPassword || normalizedPassword.length > PASSWORD_BCRYPT_MAX_LENGTH || !validateIranianPhone(phone)) {
+    if (!phone || !passwordCandidates.length || !validateIranianPhone(phone)) {
+      logAuthEvent('shared_login_rejected_validation', { phone: logPhone }, 'warn');
       return res.status(400).json({
         success: false,
         message: 'شماره و رمز الزامی است.'
@@ -1166,39 +1252,92 @@ exports.loginUser = async (req, res) => {
     /* ۲) ردِ شماره‌های مسدود یا حساب‌های حذف‌شده */
     await ensurePhoneAllowed(phone);
 
+    const seller = await findSellerByPhoneForLogin(phone);
+    if (seller && await comparePasswordCandidates(password, seller.password)) {
+      issueSellerSession(req, res, seller);
+      seller.password = undefined;
+
+      logAuthEvent('shared_login_success', {
+        phone: logPhone,
+        accountType: 'seller',
+        sellerId: seller._id.toString()
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'ورود با موفقیت انجام شد.',
+        token: USER_SESSION_MARKER,
+        accountType: 'seller',
+        redirectTo: seller.category === 'خدمات' ? '/service-seller-panel/s-seller-panel.html' : '/seller/dashboard.html',
+        seller: {
+          id: seller._id,
+          firstname: seller.firstname || '',
+          lastname: seller.lastname || '',
+          storename: seller.storename || '',
+          shopurl: seller.shopurl || '',
+          phone: seller.phone,
+          category: seller.category || '',
+          address: seller.address || '',
+          desc: seller.desc || '',
+          createdAt: seller.createdAt
+        }
+      });
+    }
+
     /* ۳) پیدا کردن کاربری که حذف نشده باشد */
     const user = await findUserByPhone(phone);
+    logAuthEvent('shared_login_records_checked', {
+      phone: logPhone,
+      sellerFound: Boolean(seller),
+      userFound: Boolean(user),
+      userHasPassword: Boolean(user?.password)
+    });
     if (!user) {
+      logAuthEvent('shared_login_account_not_found', { phone: logPhone, sellerFound: Boolean(seller) }, 'warn');
       return res.status(401).json({
         success: false,
-        message: 'شماره موبایل یا رمز عبور اشتباه است'
+        message: GENERIC_LOGIN_FAILURE_MESSAGE
       });
     }
 
     /* ۴) تطابق رمز عبور */
     if (!user.password) {
+      logAuthEvent('shared_login_missing_user_password', { phone: logPhone, userId: user._id.toString() }, 'warn');
       return res.status(401).json({
         success: false,
-        message: 'شماره موبایل یا رمز عبور اشتباه است'
+        message: GENERIC_LOGIN_FAILURE_MESSAGE
       });
     }
 
-    const isMatch = await bcrypt.compare(normalizedPassword, user.password);
+    const isMatch = await comparePasswordCandidates(password, user.password);
     if (!isMatch) {
+      logAuthEvent('shared_login_password_mismatch', {
+        phone: logPhone,
+        sellerFound: Boolean(seller),
+        userId: user._id.toString()
+      }, 'warn');
       return res.status(401).json({
         success: false,
-        message: 'شماره موبایل یا رمز عبور اشتباه است'
+        message: GENERIC_LOGIN_FAILURE_MESSAGE
       });
     }
 
     /* ۵) تولید JWT و ست کوکی */
     issueUserSession(req, res, user);
 
+    logAuthEvent('shared_login_success', {
+      phone: logPhone,
+      accountType: 'user',
+      userId: user._id.toString()
+    });
+
     /* ۷) پاسخ نهایی */
     return res.status(200).json({
       success: true,
       message: 'ورود با موفقیت انجام شد.',
       token: USER_SESSION_MARKER,
+      accountType: 'user',
+      redirectTo: '/user/dashboard.html',
       user: {
         id: user._id,
         firstname: user.firstname || '',

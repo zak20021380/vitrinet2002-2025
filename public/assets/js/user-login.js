@@ -35,6 +35,8 @@ let csrfTokenCache = '';
 const loginForm = document.getElementById('loginForm');
 const errorMsg = document.getElementById('error-message');
 const forgotLink = document.getElementById('forgot-link');
+const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
 function clearInlineLoginError() {
   if (!errorMsg) return;
@@ -78,6 +80,37 @@ function normalizeInlineLoginError(rawMessage) {
   return message || 'خطا در ورود!';
 }
 
+function toEnglishDigits(value = '') {
+  return String(value || '')
+    .replace(/[۰-۹]/g, (digit) => String(PERSIAN_DIGITS.indexOf(digit)))
+    .replace(/[٠-٩]/g, (digit) => String(ARABIC_DIGITS.indexOf(digit)));
+}
+
+function normalizeLoginPhone(value = '') {
+  const digits = toEnglishDigits(value).replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('0')) return digits;
+  if (digits.length === 10 && digits.startsWith('9')) return `0${digits}`;
+  if (digits.length === 12 && digits.startsWith('98')) return `0${digits.slice(2)}`;
+  if (digits.length === 14 && digits.startsWith('0098')) return `0${digits.slice(4)}`;
+  return digits;
+}
+
+function buildSellerRedirect(data) {
+  const seller = data?.seller || {};
+  const baseTarget = data?.redirectTo || '/seller/dashboard.html';
+  const shopurl = String(seller.shopurl || '').trim();
+  if (!shopurl) return baseTarget;
+
+  try {
+    const target = new URL(baseTarget, window.location.origin);
+    target.searchParams.set('shopurl', shopurl);
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    const separator = baseTarget.includes('?') ? '&' : '?';
+    return `${baseTarget}${separator}shopurl=${encodeURIComponent(shopurl)}`;
+  }
+}
+
 async function getAuthCsrfToken() {
   if (csrfTokenCache) return csrfTokenCache;
 
@@ -96,8 +129,8 @@ async function getAuthCsrfToken() {
 
 loginForm.addEventListener('submit', async function (e) {
   e.preventDefault();
-  const phone = document.getElementById('mobile').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const phone = normalizeLoginPhone(document.getElementById('mobile').value);
+  const password = document.getElementById('password').value;
 
   try {
     const csrfToken = await getAuthCsrfToken();
@@ -112,7 +145,7 @@ loginForm.addEventListener('submit', async function (e) {
       body: JSON.stringify({ phone, password })
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'خطا در ورود!');
 
     // Clear old data
@@ -120,7 +153,14 @@ loginForm.addEventListener('submit', async function (e) {
 
     // Session is maintained in HttpOnly cookie. Keep a marker for legacy checks.
     localStorage.setItem('token', data.token || SESSION_MARKER);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    if (data.accountType === 'seller' || data.seller) {
+      localStorage.setItem('seller_token', data.token || SESSION_MARKER);
+      localStorage.setItem('seller', JSON.stringify(data.seller || {}));
+      window.location.href = buildSellerRedirect(data);
+      return;
+    }
+
+    localStorage.setItem('user', JSON.stringify(data.user || {}));
 
     const back = SafeSS.getJSON('afterLoginReturn');
     if (back) {
