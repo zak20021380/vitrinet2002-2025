@@ -91,7 +91,14 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-CSRF-Token',
+    'X-Requested-With',
+    'X-Story-Reaction-Key',
+    'X-Story-Reaction-State'
+  ],
   exposedHeaders: ['Content-Disposition']
 }));
 

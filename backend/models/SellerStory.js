@@ -30,9 +30,14 @@ const sellerStorySchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+  likedBy: {
+    type: [String],
+    default: [],
+    select: false
+  },
   status: {
     type: String,
-    enum: ['active', 'expired'],
+    enum: ['active', 'expired', 'deleted'],
     default: 'active',
     index: true
   },

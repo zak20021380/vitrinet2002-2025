@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -42,7 +43,8 @@ function serializeStory(story, now = new Date()) {
   if (!story) return null;
   const expiresAt = story.expiresAt ? new Date(story.expiresAt) : null;
   const createdAt = story.createdAt ? new Date(story.createdAt) : null;
-  const isExpired = !expiresAt || expiresAt.getTime() <= now.getTime() || story.status === 'expired';
+  const isDeleted = story.status === 'deleted';
+  const isExpired = isDeleted || !expiresAt || expiresAt.getTime() <= now.getTime() || story.status === 'expired';
   const remainingMs = expiresAt ? Math.max(0, expiresAt.getTime() - now.getTime()) : 0;
   const elapsedMs = createdAt ? Math.max(0, now.getTime() - createdAt.getTime()) : 0;
   const progress = Math.min(100, Math.max(0, (elapsedMs / STORY_DURATION_MS) * 100));
@@ -54,12 +56,42 @@ function serializeStory(story, now = new Date()) {
     caption: story.caption || '',
     viewsCount: story.viewsCount || 0,
     likesCount: story.likesCount || 0,
-    status: isExpired ? 'expired' : 'active',
+    status: isDeleted ? 'deleted' : (isExpired ? 'expired' : 'active'),
     createdAt: story.createdAt,
     expiresAt: story.expiresAt,
     remainingMs,
     progress
   };
+}
+
+function getReactionKey(req) {
+  const raw = String(
+    req.get('x-story-reaction-key') ||
+    req.body?.reactionKey ||
+    req.query?.reactionKey ||
+    ''
+  ).trim();
+
+  const safeRaw = raw.replace(/[^a-zA-Z0-9:_-]/g, '').slice(0, 96);
+  if (safeRaw) return safeRaw;
+
+  const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const ip = forwardedFor || req.ip || req.socket?.remoteAddress || 'unknown-ip';
+  const userAgent = req.get('user-agent') || 'unknown-agent';
+  const fallbackHash = crypto
+    .createHash('sha256')
+    .update(`${ip}|${userAgent}`)
+    .digest('hex')
+    .slice(0, 40);
+
+  return `request:${fallbackHash}`;
+}
+
+function getDesiredReactionState(req) {
+  const raw = String(req.get('x-story-reaction-state') || req.body?.reacted || '').trim().toLowerCase();
+  if (['1', 'true', 'liked', 'like'].includes(raw)) return true;
+  if (['0', 'false', 'unliked', 'unlike'].includes(raw)) return false;
+  return null;
 }
 
 async function expireOldStories(sellerId, now = new Date()) {
@@ -84,11 +116,12 @@ async function buildStoryState(sellerId) {
   const cooldownRemainingMs = nextAvailableAt
     ? Math.max(0, nextAvailableAt.getTime() - now.getTime())
     : 0;
+  const visibleLatestStory = latestStory?.status === 'deleted' ? null : latestStory;
 
   return {
     success: true,
-    story: serializeStory(activeStory || latestStory, now),
-    latestStory: serializeStory(latestStory, now),
+    story: serializeStory(activeStory || visibleLatestStory, now),
+    latestStory: serializeStory(visibleLatestStory, now),
     canPost: cooldownRemainingMs <= 0,
     cooldownRemainingMs,
     nextAvailableAt
@@ -106,12 +139,13 @@ async function buildPublicStoryState(sellerId) {
       .lean(),
     SellerStory.findOne({ seller: sellerId }).sort({ createdAt: -1 }).lean()
   ]);
+  const visibleLatestStory = latestStory?.status === 'deleted' ? null : latestStory;
 
   return {
     success: true,
     stories: activeStories.map((story) => serializeStory(story, now)),
     story: serializeStory(activeStories[0] || null, now),
-    latestStory: serializeStory(latestStory, now)
+    latestStory: serializeStory(visibleLatestStory, now)
   };
 }
 
@@ -120,6 +154,21 @@ function removeUploadedFile(file) {
   fs.unlink(file.path, (error) => {
     if (error) {
       console.warn('Failed to remove story upload:', error.message || error);
+    }
+  });
+}
+
+function removeStoryImage(imageUrl) {
+  const normalized = String(imageUrl || '').replace(/\\/g, '/');
+  const prefix = '/uploads/stories/';
+  if (!normalized.startsWith(prefix)) return;
+
+  const filename = path.basename(normalized);
+  if (!filename) return;
+
+  fs.unlink(path.join(uploadDir, filename), (error) => {
+    if (error && error.code !== 'ENOENT') {
+      console.warn('Failed to remove story image:', error.message || error);
     }
   });
 }
@@ -171,17 +220,34 @@ router.post('/public/:storyId/reaction', async (req, res) => {
     }
 
     const now = new Date();
-    const story = await SellerStory.findOneAndUpdate(
-      { _id: storyId, status: 'active', expiresAt: { $gt: now } },
-      { $inc: { likesCount: 1 } },
-      { new: true }
-    ).lean();
-
+    const reactionKey = getReactionKey(req);
+    const desiredReacted = getDesiredReactionState(req);
+    const story = await SellerStory.findOne({ _id: storyId, status: 'active', expiresAt: { $gt: now } })
+      .select('+likedBy');
     if (!story) {
       return res.status(404).json({ success: false, message: 'Story is not active.' });
     }
 
-    return res.json({ success: true, story: serializeStory(story, now) });
+    const currentLikedBy = Array.isArray(story.likedBy) ? story.likedBy : [];
+    const alreadyReacted = currentLikedBy.includes(reactionKey);
+    const shouldReact = desiredReacted === null ? !alreadyReacted : desiredReacted;
+    let reacted = alreadyReacted;
+
+    if (!shouldReact && alreadyReacted) {
+      story.likedBy = currentLikedBy.filter((key) => key !== reactionKey);
+      story.likesCount = Math.max(0, Number(story.likesCount || 0) - 1);
+      reacted = false;
+      await story.save();
+    } else if (shouldReact && !alreadyReacted) {
+      story.likedBy = [...currentLikedBy, reactionKey];
+      story.likesCount = Math.max(0, Number(story.likesCount || 0) + 1);
+      reacted = true;
+      await story.save();
+    } else {
+      story.likesCount = Math.max(0, Number(story.likesCount || 0));
+    }
+
+    return res.json({ success: true, reacted, story: serializeStory(story.toObject(), now) });
   } catch (error) {
     console.error('Failed to react to story:', error);
     return res.status(500).json({ success: false, message: 'Could not react to story.' });
@@ -199,6 +265,38 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
   } catch (error) {
     console.error('Failed to load seller story:', error);
     return res.status(500).json({ success: false, message: 'Could not load story data.' });
+  }
+});
+
+router.delete('/:storyId', authMiddleware('seller'), async (req, res) => {
+  try {
+    const sellerId = getSellerId(req);
+    const { storyId } = req.params;
+    if (!sellerId) {
+      return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const now = new Date();
+    await expireOldStories(sellerId, now);
+
+    const story = await SellerStory.findOneAndUpdate(
+      { _id: storyId, seller: sellerId, status: 'active', expiresAt: { $gt: now } },
+      { $set: { status: 'deleted', expiresAt: now } },
+      { new: true }
+    ).lean();
+
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story is not active.' });
+    }
+
+    removeStoryImage(story.imageUrl);
+    return res.json(await buildStoryState(sellerId));
+  } catch (error) {
+    console.error('Failed to delete seller story:', error);
+    return res.status(500).json({ success: false, message: 'Could not delete story.' });
   }
 });
 

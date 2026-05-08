@@ -8431,6 +8431,41 @@
   font-weight: 900;
 }
 
+.story-card__actions {
+  padding: 0 14px 14px;
+  background: #fff;
+}
+
+.story-delete-btn {
+  width: 100%;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(220, 38, 38, .18);
+  border-radius: 16px;
+  color: #b91c1c;
+  background: #fef2f2;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+}
+
+.story-delete-btn:not(:disabled):hover,
+.story-delete-btn:not(:disabled):focus-visible {
+  transform: translateY(-1px);
+  background: #fee2e2;
+  border-color: rgba(220, 38, 38, .32);
+  outline: none;
+}
+
+.story-delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
 .story-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -9610,6 +9645,12 @@
                 <strong id="storyLikesCount">۰</strong>
               </div>
             </div>
+            <div class="story-card__actions">
+              <button type="button" class="story-delete-btn" id="storyDeleteBtn">
+                <i class="ri-delete-bin-6-line" aria-hidden="true"></i>
+                حذف استوری فعلی
+              </button>
+            </div>
           </article>
         </section>
       </div>
@@ -10272,6 +10313,7 @@
       loaded: false,
       loading: false,
       uploading: false,
+      deleting: false,
       canPost: false,
       selectedFile: null,
       previewUrl: '',
@@ -10289,7 +10331,7 @@
         'storyFeedback', 'storyLoadingState', 'storyEmptyState', 'storyCard',
         'storyCardImage', 'storyCardCaption', 'storyExpirationText', 'storyViewsCount',
         'storyLikesCount', 'storyProgressBar', 'storySuccessPopup', 'storySuccessClose',
-        'storySuccessOk'
+        'storySuccessOk', 'storyDeleteBtn'
       ].forEach((id) => { els[id] = document.getElementById(id); });
     }
 
@@ -10329,7 +10371,10 @@
         'Could not upload story image.': 'امکان بارگذاری تصویر استوری وجود ندارد.',
         'Story image is required.': 'تصویر استوری الزامی است.',
         'Only one story can be posted every 24 hours.': 'در هر ۲۴ ساعت فقط یک استوری می‌توانید منتشر کنید.',
-        'Could not publish story.': 'امکان انتشار استوری وجود ندارد.'
+        'Could not publish story.': 'امکان انتشار استوری وجود ندارد.',
+        'Invalid story id.': 'شناسه استوری معتبر نیست.',
+        'Story is not active.': 'این استوری دیگر فعال نیست.',
+        'Could not delete story.': 'امکان حذف استوری وجود ندارد.'
       };
       return messages[normalized] || fallback;
     }
@@ -10388,6 +10433,13 @@
       if (els.storyImageInput) els.storyImageInput.disabled = state.uploading || !state.canPost;
       if (els.storyCaptionInput) els.storyCaptionInput.disabled = state.uploading || !state.canPost;
       if (els.storyUploadDrop) els.storyUploadDrop.classList.toggle('is-disabled', !state.canPost || state.uploading);
+      if (els.storyDeleteBtn) {
+        const hasActiveStory = state.story?.id && state.story?.status === 'active';
+        els.storyDeleteBtn.disabled = state.deleting || state.uploading || !hasActiveStory;
+        els.storyDeleteBtn.innerHTML = state.deleting
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال حذف...'
+          : '<i class="ri-delete-bin-6-line" aria-hidden="true"></i> حذف استوری فعلی';
+      }
     }
 
     function updateCooldown() {
@@ -10440,9 +10492,10 @@
     function renderStory() {
       showLoading(false);
       const story = state.story;
-      if (!story?.imageUrl) {
+      if (!story?.imageUrl || story.status === 'deleted') {
         if (els.storyEmptyState) els.storyEmptyState.style.display = '';
         if (els.storyCard) els.storyCard.style.display = 'none';
+        refreshSubmitState();
         return;
       }
 
@@ -10453,6 +10506,7 @@
       if (els.storyViewsCount) els.storyViewsCount.textContent = formatCount(story.viewsCount);
       if (els.storyLikesCount) els.storyLikesCount.textContent = formatCount(story.likesCount);
       updateStoryCountdown();
+      refreshSubmitState();
     }
 
     async function loadStories(force = false) {
@@ -10561,6 +10615,40 @@
       }
     }
 
+    async function deleteCurrentStory() {
+      const storyId = state.story?.id || state.story?._id;
+      if (state.deleting || !storyId || state.story?.status !== 'active') return;
+      const confirmed = window.confirm('استوری فعلی حذف شود؟ برای ثبت استوری جدید باید تا پایان نوبت ۲۴ ساعته صبر کنید.');
+      if (!confirmed) return;
+
+      state.deleting = true;
+      refreshSubmitState();
+      showFeedback('');
+
+      try {
+        const res = await fetch(buildApiUrl(`/api/seller/stories/${encodeURIComponent(storyId)}`), withCredentials({
+          method: 'DELETE'
+        }));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeStoryError(data.message, 'امکان حذف استوری وجود ندارد.'));
+        }
+
+        state.story = data.story || data.latestStory || null;
+        state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
+          ? new Date(data.nextAvailableAt).getTime()
+          : 0;
+        updateCooldown();
+        renderStory();
+        showFeedback('استوری حذف شد. برای ثبت استوری جدید باید تا نوبت بعدی صبر کنید.');
+      } catch (error) {
+        showFeedback(error.message || 'امکان حذف استوری وجود ندارد.', 'error');
+      } finally {
+        state.deleting = false;
+        refreshSubmitState();
+      }
+    }
+
     function bind() {
       cacheElements();
       if (!els.storyUploadForm || els.storyUploadForm.dataset.bound === '1') return;
@@ -10575,6 +10663,7 @@
         }
       });
       els.storyUploadForm.addEventListener('submit', submitStory);
+      els.storyDeleteBtn?.addEventListener('click', deleteCurrentStory);
       els.storySuccessClose?.addEventListener('click', closeStorySuccessPopup);
       els.storySuccessOk?.addEventListener('click', closeStorySuccessPopup);
       els.storySuccessPopup?.addEventListener('click', (event) => {
