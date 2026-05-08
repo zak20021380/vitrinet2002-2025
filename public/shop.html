@@ -1449,9 +1449,29 @@ body {
 
 /* Minimal shop story avatar */
 .shop-stories {
-  width: min(95%, 1280px);
-  margin: .55rem auto 0;
+  width: auto;
+  margin: 0;
   direction: rtl;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-area .shop-stories {
+  margin-inline-start: .1rem;
+}
+
+.brand-area,
+.home-link,
+.logo-wrap {
+  min-width: 0;
+}
+
+.logo-text {
+  max-width: min(26vw, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-stories[hidden] {
@@ -1462,7 +1482,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 .15rem;
+  padding: 0;
   margin: 0;
   background: transparent;
   border: 0;
@@ -1496,10 +1516,10 @@ body {
 }
 
 .stories-skeleton-thumb {
-  width: 58px;
-  height: 58px;
-  min-height: 58px;
-  flex: 0 0 58px;
+  width: 50px;
+  height: 50px;
+  min-height: 50px;
+  flex: 0 0 50px;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: linear-gradient(90deg, #f1f5f9 0%, #fff 45%, #f1f5f9 100%);
@@ -1519,10 +1539,10 @@ body {
 
 .story-thumb {
   position: relative;
-  width: 62px;
-  min-width: 62px;
-  height: 62px;
-  flex: 0 0 62px;
+  width: 54px;
+  min-width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -1539,7 +1559,7 @@ body {
   inset: 0;
   border-radius: inherit;
   background: conic-gradient(from 30deg, #7c83fd, #52b788, #7c83fd);
-  box-shadow: 0 8px 20px rgba(28, 44, 90, .12);
+  box-shadow: 0 6px 16px rgba(28, 44, 90, .12);
 }
 
 .story-thumb:hover,
@@ -1556,8 +1576,8 @@ body {
 .story-thumb-media {
   position: relative;
   z-index: 1;
-  width: 54px;
-  height: 54px;
+  width: 46px;
+  height: 46px;
   aspect-ratio: 1;
   padding: 0;
   overflow: hidden;
@@ -1589,21 +1609,57 @@ body {
 }
 
 @media (max-width: 520px) {
+  .brand-area {
+    gap: .45rem;
+    flex: 1 1 auto;
+  }
+
+  .home-link {
+    gap: .45rem;
+  }
+
+  .logo-text {
+    max-width: 22vw;
+  }
+
   .shop-stories {
-    width: min(95%, 100%);
-    margin-top: .45rem;
+    width: auto;
+    margin: 0;
   }
 
   .story-thumb {
-    width: 58px;
-    min-width: 58px;
-    height: 58px;
-    flex-basis: 58px;
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    flex-basis: 46px;
   }
 
   .story-thumb-media {
-    width: 50px;
-    height: 50px;
+    width: 39px;
+    height: 39px;
+    border-width: 2px;
+  }
+}
+
+@media (max-width: 390px) {
+  .brand-label {
+    display: none;
+  }
+
+  .logo-text {
+    max-width: 24vw;
+  }
+
+  .story-thumb {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .story-thumb-media {
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -2233,6 +2289,11 @@ body {
           <p class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</p>
         </div>
       </a>
+      <section class="shop-stories" id="shopStoriesSection" aria-label="استوری فروشگاه" hidden>
+        <div class="stories-shell">
+          <div class="stories-content" id="shopStoriesContent" aria-live="polite"></div>
+        </div>
+      </section>
     </div>
 
     <!-- Customer Badge -->
@@ -2433,16 +2494,6 @@ body {
 
 
 
-
-<section class="shop-stories" id="shopStoriesSection" aria-label="استوری فروشگاه" hidden>
-  <div class="stories-shell">
-    <div class="stories-content" id="shopStoriesContent" aria-live="polite">
-      <div class="stories-loading">
-        <div class="stories-skeleton-thumb"></div>
-      </div>
-    </div>
-  </div>
-</section>
 
   <!-- Hero Slider -->
 <section class="max-w-[95%] mx-auto hero-slider mt-4 relative" aria-label="اسلایدر تبلیغاتی" id="heroSliderSection">
@@ -2752,6 +2803,7 @@ function setCustomerCount(countValue = 0) {
 const STORY_VIEW_DURATION_MS = 6500;
 const shopStoriesState = {
   stories: [],
+  avatarUrl: '',
   activeIndex: 0,
   viewerTimer: null,
   viewerStartedAt: 0,
@@ -2831,7 +2883,8 @@ function renderShopStories(stories = []) {
 
     const media = document.createElement('div');
     media.className = 'story-thumb-media';
-    media.appendChild(createStoryImage(normalizeStoryImageUrl(story.imageUrl), 'استوری فروشگاه', media));
+    const avatarSrc = normalizeStoryImageUrl(shopStoriesState.avatarUrl || story.imageUrl);
+    media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
     const fallback = document.createElement('div');
     fallback.className = 'story-media-fallback';
     fallback.textContent = '';
@@ -3022,6 +3075,7 @@ async function loadShopData() {
 
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
     currentSellerId = normalizeSellerId(data.sellerId) || sellerIdParam;
+    shopStoriesState.avatarUrl = data.shopLogo || data.boardImage || data.footerImage || '';
     loadShopStories(currentSellerId);
 
     // لوگو و نام فروشگاه
