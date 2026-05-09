@@ -687,6 +687,47 @@ if (shopPreviewButton) {
 
 
 
+function closeSidebarIfMobile() {
+  const sidebar = document.getElementById('sidebar');
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (sidebar && sidebar.classList.contains('expanded') && isMobile) {
+    toggleSidebar();
+  }
+}
+
+function getSellerShopSlug() {
+  const seller = window.seller || {};
+  return (seller.shopurl || seller.shopUrl || seller.slug || '').toString().trim();
+}
+
+function openSellerShopPage() {
+  const shopSlug = getSellerShopSlug();
+  if (!shopSlug) {
+    alert('آدرس فروشگاه شما هنوز ثبت نشده است.');
+    return;
+  }
+
+  const url = new URL('/shop.html', window.location.origin);
+  url.searchParams.set('shopurl', shopSlug);
+  window.open(url.href, '_blank', 'noopener');
+  closeSidebarIfMobile();
+}
+
+document.querySelectorAll('[data-seller-shop-link]').forEach((button) => {
+  if (button.dataset.sellerShopBound === '1') return;
+  button.dataset.sellerShopBound = '1';
+  button.addEventListener('click', openSellerShopPage);
+});
+
+document.querySelectorAll('[data-vitrinet-home-link]').forEach((button) => {
+  if (button.dataset.vitrinetHomeBound === '1') return;
+  button.dataset.vitrinetHomeBound = '1';
+  button.addEventListener('click', () => {
+    closeSidebarIfMobile();
+    window.location.href = '/';
+  });
+});
+
 function showProductSuccessPopup() {
   console.log("✅ تابع showProductSuccessPopup صدا زده شد");
   const popup = document.getElementById('productSuccessPopup');

@@ -1956,6 +1956,67 @@
       text-overflow: ellipsis;
     }
 
+    .sidebar-quick-links {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 0 16px 12px;
+    }
+
+    .sidebar-quick-link {
+      min-width: 0;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      text-align: right;
+      justify-content: flex-start;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .sidebar-quick-link:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .sidebar-quick-link:active {
+      transform: scale(0.98);
+    }
+
+    .sidebar-quick-link__icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 9px;
+      background: #ecfdf5;
+      color: #059669;
+      font-size: 16px;
+    }
+
+    .sidebar-quick-link--home .sidebar-quick-link__icon {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .sidebar-quick-link__text {
+      min-width: 0;
+      display: block;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
     /* ========== Menu Items Container - Breathable ========== */
     .sidebar-menu-container {
       flex: 1;
@@ -2174,9 +2235,14 @@
     /* Show mobile-specific elements */
     .sidebar-mobile-header,
     .sidebar-primary-actions,
+    .sidebar-quick-links,
     .sidebar-menu-container,
     .sidebar-footer {
       display: flex;
+    }
+
+    .sidebar-quick-links {
+      display: grid;
     }
 
     .sidebar-menu-container {
@@ -2188,6 +2254,7 @@
   @media (min-width: 769px) {
     .sidebar-mobile-header,
     .sidebar-primary-actions,
+    .sidebar-quick-links,
     .sidebar-menu-container,
     .sidebar-footer {
       display: none !important;
@@ -2201,9 +2268,14 @@
     /* Show mobile-style elements on desktop with adapted styling */
     .sidebar-mobile-header,
     .sidebar-primary-actions,
+    .sidebar-quick-links,
     .sidebar-menu-container,
     .sidebar-footer {
       display: flex !important;
+    }
+
+    .sidebar-quick-links {
+      display: grid !important;
     }
 
     .sidebar-menu-container {
@@ -2292,6 +2364,36 @@
       padding: 16px 16px 12px !important;
       gap: 10px !important;
       flex-direction: column !important;
+    }
+
+    .sidebar-quick-links {
+      grid-template-columns: 1fr !important;
+      padding: 0 16px 12px !important;
+      gap: 10px !important;
+    }
+
+    .sidebar-quick-link {
+      min-height: 48px !important;
+      padding: 0 16px !important;
+      border-radius: 12px !important;
+      gap: 12px !important;
+    }
+
+    .sidebar-quick-link:hover {
+      transform: translateX(-4px) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .sidebar-quick-link__icon {
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 10px !important;
+      font-size: 17px !important;
+    }
+
+    .sidebar-quick-link__text {
+      font-size: 14px !important;
+      font-weight: 700 !important;
     }
 
     .sidebar-action-card {
@@ -8844,6 +8946,21 @@
       </button>
     </div>
 
+    <div class="sidebar-quick-links" aria-label="دسترسی سریع">
+      <button class="sidebar-quick-link" type="button" data-seller-shop-link aria-label="رفتن به صفحه فروشگاه من">
+        <span class="sidebar-quick-link__icon">
+          <i class="ri-store-3-fill" aria-hidden="true"></i>
+        </span>
+        <span class="sidebar-quick-link__text">صفحه فروشگاه من</span>
+      </button>
+      <button class="sidebar-quick-link sidebar-quick-link--home" type="button" data-vitrinet-home-link aria-label="رفتن به صفحه اصلی ویترینت">
+        <span class="sidebar-quick-link__icon">
+          <i class="ri-home-5-fill" aria-hidden="true"></i>
+        </span>
+        <span class="sidebar-quick-link__text">صفحه اصلی ویترینت</span>
+      </button>
+    </div>
+
     <!-- Menu Items -->
     <div class="sidebar-menu-container">
       <!-- گروه آمار و ثبت -->
@@ -8980,6 +9097,14 @@
     <button class="sidebar-link accountant-shortcut" id="accountantShortcut" type="button" title="ورود به حسابداری فروشگاه" aria-label="ورود به حسابداری فروشگاه" data-target="../hesabketab/accountant.html">
       <i class="ri-calculator-line" aria-hidden="true"></i>
       <span>ورود به حسابداری</span>
+    </button>
+    <button class="sidebar-link" type="button" data-seller-shop-link aria-label="رفتن به صفحه فروشگاه من">
+      <i class="ri-store-3-line" aria-hidden="true"></i>
+      <span>صفحه فروشگاه من</span>
+    </button>
+    <button class="sidebar-link" type="button" data-vitrinet-home-link aria-label="رفتن به صفحه اصلی ویترینت">
+      <i class="ri-home-5-line" aria-hidden="true"></i>
+      <span>صفحه اصلی ویترینت</span>
     </button>
 
     <!-- دکمه‌های سایدبار -->
