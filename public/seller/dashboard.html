@@ -8602,6 +8602,166 @@
   }
 }
 
+/* Seller dashboard mobile bottom navigation */
+.seller-mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .main-container {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .seller-mobile-bottom-nav {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 240;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: end;
+    gap: 4px;
+    min-height: 74px;
+    padding: 9px 8px 10px;
+    border: 1px solid rgba(226, 232, 240, 0.78);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow:
+      0 18px 42px rgba(15, 23, 42, 0.16),
+      0 6px 18px rgba(16, 185, 129, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(18px) saturate(1.45);
+    -webkit-backdrop-filter: blur(18px) saturate(1.45);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  .sidebar.expanded + .seller-mobile-bottom-nav {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(22px);
+  }
+
+  .seller-mobile-bottom-nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.04));
+  }
+
+  .seller-mobile-bottom-nav__item {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 54px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+    color: #64748b;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  }
+
+  .seller-mobile-bottom-nav__item i {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    font-size: 23px;
+    line-height: 1;
+  }
+
+  .seller-mobile-bottom-nav__item:active {
+    transform: translateY(1px) scale(0.97);
+  }
+
+  .seller-mobile-bottom-nav__item.active {
+    color: #059669;
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .seller-mobile-bottom-nav__item--primary {
+    min-height: 64px;
+    margin-top: -18px;
+    color: #ffffff;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 12px 26px rgba(16, 185, 129, 0.34);
+  }
+
+  .seller-mobile-bottom-nav__item--primary.active,
+  .seller-mobile-bottom-nav__item--primary:hover {
+    color: #ffffff;
+    background: linear-gradient(145deg, #10b981 0%, #047857 100%);
+  }
+
+  .seller-mobile-bottom-nav__item--primary i {
+    font-size: 27px;
+  }
+
+  .seller-mobile-bottom-nav__badge {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 5px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.28);
+  }
+
+  .notif-btn {
+    bottom: calc(98px + env(safe-area-inset-bottom, 0px));
+    left: 1rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  .seller-mobile-bottom-nav {
+    right: 8px;
+    left: 8px;
+    gap: 2px;
+    padding-inline: 6px;
+  }
+
+  .seller-mobile-bottom-nav__item {
+    font-size: 10px;
+  }
+
+  .seller-mobile-bottom-nav__item i {
+    font-size: 21px;
+  }
+}
+
 </style>
   <script src="/nav-active.js" defer></script>
 
@@ -8944,6 +9104,30 @@
     </button>
   </aside>
 
+
+  <nav class="seller-mobile-bottom-nav" id="sellerMobileBottomNav" aria-label="ناوبری سریع داشبورد فروشنده">
+    <button class="seller-mobile-bottom-nav__item active" type="button" data-section="visit" aria-label="آمار">
+      <i class="ri-dashboard-3-line" aria-hidden="true"></i>
+      <span>آمار</span>
+    </button>
+    <button class="seller-mobile-bottom-nav__item" type="button" data-section="products" aria-label="محصولات">
+      <i class="ri-shopping-bag-3-line" aria-hidden="true"></i>
+      <span>محصولات</span>
+    </button>
+    <button class="seller-mobile-bottom-nav__item seller-mobile-bottom-nav__item--primary" type="button" data-section="add" aria-label="افزودن محصول">
+      <i class="ri-add-line" aria-hidden="true"></i>
+      <span>افزودن</span>
+    </button>
+    <button class="seller-mobile-bottom-nav__item" type="button" data-section="msg" aria-label="پیام‌ها">
+      <i class="ri-message-3-line" aria-hidden="true"></i>
+      <span>پیام‌ها</span>
+      <span class="seller-mobile-bottom-nav__badge" id="sellerMobileMsgBadge">0</span>
+    </button>
+    <button class="seller-mobile-bottom-nav__item" type="button" data-action="menu" aria-label="منوی بیشتر">
+      <i class="ri-menu-3-line" aria-hidden="true"></i>
+      <span>منو</span>
+    </button>
+  </nav>
 
 
   <!-- این بخش برای نمایش محتوای لودشونده است -->
@@ -14737,5 +14921,86 @@
   </div>
 </div>
 
+<script>
+  (function initSellerMobileBottomNav() {
+    const nav = document.getElementById('sellerMobileBottomNav');
+    if (!nav) return;
+
+    const navItems = Array.from(nav.querySelectorAll('.seller-mobile-bottom-nav__item'));
+    const sectionItems = navItems.filter((item) => item.dataset.section);
+    const sidebarButtons = Array.from(document.querySelectorAll('.sidebar-link[data-section]'));
+    const sidebarMenuItems = Array.from(document.querySelectorAll('.sidebar-menu-item[data-section]'));
+
+    function setActiveSection(section) {
+      sectionItems.forEach((item) => {
+        const isActive = item.dataset.section === section;
+        item.classList.toggle('active', isActive);
+        item.toggleAttribute('aria-current', isActive);
+      });
+    }
+
+    function syncFromSidebar() {
+      const activeButton = document.querySelector('.sidebar-link.active[data-section], .sidebar-menu-item.active[data-section]');
+      if (activeButton?.dataset.section) {
+        setActiveSection(activeButton.dataset.section);
+      }
+    }
+
+    function syncMessageBadge() {
+      const source = document.getElementById('msgBadge');
+      const target = document.getElementById('sellerMobileMsgBadge');
+      if (!target) return;
+
+      const value = (source?.textContent || '').trim();
+      const isVisible = Boolean(value && value !== '0' && source && getComputedStyle(source).display !== 'none');
+      target.textContent = value || '0';
+      target.style.display = isVisible ? 'inline-flex' : 'none';
+    }
+
+    navItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        const section = item.dataset.section;
+
+        if (item.dataset.action === 'menu') {
+          document.getElementById('sidebarHamburger')?.click();
+          return;
+        }
+
+        if (!section) return;
+
+        const desktopButton = document.getElementById(`menu-${section}`);
+        if (desktopButton) {
+          desktopButton.click();
+        } else if (typeof window.showSection === 'function') {
+          window.showSection(section);
+        }
+
+        setActiveSection(section);
+      });
+    });
+
+    const observer = new MutationObserver(() => {
+      syncFromSidebar();
+      syncMessageBadge();
+    });
+
+    [...sidebarButtons, ...sidebarMenuItems].forEach((button) => {
+      observer.observe(button, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    const msgBadge = document.getElementById('msgBadge');
+    if (msgBadge) {
+      observer.observe(msgBadge, {
+        attributes: true,
+        childList: true,
+        characterData: true,
+        subtree: true
+      });
+    }
+
+    syncFromSidebar();
+    syncMessageBadge();
+  })();
+</script>
 </body>
 </html>
