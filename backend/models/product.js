@@ -77,6 +77,15 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  viewsTotal: {
+    type: Number,
+    default: 0
+  },
+  viewsByMonth: {
+    type: Map,
+    of: Number,
+    default: {}
+  },
   likedBy: [{
     type: String,
     index: true

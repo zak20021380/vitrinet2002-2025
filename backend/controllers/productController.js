@@ -67,6 +67,20 @@ function resolveRequestActor(req, { allowIpFallback = true } = {}) {
   return ip ? `ip:${ip}` : null;
 }
 
+function getMonthKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function getMapNumber(mapLike, key) {
+  if (!mapLike || !key) return 0;
+  if (typeof mapLike.get === 'function') {
+    return Number(mapLike.get(key) || 0);
+  }
+  return Number(mapLike[key] || 0);
+}
+
 // افزودن محصول جدید
 exports.addProduct = async (req, res) => {
   try {
@@ -181,6 +195,7 @@ function buildProductResponse(req, doc, options = {}) {
     shopurl: sellerShopUrl, // اضافه کردن shopurl در سطح بالای پاسخ
     shopUrl: sellerShopUrl, // برای سازگاری با هر دو نام‌گذاری
     likesCount: Number.isFinite(Number(p.likesCount)) ? Number(p.likesCount) : 0,
+    viewsTotal: Number.isFinite(Number(p.viewsTotal)) ? Number(p.viewsTotal) : 0,
     ...(liked !== null ? { liked } : {}),
     seller: p.sellerId || {},
     sellerCategory: p.sellerId?.category || '',
@@ -188,6 +203,72 @@ function buildProductResponse(req, doc, options = {}) {
     sellerId: p.sellerId?._id?.toString() || p.sellerId
   };
 }
+
+exports.trackProductView = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const monthKey = getMonthKey();
+    const product = await Product.findByIdAndUpdate(
+      id,
+      {
+        $inc: {
+          viewsTotal: 1,
+          [`viewsByMonth.${monthKey}`]: 1
+        }
+      },
+      { new: true, select: 'viewsTotal viewsByMonth' }
+    ).lean();
+
+    if (!product) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+
+    res.json({
+      success: true,
+      month: monthKey,
+      monthViews: getMapNumber(product.viewsByMonth, monthKey),
+      totalViews: Number(product.viewsTotal || 0)
+    });
+  } catch (err) {
+    console.error('Failed to track product view:', err);
+    res.status(500).json({ message: 'خطا در ثبت بازدید محصول', error: err.message });
+  }
+};
+
+exports.getSellerProductVisitStats = async (req, res) => {
+  try {
+    const sellerId = req.user && (req.user.id || req.user._id);
+    const monthKey = /^\d{4}-\d{2}$/.test(String(req.query.month || ''))
+      ? String(req.query.month)
+      : getMonthKey();
+    const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 100));
+
+    if (!sellerId) {
+      return res.status(401).json({ message: 'فروشنده احراز هویت نشده است.' });
+    }
+
+    const products = await Product.find({ sellerId })
+      .select('title viewsTotal viewsByMonth createdAt')
+      .lean();
+
+    const rows = products
+      .map((product) => ({
+        id: product._id,
+        title: product.title || 'محصول بدون نام',
+        monthViews: getMapNumber(product.viewsByMonth, monthKey),
+        totalViews: Number(product.viewsTotal || 0)
+      }))
+      .sort((a, b) => (b.monthViews - a.monthViews) || (b.totalViews - a.totalViews) || String(a.title).localeCompare(String(b.title), 'fa'))
+      .slice(0, limit);
+
+    res.json({
+      success: true,
+      month: monthKey,
+      products: rows
+    });
+  } catch (err) {
+    console.error('Failed to load seller product visit stats:', err);
+    res.status(500).json({ message: 'خطا در دریافت آمار بازدید محصولات', error: err.message });
+  }
+};
 
 // ساخت یا به‌روزرسانی تخفیف محصول
 exports.upsertDiscount = async (req, res) => {

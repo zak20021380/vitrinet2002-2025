@@ -5,6 +5,7 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const Seller = require('../models/Seller');
 const Product = require('../models/product');
+const authMiddleware = require('../middlewares/authMiddleware');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -44,6 +45,8 @@ router.get('/', productController.getProducts);
 
 // اضافه کردن مسیر جدید برای دریافت جدیدترین محصولات
 router.get('/latest-products', productController.getLatestProducts);
+
+router.get('/seller/visit-stats', authMiddleware('seller'), productController.getSellerProductVisitStats);
 
 
 // -----------------------------
@@ -92,6 +95,7 @@ router.patch('/:id/stock', /* authMiddleware */ productController.updateStock);
 // -----------------------------
 router.get('/:id/like-status', productController.getLikeStatus);
 router.post('/:id/like', productController.toggleLike);
+router.post('/:id/view', productController.trackProductView);
 
 // -----------------------------
 // دریافت محصولات مشابه

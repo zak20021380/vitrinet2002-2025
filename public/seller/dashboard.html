@@ -9345,7 +9345,7 @@
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M3 12l2-2 4 4 8-8 4 4" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-label">کل بازدیدها</div>
-          <div class="stat-value" id="totalViews">18,974</div>
+          <div class="stat-value" id="totalViews">—</div>
           <div class="stat-growth">
             <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
             +7.1%
@@ -9356,7 +9356,7 @@
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#fb923c" stroke-width="2"/><path d="M12 8v4l3 2" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-label">این ماه</div>
-          <div class="stat-value text-[#fb923c]" id="monthViews">983</div>
+          <div class="stat-value text-[#fb923c]" id="monthViews">—</div>
           <div class="stat-growth">
             <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#fb923c" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
             +5.2%
@@ -9367,7 +9367,7 @@
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#0ea5e9" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-label">دیروز</div>
-          <div class="stat-value text-[#0ea5e9]" id="yesterdayViews">160</div>
+          <div class="stat-value text-[#0ea5e9]" id="yesterdayViews">—</div>
           <div class="stat-growth negative">
             <svg width="14" height="14" viewBox="0 0 16 16"><path d="M13 7l-4 4-3.5-3.5-2.5 2.5" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
             -2.5%
@@ -9378,7 +9378,7 @@
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M12 8v6" stroke="#10b981" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <div class="stat-label">امروز</div>
-          <div class="stat-value text-[#10b981]" id="todayViews">148</div>
+          <div class="stat-value text-[#10b981]" id="todayViews">—</div>
           <div class="stat-growth">
             <svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 9l4-4 3.5 3.5 2.5-2.5" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
             +4.3%
@@ -9392,7 +9392,7 @@
         </div>
         <div class="text-md font-bold text-[#10b981] mb-2 text-center" id="chartTitle">نمودار بازدید هفتگی</div>
         <canvas id="visitChart" height="150"></canvas>
-        <div class="chart-info">بروزرسانی: امروز | داده‌ها شبیه‌سازی شده‌اند</div>
+        <div class="chart-info" id="visitChartInfo">در حال دریافت آمار واقعی...</div>
       </div>
 
       <!-- Product Visits Preview -->
@@ -9407,21 +9407,9 @@
                 <th scope="col">بازدید کل</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="productVisitsPreviewBody">
               <tr>
-                <td>پسته ممتاز</td>
-                <td>۳۵۵</td>
-                <td>۷۲۰۰</td>
-              </tr>
-              <tr>
-                <td>زعفران صادراتی</td>
-                <td>۲۷۸</td>
-                <td>۶۹۵۰</td>
-              </tr>
-              <tr>
-                <td>خرمای کبکاب</td>
-                <td>۱۹۰</td>
-                <td>۴۴۰۰</td>
+                <td colspan="3">در حال بارگذاری آمار واقعی...</td>
               </tr>
             </tbody>
           </table>
@@ -9447,26 +9435,9 @@
                 <th scope="col">بازدید کل</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="productVisitsModalBody">
               <tr>
-                <td>پسته ممتاز</td>
-                <td>۳۵۵</td>
-                <td>۷۲۰۰</td>
-              </tr>
-              <tr>
-                <td>زعفران صادراتی</td>
-                <td>۲۷۸</td>
-                <td>۶۹۵۰</td>
-              </tr>
-              <tr>
-                <td>خرمای کبکاب</td>
-                <td>۱۹۰</td>
-                <td>۴۴۰۰</td>
-              </tr>
-              <tr>
-                <td>عسل طبیعی</td>
-                <td>۱۶۰</td>
-                <td>۳۷۰۰</td>
+                <td colspan="3">در حال بارگذاری آمار واقعی...</td>
               </tr>
             </tbody>
           </table>
@@ -11881,15 +11852,169 @@
 </script>
 
 <script>
+  (function loadRealVisitDashboardStats() {
+    const numberFormatter = new Intl.NumberFormat('fa-IR');
+    const canvas = document.getElementById('visitChart');
+    const chartInfo = document.getElementById('visitChartInfo');
+
+    function toIsoDate(date) {
+      return date.toISOString().slice(0, 10);
+    }
+
+    function dateKey(value) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '' : toIsoDate(date);
+    }
+
+    function setMetric(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = numberFormatter.format(Number(value || 0));
+    }
+
+    function monthSum(visits, monthKey) {
+      return visits.reduce((sum, visit) => dateKey(visit.date).startsWith(monthKey) ? sum + Number(visit.count || 0) : sum, 0);
+    }
+
+    function renderRealChart(labels, data) {
+      if (!canvas || typeof Chart === 'undefined') return;
+      const existing = Chart.getChart(canvas);
+      if (existing) existing.destroy();
+      new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'بازدیدها',
+            data,
+            fill: true,
+            tension: 0.38,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.09)',
+            pointBackgroundColor: '#10b981',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#e5e7eb44', borderDash: [4,4] }, ticks: { color: '#888', font: { size: 13, weight: 'bold' } } },
+            x: { grid: { display: false }, ticks: { color: '#666', font: { size: 13, weight: 'bold' } } }
+          }
+        }
+      });
+    }
+
+    async function load() {
+      document.querySelectorAll('#section-visit .stat-growth').forEach((el) => {
+        el.style.display = 'none';
+      });
+
+      try {
+        const today = new Date();
+        const from = new Date(today);
+        from.setFullYear(today.getFullYear() - 1);
+        const response = await apiFetch(`/api/daily-visits?from=${toIsoDate(from)}&to=${toIsoDate(today)}`);
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+        const visits = await response.json();
+        const rows = Array.isArray(visits) ? visits : [];
+        const map = new Map(rows.map((visit) => [dateKey(visit.date), Number(visit.count || 0)]));
+        const todayKey = toIsoDate(today);
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const currentMonthKey = todayKey.slice(0, 7);
+
+        setMetric('totalViews', rows.reduce((sum, visit) => sum + Number(visit.count || 0), 0));
+        setMetric('monthViews', monthSum(rows, currentMonthKey));
+        setMetric('yesterdayViews', map.get(toIsoDate(yesterday)) || 0);
+        setMetric('todayViews', map.get(todayKey) || 0);
+
+        const weekdayFormatter = new Intl.DateTimeFormat('fa-IR', { weekday: 'short' });
+        const labels = [];
+        const data = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          labels.push(weekdayFormatter.format(date));
+          data.push(map.get(toIsoDate(date)) || 0);
+        }
+
+        renderRealChart(labels, data);
+        if (chartInfo) chartInfo.textContent = 'بروزرسانی: امروز | داده‌ها از آمار واقعی فروشگاه شما';
+      } catch (error) {
+        console.warn('Failed to load real visit dashboard stats:', error);
+        setMetric('totalViews', 0);
+        setMetric('monthViews', 0);
+        setMetric('yesterdayViews', 0);
+        setMetric('todayViews', 0);
+        renderRealChart([], []);
+        if (chartInfo) chartInfo.textContent = 'امکان دریافت آمار واقعی در این لحظه وجود ندارد.';
+      }
+    }
+
+    load();
+  })();
+</script>
+
+<script>
   (function () {
     const modal = document.getElementById('visitsModal');
     const dialog = modal?.querySelector('.visits-modal__dialog');
     const openButton = document.getElementById('openVisitsModal');
     const closeButtons = modal ? modal.querySelectorAll('[data-close-visits-modal]') : [];
+    const previewBody = document.getElementById('productVisitsPreviewBody');
+    const modalBody = document.getElementById('productVisitsModalBody');
     const focusableSelector = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
     let lastFocusedElement = null;
+    const numberFormatter = new Intl.NumberFormat('fa-IR');
 
     if (!modal || !dialog || !openButton) return;
+
+    function escapeHtml(value = '') {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function renderRows(target, products, { limit } = {}) {
+      if (!target) return;
+      const rows = Array.isArray(products) ? products.slice(0, limit || products.length) : [];
+      if (!rows.length) {
+        target.innerHTML = '<tr><td colspan="3">هنوز بازدیدی برای محصولات ثبت نشده است.</td></tr>';
+        return;
+      }
+
+      target.innerHTML = rows.map((product) => `
+        <tr>
+          <td>${escapeHtml(product.title || 'محصول بدون نام')}</td>
+          <td>${numberFormatter.format(Number(product.monthViews || 0))}</td>
+          <td>${numberFormatter.format(Number(product.totalViews || 0))}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadProductVisitStats() {
+      try {
+        const response = await apiFetch('/api/products/seller/visit-stats?limit=100');
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        const products = Array.isArray(data.products) ? data.products : [];
+        renderRows(previewBody, products, { limit: 3 });
+        renderRows(modalBody, products);
+      } catch (error) {
+        console.warn('Failed to load product visit stats:', error);
+        const errorRow = '<tr><td colspan="3">خطا در دریافت آمار واقعی محصولات.</td></tr>';
+        if (previewBody) previewBody.innerHTML = errorRow;
+        if (modalBody) modalBody.innerHTML = errorRow;
+      }
+    }
 
     const getFocusableElements = () => Array.from(modal.querySelectorAll(focusableSelector)).filter((el) => el.offsetParent !== null);
 
@@ -11945,6 +12070,8 @@
         closeModal();
       }
     });
+
+    loadProductVisitStats();
   })();
 </script>
 

@@ -352,11 +352,26 @@
       }
       const product = await response.json();
       renderProduct(product, id);
+      trackProductView(id);
       clearStatus();
     } catch (error) {
       console.error('load product failed', error);
       showError('امکان دریافت اطلاعات محصول وجود ندارد. لطفاً بعداً تلاش کنید.');
     }
+  }
+
+  function trackProductView(id) {
+    if (!id) return;
+    fetch(`/api/products/${encodeURIComponent(id)}/view`, {
+      method: 'POST',
+      headers: {
+        'x-client-id': likeState.deviceId
+      },
+      credentials: 'include',
+      keepalive: true
+    }).catch((error) => {
+      console.warn('product view tracking failed', error);
+    });
   }
 
   document.addEventListener('keydown', handleGlobalKeydown);
