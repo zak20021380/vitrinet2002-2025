@@ -5352,6 +5352,517 @@ function bindFloatingCloseOnce() {
 
 
 
+  function initServiceSellerStories() {
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const els = {};
+    const ids = [
+      'story-status-pill', 'story-cooldown-panel', 'story-cooldown-timer',
+      'story-upload-form', 'story-upload-drop', 'story-image-input',
+      'story-upload-empty', 'story-upload-preview', 'story-preview-image',
+      'story-caption-input', 'story-feedback', 'story-submit-btn',
+      'story-refresh-btn', 'story-loading-state', 'story-empty-state',
+      'story-card', 'story-card-image', 'story-card-caption',
+      'story-expiration-text', 'story-progress-bar', 'story-views-count',
+      'story-likes-count', 'story-replies-count', 'story-delete-btn',
+      'story-replies-panel', 'story-replies-list', 'story-replies-empty',
+      'story-unread-replies-badge', 'story-mark-replies-read-btn',
+      'stories-nav-badge', 'story-menu-badge'
+    ];
+
+    const state = {
+      loaded: false,
+      loading: false,
+      uploading: false,
+      deleting: false,
+      markingRepliesRead: false,
+      selectedFile: null,
+      previewUrl: '',
+      story: null,
+      cooldownEndsAt: 0,
+      ticker: null
+    };
+
+    const cacheElements = () => {
+      ids.forEach((id) => {
+        els[id] = document.getElementById(id);
+      });
+    };
+
+    const buildUrl = (path) => `${API_BASE}${path}`;
+
+    const readJson = async (res) => {
+      const text = await res.text();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return {};
+      }
+    };
+
+    const localizeError = (message, fallback) => {
+      const map = {
+        'Seller authentication is required.': 'برای مدیریت استوری، ابتدا وارد حساب فروشنده شوید.',
+        'Could not load story data.': 'امکان بارگذاری اطلاعات استوری وجود ندارد.',
+        'Only image files are allowed.': 'لطفا فقط فایل تصویر انتخاب کنید.',
+        'Image must be smaller than 5MB.': 'حجم تصویر باید کمتر از ۵ مگابایت باشد.',
+        'Story image is required.': 'تصویر استوری الزامی است.',
+        'Only one story can be posted every 24 hours.': 'در هر ۲۴ ساعت فقط یک استوری می‌توانید منتشر کنید.',
+        'Could not publish story.': 'امکان انتشار استوری وجود ندارد.',
+        'Story is not active.': 'این استوری دیگر فعال نیست.',
+        'Could not delete story.': 'امکان حذف استوری وجود ندارد.',
+        'Could not load story replies.': 'امکان دریافت پاسخ‌های استوری وجود ندارد.',
+        'Could not mark story replies as read.': 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.'
+      };
+      return map[String(message || '').trim()] || fallback;
+    };
+
+    const formatDuration = (ms) => {
+      const total = Math.max(0, Math.floor(ms / 1000));
+      const hours = String(Math.floor(total / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+      const seconds = String(total % 60).padStart(2, '0');
+      return toFaDigits(`${hours}:${minutes}:${seconds}`);
+    };
+
+    const formatCount = (value) => Number(value || 0).toLocaleString('fa-IR');
+
+    const formatReplyTime = (value) => {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('fa-IR', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    const showFeedback = (message = '', type = '') => {
+      if (!els['story-feedback']) return;
+      els['story-feedback'].textContent = message;
+      els['story-feedback'].classList.toggle('is-error', type === 'error');
+    };
+
+    const setStatus = (text, mode = '') => {
+      const pill = els['story-status-pill'];
+      if (!pill) return;
+      pill.textContent = text;
+      pill.classList.toggle('is-waiting', mode === 'waiting');
+      pill.classList.toggle('is-error', mode === 'error');
+    };
+
+    const setBadge = (el, count) => {
+      if (!el) return;
+      const numeric = Number(count || 0);
+      if (numeric > 0) {
+        el.textContent = formatCount(numeric);
+        el.hidden = false;
+      } else {
+        el.hidden = true;
+      }
+    };
+
+    const clearPreview = () => {
+      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      state.previewUrl = '';
+      state.selectedFile = null;
+      if (els['story-image-input']) els['story-image-input'].value = '';
+      if (els['story-preview-image']) els['story-preview-image'].removeAttribute('src');
+      if (els['story-upload-preview']) els['story-upload-preview'].hidden = true;
+      if (els['story-upload-empty']) els['story-upload-empty'].hidden = false;
+    };
+
+    const refreshSubmitState = () => {
+      const remaining = state.cooldownEndsAt ? Math.max(0, state.cooldownEndsAt - Date.now()) : 0;
+      const canPost = remaining <= 0;
+      const submit = els['story-submit-btn'];
+      if (submit) {
+        submit.disabled = state.uploading || !canPost || !state.selectedFile;
+        submit.textContent = state.uploading ? 'در حال انتشار...' : 'انتشار استوری';
+      }
+      if (els['story-image-input']) els['story-image-input'].disabled = state.uploading || !canPost;
+      if (els['story-upload-drop']) els['story-upload-drop'].classList.toggle('is-disabled', !canPost || state.uploading);
+
+      const story = state.story;
+      const hasActiveStory = !!(story?.id || story?._id) && story.status === 'active';
+      if (els['story-delete-btn']) {
+        els['story-delete-btn'].disabled = state.deleting || state.uploading || !hasActiveStory;
+        els['story-delete-btn'].textContent = state.deleting ? 'در حال حذف...' : 'حذف استوری فعلی';
+      }
+
+      const unread = Number(story?.unreadRepliesCount || 0);
+      if (els['story-mark-replies-read-btn']) {
+        els['story-mark-replies-read-btn'].disabled = state.markingRepliesRead || unread <= 0;
+        els['story-mark-replies-read-btn'].textContent = state.markingRepliesRead
+          ? 'در حال ثبت...'
+          : 'علامت‌گذاری به عنوان خوانده‌شده';
+      }
+    };
+
+    const updateCooldown = () => {
+      const remaining = state.cooldownEndsAt ? Math.max(0, state.cooldownEndsAt - Date.now()) : 0;
+      if (remaining > 0) {
+        if (els['story-cooldown-panel']) els['story-cooldown-panel'].hidden = false;
+        if (els['story-cooldown-timer']) els['story-cooldown-timer'].textContent = formatDuration(remaining);
+        setStatus(`استوری بعدی تا ${formatDuration(remaining)}`, 'waiting');
+      } else {
+        state.cooldownEndsAt = 0;
+        if (els['story-cooldown-panel']) els['story-cooldown-panel'].hidden = true;
+        setStatus('آماده انتشار');
+      }
+      refreshSubmitState();
+    };
+
+    const updateStoryCountdown = () => {
+      const story = state.story;
+      if (!story || !els['story-expiration-text']) return;
+      const expiresAt = story.expiresAt ? new Date(story.expiresAt).getTime() : 0;
+      const createdAt = story.createdAt ? new Date(story.createdAt).getTime() : 0;
+      const remaining = expiresAt ? Math.max(0, expiresAt - Date.now()) : 0;
+      const isActive = story.status === 'active' && remaining > 0;
+      const elapsed = createdAt ? Math.max(0, Date.now() - createdAt) : 0;
+      const progress = isActive ? Math.min(100, Math.max(0, (elapsed / DAY_MS) * 100)) : 100;
+
+      if (els['story-progress-bar']) {
+        els['story-progress-bar'].style.setProperty('--story-progress', `${progress}%`);
+      }
+      els['story-expiration-text'].textContent = isActive
+        ? `انقضا تا ${formatDuration(remaining)}`
+        : 'منقضی شده';
+    };
+
+    const startTicker = () => {
+      if (state.ticker) return;
+      state.ticker = window.setInterval(() => {
+        updateCooldown();
+        updateStoryCountdown();
+      }, 1000);
+    };
+
+    const showLoading = (isLoading) => {
+      if (els['story-loading-state']) els['story-loading-state'].hidden = !isLoading;
+      if (isLoading) {
+        if (els['story-empty-state']) els['story-empty-state'].hidden = true;
+        if (els['story-card']) els['story-card'].hidden = true;
+      }
+    };
+
+    const renderReplies = () => {
+      const story = state.story;
+      const replies = Array.isArray(story?.replies) ? story.replies : [];
+      const repliesCount = Number(story?.repliesCount || replies.length || 0);
+      const unreadCount = Number(story?.unreadRepliesCount || replies.filter((reply) => !reply.readAt).length || 0);
+
+      if (els['story-replies-count']) els['story-replies-count'].textContent = formatCount(repliesCount);
+      if (els['story-unread-replies-badge']) els['story-unread-replies-badge'].textContent = `${formatCount(unreadCount)} جدید`;
+      setBadge(els['stories-nav-badge'], unreadCount);
+      setBadge(els['story-menu-badge'], unreadCount);
+
+      if (els['story-replies-panel']) {
+        els['story-replies-panel'].hidden = !(story?.id || story?._id);
+      }
+      if (!els['story-replies-list'] || !els['story-replies-empty']) {
+        refreshSubmitState();
+        return;
+      }
+
+      els['story-replies-list'].innerHTML = '';
+      els['story-replies-empty'].hidden = replies.length > 0;
+
+      replies.forEach((reply) => {
+        const item = document.createElement('article');
+        item.className = `story-reply-item${reply.readAt ? '' : ' is-unread'}`;
+
+        const meta = document.createElement('div');
+        meta.className = 'story-reply-item__meta';
+
+        const author = document.createElement('span');
+        author.textContent = reply.displayName || 'کاربر ویترینت';
+
+        const time = document.createElement('time');
+        time.dateTime = reply.createdAt || '';
+        time.textContent = formatReplyTime(reply.createdAt);
+
+        const message = document.createElement('p');
+        message.textContent = reply.message || '';
+
+        meta.append(author, time);
+        item.append(meta, message);
+        els['story-replies-list'].appendChild(item);
+      });
+
+      refreshSubmitState();
+    };
+
+    const renderStory = () => {
+      showLoading(false);
+      const story = state.story;
+      if (!story?.imageUrl || story.status === 'deleted') {
+        if (els['story-empty-state']) els['story-empty-state'].hidden = false;
+        if (els['story-card']) els['story-card'].hidden = true;
+        if (els['story-replies-panel']) els['story-replies-panel'].hidden = true;
+        renderReplies();
+        refreshSubmitState();
+        return;
+      }
+
+      if (els['story-empty-state']) els['story-empty-state'].hidden = true;
+      if (els['story-card']) els['story-card'].hidden = false;
+      if (els['story-card-image']) els['story-card-image'].src = story.imageUrl;
+      if (els['story-card-caption']) {
+        els['story-card-caption'].textContent = String(story.caption || '').trim();
+      }
+      if (els['story-views-count']) els['story-views-count'].textContent = formatCount(story.viewsCount);
+      if (els['story-likes-count']) els['story-likes-count'].textContent = formatCount(story.likesCount);
+      renderReplies();
+      updateStoryCountdown();
+      refreshSubmitState();
+    };
+
+    const load = async (force = false) => {
+      if (state.loading || (state.loaded && !force)) return;
+      state.loading = true;
+      showLoading(true);
+      showFeedback('');
+      try {
+        const res = await fetch(bust(buildUrl('/api/seller/stories/me')), {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const data = await readJson(res);
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeError(data.message, 'امکان بارگذاری استوری‌ها وجود ندارد.'));
+        }
+
+        state.story = data.story || data.latestStory || null;
+        state.cooldownEndsAt = data.nextAvailableAt && Number(data.cooldownRemainingMs || 0) > 0
+          ? new Date(data.nextAvailableAt).getTime()
+          : 0;
+        state.loaded = true;
+        updateCooldown();
+        renderStory();
+        startTicker();
+      } catch (error) {
+        state.story = null;
+        setStatus('در دسترس نیست', 'error');
+        showFeedback(error.message || 'امکان بارگذاری استوری‌ها وجود ندارد.', 'error');
+        renderStory();
+      } finally {
+        state.loading = false;
+      }
+    };
+
+    const refreshReplies = async () => {
+      const storyId = state.story?.id || state.story?._id;
+      if (!storyId) return;
+      try {
+        const res = await fetch(bust(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies`)), {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const data = await readJson(res);
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeError(data.message, 'امکان دریافت پاسخ‌های استوری وجود ندارد.'));
+        }
+        state.story.replies = Array.isArray(data.replies) ? data.replies : [];
+        state.story.repliesCount = data.repliesCount ?? state.story.replies.length;
+        state.story.unreadRepliesCount = data.unreadRepliesCount ?? 0;
+        renderReplies();
+      } catch (error) {
+        showFeedback(error.message || 'امکان دریافت پاسخ‌های استوری وجود ندارد.', 'error');
+      }
+    };
+
+    const markRepliesRead = async () => {
+      const storyId = state.story?.id || state.story?._id;
+      if (!storyId || state.markingRepliesRead || Number(state.story?.unreadRepliesCount || 0) <= 0) return;
+
+      state.markingRepliesRead = true;
+      refreshSubmitState();
+      try {
+        const res = await fetch(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies/read`), {
+          method: 'PATCH',
+          credentials: 'include'
+        });
+        const data = await readJson(res);
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeError(data.message, 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.'));
+        }
+        state.story.replies = Array.isArray(data.replies)
+          ? data.replies
+          : (state.story.replies || []).map((reply) => ({ ...reply, readAt: reply.readAt || new Date().toISOString() }));
+        state.story.unreadRepliesCount = 0;
+        renderReplies();
+        showFeedback('پاسخ‌های جدید خوانده شد.');
+      } catch (error) {
+        showFeedback(error.message || 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.', 'error');
+      } finally {
+        state.markingRepliesRead = false;
+        refreshSubmitState();
+      }
+    };
+
+    const handleFile = (file) => {
+      showFeedback('');
+      clearPreview();
+      if (!file) {
+        refreshSubmitState();
+        return;
+      }
+      if (!file.type || !file.type.startsWith('image/')) {
+        showFeedback('لطفا یک فایل تصویر انتخاب کنید.', 'error');
+        refreshSubmitState();
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showFeedback('حجم تصویر باید کمتر از ۵ مگابایت باشد.', 'error');
+        refreshSubmitState();
+        return;
+      }
+      state.selectedFile = file;
+      state.previewUrl = URL.createObjectURL(file);
+      if (els['story-preview-image']) els['story-preview-image'].src = state.previewUrl;
+      if (els['story-upload-preview']) els['story-upload-preview'].hidden = false;
+      if (els['story-upload-empty']) els['story-upload-empty'].hidden = true;
+      refreshSubmitState();
+    };
+
+    const submitStory = async (event) => {
+      event.preventDefault();
+      updateCooldown();
+      if (state.uploading) return;
+      if (state.cooldownEndsAt && state.cooldownEndsAt > Date.now()) {
+        showFeedback('پس از پایان زمان انتظار می‌توانید استوری جدید منتشر کنید.', 'error');
+        return;
+      }
+      if (!state.selectedFile) {
+        showFeedback('قبل از انتشار، تصویر استوری را انتخاب کنید.', 'error');
+        return;
+      }
+
+      state.uploading = true;
+      refreshSubmitState();
+      showFeedback('');
+      const formData = new FormData();
+      formData.append('image', state.selectedFile);
+      formData.append('caption', (els['story-caption-input']?.value || '').trim());
+
+      try {
+        const res = await fetch(buildUrl('/api/seller/stories'), {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        const data = await readJson(res);
+        if (!res.ok || data.success === false) {
+          if (data.nextAvailableAt) {
+            state.cooldownEndsAt = new Date(data.nextAvailableAt).getTime();
+            updateCooldown();
+          }
+          throw new Error(localizeError(data.message, 'امکان انتشار استوری وجود ندارد.'));
+        }
+
+        state.story = data.story || null;
+        state.cooldownEndsAt = data.nextAvailableAt ? new Date(data.nextAvailableAt).getTime() : Date.now() + DAY_MS;
+        clearPreview();
+        if (els['story-caption-input']) els['story-caption-input'].value = '';
+        updateCooldown();
+        renderStory();
+        showFeedback('استوری منتشر شد.');
+        UIComponents?.showToast?.('استوری با موفقیت منتشر شد.', 'success');
+      } catch (error) {
+        showFeedback(error.message || 'امکان انتشار استوری وجود ندارد.', 'error');
+      } finally {
+        state.uploading = false;
+        refreshSubmitState();
+      }
+    };
+
+    const deleteStory = async () => {
+      const storyId = state.story?.id || state.story?._id;
+      if (state.deleting || !storyId || state.story?.status !== 'active') return;
+      if (!window.confirm('استوری فعلی حذف شود؟ برای ثبت استوری جدید همچنان باید تا پایان نوبت ۲۴ ساعته صبر کنید.')) return;
+
+      state.deleting = true;
+      refreshSubmitState();
+      showFeedback('');
+      try {
+        const res = await fetch(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}`), {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        const data = await readJson(res);
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeError(data.message, 'امکان حذف استوری وجود ندارد.'));
+        }
+        state.story = data.story || data.latestStory || null;
+        state.cooldownEndsAt = data.nextAvailableAt && Number(data.cooldownRemainingMs || 0) > 0
+          ? new Date(data.nextAvailableAt).getTime()
+          : 0;
+        updateCooldown();
+        renderStory();
+        showFeedback('استوری حذف شد.');
+      } catch (error) {
+        showFeedback(error.message || 'امکان حذف استوری وجود ندارد.', 'error');
+      } finally {
+        state.deleting = false;
+        refreshSubmitState();
+      }
+    };
+
+    const bind = () => {
+      cacheElements();
+      if (!els['story-upload-form'] || els['story-upload-form'].dataset.bound === '1') return;
+      els['story-upload-form'].dataset.bound = '1';
+
+      els['story-image-input']?.addEventListener('change', (event) => {
+        handleFile(event.target.files?.[0] || null);
+      });
+      els['story-upload-form'].addEventListener('submit', submitStory);
+      els['story-refresh-btn']?.addEventListener('click', () => load(true).then(refreshReplies).catch(() => {}));
+      els['story-delete-btn']?.addEventListener('click', deleteStory);
+      els['story-mark-replies-read-btn']?.addEventListener('click', markRepliesRead);
+
+      const drop = els['story-upload-drop'];
+      if (drop) {
+        ['dragenter', 'dragover'].forEach((type) => {
+          drop.addEventListener(type, (event) => {
+            event.preventDefault();
+            if (!els['story-image-input']?.disabled) drop.classList.add('is-dragging');
+          });
+        });
+        ['dragleave', 'drop'].forEach((type) => {
+          drop.addEventListener(type, (event) => {
+            event.preventDefault();
+            drop.classList.remove('is-dragging');
+          });
+        });
+        drop.addEventListener('drop', (event) => {
+          if (els['story-image-input']?.disabled) return;
+          handleFile(event.dataTransfer?.files?.[0] || null);
+        });
+      }
+
+      updateCooldown();
+      renderStory();
+      if (window.location.hash === '#/stories') {
+        load(true);
+      }
+    };
+
+    bind();
+
+    return {
+      load,
+      refreshReplies,
+      getState: () => ({ ...state })
+    };
+  }
+
+
+
   class SellerPanelApp {
     constructor(flags = {}) {
       this.root = document.documentElement;
@@ -6013,6 +6524,10 @@ destroy() {
           break;
         case 'settings': this.renderSettings(); break; // New call for settings
         case 'messages': this.renderMessages(); break; // Customer messages
+        case 'stories':
+          window.ServiceSellerStories?.load(true);
+          window.ServiceSellerStories?.refreshReplies?.();
+          break;
       }
     }
     clearTopPeersAutoRefresh() {
@@ -10420,6 +10935,8 @@ window.__FEATURE_FLAGS__ = featureFlags;
 await loadSellerPlans();
 
 await loadComplimentaryPlan();
+
+window.ServiceSellerStories = initServiceSellerStories();
 
 const app = new SellerPanelApp(featureFlags);
 window.sellerPanelApp = app; // Expose to window for global access
