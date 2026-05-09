@@ -30,6 +30,50 @@ const sellerStorySchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+  repliesCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  unreadRepliesCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  replies: [{
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 500
+    },
+    displayName: {
+      type: String,
+      default: 'کاربر ویتری‌نت',
+      trim: true,
+      maxlength: 60
+    },
+    replyKey: {
+      type: String,
+      default: '',
+      trim: true,
+      maxlength: 96,
+      select: false
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    readAt: {
+      type: Date,
+      default: null
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   likedBy: {
     type: [String],
     default: [],

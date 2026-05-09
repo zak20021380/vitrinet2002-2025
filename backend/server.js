@@ -90,14 +90,15 @@ app.use(cors({
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: [
     'Content-Type',
     'Authorization',
     'X-CSRF-Token',
     'X-Requested-With',
     'X-Story-Reaction-Key',
-    'X-Story-Reaction-State'
+    'X-Story-Reaction-State',
+    'X-Story-Reply-Key'
   ],
   exposedHeaders: ['Content-Disposition']
 }));

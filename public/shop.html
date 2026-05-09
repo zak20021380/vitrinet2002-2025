@@ -1198,6 +1198,73 @@ body {
   font-weight: 800;
 }
 
+.story-reply-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: .58rem;
+  align-items: end;
+}
+
+.story-reply-field {
+  width: 100%;
+  min-height: 44px;
+  max-height: 92px;
+  resize: none;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 18px;
+  padding: .72rem .9rem;
+  color: #fff;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(14px);
+  outline: none;
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.story-reply-field::placeholder {
+  color: rgba(255,255,255,.72);
+}
+
+.story-reply-field:focus {
+  border-color: rgba(255,255,255,.52);
+  background: rgba(255,255,255,.2);
+}
+
+.story-reply-send {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 16px;
+  color: #082f49;
+  background: #fff;
+  cursor: pointer;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+.story-reply-send:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.story-reply-send:disabled {
+  cursor: default;
+  opacity: .58;
+}
+
+.story-reply-feedback {
+  min-height: 18px;
+  color: rgba(255,255,255,.82);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.story-reply-feedback.error {
+  color: #fecaca;
+}
+
 .story-viewer-nav {
   position: absolute;
   top: 50%;
@@ -2574,6 +2641,16 @@ body {
     <button class="story-viewer-nav next" id="storyViewerNext" type="button" aria-label="استوری بعدی">
       <i class="fas fa-chevron-left" aria-hidden="true"></i>
     </button>
+    <div class="story-viewer-bottom">
+      <p class="story-viewer-caption" id="storyViewerCaption"></p>
+      <form class="story-reply-form" id="storyReplyForm" autocomplete="off">
+        <textarea class="story-reply-field" id="storyReplyInput" rows="1" maxlength="500" placeholder="پاسخ به استوری..." aria-label="پاسخ به استوری"></textarea>
+        <button class="story-reply-send" id="storyReplySend" type="submit" aria-label="ارسال پاسخ">
+          <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        </button>
+      </form>
+      <div class="story-reply-feedback" id="storyReplyFeedback" role="status" aria-live="polite"></div>
+    </div>
   </div>
 </div>
 
@@ -2858,7 +2935,8 @@ const shopStoriesState = {
   viewerPointerStartedAt: 0,
   viewerWasPausedBeforePointer: false,
   mobileNavWasHidden: false,
-  countdownTimer: null
+  countdownTimer: null,
+  replying: false
 };
 
 function getStoryId(story) {
@@ -2885,6 +2963,10 @@ function getStoryReactionKey() {
   } catch {
     return '';
   }
+}
+
+function getStoryReplyKey() {
+  return getStoryReactionKey();
 }
 
 function isStoryReacted(story) {
@@ -3091,6 +3173,31 @@ function updateStoryReactionUi(story) {
   if (likes) likes.textContent = formatStoryCount(story?.likesCount);
 }
 
+function setStoryReplyFeedback(message = '', type = '') {
+  const feedback = document.getElementById('storyReplyFeedback');
+  if (!feedback) return;
+  feedback.textContent = message;
+  feedback.classList.toggle('error', type === 'error');
+}
+
+function resetStoryReplyForm() {
+  const input = document.getElementById('storyReplyInput');
+  if (input) {
+    input.value = '';
+    input.style.height = '';
+  }
+  shopStoriesState.replying = false;
+  setStoryReplyFeedback('');
+  updateStoryReplyFormState();
+}
+
+function updateStoryReplyFormState() {
+  const send = document.getElementById('storyReplySend');
+  const input = document.getElementById('storyReplyInput');
+  const hasMessage = Boolean(String(input?.value || '').trim());
+  if (send) send.disabled = shopStoriesState.replying || !hasMessage;
+}
+
 function renderViewerStory(index) {
   const stories = shopStoriesState.stories;
   const story = stories[index];
@@ -3106,6 +3213,7 @@ function renderViewerStory(index) {
   const media = document.getElementById('storyViewerMedia');
   const progress = document.getElementById('storyViewerProgress');
   const react = document.getElementById('storyViewerReact');
+  const caption = document.getElementById('storyViewerCaption');
 
   media?.classList.remove('media-failed');
   if (image) {
@@ -3120,6 +3228,12 @@ function renderViewerStory(index) {
     stories.forEach(() => progress.appendChild(document.createElement('span')));
   }
   if (react) updateStoryReactionUi(story);
+  if (caption) {
+    const captionText = String(story.caption || '').trim();
+    caption.textContent = captionText;
+    caption.style.display = captionText ? '' : 'none';
+  }
+  resetStoryReplyForm();
 
   clearInterval(shopStoriesState.viewerTimer);
   shopStoriesState.viewerTimer = window.setInterval(updateViewerProgress, 90);
@@ -3219,6 +3333,57 @@ async function reactToCurrentStory() {
     console.warn('ثبت واکنش استوری ناموفق بود:', error);
   } finally {
     if (react) react.disabled = false;
+  }
+}
+
+async function submitStoryReply(event) {
+  event?.preventDefault?.();
+  const story = shopStoriesState.stories[shopStoriesState.activeIndex];
+  const storyId = getStoryId(story);
+  const input = document.getElementById('storyReplyInput');
+  const send = document.getElementById('storyReplySend');
+  const message = String(input?.value || '').trim();
+
+  if (!storyId || shopStoriesState.replying) return;
+  if (message.length < 2) {
+    setStoryReplyFeedback('متن پاسخ را وارد کنید.', 'error');
+    updateStoryReplyFormState();
+    return;
+  }
+
+  shopStoriesState.replying = true;
+  if (send) send.disabled = true;
+  setStoryPaused(true);
+  setStoryReplyFeedback('در حال ارسال پاسخ...');
+
+  try {
+    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${storyId}/replies`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Story-Reply-Key': getStoryReplyKey()
+      },
+      body: JSON.stringify({ message })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || 'امکان ارسال پاسخ وجود ندارد.');
+    }
+
+    if (data.story) Object.assign(story, data.story);
+    if (input) {
+      input.value = '';
+      input.style.height = '';
+    }
+    setStoryReplyFeedback('پاسخ شما ارسال شد.');
+    renderShopStories(shopStoriesState.stories);
+  } catch (error) {
+    console.warn('ارسال پاسخ استوری ناموفق بود:', error);
+    setStoryReplyFeedback('ارسال پاسخ انجام نشد. دوباره تلاش کنید.', 'error');
+  } finally {
+    shopStoriesState.replying = false;
+    updateStoryReplyFormState();
   }
 }
 
@@ -3502,6 +3667,15 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('storyViewerNext')?.addEventListener('click', showNextStory);
   document.getElementById('storyViewerPrev')?.addEventListener('click', showPrevStory);
   document.getElementById('storyViewerReact')?.addEventListener('click', reactToCurrentStory);
+  document.getElementById('storyReplyForm')?.addEventListener('submit', submitStoryReply);
+  document.getElementById('storyReplyInput')?.addEventListener('input', (event) => {
+    const input = event.currentTarget;
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 92)}px`;
+    setStoryReplyFeedback('');
+    updateStoryReplyFormState();
+  });
+  document.getElementById('storyReplyInput')?.addEventListener('focus', () => setStoryPaused(true));
 
   const storyViewer = document.getElementById('storyViewer');
   const storyViewerCard = document.getElementById('storyViewerCard');
@@ -3510,7 +3684,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   const beginStoryPointer = (event) => {
-    if (event.target?.closest?.('button')) return;
+    if (event.target?.closest?.('button, input, textarea, form, .story-reply-form')) return;
     const point = event.touches?.[0] || event;
     shopStoriesState.viewerTouchX = point.clientX ?? null;
     shopStoriesState.viewerTouchY = point.clientY ?? null;

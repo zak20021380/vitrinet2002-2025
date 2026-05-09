@@ -1,14 +1,17 @@
 const express = require('express');
 const crypto = require('crypto');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const SellerStory = require('../models/SellerStory');
+const User = require('../models/user');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 const STORY_DURATION_MS = SellerStory.DAY_MS;
+const JWT_SECRET = process.env.JWT_SECRET || 'vitrinet_secret_key';
 const uploadDir = path.join(__dirname, '..', 'uploads', 'stories');
 
 fs.mkdirSync(uploadDir, { recursive: true });
@@ -39,7 +42,35 @@ function getSellerId(req) {
   return req.user && (req.user.id || req.user._id);
 }
 
-function serializeStory(story, now = new Date()) {
+function cleanSingleLine(value, maxLength = 140) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function serializeReply(reply) {
+  if (!reply) return null;
+  return {
+    id: reply._id,
+    _id: reply._id,
+    message: reply.message || '',
+    displayName: reply.displayName || 'کاربر ویتری‌نت',
+    user: reply.user || null,
+    readAt: reply.readAt || null,
+    createdAt: reply.createdAt || null
+  };
+}
+
+function serializeReplies(replies = [], limit = 50) {
+  return [...(Array.isArray(replies) ? replies : [])]
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+    .slice(0, limit)
+    .map(serializeReply)
+    .filter(Boolean);
+}
+
+function serializeStory(story, now = new Date(), options = {}) {
   if (!story) return null;
   const expiresAt = story.expiresAt ? new Date(story.expiresAt) : null;
   const createdAt = story.createdAt ? new Date(story.createdAt) : null;
@@ -48,20 +79,35 @@ function serializeStory(story, now = new Date()) {
   const remainingMs = expiresAt ? Math.max(0, expiresAt.getTime() - now.getTime()) : 0;
   const elapsedMs = createdAt ? Math.max(0, now.getTime() - createdAt.getTime()) : 0;
   const progress = Math.min(100, Math.max(0, (elapsedMs / STORY_DURATION_MS) * 100));
+  const replies = Array.isArray(story.replies) ? story.replies : [];
+  const repliesCount = Number.isFinite(Number(story.repliesCount))
+    ? Number(story.repliesCount || 0)
+    : replies.length;
+  const unreadRepliesCount = Number.isFinite(Number(story.unreadRepliesCount))
+    ? Number(story.unreadRepliesCount || 0)
+    : replies.filter((reply) => !reply.readAt).length;
 
-  return {
+  const payload = {
     id: story._id,
     _id: story._id,
     imageUrl: story.imageUrl,
     caption: story.caption || '',
     viewsCount: story.viewsCount || 0,
     likesCount: story.likesCount || 0,
+    repliesCount,
     status: isDeleted ? 'deleted' : (isExpired ? 'expired' : 'active'),
     createdAt: story.createdAt,
     expiresAt: story.expiresAt,
     remainingMs,
     progress
   };
+
+  if (options.includeReplies) {
+    payload.unreadRepliesCount = unreadRepliesCount;
+    payload.replies = serializeReplies(replies, options.replyLimit || 50);
+  }
+
+  return payload;
 }
 
 function getReactionKey(req) {
@@ -85,6 +131,16 @@ function getReactionKey(req) {
     .slice(0, 40);
 
   return `request:${fallbackHash}`;
+}
+
+function getReplyKey(req) {
+  const raw = String(
+    req.get('x-story-reply-key') ||
+    req.body?.replyKey ||
+    ''
+  ).trim();
+  const safeRaw = raw.replace(/[^a-zA-Z0-9:_-]/g, '').slice(0, 96);
+  return safeRaw || getReactionKey(req);
 }
 
 function getDesiredReactionState(req) {
@@ -120,8 +176,8 @@ async function buildStoryState(sellerId) {
 
   return {
     success: true,
-    story: serializeStory(activeStory || visibleLatestStory, now),
-    latestStory: serializeStory(visibleLatestStory, now),
+    story: serializeStory(activeStory || visibleLatestStory, now, { includeReplies: true }),
+    latestStory: serializeStory(visibleLatestStory, now, { includeReplies: true }),
     canPost: cooldownRemainingMs <= 0,
     cooldownRemainingMs,
     nextAvailableAt
@@ -171,6 +227,29 @@ function removeStoryImage(imageUrl) {
       console.warn('Failed to remove story image:', error.message || error);
     }
   });
+}
+
+async function getOptionalReplyAuthor(req) {
+  const authHeader = req.headers.authorization;
+  const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const token = headerToken || req.cookies?.user_token || '';
+  if (!token) return null;
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    if (!payload?.id || String(payload.role || '').toLowerCase() !== 'user') return null;
+
+    const user = await User.findById(payload.id).select('firstname lastname phone deleted').lean();
+    if (!user || user.deleted) return null;
+
+    const fullName = cleanSingleLine(`${user.firstname || ''} ${user.lastname || ''}`, 60);
+    return {
+      userId: user._id,
+      displayName: fullName || (user.phone ? `کاربر ${String(user.phone).slice(-4)}` : 'کاربر ویتری‌نت')
+    };
+  } catch {
+    return null;
+  }
 }
 
 router.get('/public/:sellerId', async (req, res) => {
@@ -254,6 +333,52 @@ router.post('/public/:storyId/reaction', async (req, res) => {
   }
 });
 
+router.post('/public/:storyId/replies', async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const message = cleanSingleLine(req.body?.message, 500);
+    if (!message || message.length < 2) {
+      return res.status(400).json({ success: false, message: 'Reply message is required.' });
+    }
+
+    const now = new Date();
+    const story = await SellerStory.findOne({ _id: storyId, status: 'active', expiresAt: { $gt: now } })
+      .select('+replies.replyKey');
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story is not active.' });
+    }
+
+    const optionalAuthor = await getOptionalReplyAuthor(req);
+    const requestedName = cleanSingleLine(req.body?.displayName, 60);
+    const reply = {
+      message,
+      displayName: optionalAuthor?.displayName || requestedName || 'کاربر ویتری‌نت',
+      replyKey: getReplyKey(req),
+      user: optionalAuthor?.userId || null,
+      createdAt: now
+    };
+
+    story.replies.push(reply);
+    story.repliesCount = Math.max(Number(story.repliesCount || 0) + 1, story.replies.length);
+    story.unreadRepliesCount = Math.max(0, Number(story.unreadRepliesCount || 0) + 1);
+    await story.save();
+
+    const savedReply = story.replies[story.replies.length - 1];
+    return res.status(201).json({
+      success: true,
+      reply: serializeReply(savedReply),
+      story: serializeStory(story.toObject(), now)
+    });
+  } catch (error) {
+    console.error('Failed to submit story reply:', error);
+    return res.status(500).json({ success: false, message: 'Could not submit story reply.' });
+  }
+});
+
 router.get('/me', authMiddleware('seller'), async (req, res) => {
   try {
     const sellerId = getSellerId(req);
@@ -265,6 +390,68 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
   } catch (error) {
     console.error('Failed to load seller story:', error);
     return res.status(500).json({ success: false, message: 'Could not load story data.' });
+  }
+});
+
+router.get('/:storyId/replies', authMiddleware('seller'), async (req, res) => {
+  try {
+    const sellerId = getSellerId(req);
+    const { storyId } = req.params;
+    if (!sellerId) {
+      return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const story = await SellerStory.findOne({ _id: storyId, seller: sellerId }).lean();
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story was not found.' });
+    }
+
+    return res.json({
+      success: true,
+      replies: serializeReplies(story.replies, 100),
+      repliesCount: story.repliesCount || story.replies?.length || 0,
+      unreadRepliesCount: story.unreadRepliesCount || 0
+    });
+  } catch (error) {
+    console.error('Failed to load story replies:', error);
+    return res.status(500).json({ success: false, message: 'Could not load story replies.' });
+  }
+});
+
+router.patch('/:storyId/replies/read', authMiddleware('seller'), async (req, res) => {
+  try {
+    const sellerId = getSellerId(req);
+    const { storyId } = req.params;
+    if (!sellerId) {
+      return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+      return res.status(400).json({ success: false, message: 'Invalid story id.' });
+    }
+
+    const story = await SellerStory.findOne({ _id: storyId, seller: sellerId });
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story was not found.' });
+    }
+
+    const now = new Date();
+    story.replies.forEach((reply) => {
+      if (!reply.readAt) reply.readAt = now;
+    });
+    story.unreadRepliesCount = 0;
+    await story.save();
+
+    return res.json({
+      success: true,
+      replies: serializeReplies(story.toObject().replies, 100),
+      unreadRepliesCount: 0
+    });
+  } catch (error) {
+    console.error('Failed to mark story replies as read:', error);
+    return res.status(500).json({ success: false, message: 'Could not mark story replies as read.' });
   }
 });
 

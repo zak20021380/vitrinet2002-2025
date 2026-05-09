@@ -8549,7 +8549,7 @@
 
 .story-metrics {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   padding: 14px;
   background: #fff;
@@ -8578,6 +8578,145 @@
   color: #0f172a;
   font-size: 24px;
   font-weight: 900;
+}
+
+.story-replies-panel {
+  width: min(520px, 100%);
+  margin: 16px auto 0;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, .18);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, .07);
+}
+
+.story-replies-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.story-replies-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.story-replies-title i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #0369a1;
+  background: #e0f2fe;
+}
+
+.story-replies-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid rgba(16, 185, 129, .16);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.story-replies-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  padding-inline-end: 2px;
+}
+
+.story-reply-item {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.story-reply-item.unread {
+  border-color: rgba(14, 165, 233, .34);
+  background: #f0f9ff;
+}
+
+.story-reply-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.story-reply-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0f172a;
+}
+
+.story-reply-message {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.story-replies-empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+  color: #64748b;
+  background: #f8fafc;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.story-replies-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.story-replies-read-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 14px;
+  padding: 8px 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.story-replies-read-btn:disabled {
+  cursor: default;
+  opacity: .58;
 }
 
 .story-empty,
@@ -9901,6 +10040,10 @@
                 <span><i class="ri-heart-3-line" aria-hidden="true"></i> پسند کل</span>
                 <strong id="storyLikesCount">۰</strong>
               </div>
+              <div class="story-metric">
+                <span><i class="ri-chat-1-line" aria-hidden="true"></i> پاسخ‌ها</span>
+                <strong id="storyRepliesCount">۰</strong>
+              </div>
             </div>
             <div class="story-card__actions">
               <button type="button" class="story-delete-btn" id="storyDeleteBtn">
@@ -9909,6 +10052,26 @@
               </button>
             </div>
           </article>
+          <div class="story-replies-panel" id="storyRepliesPanel" style="display:none;">
+            <div class="story-replies-header">
+              <h3 class="story-replies-title">
+                <i class="ri-chat-3-line" aria-hidden="true"></i>
+                پاسخ‌های کاربران
+              </h3>
+              <span class="story-replies-badge" id="storyUnreadRepliesBadge">
+                <i class="ri-mail-unread-line" aria-hidden="true"></i>
+                ۰ جدید
+              </span>
+            </div>
+            <div class="story-replies-list" id="storyRepliesList" aria-live="polite"></div>
+            <p class="story-replies-empty" id="storyRepliesEmpty">هنوز پاسخی برای این استوری ثبت نشده است.</p>
+            <div class="story-replies-actions">
+              <button type="button" class="story-replies-read-btn" id="storyMarkRepliesReadBtn">
+                <i class="ri-check-double-line" aria-hidden="true"></i>
+                علامت‌گذاری به‌عنوان خوانده‌شده
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -10571,6 +10734,7 @@
       loading: false,
       uploading: false,
       deleting: false,
+      markingRepliesRead: false,
       canPost: false,
       selectedFile: null,
       previewUrl: '',
@@ -10587,8 +10751,9 @@
         'storyPreviewImage', 'storySubmitBtn',
         'storyFeedback', 'storyLoadingState', 'storyEmptyState', 'storyCard',
         'storyCardImage', 'storyCardCaption', 'storyExpirationText', 'storyViewsCount',
-        'storyLikesCount', 'storyProgressBar', 'storySuccessPopup', 'storySuccessClose',
-        'storySuccessOk', 'storyDeleteBtn'
+        'storyLikesCount', 'storyRepliesCount', 'storyProgressBar', 'storySuccessPopup', 'storySuccessClose',
+        'storySuccessOk', 'storyDeleteBtn', 'storyRepliesPanel', 'storyRepliesList',
+        'storyRepliesEmpty', 'storyUnreadRepliesBadge', 'storyMarkRepliesReadBtn'
       ].forEach((id) => { els[id] = document.getElementById(id); });
     }
 
@@ -10618,6 +10783,18 @@
       return toPersianDigits(`${hours}:${minutes}:${seconds}`);
     }
 
+    function formatReplyTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString('fa-IR', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
     function localizeStoryError(message, fallback) {
       const normalized = String(message || '').trim();
       const messages = {
@@ -10631,7 +10808,9 @@
         'Could not publish story.': 'امکان انتشار استوری وجود ندارد.',
         'Invalid story id.': 'شناسه استوری معتبر نیست.',
         'Story is not active.': 'این استوری دیگر فعال نیست.',
-        'Could not delete story.': 'امکان حذف استوری وجود ندارد.'
+        'Could not delete story.': 'امکان حذف استوری وجود ندارد.',
+        'Could not load story replies.': 'امکان دریافت پاسخ‌های استوری وجود ندارد.',
+        'Could not mark story replies as read.': 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.'
       };
       return messages[normalized] || fallback;
     }
@@ -10696,6 +10875,63 @@
           ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال حذف...'
           : '<i class="ri-delete-bin-6-line" aria-hidden="true"></i> حذف استوری فعلی';
       }
+      if (els.storyMarkRepliesReadBtn) {
+        const unread = Number(state.story?.unreadRepliesCount || 0);
+        els.storyMarkRepliesReadBtn.disabled = state.markingRepliesRead || unread <= 0;
+        els.storyMarkRepliesReadBtn.innerHTML = state.markingRepliesRead
+          ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال ثبت...'
+          : '<i class="ri-check-double-line" aria-hidden="true"></i> علامت‌گذاری به‌عنوان خوانده‌شده';
+      }
+    }
+
+    function renderStoryReplies() {
+      const story = state.story;
+      const replies = Array.isArray(story?.replies) ? story.replies : [];
+      const repliesCount = Number(story?.repliesCount || replies.length || 0);
+      const unreadCount = Number(story?.unreadRepliesCount || replies.filter((reply) => !reply.readAt).length || 0);
+
+      if (els.storyRepliesPanel) {
+        els.storyRepliesPanel.style.display = story?.id || story?._id ? '' : 'none';
+      }
+      if (els.storyRepliesCount) els.storyRepliesCount.textContent = formatCount(repliesCount);
+      if (els.storyUnreadRepliesBadge) {
+        els.storyUnreadRepliesBadge.innerHTML = `<i class="${unreadCount > 0 ? 'ri-mail-unread-line' : 'ri-mail-check-line'}" aria-hidden="true"></i>${formatCount(unreadCount)} جدید`;
+      }
+
+      if (!els.storyRepliesList || !els.storyRepliesEmpty) {
+        refreshSubmitState();
+        return;
+      }
+
+      els.storyRepliesList.innerHTML = '';
+      els.storyRepliesEmpty.style.display = replies.length ? 'none' : '';
+
+      replies.forEach((reply) => {
+        const item = document.createElement('article');
+        item.className = `story-reply-item${reply.readAt ? '' : ' unread'}`;
+
+        const meta = document.createElement('div');
+        meta.className = 'story-reply-meta';
+
+        const author = document.createElement('span');
+        author.className = 'story-reply-author';
+        author.innerHTML = '<i class="ri-user-smile-line" aria-hidden="true"></i>';
+        author.append(document.createTextNode(reply.displayName || 'کاربر ویتری‌نت'));
+
+        const time = document.createElement('time');
+        time.dateTime = reply.createdAt || '';
+        time.textContent = formatReplyTime(reply.createdAt);
+
+        const message = document.createElement('p');
+        message.className = 'story-reply-message';
+        message.textContent = reply.message || '';
+
+        meta.append(author, time);
+        item.append(meta, message);
+        els.storyRepliesList.appendChild(item);
+      });
+
+      refreshSubmitState();
     }
 
     function updateCooldown() {
@@ -10751,6 +10987,7 @@
       if (!story?.imageUrl || story.status === 'deleted') {
         if (els.storyEmptyState) els.storyEmptyState.style.display = '';
         if (els.storyCard) els.storyCard.style.display = 'none';
+        if (els.storyRepliesPanel) els.storyRepliesPanel.style.display = 'none';
         refreshSubmitState();
         return;
       }
@@ -10765,6 +11002,7 @@
       }
       if (els.storyViewsCount) els.storyViewsCount.textContent = formatCount(story.viewsCount);
       if (els.storyLikesCount) els.storyLikesCount.textContent = formatCount(story.likesCount);
+      renderStoryReplies();
       updateStoryCountdown();
       refreshSubmitState();
     }
@@ -10796,6 +11034,54 @@
         setStatus('در دسترس نیست', 'cooldown');
       } finally {
         state.loading = false;
+      }
+    }
+
+    async function refreshStoryReplies() {
+      const storyId = state.story?.id || state.story?._id;
+      if (!storyId) return;
+
+      try {
+        const res = await fetch(buildApiUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies`), withCredentials());
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeStoryError(data.message, 'امکان دریافت پاسخ‌های استوری وجود ندارد.'));
+        }
+        state.story.replies = Array.isArray(data.replies) ? data.replies : [];
+        state.story.repliesCount = data.repliesCount ?? state.story.replies.length;
+        state.story.unreadRepliesCount = data.unreadRepliesCount ?? 0;
+        renderStoryReplies();
+      } catch (error) {
+        showFeedback(error.message || 'امکان دریافت پاسخ‌های استوری وجود ندارد.', 'error');
+      }
+    }
+
+    async function markStoryRepliesRead() {
+      const storyId = state.story?.id || state.story?._id;
+      if (!storyId || state.markingRepliesRead || Number(state.story?.unreadRepliesCount || 0) <= 0) return;
+
+      state.markingRepliesRead = true;
+      refreshSubmitState();
+      try {
+        const res = await fetch(buildApiUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies/read`), withCredentials({
+          method: 'PATCH'
+        }));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          throw new Error(localizeStoryError(data.message, 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.'));
+        }
+
+        state.story.replies = Array.isArray(data.replies)
+          ? data.replies
+          : (state.story.replies || []).map((reply) => ({ ...reply, readAt: reply.readAt || new Date().toISOString() }));
+        state.story.unreadRepliesCount = 0;
+        renderStoryReplies();
+        showFeedback('پاسخ‌های جدید خوانده شد.');
+      } catch (error) {
+        showFeedback(error.message || 'امکان خوانده‌شدن پاسخ‌ها وجود ندارد.', 'error');
+      } finally {
+        state.markingRepliesRead = false;
+        refreshSubmitState();
       }
     }
 
@@ -10916,6 +11202,7 @@
       });
       els.storyUploadForm.addEventListener('submit', submitStory);
       els.storyDeleteBtn?.addEventListener('click', deleteCurrentStory);
+      els.storyMarkRepliesReadBtn?.addEventListener('click', markStoryRepliesRead);
       els.storySuccessClose?.addEventListener('click', closeStorySuccessPopup);
       els.storySuccessOk?.addEventListener('click', closeStorySuccessPopup);
       els.storySuccessPopup?.addEventListener('click', (event) => {
@@ -10928,7 +11215,9 @@
       });
 
       document.querySelectorAll('[data-section="stories"]').forEach((node) => {
-        node.addEventListener('click', () => loadStories());
+        node.addEventListener('click', () => {
+          loadStories(true).then(refreshStoryReplies).catch(() => {});
+        });
       });
 
       document.addEventListener('seller:ready', () => {
