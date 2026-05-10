@@ -7676,41 +7676,60 @@ tr:last-child td {
 
 .categories-manage-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 992px) {
   .categories-manage-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
 }
 
 .categories-card {
   background: var(--card);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 1.5rem;
-  box-shadow: 0 16px 40px rgba(15, 118, 110, 0.07);
+  border-radius: 18px;
+  border: 1px solid rgba(203, 213, 225, 0.72);
+  padding: 1.35rem;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 100%;
 }
 
-.categories-card.preview-card {
-  background: linear-gradient(145deg, #ffffff 60%, rgba(224, 242, 254, 0.75));
+.categories-card-header {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 .categories-card-header h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1.2rem;
-  color: var(--primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.categories-card-header h3 i {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .categories-card-header p {
   margin: 0;
   color: #64748b;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  line-height: 1.8;
 }
 
 .categories-form {
@@ -7730,21 +7749,37 @@ tr:last-child td {
   gap: 0.7rem;
 }
 
-.categories-form-row input {
+.categories-form-row input,
+.categories-select {
   flex: 1;
   border-radius: 14px;
-  border: 1.5px solid rgba(14, 165, 233, 0.35);
+  border: 1.5px solid rgba(148, 163, 184, 0.45);
   padding: 0.75rem 1rem;
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
   transition: border var(--transition), box-shadow var(--transition);
-  background: #f8fafc;
+  background: #fff;
+  color: #0f172a;
 }
 
-.categories-form-row input:focus {
+.categories-select {
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+}
+
+.categories-form-row input:focus,
+.categories-select:focus {
   border-color: var(--secondary);
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.categories-form-hint {
+  display: block;
+  margin-top: 0.1rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.7;
 }
 
 .primary-btn {
@@ -7767,11 +7802,22 @@ tr:last-child td {
   transform: scale(0.97);
 }
 
+@media (max-width: 640px) {
+  .categories-form-row {
+    flex-direction: column;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+}
+
 .chip-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   min-height: 40px;
+  padding-top: 0.25rem;
 }
 
 .chip-list::before {
@@ -7790,11 +7836,12 @@ tr:last-child td {
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(14, 165, 233, 0.1);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.98);
   color: #0f172a;
-  font-weight: 500;
-  border: 1px solid rgba(14, 165, 233, 0.25);
+  font-weight: 700;
+  border: 1px solid rgba(203, 213, 225, 0.82);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
 }
 
 .chip-item button {
@@ -7812,50 +7859,6 @@ tr:last-child td {
 
 .chip-item button:hover {
   color: #ef4444;
-}
-
-.chip-list.preview .chip-item {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.2);
-  color: #047857;
-}
-
-.preview-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.preview-field label {
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.preview-field select {
-  border-radius: 14px;
-  border: 1.5px solid rgba(148, 163, 184, 0.6);
-  padding: 0.65rem 0.9rem;
-  background: rgba(248, 250, 252, 0.9);
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: #1e293b;
-}
-
-.preview-note {
-  display: flex;
-  gap: 0.7rem;
-  align-items: flex-start;
-  padding: 0.85rem 1rem;
-  border-radius: 16px;
-  background: rgba(250, 204, 21, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.25);
-  color: #92400e;
-  font-size: 0.92rem;
-  line-height: 1.7;
-}
-
-.preview-note i {
-  font-size: 1.4rem;
 }
 
 .category-feedback {

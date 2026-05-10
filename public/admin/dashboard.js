@@ -2392,78 +2392,6 @@ function updateCategoryMetrics() {
   }
 }
 
-function updateCategoryPreview() {
-  const select = document.getElementById('categoryPreviewSelect');
-  const chips = document.getElementById('servicePreviewChips');
-  if (select) {
-    const previousOption = select.options[select.selectedIndex];
-    const previousId = select.dataset.selectedId || (previousOption && previousOption.dataset.id) || '';
-    const previousName = select.dataset.selectedName || (previousOption && previousOption.value) || '';
-    select.innerHTML = '';
-    if (!categoryManagerState.categories.length) {
-      const option = document.createElement('option');
-      option.textContent = 'دسته‌ای تعریف نشده است';
-      option.disabled = true;
-      option.selected = true;
-      select.appendChild(option);
-      select.disabled = true;
-      select.dataset.selectedId = '';
-      select.dataset.selectedName = '';
-    } else {
-      const placeholder = document.createElement('option');
-      placeholder.textContent = 'انتخاب دسته';
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      select.appendChild(placeholder);
-      categoryManagerState.categories.forEach(item => {
-        const option = document.createElement('option');
-        const name = getCategoryName(item);
-        option.value = name;
-        option.textContent = name;
-        const id = getCategoryId(item);
-        if (id) {
-          option.dataset.id = id;
-        }
-        if (id && previousId && id === previousId) {
-          option.selected = true;
-          placeholder.selected = false;
-        } else if (!previousId && previousName && name === previousName) {
-          option.selected = true;
-          placeholder.selected = false;
-        }
-        select.appendChild(option);
-      });
-      select.disabled = false;
-      const selectedOption = select.options[select.selectedIndex];
-      select.dataset.selectedId = selectedOption?.dataset.id || '';
-      select.dataset.selectedName = selectedOption?.value || '';
-      if (!select.dataset.previewBound) {
-        select.addEventListener('change', () => {
-          const currentOption = select.options[select.selectedIndex];
-          select.dataset.selectedId = currentOption?.dataset.id || '';
-          select.dataset.selectedName = currentOption?.value || '';
-          updateCategoryPreview();
-        });
-        select.dataset.previewBound = 'true';
-      }
-    }
-  }
-  if (chips) {
-    const selectedOption = select && select.options[select.selectedIndex];
-    const filterParent = selectedOption && selectedOption.dataset.id
-      ? { id: selectedOption.dataset.id }
-      : selectedOption && selectedOption.value
-        ? { name: selectedOption.value }
-        : null;
-    renderChipList(chips, categoryManagerState.serviceSubcategories, {
-      removable: false,
-      type: 'service-subcategory',
-      filterParent,
-      showParent: false
-    });
-  }
-}
-
 function updateServiceParentOptions() {
   const select = document.getElementById('serviceSubcategoryParent');
   if (!select) return;
@@ -2690,7 +2618,6 @@ function renderCategoryManager() {
   }
   updateServiceParentOptions();
   updateCategoryMetrics();
-  updateCategoryPreview();
 }
 
 function initCategoryManager() {
