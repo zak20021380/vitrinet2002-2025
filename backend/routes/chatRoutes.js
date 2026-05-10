@@ -175,7 +175,7 @@ router.post(
   auth('seller'),
   (req, res, next) => {
     // اطمینان از اینکه sellerId از توکن کاربر گرفته شود
-    req.body.sellerId = req.user.id;
+    req.body.sellerId = req.user.sellerId;
     return chatController.markAllRead(req, res, next);
   }
 );

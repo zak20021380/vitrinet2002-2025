@@ -340,7 +340,7 @@ exports.createAdOrder = async (req, res) => {
   try {
     // Ad order request received
 
-    const sellerId = req.user.id || req.user.sellerId;
+    const sellerId = req.user.sellerId;
 
     // داده‌های فرم
     const planSlug   = req.fields.adType || req.fields.planSlug;

@@ -29,7 +29,7 @@ const toPersianNumber = (num) => {
  */
 exports.checkIn = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     
     if (!sellerId) {
       return res.status(401).json({
@@ -185,7 +185,7 @@ exports.checkIn = async (req, res) => {
  */
 exports.getStreak = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const todayStr = SellerStreak.getTehranDateString();
     const yesterdayStr = SellerStreak.getTehranYesterdayString();
     const calendarDays = parseInt(req.query.days) || 14;

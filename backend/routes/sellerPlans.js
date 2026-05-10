@@ -9,7 +9,7 @@ const auth = require('../middlewares/authMiddleware');
 // Returns the seller's current subscription status with server-calculated remaining days
 router.get('/subscription-status', auth('seller'), async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const serverNow = new Date();
 
     // Find the most recent active subscription plan
@@ -84,7 +84,7 @@ router.get('/subscription-status', auth('seller'), async (req, res) => {
 // GET /api/sellerPlans/my
 router.get('/my', auth('seller'), async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
 
     // هردو نوع پلن رو از دیتابیس بیار
     const [plans, ads] = await Promise.all([
@@ -134,7 +134,7 @@ router.get('/my', auth('seller'), async (req, res) => {
 // Includes subscription info and active ads count with server-calculated remaining days
 router.get('/summary', auth('seller'), async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const serverNow = new Date();
 
     // Find the most recent active subscription plan

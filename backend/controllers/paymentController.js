@@ -43,7 +43,7 @@ exports.createPaymentRequest = async (req, res) => {
     // پرداخت پلن اشتراک
     if (planSlug) {
       // -------------- خرید پلن اشتراک (ویتری‌پلاس) --------------
-      const sellerId = req.user && req.user.id;
+      const sellerId = req.user && req.user.sellerId;
       if (!sellerId) {
         return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
       }

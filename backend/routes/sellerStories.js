@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 function getSellerId(req) {
-  return req.user && (req.user.id || req.user._id);
+  return req.user && req.user.sellerId;
 }
 
 function getStoryTarget(req) {

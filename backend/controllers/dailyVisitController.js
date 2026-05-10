@@ -11,7 +11,7 @@ exports.createOrUpdateVisit = async (req, res) => {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
-    const sellerId = req.user.id;  // استفاده از req.user.id (برای سازگاری با middleware)
+    const sellerId = req.user.sellerId;  // استفاده از req.user.id (برای سازگاری با middleware)
     let { date, count } = req.body;
 
     // پیش‌فرض: امروز
@@ -107,7 +107,7 @@ if (from || to) {
     // اگر ادمین باشه، دسترسی کامل (بدون فیلتر seller اجباری)
     if (req.user.role !== 'admin') {
       // اگر فروشنده عادی باشه، فقط آمار خودش رو ببینه
-      const currentSellerId = req.user.id;
+      const currentSellerId = req.user.sellerId;
       filter.seller = currentSellerId;
       if (sellerId && sellerId !== currentSellerId.toString()) {
         return res.status(403).json({ message: 'مجوز دیدن آمار دیگران ندارید' });
@@ -145,7 +145,7 @@ exports.deleteVisit = async (req, res) => {
 
     // چک auth: ادمین همیشه اجازه داره، فروشنده فقط اگر صاحب رکورد باشه
     if (req.user.role !== 'admin') {
-      if (visit.seller.toString() !== req.user.id.toString()) {
+      if (visit.seller.toString() !== req.user.sellerId.toString()) {
         return res.status(403).json({ message: 'مجوز حذف ندارید' });
       }
     }

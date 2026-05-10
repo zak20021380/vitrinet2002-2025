@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
  */
 exports.getNotifications = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const { limit = 50, skip = 0, unreadOnly = false } = req.query;
 
     const query = { sellerId };
@@ -40,7 +40,7 @@ exports.getNotifications = async (req, res) => {
  */
 exports.getUnreadCount = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const count = await SellerNotification.countDocuments({ sellerId, read: false });
     res.json({ count });
   } catch (err) {
@@ -56,7 +56,7 @@ exports.getUnreadCount = async (req, res) => {
 exports.markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'شناسه اعلان نامعتبر است' });
@@ -85,7 +85,7 @@ exports.markAsRead = async (req, res) => {
  */
 exports.markAllAsRead = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
 
     await SellerNotification.updateMany(
       { sellerId, read: false },
@@ -106,7 +106,7 @@ exports.markAllAsRead = async (req, res) => {
 exports.deleteNotification = async (req, res) => {
   try {
     const { id } = req.params;
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'شناسه اعلان نامعتبر است' });
@@ -131,7 +131,7 @@ exports.deleteNotification = async (req, res) => {
  */
 exports.clearAll = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     await SellerNotification.deleteMany({ sellerId });
     res.json({ success: true });
   } catch (err) {
@@ -223,7 +223,7 @@ exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
  */
 exports.createTestNotification = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     
     const notification = new SellerNotification({
       sellerId,

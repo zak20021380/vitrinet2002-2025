@@ -176,7 +176,7 @@ exports.registerSeller = async (req, res) => {
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }
@@ -309,7 +309,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getMonthlyBookingInsights = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }
@@ -530,7 +530,7 @@ exports.deleteSeller = async (req, res) => {
 // ارتقای فروشنده به پلن انتخابی (معمولی یا پرمیوم)
 exports.upgradeSeller = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     const { planSlug, premium, creditUsed } = req.body || {};
 
     if (!sellerId) {
@@ -747,7 +747,7 @@ exports.listSellerPerformance = async (req, res) => {
 
 exports.getCurrentSellerPerformanceStatus = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'برای مشاهده وضعیت عملکرد ابتدا وارد شوید.' });
     }
@@ -775,7 +775,7 @@ exports.getCurrentSellerPerformanceStatus = async (req, res) => {
 
 exports.getTopServicePeers = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }

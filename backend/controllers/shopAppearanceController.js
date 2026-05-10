@@ -107,6 +107,10 @@ exports.saveShopAppearance = async (req, res) => {
     }
 
     // حالت ObjectId معتبر
+    if (req.user?.role !== 'admin' && String(req.user?.sellerId || '') !== String(sellerId)) {
+      return res.status(403).json({ message: 'Access denied.' });
+    }
+
     let objectId = null;
     if (mongoose.Types.ObjectId.isValid(sellerId)) {
       objectId = new mongoose.Types.ObjectId(sellerId);
@@ -334,7 +338,7 @@ exports.getReviews = async (req, res) => {
 // ================== دریافت نظرات تایید نشده ==================
 exports.getPendingReviews = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const reviews = await Review.find({ sellerId, approved: false })
       .sort({ createdAt: -1 })
       .populate('userId', 'firstname lastname username')
@@ -362,7 +366,7 @@ exports.getPendingReviews = async (req, res) => {
 // ================== تایید نظر ==================
 exports.approveReview = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const { reviewId } = req.params;
     const review = await Review.findOneAndUpdate(
       { _id: reviewId, sellerId },
@@ -383,7 +387,7 @@ exports.approveReview = async (req, res) => {
 // ================== حذف/رد نظر ==================
 exports.rejectReview = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const { reviewId } = req.params;
     const review = await Review.findOneAndDelete({ _id: reviewId, sellerId });
     if (!review) {

@@ -120,7 +120,7 @@ async function unbanSellerPhoneIfNoOtherBlocked(sellerDoc) {
 // GET /api/chats?sellerId=...
 exports.getChatsBySeller = async (req, res) => {
   try {
-    const sid = new mongoose.Types.ObjectId(req.user.id);
+    const sid = new mongoose.Types.ObjectId(req.user.sellerId);
     
     // همچنین چت‌های product که فروشنده در participants هست را هم برگردان
     const chats = await Chat.find({
@@ -1209,11 +1209,11 @@ exports.replyToChat = async (req, res) => {
     }
 
   // ۳. فقط فروشنده‌ی عضو این چت می‌تواند پاسخ بدهد (یا ادمین)
-  if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+  if (!req.user?.sellerId) {
     return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
   }
 
-  const senderId = (req.user.id || req.user._id)?.toString();
+  const senderId = req.user.sellerId?.toString();
 
   // چک کنید که این فروشنده داخل چت شرکت‌کننده است
   const isParticipant = chat.participants.some(p => {
@@ -1457,7 +1457,7 @@ exports.getAllChats = async (req, res) => {
     exports.markMessagesReadBySeller = async (req, res) => {
       try {
         const chatId = req.params.id;
-        const sellerId = (req.user.id || req.user._id)?.toString();
+        const sellerId = req.user.sellerId?.toString();
 
         // اعتبارسنجی ObjectId
         if (!mongoose.Types.ObjectId.isValid(chatId)) {
@@ -1763,17 +1763,17 @@ exports.contactAdmin = async (req, res) => {
     const content = (text || message || '').trim();
   if (!content)
       return res.status(400).json({ error: 'متن پیام اجباری است.' });
-  if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin'))
+  if (!req.user?.sellerId)
       return res.status(403).json({ error: 'فقط فروشنده مجاز است.' });
 
-  const sellerDoc = await Seller.findById(req.user.id).select('blockedByAdmin');
+  const sellerDoc = await Seller.findById(req.user.sellerId).select('blockedByAdmin');
   if (sellerDoc && sellerDoc.blockedByAdmin) {
     return res
       .status(403)
       .json({ success: false, message: 'شما مسدود شده‌اید و نمی‌توانید پیامی ارسال کنید.' });
   }
 
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
 
     // ———————————— اضافه: پیدا کردن adminId ————————————
     const adminDoc = await Admin.findOne().select('_id');

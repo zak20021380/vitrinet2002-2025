@@ -2,6 +2,10 @@ const AdminSellerNotification = require('../models/AdminSellerNotification');
 const ServiceShop = require('../models/serviceShop');
 const Seller = require('../models/Seller');
 
+function canAccessSeller(req, sellerId) {
+  return req.user?.role === 'admin' || String(req.user?.sellerId || '') === String(sellerId || '');
+}
+
 /**
  * ارسال پیام از ادمین به فروشنده
  */
@@ -54,7 +58,7 @@ exports.sendNotification = async (req, res) => {
  */
 exports.getMyNotifications = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
 
     if (!sellerId) {
@@ -98,7 +102,7 @@ exports.getMyNotifications = async (req, res) => {
  */
 exports.getMyUnreadCount = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
 
     if (!sellerId) {
       return res.status(401).json({ error: 'لطفاً وارد حساب کاربری شوید' });
@@ -126,10 +130,7 @@ exports.getSellerNotifications = async (req, res) => {
 
     // بررسی دسترسی: فروشنده فقط می‌تواند پیام‌های خودش را ببیند
     // ادمین می‌تواند پیام‌های همه را ببیند
-    const userRole = req.user?.role;
-    const userId = req.user?.id || req.user?._id;
-    
-    if (userRole === 'seller' && sellerId !== String(userId)) {
+    if (!canAccessSeller(req, sellerId)) {
       return res.status(403).json({ error: 'شما فقط می‌توانید پیام‌های خودتان را مشاهده کنید' });
     }
 
@@ -172,8 +173,13 @@ exports.markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const notification = await AdminSellerNotification.findByIdAndUpdate(
-      id,
+    const sellerContextId = req.user?.sellerId;
+    if (!sellerContextId) {
+      return res.status(403).json({ error: 'Seller context is required for this endpoint.' });
+    }
+
+    const notification = await AdminSellerNotification.findOneAndUpdate(
+      { _id: id, sellerId: sellerContextId },
       { read: true, readAt: new Date() },
       { new: true }
     );
@@ -195,6 +201,9 @@ exports.markAsRead = async (req, res) => {
 exports.markAllAsRead = async (req, res) => {
   try {
     const { sellerId } = req.params;
+    if (!canAccessSeller(req, sellerId)) {
+      return res.status(403).json({ error: 'Access denied.' });
+    }
 
     const result = await AdminSellerNotification.updateMany(
       { sellerId, read: false },
@@ -218,7 +227,12 @@ exports.deleteNotification = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const notification = await AdminSellerNotification.findByIdAndDelete(id);
+    const sellerContextId = req.user?.sellerId;
+    if (!sellerContextId) {
+      return res.status(403).json({ error: 'Seller context is required for this endpoint.' });
+    }
+
+    const notification = await AdminSellerNotification.findOneAndDelete({ _id: id, sellerId: sellerContextId });
 
     if (!notification) {
       return res.status(404).json({ error: 'پیام یافت نشد' });
@@ -239,10 +253,7 @@ exports.getUnreadCount = async (req, res) => {
     const { sellerId } = req.params;
 
     // بررسی دسترسی: فروشنده فقط می‌تواند تعداد پیام‌های خودش را ببیند
-    const userRole = req.user?.role;
-    const userId = req.user?.id || req.user?._id;
-    
-    if (userRole === 'seller' && sellerId !== String(userId)) {
+    if (!canAccessSeller(req, sellerId)) {
       return res.status(403).json({ error: 'دسترسی غیرمجاز' });
     }
 

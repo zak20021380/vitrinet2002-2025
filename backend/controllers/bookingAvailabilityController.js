@@ -3,7 +3,7 @@ const BookingAvailability = require('../models/booking-availability');
 // Get availability for authenticated seller
 exports.getMyAvailability = async (req, res) => {
   try {
-    const doc = await BookingAvailability.findOne({ sellerId: req.user.id });
+    const doc = await BookingAvailability.findOne({ sellerId: req.user.sellerId });
     res.json(doc?.slots || {});
   } catch (err) {
     console.error('getMyAvailability failed', err);
@@ -16,7 +16,7 @@ exports.updateMyAvailability = async (req, res) => {
   try {
     const slots = req.body || {};
     const doc = await BookingAvailability.findOneAndUpdate(
-      { sellerId: req.user.id },
+      { sellerId: req.user.sellerId },
       { slots },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );

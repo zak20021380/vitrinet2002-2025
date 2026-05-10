@@ -3,7 +3,7 @@ const SellerPlan = require('../models/sellerPlan');
 
 exports.getMyPlans = async (req, res) => {
   try {
-    const sellerId = req.user.id; // فرض: seller اومده توکن زده
+    const sellerId = req.user.sellerId; // فرض: seller اومده توکن زده
     const plans = await SellerPlan.find({ sellerId }).sort({ startDate: -1 }).lean();
 
     res.json({

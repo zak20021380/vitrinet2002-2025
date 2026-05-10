@@ -76,7 +76,7 @@ exports.requestReward = async (req, res) => {
 // فروشنده: دریافت درخواست‌های جایزه در انتظار
 exports.getRewardRequests = async (req, res) => {
   try {
-    const storeId = req.user.id;
+    const storeId = req.user.sellerId;
     const requests = await Loyalty.find({ storeId, pending: { $gt: 0 } })
       .populate('userId', 'name phone');
 
@@ -96,7 +96,7 @@ exports.getRewardRequests = async (req, res) => {
 // فروشنده: تایید یا رد درخواست جایزه
 exports.resolveReward = async (req, res) => {
   try {
-    const storeId = req.user.id;
+    const storeId = req.user.sellerId;
     const { userId, action } = req.body;
     if (!userId || !['approve', 'reject'].includes(action)) {
       return res.status(400).json({ message: 'invalid data' });
@@ -121,7 +121,7 @@ exports.resolveReward = async (req, res) => {
 // فروشنده: دریافت همه مشتریان با وضعیت وفاداری
 exports.getStoreCustomers = async (req, res) => {
   try {
-    const storeId = req.user.id;
+    const storeId = req.user.sellerId;
     const loyalties = await Loyalty.find({ storeId }).populate('userId', 'name phone');
 
     const mapped = loyalties.map(l => ({

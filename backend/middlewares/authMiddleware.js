@@ -5,6 +5,7 @@
 // ------------------------------------
 
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const { JWT_SECRET } = require('../config/security');
 
 const User = require('../models/user');           // مدل کاربر
@@ -177,9 +178,19 @@ const createAuthMiddleware = (requiredRole = null) => {
 
       if (requiredRoleNormalized === 'seller' && hasSellerAccess(payload)) {
         
-        // Admin bypass: skip seller resolution for admin users
         if (payloadRole === 'admin') {
-          // Admin doesn't need seller ID resolution
+          const requestedSellerId = req.params?.sellerId || req.query?.sellerId || req.body?.sellerId;
+          if (!requestedSellerId) {
+            return res.status(403).json({ message: 'Seller context is required for this endpoint.' });
+          }
+          if (!mongoose.Types.ObjectId.isValid(requestedSellerId)) {
+            return res.status(400).json({ message: 'Invalid sellerId.' });
+          }
+          const sellerDoc = await Seller.findById(requestedSellerId).select('_id');
+          if (!sellerDoc) {
+            return res.status(404).json({ message: 'Seller not found.' });
+          }
+          resolvedSellerId = sellerDoc._id;
         } else {
           // الف) تلاش اول: جستجو با آیدی مستقیم
           let sellerDoc = await Seller.findById(payload.id).select('_id phone');
@@ -203,19 +214,18 @@ const createAuthMiddleware = (requiredRole = null) => {
       }
 
       // ۹) تزریق اطلاعات به req.user
-      const finalId = resolvedSellerId || payload.id;
-      const finalRole = payloadRole === 'admin'
-        ? 'admin'
-        : (requiredRoleNormalized === 'seller') ? 'seller' : payloadRole;
-
       req.user = {
-        id: finalId,           // آیدی نهایی
-        _id: finalId,          
-        role: finalRole,       
+        id: payload.id,
+        _id: payload.id,
+        role: payloadRole,
         userType: payload.userType,
         authId: payload.id,    
         phone: payload.phone
       };
+
+      if (resolvedSellerId) {
+        req.user.sellerId = resolvedSellerId;
+      }
 
       next();
 

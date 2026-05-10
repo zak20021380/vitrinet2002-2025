@@ -44,7 +44,7 @@ router.post('/', registerSeller);
 // گرفتن اطلاعات فروشنده‌ی جاری
 router.get('/me', authMiddleware('seller'), async (req, res) => {
   try {
-    const seller = await Seller.findById(req.user.id)
+    const seller = await Seller.findById(req.user.sellerId)
       .select('-password -otp -otpExpire')
       .lean();
     if (!seller) return res.status(404).json({ message: 'فروشنده پیدا نشد!' });
@@ -59,7 +59,7 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
 // به‌روزرسانی اطلاعات فروشنده (شماره تلفن و آدرس)
 router.put('/me', authMiddleware('seller'), async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { phone, address, storename, shopurl: rawShopurl } = req.body;
     
     // اعتبارسنجی نام کسب‌وکار
@@ -299,7 +299,7 @@ router.get('/', authMiddleware('admin'), async (req, res) => {
 router.put('/working-hours', authMiddleware('seller'), async (req, res) => {
   try {
     const { startTime, endTime } = req.body || {};
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     const seller = await Seller.findByIdAndUpdate(
       sellerId,
       { startTime, endTime },
@@ -323,7 +323,7 @@ router.get('/top-peers', authMiddleware('seller'), getTopServicePeers);
 // دریافت متریک‌های داشبورد شامل streak و wallet
 router.get('/me/dashboard-metrics', authMiddleware('seller'), async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     
     // Import models
     const SellerStreak = require('../models/SellerStreak');
@@ -468,7 +468,7 @@ router.post(
   authMiddleware('seller'),
   async (req, res) => {
     try {
-      const sellerId = req.user && (req.user.id || req.user._id);
+      const sellerId = req.user && req.user.sellerId;
       const { message } = req.body;
       if (!message || !message.trim()) {
         return res.status(400).json({ error: 'متن پیام لازم است.' });

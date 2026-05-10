@@ -25,7 +25,7 @@ router.get('/footer', auth('seller'), async (req, res) => {
       return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
     }
 
-    const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
+    const appearance = await ShopAppearance.findOne({ sellerId: req.user.sellerId });
     const url = makeFullUrl(req, appearance?.footerImage || '');
     return res.json({ url });
   } catch (err) {
@@ -63,7 +63,7 @@ router.post('/footer', auth('seller'), upload.single('image'), async (req, res) 
       return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
     }
 
-    const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
+    const appearance = await ShopAppearance.findOne({ sellerId: req.user.sellerId });
     if (!appearance) {
       return res.status(404).json({ message: 'ظاهر فروشگاه یافت نشد.' });
     }
@@ -94,7 +94,7 @@ router.delete('/footer', auth('seller'), async (req, res) => {
       return res.status(400).json({ message: 'شناسه فروشنده معتبر نیست.' });
     }
 
-    const appearance = await ShopAppearance.findOne({ sellerId: req.user.id });
+    const appearance = await ShopAppearance.findOne({ sellerId: req.user.sellerId });
     if (!appearance) {
       return res.status(404).json({ message: 'ظاهر فروشگاه یافت نشد.' });
     }

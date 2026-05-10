@@ -1435,7 +1435,7 @@ exports.getCurrentSeller = async (req, res) => {
   try {
     // استفاده از req.user که توسط authMiddleware ست شده
     // این روش از خواندن مستقیم کوکی بهتره چون middleware همه توکن‌ها رو چک میکنه
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'عدم احراز هویت' });

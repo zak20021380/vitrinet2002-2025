@@ -55,7 +55,7 @@ const SERVICE_COSTS = {
  */
 exports.getWallet = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const wallet = await SellerWallet.getOrCreate(sellerId);
 
     // دریافت 10 تراکنش اخیر
@@ -97,7 +97,7 @@ exports.getWallet = async (req, res) => {
  */
 exports.getTransactions = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, parseInt(req.query.limit) || 20);
     const skip = (page - 1) * limit;
@@ -139,7 +139,7 @@ exports.getTransactions = async (req, res) => {
  */
 exports.earnCredit = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { category, relatedId, relatedType, metadata, idempotencyKey } = req.body;
 
     // بررسی دسته‌بندی معتبر
@@ -196,7 +196,7 @@ exports.earnCredit = async (req, res) => {
  */
 exports.spendCredit = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { serviceType, metadata, idempotencyKey } = req.body;
 
     // بررسی نوع خدمت معتبر

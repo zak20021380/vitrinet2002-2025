@@ -19,7 +19,7 @@ exports.createTicket = async (req, res) => {
     let sellerInfo = { id: null, name: '', shopurl: '', phone: '' };
 
     if (req.user?.id) {
-      const seller = await Seller.findById(req.user.id).select('firstname lastname storename shopurl phone');
+      const seller = await Seller.findById(req.user.sellerId).select('firstname lastname storename shopurl phone');
       if (!seller) {
         return res.status(403).json({ message: 'حساب فروشنده یافت نشد.' });
       }
@@ -208,7 +208,7 @@ exports.deleteTicket = async (req, res) => {
 // فروشنده: دریافت تیکت‌های خود
 exports.getMyTickets = async (req, res) => {
   try {
-    const sellerId = req.user?.id;
+    const sellerId = req.user?.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت الزامی است.' });
     }
@@ -279,7 +279,7 @@ exports.sellerReplyToTicket = async (req, res) => {
   try {
     const { id } = req.params;
     const { message } = req.body || {};
-    const sellerId = req.user?.id;
+    const sellerId = req.user?.sellerId;
 
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت الزامی است.' });

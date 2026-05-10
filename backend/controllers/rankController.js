@@ -187,7 +187,7 @@ const updateCategoryRankings = async (category, subcategory = null) => {
  */
 exports.getMyRank = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }
@@ -250,7 +250,7 @@ exports.getMyRank = async (req, res) => {
  */
 exports.getCategoryLeaderboard = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }

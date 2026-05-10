@@ -169,7 +169,7 @@ exports.createBooking = async (req, res) => {
 // دریافت نوبت‌ها برای فروشنده لاگین شده
 exports.getSellerBookings = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const items = await Booking.find({ sellerId }).sort({ createdAt: -1 }).lean();
     return res.json({ items });
   } catch (err) {
@@ -181,7 +181,7 @@ exports.getSellerBookings = async (req, res) => {
 // به‌روزرسانی وضعیت نوبت برای فروشنده لاگین شده
 exports.updateBookingStatus = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const { id } = req.params;
     const { status } = req.body || {};
 
@@ -240,7 +240,7 @@ exports.updateBookingStatus = async (req, res) => {
 // حذف نوبت برای فروشنده لاگین شده
 exports.deleteBooking = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const sellerId = req.user.sellerId;
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

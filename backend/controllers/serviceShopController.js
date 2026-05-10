@@ -2412,7 +2412,7 @@ exports.unblockServiceShop = async (req, res) => {
 
 exports.getMyComplimentaryPlan = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'احراز هویت نامعتبر است.' });
     }
@@ -2479,7 +2479,7 @@ exports.getMyComplimentaryPlan = async (req, res) => {
 
 exports.getMyModerationStatus = async (req, res) => {
   try {
-    const sellerId = req.user?.id || req.user?._id;
+    const sellerId = req.user?.sellerId;
     if (!sellerId) {
       return res.status(401).json({ message: 'احراز هویت نامعتبر است.' });
     }

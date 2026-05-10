@@ -49,7 +49,7 @@ exports.blockCustomer = async (req, res) => {
     const { reason = '' } = req.body || {};
     if (!userId) return res.status(400).json({ message: 'شناسه کاربر ارسال نشده!' });
 
-    const sellerId = req.user && req.user.id;
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) return res.status(401).json({ message: 'فروشنده احراز هویت نشد.' });
 
     const seller = await Seller.findById(sellerId);
@@ -89,7 +89,7 @@ exports.unblockCustomer = async (req, res) => {
     const { userId } = req.params;
     if (!userId) return res.status(400).json({ message: 'شناسه کاربر ارسال نشده!' });
 
-    const sellerId = req.user && req.user.id;
+    const sellerId = req.user && req.user.sellerId;
     if (!sellerId) return res.status(401).json({ message: 'فروشنده احراز هویت نشد.' });
 
     const seller = await Seller.findById(sellerId);

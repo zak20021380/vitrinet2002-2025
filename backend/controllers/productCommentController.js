@@ -265,7 +265,7 @@ exports.submitComment = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.getPendingComments = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
@@ -339,7 +339,7 @@ exports.getPendingComments = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.updateCommentStatus = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { id } = req.params;
     const { status, rejectionReason } = req.body;
 
@@ -487,7 +487,7 @@ exports.getPublishedComments = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.getPendingCount = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const count = await ProductComment.getPendingCountForSeller(sellerId);
 
     res.json({
@@ -510,7 +510,7 @@ exports.getPendingCount = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.getSellerComments = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
@@ -594,7 +594,7 @@ exports.getSellerComments = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.deleteComment = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { id } = req.params;
 
     // اعتبارسنجی ObjectId
@@ -645,7 +645,7 @@ exports.deleteComment = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.blockCommenter = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { userId, reason, deleteComments } = req.body;
 
     // اعتبارسنجی
@@ -703,7 +703,7 @@ exports.blockCommenter = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.unblockCommenter = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { userId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -744,7 +744,7 @@ exports.unblockCommenter = async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 exports.getBlockedCommenters = async (req, res) => {
   try {
-    const sellerId = req.user.id || req.user._id;
+    const sellerId = req.user.sellerId;
     const { BlockedCommentUser } = require('../models/ProductComment');
 
     const blockedUsers = await BlockedCommentUser.find({ sellerId })

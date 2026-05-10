@@ -88,7 +88,7 @@ async function loadProductForMutation(req, res) {
     return null;
   }
 
-  const requesterId = req.user && (req.user.id || req.user._id);
+  const requesterId = req.user && req.user.sellerId;
   const isOwner = requesterId && String(product.sellerId) === String(requesterId);
   if (req.user?.role !== 'admin' && !isOwner) {
     res.status(403).json({ message: 'شما اجازه تغییر این محصول را ندارید.' });
@@ -102,7 +102,7 @@ async function loadProductForMutation(req, res) {
 exports.addProduct = async (req, res) => {
   try {
     const { title, price, category, tags, desc, images, mainImageIndex, discountCeiling, isNegotiable } = req.body;
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
 
     const uploadedImages = Array.isArray(req.files)
       ? req.files.map((file) => normalizeUploadedPath(file)).filter(Boolean)
@@ -253,7 +253,7 @@ exports.trackProductView = async (req, res) => {
 
 exports.getSellerProductVisitStats = async (req, res) => {
   try {
-    const sellerId = req.user && (req.user.id || req.user._id);
+    const sellerId = req.user && req.user.sellerId;
     const monthKey = /^\d{4}-\d{2}$/.test(String(req.query.month || ''))
       ? String(req.query.month)
       : getMonthKey();

@@ -510,7 +510,7 @@ router.post('/discount-codes/:code/redeem', auth('seller'), async (req, res) => 
       return res.status(409).json({ message: 'سقف استفاده از این کد تکمیل شده است.' });
     }
 
-    const sellerId = req.user?.id ? String(req.user.id) : null;
+    const sellerId = req.user?.sellerId ? String(req.user.sellerId) : null;
     if (sellerId) {
       const hasAlreadyUsed = discount.usages?.some((usage) => usage.seller && String(usage.seller) === sellerId);
       if (hasAlreadyUsed) {

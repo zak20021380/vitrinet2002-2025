@@ -63,7 +63,7 @@ exports.getPortfolioByShopUrl = async (req, res) => {
 exports.getMyPortfolio = async (req, res) => {
   try {
     const items = await SellerPortfolio.find({
-      sellerId: req.user.id
+      sellerId: req.user.sellerId
     }).sort({ order: 1, createdAt: -1 }).lean();
 
     return res.json({ items });
@@ -83,7 +83,7 @@ exports.createPortfolioItem = async (req, res) => {
     }
 
     const item = await SellerPortfolio.create({
-      sellerId: req.user.id,
+      sellerId: req.user.sellerId,
       title,
       description,
       image,
@@ -102,7 +102,7 @@ exports.updatePortfolioItem = async (req, res) => {
   try {
     const item = await SellerPortfolio.findOne({ 
       _id: req.params.id, 
-      sellerId: req.user.id 
+      sellerId: req.user.sellerId 
     });
 
     if (!item) {
@@ -129,7 +129,7 @@ exports.deletePortfolioItem = async (req, res) => {
   try {
     const result = await SellerPortfolio.deleteOne({ 
       _id: req.params.id, 
-      sellerId: req.user.id 
+      sellerId: req.user.sellerId 
     });
 
     if (result.deletedCount === 0) {

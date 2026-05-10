@@ -41,7 +41,7 @@ const buildSearchQuery = (searchTerm) => {
 };
 
 exports.createEntry = async (req, res) => {
-  const sellerId = req.user?.id;
+  const sellerId = req.user?.sellerId;
   if (!sellerId) {
     return res.status(401).json({ message: 'ابتدا وارد حساب کاربری خود شوید.' });
   }
@@ -145,7 +145,7 @@ exports.createEntry = async (req, res) => {
 };
 
 exports.listEntries = async (req, res) => {
-  const sellerId = req.user?.id;
+  const sellerId = req.user?.sellerId;
   if (!sellerId) {
     return res.status(401).json({ message: 'ابتدا وارد حساب کاربری خود شوید.' });
   }

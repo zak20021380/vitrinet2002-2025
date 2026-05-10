@@ -88,7 +88,7 @@ async function mustOwnService(sellerId, serviceId) {
 // لیست سرویس‌های فروشندهٔ جاری با pagination، سرچ و فیلتر وضعیت
 exports.getMyServices = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
@@ -97,7 +97,7 @@ exports.getMyServices = async (req, res) => {
     const q = String(req.query.q || '').trim();
     const status = String(req.query.status || '').trim(); // 'active' | 'inactive' | ''
 
-    const where = { sellerId: req.user.id };
+    const where = { sellerId: req.user.sellerId };
     if (q) {
       where.$or = [
         { title: { $regex: q, $options: 'i' } },
@@ -133,12 +133,12 @@ exports.getMyServices = async (req, res) => {
 // ساخت سرویس جدید برای فروشندهٔ جاری
 exports.createService = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
     const data = normalizePayload(req.body);
-    data.sellerId = req.user.id;
+    data.sellerId = req.user.sellerId;
 
     const created = await SellerService.create(data);
     return res.status(201).json({ item: created });
@@ -158,10 +158,10 @@ exports.createService = async (req, res) => {
 // دریافت یک سرویس (فقط مالک)
 exports.getServiceById = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
-    const svc = await mustOwnService(req.user.id, req.params.id);
+    const svc = await mustOwnService(req.user.sellerId, req.params.id);
     if (!svc) return res.status(404).json({ message: 'سرویس پیدا نشد.' });
     return res.json({ item: svc });
   } catch (err) {
@@ -174,11 +174,11 @@ exports.getServiceById = async (req, res) => {
 // ویرایش سرویس (فقط مالک)
 exports.updateService = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
 
-    const svc = await mustOwnService(req.user.id, req.params.id);
+    const svc = await mustOwnService(req.user.sellerId, req.params.id);
     if (!svc) return res.status(404).json({ message: 'سرویس پیدا نشد.' });
 
     const data = normalizePayload(req.body);
@@ -202,10 +202,10 @@ exports.updateService = async (req, res) => {
 // تغییر سریع وضعیت فعال/غیرفعال (فقط مالک)
 exports.toggleActive = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
-    const svc = await mustOwnService(req.user.id, req.params.id);
+    const svc = await mustOwnService(req.user.sellerId, req.params.id);
     if (!svc) return res.status(404).json({ message: 'سرویس پیدا نشد.' });
 
     const next = req.body.isActive != null ? !!req.body.isActive : !svc.isActive;
@@ -223,10 +223,10 @@ exports.toggleActive = async (req, res) => {
 // حذف سرویس (فقط مالک)
 exports.deleteService = async (req, res) => {
   try {
-    if (!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+    if (!req.user?.sellerId) {
       return res.status(403).json({ message: 'دسترسی غیرمجاز.' });
     }
-    const svc = await mustOwnService(req.user.id, req.params.id);
+    const svc = await mustOwnService(req.user.sellerId, req.params.id);
     if (!svc) return res.status(404).json({ message: 'سرویس پیدا نشد.' });
 
     await SellerService.deleteOne({ _id: svc._id });
