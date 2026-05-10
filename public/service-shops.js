@@ -4047,9 +4047,12 @@ window.addEventListener('load', () => {
 
   const STORY_REACTION_KEY = 'vt_service_story_reaction_key';
   const STORY_LIKED_KEY = 'vt_service_story_liked_ids';
-  const STORY_VIEW_DURATION_MS = 8000;
+  const STORY_VIEW_DURATION_MS = 6500;
   let activeStoryState = null;
   let storyViewerTimer = null;
+  let storyViewerStartedAt = 0;
+  let storyViewerElapsedMs = 0;
+  let storyViewerPaused = false;
 
   function formatStoryNumber(value) {
     return String(Math.max(0, Number(value || 0))).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -4240,6 +4243,7 @@ window.addEventListener('load', () => {
         document.getElementById('storyViewerReplyForm')?.requestSubmit();
       }
     });
+    document.getElementById('storyViewerReplyInput')?.addEventListener('focus', () => setStoryViewerPaused(true));
     return modal;
   }
 
@@ -4295,26 +4299,60 @@ window.addEventListener('load', () => {
     }
   }
 
+  function updateStoryViewerProgress() {
+    const modal = document.getElementById('storyViewerModal');
+    const progress = modal?.querySelector('.story-viewer-progress');
+    if (!progress) return;
+
+    const elapsed = storyViewerPaused
+      ? storyViewerElapsedMs
+      : storyViewerElapsedMs + (Date.now() - storyViewerStartedAt);
+    const currentProgress = Math.min(100, Math.max(0, (elapsed / STORY_VIEW_DURATION_MS) * 100));
+    Array.from(progress.children).forEach((bar) => {
+      bar.style.setProperty('--viewer-progress', `${currentProgress}%`);
+    });
+
+    if (elapsed >= STORY_VIEW_DURATION_MS) {
+      closeStoryViewer();
+    }
+  }
+
+  function setStoryViewerPaused(paused) {
+    const modal = document.getElementById('storyViewerModal');
+    if (paused === storyViewerPaused) return;
+
+    if (paused) {
+      storyViewerElapsedMs += Date.now() - storyViewerStartedAt;
+      storyViewerPaused = true;
+      modal?.classList.add('is-paused');
+    } else {
+      storyViewerStartedAt = Date.now();
+      storyViewerPaused = false;
+      modal?.classList.remove('is-paused');
+    }
+    updateStoryViewerProgress();
+  }
+
   function stopStoryProgressTimer() {
     if (storyViewerTimer) {
-      clearTimeout(storyViewerTimer);
+      clearInterval(storyViewerTimer);
       storyViewerTimer = null;
     }
   }
 
-  function startStoryProgressTimer(modal) {
+  function startStoryProgressTimer() {
     stopStoryProgressTimer();
-    if (!modal) return;
-    modal.style.setProperty('--story-viewer-duration', `${STORY_VIEW_DURATION_MS}ms`);
-    const progress = modal.querySelector('.story-viewer-progress span');
-    if (progress) {
-      progress.style.animation = 'none';
-      progress.offsetHeight;
-      progress.style.animation = '';
-    }
-    storyViewerTimer = window.setTimeout(() => {
-      closeStoryViewer();
-    }, STORY_VIEW_DURATION_MS);
+    storyViewerStartedAt = Date.now();
+    storyViewerElapsedMs = 0;
+    storyViewerPaused = false;
+    const modal = document.getElementById('storyViewerModal');
+    modal?.classList.remove('is-paused');
+    const progress = modal?.querySelector('.story-viewer-progress');
+    Array.from(progress?.children || []).forEach((bar) => {
+      bar.style.setProperty('--viewer-progress', '0%');
+    });
+    storyViewerTimer = window.setInterval(updateStoryViewerProgress, 90);
+    updateStoryViewerProgress();
   }
 
   function closeStoryViewer() {
@@ -4322,7 +4360,10 @@ window.addEventListener('load', () => {
     if (!modal) return;
     stopStoryProgressTimer();
     modal.classList.remove('is-open');
+    modal.classList.remove('is-paused');
     modal.setAttribute('aria-hidden', 'true');
+    storyViewerPaused = false;
+    storyViewerElapsedMs = 0;
     activeStoryState = null;
     const input = document.getElementById('storyViewerReplyInput');
     if (input) input.value = '';
@@ -4353,7 +4394,7 @@ window.addEventListener('load', () => {
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('story-viewer-open');
     document.body.style.overflow = 'hidden';
-    startStoryProgressTimer(modal);
+    startStoryProgressTimer();
     fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(story.id)}/view`, {
       method: 'POST',
       credentials: 'include'
@@ -4444,6 +4485,7 @@ window.addEventListener('load', () => {
       if (input) input.value = '';
       renderStoryViewerState();
       setStoryFeedback('پاسخ شما ارسال شد.');
+      setStoryViewerPaused(false);
     } catch (err) {
       setStoryFeedback('ارسال پاسخ انجام نشد. دوباره تلاش کنید.', 'error');
     } finally {
