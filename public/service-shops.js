@@ -4124,7 +4124,7 @@ window.addEventListener('load', () => {
     bindStoryIndicatorClicks();
     slot.innerHTML = '';
     try {
-      const res = await fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(sellerId)}`, {
+      const res = await fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(sellerId)}?target=service`, {
         credentials: 'include'
       });
       if (!res.ok) return;

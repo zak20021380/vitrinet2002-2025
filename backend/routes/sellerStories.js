@@ -42,6 +42,39 @@ function getSellerId(req) {
   return req.user && (req.user.id || req.user._id);
 }
 
+function getStoryTarget(req) {
+  const raw = String(
+    req.query?.target ||
+    req.query?.scope ||
+    req.query?.context ||
+    req.body?.target ||
+    req.get('x-story-target') ||
+    ''
+  ).trim().toLowerCase();
+
+  if (['service', 'services', 'service-shop', 'serviceshop'].includes(raw)) return 'service';
+  return 'shop';
+}
+
+function getStoryTargetFilter(target = 'shop') {
+  if (target === 'service') return { targetType: 'service' };
+  return {
+    $or: [
+      { targetType: 'shop' },
+      { targetType: { $exists: false } },
+      { targetType: null }
+    ]
+  };
+}
+
+function mergeStoryTargetFilter(base, target) {
+  const filter = getStoryTargetFilter(target);
+  if (filter.$or) {
+    return { $and: [base, filter] };
+  }
+  return { ...base, ...filter };
+}
+
 function cleanSingleLine(value, maxLength = 140) {
   return String(value || '')
     .replace(/\s+/g, ' ')
@@ -91,6 +124,7 @@ function serializeStory(story, now = new Date(), options = {}) {
     id: story._id,
     _id: story._id,
     imageUrl: story.imageUrl,
+    targetType: story.targetType || 'shop',
     caption: story.caption || '',
     viewsCount: story.viewsCount || 0,
     likesCount: story.likesCount || 0,
@@ -150,20 +184,20 @@ function getDesiredReactionState(req) {
   return null;
 }
 
-async function expireOldStories(sellerId, now = new Date()) {
+async function expireOldStories(sellerId, target = 'shop', now = new Date()) {
   await SellerStory.updateMany(
-    { seller: sellerId, status: 'active', expiresAt: { $lte: now } },
+    mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $lte: now } }, target),
     { $set: { status: 'expired' } }
   );
 }
 
-async function buildStoryState(sellerId) {
+async function buildStoryState(sellerId, target = 'shop') {
   const now = new Date();
-  await expireOldStories(sellerId, now);
+  await expireOldStories(sellerId, target, now);
 
   const [latestStory, activeStory] = await Promise.all([
-    SellerStory.findOne({ seller: sellerId }).sort({ createdAt: -1 }).lean(),
-    SellerStory.findOne({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }).sort({ createdAt: -1 }).lean()
+    SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId }, target)).sort({ createdAt: -1 }).lean(),
+    SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target)).sort({ createdAt: -1 }).lean()
   ]);
 
   const nextAvailableAt = latestStory?.createdAt
@@ -176,6 +210,7 @@ async function buildStoryState(sellerId) {
 
   return {
     success: true,
+    targetType: target,
     story: serializeStory(activeStory || visibleLatestStory, now, { includeReplies: true }),
     latestStory: serializeStory(visibleLatestStory, now, { includeReplies: true }),
     canPost: cooldownRemainingMs <= 0,
@@ -184,21 +219,22 @@ async function buildStoryState(sellerId) {
   };
 }
 
-async function buildPublicStoryState(sellerId) {
+async function buildPublicStoryState(sellerId, target = 'shop') {
   const now = new Date();
-  await expireOldStories(sellerId, now);
+  await expireOldStories(sellerId, target, now);
 
   const [activeStories, latestStory] = await Promise.all([
-    SellerStory.find({ seller: sellerId, status: 'active', expiresAt: { $gt: now } })
+    SellerStory.find(mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target))
       .sort({ createdAt: -1 })
       .limit(12)
       .lean(),
-    SellerStory.findOne({ seller: sellerId }).sort({ createdAt: -1 }).lean()
+    SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId }, target)).sort({ createdAt: -1 }).lean()
   ]);
   const visibleLatestStory = latestStory?.status === 'deleted' ? null : latestStory;
 
   return {
     success: true,
+    targetType: target,
     stories: activeStories.map((story) => serializeStory(story, now)),
     story: serializeStory(activeStories[0] || null, now),
     latestStory: serializeStory(visibleLatestStory, now)
@@ -259,7 +295,7 @@ router.get('/public/:sellerId', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid seller id.' });
     }
 
-    return res.json(await buildPublicStoryState(sellerId));
+    return res.json(await buildPublicStoryState(sellerId, getStoryTarget(req)));
   } catch (error) {
     console.error('Failed to load public seller stories:', error);
     return res.status(500).json({ success: false, message: 'Could not load story data.' });
@@ -386,7 +422,7 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
       return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
     }
 
-    return res.json(await buildStoryState(sellerId));
+    return res.json(await buildStoryState(sellerId, getStoryTarget(req)));
   } catch (error) {
     console.error('Failed to load seller story:', error);
     return res.status(500).json({ success: false, message: 'Could not load story data.' });
@@ -397,6 +433,7 @@ router.get('/:storyId/replies', authMiddleware('seller'), async (req, res) => {
   try {
     const sellerId = getSellerId(req);
     const { storyId } = req.params;
+    const target = getStoryTarget(req);
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
     }
@@ -404,7 +441,7 @@ router.get('/:storyId/replies', authMiddleware('seller'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid story id.' });
     }
 
-    const story = await SellerStory.findOne({ _id: storyId, seller: sellerId }).lean();
+    const story = await SellerStory.findOne(mergeStoryTargetFilter({ _id: storyId, seller: sellerId }, target)).lean();
     if (!story) {
       return res.status(404).json({ success: false, message: 'Story was not found.' });
     }
@@ -425,6 +462,7 @@ router.patch('/:storyId/replies/read', authMiddleware('seller'), async (req, res
   try {
     const sellerId = getSellerId(req);
     const { storyId } = req.params;
+    const target = getStoryTarget(req);
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
     }
@@ -432,7 +470,7 @@ router.patch('/:storyId/replies/read', authMiddleware('seller'), async (req, res
       return res.status(400).json({ success: false, message: 'Invalid story id.' });
     }
 
-    const story = await SellerStory.findOne({ _id: storyId, seller: sellerId });
+    const story = await SellerStory.findOne(mergeStoryTargetFilter({ _id: storyId, seller: sellerId }, target));
     if (!story) {
       return res.status(404).json({ success: false, message: 'Story was not found.' });
     }
@@ -459,6 +497,7 @@ router.delete('/:storyId', authMiddleware('seller'), async (req, res) => {
   try {
     const sellerId = getSellerId(req);
     const { storyId } = req.params;
+    const target = getStoryTarget(req);
     if (!sellerId) {
       return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
     }
@@ -467,10 +506,10 @@ router.delete('/:storyId', authMiddleware('seller'), async (req, res) => {
     }
 
     const now = new Date();
-    await expireOldStories(sellerId, now);
+    await expireOldStories(sellerId, target, now);
 
     const story = await SellerStory.findOneAndUpdate(
-      { _id: storyId, seller: sellerId, status: 'active', expiresAt: { $gt: now } },
+      mergeStoryTargetFilter({ _id: storyId, seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target),
       { $set: { status: 'deleted', expiresAt: now } },
       { new: true }
     ).lean();
@@ -480,7 +519,7 @@ router.delete('/:storyId', authMiddleware('seller'), async (req, res) => {
     }
 
     removeStoryImage(story.imageUrl);
-    return res.json(await buildStoryState(sellerId));
+    return res.json(await buildStoryState(sellerId, target));
   } catch (error) {
     console.error('Failed to delete seller story:', error);
     return res.status(500).json({ success: false, message: 'Could not delete story.' });
@@ -498,6 +537,7 @@ router.post('/', authMiddleware('seller'), (req, res) => {
 
     try {
       const sellerId = getSellerId(req);
+      const target = getStoryTarget(req);
       if (!sellerId) {
         removeUploadedFile(req.file);
         return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
@@ -509,9 +549,9 @@ router.post('/', authMiddleware('seller'), (req, res) => {
 
       const caption = String(req.body.caption || '').trim().slice(0, 140);
       const now = new Date();
-      await expireOldStories(sellerId, now);
+      await expireOldStories(sellerId, target, now);
 
-      const latestStory = await SellerStory.findOne({ seller: sellerId }).sort({ createdAt: -1 }).lean();
+      const latestStory = await SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId }, target)).sort({ createdAt: -1 }).lean();
       if (latestStory?.createdAt) {
         const nextAvailableAt = new Date(new Date(latestStory.createdAt).getTime() + STORY_DURATION_MS);
         if (nextAvailableAt.getTime() > now.getTime()) {
@@ -527,13 +567,14 @@ router.post('/', authMiddleware('seller'), (req, res) => {
 
       const story = await SellerStory.create({
         seller: sellerId,
+        targetType: target,
         imageUrl: `/uploads/stories/${req.file.filename}`,
         caption,
         expiresAt: SellerStory.buildExpiryDate(now)
       });
 
       return res.status(201).json({
-        ...(await buildStoryState(sellerId)),
+        ...(await buildStoryState(sellerId, target)),
         story: serializeStory(story, now)
       });
     } catch (error) {

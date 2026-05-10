@@ -9,6 +9,12 @@ const sellerStorySchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  targetType: {
+    type: String,
+    enum: ['shop', 'service'],
+    default: 'shop',
+    index: true
+  },
   imageUrl: {
     type: String,
     required: true,
@@ -100,7 +106,7 @@ sellerStorySchema.statics.buildExpiryDate = function buildExpiryDate(from = new 
   return new Date(from.getTime() + DAY_MS);
 };
 
-sellerStorySchema.index({ seller: 1, createdAt: -1 });
+sellerStorySchema.index({ seller: 1, targetType: 1, createdAt: -1 });
 
 module.exports = mongoose.model('SellerStory', sellerStorySchema);
 module.exports.DAY_MS = DAY_MS;

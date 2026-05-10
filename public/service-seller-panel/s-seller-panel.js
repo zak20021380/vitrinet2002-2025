@@ -5389,6 +5389,7 @@ function bindFloatingCloseOnce() {
     };
 
     const buildUrl = (path) => `${API_BASE}${path}`;
+    const withServiceTarget = (path) => `${path}${path.includes('?') ? '&' : '?'}target=service`;
 
     const readJson = async (res) => {
       const text = await res.text();
@@ -5627,7 +5628,7 @@ function bindFloatingCloseOnce() {
       showLoading(true);
       showFeedback('');
       try {
-        const res = await fetch(bust(buildUrl('/api/seller/stories/me')), {
+        const res = await fetch(bust(buildUrl(withServiceTarget('/api/seller/stories/me'))), {
           credentials: 'include',
           cache: 'no-store'
         });
@@ -5658,7 +5659,7 @@ function bindFloatingCloseOnce() {
       const storyId = state.story?.id || state.story?._id;
       if (!storyId) return;
       try {
-        const res = await fetch(bust(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies`)), {
+        const res = await fetch(bust(buildUrl(withServiceTarget(`/api/seller/stories/${encodeURIComponent(storyId)}/replies`))), {
           credentials: 'include',
           cache: 'no-store'
         });
@@ -5682,7 +5683,7 @@ function bindFloatingCloseOnce() {
       state.markingRepliesRead = true;
       refreshSubmitState();
       try {
-        const res = await fetch(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}/replies/read`), {
+        const res = await fetch(buildUrl(withServiceTarget(`/api/seller/stories/${encodeURIComponent(storyId)}/replies/read`)), {
           method: 'PATCH',
           credentials: 'include'
         });
@@ -5750,7 +5751,7 @@ function bindFloatingCloseOnce() {
       formData.append('caption', (els['story-caption-input']?.value || '').trim());
 
       try {
-        const res = await fetch(buildUrl('/api/seller/stories'), {
+        const res = await fetch(buildUrl(withServiceTarget('/api/seller/stories')), {
           method: 'POST',
           credentials: 'include',
           body: formData
@@ -5789,7 +5790,7 @@ function bindFloatingCloseOnce() {
       refreshSubmitState();
       showFeedback('');
       try {
-        const res = await fetch(buildUrl(`/api/seller/stories/${encodeURIComponent(storyId)}`), {
+        const res = await fetch(buildUrl(withServiceTarget(`/api/seller/stories/${encodeURIComponent(storyId)}`)), {
           method: 'DELETE',
           credentials: 'include'
         });

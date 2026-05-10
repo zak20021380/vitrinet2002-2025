@@ -2998,7 +2998,7 @@ exports.getSimilarPublicShops = async (req, res) => {
         ShopAppearance.find({ sellerId: { $in: sellerObjectIds } })
           .select('sellerId shopLogo footerImage slides')
           .lean(),
-        SellerStory.find({ seller: { $in: sellerObjectIds }, status: 'active', expiresAt: { $gt: new Date() } })
+        SellerStory.find({ seller: { $in: sellerObjectIds }, targetType: 'service', status: 'active', expiresAt: { $gt: new Date() } })
           .select('seller imageUrl caption createdAt expiresAt')
           .sort({ createdAt: -1 })
           .lean()
@@ -3261,7 +3261,7 @@ exports.getPublicShowcase = async (req, res) => {
           },
           { $project: { items: { $slice: ['$items', 6] } } }
         ]),
-        SellerStory.find({ seller: { $in: sellerIdList }, status: 'active', expiresAt: { $gt: new Date() } })
+        SellerStory.find({ seller: { $in: sellerIdList }, targetType: 'service', status: 'active', expiresAt: { $gt: new Date() } })
           .select('seller imageUrl caption createdAt expiresAt')
           .sort({ createdAt: -1 })
           .lean()
