@@ -10,13 +10,22 @@ const DailyVisit = require('../models/DailyVisit');
 const ServiceShop = require('../models/serviceShop');
 const Payment = require('../models/payment');
 
-// کلید سری JWT از .env خوانده می‌شود وگرنه مقدار پیش‌فرض
-const JWT_SECRET = "vitrinet_secret_key";
+// JWT signing must come from the deployment environment.
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required in production.');
+}
 /**
  * ثبت‌نام ادمین جدید
  */
 exports.register = async (req, res) => {
   try {
+    const adminCount = await Admin.countDocuments();
+    if (adminCount > 0) {
+      return res.status(403).json({ message: 'Admin registration is disabled after initial bootstrap.' });
+    }
+
     const { phone, password, name } = req.body;
     if (!phone || !password) {
       return res.status(400).json({ message: 'شماره موبایل و رمز عبور الزامی است.' });
@@ -44,6 +53,10 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({ message: 'JWT secret is not configured.' });
+    }
+
     const { phone, password } = req.body;
     if (!phone || !password) {
       return res.status(400).json({ message: 'شماره موبایل و رمز عبور الزامی است.' });
