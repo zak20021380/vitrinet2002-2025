@@ -105,7 +105,9 @@
 }
 
 .story-upload-drop {
-  min-height: 340px;
+  width: 100%;
+  height: clamp(360px, 62vh, 560px);
+  min-height: 0;
   display: grid;
   place-items: center;
   border: 1.5px dashed rgba(96, 165, 250, 0.42);
@@ -153,9 +155,17 @@
   height: 100%;
 }
 
+.story-upload-preview {
+  display: block;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(96, 165, 250, 0.18), transparent 32%),
+    #05070d;
+}
+
 .story-upload-preview img {
   display: block;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .story-caption-field {
@@ -264,17 +274,23 @@
 .story-current-card__media {
   position: relative;
   overflow: hidden;
-  min-height: 430px;
+  width: min(100%, 320px);
+  max-width: 320px;
+  min-height: 0;
   aspect-ratio: 9 / 16;
+  margin-inline: auto;
   border-radius: var(--border-radius-box-lg);
-  background: #05070d;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(96, 165, 250, 0.18), transparent 32%),
+    #05070d;
 }
 
 .story-current-card__media img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .story-current-card__progress {
@@ -461,6 +477,7 @@
   }
 
   .story-current-card__media {
-    min-height: 360px;
+    width: min(100%, 300px);
+    max-width: 300px;
   }
 }
