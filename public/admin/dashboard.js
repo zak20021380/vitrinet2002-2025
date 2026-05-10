@@ -2825,6 +2825,8 @@ let serviceShopsOverviewLoading = false;
 let serviceShopsFilter = 'all';
 let serviceShopsPlanFilter = '';
 let serviceShopsSearch = '';
+let serviceShopsSubcategoryFilter = '';
+let serviceShopsSubcategoryOptionsCache = new Map();
 
 let usersList = [];
 let shopsList = [];
@@ -6061,6 +6063,7 @@ async function fetchServiceShopsList({ force = false } = {}) {
   if (serviceShopsSearch) url.searchParams.set('q', serviceShopsSearch);
   if (serviceShopsFilter && serviceShopsFilter !== 'all') url.searchParams.set('status', serviceShopsFilter);
   if (serviceShopsPlanFilter) url.searchParams.set('planStatus', serviceShopsPlanFilter);
+  if (serviceShopsSubcategoryFilter) url.searchParams.set('category', serviceShopsSubcategoryFilter);
 
   try {
     const res = await fetch(url.toString(), { credentials: 'include' });
@@ -6082,6 +6085,7 @@ async function fetchServiceShopsList({ force = false } = {}) {
             : [];
 
     serviceShopsList = dedupeServiceShops(items.map(normaliseServiceShopRecord).filter(Boolean));
+    renderServiceShopSubcategoryFilterOptions();
     renderServiceShopsTable();
     updateSidebarCounts();
     updateHeaderCounts();
@@ -6155,6 +6159,110 @@ function getServiceShopPlanLabel(shop) {
   return 'بدون پلن فعال';
 }
 
+function getServiceShopFilterKey(value) {
+  const text = typeof normaliseCategoryText === 'function'
+    ? normaliseCategoryText(value)
+    : String(value || '').replace(/\s+/g, ' ').trim();
+  return text
+    .replace(/ي/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/\u200c/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('fa-IR');
+}
+
+function getServiceShopSubcategoryLabels(shop = {}) {
+  return Array.from(new Set(normaliseCategoryList([
+    shop.subcategory,
+    shop.subcategories,
+    shop.meta?.serviceSubcategory,
+    shop.meta?.subcategory,
+    shop.meta?.subCategory,
+    shop.meta?.serviceSubcategoryName,
+    shop.meta?.serviceSubcategoryTitle,
+    shop.meta?.subcategoryTitle,
+    shop.meta?.subGroupName
+  ])));
+}
+
+function rememberServiceShopSubcategoryOption(value) {
+  const label = extractCategoryLabel(value);
+  const key = getServiceShopFilterKey(label);
+  if (key && !serviceShopsSubcategoryOptionsCache.has(key)) {
+    serviceShopsSubcategoryOptionsCache.set(key, label);
+  }
+}
+
+function isAdminAddedServiceSubcategory(item) {
+  if (!item) return false;
+  const name = getCategoryName(item);
+  if (!name) return false;
+  return !isDefaultCategory(item);
+}
+
+function syncServiceShopSubcategoryStateFromStorage() {
+  const stored = loadCategoryList(SERVICE_SUBCATEGORY_STORAGE_KEY, [], 'service-subcategory');
+  if (!stored.length) return;
+  categoryManagerState.serviceSubcategories = sortCategoryList(normalizeCategoryList([
+    ...(Array.isArray(categoryManagerState.serviceSubcategories) ? categoryManagerState.serviceSubcategories : []),
+    ...stored
+  ], 'service-subcategory'));
+}
+
+function collectServiceShopSubcategoryOptions() {
+  const options = new Map();
+  const add = (value) => {
+    const label = extractCategoryLabel(value);
+    const key = getServiceShopFilterKey(label);
+    if (key && !options.has(key)) {
+      options.set(key, label);
+    }
+  };
+
+  serviceShopsList.forEach(shop => getServiceShopSubcategoryLabels(shop).forEach(rememberServiceShopSubcategoryOption));
+  serviceShopsSubcategoryOptionsCache.forEach(add);
+  (Array.isArray(categoryManagerState?.serviceSubcategories) ? categoryManagerState.serviceSubcategories : [])
+    .filter(isAdminAddedServiceSubcategory)
+    .forEach(add);
+
+  return Array.from(options.values())
+    .sort((a, b) => a.localeCompare(b, 'fa-IR', { sensitivity: 'base' }));
+}
+
+function renderServiceShopSubcategoryFilterOptions() {
+  const select = document.getElementById('serviceShopsSubcategoryFilter');
+  if (!select) return;
+
+  const currentKey = getServiceShopFilterKey(serviceShopsSubcategoryFilter);
+  const options = collectServiceShopSubcategoryOptions();
+  select.innerHTML = '<option value="">همه زیرگروه‌ها</option>';
+
+  let hasCurrent = !currentKey;
+  options.forEach(label => {
+    const option = document.createElement('option');
+    option.value = label;
+    option.textContent = label;
+    if (getServiceShopFilterKey(label) === currentKey) {
+      option.selected = true;
+      hasCurrent = true;
+    }
+    select.appendChild(option);
+  });
+
+  if (!hasCurrent) {
+    serviceShopsSubcategoryFilter = '';
+    select.value = '';
+  }
+}
+
+function serviceShopMatchesSubcategory(shop, selectedSubcategory) {
+  const selectedKey = getServiceShopFilterKey(selectedSubcategory);
+  if (!selectedKey) return true;
+  return getServiceShopSubcategoryLabels(shop)
+    .some(label => getServiceShopFilterKey(label) === selectedKey);
+}
+
 function renderServiceShopsTable() {
   console.log("✅ FINAL LAYOUT FIX RUNNING");
 
@@ -6166,14 +6274,16 @@ function renderServiceShopsTable() {
     const matchesPlan = !serviceShopsPlanFilter
       || (serviceShopsPlanFilter === 'complimentary' && shop.complimentaryActive)
       || (serviceShopsPlanFilter === 'premium' && shop.isPremium);
+    const matchesSubcategory = serviceShopMatchesSubcategory(shop, serviceShopsSubcategoryFilter);
     const searchText = serviceShopsSearch.trim().toLowerCase();
     const matchesSearch = !searchText
       || shop.name.toLowerCase().includes(searchText)
       || (shop.city || '').toLowerCase().includes(searchText)
       || (shop.address || '').toLowerCase().includes(searchText)
       || (shop.ownerPhone || '').toLowerCase().includes(searchText)
-      || (shop.ownerName || '').toLowerCase().includes(searchText);
-    return matchesStatus && matchesPlan && matchesSearch;
+      || (shop.ownerName || '').toLowerCase().includes(searchText)
+      || getServiceShopSubcategoryLabels(shop).some(label => label.toLowerCase().includes(searchText));
+    return matchesStatus && matchesPlan && matchesSubcategory && matchesSearch;
   });
 
   if (!filtered.length) {
@@ -8212,6 +8322,7 @@ const rewardWinnersMessageEl = document.getElementById('rewardWinnersMessage');
 const rewardWinnersListEl = document.getElementById('rewardWinnersList');
 const rewardWinnersEmptyStateEl = document.getElementById('rewardWinnersEmptyState');
 const serviceShopsSearchInput = document.getElementById('serviceShopsSearch');
+const serviceShopsSubcategoryFilterEl = document.getElementById('serviceShopsSubcategoryFilter');
 const serviceShopsQuickFiltersEl = document.getElementById('serviceShopsQuickFilters');
 const serviceShopsSummaryEl = document.getElementById('serviceShopsSummary');
 const refreshServiceShopsBtn = document.getElementById('refreshServiceShops');
@@ -9008,6 +9119,18 @@ if (serviceShopsSearchInput) {
   serviceShopsSearchInput.addEventListener('input', (event) => {
     serviceShopsSearch = (event.target.value || '').trim();
     fetchServiceShopsList();
+  });
+}
+
+if (serviceShopsSubcategoryFilterEl) {
+  syncServiceShopSubcategoryStateFromStorage();
+  renderServiceShopSubcategoryFilterOptions();
+  fetchCategoryListsFromApi({ silent: true })
+    .then(() => renderServiceShopSubcategoryFilterOptions())
+    .catch(err => console.warn('service shops subcategory filter categories sync failed:', err));
+  serviceShopsSubcategoryFilterEl.addEventListener('change', (event) => {
+    serviceShopsSubcategoryFilter = (event.target.value || '').trim();
+    fetchServiceShopsList({ force: true });
   });
 }
 
