@@ -4243,6 +4243,11 @@ window.addEventListener('load', () => {
     shell?.addEventListener('pointerup', endStoryViewerPressPause);
     shell?.addEventListener('pointercancel', endStoryViewerPressPause);
     shell?.addEventListener('pointerleave', endStoryViewerPressPause);
+    modal.querySelector('[data-story-close]')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeStoryViewer();
+    });
     document.getElementById('storyViewerLike')?.addEventListener('click', toggleStoryReaction);
     document.getElementById('storyViewerProgressToggle')?.addEventListener('click', toggleStoryViewerPaused);
     document.getElementById('storyViewerReplyForm')?.addEventListener('submit', submitStoryReply);
