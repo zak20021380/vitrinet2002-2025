@@ -5,7 +5,7 @@
 // ------------------------------------
 
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || "vitrinet_secret_key";
+const { JWT_SECRET } = require('../config/security');
 
 const User = require('../models/user');           // مدل کاربر
 const BannedPhone = require('../models/BannedPhone'); // لیست سیاه

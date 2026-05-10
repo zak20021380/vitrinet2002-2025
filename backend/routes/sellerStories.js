@@ -8,10 +8,10 @@ const path = require('path');
 const SellerStory = require('../models/SellerStory');
 const User = require('../models/user');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { JWT_SECRET } = require('../config/security');
 
 const router = express.Router();
 const STORY_DURATION_MS = SellerStory.DAY_MS;
-const JWT_SECRET = process.env.JWT_SECRET || 'vitrinet_secret_key';
 const uploadDir = path.join(__dirname, '..', 'uploads', 'stories');
 
 fs.mkdirSync(uploadDir, { recursive: true });

@@ -1,5 +1,7 @@
 // server.js
 
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -16,7 +18,6 @@ const accountantRoutes = require('./routes/accountant');
 const categoryRoutes = require('./routes/categoryRoutes');
 const securityRoutes = require('./routes/security');
 const supportTicketRoutes = require('./routes/supportTickets');
-require('dotenv').config();
 
 const app = express();
 const cookieParser = require('cookie-parser');

@@ -10,12 +10,7 @@ const DailyVisit = require('../models/DailyVisit');
 const ServiceShop = require('../models/serviceShop');
 const Payment = require('../models/payment');
 
-// JWT signing must come from the deployment environment.
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required in production.');
-}
+const { JWT_SECRET } = require('../config/security');
 /**
  * ثبت‌نام ادمین جدید
  */

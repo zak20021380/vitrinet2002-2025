@@ -3,13 +3,12 @@
 // ═══════════════════════════════════════════════════════════════
 
 const crypto = require('crypto');
+const { CSRF_SECRET } = require('../config/security');
 
 // Environment check
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const isDev = NODE_ENV === 'development';
 
-// Secret key for HMAC signing (should be in env vars in production)
-const CSRF_SECRET = process.env.CSRF_SECRET || 'vitrinet_csrf_secret_key_2024';
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 const COOKIE_NAME = 'csrf_token';
 
