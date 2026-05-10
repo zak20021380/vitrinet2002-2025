@@ -5,6 +5,8 @@ const ShopAppearance = require('../models/ShopAppearance');
 const fs = require('fs');
 const path = require('path');
 
+const ALLOWED_BODY_FIELDS = ['title', 'description', 'tag', 'location', 'order', 'hours', 'holidays'];
+
 function getTitleForRegex(title) {
   // Use the first word of the title for matching to handle partial addresses
   return title.trim().split(/\s+/)[0] || title;
@@ -12,6 +14,51 @@ function getTitleForRegex(title) {
 
 function escapeRegex(string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+function getUnexpectedBodyFields(body = {}) {
+  return Object.keys(body || {}).filter((field) => !ALLOWED_BODY_FIELDS.includes(field));
+}
+
+function deleteUploadedFile(file) {
+  if (!file?.path) return;
+
+  try {
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+  } catch (err) {
+    console.error('Failed to delete uploaded shopping center image:', err);
+  }
+}
+
+function rejectUnexpectedBodyFields(req, res) {
+  const unexpectedFields = getUnexpectedBodyFields(req.body);
+
+  if (!unexpectedFields.length) {
+    return false;
+  }
+
+  deleteUploadedFile(req.file);
+  res.status(400).json({
+    error: 'Unexpected field(s) in request body.',
+    fields: unexpectedFields
+  });
+  return true;
+}
+
+function isValidObjectId(id) {
+  return typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
+}
+
+function rejectInvalidObjectId(req, res) {
+  if (isValidObjectId(req.params.id)) {
+    return false;
+  }
+
+  deleteUploadedFile(req.file);
+  res.status(400).json({ error: 'Invalid shopping center id.' });
+  return true;
 }
 
 // دریافت همه مراکز خرید با محاسبه تعداد مغازه‌ها
@@ -38,6 +85,8 @@ exports.getAll = async (req, res) => {
 // دریافت یک مرکز خرید خاص با محاسبه تعداد مغازه‌ها
 exports.getById = async (req, res) => {
   try {
+    if (rejectInvalidObjectId(req, res)) return;
+
     const center = await ShoppingCenter.findById(req.params.id);
     if (!center) {
       return res.status(404).json({ error: 'مرکز خرید یافت نشد!' });
@@ -59,6 +108,8 @@ exports.getById = async (req, res) => {
 // ایجاد مرکز خرید جدید
 exports.create = async (req, res) => {
   try {
+    if (rejectUnexpectedBodyFields(req, res)) return;
+
     const { title, description, tag, location, order, hours, holidays } = req.body;
     const image = req.file ? `/uploads/shopping-centers/${req.file.filename}` : '';  // ذخیره مسیر عکس
     
@@ -84,6 +135,9 @@ exports.create = async (req, res) => {
 // ویرایش مرکز خرید
 exports.update = async (req, res) => {
   try {
+    if (rejectInvalidObjectId(req, res)) return;
+    if (rejectUnexpectedBodyFields(req, res)) return;
+
     const { title, description, tag, location, order, hours, holidays } = req.body;
     const center = await ShoppingCenter.findById(req.params.id);
     if (!center) {
@@ -99,14 +153,14 @@ exports.update = async (req, res) => {
       image = `/uploads/shopping-centers/${req.file.filename}`;
     }
     
-    center.title = title || center.title;
-    center.description = description || center.description;
+    center.title = title !== undefined ? title : center.title;
+    center.description = description !== undefined ? description : center.description;
     center.image = image;
-    center.tag = tag || center.tag;
-    center.location = location || center.location;
-    center.order = order || center.order;
-    center.hours = hours || center.hours;
-    center.holidays = holidays || center.holidays;
+    center.tag = tag !== undefined ? tag : center.tag;
+    center.location = location !== undefined ? location : center.location;
+    center.order = order !== undefined ? order : center.order;
+    center.hours = hours !== undefined ? hours : center.hours;
+    center.holidays = holidays !== undefined ? holidays : center.holidays;
     
     await center.save();
     res.json(center);
@@ -119,6 +173,8 @@ exports.update = async (req, res) => {
 // حذف مرکز خرید
 exports.remove = async (req, res) => {
   try {
+    if (rejectInvalidObjectId(req, res)) return;
+
     const center = await ShoppingCenter.findById(req.params.id);
     if (!center) {
       return res.status(404).json({ error: 'مرکز خرید یافت نشد!' });

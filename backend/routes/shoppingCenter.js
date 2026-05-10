@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const shoppingCenterController = require('../controllers/shoppingCenterController');
+const authMiddleware = require('../middlewares/authMiddleware');
 const multer = require('multer');
 
 // مسیر ذخیره عکس‌ها
@@ -25,12 +26,12 @@ router.get('/', shoppingCenterController.getAll);
 router.get('/:id', shoppingCenterController.getById);
 
 // افزودن مرکز خرید جدید
-router.post('/', /*adminAuth,*/ upload.single('image'), shoppingCenterController.create);
+router.post('/', authMiddleware('admin'), upload.single('image'), shoppingCenterController.create);
 
 // ویرایش مرکز خرید
-router.put('/:id', /*adminAuth,*/ upload.single('image'), shoppingCenterController.update);
+router.put('/:id', authMiddleware('admin'), upload.single('image'), shoppingCenterController.update);
 
 // حذف مرکز خرید
-router.delete('/:id', /*adminAuth,*/ shoppingCenterController.remove);
+router.delete('/:id', authMiddleware('admin'), shoppingCenterController.remove);
 
 module.exports = router;
