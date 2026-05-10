@@ -4053,6 +4053,8 @@ window.addEventListener('load', () => {
   let storyViewerStartedAt = 0;
   let storyViewerElapsedMs = 0;
   let storyViewerPaused = false;
+  let storyViewerPressWasPaused = false;
+  let storyViewerPressActive = false;
 
   function formatStoryNumber(value) {
     return String(Math.max(0, Number(value || 0))).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -4236,6 +4238,11 @@ window.addEventListener('load', () => {
         closeStoryViewer();
       }
     });
+    const shell = modal.querySelector('.story-viewer-shell');
+    shell?.addEventListener('pointerdown', beginStoryViewerPressPause);
+    shell?.addEventListener('pointerup', endStoryViewerPressPause);
+    shell?.addEventListener('pointercancel', endStoryViewerPressPause);
+    shell?.addEventListener('pointerleave', endStoryViewerPressPause);
     document.getElementById('storyViewerLike')?.addEventListener('click', toggleStoryReaction);
     document.getElementById('storyViewerProgressToggle')?.addEventListener('click', toggleStoryViewerPaused);
     document.getElementById('storyViewerReplyForm')?.addEventListener('submit', submitStoryReply);
@@ -4358,6 +4365,29 @@ window.addEventListener('load', () => {
     setStoryViewerPaused(!storyViewerPaused);
   }
 
+  function isStoryViewerInteractiveTarget(target) {
+    return !!target?.closest?.(
+      'button, input, textarea, form, a, [data-story-close], .story-viewer-toolbar, .story-viewer-reply, .story-viewer-progress'
+    );
+  }
+
+  function beginStoryViewerPressPause(event) {
+    const modal = document.getElementById('storyViewerModal');
+    if (!modal?.classList.contains('is-open')) return;
+    if (isStoryViewerInteractiveTarget(event.target)) return;
+    storyViewerPressWasPaused = storyViewerPaused;
+    storyViewerPressActive = true;
+    setStoryViewerPaused(true);
+  }
+
+  function endStoryViewerPressPause() {
+    if (!storyViewerPressActive) return;
+    storyViewerPressActive = false;
+    if (!storyViewerPressWasPaused) {
+      setStoryViewerPaused(false);
+    }
+  }
+
   function stopStoryProgressTimer() {
     if (storyViewerTimer) {
       clearInterval(storyViewerTimer);
@@ -4370,6 +4400,8 @@ window.addEventListener('load', () => {
     storyViewerStartedAt = Date.now();
     storyViewerElapsedMs = 0;
     storyViewerPaused = false;
+    storyViewerPressActive = false;
+    storyViewerPressWasPaused = false;
     const modal = document.getElementById('storyViewerModal');
     modal?.classList.remove('is-paused');
     const progress = modal?.querySelector('.story-viewer-progress');
@@ -4390,6 +4422,8 @@ window.addEventListener('load', () => {
     modal.setAttribute('aria-hidden', 'true');
     storyViewerPaused = false;
     storyViewerElapsedMs = 0;
+    storyViewerPressActive = false;
+    storyViewerPressWasPaused = false;
     activeStoryState = null;
     const input = document.getElementById('storyViewerReplyInput');
     if (input) input.value = '';
