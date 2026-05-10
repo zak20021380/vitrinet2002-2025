@@ -514,45 +514,21 @@
             gap: 0.75rem;
             padding: 0.85rem 0.85rem 0;
         }
-        .story-viewer-pause {
-            min-height: 38px;
-            flex: 0 0 auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.38rem;
-            margin-inline-start: auto;
-            margin-inline-end: 3.1rem;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(15, 23, 42, 0.48);
-            color: rgba(255, 255, 255, 0.92);
-            padding: 0 0.7rem;
-            font-size: 0.75rem;
-            font-weight: 850;
-            line-height: 1;
-            backdrop-filter: blur(12px);
-            cursor: pointer;
-            transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
-            touch-action: manipulation;
-        }
-        .story-viewer-pause:hover {
-            background: rgba(255, 255, 255, 0.14);
-        }
-        .story-viewer-pause[aria-pressed="true"] {
-            border-color: rgba(34, 211, 238, 0.4);
-            background: rgba(8, 145, 178, 0.76);
-        }
         .story-viewer-progress {
             position: absolute;
             top: 0.55rem;
             right: 0.85rem;
             left: 0.85rem;
-            height: 3px;
+            height: 5px;
             border-radius: 999px;
+            border: 0;
             background: rgba(255, 255, 255, 0.22);
             overflow: hidden;
             direction: ltr;
+            padding: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            z-index: 5;
         }
         .story-viewer-progress span {
             display: block;
@@ -569,6 +545,16 @@
             height: 100%;
             border-radius: inherit;
             background: rgba(255, 255, 255, 0.92);
+        }
+        .story-viewer-progress:focus-visible {
+            outline: 3px solid rgba(34, 211, 238, 0.35);
+            outline-offset: 4px;
+        }
+        .story-viewer-modal.is-paused .story-viewer-progress {
+            background: rgba(34, 211, 238, 0.22);
+        }
+        .story-viewer-modal.is-paused .story-viewer-progress span::after {
+            background: #22d3ee;
         }
         .story-viewer-meta {
             min-width: 0;
@@ -642,7 +628,7 @@
         }
         .story-viewer-close:active,
         .story-viewer-action:active,
-        .story-viewer-pause:active,
+        .story-viewer-progress:active,
         .story-viewer-send:active {
             transform: scale(0.96);
         }
@@ -1138,12 +1124,6 @@
                 width: calc(100% - 0.75rem);
                 height: calc(100% - 10rem);
                 margin: 4rem 0.375rem 6rem;
-            }
-            .story-viewer-pause {
-                min-height: 36px;
-                margin-inline-end: 2.75rem;
-                padding-inline: 0.58rem;
-                font-size: 0.7rem;
             }
             .story-viewer-caption {
                 max-height: 5.7rem;

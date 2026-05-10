@@ -4197,7 +4197,9 @@ window.addEventListener('load', () => {
           <img id="storyViewerBackdropImage" class="story-viewer-backdrop-image" alt="">
           <img id="storyViewerImage" alt="">
         </div>
-        <div class="story-viewer-progress" aria-hidden="true"><span></span></div>
+        <button type="button" class="story-viewer-progress" id="storyViewerProgressToggle" aria-pressed="false" aria-label="توقف زمان استوری">
+          <span></span>
+        </button>
         <div class="story-viewer-topbar">
           <div class="story-viewer-meta">
             <span class="story-viewer-avatar"><img id="storyViewerAvatar" alt=""></span>
@@ -4206,10 +4208,6 @@ window.addEventListener('load', () => {
               <span id="storyViewerTime">استوری فعال</span>
             </span>
           </div>
-          <button type="button" class="story-viewer-pause" id="storyViewerPause" aria-pressed="false" aria-label="توقف زمان استوری">
-            <i class="fas fa-pause" aria-hidden="true"></i>
-            <span id="storyViewerCountdown">۷ ثانیه</span>
-          </button>
         </div>
         <div class="story-viewer-content">
           <div id="storyViewerCaption" class="story-viewer-caption"></div>
@@ -4239,7 +4237,7 @@ window.addEventListener('load', () => {
       }
     });
     document.getElementById('storyViewerLike')?.addEventListener('click', toggleStoryReaction);
-    document.getElementById('storyViewerPause')?.addEventListener('click', toggleStoryViewerPaused);
+    document.getElementById('storyViewerProgressToggle')?.addEventListener('click', toggleStoryViewerPaused);
     document.getElementById('storyViewerReplyForm')?.addEventListener('submit', submitStoryReply);
     document.getElementById('storyViewerReplyInput')?.addEventListener('input', syncStoryReplyButton);
     document.getElementById('storyViewerReplyInput')?.addEventListener('keydown', (event) => {
@@ -4305,25 +4303,19 @@ window.addEventListener('load', () => {
   }
 
   function renderStoryViewerCountdown(elapsedMs = 0) {
-    const countdown = document.getElementById('storyViewerCountdown');
-    const pauseBtn = document.getElementById('storyViewerPause');
-    const pauseIcon = pauseBtn?.querySelector('i');
+    const progressToggle = document.getElementById('storyViewerProgressToggle');
     const remainingMs = Math.max(0, STORY_VIEW_DURATION_MS - elapsedMs);
     const remainingSeconds = Math.max(1, Math.ceil(remainingMs / 1000));
 
-    if (countdown) {
-      countdown.textContent = storyViewerPaused
-        ? `متوقف شد | ${formatStoryNumber(remainingSeconds)} ثانیه`
-        : `${formatStoryNumber(remainingSeconds)} ثانیه`;
-    }
-    if (pauseBtn) {
-      pauseBtn.setAttribute('aria-pressed', storyViewerPaused ? 'true' : 'false');
-      pauseBtn.setAttribute('aria-label', storyViewerPaused ? 'ادامه زمان استوری' : 'توقف زمان استوری');
-      pauseBtn.title = storyViewerPaused ? 'ادامه' : 'توقف';
-    }
-    if (pauseIcon) {
-      pauseIcon.classList.toggle('fa-pause', !storyViewerPaused);
-      pauseIcon.classList.toggle('fa-play', storyViewerPaused);
+    if (progressToggle) {
+      progressToggle.setAttribute('aria-pressed', storyViewerPaused ? 'true' : 'false');
+      progressToggle.setAttribute(
+        'aria-label',
+        storyViewerPaused
+          ? `ادامه زمان استوری، ${formatStoryNumber(remainingSeconds)} ثانیه باقی مانده`
+          : `توقف زمان استوری، ${formatStoryNumber(remainingSeconds)} ثانیه باقی مانده`
+      );
+      progressToggle.title = storyViewerPaused ? 'ادامه زمان استوری' : 'توقف زمان استوری';
     }
   }
 
