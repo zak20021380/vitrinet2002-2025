@@ -4034,10 +4034,122 @@ window.addEventListener('load', () => {
     if (!story || story.status === 'expired' || story.status === 'deleted') return null;
     const imageUrl = normalizeCategoryText(story.imageUrl || '');
     const id = normalizeCategoryText(story.id || story._id || '');
-    return imageUrl && id ? { ...story, id, imageUrl } : null;
+    return imageUrl && id ? {
+      ...story,
+      id,
+      imageUrl,
+      caption: normalizeCategoryText(story.caption || ''),
+      likesCount: Math.max(0, Number(story.likesCount || 0)),
+      repliesCount: Math.max(0, Number(story.repliesCount || 0)),
+      viewsCount: Math.max(0, Number(story.viewsCount || 0))
+    } : null;
   }
 
-  function buildSimilarStoryIndicator(item = {}, label = '') {
+  const STORY_REACTION_KEY = 'vt_service_story_reaction_key';
+  const STORY_LIKED_KEY = 'vt_service_story_liked_ids';
+  const STORY_VIEW_DURATION_MS = 8000;
+  let activeStoryState = null;
+  let storyViewerTimer = null;
+
+  function formatStoryNumber(value) {
+    return String(Math.max(0, Number(value || 0))).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  }
+
+  function getStoryReactionKey() {
+    try {
+      let key = localStorage.getItem(STORY_REACTION_KEY);
+      if (!key) {
+        const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        key = `guest:${String(random).replace(/[^a-zA-Z0-9:_-]/g, '').slice(0, 80)}`;
+        localStorage.setItem(STORY_REACTION_KEY, key);
+      }
+      return key;
+    } catch (_) {
+      return `guest:${Date.now()}`;
+    }
+  }
+
+  function getStoryLikedIds() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORY_LIKED_KEY) || '[]');
+      return new Set(Array.isArray(raw) ? raw.filter(Boolean) : []);
+    } catch (_) {
+      return new Set();
+    }
+  }
+
+  function persistStoryLiked(id, liked) {
+    if (!id) return;
+    try {
+      const ids = getStoryLikedIds();
+      if (liked) ids.add(id);
+      else ids.delete(id);
+      localStorage.setItem(STORY_LIKED_KEY, JSON.stringify(Array.from(ids).slice(-80)));
+    } catch (_) {}
+  }
+
+  function isStoryLiked(id) {
+    return getStoryLikedIds().has(id);
+  }
+
+  function getStoryDisplayName() {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const fullName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim();
+      if (fullName) return fullName;
+    } catch (_) {}
+    return normalizeCategoryText(localStorage.getItem('vt_user_name') || '');
+  }
+
+  function storyRequestHeaders(extra = {}) {
+    return {
+      ...authHeaders(),
+      ...extra
+    };
+  }
+
+  function buildStoryDataset(story = {}, label = '') {
+    return `
+              data-story-id="${escapeHtml(story.id)}"
+              data-story-image="${escapeHtml(story.imageUrl)}"
+              data-story-caption="${escapeHtml(story.caption || '')}"
+              data-story-label="${escapeHtml(label || '')}"
+              data-story-likes="${escapeHtml(story.likesCount || 0)}"
+              data-story-replies="${escapeHtml(story.repliesCount || 0)}"
+              data-story-views="${escapeHtml(story.viewsCount || 0)}"
+              data-story-created="${escapeHtml(story.createdAt || '')}"
+              data-story-expires="${escapeHtml(story.expiresAt || '')}"`;
+  }
+
+  function readStoryFromButton(storyBtn) {
+    if (!storyBtn) return null;
+    return {
+      id: storyBtn.dataset.storyId,
+      imageUrl: storyBtn.dataset.storyImage,
+      caption: storyBtn.dataset.storyCaption || '',
+      label: storyBtn.dataset.storyLabel || '',
+      likesCount: Number(storyBtn.dataset.storyLikes || 0),
+      repliesCount: Number(storyBtn.dataset.storyReplies || 0),
+      viewsCount: Number(storyBtn.dataset.storyViews || 0),
+      createdAt: storyBtn.dataset.storyCreated || '',
+      expiresAt: storyBtn.dataset.storyExpires || ''
+    };
+  }
+
+  function formatStoryTime(value) {
+    if (!value) return 'استوری فعال';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'استوری فعال';
+    const diff = Date.now() - date.getTime();
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    if (diff < minute) return 'همین حالا';
+    if (diff < hour) return `${formatStoryNumber(Math.floor(diff / minute))} دقیقه پیش`;
+    if (diff < 24 * hour) return `${formatStoryNumber(Math.floor(diff / hour))} ساعت پیش`;
+    return 'استوری فعال';
+  }
+
+  function buildSimilarStoryIndicatorLegacy(item = {}, label = '') {
     const story = getActiveStory(item);
     if (!story) return '';
     const safeLabel = escapeHtml(label || item.name || 'فروشگاه');
@@ -4053,6 +4165,21 @@ window.addEventListener('load', () => {
       </button>`;
   }
 
+  function buildSimilarStoryIndicator(item = {}, label = '') {
+    const story = getActiveStory(item);
+    if (!story) return '';
+    const displayLabel = label || item.name || '';
+    const safeLabel = escapeHtml(displayLabel || 'فروشگاه');
+    return `
+      <button type="button"
+              class="similar-story-indicator"
+              data-story-indicator
+              ${buildStoryDataset(story, displayLabel)}
+              aria-label="مشاهده استوری ${safeLabel}">
+        <img src="${escapeHtml(story.imageUrl)}" alt="" loading="lazy" decoding="async">
+      </button>`;
+  }
+
   function ensureStoryViewer() {
     let modal = document.getElementById('storyViewerModal');
     if (modal) return modal;
@@ -4061,10 +4188,42 @@ window.addEventListener('load', () => {
     modal.className = 'story-viewer-modal';
     modal.setAttribute('aria-hidden', 'true');
     modal.innerHTML = `
-      <div class="story-viewer-shell" role="dialog" aria-modal="true">
+      <div class="story-viewer-shell" role="dialog" aria-modal="true" aria-labelledby="storyViewerTitle">
         <button type="button" class="story-viewer-close" data-story-close aria-label="بستن">×</button>
-        <img id="storyViewerImage" alt="">
-        <div id="storyViewerCaption" class="story-viewer-caption"></div>
+        <div class="story-viewer-media" aria-hidden="true">
+          <img id="storyViewerBackdropImage" class="story-viewer-backdrop-image" alt="">
+          <img id="storyViewerImage" alt="">
+        </div>
+        <div class="story-viewer-progress" aria-hidden="true"><span></span></div>
+        <div class="story-viewer-topbar">
+          <div class="story-viewer-meta">
+            <span class="story-viewer-avatar"><img id="storyViewerAvatar" alt=""></span>
+            <span class="story-viewer-title">
+              <strong id="storyViewerTitle">استوری</strong>
+              <span id="storyViewerTime">استوری فعال</span>
+            </span>
+          </div>
+        </div>
+        <div class="story-viewer-content">
+          <div id="storyViewerCaption" class="story-viewer-caption"></div>
+          <div class="story-viewer-toolbar">
+            <div class="story-viewer-stats" aria-live="polite">
+              <span class="story-viewer-stat" title="بازدید"><i class="far fa-eye" aria-hidden="true"></i><span id="storyViewerViews">۰</span></span>
+              <span class="story-viewer-stat" title="پاسخ"><i class="far fa-comment-dots" aria-hidden="true"></i><span id="storyViewerReplies">۰</span></span>
+            </div>
+            <button type="button" class="story-viewer-action" id="storyViewerLike" aria-pressed="false">
+              <i class="far fa-heart" aria-hidden="true"></i>
+              <span id="storyViewerLikes">۰</span>
+            </button>
+          </div>
+          <form class="story-viewer-reply" id="storyViewerReplyForm">
+            <textarea id="storyViewerReplyInput" maxlength="500" rows="1" placeholder="پاسخ به استوری..." aria-label="پاسخ به استوری"></textarea>
+            <button class="story-viewer-send" id="storyViewerReplySend" type="submit" disabled aria-label="ارسال پاسخ">
+              <i class="fas fa-paper-plane" aria-hidden="true"></i>
+            </button>
+          </form>
+          <div class="story-viewer-feedback" id="storyViewerFeedback" aria-live="polite"></div>
+        </div>
       </div>`;
     document.body.appendChild(modal);
     modal.addEventListener('click', (event) => {
@@ -4072,31 +4231,225 @@ window.addEventListener('load', () => {
         closeStoryViewer();
       }
     });
+    document.getElementById('storyViewerLike')?.addEventListener('click', toggleStoryReaction);
+    document.getElementById('storyViewerReplyForm')?.addEventListener('submit', submitStoryReply);
+    document.getElementById('storyViewerReplyInput')?.addEventListener('input', syncStoryReplyButton);
+    document.getElementById('storyViewerReplyInput')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        document.getElementById('storyViewerReplyForm')?.requestSubmit();
+      }
+    });
     return modal;
+  }
+
+  function setStoryFeedback(message = '', type = 'info') {
+    const feedback = document.getElementById('storyViewerFeedback');
+    if (!feedback) return;
+    feedback.textContent = message;
+    feedback.classList.toggle('is-error', type === 'error');
+  }
+
+  function syncStoryReplyButton() {
+    const input = document.getElementById('storyViewerReplyInput');
+    const send = document.getElementById('storyViewerReplySend');
+    if (!input || !send) return;
+    const hasText = input.value.trim().length >= 2;
+    send.disabled = !hasText || send.dataset.loading === 'true';
+  }
+
+  function renderStoryViewerState() {
+    if (!activeStoryState) return;
+    const image = document.getElementById('storyViewerImage');
+    const bgImage = document.getElementById('storyViewerBackdropImage');
+    const avatar = document.getElementById('storyViewerAvatar');
+    const title = document.getElementById('storyViewerTitle');
+    const time = document.getElementById('storyViewerTime');
+    const caption = document.getElementById('storyViewerCaption');
+    const views = document.getElementById('storyViewerViews');
+    const likes = document.getElementById('storyViewerLikes');
+    const replies = document.getElementById('storyViewerReplies');
+    const likeBtn = document.getElementById('storyViewerLike');
+    const likeIcon = likeBtn?.querySelector('i');
+
+    if (image) {
+      image.src = activeStoryState.imageUrl;
+      image.alt = activeStoryState.label ? `استوری ${activeStoryState.label}` : 'استوری';
+    }
+    if (bgImage) bgImage.src = activeStoryState.imageUrl;
+    if (avatar) avatar.src = activeStoryState.imageUrl;
+    if (title) title.textContent = activeStoryState.label || 'استوری';
+    if (time) time.textContent = formatStoryTime(activeStoryState.createdAt);
+    if (caption) caption.textContent = activeStoryState.caption || '';
+    if (views) views.textContent = formatStoryNumber(activeStoryState.viewsCount);
+    if (likes) likes.textContent = formatStoryNumber(activeStoryState.likesCount);
+    if (replies) replies.textContent = formatStoryNumber(activeStoryState.repliesCount);
+    if (likeBtn) {
+      likeBtn.classList.toggle('is-liked', !!activeStoryState.liked);
+      likeBtn.setAttribute('aria-pressed', activeStoryState.liked ? 'true' : 'false');
+      likeBtn.title = activeStoryState.liked ? 'لغو لایک' : 'لایک';
+    }
+    if (likeIcon) {
+      likeIcon.classList.toggle('fas', !!activeStoryState.liked);
+      likeIcon.classList.toggle('far', !activeStoryState.liked);
+    }
+  }
+
+  function stopStoryProgressTimer() {
+    if (storyViewerTimer) {
+      clearTimeout(storyViewerTimer);
+      storyViewerTimer = null;
+    }
+  }
+
+  function startStoryProgressTimer(modal) {
+    stopStoryProgressTimer();
+    if (!modal) return;
+    modal.style.setProperty('--story-viewer-duration', `${STORY_VIEW_DURATION_MS}ms`);
+    const progress = modal.querySelector('.story-viewer-progress span');
+    if (progress) {
+      progress.style.animation = 'none';
+      progress.offsetHeight;
+      progress.style.animation = '';
+    }
+    storyViewerTimer = window.setTimeout(() => {
+      closeStoryViewer();
+    }, STORY_VIEW_DURATION_MS);
   }
 
   function closeStoryViewer() {
     const modal = document.getElementById('storyViewerModal');
     if (!modal) return;
+    stopStoryProgressTimer();
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
+    activeStoryState = null;
+    const input = document.getElementById('storyViewerReplyInput');
+    if (input) input.value = '';
+    setStoryFeedback('');
+    syncStoryReplyButton();
+    document.body.classList.remove('story-viewer-open');
     document.body.style.overflow = '';
   }
 
   function openStoryViewer(story = {}) {
     if (!story.id || !story.imageUrl) return;
     const modal = ensureStoryViewer();
-    const image = document.getElementById('storyViewerImage');
-    const caption = document.getElementById('storyViewerCaption');
-    if (image) image.src = story.imageUrl;
-    if (caption) caption.textContent = story.caption || '';
+    activeStoryState = {
+      id: story.id,
+      imageUrl: story.imageUrl,
+      caption: story.caption || '',
+      label: story.label || '',
+      likesCount: Math.max(0, Number(story.likesCount || 0)),
+      repliesCount: Math.max(0, Number(story.repliesCount || 0)),
+      viewsCount: Math.max(0, Number(story.viewsCount || 0)),
+      createdAt: story.createdAt || '',
+      expiresAt: story.expiresAt || '',
+      liked: isStoryLiked(story.id)
+    };
+    renderStoryViewerState();
+    setStoryFeedback('');
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('story-viewer-open');
     document.body.style.overflow = 'hidden';
+    startStoryProgressTimer(modal);
     fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(story.id)}/view`, {
       method: 'POST',
       credentials: 'include'
-    }).catch(() => {});
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data?.story || !activeStoryState || activeStoryState.id !== story.id) return;
+        activeStoryState.viewsCount = Math.max(0, Number(data.story.viewsCount || activeStoryState.viewsCount));
+        activeStoryState.likesCount = Math.max(0, Number(data.story.likesCount || activeStoryState.likesCount));
+        activeStoryState.repliesCount = Math.max(0, Number(data.story.repliesCount || activeStoryState.repliesCount));
+        renderStoryViewerState();
+      })
+      .catch(() => {});
+  }
+
+  async function toggleStoryReaction() {
+    if (!activeStoryState?.id) return;
+    const likeBtn = document.getElementById('storyViewerLike');
+    if (likeBtn?.classList.contains('is-loading')) return;
+    const previous = { ...activeStoryState };
+    const nextLiked = !activeStoryState.liked;
+    activeStoryState.liked = nextLiked;
+    activeStoryState.likesCount = Math.max(0, activeStoryState.likesCount + (nextLiked ? 1 : -1));
+    persistStoryLiked(activeStoryState.id, nextLiked);
+    likeBtn?.classList.add('is-loading');
+    renderStoryViewerState();
+
+    try {
+      const reactionKey = getStoryReactionKey();
+      const res = await fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(activeStoryState.id)}/reaction`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: storyRequestHeaders({
+          'Content-Type': 'application/json',
+          'x-story-reaction-key': reactionKey,
+          'x-story-reaction-state': nextLiked ? 'liked' : 'unliked'
+        }),
+        body: JSON.stringify({ reactionKey, reacted: nextLiked })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) throw new Error(data?.message || 'reaction failed');
+      activeStoryState.liked = !!data.reacted;
+      activeStoryState.likesCount = Math.max(0, Number(data.story?.likesCount ?? activeStoryState.likesCount));
+      persistStoryLiked(activeStoryState.id, activeStoryState.liked);
+      renderStoryViewerState();
+    } catch (err) {
+      activeStoryState = previous;
+      persistStoryLiked(previous.id, previous.liked);
+      renderStoryViewerState();
+      setStoryFeedback('لایک ثبت نشد. دوباره تلاش کنید.', 'error');
+    } finally {
+      likeBtn?.classList.remove('is-loading');
+    }
+  }
+
+  async function submitStoryReply(event) {
+    event?.preventDefault();
+    if (!activeStoryState?.id) return;
+    const input = document.getElementById('storyViewerReplyInput');
+    const send = document.getElementById('storyViewerReplySend');
+    const message = normalizeCategoryText(input?.value || '');
+    if (message.length < 2) {
+      setStoryFeedback('متن پاسخ را کامل‌تر بنویسید.', 'error');
+      return;
+    }
+
+    const replyKey = getStoryReactionKey();
+    send?.setAttribute('data-loading', 'true');
+    syncStoryReplyButton();
+    setStoryFeedback('در حال ارسال...');
+
+    try {
+      const body = { message, replyKey };
+      const displayName = getStoryDisplayName();
+      if (displayName) body.displayName = displayName;
+      const res = await fetch(`${API_ROOT}/api/seller/stories/public/${encodeURIComponent(activeStoryState.id)}/replies`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: storyRequestHeaders({
+          'Content-Type': 'application/json',
+          'x-story-reply-key': replyKey
+        }),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) throw new Error(data?.message || 'reply failed');
+      activeStoryState.repliesCount = Math.max(0, Number(data.story?.repliesCount ?? activeStoryState.repliesCount + 1));
+      if (input) input.value = '';
+      renderStoryViewerState();
+      setStoryFeedback('پاسخ شما ارسال شد.');
+    } catch (err) {
+      setStoryFeedback('ارسال پاسخ انجام نشد. دوباره تلاش کنید.', 'error');
+    } finally {
+      send?.removeAttribute('data-loading');
+      syncStoryReplyButton();
+    }
   }
 
   function bindStoryIndicatorClicks() {
@@ -4107,11 +4460,7 @@ window.addEventListener('load', () => {
       if (!storyBtn) return;
       event.preventDefault();
       event.stopPropagation();
-      openStoryViewer({
-        id: storyBtn.dataset.storyId,
-        imageUrl: storyBtn.dataset.storyImage,
-        caption: storyBtn.dataset.storyCaption || ''
-      });
+      openStoryViewer(readStoryFromButton(storyBtn));
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') closeStoryViewer();
@@ -4136,9 +4485,7 @@ window.addEventListener('load', () => {
         <button type="button"
                 class="service-hero-story-indicator"
                 data-story-indicator
-                data-story-id="${escapeHtml(story.id)}"
-                data-story-image="${escapeHtml(story.imageUrl)}"
-                data-story-caption="${escapeHtml(story.caption || '')}"
+                ${buildStoryDataset(story, label || '')}
                 aria-label="مشاهده استوری ${escapeHtml(label || 'فروشگاه')}">
           <img src="${escapeHtml(story.imageUrl)}" alt="" loading="lazy" decoding="async">
         </button>`;
@@ -4273,11 +4620,7 @@ window.addEventListener('load', () => {
       if (storyBtn) {
         event.preventDefault();
         event.stopPropagation();
-        openStoryViewer({
-          id: storyBtn.dataset.storyId,
-          imageUrl: storyBtn.dataset.storyImage,
-          caption: storyBtn.dataset.storyCaption || ''
-        });
+        openStoryViewer(readStoryFromButton(storyBtn));
         return;
       }
 
