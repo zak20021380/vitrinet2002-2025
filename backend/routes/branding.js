@@ -2,26 +2,15 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const mongoose = require('mongoose');
 const auth = require('../middlewares/authMiddleware');
 const ShopAppearance = require('../models/ShopAppearance');
+const { createImageUpload } = require('../utils/uploadHelper');
 
-// ensure upload directory exists
-const uploadDir = path.join(__dirname, '..', 'uploads', 'branding');
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, `footer-${req.user.id}-${Date.now()}${ext}`);
-  }
+const upload = createImageUpload({
+  subdirectory: 'branding',
+  filenamePrefix: 'footer'
 });
-
-const upload = multer({ storage });
 
 function makeFullUrl(req, filePath) {
   if (!filePath) return '';

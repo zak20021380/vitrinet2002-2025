@@ -45,6 +45,19 @@ function isSecureRequest(req) {
   return false;
 }
 
+function setUploadSecurityHeaders(res, filePath) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'none'; object-src 'none'; base-uri 'none'; sandbox");
+
+  const normalizedFilePath = String(filePath || '').replace(/\\/g, '/');
+  const isSanitizedHomepagePlaceholder = normalizedFilePath.endsWith('/uploads/homepage-cards/placeholder.svg');
+  const scriptableExtensions = new Set(['.svg', '.svgz', '.html', '.htm', '.xhtml', '.xml', '.mhtml', '.mht']);
+  if (!isSanitizedHomepagePlaceholder && scriptableExtensions.has(path.extname(filePath).toLowerCase())) {
+    const filename = path.basename(filePath).replace(/["\\]/g, '');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  }
+}
+
 // ------------------- Middlewares -------------------
 app.use(cookieParser());
 app.set('trust proxy', 1);
@@ -110,7 +123,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ------------------- Static Files -------------------
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  dotfiles: 'deny',
+  index: false,
+  setHeaders: setUploadSecurityHeaders
+}));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ------------------- Routes -------------------

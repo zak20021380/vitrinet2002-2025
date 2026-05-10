@@ -1,27 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
 
 const auth = require('../middlewares/authMiddleware');
 const controller = require('../controllers/homepageSectionController');
+const { createImageUpload } = require('../utils/uploadHelper');
 
-const homepageCardUploadDir = path.join(__dirname, '..', 'uploads', 'homepage-cards');
-fs.mkdirSync(homepageCardUploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: function destination(_req, _file, cb) {
-    cb(null, homepageCardUploadDir);
-  },
-  filename: function filename(_req, file, cb) {
-    const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
-    const safeBase = path.basename(file.originalname || 'homepage-card', ext).replace(/[^a-zA-Z0-9_-]/g, '');
-    cb(null, `${Date.now()}-${Math.floor(Math.random() * 10000)}-${safeBase || 'card'}${ext}`);
-  }
+const upload = createImageUpload({
+  subdirectory: 'homepage-cards',
+  filenamePrefix: 'homepage-card'
 });
-
-const upload = multer({ storage });
 
 router.get('/public', controller.listActiveSections);
 router.get('/:id/products', controller.getSectionProducts);

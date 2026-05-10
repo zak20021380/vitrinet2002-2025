@@ -2,19 +2,13 @@ const express = require('express');
 const router = express.Router();
 const shoppingCenterController = require('../controllers/shoppingCenterController');
 const authMiddleware = require('../middlewares/authMiddleware');
-const multer = require('multer');
+const { createImageUpload } = require('../utils/uploadHelper');
 
 // مسیر ذخیره عکس‌ها
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/shopping-centers');
-  },
-  filename: function (req, file, cb) {
-    const ext = file.originalname.split('.').pop();
-    cb(null, Date.now() + '-' + Math.floor(Math.random() * 1000) + '.' + ext);
-  }
+const upload = createImageUpload({
+  subdirectory: 'shopping-centers',
+  filenamePrefix: 'shopping-center'
 });
-const upload = multer({ storage });
 
 // middlewares (مثلاً احراز هویت ادمین) رو خودت اضافه کن
 // const { adminAuth } = require('../middlewares/auth');
