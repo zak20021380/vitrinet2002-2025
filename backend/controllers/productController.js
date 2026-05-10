@@ -81,10 +81,28 @@ function getMapNumber(mapLike, key) {
   return Number(mapLike[key] || 0);
 }
 
+async function loadProductForMutation(req, res) {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404).json({ message: 'محصول پیدا نشد!' });
+    return null;
+  }
+
+  const requesterId = req.user && (req.user.id || req.user._id);
+  const isOwner = requesterId && String(product.sellerId) === String(requesterId);
+  if (req.user?.role !== 'admin' && !isOwner) {
+    res.status(403).json({ message: 'شما اجازه تغییر این محصول را ندارید.' });
+    return null;
+  }
+
+  return product;
+}
+
 // افزودن محصول جدید
 exports.addProduct = async (req, res) => {
   try {
-    const { sellerId, title, price, category, tags, desc, images, mainImageIndex, discountCeiling, isNegotiable } = req.body;
+    const { title, price, category, tags, desc, images, mainImageIndex, discountCeiling, isNegotiable } = req.body;
+    const sellerId = req.user && (req.user.id || req.user._id);
 
     const uploadedImages = Array.isArray(req.files)
       ? req.files.map((file) => normalizeUploadedPath(file)).filter(Boolean)
@@ -273,11 +291,8 @@ exports.getSellerProductVisitStats = async (req, res) => {
 // ساخت یا به‌روزرسانی تخفیف محصول
 exports.upsertDiscount = async (req, res) => {
   try {
-    const id = req.params.id;
-    const product = await Product.findById(id);
-    if (!product) {
-      return res.status(404).json({ message: 'محصول پیدا نشد!' });
-    }
+    const product = await loadProductForMutation(req, res);
+    if (!product) return;
 
     const { priceAfterDiscount, start, end, quantityLimit } = req.body || {};
     const discountPrice = Number(priceAfterDiscount);
@@ -331,11 +346,8 @@ exports.upsertDiscount = async (req, res) => {
 // حذف یا غیرفعال‌سازی تخفیف محصول
 exports.removeDiscount = async (req, res) => {
   try {
-    const id = req.params.id;
-    const product = await Product.findById(id);
-    if (!product) {
-      return res.status(404).json({ message: 'محصول پیدا نشد!' });
-    }
+    const product = await loadProductForMutation(req, res);
+    if (!product) return;
 
     deactivateDiscount(product);
 
@@ -378,7 +390,9 @@ exports.getProducts = async (req, res) => {
 // ویرایش محصول (اصلاح شده برای پشتیبانی از mainImageIndex)
 exports.editProduct = async (req, res) => {
   try {
-    const id = req.params.id;
+    const product = await loadProductForMutation(req, res);
+    if (!product) return;
+
     const {
       title,
       price,
@@ -403,8 +417,8 @@ exports.editProduct = async (req, res) => {
       ...(mainImageIndex !== undefined && { mainImageIndex })
     };
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, update, { new: true });
-    if (!updatedProduct) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    product.set(update);
+    const updatedProduct = await product.save();
     res.json({ message: 'محصول ویرایش شد', product: updatedProduct });
   } catch (err) {
     res.status(500).json({ message: 'خطا در ویرایش محصول', error: err.message });
@@ -414,9 +428,10 @@ exports.editProduct = async (req, res) => {
 // حذف محصول
 exports.deleteProduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    const deleted = await Product.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ message: 'محصول پیدا نشد!' });
+    const product = await loadProductForMutation(req, res);
+    if (!product) return;
+
+    await product.deleteOne();
     res.json({ message: 'محصول حذف شد' });
   } catch (err) {
     res.status(500).json({ message: 'خطا در حذف محصول', error: err.message });
@@ -477,16 +492,13 @@ exports.toggleLike = async (req, res) => {
 // تغییر وضعیت موجودی محصول
 exports.updateStock = async (req, res) => {
   try {
-    const id = req.params.id;
+    const product = await loadProductForMutation(req, res);
+    if (!product) return;
+
     const { inStock } = req.body;
 
     if (typeof inStock !== 'boolean') {
       return res.status(400).json({ message: 'مقدار inStock باید boolean باشد.' });
-    }
-
-    const product = await Product.findById(id);
-    if (!product) {
-      return res.status(404).json({ message: 'محصول پیدا نشد!' });
     }
 
     product.inStock = inStock;

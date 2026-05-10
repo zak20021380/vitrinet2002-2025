@@ -34,7 +34,7 @@ const upload = multer({ storage });
 // -----------------------------
 // افزودن محصول جدید
 // -----------------------------
-router.post('/', upload.array('images', 10), /* authMiddleware */ productController.addProduct);
+router.post('/', authMiddleware('seller'), upload.array('images', 10), productController.addProduct);
 
 // -----------------------------
 // دریافت همه محصولات (مثلاً با ?sellerId=...)
@@ -76,18 +76,18 @@ router.get('/shop/:shopurl', async (req, res) => {
 // -----------------------------
 // ساخت/ویرایش تخفیف محصول
 // -----------------------------
-router.put('/:id/discount', /* authMiddleware */ productController.upsertDiscount);
+router.put('/:id/discount', authMiddleware('seller'), productController.upsertDiscount);
 
 // -----------------------------
 // حذف تخفیف محصول
 // -----------------------------
-router.delete('/:id/discount', /* authMiddleware */ productController.removeDiscount);
+router.delete('/:id/discount', authMiddleware('seller'), productController.removeDiscount);
 
 // -----------------------------
 // تغییر وضعیت موجودی محصول
 // PATCH /api/products/:id/stock
 // -----------------------------
-router.patch('/:id/stock', /* authMiddleware */ productController.updateStock);
+router.patch('/:id/stock', authMiddleware('seller'), productController.updateStock);
 
 // -----------------------------
 // دریافت محصول تکی با آیدی
@@ -254,11 +254,11 @@ router.get('/:id', async (req, res) => {
 // -----------------------------
 // ویرایش محصول
 // -----------------------------
-router.put('/:id', /* authMiddleware */ productController.editProduct);
+router.put('/:id', authMiddleware('seller'), productController.editProduct);
 
 // -----------------------------
 // حذف محصول
 // -----------------------------
-router.delete('/:id', /* authMiddleware */ productController.deleteProduct);
+router.delete('/:id', authMiddleware('seller'), productController.deleteProduct);
 
 module.exports = router;

@@ -204,7 +204,9 @@ const createAuthMiddleware = (requiredRole = null) => {
 
       // ۹) تزریق اطلاعات به req.user
       const finalId = resolvedSellerId || payload.id;
-      const finalRole = (requiredRoleNormalized === 'seller') ? 'seller' : payloadRole;
+      const finalRole = payloadRole === 'admin'
+        ? 'admin'
+        : (requiredRoleNormalized === 'seller') ? 'seller' : payloadRole;
 
       req.user = {
         id: finalId,           // آیدی نهایی
