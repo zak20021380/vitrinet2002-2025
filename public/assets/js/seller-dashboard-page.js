@@ -1464,6 +1464,8 @@ function setupMobileProductCard(card, prod) {
     if (deleteBtn) deleteBtn.className = 'seller-product-card__action seller-product-card__action--delete';
   }
 
+  setupProductCardImageTools(media, prod);
+
   const quickPrice = document.createElement('div');
   quickPrice.className = 'seller-product-price';
   quickPrice.dataset.productId = prod._id;
@@ -1506,6 +1508,165 @@ function setupMobileProductCard(card, prod) {
     if (event.key === 'Enter') saveQuickProductPrice(quickPrice, prod._id);
     if (event.key === 'Escape') closeQuickPriceEditor(quickPrice, prod.price);
   });
+}
+
+function getProductCardImages(media, prod) {
+  const images = Array.isArray(prod?.images)
+    ? prod.images.filter((src) => typeof src === 'string' && src.trim())
+    : [];
+  if (images.length) return images;
+
+  const fallback = media?.querySelector('img')?.getAttribute('src');
+  return fallback ? [fallback] : [];
+}
+
+function setupProductCardImageTools(media, prod) {
+  if (!media || media.querySelector('.seller-product-card__image-tools')) return;
+
+  const img = media.querySelector('img');
+  const images = getProductCardImages(media, prod);
+  if (!img || !images.length) return;
+
+  const initialIndex = Number.isInteger(prod?.mainImageIndex) && images[prod.mainImageIndex]
+    ? prod.mainImageIndex
+    : Math.max(0, images.indexOf(img.getAttribute('src')));
+  media.dataset.imageIndex = String(initialIndex);
+  img.src = images[initialIndex] || images[0];
+
+  const tools = document.createElement('div');
+  tools.className = 'seller-product-card__image-tools';
+  tools.innerHTML = `
+    <button type="button" class="seller-product-card__image-btn" data-card-image-view aria-label="مشاهده بزرگ عکس">
+      <i class="ri-eye-line" aria-hidden="true"></i>
+    </button>
+    <button type="button" class="seller-product-card__image-btn" data-card-image-next aria-label="عکس بعدی" ${images.length <= 1 ? 'disabled' : ''}>
+      <i class="ri-arrow-left-right-line" aria-hidden="true"></i>
+    </button>
+  `;
+
+  const count = document.createElement('span');
+  count.className = 'seller-product-card__image-count';
+  media.appendChild(tools);
+  media.appendChild(count);
+
+  const sync = (index) => {
+    const safeIndex = ((index % images.length) + images.length) % images.length;
+    media.dataset.imageIndex = String(safeIndex);
+    img.src = images[safeIndex];
+    count.textContent = `${(safeIndex + 1).toLocaleString('fa-IR')}/${images.length.toLocaleString('fa-IR')}`;
+  };
+
+  sync(initialIndex);
+
+  tools.querySelector('[data-card-image-next]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    sync((Number(media.dataset.imageIndex) || 0) + 1);
+  });
+
+  tools.querySelector('[data-card-image-view]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    openProductCardImageViewer({
+      images,
+      index: Number(media.dataset.imageIndex) || 0,
+      title: prod?.title || 'عکس محصول'
+    });
+  });
+}
+
+function ensureProductCardImageViewer() {
+  let viewer = document.getElementById('productCardImageViewer');
+  if (viewer) return viewer;
+
+  viewer = document.createElement('div');
+  viewer.id = 'productCardImageViewer';
+  viewer.className = 'edit-image-viewer product-card-image-viewer';
+  viewer.setAttribute('role', 'dialog');
+  viewer.setAttribute('aria-modal', 'true');
+  viewer.setAttribute('aria-hidden', 'true');
+  viewer.innerHTML = `
+    <div class="edit-image-viewer__card">
+      <div class="edit-image-viewer__header">
+        <div>
+          <h3 class="edit-image-viewer__title" id="productCardImageViewerTitle">مشاهده عکس محصول</h3>
+          <span class="edit-image-viewer__count" id="productCardImageViewerCount">۱ از ۱</span>
+        </div>
+        <button type="button" class="edit-image-viewer__close" data-close-product-card-viewer aria-label="بستن نمایش عکس">
+          <i class="ri-close-line" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="edit-image-viewer__media">
+        <button type="button" class="edit-image-viewer__nav edit-image-viewer__nav--prev" id="productCardImageViewerPrev" aria-label="عکس قبلی">
+          <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+        </button>
+        <img class="edit-image-viewer__img" id="productCardImageViewerImg" src="" alt="عکس محصول">
+        <button type="button" class="edit-image-viewer__nav edit-image-viewer__nav--next" id="productCardImageViewerNext" aria-label="عکس بعدی">
+          <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="edit-image-viewer__footer">
+        <p class="edit-image-viewer__hint">با دکمه‌های کناری بین عکس‌های محصول جابه‌جا شوید.</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(viewer);
+
+  viewer.addEventListener('click', (event) => {
+    if (event.target === viewer || event.target.closest('[data-close-product-card-viewer]')) {
+      closeProductCardImageViewer();
+    }
+  });
+  viewer.querySelector('#productCardImageViewerPrev')?.addEventListener('click', () => moveProductCardImageViewer(-1));
+  viewer.querySelector('#productCardImageViewerNext')?.addEventListener('click', () => moveProductCardImageViewer(1));
+
+  return viewer;
+}
+
+function openProductCardImageViewer({ images, index = 0, title = 'عکس محصول' }) {
+  const viewer = ensureProductCardImageViewer();
+  window._productCardImageViewerState = {
+    images: Array.isArray(images) ? images : [],
+    index,
+    title
+  };
+  viewer.classList.add('active');
+  viewer.setAttribute('aria-hidden', 'false');
+  syncProductCardImageViewer();
+}
+
+function closeProductCardImageViewer() {
+  const viewer = document.getElementById('productCardImageViewer');
+  if (!viewer) return;
+  viewer.classList.remove('active');
+  viewer.setAttribute('aria-hidden', 'true');
+}
+
+function moveProductCardImageViewer(delta) {
+  const state = window._productCardImageViewerState;
+  if (!state || !state.images?.length) return;
+  state.index = ((state.index + delta) % state.images.length + state.images.length) % state.images.length;
+  syncProductCardImageViewer();
+}
+
+function syncProductCardImageViewer() {
+  const viewer = ensureProductCardImageViewer();
+  const state = window._productCardImageViewerState;
+  if (!state || !state.images?.length) {
+    closeProductCardImageViewer();
+    return;
+  }
+
+  state.index = Math.max(0, Math.min(state.index || 0, state.images.length - 1));
+  const img = viewer.querySelector('#productCardImageViewerImg');
+  const title = viewer.querySelector('#productCardImageViewerTitle');
+  const count = viewer.querySelector('#productCardImageViewerCount');
+  const prev = viewer.querySelector('#productCardImageViewerPrev');
+  const next = viewer.querySelector('#productCardImageViewerNext');
+
+  if (img) img.src = state.images[state.index];
+  if (title) title.textContent = state.title || 'مشاهده عکس محصول';
+  if (count) count.textContent = `${(state.index + 1).toLocaleString('fa-IR')} از ${state.images.length.toLocaleString('fa-IR')}`;
+  if (prev) prev.disabled = state.images.length <= 1;
+  if (next) next.disabled = state.images.length <= 1;
 }
 
 function openQuickPriceEditor(container) {
@@ -1850,6 +2011,14 @@ async function deleteProduct(productId) {
   });
 
   document.addEventListener('keydown', (event) => {
+    const cardViewer = document.getElementById('productCardImageViewer');
+    if (cardViewer && cardViewer.classList.contains('active')) {
+      if (event.key === 'Escape') closeProductCardImageViewer();
+      if (event.key === 'ArrowLeft') moveProductCardImageViewer(-1);
+      if (event.key === 'ArrowRight') moveProductCardImageViewer(1);
+      return;
+    }
+
     const viewer = document.getElementById('editImageViewer');
     if (!viewer || !viewer.classList.contains('active')) return;
     if (event.key === 'Escape') closeEditImageViewer();
