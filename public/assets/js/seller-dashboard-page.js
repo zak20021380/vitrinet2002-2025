@@ -1029,6 +1029,21 @@ function parseInputNumber(value) {
   return parseInt(cleaned, 10) || 0;
 }
 
+function normalizeProductPriceInput(value) {
+  return String(value || '')
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/[^\d]/g, '');
+}
+
+function parseProductPrice(value) {
+  return Number.parseInt(normalizeProductPriceInput(value), 10) || 0;
+}
+
+function formatProductPrice(value) {
+  return `${new Intl.NumberFormat('fa-IR').format(Number(value) || 0)} تومان`;
+}
+
 function updateDiscountCeilingPreview() {
   if (!discountCeilingInput || !discountCeilingPreview || !discountCeilingError) return;
   
@@ -1317,7 +1332,7 @@ if (!window.seller?.id) {
       // ---- رندر کارت موبایل (فقط نمایش در md و پایین‌تر) ----
       if (mobileList) {
         const card = document.createElement('div');
-        card.className = `bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden transition-all hover:shadow-xl ${!isInStock ? 'product-card--out-of-stock' : ''}`;
+        card.className = `seller-product-card ${!isInStock ? 'product-card--out-of-stock' : ''}`;
         card.innerHTML = `
           <div class="flex flex-col">
             <!-- تصویر محصول -->
@@ -1398,6 +1413,7 @@ if (!window.seller?.id) {
           </div>
         `;
         mobileList.appendChild(card);
+        setupMobileProductCard(card, prod);
         const mobileEdit = card.querySelector('[data-action="edit-product"]');
         const mobileDelete = card.querySelector('[data-action="delete-product"]');
         const mobileStockToggle = card.querySelector('.stock-toggle__input');
@@ -1415,6 +1431,147 @@ if (!window.seller?.id) {
 
 
 // ----------- حذف محصول (دیتابیس) ----------
+function setupMobileProductCard(card, prod) {
+  if (!card || !prod) return;
+
+  const shell = card.firstElementChild;
+  const media = shell?.firstElementChild;
+  const body = media?.nextElementSibling;
+  const title = body?.querySelector('h3');
+  const oldPrice = body?.querySelector('.text-\\[\\#0ea5e9\\]');
+  const categoryRow = oldPrice?.closest('.flex.items-center.justify-between');
+  const stockRow = body?.querySelector('.stock-toggle-mobile');
+  const likesRow = body?.querySelector('.like-chip__mobile')?.closest('.flex');
+  const actionsRow = body?.querySelector('[data-action="edit-product"]')?.parentElement;
+
+  if (media) media.className = 'seller-product-card__media';
+  if (body) body.className = 'seller-product-card__body';
+  if (title) title.className = 'seller-product-card__title line-clamp-2';
+  if (stockRow) stockRow.classList.add('seller-product-card__status-row');
+  if (likesRow) likesRow.classList.add('seller-product-card__likes');
+
+  if (categoryRow) {
+    categoryRow.className = 'seller-product-card__meta';
+    const oldPriceWrap = oldPrice?.closest('.flex.items-center.gap-2');
+    if (oldPriceWrap) oldPriceWrap.remove();
+  }
+
+  if (actionsRow) {
+    actionsRow.className = 'seller-product-card__actions';
+    const editBtn = actionsRow.querySelector('[data-action="edit-product"]');
+    const deleteBtn = actionsRow.querySelector('[data-action="delete-product"]');
+    if (editBtn) editBtn.className = 'seller-product-card__action seller-product-card__action--edit';
+    if (deleteBtn) deleteBtn.className = 'seller-product-card__action seller-product-card__action--delete';
+  }
+
+  const quickPrice = document.createElement('div');
+  quickPrice.className = 'seller-product-price';
+  quickPrice.dataset.productId = prod._id;
+  quickPrice.innerHTML = `
+    <div class="seller-product-price__row">
+      <div>
+        <span class="seller-product-price__label">قیمت فروش</span>
+        <strong class="seller-product-card__price-value ${prod.inStock === false ? 'line-through opacity-60' : ''}" data-price-display>${formatProductPrice(prod.price)}</strong>
+      </div>
+      <button type="button" class="seller-product-price__edit" data-action="quick-price">
+        <i class="ri-edit-2-line" aria-hidden="true"></i>
+        تغییر قیمت
+      </button>
+    </div>
+    <div class="seller-product-price__form" data-price-form>
+      <input class="seller-product-price__input" data-price-input inputmode="numeric" pattern="[0-9]*" value="${prod.price || ''}" aria-label="قیمت جدید">
+      <button type="button" class="seller-product-price__save" data-action="save-price" aria-label="ذخیره قیمت">
+        <i class="ri-check-line" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="seller-product-price__cancel" data-action="cancel-price" aria-label="لغو تغییر قیمت">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+      <span class="seller-product-price__error" data-price-error>قیمت باید عددی بزرگ‌تر از صفر باشد.</span>
+    </div>
+  `;
+  title?.insertAdjacentElement('afterend', quickPrice);
+
+  quickPrice.querySelector('[data-action="quick-price"]')?.addEventListener('click', () => openQuickPriceEditor(quickPrice));
+  quickPrice.querySelector('[data-action="cancel-price"]')?.addEventListener('click', () => closeQuickPriceEditor(quickPrice, prod.price));
+  quickPrice.querySelector('[data-action="save-price"]')?.addEventListener('click', () => saveQuickProductPrice(quickPrice, prod._id));
+  const priceInput = quickPrice.querySelector('[data-price-input]');
+  priceInput?.addEventListener('input', (event) => {
+    const numericValue = normalizeProductPriceInput(event.target.value);
+    if (event.target.value !== numericValue) {
+      event.target.value = numericValue;
+    }
+    quickPrice.classList.remove('has-error');
+  });
+  priceInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveQuickProductPrice(quickPrice, prod._id);
+    if (event.key === 'Escape') closeQuickPriceEditor(quickPrice, prod.price);
+  });
+}
+
+function openQuickPriceEditor(container) {
+  const input = container?.querySelector('[data-price-input]');
+  if (!container || !input) return;
+  container.classList.add('is-editing');
+  container.classList.remove('has-error');
+  input.value = normalizeProductPriceInput(input.value);
+  input.focus();
+  input.select();
+}
+
+function closeQuickPriceEditor(container, fallbackPrice) {
+  const input = container?.querySelector('[data-price-input]');
+  if (!container || !input) return;
+  container.classList.remove('is-editing', 'has-error');
+  input.value = fallbackPrice || '';
+}
+
+async function saveQuickProductPrice(container, productId) {
+  const input = container?.querySelector('[data-price-input]');
+  const display = container?.querySelector('[data-price-display]');
+  const saveBtn = container?.querySelector('[data-action="save-price"]');
+  if (!container || !input || !display || !productId) return;
+
+  const price = parseProductPrice(input.value);
+  if (price <= 0) {
+    container.classList.add('has-error');
+    input.focus();
+    return;
+  }
+
+  container.classList.remove('has-error');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite;" aria-hidden="true"></i>';
+  }
+
+  try {
+    const res = await apiFetch(`/api/products/${productId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ price })
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.message || 'price-update-failed');
+
+    display.textContent = formatProductPrice(price);
+    input.value = price;
+    container.classList.remove('is-editing');
+
+    const product = (window._allProducts || []).find((item) => item._id === productId);
+    if (product) product.price = price;
+    showStockToast('قیمت محصول به‌روزرسانی شد ✓', 'success');
+  } catch (err) {
+    container.classList.add('has-error');
+    const error = container.querySelector('[data-price-error]');
+    if (error) error.textContent = 'قیمت ذخیره نشد. دوباره تلاش کنید.';
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="ri-check-line" aria-hidden="true"></i>';
+    }
+  }
+}
+
 async function deleteProduct(productId) {
   if (!confirm("آیا از حذف این محصول مطمئن هستید؟")) return;
   try {
@@ -2149,7 +2306,7 @@ async function handleStockToggle(productId, inStock, containerEl) {
       });
 
       // Update card styles for mobile
-      if (containerEl.classList.contains('bg-white')) {
+      if (containerEl.classList.contains('bg-white') || containerEl.classList.contains('seller-product-card')) {
         containerEl.classList.toggle('product-card--out-of-stock', !inStock);
         
         // Update image
@@ -2160,19 +2317,22 @@ async function handleStockToggle(productId, inStock, containerEl) {
         }
 
         // Update price
-        const priceEl = containerEl.querySelector('.text-\\[\\#0ea5e9\\]');
+        const priceEl = containerEl.querySelector('.text-\\[\\#0ea5e9\\], .seller-product-card__price-value');
         if (priceEl) {
           priceEl.classList.toggle('line-through', !inStock);
           priceEl.classList.toggle('opacity-60', !inStock);
         }
 
         // Update out-of-stock badge overlay
-        const imageContainer = containerEl.querySelector('.relative.w-full.h-48');
+        const imageContainer = containerEl.querySelector('.relative.w-full.h-48, .seller-product-card__media');
         if (imageContainer) {
-          let badge = imageContainer.querySelector('.out-of-stock-badge');
+          let badge = imageContainer.querySelector('.out-of-stock-badge, .seller-product-card__stock-badge');
           if (!inStock && !badge) {
             badge = document.createElement('div');
-            badge.className = 'out-of-stock-badge absolute inset-0 flex items-center justify-center bg-black/20';
+            const isModernCard = containerEl.classList.contains('seller-product-card');
+            badge.className = isModernCard
+              ? 'seller-product-card__stock-badge'
+              : 'out-of-stock-badge absolute inset-0 flex items-center justify-center bg-black/20';
             badge.innerHTML = '<span class="bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full">ناموجود</span>';
             imageContainer.appendChild(badge);
           } else if (inStock && badge) {
