@@ -2126,6 +2126,8 @@ async function deleteProduct(productId) {
   function showEditImageLimitPopup() {
     const popup = document.getElementById('editImageLimitPopup');
     if (!popup) return;
+    const input = document.getElementById("editProductImagesInput");
+    if (input) input.blur();
     popup.classList.add('active');
     popup.setAttribute('aria-hidden', 'false');
   }
@@ -2295,6 +2297,18 @@ async function deleteProduct(productId) {
   }
 
   const editImagesInputEl = document.getElementById("editProductImagesInput");
+  const editAddImageActionEl = document.querySelector('.edit-add-image-action');
+  if (editAddImageActionEl) {
+    editAddImageActionEl.addEventListener("click", (event) => {
+      if (getEditImageCount() >= 3) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (editImagesInputEl) editImagesInputEl.value = "";
+        showEditImageLimitPopup();
+      }
+    });
+  }
+
   if (editImagesInputEl) {
     editImagesInputEl.addEventListener("click", (event) => {
       if (getEditImageCount() >= 3) {
