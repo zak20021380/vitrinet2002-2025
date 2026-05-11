@@ -1332,7 +1332,6 @@ function createMobileProductRow(prod) {
         <i class="${isInStock ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'}" aria-hidden="true"></i>
         ${isInStock ? 'موجود' : 'ناموجود'}
       </span>
-      ${createProductActionsMarkup(prod)}
     </div>
   `;
   bindProductRowEvents(row, prod);

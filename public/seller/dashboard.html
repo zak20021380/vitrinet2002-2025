@@ -5149,6 +5149,10 @@
     color: #dc2626;
   }
 
+  .product-mobile-add-wrap {
+    display: none;
+  }
+
   .product-empty-inline {
     padding: 2.2rem 1rem;
     color: #64748b;
@@ -5158,23 +5162,20 @@
   }
 
   .product-floating-add {
-    position: fixed;
-    right: max(1rem, env(safe-area-inset-right));
-    bottom: calc(82px + env(safe-area-inset-bottom));
-    z-index: 90;
-    min-width: 122px;
-    min-height: 52px;
+    width: 100%;
+    min-height: 46px;
     border: 0;
-    border-radius: 999px;
+    border-radius: 15px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
     background: linear-gradient(135deg, #10b981, #0ea5e9);
     color: #ffffff;
-    box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
+    box-shadow: 0 12px 26px rgba(14, 165, 233, 0.24);
     font-size: 0.9rem;
     font-weight: 950;
+    cursor: pointer;
   }
 
   .product-floating-add i {
@@ -5417,6 +5418,11 @@
 
     #section-products .product-panel {
       border-radius: 18px;
+    }
+
+    .product-mobile-add-wrap {
+      display: block;
+      padding: 0.65rem 0.65rem 0;
     }
   }
 
@@ -11733,15 +11739,17 @@ body.edit-product-modal-open {
       </div>
 
       <!-- لیست فشرده محصولات برای موبایل -->
+      <div class="product-mobile-add-wrap md:hidden">
+        <button id="productAddFloatingBtn" type="button" class="product-floating-add" aria-label="افزودن محصول">
+          <i class="ri-add-line" aria-hidden="true"></i>
+          <span>افزودن</span>
+        </button>
+      </div>
+
       <div id="productsMobileList" class="product-compact-list md:hidden" role="list">
         <!-- ردیف هر محصول اینجا با JS رندر می‌شود -->
       </div>
     </div>
-
-    <button id="productAddFloatingBtn" type="button" class="product-floating-add md:hidden" aria-label="افزودن محصول">
-      <i class="ri-add-line" aria-hidden="true"></i>
-      <span>افزودن</span>
-    </button>
 
     <!-- پیام خالی -->
     <div id="noProductMsg" class="hidden">
