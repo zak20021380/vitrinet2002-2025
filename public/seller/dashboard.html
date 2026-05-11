@@ -8891,6 +8891,85 @@
     transform: translateY(28px);
   }
 
+  body.edit-product-modal-open .sidebar-hamburger,
+  body.edit-product-modal-open .notif-btn {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transform: translateY(-12px) scale(0.96);
+  }
+
+  #editProductModal {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 8px !important;
+    box-sizing: border-box;
+  }
+
+  #editProductModal > div {
+    width: min(100%, 480px) !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: calc(100dvh - 28px) !important;
+    margin: 0 !important;
+    padding: 10px 12px 12px !important;
+    border-radius: 18px !important;
+  }
+
+  #editProductModal h3 {
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+  }
+
+  #editProductForm {
+    max-height: calc(100dvh - 88px) !important;
+    min-height: 0 !important;
+    padding-bottom: 2px !important;
+  }
+
+  #editProductForm > * + * {
+    margin-top: 7px !important;
+  }
+
+  #editProductForm label {
+    margin-bottom: 2px !important;
+    font-size: 12.5px !important;
+    line-height: 1.55 !important;
+  }
+
+  #editProductForm input,
+  #editProductForm textarea {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+    font-size: 13px !important;
+  }
+
+  #editProductForm textarea {
+    min-height: 58px;
+  }
+
+  #editImagePreview {
+    gap: 5px !important;
+    margin-bottom: 5px !important;
+  }
+
+  #editImagePreview img {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  #editImgHelp {
+    margin-top: 3px !important;
+    font-size: 10.5px !important;
+    line-height: 1.6 !important;
+  }
+
+  .edit-modal-inline-close {
+    display: flex !important;
+  }
+
   .sidebar.expanded + .seller-mobile-bottom-nav {
     opacity: 0;
     pointer-events: none;
@@ -9106,6 +9185,32 @@
   background: #059669;
   outline: 2px solid rgba(16, 185, 129, 0.24);
   outline-offset: 2px;
+}
+
+.edit-modal-inline-close {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 9px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.edit-modal-inline-close:hover,
+.edit-modal-inline-close:focus-visible {
+  background: #fff1f2;
+  color: #ef4444;
+  border-color: #fecdd3;
+  outline: none;
 }
 
 @keyframes editImageLimitIn {
@@ -10411,6 +10516,10 @@
       <button type="submit"
               class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 px-6 font-bold text-base transition w-full mt-2 shadow">
         ثبت تغییرات
+      </button>
+      <button type="button" class="edit-modal-inline-close" data-close-edit-product>
+        <i class="ri-close-line" aria-hidden="true"></i>
+        بستن
       </button>
     </form>
   </div>

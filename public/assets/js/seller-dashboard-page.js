@@ -1615,6 +1615,10 @@ async function deleteProduct(productId) {
     editModalCloseBtn.addEventListener('click', () => closeEditModal());
   }
 
+  document.querySelectorAll('[data-close-edit-product]').forEach((button) => {
+    button.addEventListener('click', () => closeEditModal());
+  });
+
   // ارسال فرم ویرایش محصول
   const editImageLimitPopup = document.getElementById('editImageLimitPopup');
   if (editImageLimitPopup) {
