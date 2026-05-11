@@ -1501,13 +1501,19 @@ async function deleteProduct(productId) {
     return (window._editOldImages || []).length + (window._editNewImages || []).length;
   }
 
+  function getEditImages() {
+    return [...(window._editOldImages || []), ...(window._editNewImages || [])];
+  }
+
+  window._editImageViewerIndex = 0;
+
 
   // پیش‌نمایش عکس‌های ویرایش (قبلی + جدید)
   // فرض می‌کنیم متغیر window._editMainIndex شماره عکس شاخصه (ایندکس در مجموع عکس‌های فعلی)
   function renderEditImagePreview() {
     const preview = document.getElementById("editImagePreview");
     preview.innerHTML = "";
-    const images = [...window._editOldImages, ...window._editNewImages];
+    const images = getEditImages();
     // اگه شاخص از محدوده خارج شده بود، صفر کن
     if (typeof window._editMainIndex !== "number" || window._editMainIndex >= images.length) {
       window._editMainIndex = 0;
@@ -1515,15 +1521,15 @@ async function deleteProduct(productId) {
     images.forEach((img, idx) => {
       const isMain = idx === window._editMainIndex;
       const div = document.createElement("div");
-      div.className = "relative group inline-block m-1";
+      div.className = "relative group inline-block m-1 edit-image-thumb";
 
       const imageEl = document.createElement("img");
       imageEl.src = img;
       imageEl.alt = "عکس محصول";
       imageEl.className = `w-16 h-16 object-cover rounded-xl border shadow ring-2 ${isMain ? 'ring-[#10b981]' : 'ring-transparent'} cursor-pointer`;
-      imageEl.title = isMain ? 'عکس شاخص' : 'برای انتخاب عکس شاخص کلیک کنید';
       imageEl.style.transition = 'ring 0.15s';
-      imageEl.addEventListener('click', () => setMainImageIndex(idx));
+      imageEl.title = isMain ? 'عکس شاخص - برای مشاهده بزرگ‌تر کلیک کنید' : 'برای مشاهده بزرگ‌تر کلیک کنید';
+      imageEl.addEventListener('click', () => openEditImageViewer(idx));
 
       const removeBtn = document.createElement("button");
       removeBtn.type = "button";
@@ -1549,6 +1555,56 @@ async function deleteProduct(productId) {
 
 
   // حذف عکس (قدیمی یا جدید)
+  function syncEditImageViewer() {
+    const viewer = document.getElementById('editImageViewer');
+    const imageEl = document.getElementById('editImageViewerImg');
+    const countEl = document.getElementById('editImageViewerCount');
+    const setMainBtn = document.getElementById('editImageViewerSetMain');
+    const prevBtn = document.getElementById('editImageViewerPrev');
+    const nextBtn = document.getElementById('editImageViewerNext');
+    const images = getEditImages();
+    if (!viewer || !imageEl || !countEl || !setMainBtn || !images.length) {
+      closeEditImageViewer();
+      return;
+    }
+
+    window._editImageViewerIndex = Math.max(0, Math.min(window._editImageViewerIndex || 0, images.length - 1));
+    const index = window._editImageViewerIndex;
+    imageEl.src = images[index];
+    countEl.textContent = `${(index + 1).toLocaleString('fa-IR')} از ${images.length.toLocaleString('fa-IR')}`;
+
+    const isMain = index === window._editMainIndex;
+    setMainBtn.classList.toggle('is-main', isMain);
+    setMainBtn.disabled = isMain;
+    setMainBtn.innerHTML = isMain
+      ? '<i class="ri-checkbox-circle-line" aria-hidden="true"></i> عکس شاخص فعلی'
+      : '<i class="ri-star-smile-line" aria-hidden="true"></i> انتخاب به عنوان عکس شاخص';
+
+    if (prevBtn) prevBtn.disabled = index <= 0;
+    if (nextBtn) nextBtn.disabled = index >= images.length - 1;
+  }
+
+  function openEditImageViewer(index) {
+    const viewer = document.getElementById('editImageViewer');
+    if (!viewer) return;
+    window._editImageViewerIndex = index || 0;
+    viewer.classList.add('active');
+    viewer.setAttribute('aria-hidden', 'false');
+    syncEditImageViewer();
+  }
+
+  function closeEditImageViewer() {
+    const viewer = document.getElementById('editImageViewer');
+    if (!viewer) return;
+    viewer.classList.remove('active');
+    viewer.setAttribute('aria-hidden', 'true');
+  }
+
+  function moveEditImageViewer(delta) {
+    window._editImageViewerIndex = (window._editImageViewerIndex || 0) + delta;
+    syncEditImageViewer();
+  }
+
   function removeEditImage(type, idx) {
     if (type === "old") window._editOldImages.splice(idx, 1);
     if (type === "new") window._editNewImages.splice(idx, 1);
@@ -1587,6 +1643,7 @@ async function deleteProduct(productId) {
     const modal = document.getElementById("editProductModal");
     if (modal) modal.style.display = "none";
     setEditModalUiState(false);
+    closeEditImageViewer();
     closeEditImageLimitPopup();
     toggleInstallCtaVisibility(false);
   }
@@ -1617,6 +1674,30 @@ async function deleteProduct(productId) {
 
   document.querySelectorAll('[data-close-edit-product]').forEach((button) => {
     button.addEventListener('click', () => closeEditModal());
+  });
+
+  const editImageViewer = document.getElementById('editImageViewer');
+  if (editImageViewer) {
+    editImageViewer.addEventListener('click', (event) => {
+      if (event.target === editImageViewer || event.target.closest('[data-close-edit-image-viewer]')) {
+        closeEditImageViewer();
+      }
+    });
+  }
+
+  document.getElementById('editImageViewerPrev')?.addEventListener('click', () => moveEditImageViewer(-1));
+  document.getElementById('editImageViewerNext')?.addEventListener('click', () => moveEditImageViewer(1));
+  document.getElementById('editImageViewerSetMain')?.addEventListener('click', () => {
+    setMainImageIndex(window._editImageViewerIndex || 0);
+    syncEditImageViewer();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const viewer = document.getElementById('editImageViewer');
+    if (!viewer || !viewer.classList.contains('active')) return;
+    if (event.key === 'Escape') closeEditImageViewer();
+    if (event.key === 'ArrowLeft') moveEditImageViewer(-1);
+    if (event.key === 'ArrowRight') moveEditImageViewer(1);
   });
 
   // ارسال فرم ویرایش محصول

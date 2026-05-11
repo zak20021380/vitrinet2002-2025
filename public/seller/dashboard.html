@@ -9192,25 +9192,260 @@
   width: 100%;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 9px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: #475569;
-  font-size: 13px;
+  gap: 8px;
+  margin-top: 9px;
+  padding: 10px 14px;
+  border: 1px solid #fecdd3;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff7f7 0%, #fff 100%);
+  color: #e11d48;
+  font-size: 13.5px;
   font-weight: 900;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  box-shadow: 0 8px 18px rgba(225, 29, 72, 0.08);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.edit-modal-inline-close i {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ffe4e6;
+  font-size: 17px;
 }
 
 .edit-modal-inline-close:hover,
 .edit-modal-inline-close:focus-visible {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+  color: #be123c;
+  border-color: #fda4af;
+  box-shadow: 0 12px 24px rgba(225, 29, 72, 0.13);
+  outline: 2px solid rgba(225, 29, 72, 0.12);
+  outline-offset: 2px;
+}
+
+.edit-image-guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 8px;
+  padding: 9px 10px;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #eff6ff 100%);
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.8;
+}
+
+.edit-image-guide i {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  font-size: 15px;
+}
+
+.edit-image-thumb::after {
+  content: '\eeab';
+  font-family: remixicon;
+  position: absolute;
+  inset-inline-start: 5px;
+  top: 5px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.58);
+  color: #fff;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+
+.edit-image-thumb:hover::after,
+.edit-image-thumb:focus-within::after {
+  opacity: 1;
+}
+
+.edit-image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10030;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.edit-image-viewer.active {
+  display: flex;
+}
+
+.edit-image-viewer__card {
+  width: min(100%, 720px);
+  max-height: min(90dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 28px 80px rgba(2, 6, 23, 0.34);
+}
+
+.edit-image-viewer__header,
+.edit-image-viewer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.edit-image-viewer__title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.edit-image-viewer__count {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.edit-image-viewer__close,
+.edit-image-viewer__nav {
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.edit-image-viewer__close {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
   background: #fff1f2;
-  color: #ef4444;
-  border-color: #fecdd3;
-  outline: none;
+  color: #e11d48;
+  font-size: 20px;
+}
+
+.edit-image-viewer__media {
+  position: relative;
+  min-height: 220px;
+  max-height: 58dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.edit-image-viewer__img {
+  width: 100%;
+  height: 100%;
+  max-height: 58dvh;
+  object-fit: contain;
+  display: block;
+}
+
+.edit-image-viewer__nav {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.68);
+  color: #fff;
+  font-size: 22px;
+  transform: translateY(-50%);
+}
+
+.edit-image-viewer__nav:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.edit-image-viewer__nav--prev {
+  left: 12px;
+}
+
+.edit-image-viewer__nav--next {
+  right: 12px;
+}
+
+.edit-image-viewer__main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: #10b981;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(16, 185, 129, 0.24);
+}
+
+.edit-image-viewer__main.is-main {
+  background: #ecfdf5;
+  color: #059669;
+  box-shadow: inset 0 0 0 1px #a7f3d0;
+  cursor: default;
+}
+
+.edit-image-viewer__hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+
+@media (max-width: 520px) {
+  .edit-image-viewer {
+    padding: 10px;
+  }
+
+  .edit-image-viewer__card {
+    max-height: calc(100dvh - 20px);
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .edit-image-viewer__media,
+  .edit-image-viewer__img {
+    max-height: 54dvh;
+  }
+
+  .edit-image-viewer__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edit-image-viewer__main {
+    width: 100%;
+  }
 }
 
 @keyframes editImageLimitIn {
@@ -10494,6 +10729,10 @@
       </div>
 <div>
   <label class="block font-bold mb-1 text-[#10b981]">عکس محصول</label>
+  <div class="edit-image-guide">
+    <i class="ri-zoom-in-line" aria-hidden="true"></i>
+    <span>برای مشاهده بزرگ‌تر، روی هر عکس بزنید. در نمایش بزرگ می‌توانید همان عکس را به عنوان عکس شاخص انتخاب کنید.</span>
+  </div>
   <div id="editImagePreview" class="flex flex-wrap gap-2 mb-2"></div>
   <input
     name="images"
@@ -10522,6 +10761,37 @@
         بستن
       </button>
     </form>
+  </div>
+</div>
+
+
+<div class="edit-image-viewer" id="editImageViewer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="editImageViewerTitle">
+  <div class="edit-image-viewer__card">
+    <div class="edit-image-viewer__header">
+      <div>
+        <h3 class="edit-image-viewer__title" id="editImageViewerTitle">مشاهده عکس محصول</h3>
+        <span class="edit-image-viewer__count" id="editImageViewerCount">۱ از ۱</span>
+      </div>
+      <button type="button" class="edit-image-viewer__close" data-close-edit-image-viewer aria-label="بستن نمایش عکس">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="edit-image-viewer__media">
+      <button type="button" class="edit-image-viewer__nav edit-image-viewer__nav--prev" id="editImageViewerPrev" aria-label="عکس قبلی">
+        <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
+      </button>
+      <img class="edit-image-viewer__img" id="editImageViewerImg" src="" alt="عکس محصول">
+      <button type="button" class="edit-image-viewer__nav edit-image-viewer__nav--next" id="editImageViewerNext" aria-label="عکس بعدی">
+        <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="edit-image-viewer__footer">
+      <p class="edit-image-viewer__hint">عکس شاخص، تصویر اصلی محصول در صفحه فروشگاه است.</p>
+      <button type="button" class="edit-image-viewer__main" id="editImageViewerSetMain">
+        <i class="ri-star-smile-line" aria-hidden="true"></i>
+        انتخاب به عنوان عکس شاخص
+      </button>
+    </div>
   </div>
 </div>
 
