@@ -9857,29 +9857,36 @@
     transform: translateY(28px);
   }
 
-  body.edit-product-modal-open .sidebar-hamburger,
-  body.edit-product-modal-open .notif-btn {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-    transform: translateY(-12px) scale(0.96);
-  }
+body.edit-product-modal-open .sidebar-hamburger,
+body.edit-product-modal-open .notif-btn {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateY(-12px) scale(0.96);
+}
+
+body.edit-product-modal-open {
+  overflow: hidden;
+}
 
   #editProductModal {
-    align-items: center !important;
+    align-items: flex-end !important;
     justify-content: center !important;
-    padding: 10px 8px !important;
+    padding: 0 !important;
     box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.46) !important;
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
   }
 
   #editProductModal > div {
-    width: min(100%, 480px) !important;
+    width: 100% !important;
     max-width: none !important;
-    height: auto !important;
-    max-height: calc(100dvh - 28px) !important;
+    height: min(92dvh, 760px) !important;
+    max-height: calc(100dvh - 10px) !important;
     margin: 0 !important;
-    padding: 10px 12px 12px !important;
-    border-radius: 18px !important;
+    padding: 0 !important;
+    border-radius: 26px 26px 0 0 !important;
   }
 
   #editProductModal h3 {
@@ -9890,46 +9897,10 @@
   }
 
   #editProductForm {
-    max-height: calc(100dvh - 88px) !important;
+    max-height: none !important;
+    height: 100% !important;
     min-height: 0 !important;
-    padding-bottom: 2px !important;
-  }
-
-  #editProductForm > * + * {
-    margin-top: 7px !important;
-  }
-
-  #editProductForm label {
-    margin-bottom: 2px !important;
-    font-size: 12.5px !important;
-    line-height: 1.55 !important;
-  }
-
-  #editProductForm input,
-  #editProductForm textarea {
-    padding-top: 7px !important;
-    padding-bottom: 7px !important;
-    font-size: 13px !important;
-  }
-
-  #editProductForm textarea {
-    min-height: 58px;
-  }
-
-  #editImagePreview {
-    gap: 5px !important;
-    margin-bottom: 5px !important;
-  }
-
-  #editImagePreview img {
-    width: 54px !important;
-    height: 54px !important;
-  }
-
-  #editImgHelp {
-    margin-top: 3px !important;
-    font-size: 10.5px !important;
-    line-height: 1.6 !important;
+    padding: 12px 14px 0 !important;
   }
 
   .edit-modal-inline-close {
@@ -10193,6 +10164,375 @@
   outline-offset: 2px;
 }
 
+#editProductModal {
+  z-index: 10010 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding: 18px 18px 0 !important;
+  background: rgba(15, 23, 42, 0.48) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body.edit-product-modal-open {
+  overflow: hidden;
+}
+
+#editProductModal .edit-product-sheet {
+  width: min(620px, 100%) !important;
+  max-width: min(620px, 100%) !important;
+  height: min(88dvh, 760px) !important;
+  max-height: min(88dvh, 760px) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 28px 28px 0 0 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  box-shadow: 0 -24px 70px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+}
+
+.edit-product-sheet__handle {
+  width: 46px;
+  height: 5px;
+  margin: 10px auto 4px;
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.edit-product-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 18px 14px;
+  border-bottom: 1px solid #eef2f7;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.edit-product-sheet__eyebrow {
+  margin: 0 0 2px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+#editProductModal .edit-product-sheet__title {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: 18px !important;
+  font-weight: 1000 !important;
+  line-height: 1.45 !important;
+  text-align: right !important;
+}
+
+.edit-product-sheet__close {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: #fff1f2;
+  color: #e11d48;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+#editProductModal .edit-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px !important;
+  height: 100%;
+  min-height: 0;
+  padding: 14px 18px 0 !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scroll-padding-bottom: 96px;
+}
+
+#editProductModal .edit-product-form > * + * {
+  margin-top: 0 !important;
+}
+
+.edit-product-section {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.055);
+}
+
+.edit-product-section__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.edit-product-section__header h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.edit-product-section__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #ecfdf5;
+  color: #059669;
+  font-size: 17px;
+}
+
+.edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+#editProductForm .edit-field label {
+  margin: 0 !important;
+  color: #475569 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.5 !important;
+}
+
+#editProductForm .edit-field input,
+#editProductForm .edit-field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px !important;
+  border: 1px solid #dbe4ee !important;
+  border-radius: 14px !important;
+  background: #f8fafc !important;
+  color: #0f172a;
+  font-size: 14px !important;
+  font-weight: 800;
+  line-height: 1.7;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+#editProductForm .edit-field textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+#editProductForm .edit-field input:focus,
+#editProductForm .edit-field textarea:focus {
+  border-color: #10b981 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.edit-tag-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.edit-tag-option {
+  position: relative;
+  min-height: 44px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px !important;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.edit-tag-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: #10b981;
+}
+
+.edit-tag-option:has(input:checked) {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.edit-product-section--media {
+  gap: 9px;
+}
+
+.edit-image-thumbs {
+  display: flex;
+  gap: 8px;
+  min-height: 68px;
+  overflow-x: auto;
+  padding: 2px 1px 6px;
+  scrollbar-width: thin;
+}
+
+.edit-image-thumb {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+.edit-image-thumb img,
+#editImagePreview img {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 16px !important;
+  object-fit: cover;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1) !important;
+}
+
+.edit-image-thumb img.is-main {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.edit-image-thumb__remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #fff1f2;
+  color: #e11d48;
+  box-shadow: 0 8px 16px rgba(225, 29, 72, 0.16);
+}
+
+.edit-image-thumb__main {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.edit-add-image-action {
+  min-height: 44px;
+  border: 1px dashed rgba(16, 185, 129, 0.5);
+  border-radius: 15px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #f0fdfa;
+  color: #047857 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  cursor: pointer;
+}
+
+.edit-add-image-action i {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+.edit-image-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edit-media-hint {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.edit-sheet-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  margin: auto -18px 0;
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.edit-sheet-actions__save,
+.edit-sheet-actions__cancel {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.edit-sheet-actions__save {
+  background: linear-gradient(135deg, #10b981, #0f766e);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(16, 185, 129, 0.24);
+}
+
+.edit-sheet-actions__cancel {
+  min-width: 94px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+@media (min-width: 769px) {
+  #editProductModal .edit-product-sheet {
+    border-radius: 28px !important;
+    margin-bottom: 18px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #editProductModal .edit-product-form {
+    padding-inline: 12px !important;
+  }
+
+  .edit-product-section {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .edit-sheet-actions {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+}
+
 .edit-image-guide {
   display: flex;
   align-items: flex-start;
@@ -10221,7 +10561,7 @@
 }
 
 .edit-image-thumb::after {
-  content: '\eeab';
+  content: none;
   font-family: remixicon;
   position: absolute;
   inset-inline-start: 5px;
@@ -11696,93 +12036,99 @@
     </div>
   </div>
 
-  <!-- مدال ویرایش محصول -->
+<!-- مدال ویرایش محصول -->
 <!-- مدال ویرایش محصول - کاملاً ریسپانسیو و موبایل‌فرندلی -->
 <div id="editProductModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
+  <div class="edit-product-sheet bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 p-3 sm:p-5 relative animate-fadeIn"
       style="max-height:95vh;display:flex;flex-direction:column;">
-    <!-- دکمه بستن -->
-    <button class="absolute left-3 top-3 text-gray-400 hover:text-red-500" id="editModalClose" aria-label="بستن">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <h3 class="text-xl font-bold text-[#0ea5e9] mb-3 text-center mt-1">ویرایش محصول</h3>
-    <!-- بدنه فرم اسکرولی برای موبایل کوچک -->
+    <div class="edit-product-sheet__handle" aria-hidden="true"></div>
+    <header class="edit-product-sheet__header">
+      <div>
+        <p class="edit-product-sheet__eyebrow">مدیریت محصول</p>
+        <h3 class="edit-product-sheet__title">ویرایش محصول</h3>
+      </div>
+      <button class="edit-product-sheet__close" id="editModalClose" aria-label="بستن" type="button">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+    </header>
     <form id="editProductForm"
-          class="space-y-3 flex-1 overflow-y-auto px-1"
+          class="edit-product-form space-y-3 flex-1 overflow-y-auto px-1"
           style="min-width:0;max-height:calc(85vh - 70px);" autocomplete="off">
       <input type="hidden" name="productId" />
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">نام محصول</label>
-        <input name="title" type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">قیمت (تومان)</label>
-        <input name="price" type="number" min="1"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">دسته‌بندی</label>
-        <input name="category" type="text"
-              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-              required>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">برچسب محصول</label>
-        <div class="flex gap-5 flex-wrap" id="editTagRadioGroup">
-          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
-            <input type="radio" name="tag" value="پرفروش" class="accent-[#10b981]">
+
+      <section class="edit-product-section">
+        <div class="edit-product-section__header">
+          <span class="edit-product-section__icon"><i class="ri-file-list-3-line" aria-hidden="true"></i></span>
+          <h4>اطلاعات پایه</h4>
+        </div>
+        <div class="edit-field">
+          <label>نام محصول</label>
+          <input name="title" type="text" required>
+        </div>
+        <div class="edit-field">
+          <label>قیمت (تومان)</label>
+          <input name="price" type="number" min="1" inputmode="numeric" required>
+        </div>
+        <div class="edit-field">
+          <label>دسته‌بندی</label>
+          <input name="category" type="text" required>
+        </div>
+        <div class="edit-field">
+          <label>توضیحات</label>
+          <textarea name="desc" rows="3"></textarea>
+        </div>
+      </section>
+
+      <section class="edit-product-section">
+        <div class="edit-product-section__header">
+          <span class="edit-product-section__icon"><i class="ri-price-tag-3-line" aria-hidden="true"></i></span>
+          <h4>وضعیت</h4>
+        </div>
+        <div class="edit-tag-group" id="editTagRadioGroup">
+          <label class="edit-tag-option">
+            <input type="radio" name="tag" value="پرفروش">
             <span>پرفروش</span>
           </label>
-          <label class="flex items-center gap-2 text-gray-600 cursor-pointer text-base">
-            <input type="radio" name="tag" value="جدید" class="accent-[#10b981]">
+          <label class="edit-tag-option">
+            <input type="radio" name="tag" value="جدید">
             <span>جدید</span>
           </label>
         </div>
-      </div>
-      <div>
-        <label class="block font-bold mb-1 text-[#10b981]">توضیحات</label>
-        <textarea name="desc"
-                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] text-base"
-                  rows="2"></textarea>
-      </div>
-<div>
-  <label class="block font-bold mb-1 text-[#10b981]">عکس محصول</label>
-  <div class="edit-image-guide">
-    <i class="ri-zoom-in-line" aria-hidden="true"></i>
-    <span>برای مشاهده بزرگ‌تر، روی هر عکس بزنید. در نمایش بزرگ می‌توانید همان عکس را به عنوان عکس شاخص انتخاب کنید.</span>
-  </div>
-  <div id="editImagePreview" class="flex flex-wrap gap-2 mb-2"></div>
-  <input
-    name="images"
-    id="editProductImagesInput"
-    type="file"
-    accept="image/*"
-    multiple
-    class="w-full p-2 border rounded-lg bg-white text-base"
-    style="direction: ltr"
-  >
-  <div id="editImgHelp" class="text-xs text-gray-500 mt-1">
-    می‌توانید تا <b>۳ عکس</b> داشته باشید. برای حذف هر عکس روی <b>ضربدر</b> بزنید.
-  </div>
-  <div id="editImgErrorMsg" class="text-xs text-red-500 mt-1 hidden"></div>
-</div>
+      </section>
 
+      <section class="edit-product-section edit-product-section--media">
+        <div class="edit-product-section__header">
+          <span class="edit-product-section__icon"><i class="ri-image-2-line" aria-hidden="true"></i></span>
+          <h4>رسانه</h4>
+        </div>
+        <div id="editImagePreview" class="edit-image-thumbs"></div>
+        <label for="editProductImagesInput" class="edit-add-image-action">
+          <i class="ri-add-line" aria-hidden="true"></i>
+          <span>افزودن عکس</span>
+        </label>
+        <input
+          name="images"
+          id="editProductImagesInput"
+          type="file"
+          accept="image/*"
+          multiple
+          class="edit-image-input"
+        >
+        <div id="editImgHelp" class="edit-media-hint">
+          حداکثر ۳ عکس. برای مشاهده بزرگ‌تر روی تصویر بزنید.
+        </div>
+        <div id="editImgErrorMsg" class="text-xs text-red-500 mt-1 hidden"></div>
+      </section>
 
-      <!-- فاصله برای موبایل که دکمه زیر فرم قرار بگیره -->
-      <div style="height:4px"></div>
-      <button type="submit"
-              class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-xl py-2 px-6 font-bold text-base transition w-full mt-2 shadow">
-        ثبت تغییرات
-      </button>
-      <button type="button" class="edit-modal-inline-close" data-close-edit-product>
-        <i class="ri-close-line" aria-hidden="true"></i>
-        بستن
-      </button>
+      <footer class="edit-sheet-actions">
+        <button type="submit" class="edit-sheet-actions__save">
+          <i class="ri-check-line" aria-hidden="true"></i>
+          ثبت تغییرات
+        </button>
+        <button type="button" class="edit-sheet-actions__cancel" data-close-edit-product>
+          بستن
+        </button>
+      </footer>
     </form>
   </div>
 </div>

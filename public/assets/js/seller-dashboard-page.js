@@ -2104,29 +2104,29 @@ async function deleteProduct(productId) {
     images.forEach((img, idx) => {
       const isMain = idx === window._editMainIndex;
       const div = document.createElement("div");
-      div.className = "relative group inline-block m-1 edit-image-thumb";
+      div.className = "edit-image-thumb";
 
       const imageEl = document.createElement("img");
       imageEl.src = img;
       imageEl.alt = "عکس محصول";
-      imageEl.className = `w-16 h-16 object-cover rounded-xl border shadow ring-2 ${isMain ? 'ring-[#10b981]' : 'ring-transparent'} cursor-pointer`;
-      imageEl.style.transition = 'ring 0.15s';
+      imageEl.className = isMain ? 'is-main' : '';
       imageEl.title = isMain ? 'عکس شاخص - برای مشاهده بزرگ‌تر کلیک کنید' : 'برای مشاهده بزرگ‌تر کلیک کنید';
       imageEl.addEventListener('click', () => openEditImageViewer(idx));
 
       const removeBtn = document.createElement("button");
       removeBtn.type = "button";
-      removeBtn.className = "absolute top-1 right-1 bg-white rounded-full shadow p-1 text-gray-500 hover:bg-red-100 hover:text-red-500";
+      removeBtn.className = "edit-image-thumb__remove";
       removeBtn.title = "حذف عکس";
+      removeBtn.setAttribute('aria-label', 'حذف عکس');
       const isOld = idx < window._editOldImages.length;
       removeBtn.addEventListener('click', () => removeEditImage(isOld ? 'old' : 'new', isOld ? idx : idx - window._editOldImages.length));
-      removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/></svg>';
+      removeBtn.innerHTML = '<i class="ri-close-line" aria-hidden="true"></i>';
 
       div.appendChild(imageEl);
       div.appendChild(removeBtn);
       if (isMain) {
         const badge = document.createElement('span');
-        badge.className = 'absolute bottom-1 left-1 bg-[#10b981] text-white text-xs px-2 py-1 rounded-lg shadow';
+        badge.className = 'edit-image-thumb__main';
         badge.textContent = 'شاخص';
         div.appendChild(badge);
       }
