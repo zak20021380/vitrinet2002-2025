@@ -1440,6 +1440,8 @@ async function deleteProduct(productId) {
 
     const modal = document.getElementById("editProductModal");
     modal.style.display = "flex";
+    setEditModalUiState(true);
+    closeEditImageLimitPopup();
     toggleInstallCtaVisibility(true);
     const form = document.getElementById("editProductForm");
 
@@ -1476,6 +1478,28 @@ async function deleteProduct(productId) {
   
   // Expose showEditModal globally for stale products modal
   window.showEditModal = showEditModal;
+
+  function setEditModalUiState(isOpen) {
+    document.body.classList.toggle('edit-product-modal-open', !!isOpen);
+  }
+
+  function showEditImageLimitPopup() {
+    const popup = document.getElementById('editImageLimitPopup');
+    if (!popup) return;
+    popup.classList.add('active');
+    popup.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeEditImageLimitPopup() {
+    const popup = document.getElementById('editImageLimitPopup');
+    if (!popup) return;
+    popup.classList.remove('active');
+    popup.setAttribute('aria-hidden', 'true');
+  }
+
+  function getEditImageCount() {
+    return (window._editOldImages || []).length + (window._editNewImages || []).length;
+  }
 
 
   // پیش‌نمایش عکس‌های ویرایش (قبلی + جدید)
@@ -1536,8 +1560,15 @@ async function deleteProduct(productId) {
     const files = Array.from(event.target.files);
     if (!files.length) return;
     // بیشتر از ۳ تا نشه
-    let remain = 3 - (window._editOldImages.length + window._editNewImages.length);
-    if (remain <= 0) return; // ظرفیت پر
+    let remain = 3 - getEditImageCount();
+    if (remain <= 0) {
+      event.target.value = "";
+      showEditImageLimitPopup();
+      return;
+    }
+    if (files.length > remain) {
+      showEditImageLimitPopup();
+    }
     for (let i = 0; i < Math.min(remain, files.length); i++) {
       const file = files[i];
       const reader = new FileReader();
@@ -1553,7 +1584,10 @@ async function deleteProduct(productId) {
 
   // بستن مدال ویرایش
   function closeEditModal() {
-    document.getElementById("editProductModal").style.display = "none";
+    const modal = document.getElementById("editProductModal");
+    if (modal) modal.style.display = "none";
+    setEditModalUiState(false);
+    closeEditImageLimitPopup();
     toggleInstallCtaVisibility(false);
   }
 
@@ -1565,6 +1599,14 @@ async function deleteProduct(productId) {
 
   const editImagesInputEl = document.getElementById("editProductImagesInput");
   if (editImagesInputEl) {
+    editImagesInputEl.addEventListener("click", (event) => {
+      if (getEditImageCount() >= 3) {
+        event.preventDefault();
+        event.stopPropagation();
+        editImagesInputEl.value = "";
+        showEditImageLimitPopup();
+      }
+    });
     editImagesInputEl.addEventListener("change", previewEditImages);
   }
 
@@ -1574,6 +1616,15 @@ async function deleteProduct(productId) {
   }
 
   // ارسال فرم ویرایش محصول
+  const editImageLimitPopup = document.getElementById('editImageLimitPopup');
+  if (editImageLimitPopup) {
+    editImageLimitPopup.addEventListener('click', (event) => {
+      if (event.target === editImageLimitPopup || event.target.closest('[data-close-edit-image-limit]')) {
+        closeEditImageLimitPopup();
+      }
+    });
+  }
+
   const editForm = document.getElementById("editProductForm");
   if (editForm) editForm.addEventListener("submit", async function(e) {
     e.preventDefault();
