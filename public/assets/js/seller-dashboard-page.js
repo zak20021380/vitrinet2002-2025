@@ -1055,6 +1055,7 @@ const productManagementState = {
   products: [],
   query: '',
   status: 'all',
+  category: 'all',
   sort: 'newest',
   bound: false,
   activeProductId: null
@@ -1095,7 +1096,8 @@ function getProductTimestamp(prod) {
 }
 
 function getProductCategory(prod) {
-  return prod?.category || 'بدون دسته';
+  const category = String(prod?.category || '').trim();
+  return category || 'بدون دسته';
 }
 
 function getProductTags(prod) {
@@ -1107,6 +1109,7 @@ function getProductTags(prod) {
 function getVisibleManagedProducts() {
   const query = productManagementState.query.trim().toLowerCase();
   const status = productManagementState.status;
+  const category = productManagementState.category;
   const sort = productManagementState.sort;
 
   return [...productManagementState.products]
@@ -1114,6 +1117,7 @@ function getVisibleManagedProducts() {
       const isInStock = prod?.inStock !== false;
       if (status === 'in-stock' && !isInStock) return false;
       if (status === 'out-of-stock' && isInStock) return false;
+      if (category !== 'all' && getProductCategory(prod) !== category) return false;
       if (!query) return true;
 
       const haystack = [
@@ -1134,12 +1138,43 @@ function getVisibleManagedProducts() {
     });
 }
 
+function syncProductCategoryFilter() {
+  const categorySelect = document.getElementById('productManagementCategoryFilter');
+  if (!categorySelect) return;
+
+  const categories = [...new Set(productManagementState.products
+    .map((prod) => getProductCategory(prod).trim())
+    .filter((category) => category && category !== 'بدون دسته'))]
+    .sort((a, b) => a.localeCompare(b, 'fa'));
+
+  const selected = categories.includes(productManagementState.category)
+    ? productManagementState.category
+    : 'all';
+  productManagementState.category = selected;
+
+  categorySelect.innerHTML = '';
+  const allOption = document.createElement('option');
+  allOption.value = 'all';
+  allOption.textContent = 'همه دسته‌بندی‌ها';
+  categorySelect.appendChild(allOption);
+
+  categories.forEach((category) => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categorySelect.appendChild(option);
+  });
+
+  categorySelect.value = selected;
+}
+
 function ensureProductManagementControls() {
   if (productManagementState.bound) return;
   productManagementState.bound = true;
 
   const search = document.getElementById('productManagementSearch');
   const status = document.getElementById('productManagementStatusFilter');
+  const category = document.getElementById('productManagementCategoryFilter');
   const sort = document.getElementById('productManagementSort');
   const floatingAdd = document.getElementById('productAddFloatingBtn');
   const sheet = document.getElementById('productDetailSheet');
@@ -1151,6 +1186,11 @@ function ensureProductManagementControls() {
 
   status?.addEventListener('change', (event) => {
     productManagementState.status = event.target.value || 'all';
+    renderProductManagementList();
+  });
+
+  category?.addEventListener('change', (event) => {
+    productManagementState.category = event.target.value || 'all';
     renderProductManagementList();
   });
 
@@ -1350,6 +1390,7 @@ function updateProductManagementCount(filteredCount = null) {
 
 function renderProductManagementList() {
   ensureProductManagementControls();
+  syncProductCategoryFilter();
 
   const tbody = document.getElementById('productsTableBody');
   const mobileList = document.getElementById('productsMobileList');
