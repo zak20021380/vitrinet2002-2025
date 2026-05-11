@@ -1014,6 +1014,12 @@ const discountCeilingError = document.getElementById("discountCeilingError");
 const discountFinalPrice = document.getElementById("discountFinalPrice");
 const discountOriginalPrice = document.getElementById("discountOriginalPrice");
 const priceInput = document.querySelector('#addProductForm input[name="price"]');
+const editDiscountCeilingInput = document.getElementById("editDiscountCeilingInput");
+const editDiscountCeilingPreview = document.getElementById("editDiscountCeilingPreview");
+const editDiscountCeilingError = document.getElementById("editDiscountCeilingError");
+const editDiscountFinalPrice = document.getElementById("editDiscountFinalPrice");
+const editDiscountOriginalPrice = document.getElementById("editDiscountOriginalPrice");
+const editProductPriceInput = document.querySelector('#editProductForm input[name="price"]');
 
 function formatPersianNumber(num) {
   if (!num && num !== 0) return '—';
@@ -1482,6 +1488,39 @@ function formatDiscountCeilingInput() {
   }
 }
 
+function updateEditDiscountCeilingPreview() {
+  if (!editDiscountCeilingInput || !editDiscountCeilingPreview || !editDiscountCeilingError) return true;
+
+  const price = editProductPriceInput ? parseInputNumber(editProductPriceInput.value) : 0;
+  const ceiling = parseInputNumber(editDiscountCeilingInput.value);
+
+  editDiscountCeilingPreview.classList.add('hidden');
+  editDiscountCeilingError.classList.add('hidden');
+
+  if (!ceiling || ceiling <= 0) return true;
+
+  if (price > 0 && ceiling > price) {
+    editDiscountCeilingError.classList.remove('hidden');
+    return false;
+  }
+
+  if (price > 0) {
+    const finalPrice = Math.max(0, price - ceiling);
+    if (editDiscountFinalPrice) editDiscountFinalPrice.textContent = formatPersianNumber(finalPrice);
+    if (editDiscountOriginalPrice) editDiscountOriginalPrice.textContent = formatPersianNumber(price);
+    editDiscountCeilingPreview.classList.remove('hidden');
+  }
+
+  return true;
+}
+
+function formatEditDiscountCeilingInput() {
+  if (!editDiscountCeilingInput) return;
+  const value = parseInputNumber(editDiscountCeilingInput.value);
+  editDiscountCeilingInput.value = value > 0 ? formatPersianNumber(value) : '';
+  updateEditDiscountCeilingPreview();
+}
+
 if (discountCeilingInput) {
   discountCeilingInput.addEventListener('input', () => {
     updateDiscountCeilingPreview();
@@ -1496,6 +1535,20 @@ if (discountCeilingInput) {
 if (priceInput) {
   priceInput.addEventListener('input', updateDiscountCeilingPreview);
   priceInput.addEventListener('change', updateDiscountCeilingPreview);
+}
+
+if (editDiscountCeilingInput) {
+  editDiscountCeilingInput.addEventListener('input', () => {
+    editDiscountCeilingInput.value = editDiscountCeilingInput.value
+      .replace(/[^\d۰-۹٠-٩٬,\s]/g, '');
+    updateEditDiscountCeilingPreview();
+  });
+  editDiscountCeilingInput.addEventListener('blur', formatEditDiscountCeilingInput);
+}
+
+if (editProductPriceInput) {
+  editProductPriceInput.addEventListener('input', updateEditDiscountCeilingPreview);
+  editProductPriceInput.addEventListener('change', updateEditDiscountCeilingPreview);
 }
 
 function renderNewImages(files) {
@@ -2034,6 +2087,10 @@ async function deleteProduct(productId) {
     form.price.value = prod.price || "";
     form.category.value = prod.category || "";
     form.desc.value = prod.desc || "";
+    if (form.discountCeiling) {
+      form.discountCeiling.value = prod.discountCeiling ? formatPersianNumber(Number(prod.discountCeiling) || 0) : "";
+      updateEditDiscountCeilingPreview();
+    }
 
     // مقداردهی تگ (فقط یکی)
     const tagValue = (prod.tags && prod.tags.length) ? prod.tags[0] : "";
@@ -2305,6 +2362,14 @@ async function deleteProduct(productId) {
   if (editForm) editForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     const productId = this.productId.value;
+    const priceValue = parseInputNumber(this.price.value);
+    const discountCeilingValue = this.discountCeiling ? parseInputNumber(this.discountCeiling.value) : 0;
+
+    if (discountCeilingValue > 0 && discountCeilingValue > priceValue) {
+      updateEditDiscountCeilingPreview();
+      this.discountCeiling?.focus();
+      return;
+    }
 
     // مقدار برچسب (تگ) فقط از رادیو
     let tagValue = "";
@@ -2317,12 +2382,14 @@ async function deleteProduct(productId) {
     // افزودن mainImageIndex برای ذخیره عکس شاخص
     let updatedFields = {
       title: this.title.value.trim(),
-      price: +this.price.value,
+      price: priceValue,
       category: this.category.value.trim(),
       tags: tagValue ? [tagValue] : [],
       desc: this.desc.value.trim(),
       images: allImages,
       mainImageIndex: typeof window._editMainIndex === "number" ? window._editMainIndex : 0,
+      discountCeiling: discountCeilingValue > 0 ? discountCeilingValue : null,
+      isNegotiable: discountCeilingValue > 0,
     };
 
     try {

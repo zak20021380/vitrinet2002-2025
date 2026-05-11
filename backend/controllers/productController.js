@@ -400,21 +400,44 @@ exports.editProduct = async (req, res) => {
       tags,
       desc,
       images,
-      mainImageIndex
+      mainImageIndex,
+      discountCeiling,
+      isNegotiable
     } = req.body;
 
     // مطمئن شو آرایه‌ها درست هستن
     const _tags = Array.isArray(tags) ? tags : tags ? tags.split(',') : [];
     const _images = Array.isArray(images) ? images : images ? images.split(',') : [];
+    const parsedPrice = price !== undefined ? Number(price) : Number(product.price || 0);
+    const hasDiscountCeiling = discountCeiling !== undefined;
+    const parsedDiscountCeiling = hasDiscountCeiling && discountCeiling !== null && discountCeiling !== ''
+      ? Number(discountCeiling)
+      : null;
+
+    if (price !== undefined && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
+      return res.status(400).json({ message: 'قیمت محصول نامعتبر است.' });
+    }
+
+    if (hasDiscountCeiling && parsedDiscountCeiling !== null && (!Number.isFinite(parsedDiscountCeiling) || parsedDiscountCeiling < 0)) {
+      return res.status(400).json({ message: 'سقف تخفیف نامعتبر است.' });
+    }
+
+    if (parsedDiscountCeiling && parsedDiscountCeiling > parsedPrice) {
+      return res.status(400).json({ message: 'سقف تخفیف نمی‌تواند بیشتر از قیمت اصلی باشد.' });
+    }
 
     const update = {
       ...(title !== undefined && { title }),
-      ...(price !== undefined && { price }),
+      ...(price !== undefined && { price: parsedPrice }),
       ...(category !== undefined && { category }),
       ...(desc !== undefined && { desc }),
       ...(tags !== undefined && { tags: _tags }),
       ...(images !== undefined && { images: _images }),
-      ...(mainImageIndex !== undefined && { mainImageIndex })
+      ...(mainImageIndex !== undefined && { mainImageIndex }),
+      ...(hasDiscountCeiling && {
+        discountCeiling: parsedDiscountCeiling,
+        isNegotiable: parsedDiscountCeiling > 0 || isNegotiable === true || isNegotiable === 'true'
+      })
     };
 
     product.set(update);
