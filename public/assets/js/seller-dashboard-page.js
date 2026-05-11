@@ -1532,38 +1532,46 @@ function setupProductCardImageTools(media, prod) {
     : Math.max(0, images.indexOf(img.getAttribute('src')));
   media.dataset.imageIndex = String(initialIndex);
   img.src = images[initialIndex] || images[0];
+  if (images.length <= 1) return;
 
   const tools = document.createElement('div');
   tools.className = 'seller-product-card__image-tools';
   tools.innerHTML = `
-    <button type="button" class="seller-product-card__image-btn" data-card-image-view aria-label="مشاهده بزرگ عکس">
-      <i class="ri-eye-line" aria-hidden="true"></i>
+    <button type="button" class="seller-product-card__image-btn seller-product-card__image-btn--prev" data-card-image-prev aria-label="عکس قبلی">
+      <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
     </button>
-    <button type="button" class="seller-product-card__image-btn" data-card-image-next aria-label="عکس بعدی" ${images.length <= 1 ? 'disabled' : ''}>
-      <i class="ri-arrow-left-right-line" aria-hidden="true"></i>
+    <button type="button" class="seller-product-card__image-btn seller-product-card__image-btn--next" data-card-image-next aria-label="عکس بعدی">
+      <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
     </button>
   `;
 
-  const count = document.createElement('span');
-  count.className = 'seller-product-card__image-count';
   media.appendChild(tools);
-  media.appendChild(count);
+  const zoomBtn = document.createElement('button');
+  zoomBtn.type = 'button';
+  zoomBtn.className = 'seller-product-card__image-zoom';
+  zoomBtn.setAttribute('aria-label', 'بزرگ‌نمایی عکس محصول');
+  zoomBtn.innerHTML = '<i class="ri-fullscreen-line" aria-hidden="true"></i>';
+  media.appendChild(zoomBtn);
 
   const sync = (index) => {
     const safeIndex = ((index % images.length) + images.length) % images.length;
     media.dataset.imageIndex = String(safeIndex);
     img.src = images[safeIndex];
-    count.textContent = `${(safeIndex + 1).toLocaleString('fa-IR')}/${images.length.toLocaleString('fa-IR')}`;
   };
 
   sync(initialIndex);
+
+  tools.querySelector('[data-card-image-prev]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    sync((Number(media.dataset.imageIndex) || 0) - 1);
+  });
 
   tools.querySelector('[data-card-image-next]')?.addEventListener('click', (event) => {
     event.stopPropagation();
     sync((Number(media.dataset.imageIndex) || 0) + 1);
   });
 
-  tools.querySelector('[data-card-image-view]')?.addEventListener('click', (event) => {
+  zoomBtn.addEventListener('click', (event) => {
     event.stopPropagation();
     openProductCardImageViewer({
       images,
