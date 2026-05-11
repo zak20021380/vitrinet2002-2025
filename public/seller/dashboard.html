@@ -4815,6 +4815,611 @@
     font-size: 15px;
   }
 
+  /* مدیریت فشرده محصولات فروشنده */
+  #section-products .product-management-shell {
+    max-width: 980px;
+  }
+
+  #section-products .product-toolbar {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 30;
+    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  #section-products .product-toolbar__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.45rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  #section-products .product-toolbar__meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  #section-products .product-toolbar__actions {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.4fr) minmax(120px, 0.8fr) minmax(130px, 0.8fr);
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  #section-products .product-search-field,
+  #section-products .product-filter-control {
+    min-height: 42px;
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  }
+
+  #section-products .product-search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.75rem;
+  }
+
+  #section-products .product-search-field i {
+    color: #0f766e;
+    font-size: 1.05rem;
+  }
+
+  #section-products .product-search-field input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  #section-products .product-filter-control {
+    padding: 0 0.7rem;
+    font-size: 0.84rem;
+    font-weight: 800;
+    outline: none;
+  }
+
+  #section-products .product-panel {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.94);
+  }
+
+  #section-products .product-table-wrapper {
+    max-height: min(68vh, 720px);
+  }
+
+  #section-products table {
+    min-width: 720px;
+  }
+
+  #section-products th,
+  #section-products td {
+    padding: 10px 12px;
+  }
+
+  #section-products th {
+    background: #f1f5f9;
+    font-size: 13px;
+  }
+
+  #section-products .product-desktop-row td {
+    height: 66px;
+    background: #ffffff;
+  }
+
+  #section-products .product-desktop-row:hover td {
+    background: #f8fffc;
+  }
+
+  .product-row-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .product-row-title {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .product-row-title strong {
+    display: block;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 900;
+    line-height: 1.7;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .product-row-title span {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .product-row-price {
+    color: #0f766e;
+    font-size: 0.9rem;
+    font-weight: 1000;
+    white-space: nowrap;
+  }
+
+  .product-status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 84px;
+    min-height: 30px;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.78rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .product-status-pill--off {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  .product-compact-list {
+    display: grid;
+    gap: 0.45rem;
+    max-height: calc(100dvh - 250px);
+    min-height: 180px;
+    overflow: auto;
+    padding: 0.55rem;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .seller-product-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 72px;
+    padding: 0.55rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+    cursor: pointer;
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .seller-product-row:active {
+    transform: scale(0.99);
+  }
+
+  .seller-product-row.product-card--out-of-stock {
+    opacity: 0.78;
+    background: #f8fafc;
+  }
+
+  .seller-product-row__thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1px solid #dbe4ee;
+    background: #f8fafc;
+  }
+
+  .seller-product-row__main {
+    min-width: 0;
+    display: grid;
+    gap: 0.22rem;
+  }
+
+  .seller-product-row__name {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 950;
+    line-height: 1.55;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .seller-product-row__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .seller-product-row__price {
+    color: #0f766e;
+    font-size: 0.82rem;
+    font-weight: 1000;
+    white-space: nowrap;
+  }
+
+  .seller-product-row__category {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .seller-product-row__side {
+    display: grid;
+    justify-items: end;
+    gap: 0.42rem;
+  }
+
+  .product-actions {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .product-actions__trigger {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 12px;
+    display: inline-grid;
+    place-items: center;
+    background: #f8fafc;
+    color: #334155;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+
+  .product-actions__trigger:focus-visible {
+    outline: 3px solid rgba(14, 165, 233, 0.2);
+  }
+
+  .product-actions__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 40;
+    display: none;
+    width: 148px;
+    padding: 0.35rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+  }
+
+  .product-actions.is-open .product-actions__menu {
+    display: grid;
+  }
+
+  .product-actions__menu button,
+  .product-actions__menu a {
+    min-height: 38px;
+    border: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.65rem;
+    background: transparent;
+    color: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 850;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .product-actions__menu button:hover,
+  .product-actions__menu a:hover {
+    background: #f8fafc;
+  }
+
+  .product-actions__menu [data-action="delete-product"] {
+    color: #dc2626;
+  }
+
+  .product-empty-inline {
+    padding: 2.2rem 1rem;
+    color: #64748b;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .product-floating-add {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    z-index: 90;
+    min-width: 122px;
+    min-height: 52px;
+    border: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    background: linear-gradient(135deg, #10b981, #0ea5e9);
+    color: #ffffff;
+    box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
+    font-size: 0.9rem;
+    font-weight: 950;
+  }
+
+  .product-floating-add i {
+    font-size: 1.35rem;
+  }
+
+  .product-detail-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 3200;
+    display: none;
+    direction: rtl;
+  }
+
+  .product-detail-sheet.active {
+    display: block;
+  }
+
+  .product-detail-sheet__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .product-detail-sheet__panel {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    max-height: min(82dvh, 620px);
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -20px 50px rgba(15, 23, 42, 0.2);
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .product-detail-sheet__handle {
+    width: 46px;
+    height: 5px;
+    margin: 0.65rem auto 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+  }
+
+  .product-detail-sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .product-detail-sheet__identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .product-detail-sheet__identity img {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+  }
+
+  .product-detail-sheet__identity h3 {
+    max-width: min(62vw, 420px);
+    overflow: hidden;
+    margin: 0;
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 950;
+    line-height: 1.6;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .product-detail-sheet__identity p {
+    margin: 0.1rem 0 0;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .product-detail-sheet__close {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: #f8fafc;
+    color: #0f172a;
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  .product-detail-sheet__body {
+    display: grid;
+    gap: 0.7rem;
+    overflow: auto;
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .product-detail-sheet__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .product-detail-sheet__item {
+    min-height: 72px;
+    padding: 0.7rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #f8fafc;
+  }
+
+  .product-detail-sheet__label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 900;
+  }
+
+  .product-detail-sheet__value {
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 950;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  .product-detail-sheet__desc {
+    padding: 0.8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.9;
+  }
+
+  .product-detail-sheet__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.55rem;
+    padding: 0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
+    border-top: 1px solid #eef2f7;
+    background: #ffffff;
+  }
+
+  .product-detail-sheet__btn {
+    min-height: 46px;
+    border: 0;
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 950;
+    cursor: pointer;
+  }
+
+  .product-detail-sheet__btn--primary {
+    background: #0f766e;
+    color: #ffffff;
+  }
+
+  .product-detail-sheet__btn--secondary {
+    background: #eef6ff;
+    color: #0369a1;
+  }
+
+  .product-detail-sheet__btn--danger {
+    background: #fff1f2;
+    color: #dc2626;
+  }
+
+  @media (min-width: 768px) {
+    .product-detail-sheet__panel {
+      right: 50%;
+      left: auto;
+      bottom: 2rem;
+      width: min(460px, calc(100vw - 2rem));
+      border-radius: 24px;
+      transform: translateX(50%);
+    }
+  }
+
+  @media (max-width: 767px) {
+    #section-products .product-management-shell {
+      padding: 0.55rem 0.55rem 6.2rem;
+      gap: 0.6rem;
+    }
+
+    #section-products .product-toolbar {
+      top: 0.45rem;
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+      padding: 0.75rem;
+      border-radius: 18px;
+    }
+
+    #section-products .product-toolbar__title {
+      font-size: 0.92rem;
+      justify-content: space-between;
+    }
+
+    #section-products .product-toolbar__title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    #section-products .product-toolbar__actions {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    #section-products .product-search-field {
+      grid-column: 1 / -1;
+    }
+
+    #section-products .product-filter-control {
+      width: 100%;
+      min-width: 0;
+      font-size: 0.78rem;
+      border-radius: 13px;
+    }
+
+    #section-products .product-panel {
+      border-radius: 18px;
+    }
+  }
+
 
 
 
@@ -10623,24 +11228,42 @@
           </svg>
           مدیریت محصولات فروشگاه
         </div>
+        <div class="product-toolbar__meta">
+          <span id="productManagementCount">۰ محصول</span>
+          <span>نمایش فشرده برای مدیریت سریع</span>
+        </div>
+      </div>
+      <div class="product-toolbar__actions">
+        <label class="product-search-field" for="productManagementSearch">
+          <i class="ri-search-line" aria-hidden="true"></i>
+          <input id="productManagementSearch" type="search" autocomplete="off" placeholder="جستجوی محصول">
+        </label>
+        <select id="productManagementStatusFilter" class="product-filter-control" aria-label="فیلتر وضعیت محصول">
+          <option value="all">همه وضعیت‌ها</option>
+          <option value="in-stock">موجود</option>
+          <option value="out-of-stock">ناموجود</option>
+        </select>
+        <select id="productManagementSort" class="product-filter-control" aria-label="مرتب‌سازی محصولات">
+          <option value="newest">جدیدترین</option>
+          <option value="oldest">قدیمی‌ترین</option>
+          <option value="price-desc">گران‌ترین</option>
+          <option value="price-asc">ارزان‌ترین</option>
+          <option value="name">نام محصول</option>
+        </select>
       </div>
     </div>
 
     <div class="product-panel">
-      <!-- جدول محصولات فقط دسکتاپ و تبلت -->
+      <!-- جدول فشرده محصولات برای دسکتاپ و تبلت -->
       <div class="product-table-wrapper hidden md:block">
         <table class="text-[15px]" id="productsTable">
           <thead>
             <tr>
-              <th class="min-w-[70px]">عکس</th>
-              <th class="min-w-[140px]">نام محصول</th>
-              <th class="min-w-[100px]">قیمت</th>
-              <th class="min-w-[120px]">دسته‌بندی</th>
-              <th class="min-w-[110px]">برچسب‌ها</th>
-              <th class="min-w-[140px] text-center leading-6">تعداد مشتری‌هایی که این محصول را پسندیده‌اند</th>
-              <th class="min-w-[100px] text-center">موجودی</th>
-              <th class="min-w-[80px] text-center">ویرایش</th>
-              <th class="min-w-[80px] text-center">حذف</th>
+              <th class="min-w-[70px]">تصویر</th>
+              <th class="min-w-[220px]">نام محصول</th>
+              <th class="min-w-[130px]">قیمت</th>
+              <th class="min-w-[130px] text-center">وضعیت</th>
+              <th class="min-w-[80px] text-center">عملیات</th>
             </tr>
           </thead>
           <tbody id="productsTableBody" class="divide-y divide-gray-100">
@@ -10649,11 +11272,16 @@
         </table>
       </div>
 
-      <!-- کارت محصولات فقط موبایل (زیر سایز md) -->
-      <div id="productsMobileList" class="md:hidden flex flex-col gap-4 p-3">
-        <!-- کارت هر محصول اینجا با JS رندر می‌شه (مثال کارت خام در پایین) -->
+      <!-- لیست فشرده محصولات برای موبایل -->
+      <div id="productsMobileList" class="product-compact-list md:hidden" role="list">
+        <!-- ردیف هر محصول اینجا با JS رندر می‌شود -->
       </div>
     </div>
+
+    <button id="productAddFloatingBtn" type="button" class="product-floating-add md:hidden" aria-label="افزودن محصول">
+      <i class="ri-add-line" aria-hidden="true"></i>
+      <span>افزودن</span>
+    </button>
 
     <!-- پیام خالی -->
     <div id="noProductMsg" class="hidden">
@@ -10681,6 +11309,40 @@
           <span class="text-gray-500 text-sm">در کمتر از یک دقیقه محصول خود را ثبت کنید.</span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="productDetailSheet" class="product-detail-sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="productDetailSheetTitle">
+    <div class="product-detail-sheet__backdrop" data-close-product-sheet></div>
+    <div class="product-detail-sheet__panel">
+      <div class="product-detail-sheet__handle"></div>
+      <header class="product-detail-sheet__header">
+        <div class="product-detail-sheet__identity">
+          <img id="productDetailSheetImage" src="/assets/images/placeholder-product.svg" alt="">
+          <div>
+            <h3 id="productDetailSheetTitle">جزئیات محصول</h3>
+            <p id="productDetailSheetSubtitle">مدیریت سریع محصول</p>
+          </div>
+        </div>
+        <button type="button" class="product-detail-sheet__close" data-close-product-sheet aria-label="بستن">
+          <i class="ri-close-line" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div id="productDetailSheetBody" class="product-detail-sheet__body"></div>
+      <footer class="product-detail-sheet__actions">
+        <button type="button" class="product-detail-sheet__btn product-detail-sheet__btn--secondary" data-sheet-action="view">
+          <i class="ri-external-link-line" aria-hidden="true"></i>
+          مشاهده
+        </button>
+        <button type="button" class="product-detail-sheet__btn product-detail-sheet__btn--primary" data-sheet-action="edit">
+          <i class="ri-edit-2-line" aria-hidden="true"></i>
+          ویرایش
+        </button>
+        <button type="button" class="product-detail-sheet__btn product-detail-sheet__btn--danger" data-sheet-action="delete">
+          <i class="ri-delete-bin-6-line" aria-hidden="true"></i>
+          حذف
+        </button>
+      </footer>
     </div>
   </div>
 </section>
@@ -11514,6 +12176,7 @@
 
     function renderProductCta(card) {
       if (!card || card.querySelector('.product-card-view')) return;
+      if (card.classList.contains('seller-product-row')) return;
       const url = resolveProductUrl(card);
       if (!url) return;
 

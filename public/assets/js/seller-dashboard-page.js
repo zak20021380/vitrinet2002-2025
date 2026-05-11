@@ -1044,6 +1044,409 @@ function formatProductPrice(value) {
   return `${new Intl.NumberFormat('fa-IR').format(Number(value) || 0)} تومان`;
 }
 
+const PRODUCT_IMAGE_PLACEHOLDER = '/assets/images/placeholder-product.svg';
+const productManagementState = {
+  products: [],
+  query: '',
+  status: 'all',
+  sort: 'newest',
+  bound: false,
+  activeProductId: null
+};
+
+function getProductId(prod) {
+  return prod?._id || prod?.id || '';
+}
+
+function escapeProductText(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getProductCover(prod) {
+  const images = Array.isArray(prod?.images) ? prod.images : [];
+  if (images.length) {
+    const mainIndex = Number.isInteger(prod.mainImageIndex) ? prod.mainImageIndex : 0;
+    return images[mainIndex] || images[0] || PRODUCT_IMAGE_PLACEHOLDER;
+  }
+  return prod?.image || PRODUCT_IMAGE_PLACEHOLDER;
+}
+
+function getProductTimestamp(prod) {
+  const raw = prod?.updatedAt || prod?.createdAt || prod?._id || '';
+  const parsed = Date.parse(raw);
+  if (Number.isFinite(parsed)) return parsed;
+
+  const id = String(prod?._id || prod?.id || '');
+  if (/^[a-f0-9]{24}$/i.test(id)) {
+    return Number.parseInt(id.slice(0, 8), 16) * 1000;
+  }
+  return 0;
+}
+
+function getProductCategory(prod) {
+  return prod?.category || 'بدون دسته';
+}
+
+function getProductTags(prod) {
+  if (Array.isArray(prod?.tags)) return prod.tags.filter(Boolean);
+  if (prod?.tag) return [prod.tag];
+  return [];
+}
+
+function getVisibleManagedProducts() {
+  const query = productManagementState.query.trim().toLowerCase();
+  const status = productManagementState.status;
+  const sort = productManagementState.sort;
+
+  return [...productManagementState.products]
+    .filter((prod) => {
+      const isInStock = prod?.inStock !== false;
+      if (status === 'in-stock' && !isInStock) return false;
+      if (status === 'out-of-stock' && isInStock) return false;
+      if (!query) return true;
+
+      const haystack = [
+        prod?.title,
+        prod?.category,
+        prod?.desc,
+        prod?.description,
+        ...getProductTags(prod)
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    })
+    .sort((a, b) => {
+      if (sort === 'oldest') return getProductTimestamp(a) - getProductTimestamp(b);
+      if (sort === 'price-desc') return (Number(b?.price) || 0) - (Number(a?.price) || 0);
+      if (sort === 'price-asc') return (Number(a?.price) || 0) - (Number(b?.price) || 0);
+      if (sort === 'name') return String(a?.title || '').localeCompare(String(b?.title || ''), 'fa');
+      return getProductTimestamp(b) - getProductTimestamp(a);
+    });
+}
+
+function ensureProductManagementControls() {
+  if (productManagementState.bound) return;
+  productManagementState.bound = true;
+
+  const search = document.getElementById('productManagementSearch');
+  const status = document.getElementById('productManagementStatusFilter');
+  const sort = document.getElementById('productManagementSort');
+  const floatingAdd = document.getElementById('productAddFloatingBtn');
+  const sheet = document.getElementById('productDetailSheet');
+
+  search?.addEventListener('input', (event) => {
+    productManagementState.query = event.target.value || '';
+    renderProductManagementList();
+  });
+
+  status?.addEventListener('change', (event) => {
+    productManagementState.status = event.target.value || 'all';
+    renderProductManagementList();
+  });
+
+  sort?.addEventListener('change', (event) => {
+    productManagementState.sort = event.target.value || 'newest';
+    renderProductManagementList();
+  });
+
+  floatingAdd?.addEventListener('click', () => {
+    const addMenuBtn = document.getElementById('menu-add');
+    if (addMenuBtn) addMenuBtn.click();
+  });
+
+  sheet?.addEventListener('click', (event) => {
+    if (event.target.closest('[data-close-product-sheet]')) {
+      closeProductDetailSheet();
+      return;
+    }
+
+    const action = event.target.closest('[data-sheet-action]')?.dataset.sheetAction;
+    if (!action) return;
+
+    const productId = productManagementState.activeProductId;
+    if (!productId) return;
+    if (action === 'view') {
+      window.open(`/product.html?id=${encodeURIComponent(productId)}`, '_blank', 'noopener,noreferrer');
+    } else if (action === 'edit') {
+      closeProductDetailSheet();
+      showEditModal(productId);
+    } else if (action === 'delete') {
+      closeProductDetailSheet();
+      deleteProduct(productId);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.product-actions')) {
+      closeProductActionMenus();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeProductActionMenus();
+      closeProductDetailSheet();
+    }
+  });
+}
+
+function closeProductActionMenus() {
+  document.querySelectorAll('#section-products .product-actions.is-open').forEach((menu) => {
+    menu.classList.remove('is-open');
+  });
+}
+
+function createProductActionsMarkup(prod) {
+  const productId = escapeProductText(getProductId(prod));
+  return `
+    <div class="product-actions">
+      <button type="button" class="product-actions__trigger" data-action="toggle-product-menu" data-product-id="${productId}" aria-label="عملیات محصول" aria-haspopup="menu">
+        <i class="ri-more-2-fill" aria-hidden="true"></i>
+      </button>
+      <div class="product-actions__menu" role="menu">
+        <button type="button" data-action="details-product" data-product-id="${productId}" role="menuitem">
+          <i class="ri-information-line" aria-hidden="true"></i>
+          جزئیات
+        </button>
+        <button type="button" data-action="edit-product" data-product-id="${productId}" role="menuitem">
+          <i class="ri-edit-2-line" aria-hidden="true"></i>
+          ویرایش
+        </button>
+        <a href="/product.html?id=${encodeURIComponent(getProductId(prod))}" target="_blank" rel="noopener noreferrer" role="menuitem">
+          <i class="ri-external-link-line" aria-hidden="true"></i>
+          مشاهده
+        </a>
+        <button type="button" data-action="delete-product" data-product-id="${productId}" role="menuitem">
+          <i class="ri-delete-bin-6-line" aria-hidden="true"></i>
+          حذف
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function bindProductRowEvents(row, prod) {
+  const productId = getProductId(prod);
+  if (!row || !productId) return;
+
+  row.addEventListener('click', (event) => {
+    if (event.target.closest('button, a, input, label, .product-actions')) return;
+    openProductDetailSheet(prod);
+  });
+
+  row.querySelector('[data-action="toggle-product-menu"]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const wrapper = event.currentTarget.closest('.product-actions');
+    const willOpen = !wrapper?.classList.contains('is-open');
+    closeProductActionMenus();
+    wrapper?.classList.toggle('is-open', willOpen);
+  });
+
+  row.querySelector('[data-action="details-product"]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeProductActionMenus();
+    openProductDetailSheet(prod);
+  });
+
+  row.querySelector('[data-action="edit-product"]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeProductActionMenus();
+    showEditModal(productId);
+  });
+
+  row.querySelector('[data-action="delete-product"]')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeProductActionMenus();
+    deleteProduct(productId);
+  });
+
+  row.querySelector('.stock-toggle__input')?.addEventListener('change', async (event) => {
+    event.stopPropagation();
+    const nextValue = event.target.checked;
+    await handleStockToggle(productId, nextValue, row);
+    prod.inStock = event.target.checked;
+    if (productManagementState.status !== 'all') {
+      renderProductManagementList();
+    } else {
+      updateProductManagementCount();
+    }
+  });
+}
+
+function createDesktopProductRow(prod) {
+  const productId = escapeProductText(getProductId(prod));
+  const isInStock = prod.inStock !== false;
+  const tr = document.createElement('tr');
+  tr.className = 'product-desktop-row';
+  tr.dataset.productId = productId;
+  tr.innerHTML = `
+    <td><img src="${escapeProductText(getProductCover(prod))}" alt="" class="product-row-thumb" onerror="this.src='${PRODUCT_IMAGE_PLACEHOLDER}'"></td>
+    <td>
+      <div class="product-row-title">
+        <strong>${escapeProductText(prod.title || 'بدون نام')}</strong>
+        <span>${escapeProductText(getProductCategory(prod))}</span>
+      </div>
+    </td>
+    <td><span class="product-row-price ${!isInStock ? 'line-through opacity-60' : ''}">${formatProductPrice(prod.price)}</span></td>
+    <td class="text-center">
+      <label class="stock-toggle" data-product-id="${productId}">
+        <input type="checkbox" class="stock-toggle__input" ${isInStock ? 'checked' : ''} />
+        <span class="stock-toggle__slider"></span>
+        <span class="stock-toggle__label">${isInStock ? 'موجود' : 'ناموجود'}</span>
+      </label>
+    </td>
+    <td class="text-center">${createProductActionsMarkup(prod)}</td>
+  `;
+  bindProductRowEvents(tr, prod);
+  return tr;
+}
+
+function createMobileProductRow(prod) {
+  const productId = escapeProductText(getProductId(prod));
+  const isInStock = prod.inStock !== false;
+  const row = document.createElement('article');
+  row.className = `seller-product-row ${!isInStock ? 'product-card--out-of-stock' : ''}`;
+  row.dataset.productId = productId;
+  row.setAttribute('role', 'listitem');
+  row.innerHTML = `
+    <img class="seller-product-row__thumb ${!isInStock ? 'grayscale opacity-60' : ''}" src="${escapeProductText(getProductCover(prod))}" alt="${escapeProductText(prod.title || '')}" onerror="this.src='${PRODUCT_IMAGE_PLACEHOLDER}'">
+    <div class="seller-product-row__main">
+      <h3 class="seller-product-row__name">${escapeProductText(prod.title || 'بدون نام')}</h3>
+      <div class="seller-product-row__meta">
+        <span class="seller-product-row__price ${!isInStock ? 'line-through opacity-60' : ''}">${formatProductPrice(prod.price)}</span>
+        <span class="seller-product-row__category">${escapeProductText(getProductCategory(prod))}</span>
+      </div>
+    </div>
+    <div class="seller-product-row__side">
+      <span class="product-status-pill ${!isInStock ? 'product-status-pill--off' : ''}">
+        <i class="${isInStock ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'}" aria-hidden="true"></i>
+        ${isInStock ? 'موجود' : 'ناموجود'}
+      </span>
+      ${createProductActionsMarkup(prod)}
+    </div>
+  `;
+  bindProductRowEvents(row, prod);
+  return row;
+}
+
+function updateProductManagementCount(filteredCount = null) {
+  const countEl = document.getElementById('productManagementCount');
+  if (!countEl) return;
+  const total = productManagementState.products.length;
+  const visible = filteredCount ?? getVisibleManagedProducts().length;
+  countEl.textContent = visible === total
+    ? `${total.toLocaleString('fa-IR')} محصول`
+    : `${visible.toLocaleString('fa-IR')} از ${total.toLocaleString('fa-IR')} محصول`;
+}
+
+function renderProductManagementList() {
+  ensureProductManagementControls();
+
+  const tbody = document.getElementById('productsTableBody');
+  const mobileList = document.getElementById('productsMobileList');
+  const noProductMsg = document.getElementById('noProductMsg');
+  const products = getVisibleManagedProducts();
+
+  if (tbody) tbody.innerHTML = '';
+  if (mobileList) mobileList.innerHTML = '';
+  updateProductManagementCount(products.length);
+
+  if (!productManagementState.products.length) {
+    noProductMsg?.classList.remove('hidden');
+    return;
+  }
+
+  noProductMsg?.classList.add('hidden');
+
+  if (!products.length) {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" class="product-empty-inline">محصولی با این فیلتر پیدا نشد.</td></tr>`;
+    }
+    if (mobileList) {
+      mobileList.innerHTML = `<div class="product-empty-inline">محصولی با این فیلتر پیدا نشد.</div>`;
+    }
+    return;
+  }
+
+  products.forEach((prod) => {
+    tbody?.appendChild(createDesktopProductRow(prod));
+    mobileList?.appendChild(createMobileProductRow(prod));
+  });
+}
+
+function openProductDetailSheet(prod) {
+  const sheet = document.getElementById('productDetailSheet');
+  if (!sheet || !prod) return;
+
+  const productId = getProductId(prod);
+  productManagementState.activeProductId = productId;
+
+  const image = document.getElementById('productDetailSheetImage');
+  const title = document.getElementById('productDetailSheetTitle');
+  const subtitle = document.getElementById('productDetailSheetSubtitle');
+  const body = document.getElementById('productDetailSheetBody');
+  const tags = getProductTags(prod);
+  const likeCount = Number(prod.likesCount || 0).toLocaleString('fa-IR');
+  const inventory = prod.inventory ?? prod.stock ?? '';
+  const isInStock = prod.inStock !== false;
+  const description = prod.desc || prod.description || 'توضیحی ثبت نشده است.';
+
+  if (image) {
+    image.src = getProductCover(prod);
+    image.onerror = () => { image.src = PRODUCT_IMAGE_PLACEHOLDER; };
+  }
+  if (title) title.textContent = prod.title || 'بدون نام';
+  if (subtitle) subtitle.textContent = isInStock ? 'محصول موجود در فروشگاه' : 'محصول ناموجود';
+  if (body) {
+    body.innerHTML = `
+      <div class="product-detail-sheet__grid">
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">قیمت</span>
+          <strong class="product-detail-sheet__value">${formatProductPrice(prod.price)}</strong>
+        </div>
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">وضعیت</span>
+          <strong class="product-detail-sheet__value">${isInStock ? 'موجود' : 'ناموجود'}</strong>
+        </div>
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">دسته‌بندی</span>
+          <strong class="product-detail-sheet__value">${escapeProductText(getProductCategory(prod))}</strong>
+        </div>
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">موجودی</span>
+          <strong class="product-detail-sheet__value">${inventory !== '' ? escapeProductText(inventory) : 'ثبت نشده'}</strong>
+        </div>
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">پسندیده‌شده</span>
+          <strong class="product-detail-sheet__value">${likeCount} نفر</strong>
+        </div>
+        <div class="product-detail-sheet__item">
+          <span class="product-detail-sheet__label">برچسب‌ها</span>
+          <strong class="product-detail-sheet__value">${tags.length ? escapeProductText(tags.join('، ')) : 'بدون برچسب'}</strong>
+        </div>
+      </div>
+      <div class="product-detail-sheet__desc">${escapeProductText(description)}</div>
+    `;
+  }
+
+  sheet.classList.add('active');
+  sheet.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductDetailSheet() {
+  const sheet = document.getElementById('productDetailSheet');
+  if (!sheet) return;
+  sheet.classList.remove('active');
+  sheet.setAttribute('aria-hidden', 'true');
+  productManagementState.activeProductId = null;
+  document.body.style.overflow = '';
+}
+
 function updateDiscountCeilingPreview() {
   if (!discountCeilingInput || !discountCeilingPreview || !discountCeilingError) return;
   
@@ -1246,186 +1649,40 @@ if (addProductFormEl) addProductFormEl.addEventListener("submit", async function
 });
 // ----------- نمایش محصولات (دریافت از سرور) ----------
 async function renderProducts() {
-  // seller رو اینجا از localStorage بخون تا همیشه مقدار درست داشته باشی
-// اگر seller در حافظه لود نشده یا id ندارد، ریدایرکت به لاگین
-if (!window.seller?.id) {
-  alert("اطلاعات فروشنده ناقص است. لطفاً دوباره وارد شوید.");
-  window.location.href = "login.html";
-  return;
-}
+  if (!window.seller?.id) {
+    alert("اطلاعات فروشنده ناقص است. لطفاً دوباره وارد شوید.");
+    window.location.href = "login.html";
+    return;
+  }
 
+  ensureProductManagementControls();
 
-  // المنت‌های جدول و کارت موبایل
   const tbody = document.getElementById('productsTableBody');
   const mobileList = document.getElementById('productsMobileList');
   const noProductMsg = document.getElementById('noProductMsg');
-  if (tbody) tbody.innerHTML = "";
-  if (mobileList) mobileList.innerHTML = "";
+  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="product-empty-inline">در حال بارگذاری محصولات...</td></tr>`;
+  if (mobileList) mobileList.innerHTML = `<div class="product-empty-inline">در حال بارگذاری محصولات...</div>`;
+  noProductMsg?.classList.add('hidden');
 
   try {
-    // دریافت محصولات فروشنده
-  const res = await apiFetch(`/api/products?sellerId=${window.seller.id}`);
+    const res = await apiFetch(`/api/products?sellerId=${window.seller.id}`);
     if (!res.ok) throw new Error("مشکل در دریافت محصولات");
     const products = await res.json();
 
-    // اگر هیچ محصولی نیست
-    if (!products.length) {
-      noProductMsg.classList.remove('hidden');
-      document.dispatchEvent(new CustomEvent('products:updated', { detail: { products } }));
-      return;
+    productManagementState.products = Array.isArray(products) ? products : [];
+    window._allProducts = productManagementState.products;
+    document.dispatchEvent(new CustomEvent('products:updated', { detail: { products: productManagementState.products } }));
+
+    if (productManagementState.products.length) {
+      updateProductLikeSnapshot(productManagementState.products, { notify: likeNotificationsPrimed });
     }
-    noProductMsg.classList.add('hidden');
-    updateProductLikeSnapshot(products, { notify: likeNotificationsPrimed });
-    window._allProducts = products;
-    document.dispatchEvent(new CustomEvent('products:updated', { detail: { products } }));
 
-    // ---- رندر جدول (دسکتاپ) ----
-    products.forEach((prod) => {
-      const likeCountDisplay = Number(prod.likesCount || 0).toLocaleString('fa-IR');
-      const isInStock = prod.inStock !== false; // Default to true if not set
-      // تعیین عکس شاخص بر اساس mainImageIndex یا اولین عکس
-      let cover = "";
-      if (prod.images && prod.images.length) {
-        if (typeof prod.mainImageIndex === "number" && prod.images[prod.mainImageIndex]) {
-          cover = prod.images[prod.mainImageIndex];
-        } else {
-          cover = prod.images[0];
-        }
-      }
-      if (tbody) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${cover}" alt="" class="w-12 h-12 object-cover rounded-lg border shadow mx-auto"/></td>
-          <td>${prod.title}</td>
-          <td>${prod.price ? prod.price.toLocaleString('fa-IR') : "-"}</td>
-          <td>${prod.category || '-'}</td>
-          <td>${prod.tags && prod.tags.length ? prod.tags.join('، ') : '-'}</td>
-          <td class="text-center">
-            <span class="like-chip" title="تعداد مشتری‌هایی که این محصول را پسندیده‌اند">
-              <i class="ri-heart-3-fill" aria-hidden="true"></i>
-              <span>${likeCountDisplay}</span>
-            </span>
-          </td>
-          <td class="text-center">
-            <label class="stock-toggle" data-product-id="${prod._id}">
-              <input type="checkbox" class="stock-toggle__input" ${isInStock ? 'checked' : ''} />
-              <span class="stock-toggle__slider"></span>
-              <span class="stock-toggle__label">${isInStock ? 'موجود' : 'ناموجود'}</span>
-            </label>
-          </td>
-          <td>
-            <button class="bg-[#10b981] hover:bg-[#0ea5e9] text-white rounded-lg px-3 py-1 text-[14px] transition" data-action="edit-product" data-product-id="${prod._id}">ویرایش</button>
-          </td>
-          <td>
-            <button class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-[14px] transition" data-action="delete-product" data-product-id="${prod._id}">حذف</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-        const desktopEdit = tr.querySelector('[data-action="edit-product"]');
-        const desktopDelete = tr.querySelector('[data-action="delete-product"]');
-        const stockToggle = tr.querySelector('.stock-toggle__input');
-        if (desktopEdit) desktopEdit.addEventListener('click', () => showEditModal(prod._id));
-        if (desktopDelete) desktopDelete.addEventListener('click', () => deleteProduct(prod._id));
-        if (stockToggle) stockToggle.addEventListener('change', (e) => handleStockToggle(prod._id, e.target.checked, tr));
-      }
-
-      // ---- رندر کارت موبایل (فقط نمایش در md و پایین‌تر) ----
-      if (mobileList) {
-        const card = document.createElement('div');
-        card.className = `seller-product-card ${!isInStock ? 'product-card--out-of-stock' : ''}`;
-        card.innerHTML = `
-          <div class="flex flex-col">
-            <!-- تصویر محصول -->
-            <div class="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100">
-              <img src="${cover}" alt="${prod.title}" class="w-full h-full object-cover ${!isInStock ? 'grayscale opacity-60' : ''}" />
-              ${prod.tags && prod.tags.length ? `
-                <div class="absolute top-3 right-3 bg-[#10b981] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                  ${prod.tags[0]}
-                </div>
-              ` : ''}
-              ${!isInStock ? `
-                <div class="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <span class="bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full">ناموجود</span>
-                </div>
-              ` : ''}
-            </div>
-
-            <!-- اطلاعات محصول -->
-            <div class="p-4 space-y-3">
-              <!-- عنوان -->
-              <h3 class="font-bold text-gray-800 text-lg leading-tight line-clamp-2">${prod.title}</h3>
-
-              <!-- دسته‌بندی و قیمت -->
-              <div class="flex items-center justify-between gap-2 flex-wrap">
-                <div class="flex items-center gap-2 text-sm text-gray-600">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                  <span class="font-medium">${prod.category || 'بدون دسته'}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0ea5e9"/>
-                    <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="#0ea5e9"/>
-                  </svg>
-                  <span class="text-[#0ea5e9] font-bold text-lg ${!isInStock ? 'line-through opacity-60' : ''}">${prod.price ? prod.price.toLocaleString('fa-IR') : '0'} تومان</span>
-                </div>
-              </div>
-
-              <!-- Stock Toggle -->
-              <div class="stock-toggle-mobile" data-product-id="${prod._id}">
-                <span class="stock-toggle-mobile__label">وضعیت موجودی:</span>
-                <label class="stock-toggle stock-toggle--mobile">
-                  <input type="checkbox" class="stock-toggle__input" ${isInStock ? 'checked' : ''} />
-                  <span class="stock-toggle__slider"></span>
-                  <span class="stock-toggle__text">${isInStock ? 'موجود' : 'ناموجود'}</span>
-                </label>
-              </div>
-
-              <div class="flex items-center justify-between gap-2 flex-wrap bg-[#f8fafc] border border-gray-100 rounded-xl px-3 py-2">
-                <div class="flex items-center gap-2 text-sm text-gray-500 flex-1 min-w-[200px] leading-6">
-                  <i class="ri-heart-3-line text-[#e11d48] text-lg" aria-hidden="true"></i>
-                  <span class="font-bold text-gray-700 text-sm leading-6">تعداد مشتری‌هایی که این محصول را پسندیده‌اند</span>
-                </div>
-                <div class="like-chip like-chip__mobile shadow-none">
-                  <i class="ri-heart-3-fill text-[#e11d48]" aria-hidden="true"></i>
-                  <span class="text-[#9f1239]">${likeCountDisplay}</span>
-                </div>
-              </div>
-
-              <!-- دکمه‌های عملیات -->
-              <div class="flex gap-2 pt-2 border-t border-gray-100">
-                <button class="flex-1 bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white rounded-xl px-4 py-2.5 font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2" data-action="edit-product" data-product-id="${prod._id}">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  ویرایش
-                </button>
-                <button class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl px-4 py-2.5 font-bold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2" data-action="delete-product" data-product-id="${prod._id}">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  حذف
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-        mobileList.appendChild(card);
-        setupMobileProductCard(card, prod);
-        const mobileEdit = card.querySelector('[data-action="edit-product"]');
-        const mobileDelete = card.querySelector('[data-action="delete-product"]');
-        const mobileStockToggle = card.querySelector('.stock-toggle__input');
-        if (mobileEdit) mobileEdit.addEventListener('click', () => showEditModal(prod._id));
-        if (mobileDelete) mobileDelete.addEventListener('click', () => deleteProduct(prod._id));
-        if (mobileStockToggle) mobileStockToggle.addEventListener('change', (e) => handleStockToggle(prod._id, e.target.checked, card));
-      }
-    });
+    renderProductManagementList();
   } catch (err) {
-    if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-6">خطا در دریافت محصولات!</td></tr>`;
+    productManagementState.products = [];
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500 py-6">خطا در دریافت محصولات!</td></tr>`;
     if (mobileList) mobileList.innerHTML = `<div class="text-center text-red-500 py-6">خطا در دریافت محصولات!</div>`;
-    noProductMsg.classList.add('hidden');
+    noProductMsg?.classList.add('hidden');
   }
 }
 
