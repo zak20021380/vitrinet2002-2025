@@ -5401,20 +5401,44 @@
     }
 
     #section-products .product-toolbar__actions {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.45rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
     }
 
     #section-products .product-search-field {
       grid-column: 1 / -1;
+      order: 1;
     }
 
     #section-products .product-filter-control {
       width: 100%;
       min-width: 0;
-      padding-inline: 0.45rem;
-      font-size: 0.72rem;
+      min-height: 43px;
+      padding-inline: 0.65rem;
+      border-color: #dbe4ee;
+      background-color: #ffffff;
+      color: #0f172a;
+      font-size: 0.78rem;
       border-radius: 13px;
+      box-shadow: 0 7px 18px rgba(15, 23, 42, 0.045);
+    }
+
+    #productManagementCategoryFilter {
+      grid-column: 1 / -1;
+      order: 2;
+      border-color: rgba(16, 185, 129, 0.28);
+      background-color: #f8fffd;
+      font-weight: 900;
+      text-align: center;
+      text-align-last: center;
+    }
+
+    #productManagementStatusFilter {
+      order: 3;
+    }
+
+    #productManagementSort {
+      order: 4;
     }
 
     #section-products .product-panel {
@@ -11710,15 +11734,15 @@ body.edit-product-modal-open {
           <option value="in-stock">موجود</option>
           <option value="out-of-stock">ناموجود</option>
         </select>
+        <select id="productManagementCategoryFilter" class="product-filter-control" aria-label="فیلتر دسته‌بندی محصول">
+          <option value="all">همه دسته‌بندی‌ها</option>
+        </select>
         <select id="productManagementSort" class="product-filter-control" aria-label="مرتب‌سازی محصولات">
           <option value="newest">جدیدترین</option>
           <option value="oldest">قدیمی‌ترین</option>
           <option value="price-desc">گران‌ترین</option>
           <option value="price-asc">ارزان‌ترین</option>
           <option value="name">نام محصول</option>
-        </select>
-        <select id="productManagementCategoryFilter" class="product-filter-control" aria-label="فیلتر دسته‌بندی محصول">
-          <option value="all">همه دسته‌بندی‌ها</option>
         </select>
       </div>
     </div>
