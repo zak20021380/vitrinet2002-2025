@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { csrfProtection, getCsrfTokenHandler } = require('./middlewares/csrfMiddleware');
 const chatRoutes   = require('./routes/chatRoutes');
 const adminUserMessageRoutes = require('./routes/adminUserMessages');
 const sellerRoutes = require('./routes/seller');
@@ -117,10 +118,14 @@ app.use(cors({
   exposedHeaders: ['Content-Disposition']
 }));
 
-
-app.use('/api/branding', require('./routes/branding'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.get('/api/csrf-token', getCsrfTokenHandler);
+app.use(csrfProtection({
+  strictMode: true,
+  allowedOrigins
+}));
 
 // ------------------- Static Files -------------------
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
@@ -131,6 +136,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ------------------- Routes -------------------
+app.use('/api/branding', require('./routes/branding'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/products', require('./routes/products'));

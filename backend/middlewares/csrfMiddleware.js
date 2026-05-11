@@ -93,10 +93,16 @@ function csrfProtection(options = {}) {
   const {
     skipMethods = ['GET', 'HEAD', 'OPTIONS'],
     headerName = 'x-csrf-token',
-    strictMode = false
+    strictMode = false,
+    allowedOrigins = [],
+    skip = null
   } = options;
 
   return (req, res, next) => {
+    if (typeof skip === 'function' && skip(req)) {
+      return next();
+    }
+
     // Safe methods don't need CSRF check
     if (skipMethods.includes(req.method.toUpperCase())) {
       return next();
@@ -176,7 +182,10 @@ function csrfProtection(options = {}) {
           ? new URL(origin).host 
           : (referer ? new URL(referer).host : null);
         
-        if (sourceHost && sourceHost !== host) {
+        const sourceOrigin = origin ? new URL(origin).origin : (referer ? new URL(referer).origin : '');
+        const isAllowedOrigin = allowedOrigins.includes(sourceOrigin);
+
+        if (sourceHost && sourceHost !== host && !isAllowedOrigin) {
           if (isDev) console.warn('[CSRF] Origin mismatch:', { sourceHost, host });
           if (strictMode) {
             return res.status(403).json({

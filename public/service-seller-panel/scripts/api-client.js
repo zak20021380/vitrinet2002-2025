@@ -3,6 +3,95 @@ import { API_BASE, NO_CACHE, bust, escapeHtml } from './core-utils.js';
 import { StorageManager } from './storage.js';
 import UIComponents from './ui-components.js';
 
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+let csrfTokenPromise = null;
+
+function readCookie(name) {
+  const cookies = document.cookie ? document.cookie.split(';') : [];
+  for (const cookie of cookies) {
+    const [rawName, ...rawValue] = cookie.trim().split('=');
+    if (rawName === name) {
+      return decodeURIComponent(rawValue.join('=') || '');
+    }
+  }
+  return '';
+}
+
+function buildApiUrl(path) {
+  const normalized = String(path || '').startsWith('/') ? path : `/${path || ''}`;
+  return `${API_BASE}${normalized}`;
+}
+
+function getRequestUrl(resource) {
+  if (typeof resource === 'string') return resource;
+  if (resource && typeof resource.url === 'string') return resource.url;
+  return '';
+}
+
+function getRequestMethod(resource, init) {
+  return String(init?.method || resource?.method || 'GET').toUpperCase();
+}
+
+function isApiRequest(url) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url, window.location.href);
+    return parsed.pathname.startsWith('/api/');
+  } catch {
+    return String(url).includes('/api/');
+  }
+}
+
+async function getCsrfToken() {
+  const cookieToken = readCookie('csrf_token');
+  if (cookieToken) return cookieToken;
+
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = originalFetch(buildApiUrl('/api/csrf-token'), {
+      method: 'GET',
+      credentials: 'include'
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => data?.csrfToken || readCookie('csrf_token') || '')
+      .finally(() => {
+        csrfTokenPromise = null;
+      });
+  }
+
+  return csrfTokenPromise;
+}
+
+if (originalFetch && !window.__vitrinetCsrfFetchInitialized) {
+  window.fetch = async function csrfFetch(resource, init) {
+    const url = getRequestUrl(resource);
+    const method = getRequestMethod(resource, init);
+
+    if (!isApiRequest(url) || !UNSAFE_METHODS.has(method)) {
+      return originalFetch(resource, init);
+    }
+
+    const options = init ? { ...init } : {};
+    const headers = new Headers(options.headers || resource?.headers || {});
+    if (!headers.has('X-CSRF-Token')) {
+      const token = await getCsrfToken();
+      if (token) headers.set('X-CSRF-Token', token);
+    }
+    if (!headers.has('X-Requested-With')) {
+      headers.set('X-Requested-With', 'XMLHttpRequest');
+    }
+
+    if (options.credentials === undefined) {
+      options.credentials = 'include';
+    }
+    options.headers = headers;
+    options.method = method;
+
+    return originalFetch(resource, options);
+  };
+  window.__vitrinetCsrfFetchInitialized = true;
+}
+
 // Convert Persian/Arabic digits to English digits
 const toEn = (s) => (s || '')
   .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])

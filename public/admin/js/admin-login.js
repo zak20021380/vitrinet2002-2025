@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const API_ORIGIN = window.location.origin && window.location.origin !== 'null'
+    ? window.location.origin
+    : 'http://localhost:5000';
+  let csrfTokenPromise = null;
+
+  const readCookie = (name) => {
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+    for (const cookie of cookies) {
+      const [rawName, ...rawValue] = cookie.trim().split('=');
+      if (rawName === name) return decodeURIComponent(rawValue.join('=') || '');
+    }
+    return '';
+  };
+
+  const getCsrfToken = () => {
+    const cookieToken = readCookie('csrf_token');
+    if (cookieToken) return Promise.resolve(cookieToken);
+    if (!csrfTokenPromise) {
+      csrfTokenPromise = fetch(`${API_ORIGIN}/api/csrf-token`, { method: 'GET', credentials: 'include' })
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => data?.csrfToken || readCookie('csrf_token') || '')
+        .finally(() => {
+          csrfTokenPromise = null;
+        });
+    }
+    return csrfTokenPromise;
+  };
+
   const body = document.body;
   const themeBtn = document.getElementById('toggleTheme');
   if (!themeBtn) {
@@ -46,9 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
     errorDiv.textContent = '';
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/login', {
+      const csrfToken = await getCsrfToken();
+      const res = await fetch(`${API_ORIGIN}/api/admin/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         credentials: 'include',
         body: JSON.stringify({ phone, password })
       });
