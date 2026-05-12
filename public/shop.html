@@ -2351,9 +2351,10 @@ body {
 .similar-shops-shell {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 22px;
-  box-shadow: 0 18px 45px rgba(35, 41, 70, 0.08);
-  padding: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 16px 36px rgba(35, 41, 70, 0.075);
+  padding: .9rem;
+  overflow: hidden;
 }
 
 .similar-shops-head {
@@ -2361,7 +2362,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: .9rem;
+  margin-bottom: .7rem;
 }
 
 .similar-shops-title-wrap {
@@ -2372,16 +2373,16 @@ body {
   display: inline-flex;
   align-items: center;
   gap: .35rem;
-  margin: 0 0 .25rem;
+  margin: 0 0 .18rem;
   color: #64748b;
-  font-size: .76rem;
+  font-size: .72rem;
   font-weight: 800;
 }
 
 .similar-shops-title {
   margin: 0;
   color: var(--text);
-  font-size: clamp(1.05rem, 1vw + .85rem, 1.45rem);
+  font-size: clamp(1rem, 1vw + .78rem, 1.36rem);
   font-weight: 900;
   line-height: 1.35;
 }
@@ -2390,42 +2391,77 @@ body {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  min-height: 30px;
-  padding: .38rem .7rem;
+  min-height: 28px;
+  padding: .34rem .64rem;
   border-radius: 999px;
   background: #f8fafc;
   border: 1px solid rgba(148, 163, 184, 0.18);
   color: #475569;
-  font-size: .78rem;
+  font-size: .72rem;
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.similar-shops-carousel {
+  position: relative;
+  margin-inline: -.9rem;
+}
+
+.similar-shops-carousel::before,
+.similar-shops-carousel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: .7rem;
+  width: 34px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: .95;
+}
+
+.similar-shops-carousel::before {
+  right: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .95));
+}
+
+.similar-shops-carousel::after {
+  left: 0;
+  background: linear-gradient(270deg, transparent, rgba(255, 255, 255, .95));
+}
+
 .similar-shops-list {
   display: flex;
-  gap: .8rem;
+  gap: .65rem;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  scroll-snap-type: x mandatory;
-  padding: .2rem .05rem .7rem;
-  margin-inline: -.05rem;
-  scrollbar-width: thin;
+  scroll-snap-type: inline mandatory;
+  scroll-behavior: smooth;
+  scroll-padding-inline: .9rem;
+  -webkit-overflow-scrolling: touch;
+  padding: .18rem .9rem .62rem;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.similar-shops-list::-webkit-scrollbar {
+  display: none;
 }
 
 .similar-shop-card {
-  flex: 0 0 min(82vw, 290px);
+  flex: 0 0 clamp(214px, 72vw, 248px);
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
-  gap: .8rem;
-  min-height: 214px;
-  padding: .9rem;
-  border-radius: 18px;
+  gap: .58rem;
+  min-height: 178px;
+  padding: .72rem;
+  border-radius: 16px;
   background: #fff;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.065);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
@@ -2437,15 +2473,15 @@ body {
 
 .similar-shop-top {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: .75rem;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: .62rem;
   align-items: center;
 }
 
 .similar-shop-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   object-fit: cover;
   background: #f1f5f9;
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -2465,9 +2501,9 @@ body {
 .similar-shop-name {
   margin: 0;
   color: #172033;
-  font-size: .98rem;
+  font-size: .9rem;
   font-weight: 900;
-  line-height: 1.45;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2477,8 +2513,8 @@ body {
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
   background: rgba(16, 185, 129, 0.12);
   color: #059669;
@@ -2489,13 +2525,13 @@ body {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-top: .3rem;
+  margin-top: .24rem;
   padding: .16rem .48rem;
   border-radius: 999px;
-  background: #f8fafc;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  color: #64748b;
-  font-size: .66rem;
+  background: #fffbeb;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #92400e;
+  font-size: .68rem;
   font-weight: 800;
 }
 
@@ -2504,10 +2540,22 @@ body {
 }
 
 .similar-shop-category {
-  margin: .2rem 0 0;
+  margin: .16rem 0 0;
   color: #64748b;
-  font-size: .78rem;
+  font-size: .72rem;
   font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.similar-shop-note {
+  margin: -.18rem 0 0;
+  min-height: 16px;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1.6;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2516,7 +2564,7 @@ body {
 .similar-shop-meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .55rem;
+  gap: .45rem;
 }
 
 .similar-shop-chip {
@@ -2524,13 +2572,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: .35rem;
-  min-height: 34px;
-  padding: .42rem .55rem;
-  border-radius: 12px;
+  min-height: 30px;
+  padding: .34rem .48rem;
+  border-radius: 11px;
   background: #f8fafc;
   border: 1px solid rgba(226, 232, 240, 0.9);
   color: #475569;
-  font-size: .76rem;
+  font-size: .7rem;
   font-weight: 800;
   min-width: 0;
 }
@@ -2557,16 +2605,45 @@ body {
   justify-content: center;
   gap: .45rem;
   width: 100%;
-  min-height: 42px;
+  min-height: 36px;
   margin-top: auto;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #172033;
   color: #fff;
-  font-size: .86rem;
+  font-size: .78rem;
   font-weight: 900;
   text-decoration: none;
   box-shadow: 0 12px 24px rgba(23, 32, 51, 0.14);
   transition: transform .18s ease, background .18s ease;
+}
+
+.similar-shops-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .36rem;
+  padding-top: .15rem;
+}
+
+.similar-shops-dot {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(100, 116, 139, .28);
+  cursor: pointer;
+  transition: width .2s ease, background .2s ease, opacity .2s ease;
+}
+
+.similar-shops-dot.is-active {
+  width: 18px;
+  background: var(--primary);
+}
+
+.similar-shops-dot:focus-visible {
+  outline: 2px solid rgba(124, 131, 253, .35);
+  outline-offset: 3px;
 }
 
 .similar-shop-action:hover {
@@ -2621,8 +2698,18 @@ body {
     padding: 1.15rem;
   }
 
+  .similar-shops-carousel {
+    margin-inline: -1.15rem;
+  }
+
+  .similar-shops-list {
+    gap: .8rem;
+    padding-inline: 1.15rem;
+    scroll-padding-inline: 1.15rem;
+  }
+
   .similar-shop-card {
-    flex-basis: 300px;
+    flex-basis: 255px;
   }
 }
 
@@ -2635,39 +2722,59 @@ body {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     overflow: visible;
-    padding-bottom: .1rem;
+    padding: .1rem 0;
+  }
+
+  .similar-shops-carousel {
+    margin-inline: 0;
+  }
+
+  .similar-shops-carousel::before,
+  .similar-shops-carousel::after,
+  .similar-shops-dots {
+    display: none;
   }
 
   .similar-shop-card {
     min-width: 0;
+    min-height: 188px;
   }
 }
 
 @media (min-width: 1180px) {
   .similar-shops-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 420px) {
   .similar-shops-section {
     width: 100%;
-    padding: 0 .75rem;
+    padding: 0 .7rem;
   }
 
   .similar-shops-shell {
     border-radius: 18px;
-    padding: .85rem;
+    padding: .78rem;
   }
 
   .similar-shops-head {
     flex-direction: column;
-    gap: .55rem;
+    gap: .46rem;
+  }
+
+  .similar-shops-carousel {
+    margin-inline: -.78rem;
+  }
+
+  .similar-shops-list {
+    padding-inline: .78rem;
+    scroll-padding-inline: .78rem;
   }
 
   .similar-shop-card {
-    flex-basis: 84vw;
-    min-height: 206px;
+    flex-basis: 72vw;
+    min-height: 174px;
   }
 }
 
@@ -3028,7 +3135,10 @@ body {
       </div>
       <span class="similar-shops-context" id="similarShopsContext">بر اساس دسته‌بندی و موقعیت</span>
     </div>
-    <div class="similar-shops-list" id="similarShopsList" aria-live="polite"></div>
+    <div class="similar-shops-carousel">
+      <div class="similar-shops-list" id="similarShopsList" aria-live="polite"></div>
+    </div>
+    <div class="similar-shops-dots" id="similarShopsDots" aria-label="اسلایدهای فروشگاه‌های مشابه"></div>
     <div class="similar-shops-empty" id="similarShopsEmpty" hidden>
       <span class="similar-shops-empty-icon" aria-hidden="true">
         <i class="fas fa-magnifying-glass"></i>
@@ -4520,8 +4630,132 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
 const similarShopState = {
   current: {},
-  lastKey: ''
+  lastKey: '',
+  sliderRaf: 0
 };
+
+const SIMILAR_SHOPS_DEMO = [
+  {
+    id: 'demo-sahar-boutique',
+    shopUrl: 'sahar-boutique',
+    name: 'بوتیک سحر',
+    category: 'پوشاک زنانه',
+    subcategory: 'مانتو و استایل روزمره',
+    city: 'تهران',
+    address: 'تهران، ونک، خیابان خدامی',
+    image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=240&q=80',
+    rating: 4.8,
+    reviewCount: 126,
+    verified: true,
+    sponsored: true,
+    shortInfo: 'ارسال سریع در محدوده ونک'
+  },
+  {
+    id: 'demo-lavender-style',
+    shopUrl: 'lavender-style',
+    name: 'استایل لاوندر',
+    category: 'پوشاک زنانه',
+    subcategory: 'لباس مینیمال و مجلسی',
+    city: 'تهران',
+    address: 'تهران، سعادت‌آباد، سرو غربی',
+    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=240&q=80',
+    rating: 4.7,
+    reviewCount: 98,
+    verified: true,
+    sponsored: false,
+    shortInfo: 'کالکشن‌های محدود و خوش‌دوخت'
+  },
+  {
+    id: 'demo-rastin-shoes',
+    shopUrl: 'rastin-shoes',
+    name: 'کفش راستین',
+    category: 'کیف و کفش',
+    subcategory: 'کفش اسپرت و رسمی',
+    city: 'تهران',
+    address: 'تهران، جردن، بلوار گلشهر',
+    image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=240&q=80',
+    rating: 4.6,
+    reviewCount: 74,
+    verified: false,
+    sponsored: false,
+    shortInfo: 'سایزبندی کامل و تعویض آسان'
+  },
+  {
+    id: 'demo-narenj-accessory',
+    shopUrl: 'narenj-accessory',
+    name: 'اکسسوری نارنج',
+    category: 'اکسسوری',
+    subcategory: 'زیورآلات و کیف کوچک',
+    city: 'تهران',
+    address: 'تهران، یوسف‌آباد، خیابان جهان‌آرا',
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=240&q=80',
+    rating: 4.9,
+    reviewCount: 143,
+    verified: true,
+    sponsored: false,
+    shortInfo: 'بسته‌بندی هدیه و محصولات دست‌ساز'
+  },
+  {
+    id: 'demo-mehr-kids',
+    shopUrl: 'mehr-kids',
+    name: 'مهر کودک',
+    category: 'پوشاک کودک',
+    subcategory: 'لباس کودک و نوجوان',
+    city: 'تهران',
+    address: 'تهران، شهرک غرب، ایران‌زمین',
+    image: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=240&q=80',
+    rating: 4.5,
+    reviewCount: 61,
+    verified: false,
+    sponsored: false,
+    shortInfo: 'پارچه‌های نرم و مناسب فصل'
+  },
+  {
+    id: 'demo-aria-denim',
+    shopUrl: 'aria-denim',
+    name: 'آریا دنیم',
+    category: 'پوشاک مردانه',
+    subcategory: 'جین، هودی و تی‌شرت',
+    city: 'تهران',
+    address: 'تهران، هفت‌تیر، خیابان مفتح',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=240&q=80',
+    rating: 4.4,
+    reviewCount: 89,
+    verified: true,
+    sponsored: true,
+    shortInfo: 'استایل شهری با قیمت منطقی'
+  },
+  {
+    id: 'demo-rosha-bag',
+    shopUrl: 'rosha-bag',
+    name: 'کیف روشا',
+    category: 'کیف و کفش',
+    subcategory: 'کیف روزمره و اداری',
+    city: 'تهران',
+    address: 'تهران، میرداماد، میدان مادر',
+    image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=240&q=80',
+    rating: 4.7,
+    reviewCount: 112,
+    verified: true,
+    sponsored: false,
+    shortInfo: 'چرم مصنوعی با دوخت تمیز'
+  },
+  {
+    id: 'demo-nika-scarf',
+    shopUrl: 'nika-scarf',
+    name: 'شال و روسری نیکا',
+    category: 'پوشاک زنانه',
+    subcategory: 'شال، روسری و اکسسوری',
+    city: 'تهران',
+    address: 'تهران، کریمخان، خیابان خردمند',
+    image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=240&q=80',
+    rating: 4.6,
+    reviewCount: 77,
+    verified: false,
+    sponsored: false,
+    shortInfo: 'طرح‌های ساده برای استفاده روزانه'
+  }
+];
 
 function normalizeSimilarText(value = '') {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -4585,7 +4819,7 @@ function buildSimilarContextLabel() {
   if (category && city) return `${category} در ${city}`;
   if (category) return `دسته ${category}`;
   if (city) return `نزدیک ${city}`;
-  return 'بر اساس دسته‌بندی و موقعیت';
+  return 'پوشاک، کیف و اکسسوری نزدیک شما';
 }
 
 function normalizeServiceSimilarShop(item = {}) {
@@ -4631,6 +4865,30 @@ function normalizeLegacySimilarShop(item = {}) {
   };
 }
 
+function normalizeDemoSimilarShop(item = {}) {
+  return {
+    id: normalizeSimilarText(item.id),
+    shopUrl: normalizeSimilarText(item.shopUrl),
+    sellerId: normalizeSimilarText(item.sellerId || item.id),
+    name: normalizeSimilarText(item.name || 'فروشگاه'),
+    category: normalizeSimilarText(item.category || 'پوشاک'),
+    subcategory: normalizeSimilarText(item.subcategory || ''),
+    city: normalizeSimilarText(item.city || 'تهران'),
+    address: normalizeSimilarText(item.address || ''),
+    image: normalizeSimilarText(item.image || '/assets/images/shop-placeholder.svg'),
+    rating: Number(item.rating || 0) || 0,
+    reviewCount: Number(item.reviewCount || 0) || 0,
+    verified: Boolean(item.verified),
+    sponsored: Boolean(item.sponsored),
+    shortInfo: normalizeSimilarText(item.shortInfo || ''),
+    href: resolveShopLink(item.shopUrl)
+  };
+}
+
+function getDemoSimilarShops() {
+  return SIMILAR_SHOPS_DEMO.map(normalizeDemoSimilarShop);
+}
+
 function isCurrentSimilarShop(item = {}) {
   const current = similarShopState.current;
   const currentUrl = normalizeSimilarKey(current.shopUrl);
@@ -4672,10 +4930,85 @@ function resolveSimilarShopLocation(item = {}) {
   return itemCity || normalizeSimilarText(item.address).split(/[،,|-]/).slice(0, 2).join('، ') || 'موقعیت ثبت نشده';
 }
 
+function getActiveSimilarShopIndex() {
+  const list = document.getElementById('similarShopsList');
+  if (!list) return 0;
+  const cards = Array.from(list.querySelectorAll('.similar-shop-card'));
+  if (!cards.length) return 0;
+
+  const listRect = list.getBoundingClientRect();
+  const viewportCenter = listRect.left + (listRect.width / 2);
+  return cards.reduce((activeIndex, card, index) => {
+    const cardRect = card.getBoundingClientRect();
+    const cardCenter = cardRect.left + (cardRect.width / 2);
+    const currentDistance = Math.abs(cardCenter - viewportCenter);
+    const activeCard = cards[activeIndex];
+    const activeRect = activeCard.getBoundingClientRect();
+    const activeCenter = activeRect.left + (activeRect.width / 2);
+    return currentDistance < Math.abs(activeCenter - viewportCenter) ? index : activeIndex;
+  }, 0);
+}
+
+function updateSimilarShopDots(activeIndex = getActiveSimilarShopIndex()) {
+  const dots = document.getElementById('similarShopsDots');
+  if (!dots) return;
+  Array.from(dots.children).forEach((dot, index) => {
+    const isActive = index === activeIndex;
+    dot.classList.toggle('is-active', isActive);
+    dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+  });
+}
+
+function bindSimilarShopSlider() {
+  const list = document.getElementById('similarShopsList');
+  if (!list || list.dataset.sliderBound === 'true') return;
+  list.dataset.sliderBound = 'true';
+
+  list.addEventListener('scroll', () => {
+    if (similarShopState.sliderRaf) return;
+    similarShopState.sliderRaf = requestAnimationFrame(() => {
+      similarShopState.sliderRaf = 0;
+      updateSimilarShopDots();
+    });
+  }, { passive: true });
+
+  window.addEventListener('resize', () => updateSimilarShopDots(), { passive: true });
+}
+
+function renderSimilarShopDots(count = 0) {
+  const dots = document.getElementById('similarShopsDots');
+  const list = document.getElementById('similarShopsList');
+  if (!dots || !list) return;
+
+  dots.innerHTML = '';
+  if (count <= 1) {
+    dots.hidden = true;
+    return;
+  }
+
+  dots.hidden = false;
+  Array.from({ length: count }).forEach((_, index) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'similar-shops-dot';
+    dot.setAttribute('aria-label', `نمایش فروشگاه ${toFaNumber(index + 1)}`);
+    dot.addEventListener('click', () => {
+      const card = list.querySelectorAll('.similar-shop-card')[index];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }
+      updateSimilarShopDots(index);
+    });
+    dots.appendChild(dot);
+  });
+  updateSimilarShopDots(0);
+}
+
 function renderSimilarShops(items = []) {
   const section = document.getElementById('similarShopsSection');
   const list = document.getElementById('similarShopsList');
   const empty = document.getElementById('similarShopsEmpty');
+  const dots = document.getElementById('similarShopsDots');
   const context = document.getElementById('similarShopsContext');
   if (!section || !list || !empty) return;
 
@@ -4683,6 +5016,7 @@ function renderSimilarShops(items = []) {
 
   if (!items.length) {
     list.innerHTML = '';
+    if (dots) dots.hidden = true;
     empty.hidden = false;
     section.hidden = false;
     return;
@@ -4696,6 +5030,7 @@ function renderSimilarShops(items = []) {
     const location = escapeSimilarHtml(resolveSimilarShopLocation(item));
     const image = escapeSimilarHtml(item.image || '/assets/images/shop-placeholder.svg');
     const href = escapeSimilarHtml(item.href || resolveShopLink(item.shopUrl));
+    const shortInfo = escapeSimilarHtml(item.shortInfo || '');
     const rating = item.rating > 0
       ? toFaNumber(item.rating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
       : 'جدید';
@@ -4713,9 +5048,10 @@ function renderSimilarShops(items = []) {
               ${item.verified ? '<span class="similar-shop-verified" title="تایید شده" aria-label="تایید شده"><i class="fas fa-check"></i></span>' : ''}
             </div>
             <p class="similar-shop-category" title="${category}">${category}</p>
-            <span class="similar-shop-sponsored" ${item.sponsored ? '' : 'hidden'}>Sponsored</span>
+            <span class="similar-shop-sponsored" ${item.sponsored ? '' : 'hidden'}>⭐ ویژه</span>
           </div>
         </div>
+        <p class="similar-shop-note" title="${shortInfo}">${shortInfo}</p>
         <div class="similar-shop-meta">
           <span class="similar-shop-chip" aria-label="امتیاز">
             <i class="fas fa-star" aria-hidden="true"></i>
@@ -4733,6 +5069,8 @@ function renderSimilarShops(items = []) {
       </article>
     `;
   }).join('');
+  bindSimilarShopSlider();
+  renderSimilarShopDots(items.length);
 }
 
 async function fetchServiceSimilarShops() {
@@ -4740,7 +5078,7 @@ async function fetchServiceSimilarShops() {
   if (!category) return [];
   const params = new URLSearchParams();
   params.set('category', category);
-  params.set('limit', '5');
+  params.set('limit', '8');
   if (similarShopState.current.shopUrl) params.set('excludeShopUrl', similarShopState.current.shopUrl);
   if (similarShopState.current.sellerId) params.set('excludeSellerId', similarShopState.current.sellerId);
 
@@ -4785,7 +5123,10 @@ async function loadSimilarShops() {
       fetchServiceSimilarShops(),
       fetchLegacySimilarShops()
     ]);
-    const combined = settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
+    const combined = [
+      ...settled.flatMap(result => result.status === 'fulfilled' ? result.value : []),
+      ...getDemoSimilarShops()
+    ];
     const seen = new Set();
     const scored = combined
       .filter(item => item && !isCurrentSimilarShop(item))
@@ -4798,12 +5139,12 @@ async function loadSimilarShops() {
         return true;
       })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 8);
 
     renderSimilarShops(scored);
   } catch (error) {
     console.warn('loadSimilarShops failed:', error);
-    renderSimilarShops([]);
+    renderSimilarShops(getDemoSimilarShops().slice(0, 8));
   }
 }
 
