@@ -7,6 +7,11 @@ const paymentSchema = new mongoose.Schema({
     ref: 'AdOrder',
     required: false, // فقط برای پرداخت تبلیغات ویژه
   },
+  similarPromotionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'SimilarShopPromotion',
+    required: false,
+  },
   planSlug: {
     type: String,
     required: false, // فقط برای پرداخت اشتراک
@@ -36,7 +41,7 @@ const paymentSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['ad', 'sub'],
+    enum: ['ad', 'sub', 'similar_promotion'],
     required: true, // نوع پرداخت: ad = تبلیغ | sub = اشتراک
   },
   createdAt: {

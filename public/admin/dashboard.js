@@ -9217,10 +9217,10 @@ const similarPromotionStatusLabels = {
 };
 
 const similarPromotionPaymentLabels = {
-  pending: 'در انتظار پرداخت',
-  submitted: 'رسید ارسال شده',
+  pending: 'در انتظار پرداخت آنلاین',
+  submitted: 'در انتظار تایید پرداخت',
   verified: 'تایید پرداخت',
-  rejected: 'رد پرداخت',
+  rejected: 'پرداخت ناموفق',
   waived: 'رایگان'
 };
 
@@ -9440,11 +9440,6 @@ function renderSimilarPromotionRequests() {
     const id = similarPromotionId(item);
     const status = item.status || 'pending';
     const paymentStatus = item.paymentStatus || 'pending';
-    const proof = item.paymentProof || {};
-    const proofLink = proof.fileUrl
-      ? `<a href="${escapeHtml(buildUploadsUrl(proof.fileUrl))}" target="_blank" rel="noopener">مشاهده رسید</a>`
-      : '';
-    const proofText = proof.text ? `<span>${escapeHtml(proof.text)}</span>` : '';
     const metrics = item.metrics || {};
     const canPause = status === 'approved';
     const canResume = status === 'paused';
@@ -9471,7 +9466,7 @@ function renderSimilarPromotionRequests() {
             </div>
             <p style="margin:0;color:#64748b;line-height:1.8;">${escapeHtml(item.shopSnapshot?.categoryName || '')} ${similarPromotionShopPhone(item) ? ` | ${escapeHtml(similarPromotionShopPhone(item))}` : ''}</p>
             <p style="margin:0.35rem 0;color:#64748b;">شروع: ${escapeHtml(formatDateTime(item.startAt))} | پایان: ${escapeHtml(formatDateTime(item.endAt))}</p>
-            <p style="margin:0.35rem 0;color:#475569;">رسید پرداخت: ${proofLink || proofText || 'ثبت نشده'}</p>
+            <p style="margin:0.35rem 0;color:#475569;">روش پرداخت: درگاه آنلاین بانکی</p>
           </div>
         </div>
         <div class="similar-promotions-request__controls">

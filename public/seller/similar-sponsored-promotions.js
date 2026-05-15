@@ -41,10 +41,10 @@
   };
 
   const paymentLabels = {
-    pending: 'در انتظار پرداخت',
-    submitted: 'رسید ارسال شده',
+    pending: 'در انتظار پرداخت آنلاین',
+    submitted: 'در انتظار تایید پرداخت',
     verified: 'پرداخت تایید شد',
-    rejected: 'پرداخت رد شد',
+    rejected: 'پرداخت ناموفق',
     waived: 'رایگان'
   };
 
@@ -181,6 +181,9 @@
       .similar-sponsored-modal label{display:grid;gap:.38rem;color:#475569;font-weight:800;font-size:.82rem;margin-bottom:.75rem}
       .similar-sponsored-modal textarea,.similar-sponsored-modal input{border:1px solid #cbd5e1;border-radius:12px;padding:.72rem;font:inherit}
       .similar-sponsored-modal textarea{min-height:6rem;resize:vertical}
+      .similar-sponsored-payment-note{display:grid;gap:.35rem;margin:.85rem 0 1rem;padding:.85rem;border-radius:16px;border:1px solid #bae6fd;background:linear-gradient(135deg,#f0f9ff,#ecfdf5);color:#0f172a}
+      .similar-sponsored-payment-note strong{font-size:.9rem;font-weight:900;color:#0369a1}
+      .similar-sponsored-payment-note span{font-size:.82rem;line-height:1.9;color:#475569}
       .similar-sponsored-modal__actions{display:flex;gap:.6rem;flex-wrap:wrap}
       @media(min-width:720px){.similar-sponsored-widget__plans{grid-template-columns:repeat(2,minmax(0,1fr))}.similar-sponsored-plan.featured{grid-column:span 2}.similar-sponsored-card{padding:1.15rem}.similar-sponsored-request__grid{grid-template-columns:repeat(4,1fr)}}
       @media(max-width:640px){.similar-sponsored-widget__header{align-items:flex-start}.similar-sponsored-btn{width:100%}.similar-sponsored-plan__meta{grid-template-columns:1fr}.similar-sponsored-modal{align-items:flex-end;padding:.75rem}.similar-sponsored-modal__dialog{border-radius:18px 18px 10px 10px}.similar-sponsored-modal__actions{flex-direction:column}}
@@ -223,16 +226,12 @@
             </div>
             <button type="button" class="similar-sponsored-btn secondary" data-similar-sponsored-close>بستن</button>
           </div>
-          <label>
-            <span>توضیح یا کد پیگیری پرداخت</span>
-            <textarea name="paymentProofText" placeholder="در صورت پرداخت، شماره پیگیری یا توضیح رسید را وارد کنید"></textarea>
-          </label>
-          <label>
-            <span>فایل رسید پرداخت (اختیاری)</span>
-            <input type="file" name="paymentProof" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
-          </label>
+          <div class="similar-sponsored-payment-note">
+            <strong>پرداخت فقط آنلاین انجام می‌شود</strong>
+            <span>بعد از ثبت درخواست، به درگاه پرداخت هدایت می‌شوید. نمایش تبلیغ پس از پرداخت موفق و تایید مدیر فعال خواهد شد.</span>
+          </div>
           <div class="similar-sponsored-modal__actions">
-            <button type="submit" class="similar-sponsored-btn">ثبت درخواست تبلیغ</button>
+            <button type="submit" class="similar-sponsored-btn">ثبت درخواست و پرداخت آنلاین</button>
             <button type="button" class="similar-sponsored-btn secondary" data-similar-sponsored-close>انصراف</button>
           </div>
         </form>
@@ -362,11 +361,10 @@
     event.preventDefault();
     const plan = state.selectedPlan;
     if (!plan) return;
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData();
     formData.set('planTier', plan.tier);
     formData.set('durationUnit', plan.durationUnit);
-    setMessage('در حال ارسال درخواست...');
+    setMessage('در حال ثبت درخواست و آماده‌سازی درگاه پرداخت...');
     try {
       const token = await csrfToken();
       const res = await fetch(`${API_BASE}/similar-shop-promotions/requests`, {
@@ -380,12 +378,34 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در ثبت درخواست');
+      const promotionId = data.promotion?.id || data.promotion?._id;
+      if (!promotionId) throw new Error('شناسه درخواست تبلیغ دریافت نشد.');
+
+      const paymentRes = await fetch(`${API_BASE}/payment/request`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: authHeaders({
+          'Content-Type': 'application/json',
+          ...(token ? { 'X-CSRF-Token': token } : {})
+        }),
+        body: JSON.stringify({ similarPromotionId: promotionId })
+      });
+      const paymentData = await paymentRes.json().catch(() => ({}));
+      if (!paymentRes.ok || paymentData.success === false) {
+        throw new Error(paymentData.message || 'خطا در اتصال به درگاه پرداخت');
+      }
+
       closeModal();
       await loadData();
-      setMessage(data.message || 'درخواست تبلیغ برای بررسی مدیر ارسال شد.', 'success');
+      if (paymentData.url) {
+        setMessage(paymentData.message || 'در حال انتقال به درگاه پرداخت...', 'success');
+        window.location.assign(paymentData.url);
+        return;
+      }
+      setMessage(paymentData.message || 'درخواست ثبت شد، اما لینک درگاه دریافت نشد.', 'success');
     } catch (err) {
       console.error('similar sponsored submitRequest failed:', err);
-      setMessage(err.message || 'خطا در ثبت درخواست', 'error');
+      setMessage(err.message || 'خطا در ثبت درخواست یا اتصال به درگاه', 'error');
     }
   }
 

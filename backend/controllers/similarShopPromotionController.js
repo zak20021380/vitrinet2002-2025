@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
 
 const SimilarPromotionPlan = require('../models/SimilarPromotionPlan');
@@ -48,15 +46,6 @@ const PLAN_ORDER = {
 
 const PAYMENT_STATUSES = ['pending', 'submitted', 'verified', 'rejected', 'waived'];
 const ADMIN_ACTIONS = ['approve', 'reject', 'pause', 'resume', 'remove', 'update'];
-const PROOF_UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'promotion-proofs');
-const MAX_PROOF_SIZE = 5 * 1024 * 1024;
-const ALLOWED_PROOF_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.pdf']);
-const ALLOWED_PROOF_MIMES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'application/pdf'
-]);
 
 function normaliseText(value = '', maxLength = 500) {
   const cleaned = String(value || '')
@@ -74,10 +63,6 @@ function bodyFrom(req) {
 }
 
 function firstFieldValue(value) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function firstFileValue(value) {
   return Array.isArray(value) ? value[0] : value;
 }
 
@@ -221,34 +206,6 @@ async function findShopSnapshotForSeller(seller) {
         500
       )
     }
-  };
-}
-
-async function storePaymentProofFile(file) {
-  if (!file || !file.size) return null;
-  if (file.size > MAX_PROOF_SIZE) {
-    const err = new Error('حجم فایل رسید نباید بیشتر از ۵ مگابایت باشد.');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const ext = path.extname(file.originalFilename || file.name || '').toLowerCase();
-  const mime = String(file.mimetype || file.type || '').toLowerCase();
-  if (!ALLOWED_PROOF_EXTS.has(ext) || (mime && !ALLOWED_PROOF_MIMES.has(mime))) {
-    const err = new Error('فرمت رسید پرداخت معتبر نیست.');
-    err.statusCode = 400;
-    throw err;
-  }
-
-  await fs.promises.mkdir(PROOF_UPLOAD_DIR, { recursive: true });
-  const fileName = `proof-${Date.now()}-${Math.floor(Math.random() * 100000)}${ext}`;
-  const targetPath = path.join(PROOF_UPLOAD_DIR, fileName);
-  await fs.promises.copyFile(file.filepath || file.path, targetPath);
-
-  return {
-    fileUrl: `promotion-proofs/${fileName}`,
-    fileName: normaliseText(file.originalFilename || file.name || fileName, 180),
-    uploadedAt: new Date()
   };
 }
 
@@ -404,9 +361,6 @@ exports.createSellerRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: 'پلن انتخابی فعال نیست.' });
     }
 
-    const proofFile = firstFileValue(req.files?.paymentProof || req.files?.proof || null);
-    const storedProof = await storePaymentProofFile(proofFile);
-    const proofText = normaliseText(firstFieldValue(body.paymentProofText || body.proofText || ''), 1000);
     const { serviceShopId, snapshot } = await findShopSnapshotForSeller(seller);
 
     const promotion = await SimilarShopPromotion.create({
@@ -418,11 +372,8 @@ exports.createSellerRequest = async (req, res) => {
       planTitle: plan.title,
       price: plan.price,
       slotLimit: plan.slotLimit || (planTier === 'priority' ? 1 : 3),
-      paymentStatus: (proofText || storedProof) ? 'submitted' : 'pending',
-      paymentProof: {
-        text: proofText,
-        ...(storedProof || {})
-      },
+      paymentStatus: 'pending',
+      paymentProof: {},
       status: 'pending',
       priorityOrder: planTier === 'priority' ? 10 : 100,
       shopSnapshot: snapshot
@@ -430,7 +381,7 @@ exports.createSellerRequest = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'درخواست تبلیغ ثبت شد و پس از تایید مدیر فعال می‌شود.',
+      message: 'درخواست تبلیغ ثبت شد. برای تکمیل فرایند به درگاه پرداخت هدایت می‌شوید.',
       promotion: serializePromotion(promotion)
     });
   } catch (err) {
@@ -526,6 +477,12 @@ exports.updateAdminRequest = async (req, res) => {
     }
 
     if (action === 'approve') {
+      if (!['verified', 'waived'].includes(promotion.paymentStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: 'قبل از تایید تبلیغ، پرداخت آنلاین باید با موفقیت انجام شده باشد.'
+        });
+      }
       const startAt = requestedStart || promotion.startAt || now;
       const endAt = requestedEnd || promotion.endAt || addDays(startAt, promotion.durationDays);
       if (endAt <= startAt) {
