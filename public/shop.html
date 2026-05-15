@@ -2403,6 +2403,8 @@ body {
 .similar-shops-carousel {
   position: relative;
   margin-inline: -1rem;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 .similar-shops-carousel::before,
@@ -2431,24 +2433,39 @@ body {
   display: flex;
   gap: .75rem;
   overflow-x: auto;
+  overflow-y: hidden;
+  direction: rtl;
+  overscroll-behavior-x: contain;
   overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
   scroll-snap-type: inline mandatory;
   scroll-behavior: smooth;
   scroll-padding-inline: 1rem;
   -webkit-overflow-scrolling: touch;
   padding: .18rem 1rem .66rem;
   scrollbar-width: none;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y pinch-zoom;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .similar-shops-list::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
+}
+
+.similar-shops-list.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .similar-shop-card {
   flex: 0 0 clamp(292px, 84vw, 360px);
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
   display: grid;
   grid-template-columns: 68px minmax(0, 1fr);
   gap: .78rem;
@@ -2460,6 +2477,19 @@ body {
   border: 1px solid rgba(124, 131, 253, 0.12);
   box-shadow: 0 12px 35px rgba(28, 44, 90, 0.08);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  touch-action: pan-x pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.similar-shop-card *,
+.similar-shop-card img {
+  -webkit-user-drag: none;
+}
+
+.similar-shop-card a {
+  touch-action: manipulation;
 }
 
 .similar-shop-card:hover {
@@ -4708,7 +4738,13 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 const similarShopState = {
   current: {},
   lastKey: '',
-  sliderRaf: 0
+  sliderRaf: 0,
+  gesture: {
+    startX: 0,
+    startY: 0,
+    movedHorizontally: false,
+    resetTimer: 0
+  }
 };
 
 const SIMILAR_SHOPS_DEMO = [
@@ -5040,6 +5076,46 @@ function bindSimilarShopSlider() {
   const list = document.getElementById('similarShopsList');
   if (!list || list.dataset.sliderBound === 'true') return;
   list.dataset.sliderBound = 'true';
+
+  const gesture = similarShopState.gesture;
+  const resetGestureSoon = () => {
+    clearTimeout(gesture.resetTimer);
+    gesture.resetTimer = window.setTimeout(() => {
+      list.classList.remove('is-dragging');
+      gesture.movedHorizontally = false;
+    }, 380);
+  };
+  const getTouchPoint = (event) => event.touches?.[0] || event.changedTouches?.[0] || event;
+
+  list.addEventListener('touchstart', (event) => {
+    const point = getTouchPoint(event);
+    gesture.startX = point.clientX || 0;
+    gesture.startY = point.clientY || 0;
+    gesture.movedHorizontally = false;
+    clearTimeout(gesture.resetTimer);
+  }, { passive: true });
+
+  list.addEventListener('touchmove', (event) => {
+    const point = getTouchPoint(event);
+    const deltaX = Math.abs((point.clientX || 0) - gesture.startX);
+    const deltaY = Math.abs((point.clientY || 0) - gesture.startY);
+    if (deltaX > 8 && deltaX > deltaY * 1.15) {
+      gesture.movedHorizontally = true;
+      list.classList.add('is-dragging');
+    }
+  }, { passive: true });
+
+  list.addEventListener('touchend', resetGestureSoon, { passive: true });
+  list.addEventListener('touchcancel', resetGestureSoon, { passive: true });
+
+  list.addEventListener('click', (event) => {
+    if (!gesture.movedHorizontally) return;
+    event.preventDefault();
+    event.stopPropagation();
+    resetGestureSoon();
+  }, true);
+
+  list.addEventListener('dragstart', (event) => event.preventDefault());
 
   list.addEventListener('scroll', () => {
     if (similarShopState.sliderRaf) return;
