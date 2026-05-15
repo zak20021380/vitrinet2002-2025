@@ -126,42 +126,46 @@
     style.id = 'similar-sponsored-seller-styles';
     style.textContent = `
       .similar-sponsored-widget{direction:rtl;margin:1.25rem 0 0;font-family:inherit}
-      .similar-sponsored-card{position:relative;overflow:hidden;border:1px solid rgba(14,165,233,.2);border-radius:22px;background:linear-gradient(155deg,#082f49 0%,#0f766e 52%,#16a34a 100%);box-shadow:0 18px 44px rgba(15,118,110,.2);color:#fff;padding:1rem}
-      .similar-sponsored-card::before{content:'';position:absolute;inset:-40% auto auto -18%;width:260px;height:260px;border-radius:999px;background:rgba(255,255,255,.14);filter:blur(4px)}
-      .similar-sponsored-card::after{content:'';position:absolute;inset:auto -26% -48% auto;width:320px;height:320px;border-radius:999px;background:rgba(125,211,252,.18);filter:blur(2px)}
+      .similar-sponsored-card{position:relative;overflow:hidden;border:1px solid rgba(16,185,129,.14);border-radius:24px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);box-shadow:0 16px 42px rgba(15,23,42,.08);color:#0f172a;padding:1rem}
+      .similar-sponsored-card::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#10b981,#0ea5e9)}
+      .similar-sponsored-card::after{content:'';position:absolute;inset:auto -80px -90px auto;width:210px;height:210px;border-radius:999px;background:radial-gradient(circle,rgba(16,185,129,.12),rgba(14,165,233,0));pointer-events:none}
       .similar-sponsored-card>*{position:relative;z-index:1}
-      .similar-sponsored-widget__header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
-      .similar-sponsored-kicker{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);padding:.22rem .65rem;color:#d1fae5;font-size:.72rem;font-weight:900;margin-bottom:.6rem}
-      .similar-sponsored-widget h3{margin:0 0 .35rem;color:#fff;font-size:1.2rem;font-weight:900;line-height:1.55}
-      .similar-sponsored-widget p{margin:0;color:rgba(255,255,255,.82);line-height:1.85;font-size:.86rem}
-      .similar-sponsored-refresh{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;white-space:nowrap}
-      .similar-sponsored-alert{display:flex;gap:.55rem;align-items:flex-start;margin:.85rem 0;padding:.72rem;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(255,255,255,.11);color:#ecfeff;font-size:.8rem;line-height:1.75}
+      .similar-sponsored-widget__header{display:flex;gap:.85rem;align-items:flex-start;margin-bottom:.9rem}
+      .similar-sponsored-head-icon{display:grid;place-items:center;width:48px;height:48px;min-width:48px;border-radius:16px;background:linear-gradient(145deg,#dcfce7,#e0f2fe);color:#059669;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(16,185,129,.14);font-size:1.35rem}
+      .similar-sponsored-kicker{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;background:#ecfdf5;border:1px solid #bbf7d0;padding:.22rem .65rem;color:#047857;font-size:.7rem;font-weight:900;margin-bottom:.5rem}
+      .similar-sponsored-widget h3{margin:0 0 .28rem;color:#0f172a;font-size:1.14rem;font-weight:900;line-height:1.55}
+      .similar-sponsored-widget p{margin:0;color:#64748b;line-height:1.85;font-size:.84rem}
+      .similar-sponsored-alert{display:flex;gap:.55rem;align-items:flex-start;margin:.85rem 0;padding:.72rem;border:1px solid #bae6fd;border-radius:16px;background:linear-gradient(135deg,#f0f9ff,#ecfdf5);color:#0369a1;font-size:.79rem;line-height:1.75;font-weight:700}
       .similar-sponsored-widget__plans{display:grid;grid-template-columns:1fr;gap:.75rem;margin-top:.8rem}
-      .similar-sponsored-plan{border:1px solid rgba(255,255,255,.22);border-radius:16px;background:rgba(255,255,255,.96);color:#0f172a;padding:.9rem;box-shadow:0 10px 24px rgba(15,23,42,.1)}
-      .similar-sponsored-plan.priority{border-color:#fde68a;background:linear-gradient(145deg,#fff 0%,#fffbeb 100%)}
+      .similar-sponsored-plan{position:relative;overflow:hidden;border:1px solid #e2e8f0;border-radius:18px;background:#fff;color:#0f172a;padding:.95rem;box-shadow:0 10px 28px rgba(15,23,42,.06);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+      .similar-sponsored-plan:hover{transform:translateY(-2px);border-color:rgba(14,165,233,.35);box-shadow:0 16px 34px rgba(15,23,42,.1)}
+      .similar-sponsored-plan::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#10b981,#0ea5e9)}
+      .similar-sponsored-plan.priority{border-color:#fde68a;background:linear-gradient(145deg,#ffffff 0%,#fffdf3 100%)}
+      .similar-sponsored-plan.priority::before{background:linear-gradient(90deg,#f59e0b,#10b981,#0ea5e9)}
       .similar-sponsored-plan__top,.similar-sponsored-request__top{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;margin-bottom:.55rem}
-      .similar-sponsored-plan strong,.similar-sponsored-request strong{display:block;color:#0f172a;font-size:.93rem;line-height:1.6}
-      .similar-sponsored-pill{display:inline-flex;align-items:center;border-radius:999px;padding:.2rem .58rem;background:#e0f2fe;color:#0369a1;font-size:.72rem;font-weight:900}
-      .similar-sponsored-pill.priority{background:#fef3c7;color:#b45309}
+      .similar-sponsored-plan strong,.similar-sponsored-request strong{display:block;color:#0f172a;font-size:.94rem;line-height:1.65}
+      .similar-sponsored-pill{display:inline-flex;align-items:center;border-radius:999px;padding:.22rem .62rem;background:#e0f2fe;color:#0369a1;font-size:.7rem;font-weight:900;white-space:nowrap}
+      .similar-sponsored-pill.priority{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
       .similar-sponsored-pill.approved{background:#dcfce7;color:#166534}
       .similar-sponsored-pill.pending,.similar-sponsored-pill.paused{background:#fef9c3;color:#854d0e}
       .similar-sponsored-pill.rejected,.similar-sponsored-pill.removed,.similar-sponsored-pill.expired{background:#fee2e2;color:#991b1b}
-      .similar-sponsored-plan__meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.7rem 0}
-      .similar-sponsored-plan__meta div{border-radius:12px;background:#f8fafc;padding:.48rem;text-align:center}
+      .similar-sponsored-plan__meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.75rem 0}
+      .similar-sponsored-plan__meta div{border-radius:14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border:1px solid #eef2f7;padding:.52rem;text-align:center}
       .similar-sponsored-plan__meta span{display:block;color:#64748b;font-size:.68rem;font-weight:800}
       .similar-sponsored-plan__meta b{display:block;color:#0f172a;font-size:.78rem;margin-top:.18rem}
-      .similar-sponsored-price{font-size:1.2rem;font-weight:900;color:#059669;margin:.35rem 0}
-      .similar-sponsored-btn{border:0;border-radius:12px;padding:.72rem .95rem;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:.38rem;transition:transform .2s ease,box-shadow .2s ease}
-      .similar-sponsored-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(14,165,233,.22)}
+      .similar-sponsored-price{display:inline-flex;align-items:center;gap:.35rem;font-size:1.2rem;font-weight:900;color:#059669;margin:.35rem 0}
+      .similar-sponsored-price::before{content:'قیمت پلن';font-size:.68rem;font-weight:900;color:#64748b;background:#f1f5f9;border-radius:999px;padding:.18rem .5rem}
+      .similar-sponsored-btn{border:0;border-radius:14px;padding:.78rem .95rem;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:.38rem;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 10px 22px rgba(14,165,233,.22)}
+      .similar-sponsored-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(14,165,233,.28)}
       .similar-sponsored-btn.secondary{background:#e0f2fe;color:#0369a1}
       .similar-sponsored-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
-      .similar-sponsored-msg{min-height:1.2rem;margin:.75rem 0;color:#e0f2fe;font-weight:800;font-size:.84rem}
-      .similar-sponsored-msg.error{color:#fecaca}
-      .similar-sponsored-msg.success{color:#bbf7d0}
-      .similar-sponsored-requests-panel{margin-top:1rem;border-radius:16px;background:rgba(255,255,255,.94);padding:.85rem;color:#0f172a}
+      .similar-sponsored-msg{min-height:1.2rem;margin:.65rem 0;color:#64748b;font-weight:800;font-size:.84rem}
+      .similar-sponsored-msg.error{color:#b91c1c}
+      .similar-sponsored-msg.success{color:#047857}
+      .similar-sponsored-requests-panel{margin-top:1rem;border-radius:18px;background:#f8fafc;border:1px solid #e2e8f0;padding:.85rem;color:#0f172a}
       .similar-sponsored-requests-panel h4{margin:0 0 .65rem;color:#0f172a;font-size:.95rem;font-weight:900}
       .similar-sponsored-widget__requests{display:grid;grid-template-columns:1fr;gap:.65rem}
-      .similar-sponsored-request{border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc;padding:.78rem}
+      .similar-sponsored-request{border:1px solid #e2e8f0;border-radius:16px;background:#fff;padding:.82rem;box-shadow:0 8px 20px rgba(15,23,42,.04)}
       .similar-sponsored-request p,.similar-sponsored-plan p{color:#64748b;line-height:1.75;font-size:.8rem}
       .similar-sponsored-request__grid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.6rem}
       .similar-sponsored-request__grid div{border-radius:10px;background:#fff;padding:.45rem}
@@ -179,7 +183,7 @@
       .similar-sponsored-modal textarea{min-height:6rem;resize:vertical}
       .similar-sponsored-modal__actions{display:flex;gap:.6rem;flex-wrap:wrap}
       @media(min-width:720px){.similar-sponsored-widget__plans{grid-template-columns:repeat(2,minmax(0,1fr))}.similar-sponsored-plan.featured{grid-column:span 2}.similar-sponsored-card{padding:1.15rem}.similar-sponsored-request__grid{grid-template-columns:repeat(4,1fr)}}
-      @media(max-width:640px){.similar-sponsored-widget__header{flex-direction:column}.similar-sponsored-refresh,.similar-sponsored-btn{width:100%}.similar-sponsored-plan__meta{grid-template-columns:1fr}.similar-sponsored-modal{align-items:flex-end;padding:.75rem}.similar-sponsored-modal__dialog{border-radius:18px 18px 10px 10px}.similar-sponsored-modal__actions{flex-direction:column}}
+      @media(max-width:640px){.similar-sponsored-widget__header{align-items:flex-start}.similar-sponsored-btn{width:100%}.similar-sponsored-plan__meta{grid-template-columns:1fr}.similar-sponsored-modal{align-items:flex-end;padding:.75rem}.similar-sponsored-modal__dialog{border-radius:18px 18px 10px 10px}.similar-sponsored-modal__actions{flex-direction:column}}
     `;
     document.head.appendChild(style);
   }
@@ -192,12 +196,12 @@
     root.innerHTML = `
       <article class="similar-sponsored-card" aria-labelledby="similar-sponsored-title">
         <header class="similar-sponsored-widget__header">
+          <div class="similar-sponsored-head-icon" aria-hidden="true">🚀</div>
           <div>
             <span class="similar-sponsored-kicker">تبلیغ پرمیوم فروشگاه‌های مشابه</span>
-            <h3 id="similar-sponsored-title">🚀 نمایش در فروشگاه‌های مشابه</h3>
+            <h3 id="similar-sponsored-title">نمایش در فروشگاه‌های مشابه</h3>
             <p>فروشگاه شما در بخش مغازه‌های مشابه بالاتر دیده می‌شود. قیمت، مدت نمایش و فعال‌سازی فقط توسط مدیر تنظیم و تایید می‌شود.</p>
           </div>
-          <button type="button" class="similar-sponsored-btn similar-sponsored-refresh" data-similar-sponsored-refresh>بروزرسانی</button>
         </header>
         <div class="similar-sponsored-alert">
           <span aria-hidden="true">✓</span>
@@ -395,7 +399,6 @@
     document.querySelectorAll('[data-similar-sponsored-close]').forEach((button) => {
       button.addEventListener('click', closeModal);
     });
-    document.querySelector('[data-similar-sponsored-refresh]')?.addEventListener('click', loadData);
     document.getElementById('similar-sponsored-form')?.addEventListener('submit', submitRequest);
     document.getElementById('similar-sponsored-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-modal') closeModal();
