@@ -2627,7 +2627,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: .36rem;
-  padding-top: .15rem;
+  min-height: 12px;
+  padding-top: .18rem;
 }
 
 .similar-shops-dot {
@@ -2647,6 +2648,53 @@ body {
 }
 
 .similar-shops-dot:focus-visible {
+  outline: 2px solid rgba(124, 131, 253, .35);
+  outline-offset: 3px;
+}
+
+.similar-shops-view-all-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: .62rem;
+}
+
+.similar-shops-view-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 40px;
+  max-width: 100%;
+  padding: .48rem .9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(124, 131, 253, 0.14);
+  color: var(--primary);
+  box-shadow: 0 8px 22px rgba(28, 44, 90, 0.055);
+  font-size: .78rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.similar-shops-view-all:hover,
+.similar-shops-view-all:focus-visible {
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.1), rgba(82, 183, 136, 0.12));
+  border-color: rgba(124, 131, 253, 0.24);
+  color: #172033;
+  box-shadow: 0 10px 26px rgba(124, 131, 253, 0.13);
+  transform: translateY(-1px);
+}
+
+.similar-shops-view-all:active {
+  transform: translateY(0) scale(.98);
+  box-shadow: 0 5px 14px rgba(28, 44, 90, 0.08);
+}
+
+.similar-shops-view-all:focus-visible {
   outline: 2px solid rgba(124, 131, 253, .35);
   outline-offset: 3px;
 }
@@ -2737,6 +2785,10 @@ body {
     display: none;
   }
 
+  .similar-shops-view-all-wrap {
+    padding-top: .9rem;
+  }
+
   .similar-shop-card {
     min-width: 0;
     min-height: 132px;
@@ -2768,6 +2820,16 @@ body {
     gap: .68rem;
     padding-inline: .85rem;
     scroll-padding-inline: .85rem;
+  }
+
+  .similar-shops-view-all-wrap {
+    padding-top: .56rem;
+  }
+
+  .similar-shops-view-all {
+    min-height: 42px;
+    padding-inline: .86rem;
+    font-size: .76rem;
   }
 
   .similar-shop-card {
@@ -3149,6 +3211,11 @@ body {
       <div class="similar-shops-list" id="similarShopsList" aria-live="polite"></div>
     </div>
     <div class="similar-shops-dots" id="similarShopsDots" aria-label="اسلایدهای فروشگاه‌های مشابه"></div>
+    <div class="similar-shops-view-all-wrap" id="similarShopsViewAllWrap">
+      <a class="similar-shops-view-all" id="similarShopsViewAll" href="/all-shops.html" aria-label="مشاهده همه فروشگاه‌ها">
+        مشاهده همه ←
+      </a>
+    </div>
     <div class="similar-shops-empty" id="similarShopsEmpty" hidden>
       <span class="similar-shops-empty-icon" aria-hidden="true">
         <i class="fas fa-magnifying-glass"></i>
@@ -5019,6 +5086,7 @@ function renderSimilarShops(items = []) {
   const list = document.getElementById('similarShopsList');
   const empty = document.getElementById('similarShopsEmpty');
   const dots = document.getElementById('similarShopsDots');
+  const viewAllWrap = document.getElementById('similarShopsViewAllWrap');
   const context = document.getElementById('similarShopsContext');
   if (!section || !list || !empty) return;
 
@@ -5027,12 +5095,14 @@ function renderSimilarShops(items = []) {
   if (!items.length) {
     list.innerHTML = '';
     if (dots) dots.hidden = true;
+    if (viewAllWrap) viewAllWrap.hidden = true;
     empty.hidden = false;
     section.hidden = false;
     return;
   }
 
   empty.hidden = true;
+  if (viewAllWrap) viewAllWrap.hidden = false;
   section.hidden = false;
   list.innerHTML = items.map((item) => {
     const name = escapeSimilarHtml(item.name);
