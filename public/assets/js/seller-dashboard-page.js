@@ -2649,8 +2649,10 @@ function setMainImageIndex(idx) {
       main.innerHTML = mainContent ? mainContent.innerHTML : htmlText;
 
       /* 2) اگر اسکریپت قبلاً وجود دارد (ریفرشِ گرم)، حذفش کن تا کش نشود */
-      const old = document.getElementById('upgrade-js-script');
-      if (old) old.remove();
+      ['upgrade-js-script', 'similar-sponsored-js-script'].forEach((id) => {
+        const old = document.getElementById(id);
+        if (old) old.remove();
+      });
 
       /* 3) افزودن اسکریپت و اجرای تابع init - با تأخیر برای اطمینان از رندر کامل */
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -2661,11 +2663,13 @@ function setMainImageIndex(idx) {
       s.onload = () => {
         if (typeof bootstrapUpgradeDashboard === 'function') {
           bootstrapUpgradeDashboard();
-          return;
-        }
-        if (typeof initUpgradeDashboard === 'function') {
+        } else if (typeof initUpgradeDashboard === 'function') {
           initUpgradeDashboard();
         }
+        const similarScript = document.createElement('script');
+        similarScript.id = 'similar-sponsored-js-script';
+        similarScript.src = 'similar-sponsored-promotions.js';
+        document.body.appendChild(similarScript);
       };
       document.body.appendChild(s);
     } catch (err) {
