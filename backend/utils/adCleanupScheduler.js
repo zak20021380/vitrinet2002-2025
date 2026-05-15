@@ -1,4 +1,5 @@
 const AdOrder = require('../models/AdOrder');
+const SimilarShopPromotion = require('../models/SimilarShopPromotion');
 const { calculateExpiry } = require('./adDisplay');
 const { getCleanupIntervalMs } = require('./adDisplayConfig');
 
@@ -79,10 +80,24 @@ async function cleanupExpiredAds(referenceDate = new Date()) {
     ));
   }
 
+  const sponsoredResult = await SimilarShopPromotion.updateMany(
+    {
+      status: { $in: ['approved', 'paused'] },
+      endAt: { $lte: now }
+    },
+    {
+      $set: {
+        status: 'expired',
+        expiredAt: now
+      }
+    }
+  );
+
   return {
     processed: activeAds.length,
     metadataUpdated: metadataUpdates.length,
-    expired: expirations.length
+    expired: expirations.length,
+    sponsoredExpired: sponsoredResult.modifiedCount || 0
   };
 }
 
@@ -104,6 +119,9 @@ function startAdCleanupScheduler() {
       const result = await cleanupExpiredAds();
       if (result.expired > 0) {
         console.log(`🧹  Ad cleanup: expired ${result.expired} ad(s).`);
+      }
+      if (result.sponsoredExpired > 0) {
+        console.log(`🧹  Ad cleanup: expired ${result.sponsoredExpired} similar-shop promotion(s).`);
       }
     } catch (err) {
       console.error('❌  Ad cleanup failed:', err);

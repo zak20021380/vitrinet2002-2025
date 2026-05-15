@@ -223,6 +223,7 @@
         <a href="#" data-section="shopping-centers"><i class="ri-building-2-line"></i> مراکز خرید <span class="count" id="count-shopping-centers">0</span></a>
         <a href="#" data-section="plans"><i class="ri-money-dollar-circle-line"></i> مدیریت قیمت پلن‌ها</a>
         <a href="#" data-section="ads"><i class="ri-megaphone-line"></i> مدیریت قیمت تبلیغات</a>
+        <a href="#" data-section="similar-promotions"><i class="ri-advertisement-line"></i> مدیریت تبلیغات <span class="count" id="count-similar-promotions">0</span></a>
         <a href="#" data-section="income-insights"><i class="ri-bar-chart-grouped-line"></i> داشبورد درآمدها</a>
         <a href="#" data-section="ad-orders"><i class="ri-advertisement-line"></i> تایید تبلیغات ویژه <span class="count" id="count-ad-orders">0</span></a>
         <a href="#" data-section="messages">
@@ -1581,6 +1582,71 @@
         <button type="submit">ذخیره قیمت تبلیغات</button>
         <div id="adsMsg" style="display:none;"></div>
       </form>
+    </div>
+  </div>
+
+
+  <div class="section-panel" id="similar-promotions-panel" style="display:none;">
+    <header class="similar-promotions-hero">
+      <div class="content-header">
+        مدیریت تبلیغات <span class="header-count" id="header-similar-promotions-count"></span>
+      </div>
+      <p class="similar-promotions-subtitle">درخواست‌های اسپانسر شدن در بخش «مغازه‌های مشابه» را بررسی کنید، زمان نمایش را تنظیم کنید و عملکرد هر جایگاه را ببینید.</p>
+    </header>
+
+    <div class="similar-promotions-layout">
+      <section class="similar-promotions-card">
+        <div class="similar-promotions-card__header">
+          <div>
+            <h3>پلن‌های اسپانسری مشابه‌ها</h3>
+            <p>قیمت، مدت و سقف جایگاه‌های normal و priority را مدیریت کنید.</p>
+          </div>
+          <button type="button" class="similar-promotions-btn secondary" id="similarPromotionsPlansRefresh">
+            <i class="ri-refresh-line"></i> بروزرسانی
+          </button>
+        </div>
+        <form id="similarPromotionsPlansForm">
+          <div class="similar-promotions-plan-grid" id="similarPromotionsPlansGrid"></div>
+          <div class="similar-promotions-actions">
+            <button type="submit" class="similar-promotions-btn primary">ذخیره پلن‌ها</button>
+            <span id="similarPromotionsPlansMsg" class="similar-promotions-message" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="similar-promotions-card similar-promotions-card--requests">
+        <div class="similar-promotions-card__header">
+          <div>
+            <h3>درخواست‌های تبلیغات مشابه</h3>
+            <p>تایید، رد، توقف، ادامه یا حذف پروموشن‌ها فقط از این بخش انجام می‌شود.</p>
+          </div>
+          <button type="button" class="similar-promotions-btn secondary" id="similarPromotionsRequestsRefresh">
+            <i class="ri-refresh-line"></i> بروزرسانی
+          </button>
+        </div>
+
+        <div class="similar-promotions-summary">
+          <div><span>کل</span><strong id="similarPromotionsTotalCount">0</strong></div>
+          <div><span>در انتظار</span><strong id="similarPromotionsPendingCount">0</strong></div>
+          <div><span>فعال</span><strong id="similarPromotionsActiveCount">0</strong></div>
+        </div>
+
+        <div class="similar-promotions-toolbar">
+          <select id="similarPromotionsStatusFilter" aria-label="فیلتر وضعیت">
+            <option value="all">همه وضعیت‌ها</option>
+            <option value="pending">در انتظار</option>
+            <option value="approved">تایید شده</option>
+            <option value="paused">متوقف</option>
+            <option value="rejected">رد شده</option>
+            <option value="expired">منقضی</option>
+            <option value="removed">حذف شده</option>
+          </select>
+          <input type="search" id="similarPromotionsSearch" placeholder="جستجو بر اساس نام، تلفن یا پلن">
+        </div>
+
+        <div class="similar-promotions-list" id="similarPromotionsList"></div>
+        <p id="similarPromotionsRequestsMsg" class="similar-promotions-message" role="status" aria-live="polite"></p>
+      </section>
     </div>
   </div>
 

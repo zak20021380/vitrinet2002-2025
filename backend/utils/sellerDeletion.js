@@ -4,6 +4,7 @@ const Product = require('../models/product');
 const ShopAppearance = require('../models/ShopAppearance');
 const SellerPlan = require('../models/sellerPlan');
 const AdOrder = require('../models/AdOrder');
+const SimilarShopPromotion = require('../models/SimilarShopPromotion');
 const Payment = require('../models/payment');
 const Chat = require('../models/chat');
 const Report = require('../models/Report');
@@ -24,6 +25,7 @@ async function cascadeDeleteSeller(sellerDoc, options = {}) {
     ShopAppearance.deleteMany({ sellerId }),
     SellerPlan.deleteMany({ sellerId }),
     AdOrder.deleteMany({ sellerId }),
+    SimilarShopPromotion.deleteMany({ sellerId }),
     Payment.deleteMany({ sellerId }),
     Chat.deleteMany({ sellerId }),
     Report.deleteMany({ sellerId }),

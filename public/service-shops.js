@@ -2727,6 +2727,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     const t = getToken();
     return t ? { 'Authorization': 'Bearer ' + t } : {};
   };
+  const readCookie = (name) => {
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+    for (const cookie of cookies) {
+      const [rawName, ...rawValue] = cookie.trim().split('=');
+      if (rawName === name) return decodeURIComponent(rawValue.join('=') || '');
+    }
+    return '';
+  };
 
   // ====== Identity / Scope ======
   const body = document.body;
@@ -4028,6 +4036,59 @@ window.addEventListener('load', () => {
   }
 
   let similarServicesItems = [];
+  const similarSponsoredImpressionSet = new Set();
+  let similarPromotionCsrfPromise = null;
+
+  function getSimilarSponsoredPromotionId(item = {}) {
+    return normalizeCategoryText(item?.sponsored?.promotionId || item?.promotionId || '');
+  }
+
+  async function getSimilarPromotionCsrfToken() {
+    const cookieToken = readCookie('csrf_token');
+    if (cookieToken) return cookieToken;
+    if (!similarPromotionCsrfPromise) {
+      similarPromotionCsrfPromise = fetch(`${API_ROOT}/api/csrf-token`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => data?.csrfToken || readCookie('csrf_token') || '')
+        .catch(() => '')
+        .finally(() => {
+          similarPromotionCsrfPromise = null;
+        });
+    }
+    return similarPromotionCsrfPromise;
+  }
+
+  async function trackSimilarPromotionEvent(promotionId, eventName) {
+    const id = normalizeCategoryText(promotionId);
+    if (!id || !['impression', 'click'].includes(eventName)) return;
+    try {
+      const csrfToken = await getSimilarPromotionCsrfToken();
+      await fetch(`${API_ROOT}/api/similar-shop-promotions/${encodeURIComponent(id)}/track`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+        },
+        body: JSON.stringify({ event: eventName })
+      });
+    } catch (err) {
+      console.warn('similar promotion tracking failed:', err);
+    }
+  }
+
+  function trackSimilarPromotionImpressions(items = []) {
+    items.forEach((item) => {
+      const promotionId = getSimilarSponsoredPromotionId(item);
+      if (!promotionId || similarSponsoredImpressionSet.has(promotionId)) return;
+      similarSponsoredImpressionSet.add(promotionId);
+      trackSimilarPromotionEvent(promotionId, 'impression');
+    });
+  }
 
   function getActiveStory(item = {}) {
     const story = item.activeStory || item.story || null;
@@ -4619,9 +4680,23 @@ window.addEventListener('load', () => {
     const reviewCount = Number(item.reviewCount || 0);
     const hasRating = rating > 0;
     const storyMarkup = buildSimilarStoryIndicator(item, item.name);
+    const promotionId = getSimilarSponsoredPromotionId(item);
+    if (promotionId) item.isPromoted = false;
+    const sponsoredTier = normalizeCategoryText(item?.sponsored?.tier || '');
+    const sponsoredBadge = promotionId
+      ? '<span class="similar-service-card__badge similar-service-card__badge--sponsored">Sponsored</span>'
+      : '';
+    const visibleSuggestedBadge = !promotionId && item.isPromoted
+      ? '<span class="similar-service-card__badge similar-service-card__badge--suggested">&#1662;&#1740;&#1588;&#1606;&#1607;&#1575;&#1583;&#1740;</span>'
+      : '';
+    item.isPromoted = false;
+    const suggestedBadge = !promotionId && item.isPromoted
+      ? '<span class="similar-service-card__badge similar-service-card__badge--suggested">Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ</span>'
+      : '';
 
     return `
-      <article class="similar-service-card">
+      <article class="similar-service-card${promotionId ? ' similar-service-card--sponsored' : ''}"
+               ${promotionId ? `data-sponsored-promotion-id="${escapeHtml(promotionId)}" data-sponsored-tier="${escapeHtml(sponsoredTier)}"` : ''}>
         <a class="similar-service-card__media" href="${escapeHtml(requestUrl)}" aria-label="مشاهده ${safeName}">
           <img src="${safeImage}" alt="${safeName}" loading="lazy" decoding="async"
                onerror="this.src='/assets/images/shop-placeholder.svg'">
@@ -4629,6 +4704,8 @@ window.addEventListener('load', () => {
         </a>
         <div class="similar-service-card__top">
           <div class="similar-service-card__badges">
+            ${sponsoredBadge}
+            ${visibleSuggestedBadge}
             ${item.isPromoted ? '<span class="similar-service-card__badge similar-service-card__badge--suggested">پیشنهادی</span>' : ''}
             ${safeOffer ? `<span class="similar-service-card__badge similar-service-card__badge--offer">${safeOffer}</span>` : ''}
             ${item.isAvailableNow ? '<span class="similar-service-card__badge similar-service-card__badge--available">آماده پذیرش</span>' : ''}
@@ -4723,6 +4800,12 @@ window.addEventListener('load', () => {
     bindStoryIndicatorClicks();
 
     section.addEventListener('click', (event) => {
+      const sponsoredCard = event.target.closest('[data-sponsored-promotion-id]');
+      const sponsoredInteractive = event.target.closest('a, button, [role="button"]');
+      if (sponsoredCard && sponsoredInteractive) {
+        trackSimilarPromotionEvent(sponsoredCard.dataset.sponsoredPromotionId || '', 'click');
+      }
+
       const storyBtn = event.target.closest('[data-story-indicator]');
       if (storyBtn) {
         event.preventDefault();
@@ -4784,6 +4867,7 @@ window.addEventListener('load', () => {
       }
       similarServicesItems = items;
       list.innerHTML = similarServicesItems.map(similarServiceCardTemplate).join('');
+      trackSimilarPromotionImpressions(similarServicesItems);
       section.hidden = false;
     } catch (err) {
       console.warn('loadSimilarServices failed:', err);

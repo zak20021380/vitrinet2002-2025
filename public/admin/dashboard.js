@@ -9189,6 +9189,380 @@ serviceShopModalDisableBtn?.addEventListener('click', () => {
   revokeComplimentaryPlan(assignmentId, shopId, serviceShopModalDisableBtn);
 });
 
+// -------- Similar Shops Sponsored Promotions --------
+let similarPromotionsInitialised = false;
+let similarPromotionPlans = [];
+let similarPromotionRequests = [];
+let similarPromotionsFilter = 'all';
+let similarPromotionsSearchTerm = '';
+
+const similarPromotionTierLabels = {
+  normal: 'اسپانسری معمولی',
+  priority: 'اسپانسری اولویت‌دار'
+};
+
+const similarPromotionDurationLabels = {
+  daily: 'روزانه',
+  weekly: 'هفتگی',
+  monthly: 'ماهانه'
+};
+
+const similarPromotionStatusLabels = {
+  pending: 'در انتظار',
+  approved: 'تایید شده',
+  paused: 'متوقف',
+  rejected: 'رد شده',
+  expired: 'منقضی',
+  removed: 'حذف شده'
+};
+
+const similarPromotionPaymentLabels = {
+  pending: 'در انتظار پرداخت',
+  submitted: 'رسید ارسال شده',
+  verified: 'تایید پرداخت',
+  rejected: 'رد پرداخت',
+  waived: 'رایگان'
+};
+
+const similarPromotionsPlansGrid = document.getElementById('similarPromotionsPlansGrid');
+const similarPromotionsPlansForm = document.getElementById('similarPromotionsPlansForm');
+const similarPromotionsPlansMsg = document.getElementById('similarPromotionsPlansMsg');
+const similarPromotionsRequestsMsg = document.getElementById('similarPromotionsRequestsMsg');
+const similarPromotionsListEl = document.getElementById('similarPromotionsList');
+const similarPromotionsStatusFilterEl = document.getElementById('similarPromotionsStatusFilter');
+const similarPromotionsSearchEl = document.getElementById('similarPromotionsSearch');
+const similarPromotionsPlansRefreshBtn = document.getElementById('similarPromotionsPlansRefresh');
+const similarPromotionsRequestsRefreshBtn = document.getElementById('similarPromotionsRequestsRefresh');
+const similarPromotionsSidebarCountEl = document.getElementById('count-similar-promotions');
+const similarPromotionsHeaderCountEl = document.getElementById('header-similar-promotions-count');
+const similarPromotionsTotalCountEl = document.getElementById('similarPromotionsTotalCount');
+const similarPromotionsPendingCountEl = document.getElementById('similarPromotionsPendingCount');
+const similarPromotionsActiveCountEl = document.getElementById('similarPromotionsActiveCount');
+
+function setSimilarPromotionsMessage(target, message = '', type = 'info') {
+  if (!target) return;
+  target.textContent = message;
+  target.classList.remove('is-error', 'is-success');
+  if (type === 'error') target.classList.add('is-error');
+  if (type === 'success') target.classList.add('is-success');
+}
+
+function toDateTimeLocal(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const local = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+  return local.toISOString().slice(0, 16);
+}
+
+function normaliseSimilarPromotionText(value = '') {
+  return String(value || '').trim().toLowerCase();
+}
+
+function similarPromotionId(item = {}) {
+  return String(item.id || item._id || '');
+}
+
+function similarPromotionShopName(item = {}) {
+  const seller = item.sellerId && typeof item.sellerId === 'object' ? item.sellerId : {};
+  const serviceShop = item.serviceShopId && typeof item.serviceShopId === 'object' ? item.serviceShopId : {};
+  return item.shopSnapshot?.name || serviceShop.name || seller.storename || 'بدون نام';
+}
+
+function similarPromotionShopImage(item = {}) {
+  const seller = item.sellerId && typeof item.sellerId === 'object' ? item.sellerId : {};
+  const serviceShop = item.serviceShopId && typeof item.serviceShopId === 'object' ? item.serviceShopId : {};
+  const raw = item.shopSnapshot?.imageUrl || serviceShop.coverImage || seller.boardImage || '';
+  return buildUploadsUrl(raw) || '/assets/images/shop-placeholder.svg';
+}
+
+function similarPromotionShopPhone(item = {}) {
+  const seller = item.sellerId && typeof item.sellerId === 'object' ? item.sellerId : {};
+  return item.shopSnapshot?.phone || seller.phone || '';
+}
+
+function similarPromotionCtr(item = {}) {
+  const metrics = item.metrics || {};
+  const impressions = Number(metrics.impressions || 0);
+  const clicks = Number(metrics.clicks || 0);
+  if (!impressions) return '۰٪';
+  return `${formatNumber(((clicks / impressions) * 100).toFixed(1))}٪`;
+}
+
+async function loadSimilarPromotionPlans() {
+  if (!similarPromotionsPlansGrid) return;
+  setSimilarPromotionsMessage(similarPromotionsPlansMsg, 'در حال بارگذاری پلن‌ها...');
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/plans`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در دریافت پلن‌ها');
+    similarPromotionPlans = Array.isArray(data.plans) ? data.plans : [];
+    renderSimilarPromotionPlans();
+    setSimilarPromotionsMessage(similarPromotionsPlansMsg, '');
+  } catch (err) {
+    console.error('loadSimilarPromotionPlans failed:', err);
+    setSimilarPromotionsMessage(similarPromotionsPlansMsg, err.message || 'خطا در دریافت پلن‌ها', 'error');
+  }
+}
+
+function renderSimilarPromotionPlans() {
+  if (!similarPromotionsPlansGrid) return;
+  const tierOrder = { priority: 0, normal: 1 };
+  const durationOrder = { daily: 0, weekly: 1, monthly: 2 };
+  const plans = [...similarPromotionPlans].sort((a, b) => {
+    const tierDiff = (tierOrder[a.tier] ?? 99) - (tierOrder[b.tier] ?? 99);
+    if (tierDiff) return tierDiff;
+    return (durationOrder[a.durationUnit] ?? 99) - (durationOrder[b.durationUnit] ?? 99);
+  });
+
+  similarPromotionsPlansGrid.innerHTML = plans.map((plan) => {
+    const key = `${plan.tier}-${plan.durationUnit}`;
+    return `
+      <article class="similar-promotions-plan" data-plan-key="${escapeHtml(key)}" data-tier="${escapeHtml(plan.tier)}" data-duration="${escapeHtml(plan.durationUnit)}">
+        <div class="similar-promotions-plan__title">
+          <strong>${escapeHtml(similarPromotionTierLabels[plan.tier] || plan.tier)} / ${escapeHtml(similarPromotionDurationLabels[plan.durationUnit] || plan.durationUnit)}</strong>
+          <label>
+            <span>فعال</span>
+            <input type="checkbox" data-field="isActive" ${plan.isActive !== false ? 'checked' : ''}>
+          </label>
+        </div>
+        <div class="similar-promotions-plan__fields">
+          <label><span>عنوان</span><input type="text" data-field="title" value="${escapeHtml(plan.title || '')}"></label>
+          <label><span>قیمت تومان</span><input type="number" min="0" step="1000" data-field="price" value="${escapeHtml(plan.price ?? '')}"></label>
+          <label><span>مدت روز</span><input type="number" min="1" max="370" data-field="durationDays" value="${escapeHtml(plan.durationDays ?? '')}"></label>
+          <label><span>سقف جایگاه</span><input type="number" min="1" max="10" data-field="slotLimit" value="${escapeHtml(plan.slotLimit ?? '')}"></label>
+          <label style="grid-column:1/-1;"><span>توضیح</span><textarea data-field="description">${escapeHtml(plan.description || '')}</textarea></label>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+async function saveSimilarPromotionPlans(event) {
+  event?.preventDefault();
+  const rows = [...document.querySelectorAll('.similar-promotions-plan')];
+  const plans = rows.map((row) => {
+    const readField = (field) => row.querySelector(`[data-field="${field}"]`);
+    return {
+      tier: row.dataset.tier,
+      durationUnit: row.dataset.duration,
+      title: readField('title')?.value || '',
+      price: Number(readField('price')?.value || 0),
+      durationDays: Number(readField('durationDays')?.value || 0),
+      slotLimit: Number(readField('slotLimit')?.value || 1),
+      description: readField('description')?.value || '',
+      isActive: !!readField('isActive')?.checked
+    };
+  });
+
+  setSimilarPromotionsMessage(similarPromotionsPlansMsg, 'در حال ذخیره...');
+  try {
+    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/plans`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plans })
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در ذخیره پلن‌ها');
+    similarPromotionPlans = Array.isArray(data.plans) ? data.plans : [];
+    renderSimilarPromotionPlans();
+    setSimilarPromotionsMessage(similarPromotionsPlansMsg, data.message || 'پلن‌ها ذخیره شد.', 'success');
+  } catch (err) {
+    console.error('saveSimilarPromotionPlans failed:', err);
+    setSimilarPromotionsMessage(similarPromotionsPlansMsg, err.message || 'خطا در ذخیره پلن‌ها', 'error');
+  }
+}
+
+async function loadSimilarPromotionRequests() {
+  if (!similarPromotionsListEl) return;
+  setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'در حال بارگذاری درخواست‌ها...');
+  try {
+    const status = similarPromotionsFilter || 'all';
+    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin?status=${encodeURIComponent(status)}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در دریافت درخواست‌ها');
+    similarPromotionRequests = Array.isArray(data.promotions) ? data.promotions : [];
+    renderSimilarPromotionRequests();
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, '');
+  } catch (err) {
+    console.error('loadSimilarPromotionRequests failed:', err);
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, err.message || 'خطا در دریافت درخواست‌ها', 'error');
+  }
+}
+
+function updateSimilarPromotionsSummary() {
+  const total = similarPromotionRequests.length;
+  const pending = similarPromotionRequests.filter((item) => item.status === 'pending').length;
+  const active = similarPromotionRequests.filter((item) => item.status === 'approved' && item.isActive !== false).length;
+  if (similarPromotionsTotalCountEl) similarPromotionsTotalCountEl.textContent = formatNumber(total);
+  if (similarPromotionsPendingCountEl) similarPromotionsPendingCountEl.textContent = formatNumber(pending);
+  if (similarPromotionsActiveCountEl) similarPromotionsActiveCountEl.textContent = formatNumber(active);
+  if (similarPromotionsSidebarCountEl) similarPromotionsSidebarCountEl.textContent = formatNumber(pending);
+  if (similarPromotionsHeaderCountEl) {
+    similarPromotionsHeaderCountEl.textContent = total
+      ? `(${formatNumber(total)} درخواست | ${formatNumber(pending)} در انتظار | ${formatNumber(active)} فعال)`
+      : '(درخواستی ثبت نشده)';
+  }
+}
+
+function filterSimilarPromotionRequests() {
+  let rows = [...similarPromotionRequests];
+  if (similarPromotionsFilter && similarPromotionsFilter !== 'all') {
+    rows = rows.filter((item) => item.status === similarPromotionsFilter);
+  }
+  if (similarPromotionsSearchTerm) {
+    const term = similarPromotionsSearchTerm;
+    rows = rows.filter((item) => {
+      const haystack = [
+        similarPromotionShopName(item),
+        similarPromotionShopPhone(item),
+        item.planTitle,
+        item.planTier,
+        item.durationUnit,
+        item.shopSnapshot?.shopUrl
+      ].map(normaliseSimilarPromotionText).join(' ');
+      return haystack.includes(term);
+    });
+  }
+  return rows.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+}
+
+function renderSimilarPromotionRequests() {
+  if (!similarPromotionsListEl) return;
+  updateSimilarPromotionsSummary();
+  const rows = filterSimilarPromotionRequests();
+  if (!rows.length) {
+    similarPromotionsListEl.innerHTML = '<div class="similar-promotions-empty">درخواستی مطابق فیلتر فعلی پیدا نشد.</div>';
+    return;
+  }
+
+  similarPromotionsListEl.innerHTML = rows.map((item) => {
+    const id = similarPromotionId(item);
+    const status = item.status || 'pending';
+    const paymentStatus = item.paymentStatus || 'pending';
+    const proof = item.paymentProof || {};
+    const proofLink = proof.fileUrl
+      ? `<a href="${escapeHtml(buildUploadsUrl(proof.fileUrl))}" target="_blank" rel="noopener">مشاهده رسید</a>`
+      : '';
+    const proofText = proof.text ? `<span>${escapeHtml(proof.text)}</span>` : '';
+    const metrics = item.metrics || {};
+    const canPause = status === 'approved';
+    const canResume = status === 'paused';
+    const canApprove = ['pending', 'rejected', 'paused'].includes(status);
+    return `
+      <article class="similar-promotions-request" data-id="${escapeHtml(id)}">
+        <div class="similar-promotions-request__title">
+          <strong>${escapeHtml(similarPromotionShopName(item))}</strong>
+          <div class="similar-promotions-request__meta">
+            <span class="similar-promotions-pill ${escapeHtml(status)}">${escapeHtml(similarPromotionStatusLabels[status] || status)}</span>
+            <span class="similar-promotions-pill ${item.planTier === 'priority' ? 'priority' : ''}">${escapeHtml(similarPromotionTierLabels[item.planTier] || item.planTier || '')}</span>
+            <span class="similar-promotions-pill">${escapeHtml(similarPromotionDurationLabels[item.durationUnit] || item.durationUnit || '')}</span>
+          </div>
+        </div>
+        <div class="similar-promotions-request__body">
+          <img class="similar-promotions-request__preview" src="${escapeHtml(similarPromotionShopImage(item))}" alt="" onerror="this.src='/assets/images/shop-placeholder.svg'">
+          <div>
+            <div class="similar-promotions-request__meta">
+              <span class="similar-promotions-pill">${escapeHtml(formatCurrency(item.price))}</span>
+              <span class="similar-promotions-pill">${escapeHtml(similarPromotionPaymentLabels[paymentStatus] || paymentStatus)}</span>
+              <span class="similar-promotions-pill">نمایش: ${escapeHtml(formatNumber(metrics.impressions || 0))}</span>
+              <span class="similar-promotions-pill">کلیک: ${escapeHtml(formatNumber(metrics.clicks || 0))}</span>
+              <span class="similar-promotions-pill">CTR: ${escapeHtml(similarPromotionCtr(item))}</span>
+            </div>
+            <p style="margin:0;color:#64748b;line-height:1.8;">${escapeHtml(item.shopSnapshot?.categoryName || '')} ${similarPromotionShopPhone(item) ? ` | ${escapeHtml(similarPromotionShopPhone(item))}` : ''}</p>
+            <p style="margin:0.35rem 0;color:#64748b;">شروع: ${escapeHtml(formatDateTime(item.startAt))} | پایان: ${escapeHtml(formatDateTime(item.endAt))}</p>
+            <p style="margin:0.35rem 0;color:#475569;">رسید پرداخت: ${proofLink || proofText || 'ثبت نشده'}</p>
+          </div>
+        </div>
+        <div class="similar-promotions-request__controls">
+          <label><span>شروع</span><input type="datetime-local" data-control="startAt" value="${escapeHtml(toDateTimeLocal(item.startAt))}"></label>
+          <label><span>پایان</span><input type="datetime-local" data-control="endAt" value="${escapeHtml(toDateTimeLocal(item.endAt))}"></label>
+          <label><span>اولویت</span><input type="number" min="0" max="9999" data-control="priorityOrder" value="${escapeHtml(item.priorityOrder ?? (item.planTier === 'priority' ? 10 : 100))}"></label>
+          <label><span>پرداخت</span>
+            <select data-control="paymentStatus">
+              ${Object.entries(similarPromotionPaymentLabels).map(([key, label]) => `<option value="${escapeHtml(key)}" ${key === paymentStatus ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
+            </select>
+          </label>
+          <label style="grid-column:1/-1;"><span>یادداشت مدیر</span><textarea data-control="adminNote">${escapeHtml(item.adminNote || '')}</textarea></label>
+        </div>
+        <div class="similar-promotions-request__actions" style="margin-top:0.75rem;">
+          <button type="button" class="similar-promotions-btn primary" data-action="update">ذخیره تنظیمات</button>
+          ${canApprove ? '<button type="button" class="similar-promotions-btn primary" data-action="approve">تایید</button>' : ''}
+          ${status === 'pending' ? '<button type="button" class="similar-promotions-btn danger" data-action="reject">رد</button>' : ''}
+          ${canPause ? '<button type="button" class="similar-promotions-btn secondary" data-action="pause">توقف</button>' : ''}
+          ${canResume ? '<button type="button" class="similar-promotions-btn secondary" data-action="resume">ادامه</button>' : ''}
+          <button type="button" class="similar-promotions-btn danger" data-action="remove">حذف</button>
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function readSimilarPromotionControls(card) {
+  const get = (field) => card.querySelector(`[data-control="${field}"]`);
+  return {
+    startAt: get('startAt')?.value || null,
+    endAt: get('endAt')?.value || null,
+    priorityOrder: Number(get('priorityOrder')?.value || 0),
+    paymentStatus: get('paymentStatus')?.value || 'pending',
+    adminNote: get('adminNote')?.value || ''
+  };
+}
+
+async function updateSimilarPromotionRequest(id, payload) {
+  const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در بروزرسانی تبلیغ');
+  return data;
+}
+
+async function handleSimilarPromotionAction(card, action) {
+  const id = card?.dataset?.id || '';
+  if (!id || !action) return;
+  if (['reject', 'remove'].includes(action) && !confirm('این عملیات اعمال شود؟')) return;
+  const payload = { ...readSimilarPromotionControls(card), action };
+  setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'در حال بروزرسانی...');
+  try {
+    await updateSimilarPromotionRequest(id, payload);
+    await loadSimilarPromotionRequests();
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'تبلیغ بروزرسانی شد.', 'success');
+  } catch (err) {
+    console.error('handleSimilarPromotionAction failed:', err);
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, err.message || 'خطا در بروزرسانی تبلیغ', 'error');
+  }
+}
+
+async function ensureSimilarPromotionsAdmin() {
+  if (!similarPromotionsInitialised) {
+    similarPromotionsInitialised = true;
+    similarPromotionsPlansForm?.addEventListener('submit', saveSimilarPromotionPlans);
+    similarPromotionsPlansRefreshBtn?.addEventListener('click', loadSimilarPromotionPlans);
+    similarPromotionsRequestsRefreshBtn?.addEventListener('click', loadSimilarPromotionRequests);
+    similarPromotionsStatusFilterEl?.addEventListener('change', () => {
+      similarPromotionsFilter = similarPromotionsStatusFilterEl.value || 'all';
+      loadSimilarPromotionRequests();
+    });
+    similarPromotionsSearchEl?.addEventListener('input', debounce(() => {
+      similarPromotionsSearchTerm = normaliseSimilarPromotionText(similarPromotionsSearchEl.value || '');
+      renderSimilarPromotionRequests();
+    }, 250));
+    similarPromotionsListEl?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const card = button.closest('.similar-promotions-request');
+      handleSimilarPromotionAction(card, button.dataset.action);
+    });
+  }
+  await Promise.all([
+    loadSimilarPromotionPlans(),
+    loadSimilarPromotionRequests()
+  ]);
+}
+
 // -------- Nav & Responsive (FIXED) --------
 // -------- Nav & Responsive (FIXED) --------
 const sidebar       = document.getElementById('sidebar');
@@ -9216,6 +9590,7 @@ const panels = {
   'shopping-centers': document.getElementById('shopping-centers-panel'),
   plans:     document.getElementById('plans-panel'),
   ads:       document.getElementById('ads-panel'),
+  'similar-promotions': document.getElementById('similar-promotions-panel'),
   'income-insights': document.getElementById('income-insights-panel'),
   'ad-orders': document.getElementById('ad-orders-panel'),
   messages:  document.getElementById('messages-panel'),
@@ -9273,6 +9648,10 @@ menuLinks.forEach(link => {
 
     if (section === 'ad-orders') {
       await loadAdOrders();
+    }
+
+    if (section === 'similar-promotions') {
+      await ensureSimilarPromotionsAdmin();
     }
 
     if (section === 'tickets') {

@@ -11,6 +11,7 @@ const SellerStory = require('../models/SellerStory');
 const Product = require('../models/product');
 const SellerPlan = require('../models/sellerPlan');
 const AdOrder = require('../models/AdOrder');
+const SimilarShopPromotion = require('../models/SimilarShopPromotion');
 const Payment = require('../models/payment');
 const Chat = require('../models/chat');
 const Report = require('../models/Report');
@@ -24,6 +25,11 @@ const SELLER_MODERATION_FIELDS = 'storename shopurl phone blockedByAdmin blocked
 const SHOP_MODERATION_FIELDS = 'name shopUrl ownerPhone adminModeration status isVisible isBookable bookingSettings lastReviewedAt legacySellerId';
 
 const STATUS_VALUES = ['draft', 'pending', 'approved', 'suspended', 'archived'];
+const SIMILAR_SPONSORED_SLOT_LIMIT = 3;
+const SIMILAR_SPONSORED_TIER_RANK = {
+  priority: 0,
+  normal: 1
+};
 
 const toNumber = (value, fallback = undefined) => {
   const num = Number(value);
@@ -2830,10 +2836,46 @@ const resolveSimilarImage = (source = {}, activeAd = null) => {
   return image.startsWith('uploads/') ? `/${image}` : image;
 };
 
-const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCategory = '' } = {}) => {
+const normaliseSimilarPromotion = (promotion = null) => {
+  if (!promotion) return null;
+  return {
+    promotionId: String(promotion._id || promotion.id || ''),
+    tier: promotion.planTier || 'normal',
+    priorityOrder: Number.isFinite(Number(promotion.priorityOrder)) ? Number(promotion.priorityOrder) : 100,
+    slotLimit: Number.isFinite(Number(promotion.slotLimit)) ? Number(promotion.slotLimit) : 1,
+    startAt: promotion.startAt || null,
+    endAt: promotion.endAt || null
+  };
+};
+
+const sortSponsoredPromotions = (a, b) => {
+  const tierDiff = (SIMILAR_SPONSORED_TIER_RANK[a?.planTier] ?? 99) - (SIMILAR_SPONSORED_TIER_RANK[b?.planTier] ?? 99);
+  if (tierDiff) return tierDiff;
+  const orderDiff = (Number(a?.priorityOrder) || 100) - (Number(b?.priorityOrder) || 100);
+  if (orderDiff) return orderDiff;
+  return new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime();
+};
+
+const sortSponsoredCards = (a, b) => {
+  const tierDiff = (a.sponsoredRank ?? 99) - (b.sponsoredRank ?? 99);
+  if (tierDiff) return tierDiff;
+  const orderDiff = (a.sponsored?.priorityOrder ?? 100) - (b.sponsored?.priorityOrder ?? 100);
+  if (orderDiff) return orderDiff;
+  return sortSimilarCards(a, b);
+};
+
+const getSimilarDedupeKey = (card = {}) => {
+  if (card.sellerId) return `seller:${card.sellerId}`;
+  if (card.shopUrl) return `url:${String(card.shopUrl).toLowerCase()}`;
+  return `id:${card.id || ''}`;
+};
+
+const toSimilarCard = (source = {}, { services = [], activeAd = null, sponsoredPromotion = null, fallbackCategory = '' } = {}) => {
   const shopUrl = normaliseText(source.shopUrl || source.shopurl || '');
   const phone = normaliseText(source.ownerPhone || source.phone || '');
-  const isPromoted = !!(source.isFeatured || source.isPremium || activeAd);
+  const sponsored = normaliseSimilarPromotion(sponsoredPromotion);
+  const isSponsored = !!sponsored?.promotionId;
+  const isPromoted = !!(isSponsored || source.isFeatured || source.isPremium || activeAd);
   const categoryName = normaliseText(source.categoryName || source.category || fallbackCategory || 'خدمات');
   const resolvedSubcategories = resolveSimilarSubcategories(source, services, categoryName);
   const subcategories = resolvedSubcategories.length
@@ -2859,6 +2901,9 @@ const toSimilarCard = (source = {}, { services = [], activeAd = null, fallbackCa
     subcategories,
     shortInfo: buildSimilarShortInfo(source),
     isPromoted,
+    isSponsored,
+    sponsored,
+    sponsoredRank: isSponsored ? (SIMILAR_SPONSORED_TIER_RANK[sponsored.tier] ?? 99) : 99,
     isPremium: !!source.isPremium,
     isFeatured: !!source.isFeatured,
     isAvailableNow,
@@ -2977,7 +3022,25 @@ exports.getSimilarPublicShops = async (req, res) => {
       .filter((id) => mongoose.Types.ObjectId.isValid(id))
       .map((id) => new mongoose.Types.ObjectId(id));
 
-    const [services, adOrders, appearances, activeStories] = sellerObjectIds.length
+    const now = new Date();
+
+    if (sellerObjectIds.length) {
+      await SimilarShopPromotion.updateMany(
+        {
+          sellerId: { $in: sellerObjectIds },
+          status: { $in: ['approved', 'paused'] },
+          endAt: { $lte: now }
+        },
+        {
+          $set: {
+            status: 'expired',
+            expiredAt: now
+          }
+        }
+      );
+    }
+
+    const [services, adOrders, appearances, activeStories, sponsoredPromotions] = sellerObjectIds.length
       ? await Promise.all([
         SellerService.find({ sellerId: { $in: sellerObjectIds }, isActive: true })
           .select('sellerId title desc tags badge isBookable price')
@@ -2989,7 +3052,7 @@ exports.getSimilarPublicShops = async (req, res) => {
           $or: [
             { expiresAt: { $exists: false } },
             { expiresAt: null },
-            { expiresAt: { $gte: new Date() } }
+            { expiresAt: { $gte: now } }
           ]
         })
           .select('sellerId adTitle adText bannerImage planSlug expiresAt createdAt')
@@ -2998,12 +3061,21 @@ exports.getSimilarPublicShops = async (req, res) => {
         ShopAppearance.find({ sellerId: { $in: sellerObjectIds } })
           .select('sellerId shopLogo footerImage slides')
           .lean(),
-        SellerStory.find({ seller: { $in: sellerObjectIds }, targetType: 'service', status: 'active', expiresAt: { $gt: new Date() } })
+        SellerStory.find({ seller: { $in: sellerObjectIds }, targetType: 'service', status: 'active', expiresAt: { $gt: now } })
           .select('seller imageUrl caption createdAt expiresAt')
           .sort({ createdAt: -1 })
+          .lean(),
+        SimilarShopPromotion.find({
+          sellerId: { $in: sellerObjectIds },
+          status: 'approved',
+          startAt: { $lte: now },
+          endAt: { $gt: now }
+        })
+          .select('sellerId planTier priorityOrder slotLimit startAt endAt metrics createdAt')
+          .sort({ priorityOrder: 1, createdAt: -1 })
           .lean()
       ])
-      : [[], [], [], []];
+      : [[], [], [], [], []];
 
     const serviceMap = new Map();
     services.forEach((service) => {
@@ -3042,6 +3114,15 @@ exports.getSimilarPublicShops = async (req, res) => {
       });
     });
 
+    const sponsoredMap = new Map();
+    sponsoredPromotions
+      .sort(sortSponsoredPromotions)
+      .forEach((promotion) => {
+        const key = String(promotion.sellerId || '');
+        if (!key || sponsoredMap.has(key)) return;
+        sponsoredMap.set(key, promotion);
+      });
+
     const cards = [];
     const seen = new Set();
 
@@ -3052,6 +3133,7 @@ exports.getSimilarPublicShops = async (req, res) => {
       const card = toSimilarCard(shop, {
         services: sellerId ? (serviceMap.get(sellerId) || []) : [],
         activeAd: sellerId ? adMap.get(sellerId) : null,
+        sponsoredPromotion: sellerId ? sponsoredMap.get(sellerId) : null,
         fallbackCategory: category
       });
       if (sellerId && storyMap.has(sellerId)) {
@@ -3087,6 +3169,7 @@ exports.getSimilarPublicShops = async (req, res) => {
       }, {
         services: serviceMap.get(sellerId) || [],
         activeAd: adMap.get(sellerId),
+        sponsoredPromotion: sponsoredMap.get(sellerId),
         fallbackCategory: category
       });
       const dedupeKey = card.shopUrl ? `url:${card.shopUrl.toLowerCase()}` : `seller:${sellerId}`;
@@ -3095,9 +3178,32 @@ exports.getSimilarPublicShops = async (req, res) => {
       cards.push(card);
     });
 
-    const items = cards
-      .sort(sortSimilarCards)
-      .slice(0, limit);
+    const sponsoredCards = [];
+    const sponsoredTierCounts = new Map();
+    const sponsoredSeen = new Set();
+
+    cards
+      .filter((card) => card.isSponsored && card.sponsored?.promotionId)
+      .sort(sortSponsoredCards)
+      .forEach((card) => {
+        if (sponsoredCards.length >= Math.min(limit, SIMILAR_SPONSORED_SLOT_LIMIT)) return;
+        const tier = card.sponsored?.tier || 'normal';
+        const tierLimit = Math.max(1, Math.min(Number(card.sponsored?.slotLimit || 1), SIMILAR_SPONSORED_SLOT_LIMIT));
+        const tierCount = sponsoredTierCounts.get(tier) || 0;
+        if (tierCount >= tierLimit) return;
+        const key = getSimilarDedupeKey(card);
+        if (sponsoredSeen.has(key)) return;
+        sponsoredSeen.add(key);
+        sponsoredTierCounts.set(tier, tierCount + 1);
+        sponsoredCards.push(card);
+      });
+
+    const sponsoredKeys = new Set(sponsoredCards.map(getSimilarDedupeKey));
+    const regularCards = cards
+      .filter((card) => !sponsoredKeys.has(getSimilarDedupeKey(card)))
+      .sort(sortSimilarCards);
+
+    const items = [...sponsoredCards, ...regularCards].slice(0, limit);
 
     return res.json({
       items,
