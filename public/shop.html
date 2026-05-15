@@ -2343,18 +2343,14 @@ body {
 
 .similar-shops-section {
   width: min(95%, 1280px);
-  margin: 1.75rem auto 0;
+  margin: 1.85rem auto 0;
   padding: 0 1rem;
   direction: rtl;
 }
 
 .similar-shops-shell {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 20px;
-  box-shadow: 0 16px 36px rgba(35, 41, 70, 0.075);
-  padding: .9rem;
-  overflow: hidden;
+  padding: 0;
+  overflow: visible;
 }
 
 .similar-shops-head {
@@ -2362,7 +2358,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: .7rem;
+  margin-bottom: .8rem;
 }
 
 .similar-shops-title-wrap {
@@ -2374,7 +2370,7 @@ body {
   align-items: center;
   gap: .35rem;
   margin: 0 0 .18rem;
-  color: #64748b;
+  color: var(--primary);
   font-size: .72rem;
   font-weight: 800;
 }
@@ -2382,7 +2378,7 @@ body {
 .similar-shops-title {
   margin: 0;
   color: var(--text);
-  font-size: clamp(1rem, 1vw + .78rem, 1.36rem);
+  font-size: clamp(1.05rem, 1vw + .82rem, 1.42rem);
   font-weight: 900;
   line-height: 1.35;
 }
@@ -2394,8 +2390,8 @@ body {
   min-height: 28px;
   padding: .34rem .64rem;
   border-radius: 999px;
-  background: #f8fafc;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.08), rgba(82, 183, 136, 0.1));
+  border: 1px solid rgba(124, 131, 253, 0.14);
   color: #475569;
   font-size: .72rem;
   font-weight: 800;
@@ -2406,7 +2402,7 @@ body {
 
 .similar-shops-carousel {
   position: relative;
-  margin-inline: -.9rem;
+  margin-inline: -1rem;
 }
 
 .similar-shops-carousel::before,
@@ -2414,7 +2410,7 @@ body {
   content: '';
   position: absolute;
   top: 0;
-  bottom: .7rem;
+  bottom: .65rem;
   width: 34px;
   z-index: 2;
   pointer-events: none;
@@ -2423,24 +2419,24 @@ body {
 
 .similar-shops-carousel::before {
   right: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .95));
+  background: linear-gradient(90deg, transparent, rgba(248, 250, 252, .98));
 }
 
 .similar-shops-carousel::after {
   left: 0;
-  background: linear-gradient(270deg, transparent, rgba(255, 255, 255, .95));
+  background: linear-gradient(270deg, transparent, rgba(248, 250, 252, .98));
 }
 
 .similar-shops-list {
   display: flex;
-  gap: .65rem;
+  gap: .75rem;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-snap-type: inline mandatory;
   scroll-behavior: smooth;
-  scroll-padding-inline: .9rem;
+  scroll-padding-inline: 1rem;
   -webkit-overflow-scrolling: touch;
-  padding: .18rem .9rem .62rem;
+  padding: .18rem 1rem .66rem;
   scrollbar-width: none;
   touch-action: pan-x;
 }
@@ -2450,45 +2446,48 @@ body {
 }
 
 .similar-shop-card {
-  flex: 0 0 clamp(214px, 72vw, 248px);
+  flex: 0 0 clamp(292px, 84vw, 360px);
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  display: flex;
-  flex-direction: column;
-  gap: .58rem;
-  min-height: 178px;
-  padding: .72rem;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.065);
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: .78rem;
+  align-items: stretch;
+  min-height: 126px;
+  padding: .86rem;
+  border-radius: 1.1rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+  border: 1px solid rgba(124, 131, 253, 0.12);
+  box-shadow: 0 12px 35px rgba(28, 44, 90, 0.08);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
 .similar-shop-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(124, 131, 253, 0.24);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
-}
-
-.similar-shop-top {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: .62rem;
-  align-items: center;
+  transform: translateY(-4px);
+  border-color: rgba(124, 131, 253, 0.3);
+  box-shadow: 0 18px 45px rgba(28, 44, 90, 0.12);
 }
 
 .similar-shop-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 68px;
+  height: 68px;
+  align-self: start;
+  border-radius: .95rem;
   object-fit: cover;
-  background: #f1f5f9;
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(135deg, #eef2ff, #ecfdf5);
+  border: 1px solid rgba(124, 131, 253, 0.12);
+  box-shadow: 0 8px 18px rgba(28, 44, 90, 0.08);
 }
 
+.similar-shop-content,
 .similar-shop-main {
   min-width: 0;
+}
+
+.similar-shop-content {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
 }
 
 .similar-shop-name-row {
@@ -2500,10 +2499,10 @@ body {
 
 .similar-shop-name {
   margin: 0;
-  color: #172033;
-  font-size: .9rem;
+  color: var(--text);
+  font-size: .98rem;
   font-weight: 900;
-  line-height: 1.35;
+  line-height: 1.38;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2513,8 +2512,8 @@ body {
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 19px;
+  height: 19px;
   border-radius: 999px;
   background: rgba(16, 185, 129, 0.12);
   color: #059669;
@@ -2525,8 +2524,8 @@ body {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-top: .24rem;
-  padding: .16rem .48rem;
+  margin-top: .18rem;
+  padding: .14rem .46rem;
   border-radius: 999px;
   background: #fffbeb;
   border: 1px solid rgba(245, 158, 11, 0.2);
@@ -2540,7 +2539,7 @@ body {
 }
 
 .similar-shop-category {
-  margin: .16rem 0 0;
+  margin: .1rem 0 0;
   color: #64748b;
   font-size: .72rem;
   font-weight: 800;
@@ -2550,35 +2549,37 @@ body {
 }
 
 .similar-shop-note {
-  margin: -.18rem 0 0;
-  min-height: 16px;
+  margin: 0;
+  min-height: 0;
   color: #64748b;
-  font-size: .68rem;
+  font-size: .69rem;
   font-weight: 700;
-  line-height: 1.6;
+  line-height: 1.55;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .similar-shop-meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .45rem;
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  flex-wrap: wrap;
 }
 
 .similar-shop-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .35rem;
-  min-height: 30px;
-  padding: .34rem .48rem;
-  border-radius: 11px;
-  background: #f8fafc;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  gap: .28rem;
+  min-height: 25px;
+  max-width: 100%;
+  padding: .24rem .48rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(226, 232, 240, 0.92);
   color: #475569;
-  font-size: .7rem;
+  font-size: .68rem;
   font-weight: 800;
   min-width: 0;
 }
@@ -2591,12 +2592,16 @@ body {
 }
 
 .similar-shop-chip i {
-  color: #f59e0b;
-  font-size: .78rem;
+  color: var(--primary);
+  font-size: .72rem;
 }
 
 .similar-shop-location i {
-  color: #64748b;
+  color: #52b788;
+}
+
+.similar-shop-rating i {
+  color: #f59e0b;
 }
 
 .similar-shop-action {
@@ -2605,16 +2610,16 @@ body {
   justify-content: center;
   gap: .45rem;
   width: 100%;
-  min-height: 36px;
-  margin-top: auto;
-  border-radius: 12px;
-  background: #172033;
+  min-height: 38px;
+  margin-top: .08rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #5bc4b8 100%);
   color: #fff;
   font-size: .78rem;
   font-weight: 900;
   text-decoration: none;
-  box-shadow: 0 12px 24px rgba(23, 32, 51, 0.14);
-  transition: transform .18s ease, background .18s ease;
+  box-shadow: 0 10px 30px rgba(124, 131, 253, 0.24);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
 
 .similar-shops-dots {
@@ -2638,7 +2643,7 @@ body {
 
 .similar-shops-dot.is-active {
   width: 18px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), #5bc4b8);
 }
 
 .similar-shops-dot:focus-visible {
@@ -2647,9 +2652,10 @@ body {
 }
 
 .similar-shop-action:hover {
-  background: var(--primary);
   color: #fff;
   transform: translateY(-1px);
+  box-shadow: 0 12px 36px rgba(124, 131, 253, 0.28);
+  filter: brightness(1.02);
 }
 
 .similar-shops-empty {
@@ -2694,22 +2700,18 @@ body {
 }
 
 @media (min-width: 640px) {
-  .similar-shops-shell {
-    padding: 1.15rem;
-  }
-
   .similar-shops-carousel {
-    margin-inline: -1.15rem;
+    margin-inline: -1rem;
   }
 
   .similar-shops-list {
-    gap: .8rem;
-    padding-inline: 1.15rem;
-    scroll-padding-inline: 1.15rem;
+    gap: .85rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
   }
 
   .similar-shop-card {
-    flex-basis: 255px;
+    flex-basis: 360px;
   }
 }
 
@@ -2720,7 +2722,7 @@ body {
 
   .similar-shops-list {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow: visible;
     padding: .1rem 0;
   }
@@ -2737,7 +2739,7 @@ body {
 
   .similar-shop-card {
     min-width: 0;
-    min-height: 188px;
+    min-height: 132px;
   }
 }
 
@@ -2750,12 +2752,7 @@ body {
 @media (max-width: 420px) {
   .similar-shops-section {
     width: 100%;
-    padding: 0 .7rem;
-  }
-
-  .similar-shops-shell {
-    border-radius: 18px;
-    padding: .78rem;
+    padding: 0 .85rem;
   }
 
   .similar-shops-head {
@@ -2764,17 +2761,30 @@ body {
   }
 
   .similar-shops-carousel {
-    margin-inline: -.78rem;
+    margin-inline: -.85rem;
   }
 
   .similar-shops-list {
-    padding-inline: .78rem;
-    scroll-padding-inline: .78rem;
+    gap: .68rem;
+    padding-inline: .85rem;
+    scroll-padding-inline: .85rem;
   }
 
   .similar-shop-card {
-    flex-basis: 72vw;
-    min-height: 174px;
+    flex-basis: 86vw;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: .68rem;
+    min-height: 126px;
+    padding: .78rem;
+  }
+
+  .similar-shop-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .similar-shop-name {
+    font-size: .94rem;
   }
 }
 
@@ -5040,32 +5050,32 @@ function renderSimilarShops(items = []) {
 
     return `
       <article class="similar-shop-card">
-        <div class="similar-shop-top">
-          <img class="similar-shop-logo" src="${image}" alt="${name}" loading="lazy" decoding="async" onerror="this.src='/assets/images/shop-placeholder.svg'">
+        <img class="similar-shop-logo" src="${image}" alt="${name}" loading="lazy" decoding="async" onerror="this.src='/assets/images/shop-placeholder.svg'">
+        <div class="similar-shop-content">
           <div class="similar-shop-main">
             <div class="similar-shop-name-row">
               <h3 class="similar-shop-name" title="${name}">${name}</h3>
               ${item.verified ? '<span class="similar-shop-verified" title="تایید شده" aria-label="تایید شده"><i class="fas fa-check"></i></span>' : ''}
             </div>
             <p class="similar-shop-category" title="${category}">${category}</p>
-            <span class="similar-shop-sponsored" ${item.sponsored ? '' : 'hidden'}>⭐ ویژه</span>
+            <span class="similar-shop-sponsored" ${item.sponsored ? '' : 'hidden'}>ویژه</span>
           </div>
+          <div class="similar-shop-meta">
+            <span class="similar-shop-chip similar-shop-location" aria-label="موقعیت">
+              <i class="fas fa-location-dot" aria-hidden="true"></i>
+              <span>${location}</span>
+            </span>
+            <span class="similar-shop-chip similar-shop-rating" aria-label="امتیاز">
+              <i class="fas fa-star" aria-hidden="true"></i>
+              <span>${ratingLabel}</span>
+            </span>
+          </div>
+          ${shortInfo ? `<p class="similar-shop-note" title="${shortInfo}">${shortInfo}</p>` : ''}
+          <a class="similar-shop-action" href="${href}">
+            مشاهده فروشگاه
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          </a>
         </div>
-        <p class="similar-shop-note" title="${shortInfo}">${shortInfo}</p>
-        <div class="similar-shop-meta">
-          <span class="similar-shop-chip" aria-label="امتیاز">
-            <i class="fas fa-star" aria-hidden="true"></i>
-            <span>${ratingLabel}</span>
-          </span>
-          <span class="similar-shop-chip similar-shop-location" aria-label="موقعیت">
-            <i class="fas fa-location-dot" aria-hidden="true"></i>
-            <span>${location}</span>
-          </span>
-        </div>
-        <a class="similar-shop-action" href="${href}">
-          مشاهده فروشگاه
-          <i class="fas fa-arrow-left" aria-hidden="true"></i>
-        </a>
       </article>
     `;
   }).join('');
