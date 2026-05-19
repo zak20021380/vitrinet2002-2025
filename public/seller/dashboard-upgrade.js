@@ -819,6 +819,105 @@ function updateHeroContent(tab) {
   }
 }
 
+const AD_SELECTOR_LABELS = {
+  ad_search: 'تبلیغ در جستجو',
+  ad_home: 'تبلیغ در صفحه اول',
+  ad_products: 'تبلیغ بین محصولات'
+};
+
+let selectedSpecialAdSlot = 'ad_search';
+
+function setSpecialAdDropdownOpen(open) {
+  const dropdown = document.querySelector('[data-ad-dropdown]');
+  const trigger = document.querySelector('[data-ad-dropdown-trigger]');
+  if (!dropdown || !trigger) return;
+  dropdown.classList.toggle('is-open', !!open);
+  trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function syncSpecialAdOptionPrices() {
+  document.querySelectorAll('[data-ad-option-price]').forEach(priceEl => {
+    const slot = priceEl.dataset.adOptionPrice;
+    const cardPrice = document.getElementById(`price-${slot}`);
+    if (!slot || !cardPrice) return;
+    const priceText = cardPrice.textContent.trim();
+    if (priceText) priceEl.textContent = `${priceText} تومان`;
+  });
+}
+
+function selectSpecialAdSlot(slot, options = {}) {
+  const cards = document.querySelectorAll('[data-ad-slot]');
+  const selectedCard = document.querySelector(`[data-ad-slot="${slot}"]`);
+  if (!selectedCard) return;
+
+  selectedSpecialAdSlot = slot;
+
+  cards.forEach(card => {
+    const isSelected = card.dataset.adSlot === slot;
+    card.classList.toggle('is-selected', isSelected);
+    card.setAttribute('aria-expanded', isSelected ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('[data-ad-option]').forEach(option => {
+    const isSelected = option.dataset.adOption === slot;
+    option.classList.toggle('is-selected', isSelected);
+    option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+  });
+
+  const currentLabel = document.querySelector('[data-ad-dropdown-current]');
+  if (currentLabel) {
+    currentLabel.textContent = AD_SELECTOR_LABELS[slot] || 'انتخاب جایگاه';
+  }
+
+  if (options.scroll) {
+    requestAnimationFrame(() => {
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+}
+
+function initSpecialAdDropdown() {
+  const dropdown = document.querySelector('[data-ad-dropdown]');
+  const trigger = document.querySelector('[data-ad-dropdown-trigger]');
+  const menu = document.querySelector('[data-ad-dropdown-menu]');
+  if (!dropdown || !trigger || !menu) return;
+
+  if (!dropdown.dataset.listenerAttached) {
+    dropdown.dataset.listenerAttached = 'true';
+
+    trigger.addEventListener('click', () => {
+      const isOpen = dropdown.classList.contains('is-open');
+      setSpecialAdDropdownOpen(!isOpen);
+    });
+
+    menu.querySelectorAll('[data-ad-option]').forEach(option => {
+      option.addEventListener('click', (event) => {
+        event.preventDefault();
+        const slot = option.dataset.adOption;
+        if (!slot) return;
+        toggleTabs('ads');
+        selectSpecialAdSlot(slot, { scroll: true });
+        setSpecialAdDropdownOpen(false);
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!dropdown.contains(event.target)) {
+        setSpecialAdDropdownOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        setSpecialAdDropdownOpen(false);
+      }
+    });
+  }
+
+  syncSpecialAdOptionPrices();
+  selectSpecialAdSlot(selectedSpecialAdSlot);
+}
+
 /*──────────────── ۱) تب‌بندی و مقداردهی اولیه ────────────────*/
 function initUpgradeDashboard () {
   // پشتیبانی از هر دو نسخه قدیم و جدید
@@ -846,6 +945,7 @@ function initUpgradeDashboard () {
 
   // پیش‌فرض نمایش اشتراک فروشگاه
   refreshPlanCardRegistry();
+  initSpecialAdDropdown();
   toggleTabs('sub');
 
   fetchPlanPrices(true);
@@ -882,12 +982,16 @@ function toggleTabs(tab) {
 
   // Update hero content dynamically
   updateHeroContent(tab);
+  if (tab !== 'ads') {
+    setSpecialAdDropdownOpen(false);
+  }
   
   switch (tab) {
     case 'sub':
       fetchPlanPrices();
       break;
     case 'ads':
+      initSpecialAdDropdown();
       fetchAdPrices();
       break;
     case 'myplans':
@@ -998,6 +1102,7 @@ async function fetchAdPrices (force = false) {
           el.textContent = toFaPrice(plansObj[slug]);
         }
       });
+      syncSpecialAdOptionPrices();
 
       // Also fetch slot availability
       fetchSlotAvailability();
