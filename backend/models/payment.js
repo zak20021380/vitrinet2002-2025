@@ -31,12 +31,12 @@ const paymentSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed', 'cancelled'],
+    enum: ['pending', 'completed', 'test_paid', 'mock_paid', 'failed', 'cancelled'],
     default: 'pending',
   },
   paymentMethod: {
     type: String,
-    enum: ['zarinpal', 'paypal', 'credit_card'],
+    enum: ['zarinpal', 'paypal', 'credit_card', 'mock'],
     default: 'zarinpal',
   },
   type: {

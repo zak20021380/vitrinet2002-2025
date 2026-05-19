@@ -2887,6 +2887,16 @@ const AD_STATUS_META = {
   expired:  { label: 'منقضی شده',       icon: 'ri-time-line', className: 'expired' }
 };
 
+const AD_PAYMENT_STATUS_META = {
+  unpaid:    { label: 'پرداخت نشده', icon: 'ri-bank-card-line', className: 'unpaid' },
+  pending:   { label: 'در انتظار پرداخت', icon: 'ri-time-line', className: 'pending' },
+  test_paid: { label: 'پرداخت تستی موفق', icon: 'ri-flask-line', className: 'test-paid' },
+  mock_paid: { label: 'پرداخت تستی موفق', icon: 'ri-flask-line', className: 'test-paid' },
+  verified:  { label: 'پرداخت تایید شده', icon: 'ri-checkbox-circle-line', className: 'verified' },
+  failed:    { label: 'پرداخت ناموفق', icon: 'ri-close-circle-line', className: 'failed' },
+  refunded:  { label: 'بازگشت وجه', icon: 'ri-refund-2-line', className: 'refunded' }
+};
+
 const DEFAULT_AD_DURATION_UNIT = 'days';
 
 function normaliseSlug(value) {
@@ -2925,6 +2935,14 @@ function getAdStatusMeta(status) {
     return AD_STATUS_META[key];
   }
   return { label: 'نامشخص', icon: 'ri-question-line', className: 'unknown' };
+}
+
+function getAdPaymentStatusMeta(status) {
+  const key = normaliseSlug(status || 'unpaid');
+  if (key && AD_PAYMENT_STATUS_META[key]) {
+    return AD_PAYMENT_STATUS_META[key];
+  }
+  return { label: status || 'نامشخص', icon: 'ri-bank-card-line', className: 'unknown' };
 }
 
 const adOrdersTableBody = document.querySelector('#adOrdersTable tbody');
@@ -3073,6 +3091,7 @@ function renderAdOrders() {
       : '';
     const statusMeta = getAdStatusMeta(order.status);
     const statusClass = statusMeta.className || 'unknown';
+    const paymentMeta = getAdPaymentStatusMeta(order.paymentStatus || (order.isMockPayment ? 'test_paid' : 'unpaid'));
     const createdAt = formatDateTime(order.createdAt);
     const reviewedAt = order.reviewedAt ? formatDateTime(order.reviewedAt) : '';
     const reviewedBy = order.reviewedBy && order.reviewedBy.name ? order.reviewedBy.name : '';
@@ -3096,9 +3115,13 @@ function renderAdOrders() {
     if (expiresAt) {
       durationBadges.push(`<span><i class="ri-calendar-event-line"></i>فعال تا پایان روز ${escapeHtml(expiresAt)}</span>`);
     }
-    const durationMetaHtml = durationBadges.length
-      ? `<div class="ad-cell-secondary ad-duration-badges">${durationBadges.join('')}</div>`
-      : '';
+    if (order.scheduledStartDate) {
+      durationBadges.push(`<span><i class="ri-calendar-schedule-line"></i>زمان‌بندی: ${escapeHtml(formatDateTime(order.scheduledStartDate))}</span>`);
+    }
+    if (!hasCustomDuration) {
+      durationBadges.push('<span><i class="ri-24-hours-line"></i>مدت پلن: ۲۴ ساعت</span>');
+    }
+    const durationMetaHtml = `<div class="ad-cell-secondary ad-duration-badges">${durationBadges.join('')}</div>`;
 
     const sellerMetaParts = [];
     if (sellerPhone) sellerMetaParts.push(`<span><i class="ri-phone-line"></i>${escapeHtml(sellerPhone)}</span>`);
@@ -3164,6 +3187,8 @@ function renderAdOrders() {
         <td data-column="آخرین وضعیت">
           <div class="ad-status-cell">
             <span class="ad-status-badge ${statusMeta.className}"><i class="${statusMeta.icon}"></i>${statusMeta.label}</span>
+            <span class="ad-status-badge ${escapeHtml(paymentMeta.className)}"><i class="${escapeHtml(paymentMeta.icon)}"></i>${escapeHtml(paymentMeta.label)}</span>
+            ${order.isMockPayment ? '<div class="ad-status-note">پرداخت تستی است و درگاه واقعی استفاده نشده است.</div>' : ''}
             <div class="ad-status-note">${reviewText}</div>
           </div>
         </td>
@@ -3488,6 +3513,7 @@ function renderAdOrderModal(order) {
     ? `<div class="ad-modal-visit"><a href="${escapeHtml(planMeta.url)}" target="_blank" rel="noopener"><i class="ri-external-link-line"></i> مشاهده محل نمایش در سایت</a></div>`
     : '';
   const statusMeta = getAdStatusMeta(order.status);
+  const paymentMeta = getAdPaymentStatusMeta(order.paymentStatus || (order.isMockPayment ? 'test_paid' : 'unpaid'));
   const sellerName = seller.storename || order.shopTitle || 'بدون نام';
   const sellerPhone = seller.phone || order.sellerPhone || '';
   const sellerAddress = seller.address || seller.city || '';
@@ -3546,6 +3572,7 @@ function renderAdOrderModal(order) {
             <span><span class="label">مبلغ:</span> ${formatCurrency(order.price)}</span>
             <span><span class="label">تاریخ ثبت:</span> ${createdAt}</span>
             <span><span class="label">وضعیت فعلی:</span> ${statusMeta.label}</span>
+            <span><span class="label">وضعیت پرداخت:</span> <i class="${escapeHtml(paymentMeta.icon)}"></i> ${escapeHtml(paymentMeta.label)}${order.isMockPayment ? ' - تستی، بدون درگاه واقعی' : ''}</span>
             <span><span class="label">آخرین بررسی:</span> ${reviewedAt ? `${reviewedAt}${reviewedBy ? ` توسط ${escapeHtml(reviewedBy)}` : ''}` : 'در انتظار بررسی'}</span>
             ${approvedAt ? `<span><span class="label">تاریخ تایید:</span> ${approvedAt}</span>` : ''}
             ${displayedAt ? `<span><span class="label">تاریخ نمایش:</span> ${displayedAt}</span>` : '<span><span class="label">تاریخ نمایش:</span> در انتظار تعیین</span>'}
@@ -3615,7 +3642,7 @@ function renderAdOrderModal(order) {
 
       <div class="ad-modal-status">
         <i class="${statusMeta.icon}"></i>
-        <span>${statusMeta.label}</span>
+        <span>${statusMeta.label} | ${escapeHtml(paymentMeta.label)}${order.isMockPayment ? ' (پرداخت تستی)' : ''}</span>
       </div>
     </div>
   `;

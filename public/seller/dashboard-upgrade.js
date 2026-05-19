@@ -1746,7 +1746,10 @@ window.submitAdForm = async function(e) {
 
   // عملکرد دکمه تایید و ثبت نهایی (فیک)
   confirmModal.querySelector('#submitAdAndPayBtn').onclick = async function() {
-    confirmModal.style.display = 'none';
+    const payBtn = this;
+    const originalText = payBtn.textContent;
+    payBtn.disabled = true;
+    payBtn.textContent = 'در حال شبیه‌سازی پرداخت تستی...';
 
     try {
       // فقط ثبت سفارش تبلیغ (بدون پرداخت واقعی)
@@ -1758,9 +1761,10 @@ window.submitAdForm = async function(e) {
       }
       formData.append('title', title);
       formData.append('text', text);
+      formData.append('mockPayment', 'true');
       if (file) formData.append('image', file);
 
-      const res = await fetch(`${API_BASE}/adOrder`, withCreds({
+      const res = await fetch(`${API_BASE}/promotions/mock-payment-request`, withCreds({
         method: 'POST',
         body: formData
       }));
@@ -1770,6 +1774,8 @@ window.submitAdForm = async function(e) {
         showToast(result.message || 'ثبت تبلیغ ناموفق بود.', true);
         return false;
       }
+
+      confirmModal.style.display = 'none';
 
       if (typeof window.closeAdModal === 'function') {
         window.closeAdModal();
@@ -1784,14 +1790,15 @@ window.submitAdForm = async function(e) {
       const successDetails = [
         `پلن انتخابی: ${adTitle}`,
         locationHint ? `محل نمایش: ${locationHint}` : '',
+        'پرداخت تستی: موفق - بدون اتصال به درگاه واقعی',
         'وضعیت فعلی: در انتظار تایید ادمین'
       ].filter(Boolean);
 
       showSuccessPopup({
-        title: 'تبلیغ شما با موفقیت ثبت شد',
-        message: `تبلیغ «${title || adTitle}» ثبت شد و پس از تایید ادمین نمایش داده خواهد شد.`,
+        title: 'پرداخت تستی با موفقیت انجام شد',
+        message: result.message || 'پرداخت تستی با موفقیت انجام شد و درخواست شما برای بررسی ارسال شد.',
         details: successDetails,
-        highlight: 'ثبت تبلیغ جدید',
+        highlight: 'پرداخت تستی',
         autoCloseMs: 9000
       });
 
@@ -1812,6 +1819,9 @@ window.submitAdForm = async function(e) {
     } catch (err) {
       console.error('submitAdForm error', err);
       alert('خطا در ثبت تبلیغ!');
+    } finally {
+      payBtn.disabled = false;
+      payBtn.textContent = originalText;
     }
     return false;
   };

@@ -1933,6 +1933,15 @@
     if (elements.submitBtn) {
       elements.submitBtn.disabled = loading;
       elements.submitBtn.classList.toggle('is-loading', loading);
+      const textEl = elements.submitBtn.querySelector('.special-ad-submit-btn__text');
+      if (textEl) {
+        if (!elements.submitBtn.dataset.defaultText) {
+          elements.submitBtn.dataset.defaultText = textEl.textContent || '';
+        }
+        textEl.textContent = loading
+          ? 'در حال شبیه‌سازی پرداخت تستی...'
+          : (elements.submitBtn.dataset.defaultText || 'ثبت و پرداخت نهایی');
+      }
     }
   };
 
@@ -2090,6 +2099,7 @@
     }
     
     setLoading(true);
+    showToast('در حال شبیه‌سازی پرداخت تستی؛ هیچ مبلغ واقعی کسر نمی‌شود.');
     
     try {
       const profile = await fetchSellerProfile();
@@ -2120,7 +2130,9 @@
         formData.append('selectedImageUrl', state.currentImageUrl);
       }
       
-      const res = await fetch(`${API_BASE}/adOrder`, withCreds({
+      formData.append('mockPayment', 'true');
+
+      const res = await fetch(`${API_BASE}/promotions/mock-payment-request`, withCreds({
         method: 'POST',
         body: formData
       }));
@@ -2161,13 +2173,20 @@
       
       closeModal();
       showSuccessPopup({
-        title: 'تبلیغ شما زمان‌بندی شد!',
+        title: 'پرداخت تستی با موفقیت انجام شد',
+        message: result.message || 'پرداخت تستی با موفقیت انجام شد و درخواست شما برای بررسی ارسال شد.',
         startDate: isToday ? `امروز (${scheduledStartDate})` : scheduledStartDate,
         duration: '۲۴ ساعت کامل',
         slotName: slotDisplayNames[state.planSlug] || AD_PLAN_TITLES[state.planSlug],
         amountPaid: state.finalPrice > 0 ? `${toFaPrice(state.finalPrice)} تومان` : null,
         creditUsed: state.creditAmount > 0 ? `${toFaPrice(state.creditAmount)} تومان` : null,
         frequencyCap: 'حداکثر ۲ بار برای هر کاربر',
+        details: [
+          'این پرداخت فقط تستی است و هیچ درگاه واقعی اجرا نشده است.',
+          'وضعیت پرداخت: پرداخت تستی موفق',
+          'وضعیت درخواست: در انتظار بررسی ادمین'
+        ],
+        highlight: 'پرداخت تستی',
         onGoToMyAds: () => {
           const myPlansTab = document.querySelector('[data-tab="myplans"]');
           if (myPlansTab) myPlansTab.click();
@@ -2213,6 +2232,12 @@
     if (!elements.backdrop) {
       initElements();
       attachEventListeners();
+    }
+
+    const submitText = elements.submitBtn?.querySelector('.special-ad-submit-btn__text');
+    if (submitText) {
+      submitText.textContent = 'پرداخت تستی و ارسال برای بررسی';
+      elements.submitBtn.dataset.defaultText = submitText.textContent;
     }
     
     // Reset state

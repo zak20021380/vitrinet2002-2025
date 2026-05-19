@@ -15,6 +15,20 @@ const adOrderSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'paid', 'rejected', 'expired'],
     default: 'pending'
   },                                                    // وضعیت سفارش تبلیغ
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'pending', 'test_paid', 'mock_paid', 'verified', 'failed', 'refunded'],
+    default: 'unpaid',
+    index: true
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['none', 'mock', 'zarinpal', 'wallet', 'mixed'],
+    default: 'none'
+  },
+  paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment', default: null },
+  paidAt: { type: Date, default: null },
+  isMockPayment: { type: Boolean, default: false, index: true },
   adminNote: { type: String, trim: true },              // یادداشت داخلی ادمین
   reviewedAt: { type: Date },                           // تاریخ آخرین بررسی ادمین
   reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }, // شناسه ادمین بررسی کننده

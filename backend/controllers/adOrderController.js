@@ -1,4 +1,5 @@
 const AdOrder = require('../models/AdOrder');
+const Payment = require('../models/payment');
 const Product = require('../models/product');
 const Seller = require('../models/Seller');
 const AdPlan = require('../models/adPlan');
@@ -12,7 +13,8 @@ const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
 const POPULATE_SPEC = [
   { path: 'sellerId', select: 'storename shopurl phone city address ownerName ownerLastname' },
   { path: 'productId', select: 'title price slug' },
-  { path: 'reviewedBy', select: 'name phone' }
+  { path: 'reviewedBy', select: 'name phone' },
+  { path: 'paymentId', select: 'paymentStatus paymentMethod transactionId createdAt amount' }
 ];
 
 const PUBLIC_POPULATE_SPEC = [
@@ -254,6 +256,25 @@ async function findEffectiveAdPlan(slug, sellerPhone) {
   return plan;
 }
 
+async function findBlockingAdOrder(sellerId, planSlug) {
+  if (!sellerId || !planSlug) return null;
+
+  const now = new Date();
+  const today = getStartOfDay(now);
+  return AdOrder.findOne({
+    sellerId,
+    planSlug,
+    status: { $in: ['pending', 'approved', 'paid'] },
+    $or: [
+      { status: 'pending' },
+      { scheduledEndDate: { $gte: today } },
+      { expiresAt: { $gte: now } },
+      { displayedAt: { $exists: false } },
+      { displayedAt: null }
+    ]
+  }).select('_id status planSlug createdAt scheduledStartDate scheduledEndDate paymentStatus').lean();
+}
+
 async function populateAdOrder(doc) {
   if (!doc) return doc;
   await doc.populate(POPULATE_SPEC);
@@ -341,6 +362,7 @@ exports.createAdOrder = async (req, res) => {
     // Ad order request received
 
     const sellerId = req.user.sellerId;
+    const isMockPaymentRequest = req.mockPayment === true || req.fields?.mockPayment === 'true';
 
     // داده‌های فرم
     const planSlug   = req.fields.adType || req.fields.planSlug;
@@ -363,6 +385,16 @@ exports.createAdOrder = async (req, res) => {
     const plan = await findEffectiveAdPlan(planSlug, seller.phone);
     if (!plan) {
       return res.status(404).json({ success: false, message: 'پلن تبلیغ پیدا نشد.' });
+    }
+
+    const duplicate = await findBlockingAdOrder(sellerId, planSlug);
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        code: 'DUPLICATE_AD_PLACEMENT',
+        message: 'برای این جایگاه تبلیغ، یک درخواست فعال یا در انتظار بررسی دارید. ابتدا وضعیت درخواست قبلی را پیگیری کنید.',
+        adOrder: duplicate
+      });
     }
 
     // Determine ad type based on whether product is selected
@@ -433,6 +465,10 @@ exports.createAdOrder = async (req, res) => {
       adTitle: sanitizedTitle || undefined,
       adText: sanitizedText || undefined,
       status: 'pending',
+      paymentStatus: isMockPaymentRequest ? 'test_paid' : 'unpaid',
+      paymentMethod: isMockPaymentRequest ? 'mock' : 'none',
+      paidAt: isMockPaymentRequest ? new Date() : null,
+      isMockPayment: isMockPaymentRequest,
       // Scheduling fields
       scheduledStartDate,
       scheduledEndDate,
@@ -440,6 +476,21 @@ exports.createAdOrder = async (req, res) => {
     });
 
     await adOrder.save();
+
+    if (isMockPaymentRequest) {
+      const payment = await Payment.create({
+        adOrderId: adOrder._id,
+        sellerId,
+        amount: plan.price,
+        paymentStatus: 'test_paid',
+        paymentMethod: 'mock',
+        transactionId: `mock_${Date.now()}_${String(adOrder._id).slice(-6)}`,
+        type: 'ad'
+      });
+      adOrder.paymentId = payment._id;
+      await adOrder.save();
+    }
+
     // TODO: ارسال رخداد ایجاد سفارش به PostHog پس از فعال‌سازی | TODO: Send order_created event to PostHog once enabled
     // const { trackOrderCreated } = require('../utils/posthog-tracking');
     // await trackOrderCreated(adOrder);
@@ -455,9 +506,12 @@ exports.createAdOrder = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: nextAvailable.daysUntil === 0 
-        ? 'سفارش تبلیغ ثبت شد و برای امروز برنامه‌ریزی شد.'
-        : `سفارش تبلیغ ثبت شد و برای ${nextAvailable.daysUntil} روز دیگر برنامه‌ریزی شد.`,
+      mockPayment: isMockPaymentRequest,
+      message: isMockPaymentRequest
+        ? 'پرداخت تستی با موفقیت انجام شد و درخواست شما برای بررسی ارسال شد.'
+        : (nextAvailable.daysUntil === 0
+          ? 'سفارش تبلیغ ثبت شد و برای امروز برنامه‌ریزی شد.'
+          : `سفارش تبلیغ ثبت شد و برای ${nextAvailable.daysUntil} روز دیگر برنامه‌ریزی شد.`),
       adOrder: responseOrder
     });
   } catch (err) {
@@ -471,6 +525,11 @@ exports.createAdOrder = async (req, res) => {
 };
 
 // گرفتن سفارشات تبلیغ یک فروشنده (مثلا برای پنل فروشنده)
+exports.createMockPaymentAdOrder = async (req, res) => {
+  req.mockPayment = true;
+  return exports.createAdOrder(req, res);
+};
+
 exports.getSellerAdOrders = async (req, res) => {
   try {
     const { sellerId } = req.query;
