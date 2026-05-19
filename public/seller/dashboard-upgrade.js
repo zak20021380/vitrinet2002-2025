@@ -820,9 +820,10 @@ function updateHeroContent(tab) {
 }
 
 const AD_SELECTOR_LABELS = {
-  ad_search: 'باکس جستجو',
-  ad_home: 'صفحه اول',
-  ad_products: 'لیست محصولات'
+  ad_search: 'بخش جستجو',
+  ad_home: 'بخش صفحه اول',
+  ad_products: 'بخش لیست محصولات',
+  similar_promotions: 'بخش فروشگاه‌های مشابه'
 };
 
 let selectedSpecialAdSlot = 'ad_search';
@@ -848,7 +849,13 @@ function syncSpecialAdOptionPrices() {
 function selectSpecialAdSlot(slot, options = {}) {
   const cards = document.querySelectorAll('[data-ad-slot]');
   const selectedCard = document.querySelector(`[data-ad-slot="${slot}"]`);
-  if (!selectedCard) return;
+  if (!selectedCard) {
+    const retriesLeft = Number.isFinite(options.retriesLeft) ? options.retriesLeft : 8;
+    if (slot === 'similar_promotions' && retriesLeft > 0) {
+      setTimeout(() => selectSpecialAdSlot(slot, { ...options, retriesLeft: retriesLeft - 1 }), 180);
+    }
+    return;
+  }
 
   selectedSpecialAdSlot = slot;
 
@@ -871,7 +878,7 @@ function selectSpecialAdSlot(slot, options = {}) {
 
   if (options.scroll) {
     requestAnimationFrame(() => {
-      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 }

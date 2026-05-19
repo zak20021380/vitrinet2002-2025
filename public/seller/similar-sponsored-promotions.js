@@ -196,6 +196,9 @@
     const root = document.createElement('section');
     root.id = 'similar-sponsored-seller-root';
     root.className = 'similar-sponsored-widget';
+    root.dataset.adSlot = 'similar_promotions';
+    root.style.scrollMarginTop = '12px';
+    root.setAttribute('aria-expanded', 'false');
     root.innerHTML = `
       <article class="similar-sponsored-card" aria-labelledby="similar-sponsored-title">
         <header class="similar-sponsored-widget__header">
