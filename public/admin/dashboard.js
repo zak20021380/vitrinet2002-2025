@@ -9247,6 +9247,16 @@ function setSimilarPromotionsMessage(target, message = '', type = 'info') {
   if (type === 'success') target.classList.add('is-success');
 }
 
+function signalSimilarPromotionPlansUpdated(meta = {}) {
+  const version = meta.version || meta.plansUpdatedAt || String(Date.now());
+  try {
+    localStorage.setItem('similar-promotions-plans-updated', version);
+  } catch (err) {
+    console.warn('similar promotions storage signal failed:', err);
+  }
+  window.dispatchEvent(new CustomEvent('similar-promotions:plans-updated', { detail: { version } }));
+}
+
 function toDateTimeLocal(value) {
   if (!value) return '';
   const date = new Date(value);
@@ -9293,7 +9303,10 @@ async function loadSimilarPromotionPlans() {
   if (!similarPromotionsPlansGrid) return;
   setSimilarPromotionsMessage(similarPromotionsPlansMsg, 'در حال بارگذاری پلن‌ها...');
   try {
-    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/plans`, { credentials: 'include' });
+    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/plans?_=${Date.now()}`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در دریافت پلن‌ها');
     similarPromotionPlans = Array.isArray(data.plans) ? data.plans : [];
@@ -9359,6 +9372,7 @@ async function saveSimilarPromotionPlans(event) {
     const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/plans`, {
       method: 'PUT',
       credentials: 'include',
+      cache: 'no-cache',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plans })
     });
@@ -9366,6 +9380,7 @@ async function saveSimilarPromotionPlans(event) {
     if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در ذخیره پلن‌ها');
     similarPromotionPlans = Array.isArray(data.plans) ? data.plans : [];
     renderSimilarPromotionPlans();
+    signalSimilarPromotionPlansUpdated(data.meta || {});
     setSimilarPromotionsMessage(similarPromotionsPlansMsg, data.message || 'پلن‌ها ذخیره شد.', 'success');
   } catch (err) {
     console.error('saveSimilarPromotionPlans failed:', err);

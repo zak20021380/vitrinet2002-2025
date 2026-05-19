@@ -1,7 +1,13 @@
 (() => {
   'use strict';
 
-  if (document.getElementById('similar-sponsored-seller-root')) return;
+  if (document.getElementById('similar-sponsored-seller-root')) {
+    if (window.SimilarSponsoredPromotions?.refresh) {
+      window.SimilarSponsoredPromotions.refresh({ force: true, reason: 'script-reload' });
+    }
+    return;
+  }
+  window.SimilarSponsoredPromotions?.destroy?.();
 
   const target = document.getElementById('content-ads') || document.getElementById('ads-content');
   if (!target) return;
@@ -17,6 +23,9 @@
     plans: [],
     requests: [],
     selectedPlan: null,
+    planVersion: null,
+    lastLoadedAt: 0,
+    loadPromise: null,
     csrfPromise: null
   };
 
@@ -250,33 +259,57 @@
     el.className = `similar-sponsored-msg ${type || ''}`.trim();
   }
 
+  function freshPath(path) {
+    const separator = String(path).includes('?') ? '&' : '?';
+    return `${path}${separator}_=${Date.now()}`;
+  }
+
   async function apiJson(path, options = {}) {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const { fresh = true, ...fetchOptions } = options;
+    const method = String(fetchOptions.method || 'GET').toUpperCase();
+    const requestPath = method === 'GET' && fresh ? freshPath(path) : path;
+    const res = await fetch(`${API_BASE}${requestPath}`, {
       credentials: 'include',
-      ...options,
-      headers: authHeaders(options.headers || {})
+      cache: method === 'GET' ? 'no-store' : 'no-cache',
+      ...fetchOptions,
+      headers: authHeaders(fetchOptions.headers || {})
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در ارتباط با سرور');
     return data;
   }
 
-  async function loadData() {
-    setMessage('در حال بارگذاری...');
-    try {
-      const [plansData, requestsData] = await Promise.all([
-        apiJson('/similar-shop-promotions/plans'),
-        apiJson('/similar-shop-promotions/seller')
-      ]);
-      state.plans = Array.isArray(plansData.plans) ? plansData.plans : [];
-      state.requests = Array.isArray(requestsData.promotions) ? requestsData.promotions : [];
-      renderPlans();
-      renderRequests();
-      setMessage('');
-    } catch (err) {
-      console.error('similar sponsored loadData failed:', err);
-      setMessage(err.message || 'خطا در بارگذاری تبلیغات فروشگاه‌های مشابه', 'error');
-    }
+  async function loadData(options = {}) {
+    const { force = false, silent = false } = options;
+    if (!force && state.loadPromise) return state.loadPromise;
+
+    state.loadPromise = (async () => {
+      if (!silent) setMessage('در حال بارگذاری...');
+      try {
+        const [plansData, requestsData] = await Promise.all([
+          apiJson('/similar-shop-promotions/plans'),
+          apiJson('/similar-shop-promotions/seller')
+        ]);
+        state.plans = Array.isArray(plansData.plans) ? plansData.plans : [];
+        state.requests = Array.isArray(requestsData.promotions) ? requestsData.promotions : [];
+        state.planVersion = plansData.meta?.version || plansData.meta?.plansUpdatedAt || null;
+        state.lastLoadedAt = Date.now();
+        renderPlans();
+        renderRequests();
+        setMessage('');
+        return { plans: state.plans, requests: state.requests, version: state.planVersion };
+      } catch (err) {
+        console.error('similar sponsored loadData failed:', err);
+        if (!silent) {
+          setMessage(err.message || 'خطا در بارگذاری تبلیغات فروشگاه‌های مشابه', 'error');
+        }
+        throw err;
+      } finally {
+        state.loadPromise = null;
+      }
+    })();
+
+    return state.loadPromise;
   }
 
   function renderPlans() {
@@ -428,7 +461,47 @@
     });
   }
 
+  function setupPlanSync() {
+    const refresh = (options = {}) => loadData({ force: true, silent: !!options.silent }).catch(() => null);
+    const handleVisibility = () => {
+      if (!document.hidden && Date.now() - state.lastLoadedAt > 5000) {
+        refresh({ silent: true });
+      }
+    };
+    const handleFocus = () => refresh({ silent: true });
+    const handleStorage = (event) => {
+      if (event.key === 'similar-promotions-plans-updated') {
+        refresh({ silent: false });
+      }
+    };
+    const handleAdminSignal = () => refresh({ silent: false });
+    const intervalId = window.setInterval(() => refresh({ silent: true }), 60000);
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('similar-promotions:plans-updated', handleAdminSignal);
+
+    window.SimilarSponsoredPromotions = {
+      refresh,
+      getState: () => ({
+        plans: [...state.plans],
+        requests: [...state.requests],
+        version: state.planVersion,
+        lastLoadedAt: state.lastLoadedAt
+      }),
+      destroy: () => {
+        window.clearInterval(intervalId);
+        document.removeEventListener('visibilitychange', handleVisibility);
+        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('storage', handleStorage);
+        window.removeEventListener('similar-promotions:plans-updated', handleAdminSignal);
+      }
+    };
+  }
+
   renderShell();
   bindEvents();
-  loadData();
+  setupPlanSync();
+  loadData({ force: true }).catch(() => null);
 })();

@@ -120,6 +120,24 @@ function serializePlan(plan) {
   };
 }
 
+function setPlansNoStoreHeaders(res) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+}
+
+function buildPlansMeta(plans) {
+  const timestamps = (Array.isArray(plans) ? plans : [])
+    .map((plan) => new Date(plan.updatedAt || 0).getTime())
+    .filter(Number.isFinite);
+  const latest = timestamps.length ? Math.max(...timestamps) : Date.now();
+  return {
+    version: String(latest),
+    plansUpdatedAt: new Date(latest).toISOString()
+  };
+}
+
 function serializePromotion(promotion) {
   if (!promotion) return null;
   const raw = typeof promotion.toObject === 'function'
@@ -255,7 +273,8 @@ function getAdminId(req) {
 exports.getPublicPlans = async (req, res) => {
   try {
     const plans = await getPlans({ includeInactive: false });
-    return res.json({ success: true, plans });
+    setPlansNoStoreHeaders(res);
+    return res.json({ success: true, plans, meta: buildPlansMeta(plans) });
   } catch (err) {
     console.error('similar promotions getPublicPlans error:', err);
     return res.status(500).json({ success: false, message: 'خطا در دریافت پلن‌های تبلیغات.' });
@@ -265,7 +284,8 @@ exports.getPublicPlans = async (req, res) => {
 exports.getAdminPlans = async (req, res) => {
   try {
     const plans = await getPlans({ includeInactive: true });
-    return res.json({ success: true, plans });
+    setPlansNoStoreHeaders(res);
+    return res.json({ success: true, plans, meta: buildPlansMeta(plans) });
   } catch (err) {
     console.error('similar promotions getAdminPlans error:', err);
     return res.status(500).json({ success: false, message: 'خطا در دریافت پلن‌های تبلیغات.' });
@@ -322,7 +342,13 @@ exports.updateAdminPlans = async (req, res) => {
 
     await Promise.all(updates);
     const savedPlans = await getPlans({ includeInactive: true });
-    return res.json({ success: true, message: 'پلن‌های تبلیغات ذخیره شد.', plans: savedPlans });
+    setPlansNoStoreHeaders(res);
+    return res.json({
+      success: true,
+      message: 'پلن‌های تبلیغات ذخیره شد.',
+      plans: savedPlans,
+      meta: buildPlansMeta(savedPlans)
+    });
   } catch (err) {
     console.error('similar promotions updateAdminPlans error:', err);
     return res.status(500).json({ success: false, message: 'خطا در ذخیره پلن‌های تبلیغات.' });
