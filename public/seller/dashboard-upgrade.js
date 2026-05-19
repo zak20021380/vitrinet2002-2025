@@ -820,9 +820,9 @@ function updateHeroContent(tab) {
 }
 
 const AD_SELECTOR_LABELS = {
-  ad_search: 'تبلیغ در جستجو',
-  ad_home: 'تبلیغ در صفحه اول',
-  ad_products: 'تبلیغ بین محصولات'
+  ad_search: 'باکس جستجو',
+  ad_home: 'صفحه اول',
+  ad_products: 'لیست محصولات'
 };
 
 let selectedSpecialAdSlot = 'ad_search';
@@ -866,7 +866,7 @@ function selectSpecialAdSlot(slot, options = {}) {
 
   const currentLabel = document.querySelector('[data-ad-dropdown-current]');
   if (currentLabel) {
-    currentLabel.textContent = AD_SELECTOR_LABELS[slot] || 'انتخاب جایگاه';
+    currentLabel.textContent = AD_SELECTOR_LABELS[slot] || 'انتخاب نوع تبلیغ';
   }
 
   if (options.scroll) {
