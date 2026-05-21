@@ -3275,16 +3275,23 @@ function handleQuickAdAction(button, status) {
     .finally(() => setButtonLoading(button, false));
 }
 
-function handleQuickDelete(button) {
+async function handleQuickDelete(button) {
   const orderId = button?.dataset?.id;
   if (!orderId) return;
-  if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
-    return;
-  }
+  const confirmed = await openDeleteConfirm({
+    title: 'تأیید حذف تبلیغ',
+    description: 'آیا از حذف این درخواست تبلیغ مطمئن هستید؟ این عملیات غیرقابل بازگشت است.'
+  });
+  if (!confirmed) return;
   setButtonLoading(button, true);
-  removeAdOrder(orderId, { silent: false })
-    .catch(() => {})
-    .finally(() => setButtonLoading(button, false));
+  try {
+    await removeAdOrder(orderId, { silent: true });
+    showAdminToast('تبلیغ با موفقیت حذف شد.', 'success');
+  } catch (err) {
+    showAdminToast(err?.message || 'خطا در حذف تبلیغ.', 'error');
+  } finally {
+    setButtonLoading(button, false);
+  }
 }
 
 async function updateAdOrderStatus(orderId, status, note, { silent = false } = {}) {
@@ -3441,7 +3448,7 @@ async function loadAdOrders(force = false) {
 
   adOrdersLoadingPromise = (async () => {
     try {
-      const res = await fetch(`${ADMIN_API_BASE}/adOrder`, { credentials: 'include' });
+      const res = await fetch(`${ADMIN_API_BASE}/adOrder`, { credentials: 'include', cache: 'no-store' });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || data.message || 'خطا در دریافت تبلیغات.');
@@ -3786,22 +3793,25 @@ function renderAdOrderModal(order) {
   }
 
   if (deleteButton) {
-    deleteButton.addEventListener('click', () => {
-      if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
-        return;
-      }
+    deleteButton.addEventListener('click', async () => {
+      const confirmed = await openDeleteConfirm({
+        title: 'تأیید حذف تبلیغ',
+        description: 'آیا از حذف این درخواست تبلیغ مطمئن هستید؟ این عملیات غیرقابل بازگشت است.'
+      });
+      if (!confirmed) return;
       setAdModalEditStatus('در حال حذف تبلیغ...', 'info');
       setButtonLoading(deleteButton, true);
-      removeAdOrder(orderId, { silent: true })
-        .then(() => {
-          closeAdOrderModal();
-          setAdOrdersStatus('تبلیغ با موفقیت حذف شد.', 'success');
-        })
-        .catch(err => {
-          console.error('ad-modal delete error:', err);
-          setAdModalEditStatus(err.message || 'خطا در حذف تبلیغ.', 'error');
-        })
-        .finally(() => setButtonLoading(deleteButton, false));
+      try {
+        await removeAdOrder(orderId, { silent: true });
+        closeAdOrderModal();
+        showAdminToast('تبلیغ با موفقیت حذف شد.', 'success');
+      } catch (err) {
+        console.error('ad-modal delete error:', err);
+        setAdModalEditStatus(err?.message || 'خطا در حذف تبلیغ.', 'error');
+        showAdminToast(err?.message || 'خطا در حذف تبلیغ.', 'error');
+      } finally {
+        setButtonLoading(deleteButton, false);
+      }
     });
   }
 }
@@ -9420,7 +9430,7 @@ async function loadSimilarPromotionRequests() {
   setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'در حال بارگذاری درخواست‌ها...');
   try {
     const status = similarPromotionsFilter || 'all';
-    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin?status=${encodeURIComponent(status)}`, { credentials: 'include' });
+    const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin?status=${encodeURIComponent(status)}`, { credentials: 'include', cache: 'no-store' });
     const data = await res.json();
     if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در دریافت درخواست‌ها');
     similarPromotionRequests = Array.isArray(data.promotions) ? data.promotions : [];
@@ -9557,10 +9567,39 @@ async function updateSimilarPromotionRequest(id, payload) {
   return data;
 }
 
+async function deleteSimilarPromotion(id) {
+  const res = await fetch(`${ADMIN_API_BASE}/similar-shop-promotions/admin/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  const data = await res.json();
+  if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در حذف تبلیغ');
+  return data;
+}
+
 async function handleSimilarPromotionAction(card, action) {
   const id = card?.dataset?.id || '';
   if (!id || !action) return;
-  if (['reject', 'remove'].includes(action) && !confirm('این عملیات اعمال شود؟')) return;
+  if (action === 'remove') {
+    const confirmed = await openDeleteConfirm({
+      title: 'تأیید حذف تبلیغ',
+      description: 'آیا از حذف این درخواست تبلیغ مطمئن هستید؟ این عملیات غیرقابل بازگشت است.'
+    });
+    if (!confirmed) return;
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'در حال حذف...');
+    try {
+      await deleteSimilarPromotion(id);
+      similarPromotionRequests = similarPromotionRequests.filter((item) => similarPromotionId(item) !== id);
+      renderSimilarPromotionRequests();
+      showAdminToast('تبلیغ با موفقیت حذف شد.', 'success');
+    } catch (err) {
+      console.error('handleSimilarPromotionAction remove failed:', err);
+      setSimilarPromotionsMessage(similarPromotionsRequestsMsg, err?.message || 'خطا در حذف تبلیغ', 'error');
+      showAdminToast(err?.message || 'خطا در حذف تبلیغ', 'error');
+    }
+    return;
+  }
+  if (action === 'reject' && !confirm('این عملیات اعمال شود؟')) return;
   const payload = { ...readSimilarPromotionControls(card), action };
   setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'در حال بروزرسانی...');
   try {
@@ -9569,7 +9608,7 @@ async function handleSimilarPromotionAction(card, action) {
     setSimilarPromotionsMessage(similarPromotionsRequestsMsg, 'تبلیغ بروزرسانی شد.', 'success');
   } catch (err) {
     console.error('handleSimilarPromotionAction failed:', err);
-    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, err.message || 'خطا در بروزرسانی تبلیغ', 'error');
+    setSimilarPromotionsMessage(similarPromotionsRequestsMsg, err?.message || 'خطا در بروزرسانی تبلیغ', 'error');
   }
 }
 
@@ -11854,6 +11893,57 @@ async function saveSellerPlanFeatureFlag() {
 
 
 
+
+/* ── Toast Notifications (Admin Dashboard) ── */
+(function initAdminToasts() {
+  const container = document.createElement('div');
+  container.id = 'toast-container';
+  container.className = 'toast-container';
+  document.body.appendChild(container);
+
+  window.showAdminToast = function showAdminToast(message, type = 'success', duration = 3500) {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const iconMap = {
+      success: 'ri-checkbox-circle-line',
+      error:   'ri-error-warning-line',
+      info:    'ri-information-line',
+      warning: 'ri-alert-line'
+    };
+    el.innerHTML = `<i class="${iconMap[type] || iconMap.info}"></i><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('exit');
+      setTimeout(() => el.remove(), 300);
+    }, duration);
+  };
+})();
+
+/* ── Delete Confirmation Modal ── */
+let _deleteConfirmResolve = null;
+function openDeleteConfirm({ title = 'تأیید حذف', description = 'آیا از حذف این مورد مطمئن هستید؟ این عملیات قابل بازگشت نیست.' } = {}) {
+  return new Promise((resolve) => {
+    _deleteConfirmResolve = resolve;
+    const overlay = document.getElementById('delete-confirm-overlay');
+    const desc = document.getElementById('delete-confirm-desc');
+    if (!overlay) { resolve(false); return; }
+    if (desc) desc.textContent = description;
+    overlay.classList.add('active');
+  });
+}
+function closeDeleteConfirm(result = false) {
+  const overlay = document.getElementById('delete-confirm-overlay');
+  if (overlay) overlay.classList.remove('active');
+  if (_deleteConfirmResolve) { _deleteConfirmResolve(result); _deleteConfirmResolve = null; }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const cancelBtn = document.getElementById('delete-confirm-cancel');
+  const confirmBtn = document.getElementById('delete-confirm-confirm');
+  const overlay = document.getElementById('delete-confirm-overlay');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => closeDeleteConfirm(false));
+  if (confirmBtn) confirmBtn.addEventListener('click', () => closeDeleteConfirm(true));
+  if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDeleteConfirm(false); });
+});
 
 // تابع debounce برای جلوگیری از درخواست‌های مکرر موقع تایپ (۵۰۰ میلی‌ثانیه)
 function debounce(fn, delay = 500) {

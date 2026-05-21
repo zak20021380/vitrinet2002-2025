@@ -3,6 +3,7 @@ const Payment = require('../models/payment');
 const Product = require('../models/product');
 const Seller = require('../models/Seller');
 const AdPlan = require('../models/adPlan');
+const SellerNotification = require('../models/SellerNotification');
 const fs = require('fs');
 const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
@@ -836,6 +837,12 @@ exports.deleteAdOrder = async (req, res) => {
     const bannerPath = adOrder.bannerImage
       ? path.join(__dirname, '..', 'uploads', adOrder.bannerImage)
       : null;
+
+    // حذف رکوردهای مرتبط
+    await Promise.all([
+      Payment.deleteMany({ adOrderId: adOrder._id }),
+      SellerNotification.deleteMany({ 'relatedData.adId': adOrder._id })
+    ]);
 
     await adOrder.deleteOne();
 
