@@ -35,6 +35,27 @@
     priority: 'پلن اولویت‌دار'
   };
 
+  const tierDescriptions = {
+    normal: 'نمایش هدفمند در کنار فروشگاه‌های هم‌حوزه شما',
+    priority: 'جایگاه برتر و دیده‌شدن بیشتر نسبت به پلن عادی'
+  };
+
+  const tierFeatures = {
+    normal: [
+      'نمایش در بخش فروشگاه‌های مشابه',
+      'هدف‌گیری هم‌حوزه و رقبای هم‌نوع',
+      'فعال‌سازی پس از تأیید مدیر',
+      'تعریف مدت نمایش توسط مدیر'
+    ],
+    priority: [
+      'نمایش اولویت‌دار بالاتر از پلن عادی',
+      'هدف‌گیری دقیق‌تر هم‌حوزه',
+      'جایگاه ممتاز در فروشگاه‌های مشابه',
+      'فعال‌سازی سریع‌تر پس از تأیید',
+      'دیده‌شدن بیشتر توسط مشتریان هدف'
+    ]
+  };
+
   const durationLabels = {
     daily: 'روزانه',
     weekly: 'هفتگی',
@@ -91,9 +112,7 @@
         .then((res) => res.ok ? res.json() : null)
         .then((data) => data?.csrfToken || readCookie('csrf_token') || '')
         .catch(() => '')
-        .finally(() => {
-          state.csrfPromise = null;
-        });
+        .finally(() => { state.csrfPromise = null; });
     }
     return state.csrfPromise;
   }
@@ -130,122 +149,811 @@
     });
   }
 
+  /* ─────────────────────────────────────────────────────
+     PREMIUM CSS — matches upgrade-ad-card design language
+     Purple/Violet accent for Similar Shops identity
+     ───────────────────────────────────────────────────── */
   function injectStyles() {
     if (document.getElementById('similar-sponsored-seller-styles')) return;
     const style = document.createElement('style');
     style.id = 'similar-sponsored-seller-styles';
     style.textContent = `
-      .similar-sponsored-widget{direction:rtl;margin:1.25rem 0 0;font-family:inherit}
-      .similar-sponsored-card{position:relative;overflow:hidden;border:1px solid rgba(16,185,129,.14);border-radius:24px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);box-shadow:0 16px 42px rgba(15,23,42,.08);color:#0f172a;padding:1rem}
-      .similar-sponsored-card::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#10b981,#0ea5e9)}
-      .similar-sponsored-card::after{content:'';position:absolute;inset:auto -80px -90px auto;width:210px;height:210px;border-radius:999px;background:radial-gradient(circle,rgba(16,185,129,.12),rgba(14,165,233,0));pointer-events:none}
-      .similar-sponsored-card>*{position:relative;z-index:1}
-      .similar-sponsored-widget__header{display:flex;gap:.85rem;align-items:flex-start;margin-bottom:.9rem}
-      .similar-sponsored-head-icon{display:grid;place-items:center;width:48px;height:48px;min-width:48px;border-radius:16px;background:linear-gradient(145deg,#dcfce7,#e0f2fe);color:#059669;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(16,185,129,.14);font-size:1.35rem}
-      .similar-sponsored-kicker{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;background:#ecfdf5;border:1px solid #bbf7d0;padding:.22rem .65rem;color:#047857;font-size:.7rem;font-weight:900;margin-bottom:.5rem}
-      .similar-sponsored-widget h3{margin:0 0 .28rem;color:#0f172a;font-size:1.14rem;font-weight:900;line-height:1.55}
-      .similar-sponsored-widget p{margin:0;color:#64748b;line-height:1.85;font-size:.84rem}
-      .similar-sponsored-alert{display:flex;gap:.55rem;align-items:flex-start;margin:.85rem 0;padding:.72rem;border:1px solid #bae6fd;border-radius:16px;background:linear-gradient(135deg,#f0f9ff,#ecfdf5);color:#0369a1;font-size:.79rem;line-height:1.75;font-weight:700}
-      .similar-sponsored-widget__plans{display:grid;grid-template-columns:1fr;gap:.75rem;margin-top:.8rem}
-      .similar-sponsored-plan{position:relative;overflow:hidden;border:1px solid #e2e8f0;border-radius:18px;background:#fff;color:#0f172a;padding:.95rem;box-shadow:0 10px 28px rgba(15,23,42,.06);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
-      .similar-sponsored-plan:hover{transform:translateY(-2px);border-color:rgba(14,165,233,.35);box-shadow:0 16px 34px rgba(15,23,42,.1)}
-      .similar-sponsored-plan::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#10b981,#0ea5e9)}
-      .similar-sponsored-plan.priority{border-color:#fde68a;background:linear-gradient(145deg,#ffffff 0%,#fffdf3 100%)}
-      .similar-sponsored-plan.priority::before{background:linear-gradient(90deg,#f59e0b,#10b981,#0ea5e9)}
-      .similar-sponsored-plan__top,.similar-sponsored-request__top{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;margin-bottom:.55rem}
-      .similar-sponsored-plan strong,.similar-sponsored-request strong{display:block;color:#0f172a;font-size:.94rem;line-height:1.65}
-      .similar-sponsored-pill{display:inline-flex;align-items:center;border-radius:999px;padding:.22rem .62rem;background:#e0f2fe;color:#0369a1;font-size:.7rem;font-weight:900;white-space:nowrap}
-      .similar-sponsored-pill.priority{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
-      .similar-sponsored-pill.approved{background:#dcfce7;color:#166534}
-      .similar-sponsored-pill.pending,.similar-sponsored-pill.paused{background:#fef9c3;color:#854d0e}
-      .similar-sponsored-pill.rejected,.similar-sponsored-pill.removed,.similar-sponsored-pill.expired{background:#fee2e2;color:#991b1b}
-      .similar-sponsored-plan__meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.75rem 0}
-      .similar-sponsored-plan__meta div{border-radius:14px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);border:1px solid #eef2f7;padding:.52rem;text-align:center}
-      .similar-sponsored-plan__meta span{display:block;color:#64748b;font-size:.68rem;font-weight:800}
-      .similar-sponsored-plan__meta b{display:block;color:#0f172a;font-size:.78rem;margin-top:.18rem}
-      .similar-sponsored-price{display:inline-flex;align-items:center;gap:.35rem;font-size:1.2rem;font-weight:900;color:#059669;margin:.35rem 0}
-      .similar-sponsored-price::before{content:'قیمت پلن';font-size:.68rem;font-weight:900;color:#64748b;background:#f1f5f9;border-radius:999px;padding:.18rem .5rem}
-      .similar-sponsored-btn{border:0;border-radius:14px;padding:.78rem .95rem;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:.38rem;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 10px 22px rgba(14,165,233,.22)}
-      .similar-sponsored-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(14,165,233,.28)}
-      .similar-sponsored-btn.secondary{background:#e0f2fe;color:#0369a1}
-      .similar-sponsored-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
-      .similar-sponsored-msg{min-height:1.2rem;margin:.65rem 0;color:#64748b;font-weight:800;font-size:.84rem}
-      .similar-sponsored-msg.error{color:#b91c1c}
-      .similar-sponsored-msg.success{color:#047857}
-      .similar-sponsored-requests-panel{margin-top:1rem;border-radius:18px;background:#f8fafc;border:1px solid #e2e8f0;padding:.85rem;color:#0f172a}
-      .similar-sponsored-requests-panel h4{margin:0 0 .65rem;color:#0f172a;font-size:.95rem;font-weight:900}
-      .similar-sponsored-widget__requests{display:grid;grid-template-columns:1fr;gap:.65rem}
-      .similar-sponsored-request{border:1px solid #e2e8f0;border-radius:16px;background:#fff;padding:.82rem;box-shadow:0 8px 20px rgba(15,23,42,.04)}
-      .similar-sponsored-request p,.similar-sponsored-plan p{color:#64748b;line-height:1.75;font-size:.8rem}
-      .similar-sponsored-request__grid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.6rem}
-      .similar-sponsored-request__grid div{border-radius:10px;background:#fff;padding:.45rem}
-      .similar-sponsored-request__grid span{display:block;color:#64748b;font-size:.68rem;font-weight:800}
-      .similar-sponsored-request__grid b{display:block;color:#0f172a;font-size:.78rem;margin-top:.12rem}
-      .similar-sponsored-empty{border:1px dashed #bae6fd;border-radius:14px;background:#f0f9ff;color:#0369a1;padding:.75rem;font-weight:800;font-size:.82rem;line-height:1.8}
-      .similar-sponsored-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.52);padding:1rem}
-      .similar-sponsored-modal[hidden]{display:none}
-      .similar-sponsored-modal__dialog{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:1rem;box-shadow:0 24px 70px rgba(15,23,42,.28)}
-      .similar-sponsored-modal__header{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
-      .similar-sponsored-modal h3{color:#0f172a}
-      .similar-sponsored-modal p{color:#64748b}
-      .similar-sponsored-modal label{display:grid;gap:.38rem;color:#475569;font-weight:800;font-size:.82rem;margin-bottom:.75rem}
-      .similar-sponsored-modal textarea,.similar-sponsored-modal input{border:1px solid #cbd5e1;border-radius:12px;padding:.72rem;font:inherit}
-      .similar-sponsored-modal textarea{min-height:6rem;resize:vertical}
-      .similar-sponsored-payment-note{display:grid;gap:.35rem;margin:.85rem 0 1rem;padding:.85rem;border-radius:16px;border:1px solid #bae6fd;background:linear-gradient(135deg,#f0f9ff,#ecfdf5);color:#0f172a}
-      .similar-sponsored-payment-note strong{font-size:.9rem;font-weight:900;color:#0369a1}
-      .similar-sponsored-payment-note span{font-size:.82rem;line-height:1.9;color:#475569}
-      .similar-sponsored-modal__actions{display:flex;gap:.6rem;flex-wrap:wrap}
-      @media(min-width:720px){.similar-sponsored-widget__plans{grid-template-columns:repeat(2,minmax(0,1fr))}.similar-sponsored-plan.featured{grid-column:span 2}.similar-sponsored-card{padding:1.15rem}.similar-sponsored-request__grid{grid-template-columns:repeat(4,1fr)}}
-      @media(max-width:640px){.similar-sponsored-widget__header{align-items:flex-start}.similar-sponsored-btn{width:100%}.similar-sponsored-plan__meta{grid-template-columns:1fr}.similar-sponsored-modal{align-items:flex-end;padding:.75rem}.similar-sponsored-modal__dialog{border-radius:18px 18px 10px 10px}.similar-sponsored-modal__actions{flex-direction:column}}
+/* ── Widget Container ── */
+.ssw-widget {
+  direction: rtl;
+  margin: 1.5rem 0 0;
+  font-family: inherit;
+  --ssw-accent: #8b5cf6;
+  --ssw-accent-dark: #7c3aed;
+  --ssw-accent-deeper: #6d28d9;
+  --ssw-accent-soft: rgba(139,92,246,.08);
+  --ssw-accent-border: rgba(139,92,246,.18);
+  --ssw-accent-glow: rgba(139,92,246,.25);
+  --ssw-text-dark: #0f172a;
+  --ssw-text-secondary: #64748b;
+  --ssw-surface: #ffffff;
+  --ssw-surface-alt: #f8fafc;
+  --ssw-border: rgba(226,232,240,.8);
+  --ssw-radius-card: 20px;
+  --ssw-radius-btn: 14px;
+}
+
+/* ── Section Header ── */
+.ssw-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+  margin-bottom: 1rem;
+  padding: 0 .1rem;
+}
+.ssw-section-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(139,92,246,.14), rgba(99,102,241,.08));
+  border: 1.5px solid var(--ssw-accent-border);
+  box-shadow: 0 4px 14px rgba(139,92,246,.12), inset 0 1px 0 rgba(255,255,255,.85);
+  color: var(--ssw-accent);
+}
+.ssw-section-header-icon svg { width: 26px; height: 26px; }
+.ssw-section-header-meta { flex: 1; min-width: 0; }
+.ssw-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .22rem .65rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.1), rgba(99,102,241,.06));
+  border: 1px solid var(--ssw-accent-border);
+  border-radius: 999px;
+  color: var(--ssw-accent-dark);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  margin-bottom: .38rem;
+}
+.ssw-section-eyebrow svg { width: 11px; height: 11px; }
+.ssw-section-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0 0 .22rem;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+}
+.ssw-section-subtitle {
+  font-size: .78rem;
+  color: var(--ssw-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 550;
+}
+
+/* ── Info Banner ── */
+.ssw-info-banner {
+  display: flex;
+  gap: .65rem;
+  align-items: flex-start;
+  padding: .78rem .92rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.06), rgba(99,102,241,.03));
+  border: 1px solid var(--ssw-accent-border);
+  border-radius: 14px;
+  margin-bottom: .9rem;
+}
+.ssw-info-banner-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(139,92,246,.15), rgba(99,102,241,.1));
+  color: var(--ssw-accent-dark);
+  flex-shrink: 0;
+}
+.ssw-info-banner-icon svg { width: 14px; height: 14px; }
+.ssw-info-banner-text {
+  font-size: .78rem;
+  font-weight: 700;
+  color: #374151;
+  line-height: 1.75;
+}
+
+/* ── Status Message ── */
+.ssw-message {
+  min-height: 1.1rem;
+  margin: .45rem 0;
+  color: var(--ssw-text-secondary);
+  font-weight: 700;
+  font-size: .82rem;
+}
+.ssw-message--error { color: #b91c1c; }
+.ssw-message--success { color: #047857; }
+
+/* ── Plans Grid ── */
+.ssw-plans-grid {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+}
+@media (min-width:640px) {
+  .ssw-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 1rem;
+  }
+}
+
+/* ── Plan Card (matches upgrade-ad-card) ── */
+.ssw-plan-card {
+  position: relative;
+  background: linear-gradient(165deg, rgba(255,255,255,.97) 0%, rgba(248,250,252,.98) 100%);
+  border: 1.5px solid var(--ssw-border);
+  border-radius: var(--ssw-radius-card);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .68rem;
+  transition: all .35s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.02);
+  scroll-margin-top: 1rem;
+}
+.ssw-plan-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ssw-accent), #6366f1);
+}
+.ssw-plan-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--ssw-accent-border);
+  box-shadow: 0 12px 32px rgba(139,92,246,.12), 0 4px 12px rgba(0,0,0,.06);
+}
+.ssw-plan-card:hover::before { height: 4px; }
+
+/* Priority variant */
+.ssw-plan-card--priority {
+  background: linear-gradient(165deg, #ffffff 0%, #faf5ff 100%);
+  border-color: rgba(139,92,246,.22);
+}
+.ssw-plan-card--priority::before {
+  background: linear-gradient(90deg, var(--ssw-accent-deeper), var(--ssw-accent), #6366f1);
+  height: 4px;
+}
+.ssw-plan-card--priority:hover {
+  box-shadow: 0 16px 40px rgba(139,92,246,.18), 0 4px 12px rgba(0,0,0,.06);
+}
+
+/* ── Badge ── */
+.ssw-plan-badge {
+  position: absolute;
+  top: .75rem;
+  left: .75rem;
+  padding: .28rem .62rem;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ssw-accent), #6366f1);
+  box-shadow: 0 2px 8px rgba(139,92,246,.28);
+  z-index: 2;
+}
+.ssw-plan-badge--recommended {
+  background: linear-gradient(135deg, var(--ssw-accent-deeper), var(--ssw-accent));
+  box-shadow: 0 2px 10px rgba(124,58,237,.38);
+}
+
+/* ── Card Header ── */
+.ssw-plan-header {
+  display: flex;
+  align-items: center;
+  gap: .82rem;
+  padding-top: .28rem;
+}
+.ssw-plan-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(139,92,246,.12), rgba(99,102,241,.06));
+  border: 1.5px solid var(--ssw-accent-border);
+  box-shadow: 0 4px 12px rgba(139,92,246,.1), inset 0 1px 0 rgba(255,255,255,.8);
+  color: var(--ssw-accent);
+  transition: all .3s ease;
+}
+.ssw-plan-icon svg { width: 24px; height: 24px; transition: transform .3s ease; }
+.ssw-plan-card:hover .ssw-plan-icon {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(139,92,246,.18), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.ssw-plan-card:hover .ssw-plan-icon svg { transform: rotate(-5deg); }
+.ssw-plan-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+}
+.ssw-plan-desc {
+  margin: .08rem 0 0;
+  color: var(--ssw-text-secondary);
+  font-size: .77rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* ── Pricing Block ── */
+.ssw-plan-pricing {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .38rem;
+  padding: .65rem 0;
+  background: linear-gradient(135deg, rgba(139,92,246,.05), rgba(99,102,241,.02));
+  border-radius: 12px;
+  margin: .1rem 0;
+}
+.ssw-plan-price {
+  font-size: 1.35rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -.02em;
+}
+.ssw-plan-unit {
+  font-size: .74rem;
+  color: var(--ssw-text-secondary);
+  font-weight: 600;
+}
+
+/* ── Features ── */
+.ssw-plan-features {
+  list-style: none;
+  margin: 0;
+  padding: .45rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  border-top: 1px solid rgba(226,232,240,.6);
+}
+.ssw-plan-feature {
+  display: flex;
+  align-items: center;
+  gap: .48rem;
+  font-size: .77rem;
+  color: #475569;
+  line-height: 1.4;
+}
+.ssw-plan-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 5px;
+  background: rgba(139,92,246,.1);
+  color: var(--ssw-accent);
+  flex-shrink: 0;
+}
+.ssw-plan-feature-icon svg { width: 11px; height: 11px; }
+
+/* ── Meta Chips ── */
+.ssw-plan-meta {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: .48rem;
+}
+.ssw-plan-meta-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .18rem;
+  padding: .52rem .4rem;
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  text-align: center;
+}
+.ssw-plan-meta-chip__label {
+  font-size: .63rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.ssw-plan-meta-chip__value {
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+}
+
+/* ── Admin Note ── */
+.ssw-plan-admin-note {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+  padding: .58rem .72rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.05), rgba(99,102,241,.03));
+  border: 1px solid rgba(139,92,246,.12);
+  border-radius: 10px;
+  font-size: .73rem;
+  color: #5b21b6;
+  line-height: 1.65;
+  font-weight: 700;
+}
+.ssw-plan-admin-note svg {
+  width: 13px; height: 13px;
+  min-width: 13px;
+  margin-top: .15rem;
+  color: var(--ssw-accent);
+  flex-shrink: 0;
+}
+
+/* ── CTA Button (matches upgrade-ad-cta) ── */
+.ssw-plan-cta {
+  margin-top: auto;
+  width: 100%;
+  padding: .82rem 1rem;
+  border-radius: var(--ssw-radius-btn);
+  border: none;
+  font-family: inherit;
+  font-size: .9rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
+  cursor: pointer;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 4px 14px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.ssw-plan-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--ssw-accent-dark) 0%, var(--ssw-accent) 100%);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.ssw-plan-cta span, .ssw-plan-cta svg { position: relative; z-index: 1; }
+.ssw-plan-cta svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ssw-plan-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139,92,246,.38), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.ssw-plan-cta:hover::before { opacity: 1; }
+.ssw-plan-cta:active { transform: translateY(0); }
+.ssw-plan-cta:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Empty State ── */
+.ssw-empty {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.04), rgba(99,102,241,.02));
+  border: 1px dashed rgba(139,92,246,.22);
+  border-radius: 14px;
+  color: var(--ssw-accent-dark);
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1.65;
+}
+.ssw-empty svg { width: 18px; height: 18px; min-width: 18px; opacity: .6; }
+
+/* ── Requests Panel ── */
+.ssw-requests-panel {
+  margin-top: 1.25rem;
+  border-radius: var(--ssw-radius-card);
+  background: linear-gradient(165deg, rgba(255,255,255,.95), rgba(248,250,252,.98));
+  border: 1.5px solid var(--ssw-border);
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.02);
+}
+.ssw-requests-panel-header {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-bottom: .85rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid rgba(226,232,240,.6);
+}
+.ssw-requests-panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(139,92,246,.1), rgba(99,102,241,.06));
+  color: var(--ssw-accent);
+  flex-shrink: 0;
+}
+.ssw-requests-panel-icon svg { width: 15px; height: 15px; }
+.ssw-requests-panel-title {
+  font-size: .92rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0;
+}
+.ssw-requests-grid {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+/* ── Request Item ── */
+.ssw-request-item {
+  border: 1.5px solid var(--ssw-border);
+  border-radius: 16px;
+  background: #fff;
+  padding: .85rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.03);
+  transition: border-color .2s ease;
+}
+.ssw-request-item:hover { border-color: var(--ssw-accent-border); }
+.ssw-request-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .65rem;
+  margin-bottom: .42rem;
+}
+.ssw-request-title {
+  font-size: .88rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0;
+  line-height: 1.4;
+}
+.ssw-request-subtitle {
+  color: var(--ssw-text-secondary);
+  font-size: .74rem;
+  line-height: 1.5;
+  margin: 0;
+}
+/* Status Pill */
+.ssw-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  border-radius: 999px;
+  padding: .25rem .65rem;
+  font-size: .67rem;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ssw-status-pill::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.ssw-status-pill--pending, .ssw-status-pill--paused {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.ssw-status-pill--approved { background: #dcfce7; color: #166534; }
+.ssw-status-pill--rejected, .ssw-status-pill--removed, .ssw-status-pill--expired {
+  background: #fee2e2;
+  color: #991b1b;
+}
+/* Request Grid */
+.ssw-request-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .45rem;
+  margin-top: .62rem;
+}
+@media (min-width:480px) { .ssw-request-grid { grid-template-columns: repeat(4,1fr); } }
+.ssw-request-cell {
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: .45rem;
+  text-align: center;
+}
+.ssw-request-cell__label {
+  display: block;
+  font-size: .64rem;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-bottom: .14rem;
+}
+.ssw-request-cell__value {
+  display: block;
+  font-size: .77rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+}
+.ssw-request-admin-note {
+  margin-top: .52rem;
+  padding: .45rem .65rem;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid rgba(245,158,11,.2);
+  border-radius: 9px;
+  font-size: .72rem;
+  color: #92400e;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ── Modal ── */
+.ssw-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15,23,42,.52);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ssw-modal[hidden] { display: none; }
+.ssw-modal__dialog {
+  width: min(520px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  border-radius: 28px 28px 0 0;
+  padding: 1.25rem 1.35rem 1.5rem;
+  box-shadow: 0 -8px 40px rgba(15,23,42,.2);
+  border-top: 1px solid rgba(255,255,255,.9);
+}
+@media (min-width:640px) {
+  .ssw-modal { align-items: center; padding: 1.5rem; }
+  .ssw-modal__dialog { border-radius: 24px; }
+}
+.ssw-modal__handle {
+  width: 36px; height: 4px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  margin: 0 auto 1.15rem;
+  display: block;
+}
+@media (min-width:640px) { .ssw-modal__handle { display: none; } }
+.ssw-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.ssw-modal__title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0 0 .28rem;
+}
+.ssw-modal__plan-label { font-size: .8rem; color: var(--ssw-text-secondary); margin: 0; }
+.ssw-modal__close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+  transition: all .25s ease;
+  flex-shrink: 0;
+}
+.ssw-modal__close-btn:hover { background: #fee2e2; color: #ef4444; }
+.ssw-modal__close-btn svg { width: 16px; height: 16px; }
+.ssw-modal__payment-note {
+  display: flex;
+  gap: .72rem;
+  align-items: flex-start;
+  padding: .88rem 1rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.06), rgba(99,102,241,.03));
+  border: 1px solid var(--ssw-accent-border);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+.ssw-modal__note-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(139,92,246,.15), rgba(99,102,241,.1));
+  color: var(--ssw-accent-dark);
+  flex-shrink: 0;
+}
+.ssw-modal__note-icon svg { width: 18px; height: 18px; }
+.ssw-modal__note-strong {
+  display: block;
+  font-size: .88rem;
+  font-weight: 800;
+  color: #4c1d95;
+  margin-bottom: .28rem;
+}
+.ssw-modal__note-span {
+  display: block;
+  font-size: .77rem;
+  line-height: 1.75;
+  color: #4b5563;
+  font-weight: 600;
+}
+.ssw-modal__actions { display: flex; gap: .65rem; flex-wrap: wrap; }
+.ssw-modal__submit {
+  flex: 1;
+  min-width: 180px;
+  padding: .84rem 1rem;
+  border-radius: var(--ssw-radius-btn);
+  border: none;
+  font-family: inherit;
+  font-size: .92rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
+  cursor: pointer;
+  transition: all .3s ease;
+  box-shadow: 0 4px 14px rgba(139,92,246,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-modal__submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(139,92,246,.4); }
+.ssw-modal__submit:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.ssw-modal__submit svg { width: 16px; height: 16px; }
+.ssw-modal__cancel {
+  padding: .84rem 1.25rem;
+  border-radius: var(--ssw-radius-btn);
+  border: 1.5px solid #e2e8f0;
+  font-family: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--ssw-text-secondary);
+  background: #fff;
+  cursor: pointer;
+  transition: all .25s ease;
+  white-space: nowrap;
+}
+.ssw-modal__cancel:hover { border-color: #cbd5e1; background: #f8fafc; }
+@media (max-width:480px) {
+  .ssw-modal__actions { flex-direction: column; }
+  .ssw-modal__submit { min-width: 0; }
+}
+
+/* Mobile compacting */
+@media (max-width:639px) {
+  .ssw-widget { margin-top: 1rem; }
+  .ssw-plan-card { border-radius: 18px; padding: .88rem; }
+  .ssw-plan-meta, .ssw-plan-features, .ssw-plan-admin-note { display: none; }
+  .ssw-plans-grid { gap: .7rem; }
+}
     `;
     document.head.appendChild(style);
   }
 
+  /* ─────────────────────────────────────────────────────
+     SVG ICONS
+     ───────────────────────────────────────────────────── */
+  const icons = {
+    store: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    storeSmall: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    trendUp: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+    zap: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    zapSmall: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    check: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    shield: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    list: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+    arrowLeft: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+    creditCard: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+    close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    emptyBox: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`
+  };
+
+  /* ─────────────────────────────────────────────────────
+     RENDER SHELL — premium section layout
+     ───────────────────────────────────────────────────── */
   function renderShell() {
     injectStyles();
     const root = document.createElement('section');
     root.id = 'similar-sponsored-seller-root';
-    root.className = 'similar-sponsored-widget';
+    root.className = 'ssw-widget';
     root.dataset.adSlot = 'similar_promotions';
     root.style.scrollMarginTop = '12px';
     root.setAttribute('aria-expanded', 'false');
     root.innerHTML = `
-      <article class="similar-sponsored-card" aria-labelledby="similar-sponsored-title">
-        <header class="similar-sponsored-widget__header">
-          <div class="similar-sponsored-head-icon" aria-hidden="true">🚀</div>
-          <div>
-            <span class="similar-sponsored-kicker">تبلیغ پرمیوم فروشگاه‌های مشابه</span>
-            <h3 id="similar-sponsored-title">نمایش در فروشگاه‌های مشابه</h3>
-            <p>فروشگاه شما در بخش مغازه‌های مشابه بالاتر دیده می‌شود. قیمت، مدت نمایش و فعال‌سازی فقط توسط مدیر تنظیم و تایید می‌شود.</p>
-          </div>
+      <!-- Section Header -->
+      <header class="ssw-section-header">
+        <div class="ssw-section-header-icon" aria-hidden="true">${icons.storeSmall}</div>
+        <div class="ssw-section-header-meta">
+          <span class="ssw-section-eyebrow" aria-label="پیشنهادی">
+            ${icons.zapSmall}
+            پیشنهادی
+          </span>
+          <h3 id="ssw-title" class="ssw-section-title">نمایش در فروشگاه‌های مشابه</h3>
+          <p class="ssw-section-subtitle">فروشگاه شما در بخش فروشگاه‌های هم‌حوزه مشتریان هدف نمایش داده می‌شود</p>
+        </div>
+      </header>
+
+      <!-- Info Banner -->
+      <div class="ssw-info-banner" role="note">
+        <div class="ssw-info-banner-icon" aria-hidden="true">${icons.shield}</div>
+        <p class="ssw-info-banner-text">درخواست را همین‌جا ثبت کنید؛ مدیر آن را بررسی و پس از تأیید، زمان شروع و پایان تبلیغ را تعیین می‌کند.</p>
+      </div>
+
+      <!-- Status Message -->
+      <div id="similar-sponsored-message" class="ssw-message" role="status" aria-live="polite"></div>
+
+      <!-- Plans Grid (filled dynamically) -->
+      <div class="ssw-plans-grid" id="similar-sponsored-plans" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
+
+      <!-- Requests Panel -->
+      <div class="ssw-requests-panel">
+        <header class="ssw-requests-panel-header">
+          <div class="ssw-requests-panel-icon" aria-hidden="true">${icons.list}</div>
+          <h4 class="ssw-requests-panel-title">وضعیت درخواست‌های شما</h4>
         </header>
-        <div class="similar-sponsored-alert">
-          <span aria-hidden="true">✓</span>
-          <span>درخواست را از همین بخش ثبت کنید؛ مدیر در «مدیریت تبلیغات» آن را بررسی می‌کند و پس از تایید، زمان شروع و پایان را فعال می‌کند.</span>
-        </div>
-        <div id="similar-sponsored-message" class="similar-sponsored-msg" role="status" aria-live="polite"></div>
-        <div class="similar-sponsored-widget__plans" id="similar-sponsored-plans"></div>
-        <div class="similar-sponsored-requests-panel">
-          <h4>وضعیت درخواست‌های شما</h4>
-          <div class="similar-sponsored-widget__requests" id="similar-sponsored-requests"></div>
-        </div>
-      </article>
-      <div class="similar-sponsored-modal" id="similar-sponsored-modal" hidden>
-        <form class="similar-sponsored-modal__dialog" id="similar-sponsored-form">
-          <div class="similar-sponsored-modal__header">
+        <div class="ssw-requests-grid" id="similar-sponsored-requests"></div>
+      </div>
+
+      <!-- Confirm/Submit Modal -->
+      <div class="ssw-modal" id="similar-sponsored-modal" hidden aria-modal="true" role="dialog" aria-labelledby="ssw-modal-title">
+        <form class="ssw-modal__dialog" id="similar-sponsored-form" novalidate>
+          <span class="ssw-modal__handle" aria-hidden="true"></span>
+
+          <div class="ssw-modal__header">
             <div>
-              <h3 id="similar-sponsored-modal-title">ثبت درخواست تبلیغ</h3>
-              <p id="similar-sponsored-modal-plan"></p>
+              <h3 id="ssw-modal-title" class="ssw-modal__title">ثبت درخواست تبلیغ</h3>
+              <p id="similar-sponsored-modal-plan" class="ssw-modal__plan-label"></p>
             </div>
-            <button type="button" class="similar-sponsored-btn secondary" data-similar-sponsored-close>بستن</button>
+            <button type="button" class="ssw-modal__close-btn" data-similar-sponsored-close aria-label="بستن">
+              ${icons.close}
+            </button>
           </div>
-          <div class="similar-sponsored-payment-note">
-            <strong>پرداخت فقط آنلاین انجام می‌شود</strong>
-            <span>بعد از ثبت درخواست، به درگاه پرداخت هدایت می‌شوید. نمایش تبلیغ پس از پرداخت موفق و تایید مدیر فعال خواهد شد.</span>
+
+          <div class="ssw-modal__payment-note">
+            <div class="ssw-modal__note-icon" aria-hidden="true">${icons.creditCard}</div>
+            <div>
+              <strong class="ssw-modal__note-strong">پرداخت فقط آنلاین انجام می‌شود</strong>
+              <span class="ssw-modal__note-span">بعد از ثبت درخواست، به درگاه پرداخت هدایت می‌شوید. نمایش تبلیغ پس از پرداخت موفق و تأیید مدیر فعال خواهد شد.</span>
+            </div>
           </div>
-          <div class="similar-sponsored-modal__actions">
-            <button type="submit" class="similar-sponsored-btn">ثبت درخواست و پرداخت آنلاین</button>
-            <button type="button" class="similar-sponsored-btn secondary" data-similar-sponsored-close>انصراف</button>
+
+          <div class="ssw-modal__actions">
+            <button type="submit" class="ssw-modal__submit">
+              ${icons.arrowLeft}
+              <span>ثبت درخواست و پرداخت آنلاین</span>
+            </button>
+            <button type="button" class="ssw-modal__cancel" data-similar-sponsored-close>انصراف</button>
           </div>
         </form>
       </div>
@@ -257,7 +965,7 @@
     const el = document.getElementById('similar-sponsored-message');
     if (!el) return;
     el.textContent = message;
-    el.className = `similar-sponsored-msg ${type || ''}`.trim();
+    el.className = `ssw-message ${type ? `ssw-message--${type}` : ''}`.trim();
   }
 
   function freshPath(path) {
@@ -301,9 +1009,7 @@
         return { plans: state.plans, requests: state.requests, version: state.planVersion };
       } catch (err) {
         console.error('similar sponsored loadData failed:', err);
-        if (!silent) {
-          setMessage(err.message || 'خطا در بارگذاری تبلیغات فروشگاه‌های مشابه', 'error');
-        }
+        if (!silent) setMessage(err.message || 'خطا در بارگذاری تبلیغات فروشگاه‌های مشابه', 'error');
         throw err;
       } finally {
         state.loadPromise = null;
@@ -313,69 +1019,144 @@
     return state.loadPromise;
   }
 
+  /* ─────────────────────────────────────────────────────
+     RENDER PLANS — premium upgrade-ad-card style
+     ───────────────────────────────────────────────────── */
   function renderPlans() {
     const container = document.getElementById('similar-sponsored-plans');
     if (!container) return;
     const plans = sortPlans(state.plans);
+
     if (!plans.length) {
-      container.innerHTML = '<div class="similar-sponsored-empty">فعلا پلن فعالی برای این جایگاه تعریف نشده است. قیمت و فعال بودن پلن از سمت مدیر کنترل می‌شود.</div>';
+      container.innerHTML = `
+        <div class="ssw-empty">
+          ${icons.emptyBox}
+          <span>فعلاً پلن فعالی برای این جایگاه تعریف نشده است. قیمت و وضعیت پلن‌ها از سمت مدیر کنترل می‌شود.</span>
+        </div>`;
       return;
     }
 
     container.innerHTML = plans.map((plan, index) => {
       const isPriority = plan.tier === 'priority';
+      const isFirst = index === 0;
       const planTitle = plan.title || tierLabels[plan.tier] || 'پلن تبلیغ مشابه';
+      const planDesc = plan.description || tierDescriptions[plan.tier] || 'نمایش ویژه فروشگاه در بخش فروشگاه‌های مشابه';
+      const features = tierFeatures[plan.tier] || ['نمایش در فروشگاه‌های مشابه', 'فعال‌سازی پس از تأیید مدیر'];
+      const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
+      const iconSvg = isPriority ? icons.trendUp : icons.store;
+
+      const metaChips = [
+        { label: 'مدت', value: plan.durationDays ? `${escapeHtml(String(plan.durationDays))} روز` : '—' },
+        { label: 'دوره', value: escapeHtml(durationLabels[plan.durationUnit] || plan.durationUnit || '—') },
+        { label: 'جایگاه', value: escapeHtml(String(plan.slotLimit || '۱')) }
+      ];
+
       return `
-        <article class="similar-sponsored-plan ${isPriority ? 'priority' : ''} ${index === 0 ? 'featured' : ''}">
-          <div class="similar-sponsored-plan__top">
+        <article class="ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ''}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
+          <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${badgeLabel}">${badgeLabel}</div>
+
+          <div class="ssw-plan-header">
+            <div class="ssw-plan-icon" aria-hidden="true">${iconSvg}</div>
             <div>
-              <strong>${escapeHtml(planTitle)}</strong>
-              <p>${escapeHtml(plan.description || 'نمایش ویژه فروشگاه در بخش فروشگاه‌های مشابه پس از تایید مدیر')}</p>
+              <h4 id="ssw-plan-title-${index}" class="ssw-plan-title">${escapeHtml(planTitle)}</h4>
+              <p class="ssw-plan-desc">${escapeHtml(planDesc)}</p>
             </div>
-            <span class="similar-sponsored-pill ${isPriority ? 'priority' : ''}">${escapeHtml(tierLabels[plan.tier] || plan.tier || '')}</span>
           </div>
-          <div class="similar-sponsored-price">${formatMoney(plan.price)} تومان</div>
-          <div class="similar-sponsored-plan__meta">
-            <div><span>مدت</span><b>${escapeHtml(String(plan.durationDays || ''))} روز</b></div>
-            <div><span>دوره</span><b>${escapeHtml(durationLabels[plan.durationUnit] || plan.durationUnit || '')}</b></div>
-            <div><span>جایگاه</span><b>${escapeHtml(String(plan.slotLimit || 1))}</b></div>
+
+          <div class="ssw-plan-pricing" aria-label="قیمت پلن">
+            <span class="ssw-plan-price">${formatMoney(plan.price)}</span>
+            <span class="ssw-plan-unit">تومان / دوره</span>
           </div>
-          <button type="button" class="similar-sponsored-btn" data-plan-tier="${escapeHtml(plan.tier)}" data-plan-duration="${escapeHtml(plan.durationUnit)}">ثبت درخواست تبلیغ</button>
+
+          <ul class="ssw-plan-features" aria-label="امکانات پلن">
+            ${features.map(f => `
+              <li class="ssw-plan-feature">
+                <span class="ssw-plan-feature-icon" aria-hidden="true">${icons.check}</span>
+                ${escapeHtml(f)}
+              </li>`).join('')}
+          </ul>
+
+          <div class="ssw-plan-meta" aria-label="مشخصات پلن">
+            ${metaChips.map(chip => `
+              <div class="ssw-plan-meta-chip">
+                <span class="ssw-plan-meta-chip__label">${chip.label}</span>
+                <span class="ssw-plan-meta-chip__value">${chip.value}</span>
+              </div>`).join('')}
+          </div>
+
+          <div class="ssw-plan-admin-note">
+            ${icons.shield}
+            <span>زمان‌بندی توسط مدیر تعیین می‌شود. پس از ثبت درخواست و پرداخت، تیم ما آن را فعال خواهد کرد.</span>
+          </div>
+
+          <button type="button" class="ssw-plan-cta"
+            data-plan-tier="${escapeHtml(plan.tier)}"
+            data-plan-duration="${escapeHtml(plan.durationUnit)}"
+            aria-label="ثبت درخواست برای ${escapeHtml(planTitle)}">
+            ${icons.arrowLeft}
+            <span>ثبت درخواست تبلیغ</span>
+          </button>
         </article>
       `;
     }).join('');
   }
 
+  /* ─────────────────────────────────────────────────────
+     RENDER REQUESTS
+     ───────────────────────────────────────────────────── */
   function renderRequests() {
     const container = document.getElementById('similar-sponsored-requests');
     if (!container) return;
+
     if (!state.requests.length) {
-      container.innerHTML = '<div class="similar-sponsored-empty">هنوز درخواستی ثبت نکرده‌اید. بعد از ثبت، وضعیت بررسی مدیر همین‌جا نمایش داده می‌شود.</div>';
+      container.innerHTML = `
+        <div class="ssw-empty">
+          ${icons.emptyBox}
+          <span>هنوز درخواستی ثبت نکرده‌اید. بعد از ثبت، وضعیت بررسی مدیر همین‌جا نمایش داده می‌شود.</span>
+        </div>`;
       return;
     }
 
     container.innerHTML = state.requests.map((item) => {
       const status = item.status || 'pending';
       const paymentStatus = item.paymentStatus || 'pending';
+      const statusClass = ['approved', 'rejected', 'removed', 'expired', 'pending', 'paused'].includes(status)
+        ? `ssw-status-pill--${status}` : 'ssw-status-pill--pending';
+
       return `
-        <article class="similar-sponsored-request">
-          <div class="similar-sponsored-request__top">
-            <strong>${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
-            <span class="similar-sponsored-pill ${escapeHtml(status)}">${escapeHtml(statusLabels[status] || status)}</span>
+        <article class="ssw-request-item">
+          <div class="ssw-request-top">
+            <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
+            <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
           </div>
-          <p>${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
-          <div class="similar-sponsored-request__grid">
-            <div><span>قیمت</span><b>${formatMoney(item.price)} تومان</b></div>
-            <div><span>پرداخت</span><b>${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</b></div>
-            <div><span>شروع</span><b>${escapeHtml(formatDate(item.startAt))}</b></div>
-            <div><span>پایان</span><b>${escapeHtml(formatDate(item.endAt))}</b></div>
+          <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
+          <div class="ssw-request-grid">
+            <div class="ssw-request-cell">
+              <span class="ssw-request-cell__label">قیمت</span>
+              <span class="ssw-request-cell__value">${formatMoney(item.price)} تومان</span>
+            </div>
+            <div class="ssw-request-cell">
+              <span class="ssw-request-cell__label">پرداخت</span>
+              <span class="ssw-request-cell__value">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+            </div>
+            <div class="ssw-request-cell">
+              <span class="ssw-request-cell__label">شروع</span>
+              <span class="ssw-request-cell__value">${escapeHtml(formatDate(item.startAt))}</span>
+            </div>
+            <div class="ssw-request-cell">
+              <span class="ssw-request-cell__label">پایان</span>
+              <span class="ssw-request-cell__value">${escapeHtml(formatDate(item.endAt))}</span>
+            </div>
           </div>
-          ${item.adminNote ? `<p>یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}
+          ${item.adminNote ? `<p class="ssw-request-admin-note">یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}
         </article>
       `;
     }).join('');
   }
 
+  /* ─────────────────────────────────────────────────────
+     MODAL LOGIC
+     ───────────────────────────────────────────────────── */
   function openModal(plan) {
     state.selectedPlan = plan;
     const modal = document.getElementById('similar-sponsored-modal');
@@ -453,34 +1234,48 @@
     }
   }
 
+  /* ─────────────────────────────────────────────────────
+     EVENT BINDING
+     ───────────────────────────────────────────────────── */
   function bindEvents() {
     document.getElementById('similar-sponsored-plans')?.addEventListener('click', (event) => {
       const button = event.target.closest('[data-plan-tier]');
       if (!button) return;
-      const plan = state.plans.find((item) => item.tier === button.dataset.planTier && item.durationUnit === button.dataset.planDuration);
+      const plan = state.plans.find(
+        (item) => item.tier === button.dataset.planTier && item.durationUnit === button.dataset.planDuration
+      );
       if (plan) openModal(plan);
     });
+
     document.querySelectorAll('[data-similar-sponsored-close]').forEach((button) => {
       button.addEventListener('click', closeModal);
     });
+
     document.getElementById('similar-sponsored-form')?.addEventListener('submit', submitRequest);
+
     document.getElementById('similar-sponsored-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-modal') closeModal();
     });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        const modal = document.getElementById('similar-sponsored-modal');
+        if (modal && !modal.hidden) closeModal();
+      }
+    });
   }
 
+  /* ─────────────────────────────────────────────────────
+     PLAN SYNC & LIFECYCLE
+     ───────────────────────────────────────────────────── */
   function setupPlanSync() {
     const refresh = (options = {}) => loadData({ force: true, silent: !!options.silent }).catch(() => null);
     const handleVisibility = () => {
-      if (!document.hidden && Date.now() - state.lastLoadedAt > 5000) {
-        refresh({ silent: true });
-      }
+      if (!document.hidden && Date.now() - state.lastLoadedAt > 5000) refresh({ silent: true });
     };
     const handleFocus = () => refresh({ silent: true });
     const handleStorage = (event) => {
-      if (event.key === 'similar-promotions-plans-updated') {
-        refresh({ silent: false });
-      }
+      if (event.key === 'similar-promotions-plans-updated') refresh({ silent: false });
     };
     const handleAdminSignal = () => refresh({ silent: false });
     const intervalId = window.setInterval(() => refresh({ silent: true }), 60000);
@@ -508,6 +1303,9 @@
     };
   }
 
+  /* ─────────────────────────────────────────────────────
+     BOOT
+     ───────────────────────────────────────────────────── */
   renderShell();
   bindEvents();
   setupPlanSync();
