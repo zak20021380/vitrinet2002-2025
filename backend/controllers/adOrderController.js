@@ -853,6 +853,7 @@ exports.updateAdOrder = async (req, res) => {
 
 // حذف سفارش تبلیغ توسط ادمین
 exports.deleteAdOrder = async (req, res) => {
+  let session = null;
   try {
     setNoStoreHeaders(res);
     const { id } = req.params;
@@ -860,23 +861,33 @@ exports.deleteAdOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'شناسه تبلیغ معتبر نیست.' });
     }
 
-    const adOrder = await AdOrder.findById(id);
+    session = await mongoose.startSession();
+    let orderId = null;
+    let bannerPath = null;
+    let paymentCleanup = { deletedCount: 0 };
+    let notificationCleanup = { deletedCount: 0 };
 
-    if (!adOrder) {
+    await session.withTransaction(async () => {
+      const adOrder = await AdOrder.findById(id).session(session);
+
+      if (!adOrder) {
+        return;
+      }
+
+      orderId = adOrder._id;
+      bannerPath = resolveUploadPath(adOrder.bannerImage);
+      const paymentFilter = adOrder.paymentId
+        ? { $or: [{ adOrderId: orderId }, { _id: adOrder.paymentId }] }
+        : { adOrderId: orderId };
+
+      paymentCleanup = await Payment.deleteMany(paymentFilter).session(session);
+      notificationCleanup = await SellerNotification.deleteMany({ 'relatedData.adId': orderId }).session(session);
+      await AdOrder.deleteOne({ _id: orderId }).session(session);
+    });
+
+    if (!orderId) {
       return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
     }
-
-    const orderId = adOrder._id;
-    const bannerPath = resolveUploadPath(adOrder.bannerImage);
-    const paymentFilter = adOrder.paymentId
-      ? { $or: [{ adOrderId: orderId }, { _id: adOrder.paymentId }] }
-      : { adOrderId: orderId };
-
-    const [paymentCleanup, notificationCleanup] = await Promise.all([
-      Payment.deleteMany(paymentFilter),
-      SellerNotification.deleteMany({ 'relatedData.adId': orderId })
-    ]);
-    await adOrder.deleteOne();
 
     if (bannerPath) {
       fs.promises.unlink(bannerPath).catch(err => {
@@ -902,6 +913,10 @@ exports.deleteAdOrder = async (req, res) => {
       message: 'خطا در حذف سفارش تبلیغ.',
       error: err.message
     });
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
