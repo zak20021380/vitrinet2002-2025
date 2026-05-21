@@ -5,6 +5,8 @@ const SimilarShopPromotion = require('../models/SimilarShopPromotion');
 const Seller = require('../models/Seller');
 const ServiceShop = require('../models/serviceShop');
 const ShopAppearance = require('../models/ShopAppearance');
+const Payment = require('../models/payment');
+const SellerNotification = require('../models/SellerNotification');
 
 const TIER_LABELS = {
   normal: 'اسپانسری معمولی',
@@ -618,6 +620,32 @@ exports.updateAdminRequest = async (req, res) => {
 exports.softRemoveAdminRequest = async (req, res) => {
   req.body = { ...(req.body || {}), action: 'remove' };
   return exports.updateAdminRequest(req, res);
+};
+
+exports.hardRemoveAdminRequest = async (req, res) => {
+  try {
+    const promotionId = toObjectId(req.params.id);
+    if (!promotionId) {
+      return res.status(400).json({ success: false, message: 'شناسه تبلیغ معتبر نیست.' });
+    }
+
+    const promotion = await SimilarShopPromotion.findById(promotionId);
+    if (!promotion) {
+      return res.status(404).json({ success: false, message: 'درخواست تبلیغ پیدا نشد.' });
+    }
+
+    await Promise.all([
+      Payment.deleteMany({ similarPromotionId: promotion._id }),
+      SellerNotification.deleteMany({ 'relatedData.similarPromotionId': promotion._id })
+    ]);
+
+    await promotion.deleteOne();
+
+    return res.json({ success: true, message: 'تبلیغ به همراه رکوردهای مرتبط حذف شد.' });
+  } catch (err) {
+    console.error('similar promotions hardRemoveAdminRequest error:', err);
+    return res.status(500).json({ success: false, message: 'خطا در حذف تبلیغ.' });
+  }
 };
 
 exports.trackPromotionEvent = async (req, res) => {
