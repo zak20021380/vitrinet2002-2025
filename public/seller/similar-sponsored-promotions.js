@@ -26,7 +26,8 @@
     planVersion: null,
     lastLoadedAt: 0,
     loadPromise: null,
-    csrfPromise: null
+    csrfPromise: null,
+    submitting: false
   };
 
   const tierLabels = {
@@ -395,11 +396,15 @@
 
   async function submitRequest(event) {
     event.preventDefault();
+    if (state.submitting) return;
     const plan = state.selectedPlan;
     if (!plan) return;
+    const submitButton = event.currentTarget?.querySelector('[type="submit"]');
     const formData = new FormData();
     formData.set('planTier', plan.tier);
     formData.set('durationUnit', plan.durationUnit);
+    state.submitting = true;
+    if (submitButton) submitButton.disabled = true;
     setMessage('در حال ثبت درخواست و آماده‌سازی درگاه پرداخت...');
     try {
       const token = await csrfToken();
@@ -442,6 +447,9 @@
     } catch (err) {
       console.error('similar sponsored submitRequest failed:', err);
       setMessage(err.message || 'خطا در ثبت درخواست یا اتصال به درگاه', 'error');
+    } finally {
+      state.submitting = false;
+      if (submitButton) submitButton.disabled = false;
     }
   }
 

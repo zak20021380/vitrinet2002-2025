@@ -268,6 +268,16 @@ async function hasCurrentActivePromotion(sellerId, now = new Date()) {
   });
 }
 
+async function findPendingPlanRequest(sellerId, planTier, durationUnit) {
+  return SimilarShopPromotion.findOne({
+    sellerId,
+    planTier,
+    durationUnit,
+    status: 'pending',
+    paymentStatus: { $ne: 'rejected' }
+  }).select('_id').lean();
+}
+
 function getAdminId(req) {
   return req.user?.id || req.user?._id || null;
 }
@@ -384,6 +394,14 @@ exports.createSellerRequest = async (req, res) => {
       });
     }
 
+    const pendingDuplicate = await findPendingPlanRequest(seller._id, planTier, durationUnit);
+    if (pendingDuplicate) {
+      return res.status(409).json({
+        success: false,
+        message: 'برای این پلن یک درخواست در انتظار بررسی یا پرداخت وجود دارد.'
+      });
+    }
+
     const plan = await getEffectivePlan(planTier, durationUnit);
     if (!plan) {
       return res.status(404).json({ success: false, message: 'پلن انتخابی فعال نیست.' });
@@ -428,7 +446,10 @@ exports.listSellerRequests = async (req, res) => {
       return res.status(401).json({ success: false, message: 'احراز هویت فروشنده معتبر نیست.' });
     }
     await expireExpiredPromotions();
-    const promotions = await SimilarShopPromotion.find({ sellerId })
+    const promotions = await SimilarShopPromotion.find({
+      sellerId,
+      status: { $ne: 'removed' }
+    })
       .sort({ createdAt: -1 })
       .lean();
     return res.json({ success: true, promotions: promotions.map(serializePromotion) });
@@ -442,8 +463,9 @@ exports.listAdminRequests = async (req, res) => {
   try {
     await expireExpiredPromotions();
     const status = normaliseEnum(req.query?.status, ['pending', 'approved', 'rejected', 'paused', 'expired', 'removed', 'all'], 'all');
-    const filter = {};
-    if (status !== 'all') filter.status = status;
+    const filter = status === 'all'
+      ? { status: { $ne: 'removed' } }
+      : { status };
 
     const promotions = await SimilarShopPromotion.find(filter)
       .populate({ path: 'sellerId', select: 'storename shopurl phone city address category subcategory boardImage' })
@@ -599,6 +621,27 @@ exports.updateAdminRequest = async (req, res) => {
     promotion.reviewedAt = now;
     promotion.reviewedBy = adminId;
     await promotion.save();
+
+    if (action === 'remove') {
+      await SimilarShopPromotion.updateMany(
+        {
+          _id: { $ne: promotion._id },
+          sellerId: promotion.sellerId,
+          planTier: promotion.planTier,
+          durationUnit: promotion.durationUnit,
+          status: 'pending',
+          paymentStatus: { $ne: 'rejected' }
+        },
+        {
+          $set: {
+            status: 'removed',
+            removedAt: now,
+            reviewedAt: now,
+            reviewedBy: adminId
+          }
+        }
+      );
+    }
 
     await promotion.populate([
       { path: 'sellerId', select: 'storename shopurl phone city address category subcategory boardImage' },

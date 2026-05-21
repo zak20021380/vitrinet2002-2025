@@ -20,6 +20,6 @@ router.get('/admin/plans', auth('admin'), ctrl.getAdminPlans);
 router.put('/admin/plans', auth('admin'), ctrl.updateAdminPlans);
 router.get('/admin', auth('admin'), ctrl.listAdminRequests);
 router.patch('/admin/:id', auth('admin'), ctrl.updateAdminRequest);
-router.delete('/admin/:id', auth('admin'), ctrl.hardRemoveAdminRequest);
+router.delete('/admin/:id', auth('admin'), ctrl.softRemoveAdminRequest);
 
 module.exports = router;
