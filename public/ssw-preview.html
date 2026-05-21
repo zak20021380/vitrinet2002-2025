@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSW Preview</title>
+<style>body{background:#f1f5f9;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}.container{max-width:700px;margin:0 auto;}</style>
+</head>
+<body><div class="container"><h2 style="color:#0f172a;font-size:1rem;font-weight:800;margin:0 0 .5rem;direction:rtl">بخش پلن‌های تبلیغاتی ویژه</h2><div id="ads-content"></div></div>
+<script>
+const origFetch=window.fetch;window.fetch=function(url,opts){const u=String(url);if(u.includes('/similar-shop-promotions/plans'))return Promise.resolve({ok:true,json:()=>Promise.resolve({plans:[{tier:'priority',title:'پلن اولویت‌دار',description:'جایگاه برتر و دیده‌شدن بیشتر نسبت به پلن عادی',price:220000,durationDays:30,durationUnit:'monthly',slotLimit:3},{tier:'normal',title:'پلن استاندارد',description:'نمایش هدفمند در کنار فروشگاه‌های هم‌حوزه شما',price:95000,durationDays:15,durationUnit:'weekly',slotLimit:5}]})});if(u.includes('/similar-shop-promotions/seller'))return Promise.resolve({ok:true,json:()=>Promise.resolve({promotions:[{planTitle:'پلن اولویت‌دار',planTier:'priority',durationUnit:'monthly',price:220000,paymentStatus:'verified',status:'approved',startAt:'2025-04-01T10:00:00',endAt:'2025-05-01T10:00:00'},{planTitle:'پلن استاندارد',planTier:'normal',durationUnit:'weekly',price:95000,paymentStatus:'pending',status:'pending',startAt:null,endAt:null}]})});return origFetch.call(window,url,opts);};
+</script>
+<script src="/seller/similar-sponsored-promotions.js"></script>
+</body></html>
