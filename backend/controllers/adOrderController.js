@@ -3,6 +3,8 @@ const Payment = require('../models/payment');
 const Product = require('../models/product');
 const Seller = require('../models/Seller');
 const AdPlan = require('../models/adPlan');
+const SellerNotification = require('../models/SellerNotification');
+const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
@@ -27,6 +29,31 @@ const PUBLIC_POPULATE_SPEC = [
 // ═══════════════════════════════════════════════════════════════════════════
 const DAILY_CAPACITY = 3;
 const AD_SLOT_KEYS = ['ad_search', 'ad_home', 'ad_products'];
+
+function setNoStoreHeaders(res) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+}
+
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(String(id || ''));
+}
+
+function resolveUploadPath(filePath) {
+  if (!filePath || /^(https?:|data:|blob:)/i.test(String(filePath))) return null;
+  const uploadsRoot = path.resolve(__dirname, '..', 'uploads');
+  const relativePath = String(filePath)
+    .trim()
+    .replace(/^\/?uploads\//, '')
+    .replace(/^\/+/, '');
+  if (!relativePath) return null;
+  const resolved = path.resolve(uploadsRoot, relativePath);
+  if (resolved !== uploadsRoot && resolved.startsWith(`${uploadsRoot}${path.sep}`)) {
+    return resolved;
+  }
+  return null;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CAPACITY & SCHEDULING HELPERS
@@ -548,6 +575,7 @@ exports.getSellerAdOrders = async (req, res) => {
 // دریافت همه سفارش‌های تبلیغ برای مدیریت ادمین
 exports.getAllAdOrders = async (req, res) => {
   try {
+    setNoStoreHeaders(res);
     const { status, planSlug, sellerId } = req.query;
 
     const filter = {};
@@ -826,17 +854,28 @@ exports.updateAdOrder = async (req, res) => {
 // حذف سفارش تبلیغ توسط ادمین
 exports.deleteAdOrder = async (req, res) => {
   try {
+    setNoStoreHeaders(res);
     const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'شناسه تبلیغ معتبر نیست.' });
+    }
+
     const adOrder = await AdOrder.findById(id);
 
     if (!adOrder) {
       return res.status(404).json({ success: false, message: 'سفارش تبلیغ پیدا نشد.' });
     }
 
-    const bannerPath = adOrder.bannerImage
-      ? path.join(__dirname, '..', 'uploads', adOrder.bannerImage)
-      : null;
+    const orderId = adOrder._id;
+    const bannerPath = resolveUploadPath(adOrder.bannerImage);
+    const paymentFilter = adOrder.paymentId
+      ? { $or: [{ adOrderId: orderId }, { _id: adOrder.paymentId }] }
+      : { adOrderId: orderId };
 
+    const [paymentCleanup, notificationCleanup] = await Promise.all([
+      Payment.deleteMany(paymentFilter),
+      SellerNotification.deleteMany({ 'relatedData.adId': orderId })
+    ]);
     await adOrder.deleteOne();
 
     if (bannerPath) {
@@ -847,7 +886,15 @@ exports.deleteAdOrder = async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: 'تبلیغ با موفقیت حذف شد.' });
+    res.json({
+      success: true,
+      message: 'تبلیغ و رکوردهای مرتبط با موفقیت حذف شد.',
+      deletedId: String(orderId),
+      cleanup: {
+        payments: paymentCleanup.deletedCount || 0,
+        notifications: notificationCleanup.deletedCount || 0
+      }
+    });
   } catch (err) {
     console.error('❌ خطا در حذف سفارش تبلیغ:', err);
     res.status(500).json({
@@ -861,6 +908,7 @@ exports.deleteAdOrder = async (req, res) => {
 // گرفتن تبلیغ‌های فعال (مثلاً برای صفحه اصلی یا جستجو)
 exports.getActiveAds = async (req, res) => {
   try {
+    setNoStoreHeaders(res);
     // planSlug رو از query بگیر (مثلاً ad_home یا ad_search)
     const { planSlug } = req.query;
 
@@ -962,4 +1010,3 @@ exports.getSellerAdOrdersWithScheduling = async (req, res) => {
     res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات تبلیغ', error: err.message });
   }
 };
-

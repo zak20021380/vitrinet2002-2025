@@ -2838,6 +2838,7 @@ let adOrdersSearchTerm = '';
 let adOrdersPlanFilter = 'all';
 let currentAdOrderId = null;
 let adModalOverlayHandler = null;
+const deletedAdOrderIds = new Set();
 
 let supportTickets = [];
 let supportTicketsLoaded = false;
@@ -3005,6 +3006,104 @@ function setAdOrdersStatus(message = '', type = 'info') {
   adOrdersStatusEl.style.display = 'block';
 }
 
+function showAdOrdersToast(message, type = 'info') {
+  if (!message) return;
+  if (window.UIComponents?.showToast) {
+    window.UIComponents.showToast(message, type);
+    return;
+  }
+
+  let stack = document.getElementById('ad-orders-toast-stack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.id = 'ad-orders-toast-stack';
+    stack.className = 'ad-orders-toast-stack';
+    stack.setAttribute('aria-live', 'polite');
+    document.body.appendChild(stack);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `ad-orders-toast ${type}`;
+  const icon = type === 'success'
+    ? 'ri-checkbox-circle-line'
+    : (type === 'error' ? 'ri-error-warning-line' : 'ri-information-line');
+  toast.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${escapeHtml(message)}</span>`;
+  stack.appendChild(toast);
+  window.setTimeout(() => {
+    toast.classList.add('is-hiding');
+    window.setTimeout(() => toast.remove(), 220);
+  }, 4200);
+}
+
+function isAdOrderDeleted(orderId) {
+  return deletedAdOrderIds.has(String(orderId || ''));
+}
+
+function removeAdOrderFromState(orderId) {
+  const normalizedId = String(orderId || '');
+  if (!normalizedId) return false;
+  deletedAdOrderIds.add(normalizedId);
+  const before = adOrdersList.length;
+  adOrdersList = adOrdersList.filter(order => getOrderId(order) !== normalizedId);
+  return adOrdersList.length !== before;
+}
+
+function getAdOrderDeleteSummary(orderId) {
+  const order = adOrdersList.find(item => getOrderId(item) === String(orderId || '')) || null;
+  if (!order) return { title: 'این تبلیغ', sellerName: 'فروشنده نامشخص', statusLabel: '' };
+  const seller = order && typeof order.sellerId === 'object' && order.sellerId !== null ? order.sellerId : {};
+  return {
+    title: order.adTitle || order.planTitle || 'تبلیغ بدون عنوان',
+    sellerName: seller.storename || order.shopTitle || 'فروشنده نامشخص',
+    statusLabel: getAdStatusMeta(order.status).label
+  };
+}
+
+function confirmAdOrderDeletion(orderId) {
+  if (!orderId) return Promise.resolve(false);
+  const summary = getAdOrderDeleteSummary(orderId);
+  return new Promise(resolve => {
+    const existing = document.getElementById('ad-delete-confirm-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ad-delete-confirm-overlay';
+    overlay.className = 'ad-delete-confirm-overlay';
+    overlay.setAttribute('role', 'presentation');
+    overlay.innerHTML = `
+      <div class="ad-delete-confirm" role="dialog" aria-modal="true" aria-labelledby="ad-delete-confirm-title">
+        <div class="ad-delete-confirm__icon"><i class="ri-delete-bin-6-line" aria-hidden="true"></i></div>
+        <div class="ad-delete-confirm__body">
+          <h3 id="ad-delete-confirm-title">حذف دائمی درخواست تبلیغ؟</h3>
+          <p>«${escapeHtml(summary.title)}» از فروشنده «${escapeHtml(summary.sellerName)}» برای همیشه از پنل مدیریت و دیتابیس حذف می‌شود.</p>
+          ${summary.statusLabel ? `<span class="ad-delete-confirm__meta">وضعیت فعلی: ${escapeHtml(summary.statusLabel)}</span>` : ''}
+        </div>
+        <div class="ad-delete-confirm__actions">
+          <button type="button" class="ad-delete-confirm__cancel" data-ad-delete-cancel>انصراف</button>
+          <button type="button" class="ad-delete-confirm__accept" data-ad-delete-accept><i class="ri-delete-bin-line"></i> حذف دائمی</button>
+        </div>
+      </div>
+    `;
+
+    const cleanup = result => {
+      document.removeEventListener('keydown', onKeydown);
+      overlay.remove();
+      resolve(result);
+    };
+    const onKeydown = event => {
+      if (event.key === 'Escape') cleanup(false);
+    };
+
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay || event.target.closest('[data-ad-delete-cancel]')) cleanup(false);
+      if (event.target.closest('[data-ad-delete-accept]')) cleanup(true);
+    });
+    document.addEventListener('keydown', onKeydown);
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-ad-delete-cancel]')?.focus();
+  });
+}
+
 function setAdOrdersLoading(isLoading) {
   if (!adOrdersTableBody) return;
   if (isLoading) {
@@ -3036,7 +3135,7 @@ function updateAdOrdersSummary() {
 function renderAdOrders() {
   if (!adOrdersTableBody) return;
 
-  let rows = [...adOrdersList];
+  let rows = adOrdersList.filter(order => !isAdOrderDeleted(getOrderId(order)));
 
   if (adOrdersFilter && adOrdersFilter !== 'all') {
     rows = rows.filter(order => order.status === adOrdersFilter);
@@ -3134,7 +3233,12 @@ function renderAdOrders() {
 
     const adText = order.adText ? `<div class="ad-text">${escapeHtml(order.adText)}</div>` : '';
 
-    let quickActions = '';
+    const deleteAction = `
+      <button class="ad-action-btn reject" data-action="quick-delete" data-id="${orderId}">
+        <i class="ri-delete-bin-line"></i> حذف
+      </button>
+    `;
+    let quickActions = deleteAction;
     if (order.status === 'pending') {
       quickActions = `
         <button class="ad-action-btn approve" data-action="quick-approve" data-id="${orderId}">
@@ -3143,15 +3247,14 @@ function renderAdOrders() {
         <button class="ad-action-btn reject" data-action="quick-reject" data-id="${orderId}">
           <i class="ri-close-circle-line"></i> رد
         </button>
+        ${deleteAction}
       `;
     } else if (order.status === 'approved') {
       quickActions = `
         <button class="ad-action-btn ghost" data-action="quick-edit" data-id="${orderId}">
           <i class="ri-edit-line"></i> ویرایش
         </button>
-        <button class="ad-action-btn reject" data-action="quick-delete" data-id="${orderId}">
-          <i class="ri-delete-bin-line"></i> حذف
-        </button>
+        ${deleteAction}
       `;
     }
 
@@ -3275,10 +3378,11 @@ function handleQuickAdAction(button, status) {
     .finally(() => setButtonLoading(button, false));
 }
 
-function handleQuickDelete(button) {
+async function handleQuickDelete(button) {
   const orderId = button?.dataset?.id;
   if (!orderId) return;
-  if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
+  const confirmed = await confirmAdOrderDeletion(orderId);
+  if (!confirmed) {
     return;
   }
   setButtonLoading(button, true);
@@ -3297,6 +3401,7 @@ async function updateAdOrderStatus(orderId, status, note, { silent = false } = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      cache: 'no-store',
       body: JSON.stringify(payload)
     });
 
@@ -3308,6 +3413,9 @@ async function updateAdOrderStatus(orderId, status, note, { silent = false } = {
     const updated = data.adOrder || data.order || null;
     if (updated) {
       const updatedId = getOrderId(updated);
+      if (isAdOrderDeleted(updatedId)) {
+        return null;
+      }
       const idx = adOrdersList.findIndex(order => getOrderId(order) === updatedId);
       if (idx !== -1) {
         adOrdersList[idx] = updated;
@@ -3334,11 +3442,13 @@ async function updateAdOrderStatus(orderId, status, note, { silent = false } = {
 
 async function removeAdOrder(orderId, { silent = false } = {}) {
   if (!orderId) return false;
+  const normalizedId = String(orderId);
 
   try {
     const res = await fetch(`${ADMIN_API_BASE}/adOrder/${encodeURIComponent(orderId)}`, {
       method: 'DELETE',
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
 
     let data = {};
@@ -3352,22 +3462,23 @@ async function removeAdOrder(orderId, { silent = false } = {}) {
       throw new Error(data.error || data.message || 'خطا در حذف تبلیغ.');
     }
 
-    const idx = adOrdersList.findIndex(order => getOrderId(order) === orderId);
-    if (idx !== -1) {
-      adOrdersList.splice(idx, 1);
-    }
+    removeAdOrderFromState(data.deletedId || normalizedId);
     updateAdOrdersSummary();
     renderAdOrders();
 
     if (!silent) {
-      setAdOrdersStatus(data.message || 'تبلیغ حذف شد.', 'success');
+      const message = data.message || 'تبلیغ حذف شد.';
+      setAdOrdersStatus(message, 'success');
+      showAdOrdersToast(message, 'success');
     }
 
     return true;
   } catch (err) {
     console.error('removeAdOrder error:', err);
     if (!silent) {
-      setAdOrdersStatus(err.message || 'خطا در حذف تبلیغ.', 'error');
+      const message = err.message || 'خطا در حذف تبلیغ.';
+      setAdOrdersStatus(message, 'error');
+      showAdOrdersToast(message, 'error');
     }
     throw err;
   }
@@ -3381,6 +3492,7 @@ async function updateAdOrderDetails(orderId, updates, { silent = false } = {}) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
+      cache: 'no-store',
       body: JSON.stringify(updates)
     });
 
@@ -3398,6 +3510,9 @@ async function updateAdOrderDetails(orderId, updates, { silent = false } = {}) {
     const updated = data.adOrder || data.order || null;
     if (updated) {
       const updatedId = getOrderId(updated);
+      if (isAdOrderDeleted(updatedId)) {
+        return null;
+      }
       const idx = adOrdersList.findIndex(item => getOrderId(item) === updatedId);
       if (idx !== -1) {
         adOrdersList[idx] = updated;
@@ -3441,13 +3556,19 @@ async function loadAdOrders(force = false) {
 
   adOrdersLoadingPromise = (async () => {
     try {
-      const res = await fetch(`${ADMIN_API_BASE}/adOrder`, { credentials: 'include' });
+      const res = await fetch(`${ADMIN_API_BASE}/adOrder`, {
+        credentials: 'include',
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || data.message || 'خطا در دریافت تبلیغات.');
       }
 
-      const list = Array.isArray(data.adOrders) ? data.adOrders : [];
+      const list = Array.isArray(data.adOrders)
+        ? data.adOrders.filter(order => !isAdOrderDeleted(getOrderId(order)))
+        : [];
       adOrdersList = list;
       adOrdersLoaded = true;
       updateAdOrdersSummary();
@@ -3786,8 +3907,9 @@ function renderAdOrderModal(order) {
   }
 
   if (deleteButton) {
-    deleteButton.addEventListener('click', () => {
-      if (!confirm('آیا از حذف این تبلیغ مطمئن هستید؟')) {
+    deleteButton.addEventListener('click', async () => {
+      const confirmed = await confirmAdOrderDeletion(orderId);
+      if (!confirmed) {
         return;
       }
       setAdModalEditStatus('در حال حذف تبلیغ...', 'info');
@@ -3796,10 +3918,12 @@ function renderAdOrderModal(order) {
         .then(() => {
           closeAdOrderModal();
           setAdOrdersStatus('تبلیغ با موفقیت حذف شد.', 'success');
+          showAdOrdersToast('تبلیغ با موفقیت حذف شد.', 'success');
         })
         .catch(err => {
           console.error('ad-modal delete error:', err);
           setAdModalEditStatus(err.message || 'خطا در حذف تبلیغ.', 'error');
+          showAdOrdersToast(err.message || 'خطا در حذف تبلیغ.', 'error');
         })
         .finally(() => setButtonLoading(deleteButton, false));
     });
