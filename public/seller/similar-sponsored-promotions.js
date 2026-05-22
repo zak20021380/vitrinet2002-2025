@@ -717,6 +717,9 @@
   border-color: var(--ssw-accent-border);
   transform: translateY(-1px);
 }
+.ssw-request-item[open] {
+  border-color: rgba(167,139,250,.3);
+}
 .ssw-request-item[data-request-state="approved"]::before {
   background: linear-gradient(180deg, #4ade80, #10b981);
 }
@@ -731,6 +734,25 @@
   justify-content: space-between;
   gap: .68rem;
   min-width: 0;
+}
+.ssw-request-summary {
+  display: grid;
+  gap: .52rem;
+  min-width: 0;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-request-summary::-webkit-details-marker {
+  display: none;
+}
+.ssw-request-summary::marker {
+  content: '';
+}
+.ssw-request-summary:focus-visible {
+  border-radius: 12px;
+  outline: 2px solid rgba(167,139,250,.78);
+  outline-offset: 4px;
 }
 .ssw-request-identity {
   display: flex;
@@ -808,6 +830,56 @@
 .ssw-status-pill--rejected, .ssw-status-pill--removed, .ssw-status-pill--expired {
   background: rgba(239,68,68,.12);
   color: #f87171;
+}
+.ssw-request-preview {
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ssw-request-preview-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid rgba(167,139,250,.18);
+  border-radius: 999px;
+  background: rgba(167,139,250,.1);
+  color: #ddd6fe;
+  padding: .27rem .54rem;
+  font-size: .66rem;
+  font-weight: 850;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.ssw-request-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: .22rem;
+  margin-inline-start: auto;
+  color: rgba(226,232,240,.64);
+  font-size: .66rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.ssw-request-expand svg {
+  width: 13px;
+  height: 13px;
+  transition: transform .2s ease;
+}
+.ssw-request-item[open] .ssw-request-expand svg {
+  transform: rotate(180deg);
+}
+.ssw-request-details {
+  display: grid;
+  gap: .56rem;
+  padding-top: .1rem;
+  animation: sswRequestDetailsIn .18s ease;
+}
+@keyframes sswRequestDetailsIn {
+  from { opacity: .1; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .ssw-request-meta {
   display: grid;
@@ -1140,6 +1212,7 @@
     info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
     shield: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
     list: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+    chevronDown: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
     arrowLeft: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
     creditCard: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
     close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
@@ -1431,39 +1504,48 @@
         ? `ssw-payment-pill--${paymentStatus}` : 'ssw-payment-pill--pending';
 
       return `
-        <article class="ssw-request-item" data-request-state="${escapeHtml(status)}">
-          <div class="ssw-request-head">
-            <div class="ssw-request-identity">
-              <div class="ssw-request-icon" aria-hidden="true">${icons.storeSmall}</div>
-              <div class="ssw-request-copy">
-                <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
-                <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
+        <details class="ssw-request-item" data-request-state="${escapeHtml(status)}">
+          <summary class="ssw-request-summary">
+            <div class="ssw-request-head">
+              <div class="ssw-request-identity">
+                <div class="ssw-request-icon" aria-hidden="true">${icons.storeSmall}</div>
+                <div class="ssw-request-copy">
+                  <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
+                  <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
+                </div>
+              </div>
+              <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
+            </div>
+            <div class="ssw-request-preview">
+              <span class="ssw-request-preview-chip">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</span>
+              <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+              <span class="ssw-request-expand">جزئیات ${icons.chevronDown}</span>
+            </div>
+          </summary>
+          <div class="ssw-request-details">
+            <div class="ssw-request-meta">
+              <div class="ssw-request-meta-card">
+                <span class="ssw-request-meta-label">نوع پلن</span>
+                <strong class="ssw-request-meta-value">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</strong>
+              </div>
+              <div class="ssw-request-meta-card">
+                <span class="ssw-request-meta-label">وضعیت پرداخت</span>
+                <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
               </div>
             </div>
-            <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
+            <div class="ssw-request-timeline">
+              <div class="ssw-request-moment">
+                <span class="ssw-request-moment__label">شروع</span>
+                <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.startAt))}</span>
+              </div>
+              <div class="ssw-request-moment">
+                <span class="ssw-request-moment__label">پایان</span>
+                <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.endAt))}</span>
+              </div>
+            </div>
+            ${item.adminNote ? `<p class="ssw-request-admin-note">یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}
           </div>
-          <div class="ssw-request-meta">
-            <div class="ssw-request-meta-card">
-              <span class="ssw-request-meta-label">نوع پلن</span>
-              <strong class="ssw-request-meta-value">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</strong>
-            </div>
-            <div class="ssw-request-meta-card">
-              <span class="ssw-request-meta-label">وضعیت پرداخت</span>
-              <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
-            </div>
-          </div>
-          <div class="ssw-request-timeline">
-            <div class="ssw-request-moment">
-              <span class="ssw-request-moment__label">شروع</span>
-              <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.startAt))}</span>
-            </div>
-            <div class="ssw-request-moment">
-              <span class="ssw-request-moment__label">پایان</span>
-              <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.endAt))}</span>
-            </div>
-          </div>
-          ${item.adminNote ? `<p class="ssw-request-admin-note">یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}
-        </article>
+        </details>
       `;
     }).join('');
   }
