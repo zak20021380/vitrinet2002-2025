@@ -1371,195 +1371,251 @@ document.addEventListener('DOMContentLoaded', async () => {
     bottomSheet.activeType = null;
   };
 
+  // فعال نگه داشتن تب انتخابی بین رندرها
+  let walletActiveTab = 'shop';
+
   const renderWalletSheet = () => {
     if (!bottomSheet.title || !bottomSheet.content) return;
     const data = sheetData.wallet;
     const currentBalance = walletData?.balance || 0;
-    bottomSheet.title.textContent = 'مرکز اعتبار و خرید خدمات';
-    
-    // نمایش تراکنش‌ها یا پیام خالی
-    const activitiesMarkup = data.activities.length > 0 
+    bottomSheet.title.textContent = 'مرکز اعتبار';
+
+    // تم‌های کارت خدمات
+    const serviceThemes = {
+      boost:    { accent: '#60a5fa', tone: 'سریع‌ترین رشد' },
+      discount: { accent: '#fbbf24', tone: 'صرفه‌جویی هوشمندانه' },
+      vip:      { accent: '#c084fc', tone: 'اعتبار حرفه‌ای' }
+    };
+
+    const serviceCardsMarkup = data.serviceCards.map((card) => {
+      const canAfford = currentBalance >= card.cost;
+      const theme = serviceThemes[card.theme] || serviceThemes.boost;
+      const stateClass = canAfford ? '' : 'is-locked';
+      return `
+        <article class="wsv2-service ${stateClass}"
+                 style="--service-accent: ${theme.accent}"
+                 data-service-type="${card.serviceType}"
+                 data-cost="${card.cost}">
+          <div class="wsv2-service__head">
+            <div class="wsv2-service__icon" aria-hidden="true">${card.icon}</div>
+            <div class="wsv2-service__title-wrap">
+              <span class="wsv2-service__tone">${theme.tone}</span>
+              <h5 class="wsv2-service__title">${card.title}</h5>
+            </div>
+          </div>
+          <p class="wsv2-service__desc">${card.description}</p>
+          <div class="wsv2-service__footer">
+            <div class="wsv2-service__price">
+              <span class="wsv2-service__price-amount">${card.price}</span>
+            </div>
+            <button type="button" class="wsv2-service__btn" ${canAfford ? '' : 'disabled aria-disabled="true"'}>
+              ${canAfford
+                ? `<span>خرید</span>
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+                   </svg>`
+                : 'موجودی کافی نیست'}
+            </button>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // کارت‌های کسب اعتبار
+    const earnItems = [
+      { theme: 'streak',     icon: '🔥', title: 'ورود روزانه',       desc: 'هر روز وارد پنل شو',          reward: '+۱,۰۰۰ ت' },
+      { theme: 'checkpoint', icon: '🎯', title: 'چک‌پوینت هفتگی',   desc: '۷ روز متوالی ورود',           reward: '+۵,۰۰۰ ت' },
+      { theme: 'booking',    icon: '📅', title: 'تکمیل نوبت',         desc: 'هر نوبت موفق',               reward: '+۲,۰۰۰ ت' },
+      { theme: 'review',     icon: '⭐', title: 'نظر مثبت',            desc: 'دریافت نظر از مشتری',         reward: '+۳,۰۰۰ ت' },
+      { theme: 'referral',   icon: '🎁', title: 'دعوت دوستان',        desc: 'معرفی فروشنده جدید',         reward: '+۱۰,۰۰۰ ت' },
+      { theme: 'profile',    icon: '✅', title: 'تکمیل پروفایل',     desc: 'اطلاعات کامل فروشگاه',        reward: '+۳,۰۰۰ ت' }
+    ];
+
+    const earnCardsMarkup = earnItems.map((item) => `
+      <div class="wallet-earn-card wallet-earn-card--${item.theme}">
+        <div class="wallet-earn-card__icon" aria-hidden="true">${item.icon}</div>
+        <div class="wallet-earn-card__content">
+          <h5 class="wallet-earn-card__title">${item.title}</h5>
+          <p class="wallet-earn-card__desc">${item.desc}</p>
+        </div>
+        <span class="wallet-earn-card__reward">${item.reward}</span>
+      </div>
+    `).join('');
+
+    // تراکنش‌ها
+    const activitiesMarkup = (data.activities && data.activities.length > 0)
       ? data.activities.map((item) => {
-          const amountClass = item.type === 'earn' ? 'is-positive' : 'is-negative';
+          const isPositive = item.type === 'earn';
+          const amountClass = isPositive ? 'is-positive' : 'is-negative';
+          const sign = isPositive ? '+' : '−';
           return `
-            <li class="wallet-sheet__activity-item">
-              <div>
-                <div class="wallet-sheet__activity-title">${item.title}</div>
-                <p class="wallet-sheet__activity-meta">${item.time}</p>
+            <li class="wsv2-tx">
+              <div class="wsv2-tx__icon ${amountClass}" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  ${isPositive
+                    ? '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>'
+                    : '<path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>'}
+                </svg>
               </div>
-              <span class="wallet-sheet__activity-amount ${amountClass}">${item.amount}</span>
+              <div class="wsv2-tx__body">
+                <span class="wsv2-tx__title">${item.title}</span>
+                <span class="wsv2-tx__time">${item.time}</span>
+              </div>
+              <span class="wsv2-tx__amount ${amountClass}">${sign} ${item.amount}</span>
             </li>
           `;
         }).join('')
-      : '<li class="wallet-sheet__activity-empty">هنوز تراکنشی ثبت نشده است</li>';
+      : `<li class="wsv2-tx-empty">
+          <div class="wsv2-tx-empty__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="3"/>
+              <path d="M2 10h20"/>
+              <path d="M6 15h4"/>
+            </svg>
+          </div>
+          <p class="wsv2-tx-empty__title">هنوز تراکنشی ثبت نشده</p>
+          <p class="wsv2-tx-empty__desc">با خرید یا کسب اعتبار، فعالیت‌های شما اینجا نمایش داده می‌شود.</p>
+        </li>`;
 
     bottomSheet.content.innerHTML = `
-      <section class="wallet-sheet" aria-label="اعتبار فروشگاه">
-        <div class="wallet-sheet__hero">
-          <div class="wallet-sheet__hero-head">
-            <span class="wallet-sheet__eyebrow">${data.highlight}</span>
-            <p class="wallet-sheet__headline">${data.balance} <span>${data.currency}</span></p>
-            <p class="wallet-sheet__tagline">${data.tagline}</p>
-          </div>
-          <div class="wallet-sheet__tags" aria-hidden="true">
-            ${data.useCases.map((item) => `<span class="wallet-sheet__tag">${item.icon} ${item.title}</span>`).join('')}
-          </div>
-        </div>
-
-        <div class="wallet-sheet__section wallet-sheet__shop" aria-label="خدمات پیشنهادی برای هزینه اعتبار">
-          <div class="wallet-sheet__section-header">
-            <div>
-              <p class="wallet-sheet__section-eyebrow">اقتصاد افزونه</p>
-              <h4 class="wallet-sheet__section-title">افزایش بازدید و اعتماد</h4>
+      <section class="wsv2" aria-label="اعتبار فروشگاه">
+        <!-- HERO: Balance card -->
+        <div class="wsv2-hero">
+          <div class="wsv2-hero__bg" aria-hidden="true"></div>
+          <div class="wsv2-hero__inner">
+            <div class="wsv2-hero__top">
+              <span class="wsv2-hero__chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="5" width="20" height="14" rx="3"/>
+                  <path d="M16 12h4"/>
+                  <circle cx="14" cy="12" r="2"/>
+                </svg>
+                <span>اعتبار فروشگاه</span>
+              </span>
             </div>
-            <span class="wallet-sheet__section-chip">پرداخت با اعتبار</span>
-          </div>
-          <div class="wallet-sheet__carousel" role="list">
-            ${data.serviceCards.map((card) => {
-              const canAfford = currentBalance >= card.cost;
-              const disabledClass = canAfford ? '' : 'is-disabled';
-              return `
-              <article class="wallet-sheet__card wallet-sheet__card--${card.theme} ${disabledClass}" 
-                       role="listitem" tabindex="0" 
-                       data-service-type="${card.serviceType}"
-                       data-cost="${card.cost}">
-                <div class="wallet-sheet__card-icon" aria-hidden="true">${card.icon}</div>
-                <div class="wallet-sheet__card-body">
-                  <h5 class="wallet-sheet__card-title">${card.title}</h5>
-                  <p class="wallet-sheet__card-price">${card.price}</p>
-                  <p class="wallet-sheet__card-meta">${card.description}</p>
-                </div>
-                <button type="button" class="wallet-sheet__card-btn" ${canAfford ? '' : 'disabled'}>
-                  ${canAfford ? 'خرید' : 'موجودی کافی نیست'}
-                </button>
-              </article>
-            `}).join('')}
+            <div class="wsv2-hero__balance">
+              <span class="wsv2-hero__amount">${data.balance}</span>
+              <span class="wsv2-hero__currency">${data.currency}</span>
+            </div>
+            <p class="wsv2-hero__hint">از این اعتبار برای ارتقای فروشگاه و خرید سرویس‌ها استفاده کنید.</p>
           </div>
         </div>
 
-        <!-- بخش راه‌های کسب اعتبار -->
-        <div class="wallet-sheet__section wallet-sheet__earn" aria-label="راه‌های کسب اعتبار">
-          <div class="wallet-sheet__section-header">
-            <div>
-              <p class="wallet-sheet__section-eyebrow">💰 کسب درآمد</p>
-              <h4 class="wallet-sheet__section-title">چطور اعتبار کسب کنم؟</h4>
-            </div>
-            <span class="wallet-sheet__section-chip wallet-sheet__section-chip--earn">رایگان</span>
-          </div>
-          
-          <div class="wallet-earn-grid">
-            <div class="wallet-earn-card wallet-earn-card--streak">
-              <div class="wallet-earn-card__icon">🔥</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">ورود روزانه</h5>
-                <p class="wallet-earn-card__desc">هر روز وارد پنل شو</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۱,۰۰۰ ت</span>
-            </div>
-            
-            <div class="wallet-earn-card wallet-earn-card--checkpoint">
-              <div class="wallet-earn-card__icon">🎯</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">چک‌پوینت هفتگی</h5>
-                <p class="wallet-earn-card__desc">۷ روز متوالی ورود</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۵,۰۰۰ ت</span>
-            </div>
-            
-            <div class="wallet-earn-card wallet-earn-card--booking">
-              <div class="wallet-earn-card__icon">📅</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">تکمیل نوبت</h5>
-                <p class="wallet-earn-card__desc">هر نوبت موفق</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۲,۰۰۰ ت</span>
-            </div>
-            
-            <div class="wallet-earn-card wallet-earn-card--review">
-              <div class="wallet-earn-card__icon">⭐</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">نظر مثبت</h5>
-                <p class="wallet-earn-card__desc">دریافت نظر از مشتری</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۳,۰۰۰ ت</span>
-            </div>
-            
-            <div class="wallet-earn-card wallet-earn-card--referral">
-              <div class="wallet-earn-card__icon">🎁</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">دعوت دوستان</h5>
-                <p class="wallet-earn-card__desc">معرفی فروشنده جدید</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۱۰,۰۰۰ ت</span>
-            </div>
-            
-            <div class="wallet-earn-card wallet-earn-card--profile">
-              <div class="wallet-earn-card__icon">✅</div>
-              <div class="wallet-earn-card__content">
-                <h5 class="wallet-earn-card__title">تکمیل پروفایل</h5>
-                <p class="wallet-earn-card__desc">اطلاعات کامل فروشگاه</p>
-              </div>
-              <span class="wallet-earn-card__reward">+۳,۰۰۰ ت</span>
-            </div>
-          </div>
-          
-          <p class="wallet-earn-tip">
-            <span class="wallet-earn-tip__icon">💡</span>
-            <span>با فعالیت مداوم در پنل، اعتبار رایگان کسب کنید و از خدمات ویژه استفاده کنید!</span>
-          </p>
+        <!-- TABS -->
+        <div class="wsv2-tabs" role="tablist" aria-label="بخش‌های مرکز اعتبار">
+          <button type="button" role="tab" class="wsv2-tab" data-tab="shop"
+                  aria-selected="${walletActiveTab === 'shop'}" aria-controls="wsv2-panel-shop">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span>خرید خدمات</span>
+          </button>
+          <button type="button" role="tab" class="wsv2-tab" data-tab="earn"
+                  aria-selected="${walletActiveTab === 'earn'}" aria-controls="wsv2-panel-earn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/>
+            </svg>
+            <span>کسب اعتبار</span>
+          </button>
+          <button type="button" role="tab" class="wsv2-tab" data-tab="history"
+                  aria-selected="${walletActiveTab === 'history'}" aria-controls="wsv2-panel-history">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>تراکنش‌ها</span>
+          </button>
         </div>
 
-        <div class="wallet-sheet__section wallet-sheet__activity" aria-label="فعالیت‌های اخیر اعتبار">
-          <div class="wallet-sheet__section-header">
-            <div>
-              <p class="wallet-sheet__section-eyebrow">جریان حساب</p>
-              <h4 class="wallet-sheet__section-title">تراکنش‌های اخیر</h4>
+        <!-- PANELS -->
+        <div class="wsv2-panels">
+          <div class="wsv2-panel" id="wsv2-panel-shop" role="tabpanel" data-panel="shop"
+               ${walletActiveTab === 'shop' ? '' : 'hidden'}>
+            <div class="wsv2-panel__head">
+              <h4 class="wsv2-panel__title">خدمات قابل خرید</h4>
+              <p class="wsv2-panel__sub">پرداخت با اعتبار فروشگاه، بدون نیاز به درگاه</p>
             </div>
-            <span class="wallet-sheet__section-chip wallet-sheet__section-chip--muted">+ / -</span>
+            <div class="wsv2-services">
+              ${serviceCardsMarkup}
+            </div>
           </div>
-          <ul class="wallet-sheet__activity-list">
-            ${activitiesMarkup}
-          </ul>
-        </div>
 
-        <button type="button" class="wallet-sheet__close-btn" aria-label="بستن مدال اعتبار">
-          متوجه شدم
-        </button>
+          <div class="wsv2-panel" id="wsv2-panel-earn" role="tabpanel" data-panel="earn"
+               ${walletActiveTab === 'earn' ? '' : 'hidden'}>
+            <div class="wsv2-panel__head">
+              <h4 class="wsv2-panel__title">چطور اعتبار کسب کنم؟</h4>
+              <p class="wsv2-panel__sub">با فعالیت روزانه و تعامل با مشتری‌ها، اعتبار رایگان جمع کن</p>
+            </div>
+            <div class="wallet-earn-grid">
+              ${earnCardsMarkup}
+            </div>
+            <p class="wallet-earn-tip">
+              <span class="wallet-earn-tip__icon" aria-hidden="true">💡</span>
+              <span>هرچه فعال‌تر باشی، اعتبار بیشتری به‌صورت رایگان به دست می‌آوری.</span>
+            </p>
+          </div>
+
+          <div class="wsv2-panel" id="wsv2-panel-history" role="tabpanel" data-panel="history"
+               ${walletActiveTab === 'history' ? '' : 'hidden'}>
+            <div class="wsv2-panel__head">
+              <h4 class="wsv2-panel__title">تراکنش‌های اخیر</h4>
+              <p class="wsv2-panel__sub">جریان دریافت و مصرف اعتبار</p>
+            </div>
+            <ul class="wsv2-tx-list">
+              ${activitiesMarkup}
+            </ul>
+          </div>
+        </div>
       </section>
     `;
 
-    // اضافه کردن event listener برای دکمه‌های خرید
-    bottomSheet.content.querySelectorAll('.wallet-sheet__card-btn:not([disabled])').forEach(btn => {
+    // === Tab switching ===
+    const tabs = bottomSheet.content.querySelectorAll('.wsv2-tab');
+    const panels = bottomSheet.content.querySelectorAll('.wsv2-panel');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        if (!target || target === walletActiveTab) return;
+        walletActiveTab = target;
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === target)));
+        panels.forEach((p) => {
+          if (p.dataset.panel === target) {
+            p.removeAttribute('hidden');
+          } else {
+            p.setAttribute('hidden', '');
+          }
+        });
+      });
+    });
+
+    // === Service buy buttons ===
+    bottomSheet.content.querySelectorAll('.wsv2-service__btn:not([disabled])').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const card = btn.closest('.wallet-sheet__card');
+        const card = btn.closest('.wsv2-service');
         const serviceType = card?.dataset?.serviceType;
         if (!serviceType) return;
 
         btn.disabled = true;
-        btn.textContent = 'در حال پردازش...';
+        btn.classList.add('is-loading');
+        btn.innerHTML = '<span class="wsv2-spinner" aria-hidden="true"></span><span>در حال پردازش...</span>';
 
         try {
           const result = await API.spendWalletCredit(serviceType);
           UIComponents.showToast(result.message || 'خدمت با موفقیت فعال شد', 'success');
-          
-          // بروزرسانی کیف پول
           await loadWallet();
           renderWalletSheet();
         } catch (err) {
           console.error('Spend credit failed:', err);
           UIComponents.showToast(err.message || 'خطا در خرید خدمت', 'error');
           btn.disabled = false;
-          btn.textContent = 'خرید';
+          btn.classList.remove('is-loading');
+          btn.innerHTML = '<span>خرید</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
         }
       });
     });
-
-    // اضافه کردن event listener برای دکمه بستن مدال
-    const closeWalletBtn = bottomSheet.content.querySelector('.wallet-sheet__close-btn');
-    if (closeWalletBtn) {
-      closeWalletBtn.addEventListener('click', closeBottomSheet);
-    }
   };
 
   const renderStreakSheet = () => {
