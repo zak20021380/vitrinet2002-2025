@@ -27,7 +27,8 @@
     lastLoadedAt: 0,
     loadPromise: null,
     csrfPromise: null,
-    submitting: false
+    submitting: false,
+    guidePlan: null
   };
 
   const tierLabels = {
@@ -507,6 +508,39 @@
 }
 
 /* ── CTA Button (matches upgrade-ad-cta) ── */
+.ssw-plan-guide-btn {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(167,139,250,.24);
+  background: linear-gradient(135deg, rgba(167,139,250,.13), rgba(14,165,233,.065));
+  color: #ddd6fe;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  cursor: pointer;
+  transition: background .25s ease, border-color .25s ease, transform .25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-plan-guide-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.ssw-plan-guide-btn:hover {
+  background: linear-gradient(135deg, rgba(167,139,250,.2), rgba(14,165,233,.1));
+  border-color: rgba(167,139,250,.42);
+  transform: translateY(-1px);
+}
+.ssw-plan-guide-btn:focus-visible {
+  outline: 2px solid rgba(167,139,250,.8);
+  outline-offset: 2px;
+}
+
 .ssw-plan-cta {
   margin-top: auto;
   width: 100%;
@@ -1173,6 +1207,265 @@
   .ssw-modal__submit { min-width: 0; }
 }
 
+.ssw-guide-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: end center;
+  padding: 1rem 0 0;
+  background: rgba(7,9,20,.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.ssw-guide-modal[hidden] { display: none; }
+.ssw-guide-modal__dialog {
+  width: min(620px, 100%);
+  max-height: min(92vh, 860px);
+  overflow: auto;
+  border: 1px solid rgba(196,181,253,.22);
+  border-radius: 28px 28px 0 0;
+  background:
+    linear-gradient(155deg, rgba(39,31,68,.98), rgba(15,17,28,.99)),
+    linear-gradient(135deg, rgba(167,139,250,.14), transparent);
+  box-shadow: 0 -18px 60px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.1);
+  color: var(--ssw-text-dark);
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.ssw-guide-modal__handle {
+  display: block;
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.2);
+  margin: 0 auto .85rem;
+}
+.ssw-guide-modal__close {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-inline-start: auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.11);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.66);
+  cursor: pointer;
+}
+.ssw-guide-modal__close svg { width: 16px; height: 16px; }
+.ssw-guide-modal__hero {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: .72rem;
+  align-items: start;
+  margin-top: -.2rem;
+}
+.ssw-guide-modal__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: #c4b5fd;
+  border: 1px solid rgba(167,139,250,.28);
+  background: linear-gradient(145deg, rgba(167,139,250,.24), rgba(14,165,233,.1));
+  box-shadow: 0 10px 28px rgba(124,58,237,.2);
+}
+.ssw-guide-modal__icon svg { width: 24px; height: 24px; }
+.ssw-guide-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 24px;
+  margin-bottom: .34rem;
+  border-radius: 999px;
+  padding: .16rem .56rem;
+  color: #ddd6fe;
+  background: rgba(167,139,250,.15);
+  border: 1px solid rgba(167,139,250,.24);
+  font-size: .66rem;
+  font-weight: 900;
+}
+.ssw-guide-badge--priority {
+  color: #f5f3ff;
+  background: linear-gradient(135deg, rgba(124,58,237,.5), rgba(167,139,250,.22));
+}
+.ssw-guide-modal__title {
+  margin: 0 0 .22rem;
+  color: #fff;
+  font-size: 1.04rem;
+  font-weight: 950;
+  line-height: 1.45;
+}
+.ssw-guide-modal__desc {
+  margin: 0;
+  color: rgba(226,232,240,.72);
+  font-size: .78rem;
+  font-weight: 650;
+  line-height: 1.75;
+}
+.ssw-guide-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  margin: .92rem 0 .72rem;
+  padding: .8rem;
+  border: 1px solid rgba(167,139,250,.24);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(167,139,250,.16), rgba(14,165,233,.08));
+}
+.ssw-guide-price span {
+  color: rgba(226,232,240,.62);
+  font-size: .72rem;
+  font-weight: 800;
+}
+.ssw-guide-price strong {
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 950;
+  text-align: end;
+}
+.ssw-guide-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .48rem;
+  margin-bottom: .72rem;
+}
+.ssw-guide-fact {
+  min-width: 0;
+  padding: .62rem .5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.055);
+  text-align: center;
+}
+.ssw-guide-fact span {
+  display: block;
+  color: rgba(226,232,240,.48);
+  font-size: .61rem;
+  font-weight: 850;
+  margin-bottom: .14rem;
+}
+.ssw-guide-fact strong {
+  display: block;
+  color: #ede9fe;
+  font-size: .76rem;
+  font-weight: 900;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.ssw-guide-grid {
+  display: grid;
+  gap: .62rem;
+}
+.ssw-guide-panel {
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  padding: .82rem;
+}
+.ssw-guide-panel__title {
+  margin: 0 0 .62rem;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 950;
+}
+.ssw-guide-features,
+.ssw-guide-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: .48rem;
+}
+.ssw-guide-features li,
+.ssw-guide-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: .48rem;
+  color: rgba(226,232,240,.8);
+  font-size: .74rem;
+  font-weight: 700;
+  line-height: 1.65;
+}
+.ssw-guide-features span,
+.ssw-guide-steps span {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  border-radius: 7px;
+  color: #c4b5fd;
+  background: rgba(167,139,250,.16);
+  border: 1px solid rgba(167,139,250,.18);
+  font-size: .64rem;
+  font-weight: 950;
+  margin-top: .08rem;
+}
+.ssw-guide-note {
+  display: flex;
+  gap: .48rem;
+  align-items: flex-start;
+  margin-top: .62rem;
+  padding: .62rem .72rem;
+  border-radius: 14px;
+  border: 1px solid rgba(245,158,11,.2);
+  background: rgba(245,158,11,.09);
+  color: #fde68a;
+  font-size: .72rem;
+  font-weight: 750;
+  line-height: 1.65;
+}
+.ssw-guide-note svg {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  margin-top: .14rem;
+}
+.ssw-guide-actions {
+  display: grid;
+  gap: .5rem;
+  margin-top: .82rem;
+}
+.ssw-guide-actions .ssw-plan-cta {
+  min-height: 48px;
+}
+.ssw-guide-actions__close {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(226,232,240,.76);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+@media (min-width:640px) {
+  .ssw-guide-modal {
+    place-items: center;
+    padding: 1.5rem;
+  }
+  .ssw-guide-modal__dialog {
+    border-radius: 28px;
+    padding: 1.25rem;
+  }
+  .ssw-guide-modal__handle {
+    display: none;
+  }
+  .ssw-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ssw-guide-actions {
+    grid-template-columns: minmax(0, 1fr) 132px;
+  }
+}
+
 /* Mobile compacting */
 @media (max-width:639px) {
   .ssw-widget { margin-top: 1rem; }
@@ -1287,6 +1580,58 @@
             <button type="button" class="ssw-modal__cancel" data-similar-sponsored-close>انصراف</button>
           </div>
         </form>
+      </div>
+
+      <div class="ssw-guide-modal" id="similar-sponsored-guide-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-guide-title">
+        <section class="ssw-guide-modal__dialog" role="document">
+          <span class="ssw-guide-modal__handle" aria-hidden="true"></span>
+          <button type="button" class="ssw-guide-modal__close" data-similar-sponsored-guide-close aria-label="بستن راهنمای پلن">
+            ${icons.close}
+          </button>
+
+          <header class="ssw-guide-modal__hero">
+            <div class="ssw-guide-modal__icon" aria-hidden="true">${icons.storeSmall}</div>
+            <div>
+              <span class="ssw-guide-badge" id="similar-sponsored-guide-badge"></span>
+              <h3 id="similar-sponsored-guide-title" class="ssw-guide-modal__title"></h3>
+              <p id="similar-sponsored-guide-desc" class="ssw-guide-modal__desc"></p>
+            </div>
+          </header>
+
+          <div class="ssw-guide-price">
+            <span>هزینه این پلن</span>
+            <strong id="similar-sponsored-guide-price"></strong>
+          </div>
+          <div class="ssw-guide-facts" id="similar-sponsored-guide-facts"></div>
+
+          <div class="ssw-guide-grid">
+            <section class="ssw-guide-panel" aria-labelledby="similar-sponsored-guide-benefits-title">
+              <h4 class="ssw-guide-panel__title" id="similar-sponsored-guide-benefits-title">چه چیزی دریافت می‌کنید؟</h4>
+              <ul class="ssw-guide-features" id="similar-sponsored-guide-features"></ul>
+            </section>
+            <section class="ssw-guide-panel" aria-labelledby="similar-sponsored-guide-flow-title">
+              <h4 class="ssw-guide-panel__title" id="similar-sponsored-guide-flow-title">مسیر فعال‌سازی تبلیغ</h4>
+              <ol class="ssw-guide-steps">
+                <li><span>۱</span>پلن را انتخاب می‌کنید و پرداخت آنلاین انجام می‌شود.</li>
+                <li><span>۲</span>مدیر درخواست را بررسی و زمان نمایش را تعیین می‌کند.</li>
+                <li><span>۳</span>پس از تایید، فروشگاه در بخش فروشگاه‌های مشابه نمایش داده می‌شود.</li>
+              </ol>
+            </section>
+          </div>
+
+          <p class="ssw-guide-note">
+            ${icons.shield}
+            <span>زمان شروع و پایان تبلیغ پس از بررسی مدیر مشخص می‌شود؛ قبل از پرداخت، وضعیت درخواست‌های قبلی خود را هم بررسی کنید.</span>
+          </p>
+
+          <div class="ssw-guide-actions">
+            <button type="button" class="ssw-plan-cta" data-similar-sponsored-guide-select>
+              ${icons.arrowLeft}
+              <span>ثبت درخواست این پلن</span>
+            </button>
+            <button type="button" class="ssw-guide-actions__close" data-similar-sponsored-guide-close>بستن</button>
+          </div>
+        </section>
       </div>
     `;
     const requestsPanel = document.createElement('section');
@@ -1442,6 +1787,14 @@
             <span>زمان‌بندی توسط مدیر تعیین می‌شود. پس از ثبت درخواست و پرداخت، تیم ما آن را فعال خواهد کرد.</span>
           </div>
 
+          <button type="button" class="ssw-plan-guide-btn"
+            data-plan-guide-tier="${escapeHtml(plan.tier)}"
+            data-plan-guide-duration="${escapeHtml(plan.durationUnit)}"
+            aria-label="اطلاعات و راهنمای ${escapeHtml(planTitle)}">
+            ${icons.info}
+            <span>اطلاعات و راهنمای پلن</span>
+          </button>
+
           <button type="button" class="ssw-plan-cta"
             data-plan-tier="${escapeHtml(plan.tier)}"
             data-plan-duration="${escapeHtml(plan.durationUnit)}"
@@ -1571,6 +1924,70 @@
     state.selectedPlan = null;
   }
 
+  function getPlanGuideFeatures(plan) {
+    return tierFeatures[plan?.tier] || [
+      'نمایش فروشگاه در بخش فروشگاه‌های مشابه',
+      'بررسی درخواست و فعال‌سازی پس از تایید مدیر'
+    ];
+  }
+
+  function openGuideModal(plan) {
+    const modal = document.getElementById('similar-sponsored-guide-modal');
+    if (!modal || !plan) return;
+
+    state.guidePlan = plan;
+
+    const title = plan.title || tierLabels[plan.tier] || 'پلن تبلیغ فروشگاه‌های مشابه';
+    const desc = plan.description || tierDescriptions[plan.tier] || 'نمایش ویژه فروشگاه شما کنار فروشگاه‌های هم‌حوزه.';
+    const periodLabel = durationLabels[plan.durationUnit] || plan.durationUnit || 'دوره';
+    const durationValue = plan.durationDays ? `${escapeHtml(String(plan.durationDays))} روز` : escapeHtml(periodLabel);
+    const slotValue = plan.slotLimit ? `${escapeHtml(String(plan.slotLimit))} جایگاه` : 'طبق ظرفیت';
+    const features = getPlanGuideFeatures(plan);
+    const badge = document.getElementById('similar-sponsored-guide-badge');
+    const titleEl = document.getElementById('similar-sponsored-guide-title');
+    const descEl = document.getElementById('similar-sponsored-guide-desc');
+    const priceEl = document.getElementById('similar-sponsored-guide-price');
+    const factsEl = document.getElementById('similar-sponsored-guide-facts');
+    const featuresEl = document.getElementById('similar-sponsored-guide-features');
+
+    if (badge) {
+      badge.textContent = plan.tier === 'priority' ? 'پلن پیشنهادی' : 'پلن استاندارد';
+      badge.className = `ssw-guide-badge${plan.tier === 'priority' ? ' ssw-guide-badge--priority' : ''}`;
+    }
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (priceEl) priceEl.textContent = `${formatMoney(plan.price)} تومان / ${periodLabel}`;
+    if (factsEl) {
+      factsEl.innerHTML = `
+        <div class="ssw-guide-fact">
+          <span>مدت نمایش</span>
+          <strong>${durationValue}</strong>
+        </div>
+        <div class="ssw-guide-fact">
+          <span>دوره پلن</span>
+          <strong>${escapeHtml(periodLabel)}</strong>
+        </div>
+        <div class="ssw-guide-fact">
+          <span>ظرفیت</span>
+          <strong>${slotValue}</strong>
+        </div>
+      `;
+    }
+    if (featuresEl) {
+      featuresEl.innerHTML = features.map((feature) => `
+        <li><span aria-hidden="true">${icons.check}</span>${escapeHtml(feature)}</li>
+      `).join('');
+    }
+
+    modal.hidden = false;
+  }
+
+  function closeGuideModal() {
+    const modal = document.getElementById('similar-sponsored-guide-modal');
+    if (modal) modal.hidden = true;
+    state.guidePlan = null;
+  }
+
   async function submitRequest(event) {
     event.preventDefault();
     if (state.submitting) return;
@@ -1635,6 +2052,15 @@
      ───────────────────────────────────────────────────── */
   function bindEvents() {
     document.getElementById('similar-sponsored-plans')?.addEventListener('click', (event) => {
+      const guideButton = event.target.closest('[data-plan-guide-tier]');
+      if (guideButton) {
+        const guidePlan = state.plans.find(
+          (item) => item.tier === guideButton.dataset.planGuideTier && item.durationUnit === guideButton.dataset.planGuideDuration
+        );
+        if (guidePlan) openGuideModal(guidePlan);
+        return;
+      }
+
       const button = event.target.closest('[data-plan-tier]');
       if (!button) return;
       const plan = state.plans.find(
@@ -1646,16 +2072,32 @@
     document.querySelectorAll('[data-similar-sponsored-close]').forEach((button) => {
       button.addEventListener('click', closeModal);
     });
+    document.querySelectorAll('[data-similar-sponsored-guide-close]').forEach((button) => {
+      button.addEventListener('click', closeGuideModal);
+    });
 
     document.getElementById('similar-sponsored-form')?.addEventListener('submit', submitRequest);
+    document.querySelector('[data-similar-sponsored-guide-select]')?.addEventListener('click', () => {
+      const plan = state.guidePlan;
+      closeGuideModal();
+      if (plan) openModal(plan);
+    });
 
     document.getElementById('similar-sponsored-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-modal') closeModal();
+    });
+    document.getElementById('similar-sponsored-guide-modal')?.addEventListener('click', (event) => {
+      if (event.target.id === 'similar-sponsored-guide-modal') closeGuideModal();
     });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const modal = document.getElementById('similar-sponsored-modal');
+        const guideModal = document.getElementById('similar-sponsored-guide-modal');
+        if (guideModal && !guideModal.hidden) {
+          closeGuideModal();
+          return;
+        }
         if (modal && !modal.hidden) closeModal();
       }
     });
