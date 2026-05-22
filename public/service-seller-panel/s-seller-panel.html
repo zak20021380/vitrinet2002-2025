@@ -2877,7 +2877,30 @@
       </header>
 
       <div class="ads-modal__content" id="ads-content">
-        <div class="ads-grid" id="ads-grid" role="list">
+        <!-- Tabs for Plans vs My Requests -->
+        <div class="ads-tabs-container">
+          <button type="button" class="ads-tab-btn ads-tab-btn--active" data-ads-tab="plans">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            <span>پلن‌ها</span>
+          </button>
+          <button type="button" class="ads-tab-btn" data-ads-tab="my-requests">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <span>تبلیغات من</span>
+            <span class="ads-tab-badge" id="ads-requests-count" hidden>۰</span>
+          </button>
+        </div>
+
+        <!-- Plans Tab Content -->
+        <div class="ads-tab-content ads-tab-content--active" id="ads-plans-tab">
+          <div class="ads-grid" id="ads-grid" role="list">
           
           <!-- Plan 1: Basic -->
           <article class="ads-plan-card" role="listitem">
@@ -3004,6 +3027,75 @@
             <button type="button" class="ads-plan-card__btn ads-plan-card__btn--premium" data-ad-slug="ad_search" data-ad-title="تبلیغ ویژه" data-ad-price="189000" data-ad-duration="روزانه">انتخاب پلن</button>
           </article>
 
+        </div>
+        </div>
+
+        <!-- My Requests Tab Content -->
+        <div class="ads-tab-content" id="ads-my-requests-tab">
+          <div class="ads-requests-container">
+            <div class="ads-requests-header">
+              <h3 class="ads-requests-title">وضعیت درخواست‌های تبلیغات شما</h3>
+              <p class="ads-requests-subtitle">پیگیری وضعیت و تاریخچه تبلیغات فعال و گذشته</p>
+            </div>
+            
+            <div class="ads-requests-list" id="ads-requests-list">
+              <!-- Empty State -->
+              <div class="ads-requests-empty" id="ads-requests-empty">
+                <div class="ads-requests-empty__icon">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M9 9h6v6H9z"/>
+                    <path d="M9 3v6H3"/>
+                    <path d="M15 3v6h6"/>
+                    <path d="M9 15v6H3"/>
+                    <path d="M15 15v6h6"/>
+                  </svg>
+                </div>
+                <h4 class="ads-requests-empty__title">هنوز هیچ تبلیغی ثبت نکرده‌اید</h4>
+                <p class="ads-requests-empty__text">برای شروع، از تب «پلن‌ها» یک بسته تبلیغاتی انتخاب کنید</p>
+                <button type="button" class="ads-requests-empty__btn" data-ads-tab-trigger="plans">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                  مشاهده پلن‌ها
+                </button>
+              </div>
+              
+              <!-- Request Cards (populated dynamically) -->
+              <template id="ads-request-card-template">
+                <article class="ads-request-card">
+                  <div class="ads-request-card__header">
+                    <div class="ads-request-card__info">
+                      <span class="ads-request-card__plan-name"></span>
+                      <span class="ads-request-card__date"></span>
+                    </div>
+                    <span class="ads-request-card__status"></span>
+                  </div>
+                  <div class="ads-request-card__body">
+                    <div class="ads-request-card__detail">
+                      <span class="ads-request-card__detail-label">مدت زمان:</span>
+                      <span class="ads-request-card__detail-value"></span>
+                    </div>
+                    <div class="ads-request-card__detail">
+                      <span class="ads-request-card__detail-label">هزینه:</span>
+                      <span class="ads-request-card__detail-value"></span>
+                    </div>
+                  </div>
+                  <div class="ads-request-card__footer">
+                    <div class="ads-request-card__progress">
+                      <div class="ads-request-card__progress-bar">
+                        <div class="ads-request-card__progress-fill"></div>
+                      </div>
+                      <span class="ads-request-card__progress-text"></span>
+                    </div>
+                  </div>
+                </article>
+              </template>
+            </div>
+          </div>
         </div>
       </div>
 
