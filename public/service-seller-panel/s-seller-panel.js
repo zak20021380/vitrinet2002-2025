@@ -11914,9 +11914,121 @@ window.customersData = window.customersData || [];
     });
   });
 
+  // Tab switching functionality for Plans vs My Requests
+  const tabButtons = modal.querySelectorAll('[data-ads-tab]');
+  const plansTabContent = document.getElementById('ads-plans-tab');
+  const myRequestsTabContent = document.getElementById('ads-my-requests-tab');
+  const requestsCountBadge = document.getElementById('ads-requests-count');
+
+  // Switch tabs
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabName = btn.dataset.adsTab;
+
+      // Update active state on buttons
+      tabButtons.forEach(b => b.classList.remove('ads-tab-btn--active'));
+      btn.classList.add('ads-tab-btn--active');
+
+      // Show/hide corresponding content
+      if (tabName === 'plans') {
+        plansTabContent.classList.add('ads-tab-content--active');
+        myRequestsTabContent.classList.remove('ads-tab-content--active');
+      } else if (tabName === 'my-requests') {
+        myRequestsTabContent.classList.add('ads-tab-content--active');
+        plansTabContent.classList.remove('ads-tab-content--active');
+        // Load requests when tab is opened
+        loadAdsRequests();
+      }
+    });
+  });
+
+  // Handle "مشاهده پلن‌ها" button in empty state
+  const emptyStateBtn = modal.querySelector('[data-ads-tab-trigger="plans"]');
+  if (emptyStateBtn) {
+    emptyStateBtn.addEventListener('click', () => {
+      const plansTabBtn = modal.querySelector('[data-ads-tab="plans"]');
+      if (plansTabBtn) {
+        plansTabBtn.click();
+      }
+    });
+  }
+
+  // Load and display user's ad requests
+  const loadAdsRequests = () => {
+    // This would normally fetch from API
+    // For now, we'll show empty state or mock data
+    const requestsList = document.getElementById('ads-requests-list');
+    const emptyState = document.getElementById('ads-requests-empty');
+    const template = document.getElementById('ads-request-card-template');
+
+    // Mock data - replace with actual API call
+    const mockRequests = []; // window.adsRequests || []
+
+    if (mockRequests.length === 0) {
+      if (emptyState) emptyState.style.display = 'flex';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    // Clear existing cards (except empty state and template)
+    requestsList.querySelectorAll('.ads-request-card').forEach(card => card.remove());
+
+    // Render request cards
+    mockRequests.forEach((request, index) => {
+      if (!template || !template.content) return;
+
+      const clone = template.content.cloneNode(true);
+      const card = clone.querySelector('.ads-request-card');
+
+      // Populate card data
+      const planNameEl = card.querySelector('.ads-request-card__plan-name');
+      const dateEl = card.querySelector('.ads-request-card__date');
+      const statusEl = card.querySelector('.ads-request-card__status');
+      const detailValues = card.querySelectorAll('.ads-request-card__detail-value');
+      const progressFill = card.querySelector('.ads-request-card__progress-fill');
+      const progressText = card.querySelector('.ads-request-card__progress-text');
+
+      if (planNameEl) planNameEl.textContent = request.planName || 'تبلیغ پایه';
+      if (dateEl) dateEl.textContent = request.date || '۱۴۰۴/۰۹/۱۶';
+
+      // Status badge
+      if (statusEl) {
+        statusEl.textContent = request.statusText || 'در انتظار بررسی';
+        statusEl.className = 'ads-request-card__status ads-request-card__status--' + (request.status || 'pending');
+      }
+
+      // Detail values
+      if (detailValues[0]) detailValues[0].textContent = request.duration || '۷ روز';
+      if (detailValues[1]) detailValues[1].textContent = (request.price && formatPersianNumber(request.price)) + ' تومان' || '—';
+
+      // Progress bar
+      if (progressFill) {
+        const progress = request.progress || 0;
+        progressFill.style.width = progress + '%';
+      }
+      if (progressText) {
+        progressText.textContent = request.progressText || '';
+      }
+
+      requestsList.appendChild(clone);
+    });
+
+    // Update badge count
+    if (requestsCountBadge) {
+      if (mockRequests.length > 0) {
+        requestsCountBadge.textContent = formatPersianNumber(mockRequests.length);
+        requestsCountBadge.hidden = false;
+      } else {
+        requestsCountBadge.hidden = true;
+      }
+    }
+  };
+
   // Expose functions globally if needed
   window.openAdsModal = openModal;
   window.closeAdsModal = closeModal;
+  window.loadAdsRequests = loadAdsRequests;
 })();
 
 /* =========================================
