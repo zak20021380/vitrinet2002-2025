@@ -603,27 +603,27 @@
 }
 .ssw-empty svg { width: 18px; height: 18px; min-width: 18px; opacity: .6; }
 
-/* ── Requests Panel ── */
+/* ══════════════════════════════════════════════════
+   REQUESTS PANEL — Premium Light Mode Redesign
+   ══════════════════════════════════════════════════ */
 .ssw-requests-panel {
   position: relative;
   direction: rtl;
-  border-radius: var(--ssw-radius-card);
-  background:
-    radial-gradient(circle at 100% 0, rgba(167,139,250,.19), transparent 34%),
-    radial-gradient(circle at 0 100%, rgba(14,165,233,.08), transparent 36%),
-    linear-gradient(165deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
-  border: 1px solid rgba(167,139,250,.25);
-  padding: .92rem;
-  margin: 0 0 1rem;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1.5px solid rgba(226,232,240,0.9);
+  padding: 1.25rem;
+  margin: 0 0 1.25rem;
   overflow: hidden;
-  box-shadow: 0 18px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.09);
+  box-shadow: 0 4px 20px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.04);
 }
 .ssw-requests-panel::before {
   content: '';
   position: absolute;
   inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(99,102,241,.82), rgba(167,139,250,.95), rgba(245,158,11,.78));
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1, #a78bfa, #f59e0b);
+  border-radius: 24px 24px 0 0;
 }
 .ssw-requests-panel--overview {
   scroll-margin-top: 12px;
@@ -631,429 +631,482 @@
 .ssw-requests-panel-header {
   display: flex;
   align-items: center;
-  gap: .68rem;
-  margin-bottom: .72rem;
-  padding: .1rem .08rem .72rem;
-  border-bottom: 1px solid rgba(255,255,255,.11);
+  gap: .85rem;
+  margin-bottom: 1.1rem;
+  padding: .15rem 0 1rem;
+  border-bottom: 1px solid rgba(226,232,240,0.7);
 }
 .ssw-requests-panel-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 13px;
-  background: linear-gradient(145deg, rgba(167,139,250,.24), rgba(14,165,233,.1));
-  border: 1px solid rgba(167,139,250,.18);
-  color: var(--ssw-accent);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(99,102,241,.12), rgba(167,139,250,.08));
+  border: 1.5px solid rgba(99,102,241,.18);
+  color: #6366f1;
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+  box-shadow: 0 4px 12px rgba(99,102,241,.12);
 }
-.ssw-requests-panel-icon svg { width: 18px; height: 18px; }
-.ssw-requests-panel-copy {
-  flex: 1;
-  min-width: 0;
-}
+.ssw-requests-panel-icon svg { width: 20px; height: 20px; }
+.ssw-requests-panel-copy { flex: 1; min-width: 0; }
 .ssw-requests-panel-title {
-  font-size: .96rem;
-  font-weight: 900;
-  color: var(--ssw-text-dark);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 .ssw-requests-panel-subtitle {
-  margin: .18rem 0 0;
-  color: rgba(226,232,240,.68);
-  font-size: .72rem;
-  font-weight: 650;
+  margin: .2rem 0 0;
+  color: #64748b;
+  font-size: .75rem;
+  font-weight: 600;
   line-height: 1.55;
 }
+/* ── Summary Stats ── */
 .ssw-requests-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: .5rem;
-  margin-bottom: .72rem;
+  gap: .75rem;
+  margin-bottom: 1rem;
 }
-.ssw-requests-summary[hidden] {
-  display: none;
-}
+.ssw-requests-summary[hidden] { display: none; }
 .ssw-request-stat {
   min-width: 0;
-  border-radius: 13px;
-  padding: .62rem .56rem;
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.1);
-  display: grid;
-  gap: .12rem;
-  align-content: center;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  border-radius: 16px;
+  padding: .9rem .8rem .8rem;
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  border: 1.5px solid rgba(226,232,240,0.8);
+  display: flex;
+  flex-direction: column;
+  gap: .28rem;
+  align-items: flex-start;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  transition: transform .2s ease, box-shadow .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.ssw-request-stat::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(99,102,241,.15);
+  border-radius: 0 0 16px 16px;
 }
 .ssw-request-stat span {
-  color: rgba(226,232,240,.56);
-  font-size: .62rem;
-  font-weight: 800;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 700;
   line-height: 1.35;
+  order: 1;
 }
 .ssw-request-stat strong {
-  color: var(--ssw-text-dark);
-  font-size: .92rem;
-  font-weight: 950;
-  line-height: 1.2;
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  order: 0;
 }
 .ssw-request-stat--live {
-  background: linear-gradient(145deg, rgba(34,197,94,.12), rgba(16,185,129,.045));
-  border-color: rgba(74,222,128,.18);
+  background: linear-gradient(145deg, #f0fdf4, #dcfce7);
+  border-color: rgba(34,197,94,.25);
 }
-.ssw-request-stat--live strong {
-  color: #86efac;
-}
+.ssw-request-stat--live::after { background: #22c55e; }
+.ssw-request-stat--live strong { color: #15803d; }
+.ssw-request-stat--live span { color: #166534; }
 .ssw-request-stat--queue {
-  background: linear-gradient(145deg, rgba(245,158,11,.13), rgba(251,191,36,.04));
-  border-color: rgba(251,191,36,.18);
+  background: linear-gradient(145deg, #fffbeb, #fef3c7);
+  border-color: rgba(245,158,11,.25);
 }
-.ssw-request-stat--queue strong {
-  color: #fcd34d;
-}
+.ssw-request-stat--queue::after { background: #f59e0b; }
+.ssw-request-stat--queue strong { color: #92400e; }
+.ssw-request-stat--queue span { color: #78350f; }
+/* ── Requests Grid ── */
 .ssw-requests-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: .68rem;
+  gap: .75rem;
   min-width: 0;
 }
 
-/* ── Request Item ── */
+/* ── Request Item Card — Premium Light ── */
 .ssw-request-item {
   position: relative;
   min-width: 0;
-  border: 1px solid var(--ssw-border);
-  border-radius: 17px;
-  background:
-    linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.035)),
-    radial-gradient(circle at 100% 0, rgba(167,139,250,.12), transparent 38%);
-  padding: .82rem;
+  border: 1.5px solid rgba(226,232,240,0.85);
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 1rem 1rem 1rem 1.25rem;
   display: grid;
-  gap: .68rem;
+  gap: .65rem;
   overflow: hidden;
   isolation: isolate;
-  box-shadow: 0 10px 26px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.05);
-  transition: border-color .2s ease, transform .2s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease;
 }
 .ssw-request-item::before {
   content: '';
   position: absolute;
-  inset-block: .8rem;
+  inset-block: .85rem;
   inset-inline-start: 0;
-  width: 3px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--ssw-accent), rgba(14,165,233,.78));
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #6366f1, #a78bfa);
 }
 .ssw-request-item:hover {
-  border-color: var(--ssw-accent-border);
-  transform: translateY(-1px);
+  border-color: rgba(99,102,241,.3);
+  box-shadow: 0 6px 20px rgba(99,102,241,.1);
+  transform: translateY(-2px);
 }
 .ssw-request-item[open] {
-  border-color: rgba(167,139,250,.3);
+  border-color: rgba(99,102,241,.35);
+  box-shadow: 0 8px 24px rgba(99,102,241,.12);
 }
+.ssw-request-item[data-request-state="approved"] { border-color: rgba(34,197,94,.25); }
 .ssw-request-item[data-request-state="approved"]::before {
-  background: linear-gradient(180deg, #4ade80, #10b981);
+  background: linear-gradient(180deg, #22c55e, #16a34a);
+}
+.ssw-request-item[data-request-state="approved"]:hover {
+  border-color: rgba(34,197,94,.45);
+  box-shadow: 0 6px 20px rgba(34,197,94,.12);
 }
 .ssw-request-item[data-request-state="rejected"]::before,
 .ssw-request-item[data-request-state="removed"]::before,
 .ssw-request-item[data-request-state="expired"]::before {
-  background: linear-gradient(180deg, #fb7185, #ef4444);
+  background: linear-gradient(180deg, #ef4444, #dc2626);
 }
-.ssw-request-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .68rem;
-  min-width: 0;
-}
+/* ── Summary element inside <details> ── */
 .ssw-request-summary {
   display: grid;
-  gap: .52rem;
+  gap: .5rem;
   min-width: 0;
   cursor: pointer;
   list-style: none;
   -webkit-tap-highlight-color: transparent;
 }
-.ssw-request-summary::-webkit-details-marker {
-  display: none;
-}
-.ssw-request-summary::marker {
-  content: '';
-}
+.ssw-request-summary::-webkit-details-marker { display: none; }
+.ssw-request-summary::marker { content: ''; }
 .ssw-request-summary:focus-visible {
   border-radius: 12px;
-  outline: 2px solid rgba(167,139,250,.78);
-  outline-offset: 4px;
+  outline: 2px solid rgba(99,102,241,.6);
+  outline-offset: 3px;
+}
+.ssw-request-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  min-width: 0;
 }
 .ssw-request-identity {
   display: flex;
   align-items: center;
-  gap: .56rem;
+  gap: .65rem;
   min-width: 0;
+  flex: 1;
 }
 .ssw-request-icon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border-radius: 12px;
-  color: #c4b5fd;
-  background: linear-gradient(145deg, rgba(167,139,250,.2), rgba(14,165,233,.08));
-  border: 1px solid rgba(167,139,250,.17);
+  color: #6366f1;
+  background: linear-gradient(145deg, rgba(99,102,241,.1), rgba(167,139,250,.06));
+  border: 1.5px solid rgba(99,102,241,.15);
+  flex-shrink: 0;
 }
-.ssw-request-icon svg {
-  width: 17px;
-  height: 17px;
-}
-.ssw-request-copy {
-  min-width: 0;
-}
+.ssw-request-icon svg { width: 18px; height: 18px; }
+.ssw-request-copy { min-width: 0; flex: 1; }
 .ssw-request-title {
   min-width: 0;
-  font-size: .87rem;
-  font-weight: 900;
-  color: var(--ssw-text-dark);
-  margin: 0 0 .13rem;
-  line-height: 1.45;
+  font-size: .9rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 .12rem;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .ssw-request-subtitle {
-  color: rgba(226,232,240,.62);
-  font-size: .69rem;
-  font-weight: 720;
-  line-height: 1.45;
+  color: #64748b;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.4;
   margin: 0;
 }
-/* Status Pill */
+/* ── Status Pill — Light Mode ── */
 .ssw-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: .28rem;
+  gap: .3rem;
   border-radius: 999px;
-  max-width: min(45%, 132px);
-  min-height: 30px;
+  max-width: min(50%, 140px);
+  min-height: 28px;
   justify-content: center;
-  padding: .34rem .62rem;
-  font-size: .68rem;
-  font-weight: 900;
-  line-height: 1.35;
+  padding: .3rem .7rem;
+  font-size: .7rem;
+  font-weight: 800;
+  line-height: 1.3;
   text-align: center;
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  border: 1px solid transparent;
 }
 .ssw-status-pill::before {
   content: '';
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
+  animation: sswPillPulse 2s ease-in-out infinite;
+}
+@keyframes sswPillPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .5; }
 }
 .ssw-status-pill--pending, .ssw-status-pill--paused {
-  background: rgba(251,191,36,.12);
-  color: #fcd34d;
+  background: #fffbeb;
+  border-color: rgba(245,158,11,.25);
+  color: #92400e;
 }
-.ssw-status-pill--approved { background: rgba(34,197,94,.12); color: #4ade80; }
-.ssw-status-pill--rejected, .ssw-status-pill--removed, .ssw-status-pill--expired {
-  background: rgba(239,68,68,.12);
-  color: #f87171;
+.ssw-status-pill--approved {
+  background: #f0fdf4;
+  border-color: rgba(34,197,94,.25);
+  color: #15803d;
 }
+.ssw-status-pill--rejected,
+.ssw-status-pill--removed,
+.ssw-status-pill--expired {
+  background: #fef2f2;
+  border-color: rgba(239,68,68,.2);
+  color: #b91c1c;
+}
+/* ── Preview Row (chips) ── */
 .ssw-request-preview {
   display: flex;
   align-items: center;
-  gap: .38rem;
+  gap: .42rem;
   flex-wrap: wrap;
   min-width: 0;
+  padding-top: .4rem;
+  border-top: 1px dashed rgba(226,232,240,.8);
 }
 .ssw-request-preview-chip {
   display: inline-flex;
   align-items: center;
   min-width: 0;
-  max-width: 100%;
-  border: 1px solid rgba(167,139,250,.18);
+  border: 1px solid rgba(99,102,241,.2);
   border-radius: 999px;
-  background: rgba(167,139,250,.1);
-  color: #ddd6fe;
-  padding: .27rem .54rem;
-  font-size: .66rem;
-  font-weight: 850;
+  background: rgba(99,102,241,.06);
+  color: #4338ca;
+  padding: .24rem .58rem;
+  font-size: .68rem;
+  font-weight: 700;
   line-height: 1.35;
-  overflow-wrap: anywhere;
 }
 .ssw-request-expand {
   display: inline-flex;
   align-items: center;
   gap: .22rem;
   margin-inline-start: auto;
-  color: rgba(226,232,240,.64);
-  font-size: .66rem;
-  font-weight: 900;
+  color: #6366f1;
+  font-size: .68rem;
+  font-weight: 700;
   white-space: nowrap;
+  background: rgba(99,102,241,.07);
+  border-radius: 8px;
+  padding: .2rem .52rem;
+  border: 1px solid rgba(99,102,241,.15);
 }
 .ssw-request-expand svg {
   width: 13px;
   height: 13px;
-  transition: transform .2s ease;
+  transition: transform .22s ease;
 }
-.ssw-request-item[open] .ssw-request-expand svg {
-  transform: rotate(180deg);
-}
+.ssw-request-item[open] .ssw-request-expand svg { transform: rotate(180deg); }
+/* ── Request Details (expanded) ── */
 .ssw-request-details {
   display: grid;
-  gap: .56rem;
-  padding-top: .1rem;
+  gap: .65rem;
+  padding-top: .65rem;
+  border-top: 1px solid rgba(226,232,240,.7);
   animation: sswRequestDetailsIn .18s ease;
 }
 @keyframes sswRequestDetailsIn {
-  from { opacity: .1; transform: translateY(-3px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .ssw-request-meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .45rem;
+  gap: .55rem;
 }
 .ssw-request-meta-card {
   min-width: 0;
-  padding: .5rem .56rem;
+  padding: .65rem .72rem;
   border-radius: 12px;
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.09);
+  background: #f8fafc;
+  border: 1px solid rgba(226,232,240,.8);
   display: grid;
   align-content: start;
-  gap: .24rem;
+  gap: .2rem;
 }
 .ssw-request-meta-label {
-  color: rgba(226,232,240,.46);
-  font-size: .61rem;
-  font-weight: 850;
+  color: #94a3b8;
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
 }
 .ssw-request-meta-value {
-  color: #ddd6fe;
-  font-size: .72rem;
-  font-weight: 880;
-  line-height: 1.45;
+  color: #0f172a;
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
+/* ── Payment Pill — Light Mode ── */
 .ssw-payment-pill {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  max-width: 100%;
   min-width: 0;
   border-radius: 999px;
-  padding: .27rem .54rem;
-  font-size: .66rem;
-  font-weight: 850;
+  padding: .26rem .58rem;
+  font-size: .68rem;
+  font-weight: 700;
   line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-.ssw-payment-pill {
-  background: rgba(14,165,233,.11);
-  border: 1px solid rgba(14,165,233,.18);
-  color: #7dd3fc;
+  border: 1px solid transparent;
+  background: #eff6ff;
+  border-color: rgba(59,130,246,.2);
+  color: #1d4ed8;
 }
 .ssw-payment-pill--verified,
 .ssw-payment-pill--waived {
-  background: rgba(34,197,94,.12);
-  border-color: rgba(34,197,94,.2);
-  color: #86efac;
+  background: #f0fdf4;
+  border-color: rgba(34,197,94,.22);
+  color: #15803d;
 }
 .ssw-payment-pill--rejected {
-  background: rgba(239,68,68,.12);
+  background: #fef2f2;
   border-color: rgba(239,68,68,.2);
-  color: #fca5a5;
+  color: #b91c1c;
 }
 .ssw-payment-pill--pending,
 .ssw-payment-pill--submitted {
-  background: rgba(245,158,11,.12);
+  background: #fffbeb;
   border-color: rgba(245,158,11,.2);
-  color: #fcd34d;
+  color: #92400e;
 }
-/* Request Timeline */
+/* ── Timeline (dates) — Light Mode ── */
 .ssw-request-timeline {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .45rem;
+  gap: .55rem;
 }
 .ssw-request-moment {
   position: relative;
-  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 13px;
-  padding: .52rem .58rem;
+  background: #f8fafc;
+  border: 1px solid rgba(226,232,240,.9);
+  border-radius: 12px;
+  padding: .58rem .65rem;
   min-width: 0;
 }
 .ssw-request-moment:first-child::after {
   content: '';
   position: absolute;
-  inset-inline-end: -.34rem;
+  inset-inline-end: -.45rem;
   top: 50%;
-  width: .22rem;
-  height: .22rem;
+  width: .3rem;
+  height: .3rem;
   border-radius: 50%;
-  background: rgba(167,139,250,.72);
+  background: rgba(99,102,241,.5);
   transform: translateY(-50%);
 }
 .ssw-request-moment__label {
   display: block;
-  font-size: .61rem;
-  font-weight: 800;
-  color: rgba(255,255,255,.42);
-  margin-bottom: .16rem;
+  font-size: .64rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: .18rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
 }
 .ssw-request-moment__value {
   display: block;
-  font-size: .7rem;
-  font-weight: 850;
-  color: var(--ssw-text-dark);
-  line-height: 1.55;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
+
+/* ── Admin Note — Light Mode ── */
 .ssw-request-admin-note {
   margin: 0;
-  padding: .52rem .62rem;
-  background: rgba(245,158,11,.1);
+  padding: .6rem .75rem;
+  background: #fffbeb;
   border: 1px solid rgba(245,158,11,.22);
   border-radius: 12px;
-  font-size: .72rem;
-  color: #fcd34d;
-  font-weight: 700;
-  line-height: 1.5;
+  font-size: .75rem;
+  color: #78350f;
+  font-weight: 600;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
 }
+.ssw-request-admin-note::before {
+  content: '💬';
+  font-size: .8rem;
+  flex-shrink: 0;
+  margin-top: .05rem;
+}
+
+/* ── Empty state ── */
 .ssw-request-empty {
   min-height: 66px;
   width: 100%;
   grid-column: 1 / -1;
   justify-content: center;
+  background: #f8fafc;
+  border-color: rgba(226,232,240,.8);
+  color: #64748b;
 }
+/* ── Responsive — requests section ── */
 @media (min-width:640px) {
   .ssw-requests-panel {
-    padding: 1.08rem;
-    margin-bottom: 1.15rem;
+    padding: 1.35rem;
+    margin-bottom: 1.25rem;
   }
   .ssw-requests-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: .8rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: .85rem;
   }
   .ssw-request-stat {
-    padding: .7rem .72rem;
+    padding: 1rem .95rem;
+  }
+  .ssw-request-stat strong {
+    font-size: 1.75rem;
   }
 }
 @media (max-width:420px) {
   .ssw-request-head {
     align-items: flex-start;
     flex-direction: column;
+    gap: .45rem;
   }
   .ssw-status-pill {
     max-width: 100%;
+    align-self: flex-start;
   }
   .ssw-request-meta,
   .ssw-request-timeline {
@@ -1061,6 +1114,18 @@
   }
   .ssw-request-moment:first-child::after {
     display: none;
+  }
+  .ssw-requests-summary {
+    gap: .45rem;
+  }
+  .ssw-request-stat {
+    padding: .75rem .65rem;
+  }
+  .ssw-request-stat strong {
+    font-size: 1.15rem;
+  }
+  .ssw-request-stat span {
+    font-size: .62rem;
   }
 }
 
@@ -1466,27 +1531,41 @@
   }
 }
 
-/* Mobile compacting */
 @media (max-width:639px) {
   .ssw-widget { margin-top: 1rem; }
   .ssw-plan-card { border-radius: 18px; padding: .88rem; }
   .ssw-plan-meta, .ssw-plan-features, .ssw-plan-admin-note { display: none; }
   .ssw-plans-grid { gap: .7rem; }
   .ssw-requests-panel {
-    border-radius: 17px;
-    padding: .78rem;
-    margin-bottom: .82rem;
+    border-radius: 20px;
+    padding: 1rem;
+    margin-bottom: 1rem;
   }
   .ssw-requests-panel-header {
-    margin-bottom: .58rem;
-    padding-bottom: .58rem;
+    margin-bottom: .85rem;
+    padding-bottom: .85rem;
+  }
+  .ssw-requests-summary {
+    gap: .55rem;
+    margin-bottom: .85rem;
+  }
+  .ssw-request-stat strong {
+    font-size: 1.3rem;
   }
   .ssw-request-item {
-    padding: .74rem;
+    padding: .85rem .85rem .85rem 1.1rem;
+    border-radius: 16px;
   }
   .ssw-status-pill {
-    min-height: 28px;
+    min-height: 26px;
+    font-size: .67rem;
+    padding: .26rem .55rem;
   }
+  .ssw-request-meta,
+  .ssw-request-timeline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ssw-request-moment:first-child::after { display: none; }
 }
     `;
     document.head.appendChild(style);
@@ -1639,7 +1718,13 @@
     requestsPanel.setAttribute('aria-labelledby', 'similar-sponsored-requests-title');
     requestsPanel.innerHTML = `
       <header class="ssw-requests-panel-header">
-        <div class="ssw-requests-panel-icon" aria-hidden="true">${icons.list}</div>
+        <div class="ssw-requests-panel-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <path d="M9 12h6M9 16h4"/>
+          </svg>
+        </div>
         <div class="ssw-requests-panel-copy">
           <h4 id="similar-sponsored-requests-title" class="ssw-requests-panel-title">وضعیت درخواست‌های شما</h4>
           <p class="ssw-requests-panel-subtitle">تبلیغات فعال و در انتظار بررسی را قبل از خرید بعدی ببینید.</p>
@@ -1822,7 +1907,10 @@
       }
       container.innerHTML = `
         <div class="ssw-empty ssw-request-empty">
-          ${icons.emptyBox}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
           <span>هنوز درخواستی ثبت نکرده‌اید.</span>
         </div>`;
       return;
@@ -1830,20 +1918,20 @@
 
     if (summary) {
       const approvedCount = state.requests.filter((item) => item.status === 'approved').length;
-      const queueCount = state.requests.filter((item) => ['pending', 'paused'].includes(item.status || 'pending')).length;
+      const queueCount   = state.requests.filter((item) => ['pending', 'paused'].includes(item.status || 'pending')).length;
       summary.hidden = false;
       summary.innerHTML = `
-        <div class="ssw-request-stat">
-          <span>کل درخواست‌ها</span>
-          <strong>${formatMoney(state.requests.length)}</strong>
+        <div class="ssw-request-stat ssw-request-stat--queue">
+          <strong>${formatMoney(queueCount)}</strong>
+          <span>در صف بررسی</span>
         </div>
         <div class="ssw-request-stat ssw-request-stat--live">
-          <span>تایید شده</span>
           <strong>${formatMoney(approvedCount)}</strong>
+          <span>تایید شده</span>
         </div>
-        <div class="ssw-request-stat ssw-request-stat--queue">
-          <span>در صف بررسی</span>
-          <strong>${formatMoney(queueCount)}</strong>
+        <div class="ssw-request-stat">
+          <strong>${formatMoney(state.requests.length)}</strong>
+          <span>کل درخواست‌ها</span>
         </div>
       `;
     }
@@ -1856,47 +1944,64 @@
       const paymentClass = ['pending', 'submitted', 'verified', 'rejected', 'waived'].includes(paymentStatus)
         ? `ssw-payment-pill--${paymentStatus}` : 'ssw-payment-pill--pending';
 
+      const planTitle   = escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه');
+      const tierLabel   = escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه');
+      const durLabel    = escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '');
+      const statusLabel = escapeHtml(statusLabels[status] || status);
+      const payLabel    = escapeHtml(paymentLabels[paymentStatus] || paymentStatus);
+
+      const startVal = escapeHtml(formatDate(item.startAt));
+      const endVal   = escapeHtml(formatDate(item.endAt));
+
       return `
         <details class="ssw-request-item" data-request-state="${escapeHtml(status)}">
           <summary class="ssw-request-summary">
             <div class="ssw-request-head">
               <div class="ssw-request-identity">
-                <div class="ssw-request-icon" aria-hidden="true">${icons.storeSmall}</div>
+                <div class="ssw-request-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
                 <div class="ssw-request-copy">
-                  <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
-                  <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
+                  <strong class="ssw-request-title">${planTitle}</strong>
+                  <p class="ssw-request-subtitle">${tierLabel}${durLabel ? ' · ' + durLabel : ''}</p>
                 </div>
               </div>
-              <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
+              <span class="ssw-status-pill ${statusClass}" role="status">${statusLabel}</span>
             </div>
             <div class="ssw-request-preview">
-              <span class="ssw-request-preview-chip">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</span>
-              <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
-              <span class="ssw-request-expand">جزئیات ${icons.chevronDown}</span>
+              <span class="ssw-payment-pill ${paymentClass}">${payLabel}</span>
+              <span class="ssw-request-expand">جزئیات
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </span>
             </div>
           </summary>
           <div class="ssw-request-details">
             <div class="ssw-request-meta">
               <div class="ssw-request-meta-card">
                 <span class="ssw-request-meta-label">نوع پلن</span>
-                <strong class="ssw-request-meta-value">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</strong>
+                <strong class="ssw-request-meta-value">${tierLabel}</strong>
               </div>
               <div class="ssw-request-meta-card">
                 <span class="ssw-request-meta-label">وضعیت پرداخت</span>
-                <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+                <span class="ssw-payment-pill ${paymentClass}">${payLabel}</span>
               </div>
             </div>
             <div class="ssw-request-timeline">
               <div class="ssw-request-moment">
-                <span class="ssw-request-moment__label">شروع</span>
-                <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.startAt))}</span>
+                <span class="ssw-request-moment__label">شروع نمایش</span>
+                <span class="ssw-request-moment__value">${startVal}</span>
               </div>
               <div class="ssw-request-moment">
-                <span class="ssw-request-moment__label">پایان</span>
-                <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.endAt))}</span>
+                <span class="ssw-request-moment__label">پایان نمایش</span>
+                <span class="ssw-request-moment__value">${endVal}</span>
               </div>
             </div>
-            ${item.adminNote ? `<p class="ssw-request-admin-note">یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}
+            ${item.adminNote ? `<p class="ssw-request-admin-note">${escapeHtml(item.adminNote)}</p>` : ''}
           </div>
         </details>
       `;
