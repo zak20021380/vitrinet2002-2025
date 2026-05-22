@@ -159,9 +159,8 @@
     style.id = 'similar-sponsored-seller-styles';
     style.textContent = `
 /* ── Widget Container ── */
-.ssw-widget {
-  direction: rtl;
-  margin: 1.5rem 0 0;
+.ssw-widget,
+.ssw-requests-panel {
   font-family: inherit;
   --ssw-accent: #a78bfa;
   --ssw-accent-dark: #8b5cf6;
@@ -176,6 +175,10 @@
   --ssw-border: rgba(255,255,255,.1);
   --ssw-radius-card: 20px;
   --ssw-radius-btn: 14px;
+}
+.ssw-widget {
+  direction: rtl;
+  margin: 1.5rem 0 0;
 }
 
 /* ── Section Header ── */
@@ -568,52 +571,96 @@
 
 /* ── Requests Panel ── */
 .ssw-requests-panel {
-  margin-top: 1.25rem;
+  position: relative;
+  direction: rtl;
   border-radius: var(--ssw-radius-card);
-  background: linear-gradient(165deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  border: 1.5px solid var(--ssw-border);
-  padding: 1rem;
-  box-shadow: 0 4px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.05);
+  background:
+    radial-gradient(circle at 100% 0, rgba(167,139,250,.18), transparent 35%),
+    linear-gradient(165deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
+  border: 1.5px solid rgba(167,139,250,.22);
+  padding: .88rem;
+  margin: 0 0 1rem;
+  overflow: hidden;
+  box-shadow: 0 12px 34px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.ssw-requests-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(99,102,241,.82), rgba(167,139,250,.95), rgba(245,158,11,.78));
+}
+.ssw-requests-panel--overview {
+  scroll-margin-top: 12px;
 }
 .ssw-requests-panel-header {
   display: flex;
   align-items: center;
-  gap: .55rem;
-  margin-bottom: .85rem;
-  padding-bottom: .75rem;
-  border-bottom: 1px solid rgba(255,255,255,.1);
+  gap: .58rem;
+  margin-bottom: .72rem;
+  padding: 0 .08rem .68rem;
+  border-bottom: 1px solid rgba(255,255,255,.11);
 }
 .ssw-requests-panel-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   background: linear-gradient(145deg, rgba(167,139,250,.18), rgba(99,102,241,.1));
   color: var(--ssw-accent);
   flex-shrink: 0;
 }
 .ssw-requests-panel-icon svg { width: 15px; height: 15px; }
+.ssw-requests-panel-copy {
+  flex: 1;
+  min-width: 0;
+}
 .ssw-requests-panel-title {
-  font-size: .92rem;
-  font-weight: 800;
+  font-size: .91rem;
+  font-weight: 900;
   color: var(--ssw-text-dark);
   margin: 0;
+  line-height: 1.35;
+}
+.ssw-requests-panel-subtitle {
+  margin: .1rem 0 0;
+  color: rgba(226,232,240,.58);
+  font-size: .69rem;
+  font-weight: 700;
+  line-height: 1.45;
 }
 .ssw-requests-grid {
-  display: flex;
-  flex-direction: column;
-  gap: .65rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(min(82vw, 292px), 1fr);
+  gap: .58rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: .04rem .02rem .2rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167,139,250,.42) transparent;
+  overscroll-behavior-inline: contain;
+}
+.ssw-requests-grid::-webkit-scrollbar {
+  height: 4px;
+}
+.ssw-requests-grid::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(167,139,250,.42);
 }
 
 /* ── Request Item ── */
 .ssw-request-item {
+  min-width: 0;
+  scroll-snap-align: start;
   border: 1.5px solid var(--ssw-border);
-  border-radius: 16px;
-  background: rgba(255,255,255,.05);
-  padding: .85rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+  border-radius: 15px;
+  background: linear-gradient(155deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+  padding: .72rem;
+  box-shadow: 0 5px 16px rgba(0,0,0,.16);
   transition: border-color .2s ease;
 }
 .ssw-request-item:hover { border-color: var(--ssw-accent-border); }
@@ -621,19 +668,25 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: .65rem;
-  margin-bottom: .42rem;
+  gap: .52rem;
+  margin-bottom: .34rem;
 }
 .ssw-request-title {
-  font-size: .88rem;
-  font-weight: 800;
+  min-width: 0;
+  font-size: .85rem;
+  font-weight: 900;
   color: var(--ssw-text-dark);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .ssw-request-subtitle {
   color: var(--ssw-text-secondary);
-  font-size: .74rem;
+  font-size: .71rem;
+  font-weight: 750;
   line-height: 1.5;
   margin: 0;
 }
@@ -643,11 +696,13 @@
   align-items: center;
   gap: .28rem;
   border-radius: 999px;
-  padding: .25rem .65rem;
-  font-size: .67rem;
-  font-weight: 800;
+  max-width: 49%;
+  padding: .32rem .62rem;
+  font-size: .68rem;
+  font-weight: 900;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
 }
 .ssw-status-pill::before {
   content: '';
@@ -666,37 +721,83 @@
   background: rgba(239,68,68,.12);
   color: #f87171;
 }
-/* Request Grid */
-.ssw-request-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .45rem;
-  margin-top: .62rem;
+.ssw-request-tags {
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  flex-wrap: wrap;
+  margin-top: .42rem;
 }
-@media (min-width:480px) { .ssw-request-grid { grid-template-columns: repeat(4,1fr); } }
-.ssw-request-cell {
+.ssw-request-tag,
+.ssw-payment-pill {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: 999px;
+  padding: .25rem .52rem;
+  font-size: .66rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+.ssw-request-tag {
+  background: rgba(167,139,250,.11);
+  border: 1px solid rgba(167,139,250,.18);
+  color: #ddd6fe;
+}
+.ssw-payment-pill {
+  background: rgba(14,165,233,.11);
+  border: 1px solid rgba(14,165,233,.18);
+  color: #7dd3fc;
+}
+.ssw-payment-pill--verified,
+.ssw-payment-pill--waived {
+  background: rgba(34,197,94,.12);
+  border-color: rgba(34,197,94,.2);
+  color: #86efac;
+}
+.ssw-payment-pill--rejected {
+  background: rgba(239,68,68,.12);
+  border-color: rgba(239,68,68,.2);
+  color: #fca5a5;
+}
+.ssw-payment-pill--pending,
+.ssw-payment-pill--submitted {
+  background: rgba(245,158,11,.12);
+  border-color: rgba(245,158,11,.2);
+  color: #fcd34d;
+}
+/* Request Timeline */
+.ssw-request-timeline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .4rem;
+  margin-top: .54rem;
+}
+.ssw-request-moment {
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 10px;
-  padding: .45rem;
-  text-align: center;
+  padding: .42rem .48rem;
+  min-width: 0;
 }
-.ssw-request-cell__label {
+.ssw-request-moment__label {
   display: block;
-  font-size: .64rem;
+  font-size: .62rem;
   font-weight: 800;
   color: rgba(255,255,255,.4);
-  margin-bottom: .14rem;
+  margin-bottom: .12rem;
 }
-.ssw-request-cell__value {
+.ssw-request-moment__value {
   display: block;
-  font-size: .77rem;
-  font-weight: 800;
+  font-size: .71rem;
+  font-weight: 850;
   color: var(--ssw-text-dark);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 .ssw-request-admin-note {
-  margin-top: .52rem;
-  padding: .45rem .65rem;
+  margin: .48rem 0 0;
+  padding: .42rem .58rem;
   background: rgba(245,158,11,.1);
   border: 1px solid rgba(245,158,11,.22);
   border-radius: 9px;
@@ -704,6 +805,24 @@
   color: #fcd34d;
   font-weight: 700;
   line-height: 1.5;
+}
+.ssw-request-empty {
+  min-height: 66px;
+  width: 100%;
+  justify-content: center;
+}
+@media (min-width:640px) {
+  .ssw-requests-panel {
+    padding: 1rem;
+    margin-bottom: 1.15rem;
+  }
+  .ssw-requests-grid {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    padding-bottom: 0;
+  }
 }
 
 /* ── Modal ── */
@@ -855,6 +974,21 @@
   .ssw-plan-card { border-radius: 18px; padding: .88rem; }
   .ssw-plan-meta, .ssw-plan-features, .ssw-plan-admin-note { display: none; }
   .ssw-plans-grid { gap: .7rem; }
+  .ssw-requests-panel {
+    border-radius: 17px;
+    padding: .78rem;
+    margin-bottom: .82rem;
+  }
+  .ssw-requests-panel-header {
+    margin-bottom: .58rem;
+    padding-bottom: .58rem;
+  }
+  .ssw-request-item {
+    padding: .68rem;
+  }
+  .ssw-status-pill {
+    min-height: 28px;
+  }
 }
     `;
     document.head.appendChild(style);
@@ -916,15 +1050,6 @@
       <!-- Plans Grid (filled dynamically) -->
       <div class="ssw-plans-grid" id="similar-sponsored-plans" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
 
-      <!-- Requests Panel -->
-      <div class="ssw-requests-panel">
-        <header class="ssw-requests-panel-header">
-          <div class="ssw-requests-panel-icon" aria-hidden="true">${icons.list}</div>
-          <h4 class="ssw-requests-panel-title">وضعیت درخواست‌های شما</h4>
-        </header>
-        <div class="ssw-requests-grid" id="similar-sponsored-requests"></div>
-      </div>
-
       <!-- Confirm/Submit Modal -->
       <div class="ssw-modal" id="similar-sponsored-modal" hidden aria-modal="true" role="dialog" aria-labelledby="ssw-modal-title">
         <form class="ssw-modal__dialog" id="similar-sponsored-form" novalidate>
@@ -958,6 +1083,27 @@
         </form>
       </div>
     `;
+    const requestsPanel = document.createElement('section');
+    requestsPanel.className = 'ssw-requests-panel ssw-requests-panel--overview';
+    requestsPanel.setAttribute('aria-labelledby', 'similar-sponsored-requests-title');
+    requestsPanel.innerHTML = `
+      <header class="ssw-requests-panel-header">
+        <div class="ssw-requests-panel-icon" aria-hidden="true">${icons.list}</div>
+        <div class="ssw-requests-panel-copy">
+          <h4 id="similar-sponsored-requests-title" class="ssw-requests-panel-title">وضعیت درخواست‌های شما</h4>
+          <p class="ssw-requests-panel-subtitle">تبلیغات فعال و در انتظار بررسی را قبل از خرید بعدی ببینید.</p>
+        </div>
+      </header>
+      <div class="ssw-requests-grid" id="similar-sponsored-requests"></div>
+    `;
+
+    const requestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
+    if (requestsAnchor) {
+      requestsAnchor.replaceChildren(requestsPanel);
+    } else {
+      target.prepend(requestsPanel);
+    }
+
     target.appendChild(root);
   }
 
@@ -1110,9 +1256,9 @@
 
     if (!state.requests.length) {
       container.innerHTML = `
-        <div class="ssw-empty">
+        <div class="ssw-empty ssw-request-empty">
           ${icons.emptyBox}
-          <span>هنوز درخواستی ثبت نکرده‌اید. بعد از ثبت، وضعیت بررسی مدیر همین‌جا نمایش داده می‌شود.</span>
+          <span>هنوز درخواستی ثبت نکرده‌اید.</span>
         </div>`;
       return;
     }
@@ -1122,6 +1268,8 @@
       const paymentStatus = item.paymentStatus || 'pending';
       const statusClass = ['approved', 'rejected', 'removed', 'expired', 'pending', 'paused'].includes(status)
         ? `ssw-status-pill--${status}` : 'ssw-status-pill--pending';
+      const paymentClass = ['pending', 'submitted', 'verified', 'rejected', 'waived'].includes(paymentStatus)
+        ? `ssw-payment-pill--${paymentStatus}` : 'ssw-payment-pill--pending';
 
       return `
         <article class="ssw-request-item">
@@ -1130,22 +1278,18 @@
             <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
           </div>
           <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
-          <div class="ssw-request-grid">
-            <div class="ssw-request-cell">
-              <span class="ssw-request-cell__label">قیمت</span>
-              <span class="ssw-request-cell__value">${formatMoney(item.price)} تومان</span>
+          <div class="ssw-request-tags">
+            <span class="ssw-request-tag">نوع: ${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</span>
+            <span class="ssw-payment-pill ${paymentClass}">پرداخت: ${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+          </div>
+          <div class="ssw-request-timeline">
+            <div class="ssw-request-moment">
+              <span class="ssw-request-moment__label">شروع</span>
+              <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.startAt))}</span>
             </div>
-            <div class="ssw-request-cell">
-              <span class="ssw-request-cell__label">پرداخت</span>
-              <span class="ssw-request-cell__value">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
-            </div>
-            <div class="ssw-request-cell">
-              <span class="ssw-request-cell__label">شروع</span>
-              <span class="ssw-request-cell__value">${escapeHtml(formatDate(item.startAt))}</span>
-            </div>
-            <div class="ssw-request-cell">
-              <span class="ssw-request-cell__label">پایان</span>
-              <span class="ssw-request-cell__value">${escapeHtml(formatDate(item.endAt))}</span>
+            <div class="ssw-request-moment">
+              <span class="ssw-request-moment__label">پایان</span>
+              <span class="ssw-request-moment__value">${escapeHtml(formatDate(item.endAt))}</span>
             </div>
           </div>
           ${item.adminNote ? `<p class="ssw-request-admin-note">یادداشت مدیر: ${escapeHtml(item.adminNote)}</p>` : ''}

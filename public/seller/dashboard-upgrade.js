@@ -963,6 +963,7 @@ function toggleTabs(tab) {
   // پشتیبانی از هر دو نسخه قدیم و جدید
   const tabButtons = document.querySelectorAll('.upgrade-tab, .tab-btn');
   const tabContents = document.querySelectorAll('.upgrade-content, #content-sub, #content-ads, #content-myplans');
+  const specialAdRequestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
   
   tabButtons.forEach(btn => {
     btn.classList.remove('tab-active', 'is-active');
@@ -985,6 +986,10 @@ function toggleTabs(tab) {
   if (activeContent) {
     activeContent.hidden = false;
     activeContent.classList.remove('hidden');
+  }
+
+  if (specialAdRequestsAnchor) {
+    specialAdRequestsAnchor.hidden = tab !== 'ads';
   }
 
   // Update hero content dynamically
@@ -1473,8 +1478,10 @@ function handleDeepLink() {
 
     setTimeout(() => {
       const adsSection = document.getElementById('content-ads');
-      if (adsSection) {
-        adsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const specialAdRequestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
+      const adsScrollTarget = specialAdRequestsAnchor || adsSection;
+      if (adsScrollTarget) {
+        adsScrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 120);
 
