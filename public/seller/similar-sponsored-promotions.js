@@ -575,13 +575,14 @@
   direction: rtl;
   border-radius: var(--ssw-radius-card);
   background:
-    radial-gradient(circle at 100% 0, rgba(167,139,250,.18), transparent 35%),
+    radial-gradient(circle at 100% 0, rgba(167,139,250,.19), transparent 34%),
+    radial-gradient(circle at 0 100%, rgba(14,165,233,.08), transparent 36%),
     linear-gradient(165deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
-  border: 1.5px solid rgba(167,139,250,.22);
-  padding: .88rem;
+  border: 1px solid rgba(167,139,250,.25);
+  padding: .92rem;
   margin: 0 0 1rem;
   overflow: hidden;
-  box-shadow: 0 12px 34px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow: 0 18px 44px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.09);
 }
 .ssw-requests-panel::before {
   content: '';
@@ -596,87 +597,171 @@
 .ssw-requests-panel-header {
   display: flex;
   align-items: center;
-  gap: .58rem;
+  gap: .68rem;
   margin-bottom: .72rem;
-  padding: 0 .08rem .68rem;
+  padding: .1rem .08rem .72rem;
   border-bottom: 1px solid rgba(255,255,255,.11);
 }
 .ssw-requests-panel-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(145deg, rgba(167,139,250,.18), rgba(99,102,241,.1));
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(167,139,250,.24), rgba(14,165,233,.1));
+  border: 1px solid rgba(167,139,250,.18);
   color: var(--ssw-accent);
   flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
 }
-.ssw-requests-panel-icon svg { width: 15px; height: 15px; }
+.ssw-requests-panel-icon svg { width: 18px; height: 18px; }
 .ssw-requests-panel-copy {
   flex: 1;
   min-width: 0;
 }
 .ssw-requests-panel-title {
-  font-size: .91rem;
+  font-size: .96rem;
   font-weight: 900;
   color: var(--ssw-text-dark);
   margin: 0;
   line-height: 1.35;
 }
 .ssw-requests-panel-subtitle {
-  margin: .1rem 0 0;
-  color: rgba(226,232,240,.58);
-  font-size: .69rem;
-  font-weight: 700;
-  line-height: 1.45;
+  margin: .18rem 0 0;
+  color: rgba(226,232,240,.68);
+  font-size: .72rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+.ssw-requests-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem;
+  margin-bottom: .72rem;
+}
+.ssw-requests-summary[hidden] {
+  display: none;
+}
+.ssw-request-stat {
+  min-width: 0;
+  border-radius: 13px;
+  padding: .62rem .56rem;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  display: grid;
+  gap: .12rem;
+  align-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.ssw-request-stat span {
+  color: rgba(226,232,240,.56);
+  font-size: .62rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.ssw-request-stat strong {
+  color: var(--ssw-text-dark);
+  font-size: .92rem;
+  font-weight: 950;
+  line-height: 1.2;
+}
+.ssw-request-stat--live {
+  background: linear-gradient(145deg, rgba(34,197,94,.12), rgba(16,185,129,.045));
+  border-color: rgba(74,222,128,.18);
+}
+.ssw-request-stat--live strong {
+  color: #86efac;
+}
+.ssw-request-stat--queue {
+  background: linear-gradient(145deg, rgba(245,158,11,.13), rgba(251,191,36,.04));
+  border-color: rgba(251,191,36,.18);
+}
+.ssw-request-stat--queue strong {
+  color: #fcd34d;
 }
 .ssw-requests-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(min(82vw, 292px), 1fr);
-  gap: .58rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: .04rem .02rem .2rem;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(167,139,250,.42) transparent;
-  overscroll-behavior-inline: contain;
-}
-.ssw-requests-grid::-webkit-scrollbar {
-  height: 4px;
-}
-.ssw-requests-grid::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(167,139,250,.42);
+  grid-template-columns: minmax(0, 1fr);
+  gap: .68rem;
+  min-width: 0;
 }
 
 /* ── Request Item ── */
 .ssw-request-item {
+  position: relative;
   min-width: 0;
-  scroll-snap-align: start;
-  border: 1.5px solid var(--ssw-border);
-  border-radius: 15px;
-  background: linear-gradient(155deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
-  padding: .72rem;
-  box-shadow: 0 5px 16px rgba(0,0,0,.16);
-  transition: border-color .2s ease;
+  border: 1px solid var(--ssw-border);
+  border-radius: 17px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.035)),
+    radial-gradient(circle at 100% 0, rgba(167,139,250,.12), transparent 38%);
+  padding: .82rem;
+  display: grid;
+  gap: .68rem;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 10px 26px rgba(0,0,0,.17), inset 0 1px 0 rgba(255,255,255,.05);
+  transition: border-color .2s ease, transform .2s ease;
 }
-.ssw-request-item:hover { border-color: var(--ssw-accent-border); }
-.ssw-request-top {
+.ssw-request-item::before {
+  content: '';
+  position: absolute;
+  inset-block: .8rem;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--ssw-accent), rgba(14,165,233,.78));
+}
+.ssw-request-item:hover {
+  border-color: var(--ssw-accent-border);
+  transform: translateY(-1px);
+}
+.ssw-request-item[data-request-state="approved"]::before {
+  background: linear-gradient(180deg, #4ade80, #10b981);
+}
+.ssw-request-item[data-request-state="rejected"]::before,
+.ssw-request-item[data-request-state="removed"]::before,
+.ssw-request-item[data-request-state="expired"]::before {
+  background: linear-gradient(180deg, #fb7185, #ef4444);
+}
+.ssw-request-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: .52rem;
-  margin-bottom: .34rem;
+  gap: .68rem;
+  min-width: 0;
+}
+.ssw-request-identity {
+  display: flex;
+  align-items: center;
+  gap: .56rem;
+  min-width: 0;
+}
+.ssw-request-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 12px;
+  color: #c4b5fd;
+  background: linear-gradient(145deg, rgba(167,139,250,.2), rgba(14,165,233,.08));
+  border: 1px solid rgba(167,139,250,.17);
+}
+.ssw-request-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.ssw-request-copy {
+  min-width: 0;
 }
 .ssw-request-title {
   min-width: 0;
-  font-size: .85rem;
+  font-size: .87rem;
   font-weight: 900;
   color: var(--ssw-text-dark);
-  margin: 0;
+  margin: 0 0 .13rem;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -684,10 +769,10 @@
   overflow: hidden;
 }
 .ssw-request-subtitle {
-  color: var(--ssw-text-secondary);
-  font-size: .71rem;
-  font-weight: 750;
-  line-height: 1.5;
+  color: rgba(226,232,240,.62);
+  font-size: .69rem;
+  font-weight: 720;
+  line-height: 1.45;
   margin: 0;
 }
 /* Status Pill */
@@ -696,11 +781,14 @@
   align-items: center;
   gap: .28rem;
   border-radius: 999px;
-  max-width: 49%;
-  padding: .32rem .62rem;
+  max-width: min(45%, 132px);
+  min-height: 30px;
+  justify-content: center;
+  padding: .34rem .62rem;
   font-size: .68rem;
   font-weight: 900;
-  white-space: nowrap;
+  line-height: 1.35;
+  text-align: center;
   flex-shrink: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
 }
@@ -721,28 +809,45 @@
   background: rgba(239,68,68,.12);
   color: #f87171;
 }
-.ssw-request-tags {
-  display: flex;
-  align-items: center;
-  gap: .38rem;
-  flex-wrap: wrap;
-  margin-top: .42rem;
+.ssw-request-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .45rem;
 }
-.ssw-request-tag,
+.ssw-request-meta-card {
+  min-width: 0;
+  padding: .5rem .56rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.09);
+  display: grid;
+  align-content: start;
+  gap: .24rem;
+}
+.ssw-request-meta-label {
+  color: rgba(226,232,240,.46);
+  font-size: .61rem;
+  font-weight: 850;
+}
+.ssw-request-meta-value {
+  color: #ddd6fe;
+  font-size: .72rem;
+  font-weight: 880;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
 .ssw-payment-pill {
   display: inline-flex;
   align-items: center;
+  width: fit-content;
+  max-width: 100%;
   min-width: 0;
   border-radius: 999px;
-  padding: .25rem .52rem;
+  padding: .27rem .54rem;
   font-size: .66rem;
   font-weight: 850;
   line-height: 1.35;
-}
-.ssw-request-tag {
-  background: rgba(167,139,250,.11);
-  border: 1px solid rgba(167,139,250,.18);
-  color: #ddd6fe;
+  overflow-wrap: anywhere;
 }
 .ssw-payment-pill {
   background: rgba(14,165,233,.11);
@@ -770,37 +875,48 @@
 .ssw-request-timeline {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .4rem;
-  margin-top: .54rem;
+  gap: .45rem;
 }
 .ssw-request-moment {
-  background: rgba(255,255,255,.06);
+  position: relative;
+  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
   border: 1px solid rgba(255,255,255,.1);
-  border-radius: 10px;
-  padding: .42rem .48rem;
+  border-radius: 13px;
+  padding: .52rem .58rem;
   min-width: 0;
+}
+.ssw-request-moment:first-child::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: -.34rem;
+  top: 50%;
+  width: .22rem;
+  height: .22rem;
+  border-radius: 50%;
+  background: rgba(167,139,250,.72);
+  transform: translateY(-50%);
 }
 .ssw-request-moment__label {
   display: block;
-  font-size: .62rem;
+  font-size: .61rem;
   font-weight: 800;
-  color: rgba(255,255,255,.4);
-  margin-bottom: .12rem;
+  color: rgba(255,255,255,.42);
+  margin-bottom: .16rem;
 }
 .ssw-request-moment__value {
   display: block;
-  font-size: .71rem;
+  font-size: .7rem;
   font-weight: 850;
   color: var(--ssw-text-dark);
-  line-height: 1.45;
+  line-height: 1.55;
   overflow-wrap: anywhere;
 }
 .ssw-request-admin-note {
-  margin: .48rem 0 0;
-  padding: .42rem .58rem;
+  margin: 0;
+  padding: .52rem .62rem;
   background: rgba(245,158,11,.1);
   border: 1px solid rgba(245,158,11,.22);
-  border-radius: 9px;
+  border-radius: 12px;
   font-size: .72rem;
   color: #fcd34d;
   font-weight: 700;
@@ -809,19 +925,36 @@
 .ssw-request-empty {
   min-height: 66px;
   width: 100%;
+  grid-column: 1 / -1;
   justify-content: center;
 }
 @media (min-width:640px) {
   .ssw-requests-panel {
-    padding: 1rem;
+    padding: 1.08rem;
     margin-bottom: 1.15rem;
   }
   .ssw-requests-grid {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
-    grid-auto-columns: auto;
-    overflow: visible;
-    padding-bottom: 0;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: .8rem;
+  }
+  .ssw-request-stat {
+    padding: .7rem .72rem;
+  }
+}
+@media (max-width:420px) {
+  .ssw-request-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .ssw-status-pill {
+    max-width: 100%;
+  }
+  .ssw-request-meta,
+  .ssw-request-timeline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ssw-request-moment:first-child::after {
+    display: none;
   }
 }
 
@@ -984,7 +1117,7 @@
     padding-bottom: .58rem;
   }
   .ssw-request-item {
-    padding: .68rem;
+    padding: .74rem;
   }
   .ssw-status-pill {
     min-height: 28px;
@@ -1094,6 +1227,7 @@
           <p class="ssw-requests-panel-subtitle">تبلیغات فعال و در انتظار بررسی را قبل از خرید بعدی ببینید.</p>
         </div>
       </header>
+      <div class="ssw-requests-summary" id="similar-sponsored-requests-summary" hidden></div>
       <div class="ssw-requests-grid" id="similar-sponsored-requests"></div>
     `;
 
@@ -1252,15 +1386,40 @@
      ───────────────────────────────────────────────────── */
   function renderRequests() {
     const container = document.getElementById('similar-sponsored-requests');
+    const summary = document.getElementById('similar-sponsored-requests-summary');
     if (!container) return;
 
     if (!state.requests.length) {
+      if (summary) {
+        summary.hidden = true;
+        summary.innerHTML = '';
+      }
       container.innerHTML = `
         <div class="ssw-empty ssw-request-empty">
           ${icons.emptyBox}
           <span>هنوز درخواستی ثبت نکرده‌اید.</span>
         </div>`;
       return;
+    }
+
+    if (summary) {
+      const approvedCount = state.requests.filter((item) => item.status === 'approved').length;
+      const queueCount = state.requests.filter((item) => ['pending', 'paused'].includes(item.status || 'pending')).length;
+      summary.hidden = false;
+      summary.innerHTML = `
+        <div class="ssw-request-stat">
+          <span>کل درخواست‌ها</span>
+          <strong>${formatMoney(state.requests.length)}</strong>
+        </div>
+        <div class="ssw-request-stat ssw-request-stat--live">
+          <span>تایید شده</span>
+          <strong>${formatMoney(approvedCount)}</strong>
+        </div>
+        <div class="ssw-request-stat ssw-request-stat--queue">
+          <span>در صف بررسی</span>
+          <strong>${formatMoney(queueCount)}</strong>
+        </div>
+      `;
     }
 
     container.innerHTML = state.requests.map((item) => {
@@ -1272,15 +1431,26 @@
         ? `ssw-payment-pill--${paymentStatus}` : 'ssw-payment-pill--pending';
 
       return `
-        <article class="ssw-request-item">
-          <div class="ssw-request-top">
-            <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
+        <article class="ssw-request-item" data-request-state="${escapeHtml(status)}">
+          <div class="ssw-request-head">
+            <div class="ssw-request-identity">
+              <div class="ssw-request-icon" aria-hidden="true">${icons.storeSmall}</div>
+              <div class="ssw-request-copy">
+                <strong class="ssw-request-title">${escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه')}</strong>
+                <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
+              </div>
+            </div>
             <span class="ssw-status-pill ${statusClass}" role="status">${escapeHtml(statusLabels[status] || status)}</span>
           </div>
-          <p class="ssw-request-subtitle">${escapeHtml(tierLabels[item.planTier] || item.planTier || '')} / ${escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '')}</p>
-          <div class="ssw-request-tags">
-            <span class="ssw-request-tag">نوع: ${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</span>
-            <span class="ssw-payment-pill ${paymentClass}">پرداخت: ${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+          <div class="ssw-request-meta">
+            <div class="ssw-request-meta-card">
+              <span class="ssw-request-meta-label">نوع پلن</span>
+              <strong class="ssw-request-meta-value">${escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه')}</strong>
+            </div>
+            <div class="ssw-request-meta-card">
+              <span class="ssw-request-meta-label">وضعیت پرداخت</span>
+              <span class="ssw-payment-pill ${paymentClass}">${escapeHtml(paymentLabels[paymentStatus] || paymentStatus)}</span>
+            </div>
           </div>
           <div class="ssw-request-timeline">
             <div class="ssw-request-moment">
