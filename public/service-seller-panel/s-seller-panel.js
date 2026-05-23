@@ -1396,25 +1396,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                  style="--service-accent: ${theme.accent}"
                  data-service-type="${card.serviceType}"
                  data-cost="${card.cost}">
-          <div class="wsv2-service__head">
-            <div class="wsv2-service__icon" aria-hidden="true">${card.icon}</div>
-            <div class="wsv2-service__title-wrap">
-              <span class="wsv2-service__tone">${theme.tone}</span>
-              <h5 class="wsv2-service__title">${card.title}</h5>
+          <div class="wsv2-service__body">
+            <div class="wsv2-service__head">
+              <div class="wsv2-service__icon" aria-hidden="true">${card.icon}</div>
+              <div class="wsv2-service__title-wrap">
+                <span class="wsv2-service__tone">${theme.tone}</span>
+                <h5 class="wsv2-service__title">${card.title}</h5>
+              </div>
             </div>
-          </div>
-          <p class="wsv2-service__desc">${card.description}</p>
-          <div class="wsv2-service__footer">
-            <div class="wsv2-service__price">
+            <p class="wsv2-service__desc">${card.description}</p>
+            <div class="wsv2-service__price-row">
+              <span class="wsv2-service__price-label">هزینه:</span>
               <span class="wsv2-service__price-amount">${card.price}</span>
             </div>
+          </div>
+          <div class="wsv2-service__footer">
             <button type="button" class="wsv2-service__btn" ${canAfford ? '' : 'disabled aria-disabled="true"'}>
               ${canAfford
-                ? `<span>خرید</span>
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                ? `<svg class="wsv2-btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                      <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
-                   </svg>`
-                : 'موجودی کافی نیست'}
+                   </svg>
+                   <span>خرید این سرویس</span>`
+                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                   </svg>
+                   <span>موجودی کافی نیست</span>`}
             </button>
           </div>
         </article>
@@ -1612,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           UIComponents.showToast(err.message || 'خطا در خرید خدمت', 'error');
           btn.disabled = false;
           btn.classList.remove('is-loading');
-          btn.innerHTML = '<span>خرید</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
+          btn.innerHTML = `<svg class="wsv2-btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg><span>خرید این سرویس</span>`;
         }
       });
     });
