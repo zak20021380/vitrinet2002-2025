@@ -1102,3 +1102,158 @@
   #dashboard-view .rank-card-v2__header { flex-wrap: wrap; align-items: flex-start; }
   #dashboard-view .rank-card-v2__badge { max-width: 100%; }
 }
+
+
+
+/* =================================================================
+   Notification Button — header-aligned dark glass style
+   Tones the FAB down so it visually belongs with the menu button
+   and the toolbar chips. Functionality (id, click, badge) is intact.
+   ================================================================= */
+
+/* Wrapper: kill stray glow & spacing */
+.notification-fab {
+  gap: 0;
+}
+
+.notification-fab__glow {
+  display: none !important;
+}
+
+/* The button itself: subtle dark-glass, header-matched */
+.notification-fab__btn,
+#notification-btn {
+  inline-size: 44px;
+  block-size: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  color: #e5e7eb !important;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease !important;
+}
+
+/* Remove the inherited bright outline ring */
+.notification-fab__btn::after,
+#notification-btn::after {
+  display: none !important;
+}
+
+/* Drop the radial highlight that adds neon feel */
+.notification-fab__btn::before,
+#notification-btn::before {
+  background: none !important;
+  opacity: 0 !important;
+}
+
+/* Icon weight: clear but soft */
+.notification-fab__btn svg,
+#notification-btn svg {
+  width: 20px;
+  height: 20px;
+  filter: none !important;
+  opacity: 0.9;
+  stroke-width: 2;
+}
+
+/* Hover / focus: lift gently, no neon */
+@media (hover: hover) {
+  .notification-fab__btn:hover,
+  #notification-btn:hover {
+    background:
+      linear-gradient(140deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    transform: translateY(-1px) !important;
+    box-shadow:
+      0 10px 26px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+.notification-fab__btn:active,
+#notification-btn:active {
+  transform: scale(0.97) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.notification-fab__btn:focus-visible,
+#notification-btn:focus-visible {
+  outline: 2px solid rgba(125, 211, 252, 0.55);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 3px rgba(125, 211, 252, 0.18),
+    0 8px 22px rgba(0, 0, 0, 0.32) !important;
+}
+
+/* Disable any unread pulse glow on the button itself */
+#notification-btn.has-unread {
+  animation: none !important;
+}
+
+/* Badge: smaller, neater, still clearly visible */
+#notification-btn .notification-badge,
+#notification-btn .badge,
+.notification-fab__btn .notification-badge {
+  inset-block-start: -3px !important;
+  inset-inline-end: -3px !important;
+  top: -3px !important;
+  right: -3px !important;
+  min-inline-size: 16px !important;
+  min-width: 16px !important;
+  block-size: 16px !important;
+  height: 16px !important;
+  padding: 0 4px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(145deg, #f87171, #ef4444) !important;
+  color: #fff !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  border: 1.5px solid #16181d !important;
+  box-shadow:
+    0 2px 6px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Reduce the badge ring pulse so it doesn't flash */
+#notification-btn.has-unread .notification-badge::before,
+#notification-btn.has-unread .badge::before {
+  display: none !important;
+}
+
+/* Mobile: keep size identical so it sits flush with header chips */
+@media (max-width: 640px) {
+  .notification-fab__btn,
+  #notification-btn {
+    inline-size: 44px;
+    block-size: 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .notification-fab__btn svg,
+  #notification-btn svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* High-DPI / dark-mode tightening */
+@media (prefers-color-scheme: dark) {
+  #notification-btn .notification-badge,
+  #notification-btn .badge {
+    border-color: #0f1115 !important;
+  }
+}
