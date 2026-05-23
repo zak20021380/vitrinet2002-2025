@@ -1873,12 +1873,14 @@
 }
 
 @media (min-width: 480px) and (max-width: 639px) {
+  /* Align FAB with the hamburger button:
+     header padding-top (14px) + toolbar padding-block (6px) = 20px */
   .notification-fab {
-    top: calc(env(safe-area-inset-top, 0px) + 30px);
+    top: calc(env(safe-area-inset-top, 0px) + 20px);
   }
 
   body:has(#dashboard-view.active) .notification-fab {
-    top: calc(env(safe-area-inset-top, 0px) + 30px);
+    top: calc(env(safe-area-inset-top, 0px) + 20px);
   }
 }
 
@@ -1892,10 +1894,10 @@
   .app-header .micro-toolbar {
     min-height: 52px;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     padding-block: 6px;
     padding-right: 8px;
-    padding-left: 54px;
+    padding-left: 56px;
     overflow: visible;
   }
 
@@ -1946,10 +1948,22 @@
     transform: none;
   }
 
-  body:has(#dashboard-view.active) .notification-fab {
-    left: calc(var(--content-padding, 8px) + 12px);
+  /* Align the notification FAB so it visually sits inside the toolbar
+     and mirrors the hamburger button exactly:
+       - vertical: header padding-top (14px) + toolbar padding-block (6px) = 20px
+       - horizontal: header padding-side (8px) + toolbar padding-side (8px) = 16px */
+  .notification-fab {
+    left: calc(var(--content-padding, 8px) + 8px);
     right: auto;
-    top: calc(env(safe-area-inset-top, 0px) + 28px);
+    top: calc(env(safe-area-inset-top, 0px) + 20px);
+    bottom: auto;
+    inset-block-end: auto;
+  }
+
+  body:has(#dashboard-view.active) .notification-fab {
+    left: calc(var(--content-padding, 8px) + 8px);
+    right: auto;
+    top: calc(env(safe-area-inset-top, 0px) + 20px);
     bottom: auto;
     inset-block-end: auto;
     opacity: 1;
@@ -1959,7 +1973,7 @@
   }
 
   body:has(#dashboard-view.active) .notification-fab:focus-within {
-    left: calc(var(--content-padding, 8px) + 12px);
+    left: calc(var(--content-padding, 8px) + 8px);
     opacity: 1;
   }
 
