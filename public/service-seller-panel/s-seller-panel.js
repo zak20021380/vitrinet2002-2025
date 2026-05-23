@@ -6317,16 +6317,21 @@ if (elements.viewStoreBtn) {
 
   // 7. Button click handlers with null checks
   const rankHelpBtn = document.getElementById('rank-help-btn');
+  const rankInsightButtons = document.querySelectorAll('[data-rank-modal-mode]');
+  const openRankModal = (mode = 'formula') => {
+    this.renderRankModalContent(mode);
+    UIComponents.openModal('rank-modal');
+  };
   const buttonHandlers = [
     {
       element: elements.rankCard,
-      handler: () => UIComponents.openModal('rank-modal')
+      handler: () => openRankModal('formula')
     },
     {
       element: rankHelpBtn,
       handler: (e) => {
         e.stopPropagation(); // Prevent rank-card click
-        UIComponents.openModal('rank-modal');
+        openRankModal('formula');
       }
     },
     {
@@ -6374,6 +6379,13 @@ if (elements.viewStoreBtn) {
     if (element) {
       element.addEventListener('click', handler);
     }
+  });
+
+  rankInsightButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openRankModal(button.dataset.rankModalMode || 'formula');
+    });
   });
 
   if (elements.rankCtaBtn) {
@@ -6737,6 +6749,148 @@ destroy() {
         } else {
           modalCurrent.textContent = 'هنوز رتبه‌ای برای فروشگاه شما ثبت نشده است. با افزایش فعالیت می‌توانید وارد فهرست برترین‌ها شوید.';
         }
+      }
+    }
+
+    renderRankModalContent(mode = 'formula') {
+      const data = this.topPeersData || {};
+      const mine = data?.mine || {};
+      const total = Number(data?.total) || 0;
+      const rank = Number(mine.rank) || 0;
+      const categoryLabel = data?.category || 'حوزه شما';
+      const rankText = rank ? this.formatNumber(rank) : '—';
+      const totalText = this.formatNumber(total || 0);
+      const nextRankText = rank > 1 ? this.formatNumber(rank - 1) : '';
+      const escapeHtml = (value = '') => String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+      const titleEl = document.getElementById('rank-modal-title');
+      const subtitleEl = document.querySelector('#rank-modal .rank-help-modal__subtitle');
+      const factorsEl = document.querySelector('#rank-modal .rank-help-modal__factors');
+      const tipsTitleEl = document.querySelector('#rank-modal .rank-help-modal__tips-title');
+      const tipsListEl = document.querySelector('#rank-modal .rank-help-modal__tips-list');
+      const statusEl = document.getElementById('rank-modal-current');
+
+      if (!titleEl || !subtitleEl || !factorsEl || !tipsTitleEl || !tipsListEl) return;
+
+      if (mode === 'category') {
+        titleEl.textContent = 'جایگاه شما در این دسته';
+        subtitleEl.textContent = `مقایسه فروشگاه شما با فروشندگان مشابه در ${categoryLabel}`;
+        factorsEl.innerHTML = `
+          <div class="rank-modal-summary-card rank-modal-summary-card--hero">
+            <span class="rank-modal-summary-card__label">رتبه فعلی</span>
+            <strong>${rankText}</strong>
+            <small>از ${totalText} فروشنده فعال</small>
+          </div>
+          <div class="rank-modal-summary-card">
+            <span class="rank-modal-summary-card__label">دامنه مقایسه</span>
+            <strong>${escapeHtml(categoryLabel)}</strong>
+            <small>فروشندگان هم‌دسته و قابل مقایسه</small>
+          </div>
+          <div class="rank-modal-summary-note">
+            این رتبه نشان می‌دهد فروشگاه شما در بین فروشندگان همین دسته چه جایگاهی دارد. رتبه بهتر یعنی فروشگاه در مقایسه با رقبا قابل اعتمادتر، فعال‌تر و کامل‌تر دیده می‌شود.
+          </div>
+        `;
+        tipsTitleEl.textContent = 'برداشت سریع از جایگاه';
+        tipsListEl.innerHTML = `
+          <li>رتبه ۱ یعنی بهترین جایگاه فعلی در همین دسته.</li>
+          <li>هرچه عدد رتبه کمتر باشد، جایگاه فروشگاه قوی‌تر است.</li>
+          <li>مقایسه فقط با فروشندگان مشابه انجام می‌شود، نه کل فروشگاه‌ها.</li>
+        `;
+        if (statusEl) {
+          statusEl.textContent = rank
+            ? `اکنون رتبه ${rankText} از ${totalText} را در ${categoryLabel} دارید.`
+            : 'هنوز داده کافی برای نمایش جایگاه دقیق ثبت نشده است.';
+        }
+        return;
+      }
+
+      if (mode === 'growth') {
+        titleEl.textContent = 'مسیر رشد رتبه';
+        subtitleEl.textContent = 'اقدام‌های عملی برای بهتر شدن جایگاه فروشگاه';
+        factorsEl.innerHTML = `
+          <div class="rank-growth-actions">
+            <div class="rank-growth-action">
+              <span class="rank-growth-action__check">✓</span>
+              <div><strong>پروفایل را کامل‌تر کنید</strong><p>خدمات، توضیحات، نمونه‌کارها و تصاویر را به‌روز نگه دارید.</p></div>
+            </div>
+            <div class="rank-growth-action">
+              <span class="rank-growth-action__check">✓</span>
+              <div><strong>نظر و امتیاز بیشتری بگیرید</strong><p>بعد از انجام خدمت، از مشتریان راضی درخواست ثبت نظر کنید.</p></div>
+            </div>
+            <div class="rank-growth-action">
+              <span class="rank-growth-action__check">✓</span>
+              <div><strong>نوبت‌های فعال را مدیریت کنید</strong><p>رزروها را سریع‌تر تایید کنید و نوبت‌های انجام‌شده را کامل ثبت کنید.</p></div>
+            </div>
+            <div class="rank-growth-action">
+              <span class="rank-growth-action__check">✓</span>
+              <div><strong>پاسخ‌گویی را بهتر کنید</strong><p>پیام‌ها و درخواست‌های مشتریان را سریع و منظم پاسخ دهید.</p></div>
+            </div>
+          </div>
+        `;
+        tipsTitleEl.textContent = 'اولویت پیشنهادی';
+        tipsListEl.innerHTML = `
+          <li>اول پروفایل و نمونه‌کارها را کامل کنید.</li>
+          <li>سپس روی دریافت نظرهای واقعی و رزروهای فعال تمرکز کنید.</li>
+          <li>برای رشد پایدار، پاسخ‌گویی سریع را به عادت روزانه تبدیل کنید.</li>
+        `;
+        if (statusEl) {
+          statusEl.textContent = rank > 1
+            ? `${nextRankText} پله تا رتبه بالاتر فاصله دارید؛ با چند اقدام منظم می‌توانید جایگاه را بهتر کنید.`
+            : rank === 1
+              ? 'در رتبه برتر هستید؛ تمرکز اصلی شما حفظ کیفیت و پاسخ‌گویی سریع است.'
+              : 'با تکمیل فعالیت‌های پایه، داده کافی برای رتبه‌بندی دقیق‌تر ساخته می‌شود.';
+        }
+        return;
+      }
+
+      titleEl.textContent = 'نحوه محاسبه رتبه شما';
+      subtitleEl.textContent = 'رتبه‌بندی بر اساس ترکیب ۴ معیار کلیدی انجام می‌شود';
+      factorsEl.innerHTML = `
+        <div class="rank-help-factor">
+          <div class="rank-help-factor__icon rank-help-factor__icon--rating">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="rank-help-factor__content"><h4 class="rank-help-factor__title">امتیاز مشتریان</h4><p class="rank-help-factor__desc">میانگین امتیازات و نظرات مشتریان در ۳۰ روز اخیر</p></div>
+          <span class="rank-help-factor__weight">۲۵٪</span>
+        </div>
+        <div class="rank-help-factor">
+          <div class="rank-help-factor__icon rank-help-factor__icon--bookings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="rank-help-factor__content"><h4 class="rank-help-factor__title">تعداد نوبت‌ها</h4><p class="rank-help-factor__desc">مجموع نوبت‌های تکمیل شده در ۳۰ روز اخیر</p></div>
+          <span class="rank-help-factor__weight">۲۵٪</span>
+        </div>
+        <div class="rank-help-factor">
+          <div class="rank-help-factor__icon rank-help-factor__icon--customers">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="rank-help-factor__content"><h4 class="rank-help-factor__title">مشتریان فعال</h4><p class="rank-help-factor__desc">تعداد مشتریان یکتا که از خدمات شما استفاده کرده‌اند</p></div>
+          <span class="rank-help-factor__weight">۲۵٪</span>
+        </div>
+        <div class="rank-help-factor">
+          <div class="rank-help-factor__icon rank-help-factor__icon--wallet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M16 12h4"/><circle cx="16" cy="12" r="1.5"/></svg>
+          </div>
+          <div class="rank-help-factor__content"><h4 class="rank-help-factor__title">اعتبار کیف پول</h4><p class="rank-help-factor__desc">موجودی اعتبار فروشگاه و سرمایه‌گذاری در رشد</p></div>
+          <span class="rank-help-factor__weight">۲۵٪</span>
+        </div>
+      `;
+      tipsTitleEl.textContent = 'راهکارهای بهبود رتبه';
+      tipsListEl.innerHTML = `
+        <li>از مشتریان بخواهید پس از دریافت خدمات، امتیاز ثبت کنند.</li>
+        <li>نوبت‌های بیشتری را تایید و تکمیل کنید.</li>
+        <li>با خدمات باکیفیت، مشتریان را به بازگشت ترغیب کنید.</li>
+        <li>اعتبار کیف پول خود را افزایش دهید.</li>
+      `;
+      if (statusEl) {
+        statusEl.textContent = rank
+          ? `رتبه فعلی شما: ${rankText} از ${totalText} فروشگاه فعال در ${categoryLabel}.`
+          : 'هنوز رتبه‌ای برای فروشگاه شما ثبت نشده است.';
       }
     }
 
