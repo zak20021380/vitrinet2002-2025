@@ -6701,6 +6701,7 @@ destroy() {
       const rankProgressBar = document.getElementById('rank-progress-bar');
       const rankProgressStatus = document.getElementById('rank-progress-status');
       const rankProgressLabel = document.getElementById('rank-progress-label');
+      const rankCategoryPosition = document.getElementById('rank-category-position');
       const rank = Number(mine.rank) || 0;
       const progressPercent = rank && total
         ? Math.max(8, Math.min(100, Math.round(((total - rank + 1) / total) * 100)))
@@ -6721,6 +6722,19 @@ destroy() {
           rankProgressStatus.textContent = 'حفظ رتبه برتر';
         } else {
           rankProgressStatus.textContent = `${this.formatNumber(rank - 1)} پله تا رتبه بالاتر`;
+        }
+      }
+
+      if (rankCategoryPosition) {
+        if (rank && total) {
+          const topPercent = Math.max(1, Math.ceil((rank / total) * 100));
+          rankCategoryPosition.textContent = topPercent <= 10
+            ? `جزو ${this.formatNumber(10)}٪ برتر این دسته`
+            : `رتبه ${this.formatNumber(rank)} از ${this.formatNumber(total)} فروشنده`;
+        } else if (rank) {
+          rankCategoryPosition.textContent = `رتبه ${this.formatNumber(rank)} در این دسته`;
+        } else {
+          rankCategoryPosition.textContent = 'در انتظار داده رتبه';
         }
       }
       
@@ -6761,6 +6775,15 @@ destroy() {
       const rankText = rank ? this.formatNumber(rank) : '—';
       const totalText = this.formatNumber(total || 0);
       const nextRankText = rank > 1 ? this.formatNumber(rank - 1) : '';
+      const topPercent = rank && total ? Math.max(1, Math.ceil((rank / total) * 100)) : 0;
+      const positionSummary = rank && total
+        ? topPercent <= 10
+          ? `جزو ${this.formatNumber(10)}٪ برتر این دسته`
+          : `رتبه ${rankText} از ${totalText} فروشنده در این دسته`
+        : 'داده رتبه هنوز کامل نیست';
+      const positionDetail = rank && total && topPercent <= 10
+        ? `${positionSummary}؛ رتبه ${rankText} از ${totalText} فروشنده`
+        : positionSummary;
       const escapeHtml = (value = '') => String(value)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -6784,7 +6807,7 @@ destroy() {
           <div class="rank-modal-summary-card rank-modal-summary-card--hero">
             <span class="rank-modal-summary-card__label">رتبه فعلی</span>
             <strong>${rankText}</strong>
-            <small>از ${totalText} فروشنده فعال</small>
+            <small>${escapeHtml(positionDetail)}</small>
           </div>
           <div class="rank-modal-summary-card">
             <span class="rank-modal-summary-card__label">دامنه مقایسه</span>
@@ -6803,7 +6826,7 @@ destroy() {
         `;
         if (statusEl) {
           statusEl.textContent = rank
-            ? `اکنون رتبه ${rankText} از ${totalText} را در ${categoryLabel} دارید.`
+            ? `${positionDetail}؛ مقایسه فقط با فروشندگان مشابه در ${categoryLabel} انجام شده است.`
             : 'هنوز داده کافی برای نمایش جایگاه دقیق ثبت نشده است.';
         }
         return;
@@ -6816,27 +6839,31 @@ destroy() {
           <div class="rank-growth-actions">
             <div class="rank-growth-action">
               <span class="rank-growth-action__check">✓</span>
-              <div><strong>پروفایل را کامل‌تر کنید</strong><p>خدمات، توضیحات، نمونه‌کارها و تصاویر را به‌روز نگه دارید.</p></div>
+              <div><strong>افزایش اعتبار فروشگاه</strong><p>اعتبار فروشگاه را برای ابزارهای رشد، دیده‌شدن و تبلیغات هدفمند آماده نگه دارید.</p></div>
             </div>
             <div class="rank-growth-action">
               <span class="rank-growth-action__check">✓</span>
-              <div><strong>نظر و امتیاز بیشتری بگیرید</strong><p>بعد از انجام خدمت، از مشتریان راضی درخواست ثبت نظر کنید.</p></div>
+              <div><strong>افزایش تعداد نوبت‌ها و رزروها</strong><p>ظرفیت آزاد، زمان‌بندی دقیق و تایید سریع رزروها را جدی بگیرید.</p></div>
             </div>
             <div class="rank-growth-action">
               <span class="rank-growth-action__check">✓</span>
-              <div><strong>نوبت‌های فعال را مدیریت کنید</strong><p>رزروها را سریع‌تر تایید کنید و نوبت‌های انجام‌شده را کامل ثبت کنید.</p></div>
+              <div><strong>بهبود پاسخگویی به مشتریان</strong><p>پیام‌ها و درخواست‌های مشتریان را سریع، کوتاه و شفاف پاسخ دهید.</p></div>
             </div>
             <div class="rank-growth-action">
               <span class="rank-growth-action__check">✓</span>
-              <div><strong>پاسخ‌گویی را بهتر کنید</strong><p>پیام‌ها و درخواست‌های مشتریان را سریع و منظم پاسخ دهید.</p></div>
+              <div><strong>دریافت نظرات و امتیازهای بیشتر</strong><p>بعد از خدمت موفق، از مشتریان راضی درخواست ثبت نظر کنید.</p></div>
+            </div>
+            <div class="rank-growth-action">
+              <span class="rank-growth-action__check">✓</span>
+              <div><strong>کامل‌تر کردن پروفایل و خدمات</strong><p>توضیحات، قیمت، تصاویر، نمونه‌کار و خدمات را به‌روز نگه دارید.</p></div>
             </div>
           </div>
         `;
         tipsTitleEl.textContent = 'اولویت پیشنهادی';
         tipsListEl.innerHTML = `
-          <li>اول پروفایل و نمونه‌کارها را کامل کنید.</li>
-          <li>سپس روی دریافت نظرهای واقعی و رزروهای فعال تمرکز کنید.</li>
-          <li>برای رشد پایدار، پاسخ‌گویی سریع را به عادت روزانه تبدیل کنید.</li>
+          <li>اول اعتبار فروشگاه و اطلاعات پروفایل را کامل و به‌روز نگه دارید.</li>
+          <li>سپس روی رزروهای فعال، تایید سریع و دریافت نظرهای واقعی تمرکز کنید.</li>
+          <li>برای رشد پایدار، پاسخگویی سریع و دقیق را به عادت روزانه تبدیل کنید.</li>
         `;
         if (statusEl) {
           statusEl.textContent = rank > 1
