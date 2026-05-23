@@ -182,60 +182,126 @@
   white-space: nowrap;
 }
 
-/* Thin divider between identity and wallet/streak */
+/* Wallet/Streak row sits inside the overview container with proper inset and gap
+   so each card reads as an independent, tappable tile (RTL-aware). */
 #dashboard-view .stats-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--db-border);
+  gap: 10px;
+  background: transparent;
   border-top: 1px solid var(--db-border);
   margin: 0;
+  padding: 12px 12px 14px;
 }
 
-/* ── Wallet & Streak cards (inside overview) ─────────────────── */
+/* ── Wallet & Streak cards (independent, tappable tiles) ─────── */
 #dashboard-view .stats-card {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 14px 14px 12px;
-  background: var(--db-surface);
-  border-radius: 0;
-  border: 0;
-  box-shadow: none;
+  /* extra bottom padding reserves space for the CTA chevron in the corner */
+  padding: 14px 14px 36px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 60%),
+    var(--db-surface-2);
+  border: 1px solid var(--db-border);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 6px 14px rgba(0, 0, 0, 0.28);
   backdrop-filter: none;
   overflow: hidden;
   min-height: 0;
-  transition: background 0.18s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
+/* Subtle colored radial accent — sits behind content */
 #dashboard-view .stats-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  /* Reset longhand values from .stats-card::before in foundations */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: auto;
+  height: auto;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.9;
 }
 
-#dashboard-view .stats-card::after { display: none; }
-
 #dashboard-view .wallet-card::before {
-  background: radial-gradient(ellipse 80% 60% at 0% 0%, rgba(59, 130, 246, 0.12), transparent);
+  background: radial-gradient(ellipse 90% 60% at 0% 0%, rgba(59, 130, 246, 0.18), transparent 60%);
 }
 
 #dashboard-view .streak-card::before {
-  background: radial-gradient(ellipse 80% 60% at 100% 0%, rgba(245, 158, 11, 0.12), transparent);
+  background: radial-gradient(ellipse 90% 60% at 100% 0%, rgba(245, 158, 11, 0.18), transparent 60%);
 }
 
-/* Round the bottom corners of the two cards */
-#dashboard-view .stats-row > .wallet-card {
-  border-bottom-right-radius: var(--db-radius-card);
-}
-#dashboard-view .stats-row > .streak-card {
-  border-bottom-left-radius: var(--db-radius-card);
+/* Compact circular CTA chevron at the leading bottom corner (RTL → left side).
+   Drawn via inline SVG so it works without adding any new files or markup. */
+#dashboard-view .stats-card::after {
+  content: '';
+  position: absolute;
+  /* Reset longhand values from .stats-card::after in foundations */
+  top: auto;
+  right: auto;
+  bottom: 10px;
+  left: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a8b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='15 18 9 12 15 6'/></svg>") center / 11px 11px no-repeat,
+    rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--db-border);
+  pointer-events: none;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
-#dashboard-view .stats-card:active { background: #171c27; }
+/* Hover-only depth (pointer devices). Touch falls back to :active. */
+@media (hover: hover) {
+  #dashboard-view .stats-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--db-border-strong);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 12px 24px rgba(0, 0, 0, 0.36);
+  }
+  #dashboard-view .stats-card:hover::after {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--db-border-strong);
+    transform: translateX(-2px);
+  }
+}
+
+/* Tap / active feedback */
+#dashboard-view .stats-card:active {
+  transform: translateY(0) scale(0.985);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%),
+    #171c27;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 10px rgba(0, 0, 0, 0.32);
+}
+
+/* Keyboard focus */
+#dashboard-view .stats-card:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.55);
+  outline-offset: 2px;
+  border-color: var(--db-border-strong);
+}
 
 
 /* Card header row */
@@ -1040,21 +1106,15 @@
     flex: 1;
     grid-template-columns: 1fr;
     border-top: 0;
-    border-right: 0;
+    border-right: 1px solid var(--db-border);
     background: none;
+    padding: 14px;
+    gap: 10px;
   }
 
   #dashboard-view .stats-card {
     flex: 1;
-    border-radius: 0;
-    border: 0;
-    border-bottom: 1px solid var(--db-border);
-  }
-
-  #dashboard-view .stats-row > .wallet-card { border-bottom-right-radius: 0; }
-  #dashboard-view .stats-row > .streak-card {
-    border-left-radius: 0;
-    border-bottom: 0;
+    border-radius: 14px;
   }
 
   #dashboard-view .plan-hero-meta {
@@ -1091,10 +1151,7 @@
     --db-gap: 10px;
   }
 
-  #dashboard-view .stats-row { grid-template-columns: 1fr; background: none; gap: 0; }
-  #dashboard-view .stats-card { border-bottom: 1px solid var(--db-border); border-radius: 0; }
-  #dashboard-view .stats-row > .wallet-card { border-bottom-right-radius: 0; }
-  #dashboard-view .stats-row > .streak-card { border-bottom-left-radius: var(--db-radius-card); border-bottom: 0; }
+  #dashboard-view .stats-row { grid-template-columns: 1fr; background: none; gap: 10px; }
 
   #dashboard-view .stats-grid { grid-template-columns: 1fr; }
   #dashboard-view .plan-hero-meta { grid-template-columns: 1fr; }
