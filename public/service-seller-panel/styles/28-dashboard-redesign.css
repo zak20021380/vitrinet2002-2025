@@ -1783,7 +1783,7 @@
 .notification-fab {
   right: auto;
   left: calc(var(--content-padding, 8px) + 12px);
-  top: calc(23px + env(safe-area-inset-top, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + 28px);
   bottom: auto;
   inset-block-end: auto;
   z-index: 1500;
@@ -1793,35 +1793,93 @@
   filter: none;
 }
 
+/* Make the notification button feel native to the header:
+   match the .hamburger-btn glass aesthetic instead of a bright cyan FAB. */
 .notification-fab__btn,
 #notification-btn {
   inline-size: 40px;
   block-size: 40px;
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.24), transparent 36%),
-    linear-gradient(135deg, #1d4ed8 0%, #0891b2 58%, #0f766e 100%);
+  border-radius: var(--border-radius-box-lg);
+  border: 1px solid var(--c-glass-border-strong);
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
+  color: rgba(248, 250, 252, 0.92);
   box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.32),
-    0 8px 22px rgba(14, 165, 233, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    border-color var(--transition-fast, 160ms ease),
+    background-color var(--transition-fast, 160ms ease),
+    transform var(--transition-fast, 160ms ease),
+    box-shadow var(--transition-fast, 160ms ease);
   pointer-events: auto;
   touch-action: manipulation;
+}
+
+/* Drop the bright cyan glow that previously bled around the button. */
+.notification-fab__btn::after,
+#notification-btn::after {
+  display: none;
+}
+
+.notification-fab__glow {
+  display: none;
 }
 
 .notification-fab__btn svg,
 #notification-btn svg {
   width: 18px;
   height: 18px;
+  filter: none;
 }
 
 .notification-fab__btn:hover,
 #notification-btn:hover {
   transform: none;
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.notification-fab__btn:active,
+#notification-btn:active {
+  transform: scale(0.97);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.notification-fab__btn:focus-visible,
+#notification-btn:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 2px rgba(255, 255, 255, 0.18);
 }
 
 .notification-panel {
   z-index: 1400;
+}
+
+@media (min-width: 480px) and (max-width: 639px) {
+  .notification-fab {
+    top: calc(env(safe-area-inset-top, 0px) + 30px);
+  }
+
+  body:has(#dashboard-view.active) .notification-fab {
+    top: calc(env(safe-area-inset-top, 0px) + 30px);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1838,7 +1896,7 @@
   body:has(#dashboard-view.active) .notification-fab {
     left: calc(var(--content-padding, 8px) + 12px);
     right: auto;
-    top: calc(23px + env(safe-area-inset-top, 0px));
+    top: calc(env(safe-area-inset-top, 0px) + 28px);
     bottom: auto;
     inset-block-end: auto;
     opacity: 1;
@@ -1856,7 +1914,7 @@
   body:has(#dashboard-view.active) #notification-btn {
     inline-size: 40px;
     block-size: 40px;
-    border-radius: 12px;
+    border-radius: var(--border-radius-box-lg);
     pointer-events: auto;
   }
 
