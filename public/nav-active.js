@@ -319,126 +319,116 @@
     const style = document.createElement('style');
     style.id = NAV_STYLE_ID;
     style.textContent = `
-      @media (max-width: 1024px) {
-        body.${BODY_READY_CLASS} {
-          padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
-        }
+      /* ── Vitreenet Mobile Nav — Premium Redesign ── */
 
+      @media (max-width: 1024px) {
+
+        /* ── Body clearance so content isn't hidden under the nav ── */
+        body.${BODY_READY_CLASS} {
+          padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+        }
         body.${BODY_READY_CLASS}.hide-mobile-nav {
           padding-bottom: 0 !important;
         }
 
+        /* Hide page footer when the injected nav is present */
         footer:not(.mobile-nav) {
           display: none !important;
         }
 
+        /* ── Nav container — floating pill ── */
         .mobile-nav,
         .mobile-bottom-nav {
           display: flex !important;
           position: fixed;
-          left: 12px;
-          right: 12px;
-          bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+          left: 14px;
+          right: 14px;
+          bottom: calc(16px + env(safe-area-inset-bottom, 0px));
           z-index: 1000;
-          height: 82px;
-          padding: 10px 6px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
-          border-radius: 32px;
-          border: 1.5px solid rgba(255, 255, 255, 0.4);
-          box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.08),
-            0 2px 8px rgba(0, 0, 0, 0.04),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-          backdrop-filter: saturate(1.8) blur(20px);
-          -webkit-backdrop-filter: saturate(1.8) blur(20px);
+          height: 76px;
+          padding: 8px 8px;
+          /* Premium light frosted glass */
+          background: rgba(255, 255, 255, 0.92);
+          border-radius: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.10),
+            0 3px 10px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+          backdrop-filter: saturate(2) blur(24px);
+          -webkit-backdrop-filter: saturate(2) blur(24px);
           justify-content: space-between;
-          align-items: center;
-          gap: 4px;
+          align-items: stretch;
+          gap: 2px;
           overflow: visible;
-          transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
-                      opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-                      box-shadow 0.32s ease;
-        }
-
-        .mobile-nav::before,
-        .mobile-bottom-nav::before {
-          content: '';
-          position: absolute;
-          inset: -1px;
-          border-radius: 32px;
-          padding: 1px;
-          background: linear-gradient(135deg, 
-            rgba(16, 185, 129, 0.15) 0%, 
-            rgba(59, 130, 246, 0.1) 50%,
-            rgba(168, 85, 247, 0.12) 100%);
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          opacity: 0.6;
-          pointer-events: none;
-        }
-
-        .mobile-nav-indicator {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 76px;
-          height: 52px;
-          border-radius: 24px;
-          background: linear-gradient(135deg, 
-            rgba(16, 185, 129, 0.14) 0%, 
-            rgba(5, 150, 105, 0.12) 100%);
-          box-shadow: 
-            0 4px 12px rgba(16, 185, 129, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.4);
-          opacity: 0;
-          pointer-events: none;
-          transform: translate3d(0, 15px, 0);
-          transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
-                      width 0.32s cubic-bezier(0.4, 0, 0.2, 1), 
-                      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 0;
+          transition:
+            transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity  0.3s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.3s ease;
         }
 
         @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
           .mobile-nav,
           .mobile-bottom-nav {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
-            border: 1.5px solid rgba(203, 213, 225, 0.6);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(203, 213, 225, 0.8);
           }
         }
 
+        /* ── Animated sliding indicator pill ── */
+        .mobile-nav-indicator {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          width: 72px;
+          height: calc(100% - 16px);
+          border-radius: 20px;
+          background: linear-gradient(135deg,
+            rgba(16, 185, 129, 0.13) 0%,
+            rgba(5, 150, 105, 0.10) 100%);
+          box-shadow:
+            0 4px 14px rgba(16, 185, 129, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+          border: 1px solid rgba(16, 185, 129, 0.18);
+          opacity: 0;
+          pointer-events: none;
+          transform: translate3d(0, 0, 0);
+          transition:
+            transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+            width   0.32s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 0;
+        }
+
+        /* Hide/show transition */
+        body.hide-mobile-nav .mobile-nav,
+        body.hide-mobile-nav .mobile-bottom-nav {
+          transform: translateY(130%);
+          opacity: 0;
+          pointer-events: none;
+          visibility: hidden;
+        }
+
+        /* Legacy ul/li structure support */
         .mobile-bottom-nav ul {
           display: flex;
           align-items: center;
           justify-content: space-between;
           width: 100%;
           height: 100%;
-          gap: 4px;
+          gap: 2px;
           margin: 0;
           padding: 0;
           list-style: none;
         }
-
         .mobile-bottom-nav li {
           flex: 1;
           min-width: 0;
+          display: flex;
         }
 
-        body.hide-mobile-nav .mobile-nav {
-          transform: translateY(150%);
-          opacity: 0;
-          pointer-events: none;
-          visibility: hidden;
-        }
-
-        body.hide-mobile-nav .mobile-bottom-nav {
-          transform: translateY(150%);
-          opacity: 0;
-          pointer-events: none;
-          visibility: hidden;
-        }
-
+        /* ── Nav items ── */
         .mobile-nav .nav-item,
         .mobile-bottom-nav .nav-item {
           position: relative;
@@ -448,118 +438,138 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 48px;
-          min-width: 48px;
+          min-height: 52px;
+          min-width: 44px;
           height: 100%;
           color: #64748b;
           text-decoration: none;
           font-weight: 500;
-          gap: 5px;
-          padding: 8px 6px;
+          font-size: 10.5px;
+          letter-spacing: 0.01em;
+          gap: 4px;
+          padding: 6px 4px;
           border-radius: 20px;
-          transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
-                      color 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
-                      background-color 0.24s cubic-bezier(0.4, 0, 0.2, 1);
           -webkit-tap-highlight-color: transparent;
           cursor: pointer;
+          transition:
+            color      0.22s cubic-bezier(0.4, 0, 0.2, 1),
+            transform  0.18s cubic-bezier(0.4, 0, 0.2, 1),
+            background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .mobile-nav .nav-item:hover,
-        .mobile-bottom-nav .nav-item:hover {
-          background: rgba(16, 185, 129, 0.06);
+        /* Hover (pointer devices only) */
+        @media (hover: hover) and (pointer: fine) {
+          .mobile-nav .nav-item:hover,
+          .mobile-bottom-nav .nav-item:hover {
+            color: #334155;
+            background: rgba(16, 185, 129, 0.07);
+          }
         }
 
+        /* Focus ring for a11y */
         .mobile-nav .nav-item:focus-visible,
         .mobile-bottom-nav .nav-item:focus-visible {
           outline: none;
-          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4);
         }
 
+        /* Touch press */
         .mobile-nav .nav-item:active,
         .mobile-bottom-nav .nav-item:active {
-          transform: scale(0.96);
+          transform: scale(0.92);
         }
 
+        /* ── Icon wrapper ── */
         .mobile-nav .nav-icon-wrap,
         .mobile-bottom-nav .nav-icon-wrap {
           position: relative;
-          width: 26px;
-          height: 26px;
+          width: 24px;
+          height: 24px;
           flex-shrink: 0;
         }
 
+        /* Both SVG states sit on top of each other */
         .mobile-nav .nav-item svg,
         .mobile-bottom-nav .nav-item svg {
-          width: 26px;
-          height: 26px;
+          width: 24px;
+          height: 24px;
           color: inherit;
           position: absolute;
           inset: 0;
           transform-origin: center;
-          transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), 
-                      opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+          transition:
+            transform 0.26s cubic-bezier(0.34, 1.4, 0.64, 1),
+            opacity   0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Outline icon — visible by default */
         .mobile-nav .nav-item .nav-icon-outline,
         .mobile-bottom-nav .nav-item .nav-icon-outline {
           opacity: 1;
           transform: scale(1) rotate(0deg);
         }
 
+        /* Filled icon — hidden by default */
         .mobile-nav .nav-item .nav-icon-filled,
         .mobile-bottom-nav .nav-item .nav-icon-filled {
           opacity: 0;
-          transform: scale(0.8) rotate(-8deg);
+          transform: scale(0.7) rotate(-10deg);
         }
 
+        /* ── Labels ── */
         .mobile-nav .nav-item .nav-label,
         .mobile-bottom-nav .nav-item .nav-label,
         .mobile-bottom-nav .nav-item span {
-          font-size: 11.5px;
+          font-size: 11px;
           font-weight: inherit;
-          line-height: 1.2;
-          opacity: 0.88;
-          transition: color 0.24s cubic-bezier(0.4, 0, 0.2, 1), 
-                      opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1),
-                      transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+          line-height: 1.1;
+          opacity: 0.78;
           white-space: nowrap;
           letter-spacing: 0.01em;
+          transition:
+            opacity   0.22s ease,
+            transform 0.22s ease,
+            color     0.22s ease;
         }
 
+        /* ── Active state ── */
         .mobile-nav .nav-item.active,
         .mobile-bottom-nav .nav-item.active {
           color: #059669;
-          background: transparent;
-          font-weight: 600;
+          font-weight: 650;
         }
 
+        /* Active icon swap: outline fades out, filled bounces in */
         .mobile-nav .nav-item.active .nav-icon-outline,
         .mobile-bottom-nav .nav-item.active .nav-icon-outline {
           opacity: 0;
-          transform: scale(0.8) rotate(8deg);
+          transform: scale(0.7) rotate(10deg);
         }
 
         .mobile-nav .nav-item.active .nav-icon-filled,
         .mobile-bottom-nav .nav-item.active .nav-icon-filled {
           opacity: 1;
-          transform: scale(1.08) rotate(0deg);
-          filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
+          transform: scale(1.1) rotate(0deg);
+          filter: drop-shadow(0 2px 5px rgba(5, 150, 105, 0.28));
         }
 
+        /* Active label lifts slightly and becomes opaque */
         .mobile-nav .nav-item.active .nav-label,
         .mobile-bottom-nav .nav-item.active .nav-label,
         .mobile-bottom-nav .nav-item.active span {
-          font-weight: 600;
           opacity: 1;
+          font-weight: 650;
           transform: translateY(-1px);
+          color: #059669;
         }
 
+        /* Suppress old static nav when injected nav is active */
         body.${BODY_READY_CLASS} .mobile-bottom-nav {
           display: none !important;
         }
       }
 
+      /* ── Reduced motion ── */
       @media (prefers-reduced-motion: reduce) {
         .mobile-nav,
         .mobile-bottom-nav,
@@ -573,6 +583,7 @@
         }
       }
 
+      /* ── Hide on desktop ── */
       @media (min-width: 1025px) {
         .mobile-nav {
           display: none !important;
@@ -658,15 +669,15 @@
       return;
     }
 
-    const width = Math.max(72, Math.min(activeRect.width + 8, 100));
-    const height = Math.max(50, Math.min(navRect.height - 20, 54));
+    // Indicator height is set via CSS (top:8px, height:calc(100%-16px))
+    // We only need to slide it horizontally to the active item
+    const width = Math.max(64, Math.min(activeRect.width + 4, 96));
     const left = activeRect.left - navRect.left + ((activeRect.width - width) / 2);
-    const top = (navRect.height - height) / 2;
     const clampedLeft = Math.max(8, Math.min(left, navRect.width - width - 8));
 
     indicator.style.width = `${width}px`;
-    indicator.style.height = `${height}px`;
-    indicator.style.transform = `translate3d(${clampedLeft}px, ${top}px, 0)`;
+    indicator.style.height = '';   // let CSS handle height
+    indicator.style.transform = `translate3d(${clampedLeft}px, 0, 0)`;
     indicator.style.opacity = '1';
   }
 
