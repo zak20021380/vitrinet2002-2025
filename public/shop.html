@@ -2343,14 +2343,18 @@ body {
 
 .similar-shops-section {
   width: min(95%, 1280px);
-  margin: 1.85rem auto 0;
+  margin: 2.5rem auto 0;
   padding: 0 1rem;
   direction: rtl;
 }
 
 .similar-shops-shell {
-  padding: 0;
+  padding: 1.4rem 1.5rem 1.6rem;
   overflow: visible;
+  border-radius: 1.5rem;
+  background: linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%);
+  border: 1px solid rgba(124, 131, 253, 0.1);
+  box-shadow: 0 4px 24px rgba(28, 44, 90, 0.045);
 }
 
 .similar-shops-head {
@@ -2402,7 +2406,7 @@ body {
 
 .similar-shops-carousel {
   position: relative;
-  margin-inline: -1rem;
+  margin-inline: -1.5rem;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y pinch-zoom;
 }
@@ -2421,12 +2425,12 @@ body {
 
 .similar-shops-carousel::before {
   right: 0;
-  background: linear-gradient(90deg, transparent, rgba(248, 250, 252, .98));
+  background: linear-gradient(90deg, transparent, rgba(240, 244, 255, .98));
 }
 
 .similar-shops-carousel::after {
   left: 0;
-  background: linear-gradient(270deg, transparent, rgba(248, 250, 252, .98));
+  background: linear-gradient(270deg, transparent, rgba(240, 244, 255, .98));
 }
 
 .similar-shops-list {
@@ -2440,9 +2444,9 @@ body {
   scroll-snap-type: x mandatory;
   scroll-snap-type: inline mandatory;
   scroll-behavior: smooth;
-  scroll-padding-inline: 1rem;
+  scroll-padding-inline: 1.5rem;
   -webkit-overflow-scrolling: touch;
-  padding: .18rem 1rem .66rem;
+  padding: .18rem 1.5rem .66rem;
   scrollbar-width: none;
   touch-action: pan-x pan-y pinch-zoom;
   cursor: grab;
@@ -2729,6 +2733,24 @@ body {
   outline-offset: 3px;
 }
 
+/* Extra-count badge inside the "مشاهده همه" button (shown on desktop only) */
+.similar-shops-view-all-badge {
+  display: none;
+  align-items: center;
+  padding: .12rem .48rem;
+  border-radius: 999px;
+  background: rgba(124, 131, 253, 0.12);
+  color: var(--primary);
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+@media (min-width: 960px) {
+  .similar-shops-view-all-badge {
+    display: inline-flex;
+  }
+}
+
 .similar-shop-action:hover {
   color: #fff;
   transform: translateY(-1px);
@@ -2779,13 +2801,13 @@ body {
 
 @media (min-width: 640px) {
   .similar-shops-carousel {
-    margin-inline: -1rem;
+    margin-inline: -1.5rem;
   }
 
   .similar-shops-list {
     gap: .85rem;
-    padding-inline: 1rem;
-    scroll-padding-inline: 1rem;
+    padding-inline: 1.5rem;
+    scroll-padding-inline: 1.5rem;
   }
 
   .similar-shop-card {
@@ -2795,7 +2817,11 @@ body {
 
 @media (min-width: 960px) {
   .similar-shops-section {
-    margin-top: 2.2rem;
+    margin-top: 2.8rem;
+  }
+
+  .similar-shops-shell {
+    padding: 1.6rem 1.8rem 1.8rem;
   }
 
   .similar-shops-list {
@@ -2803,6 +2829,12 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow: visible;
     padding: .1rem 0;
+    gap: 1rem;
+  }
+
+  /* Limit to 4 cards on desktop — curated look, not a listing page */
+  .similar-shops-list .similar-shop-card:nth-child(n+5) {
+    display: none;
   }
 
   .similar-shops-carousel {
@@ -2819,6 +2851,15 @@ body {
     padding-top: .9rem;
   }
 
+  /* More prominent CTA on desktop */
+  .similar-shops-view-all {
+    min-width: 200px;
+    gap: .6rem;
+    padding: .56rem 1.4rem;
+    font-size: .82rem;
+    border-width: 1.5px;
+  }
+
   .similar-shop-card {
     min-width: 0;
     min-height: 132px;
@@ -2828,6 +2869,12 @@ body {
 @media (min-width: 1180px) {
   .similar-shops-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  /* 4 cards in one clean row on large desktop */
+  .similar-shops-list .similar-shop-card:nth-child(n+5) {
+    display: none;
   }
 }
 
@@ -2837,19 +2884,23 @@ body {
     padding: 0 .85rem;
   }
 
+  .similar-shops-shell {
+    padding: 1rem 1rem 1.1rem;
+  }
+
   .similar-shops-head {
     flex-direction: column;
     gap: .46rem;
   }
 
   .similar-shops-carousel {
-    margin-inline: -.85rem;
+    margin-inline: -1rem;
   }
 
   .similar-shops-list {
     gap: .68rem;
-    padding-inline: .85rem;
-    scroll-padding-inline: .85rem;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
   }
 
   .similar-shops-view-all-wrap {
@@ -3243,7 +3294,7 @@ body {
     <div class="similar-shops-dots" id="similarShopsDots" aria-label="اسلایدهای فروشگاه‌های مشابه"></div>
     <div class="similar-shops-view-all-wrap" id="similarShopsViewAllWrap">
       <a class="similar-shops-view-all" id="similarShopsViewAll" href="/all-shops.html" aria-label="مشاهده همه فروشگاه‌ها">
-        مشاهده همه ←
+        مشاهده همه <i class="fas fa-arrow-left" aria-hidden="true"></i>
       </a>
     </div>
     <div class="similar-shops-empty" id="similarShopsEmpty" hidden>
@@ -5180,6 +5231,17 @@ function renderSimilarShops(items = []) {
   empty.hidden = true;
   if (viewAllWrap) viewAllWrap.hidden = false;
   section.hidden = false;
+
+  /* Update "مشاهده همه" button: show extra-count hint on desktop when more than 4 exist */
+  const viewAllBtn = document.getElementById('similarShopsViewAll');
+  if (viewAllBtn) {
+    const extraCount = items.length > 4 ? items.length - 4 : 0;
+    const extraHint = extraCount > 0
+      ? ` <span class="similar-shops-view-all-badge">+${toFaNumber(extraCount)} فروشگاه دیگر</span>`
+      : '';
+    viewAllBtn.innerHTML = `مشاهده همه${extraHint} <i class="fas fa-arrow-left" aria-hidden="true"></i>`;
+  }
+
   list.innerHTML = items.map((item) => {
     const name = escapeSimilarHtml(item.name);
     const category = escapeSimilarHtml(item.subcategory || item.category || 'دسته‌بندی عمومی');
