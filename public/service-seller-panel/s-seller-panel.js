@@ -6685,6 +6685,32 @@ destroy() {
       this.setText('rank-category', categoryLabel);
       this.setText('total-sellers', this.formatNumber(total));
       this.setText('current-rank', mine.rank ? this.formatNumber(mine.rank) : '—');
+
+      const rankProgressBar = document.getElementById('rank-progress-bar');
+      const rankProgressStatus = document.getElementById('rank-progress-status');
+      const rankProgressLabel = document.getElementById('rank-progress-label');
+      const rank = Number(mine.rank) || 0;
+      const progressPercent = rank && total
+        ? Math.max(8, Math.min(100, Math.round(((total - rank + 1) / total) * 100)))
+        : 0;
+
+      if (rankProgressBar) {
+        rankProgressBar.style.width = `${progressPercent}%`;
+      }
+
+      if (rankProgressLabel) {
+        rankProgressLabel.textContent = rank > 1 ? 'مسیر تا رتبه بالاتر' : 'وضعیت جایگاه';
+      }
+
+      if (rankProgressStatus) {
+        if (!rank) {
+          rankProgressStatus.textContent = 'در انتظار داده رتبه';
+        } else if (rank === 1) {
+          rankProgressStatus.textContent = 'حفظ رتبه برتر';
+        } else {
+          rankProgressStatus.textContent = `${this.formatNumber(rank - 1)} پله تا رتبه بالاتر`;
+        }
+      }
       
       // آپدیت معیارهای واقعی از بک‌اند
       this.setText('ucw30', this.formatNumber(metrics.uniqueCustomers || 0));
