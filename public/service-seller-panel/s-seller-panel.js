@@ -1296,13 +1296,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       tagline: 'اعتبارت را به ابزارهای بازدید و اعتماد تبدیل کن.',
       highlight: 'اعتبار فروشگاه',
       useCases: [
-        { icon: '🚀', title: 'نردبان آگهی' },
-        { icon: '🎫', title: 'کوپن تخفیف پلن' },
-        { icon: '⭐', title: 'نشان VIP' }
+        { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>', title: 'نردبان آگهی' },
+        { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.4" fill="currentColor"/></svg>', title: 'کوپن تخفیف پلن' },
+        { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>', title: 'نشان VIP' }
       ],
       serviceCards: [
         {
-          icon: '🚀',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>',
           title: 'نردبان آگهی',
           price: '۲۰,۰۰۰ تومان',
           cost: 20000,
@@ -1311,7 +1311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           theme: 'boost'
         },
         {
-          icon: '🎫',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.4" fill="currentColor"/></svg>',
           title: 'تخفیف روی پلن',
           price: '۵۰,۰۰۰ تومان',
           cost: 50000,
@@ -1320,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           theme: 'discount'
         },
         {
-          icon: '⭐',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>',
           title: 'نشان VIP',
           price: '۸۰,۰۰۰ تومان',
           cost: 80000,
@@ -1423,12 +1423,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // کارت‌های کسب اعتبار
     const earnItems = [
-      { theme: 'streak',     icon: '🔥', title: 'ورود روزانه',       desc: 'هر روز وارد پنل شو',          reward: '+۱,۰۰۰ ت' },
-      { theme: 'checkpoint', icon: '🎯', title: 'چک‌پوینت هفتگی',   desc: '۷ روز متوالی ورود',           reward: '+۵,۰۰۰ ت' },
-      { theme: 'booking',    icon: '📅', title: 'تکمیل نوبت',         desc: 'هر نوبت موفق',               reward: '+۲,۰۰۰ ت' },
-      { theme: 'review',     icon: '⭐', title: 'نظر مثبت',            desc: 'دریافت نظر از مشتری',         reward: '+۳,۰۰۰ ت' },
-      { theme: 'referral',   icon: '🎁', title: 'دعوت دوستان',        desc: 'معرفی فروشنده جدید',         reward: '+۱۰,۰۰۰ ت' },
-      { theme: 'profile',    icon: '✅', title: 'تکمیل پروفایل',     desc: 'اطلاعات کامل فروشگاه',        reward: '+۳,۰۰۰ ت' }
+      { theme: 'streak',     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>', title: 'ورود روزانه',       desc: 'هر روز وارد پنل شو',          reward: '+۱,۰۰۰ ت' },
+      { theme: 'checkpoint', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>', title: 'چک‌پوینت هفتگی',   desc: '۷ روز متوالی ورود',           reward: '+۵,۰۰۰ ت' },
+      { theme: 'booking',    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>', title: 'تکمیل نوبت',         desc: 'هر نوبت موفق',               reward: '+۲,۰۰۰ ت' },
+      { theme: 'review',     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title: 'نظر مثبت',            desc: 'دریافت نظر از مشتری',         reward: '+۳,۰۰۰ ت' },
+      { theme: 'referral',   icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', title: 'دعوت دوستان',        desc: 'معرفی فروشنده جدید',         reward: '+۱۰,۰۰۰ ت' },
+      { theme: 'profile',    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>', title: 'تکمیل پروفایل',     desc: 'اطلاعات کامل فروشگاه',        reward: '+۳,۰۰۰ ت' }
     ];
 
     const earnCardsMarkup = earnItems.map((item) => `
@@ -1552,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               ${earnCardsMarkup}
             </div>
             <p class="wallet-earn-tip">
-              <span class="wallet-earn-tip__icon" aria-hidden="true">💡</span>
+              <span class="wallet-earn-tip__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></span>
               <span>هرچه فعال‌تر باشی، اعتبار بیشتری به‌صورت رایگان به دست می‌آوری.</span>
             </p>
           </div>
