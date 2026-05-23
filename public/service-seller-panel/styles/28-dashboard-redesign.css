@@ -1524,24 +1524,51 @@
 }
 
 #dashboard-view .rank-card-v2__actions {
-  padding: 0 12px 12px;
+  padding: 8px 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0));
 }
 
 #dashboard-view .rank-card-v2__cta {
-  min-height: 44px;
-  border-radius: 15px;
-  font-size: 0.78rem;
-  font-weight: 850;
+  justify-content: center;
+  min-height: 48px;
+  padding-inline: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  font-weight: 900;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 38%),
-    linear-gradient(135deg, #2563eb, #0891b2);
-  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.28);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 40%),
+    linear-gradient(135deg, #2563eb 0%, #0ea5e9 52%, #14b8a6 100%);
+  box-shadow:
+    0 12px 24px rgba(14, 165, 233, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+#dashboard-view .rank-card-v2__cta-text {
+  flex: 0 1 auto;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#dashboard-view .rank-card-v2__cta-pill {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+#dashboard-view .rank-card-v2__cta-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .notification-fab {
   right: auto;
-  left: clamp(12px, 4vw, 18px);
-  inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--nav-height-mobile, 64px) + 8px);
+  left: clamp(14px, 4vw, 20px);
+  top: calc(34px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+  inset-block-end: auto;
   z-index: 1500;
   opacity: 1;
   pointer-events: none;
@@ -1551,15 +1578,16 @@
 
 .notification-fab__btn,
 #notification-btn {
-  inline-size: 44px;
-  block-size: 44px;
-  border-radius: 14px;
+  inline-size: 46px;
+  block-size: 46px;
+  border-radius: 15px;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.16), transparent 42%),
-    linear-gradient(135deg, #2563eb, #14b8a6);
+    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.24), transparent 36%),
+    linear-gradient(135deg, #1d4ed8 0%, #0891b2 58%, #0f766e 100%);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.28),
-    0 6px 18px rgba(37, 99, 235, 0.24);
+    0 14px 32px rgba(0, 0, 0, 0.32),
+    0 8px 22px rgba(14, 165, 233, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   pointer-events: auto;
   touch-action: manipulation;
 }
@@ -1580,13 +1608,8 @@
 }
 
 @media (max-width: 640px) {
-  #dashboard-view .plan-hero-actions {
-    padding-left: 62px;
-  }
-
-  #dashboard-view .rank-card-v2__actions {
-    padding-left: 12px;
-    padding-right: 12px;
+  .app-header .micro-toolbar {
+    padding-left: 66px;
   }
 
   body:has(#dashboard-view.active) .notification-fab.is-hidden-by-rank {
@@ -1596,8 +1619,11 @@
   }
 
   body:has(#dashboard-view.active) .notification-fab {
-    left: clamp(12px, 4vw, 18px);
+    left: clamp(14px, 4vw, 20px);
     right: auto;
+    top: calc(34px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    inset-block-end: auto;
     opacity: 1;
     filter: none;
     transform: none;
@@ -1605,16 +1631,25 @@
   }
 
   body:has(#dashboard-view.active) .notification-fab:focus-within {
-    left: clamp(12px, 4vw, 18px);
+    left: clamp(14px, 4vw, 20px);
     opacity: 1;
   }
 
   body:has(#dashboard-view.active) .notification-fab__btn,
   body:has(#dashboard-view.active) #notification-btn {
-    inline-size: 44px;
-    block-size: 44px;
-    border-radius: 14px;
+    inline-size: 46px;
+    block-size: 46px;
+    border-radius: 15px;
     pointer-events: auto;
+  }
+
+  body:has(#dashboard-view.active) .notification-panel {
+    top: calc(var(--header-height, 60px) + 36px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    inset-block-start: calc(var(--header-height, 60px) + 36px + env(safe-area-inset-top, 0px));
+    inset-block-end: auto;
+    max-block-size: min(68vh, 520px);
+    transform-origin: top left;
   }
 }
 
