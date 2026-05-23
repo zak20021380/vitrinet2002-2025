@@ -1105,7 +1105,7 @@
 
 /* Dashboard polish pass: compact premium mobile cards */
 #dashboard-view .view-container {
-  padding-bottom: calc(var(--nav-height-mobile, 72px) + 88px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 12px;
 }
 
 #dashboard-view .plan-hero {
@@ -1540,10 +1540,13 @@
 
 .notification-fab {
   right: auto;
-  left: clamp(12px, 4vw, 16px);
-  inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--nav-height-mobile, 72px) + 8px);
-  z-index: 980;
-  opacity: 0.82;
+  left: clamp(12px, 4vw, 18px);
+  inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--nav-height-mobile, 64px) + 8px);
+  z-index: 1500;
+  opacity: 1;
+  pointer-events: none;
+  transform: none;
+  filter: none;
 }
 
 .notification-fab__btn,
@@ -1557,6 +1560,8 @@
   box-shadow:
     0 10px 24px rgba(0, 0, 0, 0.28),
     0 6px 18px rgba(37, 99, 235, 0.24);
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .notification-fab__btn svg,
@@ -1575,23 +1580,37 @@
 }
 
 @media (max-width: 640px) {
+  #dashboard-view .plan-hero-actions,
+  #dashboard-view .rank-card-v2__actions {
+    padding-left: 62px;
+  }
+
+  body:has(#dashboard-view.active) .notification-fab.is-hidden-by-rank {
+    opacity: 1;
+    pointer-events: none;
+    transform: none;
+  }
+
   body:has(#dashboard-view.active) .notification-fab {
-    left: -24px;
+    left: clamp(12px, 4vw, 18px);
     right: auto;
-    opacity: 0.68;
-    filter: saturate(0.9);
+    opacity: 1;
+    filter: none;
+    transform: none;
+    z-index: 1500;
   }
 
   body:has(#dashboard-view.active) .notification-fab:focus-within {
-    left: 8px;
+    left: clamp(12px, 4vw, 18px);
     opacity: 1;
   }
 
   body:has(#dashboard-view.active) .notification-fab__btn,
   body:has(#dashboard-view.active) #notification-btn {
-    inline-size: 42px;
-    block-size: 42px;
-    border-radius: 13px;
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: 14px;
+    pointer-events: auto;
   }
 }
 
@@ -1622,7 +1641,7 @@
 
 @media (min-width: 640px) {
   #dashboard-view .view-container {
-    padding-bottom: 36px;
+    padding-bottom: 24px;
   }
 
   #dashboard-view .plan-hero-top,
