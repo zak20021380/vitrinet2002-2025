@@ -4308,30 +4308,6 @@ const Notifications = {
       UIComponents.showToast('همه اعلان‌ها خوانده شد.', 'success');
     });
 
-    // دکمه تست اعلان
-    const testBtn = document.getElementById('notif-test-btn');
-    testBtn?.addEventListener('click', async () => {
-      try {
-        testBtn.disabled = true;
-        testBtn.textContent = 'در حال ایجاد...';
-        await API.createTestNotification();
-        await this.fetchFromServer();
-        this.render();
-        UIComponents.showToast('اعلان تست ایجاد شد!', 'success');
-      } catch (err) {
-        console.error('Test notification failed:', err);
-        UIComponents.showToast('خطا در ایجاد اعلان تست', 'error');
-      } finally {
-        testBtn.disabled = false;
-        testBtn.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          ایجاد اعلان تست
-        `;
-      }
-    });
-
     // دلیگیشن برای آیتم‌ها (حذف/خواندن)
     this._els.list?.addEventListener('click', async (e) => {
       const li = e.target.closest('li[data-id]');
