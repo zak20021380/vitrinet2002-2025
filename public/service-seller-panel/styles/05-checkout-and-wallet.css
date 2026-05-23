@@ -648,7 +648,7 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
 .wsv2-services {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
 .wsv2-service {
@@ -656,67 +656,93 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 16px;
+  gap: 0;
+  padding: 0;
+  border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    linear-gradient(160deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: border-color 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
   overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Left accent bar */
 .wsv2-service::before {
   content: '';
   position: absolute;
   inset-inline-start: 0;
   inset-block: 0;
   width: 3px;
-  background: var(--service-accent);
-  opacity: 0.85;
+  background: linear-gradient(180deg, var(--service-accent), color-mix(in srgb, var(--service-accent) 40%, transparent));
+  opacity: 0.9;
   border-radius: 3px;
+  z-index: 2;
 }
 
+/* Ambient glow overlay */
 .wsv2-service::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(140% 80% at 100% 0%, color-mix(in srgb, var(--service-accent) 14%, transparent) 0%, transparent 60%);
+  background: radial-gradient(140% 80% at 100% 0%, color-mix(in srgb, var(--service-accent) 12%, transparent) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
+  z-index: 0;
 }
 
 .wsv2-service:hover:not(.is-locked) {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--service-accent) 35%, rgba(255,255,255,0.07));
-  box-shadow: 0 12px 28px -18px color-mix(in srgb, var(--service-accent) 65%, transparent);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--service-accent) 40%, rgba(255,255,255,0.09));
+  box-shadow:
+    0 14px 32px -18px color-mix(in srgb, var(--service-accent) 55%, transparent),
+    0 2px 8px -4px rgba(0,0,0,0.35);
 }
 
 .wsv2-service:hover:not(.is-locked)::after { opacity: 1; }
 
-.wsv2-service.is-locked { opacity: 0.65; }
+/* Touch press feedback */
+.wsv2-service:active:not(.is-locked) {
+  transform: translateY(0) scale(0.985);
+  transition: transform 0.1s ease;
+}
 
-.wsv2-service__head {
+.wsv2-service.is-locked {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---- Card body (top section) ---- */
+.wsv2-service__body {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 16px 14px;
   position: relative;
   z-index: 1;
 }
 
+.wsv2-service__head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
 .wsv2-service__icon {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--service-accent) 14%, rgba(255,255,255,0.04));
-  border: 1px solid color-mix(in srgb, var(--service-accent) 25%, transparent);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--service-accent) 15%, rgba(255,255,255,0.04));
+  border: 1px solid color-mix(in srgb, var(--service-accent) 28%, transparent);
   color: color-mix(in srgb, var(--service-accent) 85%, #fff);
+  box-shadow: 0 4px 12px -6px color-mix(in srgb, var(--service-accent) 45%, transparent);
 }
 
 .wsv2-service__icon svg {
@@ -728,7 +754,7 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
 .wsv2-service__title-wrap {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
@@ -737,13 +763,13 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
   font-size: 0.66rem;
   font-weight: 600;
   letter-spacing: 0.3px;
-  color: color-mix(in srgb, var(--service-accent) 75%, #fff);
+  color: color-mix(in srgb, var(--service-accent) 78%, #fff);
   text-transform: uppercase;
 }
 
 .wsv2-service__title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
   line-height: 1.3;
@@ -751,72 +777,107 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
 
 .wsv2-service__desc {
   margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
-  position: relative;
-  z-index: 1;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.62);
+  padding-inline-start: 2px;
 }
 
-.wsv2-service__footer {
+/* ---- Price row ---- */
+.wsv2-service__price-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  position: relative;
-  z-index: 1;
+  gap: 8px;
+  padding-inline-start: 2px;
+}
+
+.wsv2-service__price-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
 }
 
 .wsv2-service__price-amount {
-  font-size: 0.88rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #fff;
+  color: color-mix(in srgb, var(--service-accent) 80%, #fff);
+  letter-spacing: -0.01em;
+}
+
+/* ---- CTA footer strip ---- */
+.wsv2-service__footer {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
 }
 
 .wsv2-service__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 0 16px;
-  border-radius: 10px;
+  gap: 7px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 0 0 18px 18px;
   border: none;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #fff;
   cursor: pointer;
   background: linear-gradient(135deg,
-    color-mix(in srgb, var(--service-accent) 90%, #000),
-    color-mix(in srgb, var(--service-accent) 70%, #000));
-  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--service-accent) 80%, transparent);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    color-mix(in srgb, var(--service-accent) 32%, transparent),
+    color-mix(in srgb, var(--service-accent) 18%, transparent));
+  transition: background 0.18s ease, transform 0.12s ease, opacity 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.01em;
 }
 
 .wsv2-service__btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--service-accent) 90%, transparent);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--service-accent) 44%, transparent),
+    color-mix(in srgb, var(--service-accent) 28%, transparent));
 }
 
-.wsv2-service__btn:active:not(:disabled) { transform: translateY(0); }
+.wsv2-service__btn:active:not(:disabled) {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--service-accent) 52%, transparent),
+    color-mix(in srgb, var(--service-accent) 34%, transparent));
+}
 
 .wsv2-service__btn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -2px;
 }
 
 .wsv2-service__btn[disabled] {
   cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.45);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .wsv2-service__btn.is-loading {
   pointer-events: none;
   opacity: 0.85;
+}
+
+/* Arrow icon inside CTA (RTL: points left = leading direction) */
+.wsv2-service__btn .wsv2-btn-arrow {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.wsv2-service__btn:hover:not(:disabled) .wsv2-btn-arrow {
+  transform: translateX(-3px);
+  opacity: 1;
 }
 
 .wsv2-spinner {
@@ -830,12 +891,6 @@ body:has(.ads-modal:not([hidden])) .notification-fab {
 }
 
 @keyframes wsv2-spin { to { transform: rotate(360deg); } }
-
-/* RTL: flip the arrow icon inside the buy button so it points to the action */
-[dir="rtl"] .wsv2-service__btn svg,
-.wsv2-service__btn svg {
-  transform: scaleX(-1);
-}
 
 /* ---------- Transactions ---------- */
 .wsv2-tx-list {
