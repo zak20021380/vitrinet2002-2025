@@ -2697,3 +2697,114 @@
     gap: 4px;
   }
 }
+
+/* Header quick links: neutral navigation buttons, not selected pills */
+.app-header #view-store-btn,
+.app-header #open-reservations-btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 11px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(15, 23, 42, 0.32);
+  color: rgba(241, 245, 249, 0.9);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  filter: none;
+  text-shadow: none;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-header #view-store-btn::after,
+.app-header #open-reservations-btn::after {
+  content: none;
+  display: none;
+}
+
+.app-header #view-store-btn:hover,
+.app-header #open-reservations-btn:hover {
+  transform: none;
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)),
+    rgba(15, 23, 42, 0.42);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.app-header #view-store-btn:active,
+.app-header #open-reservations-btn:active {
+  transform: scale(0.97);
+  filter: none;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.app-header #view-store-btn:focus-visible,
+.app-header #open-reservations-btn:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(148, 163, 184, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.app-header #view-store-btn[aria-current="page"],
+.app-header #open-reservations-btn[aria-current="page"] {
+  color: #f8fafc;
+  border-color: rgba(226, 232, 240, 0.24);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)),
+    rgba(30, 41, 59, 0.52);
+}
+
+.app-header #view-store-btn[aria-current="page"]::before,
+.app-header #open-reservations-btn[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  inset-inline: 12px;
+  inset-block-end: 4px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(203, 213, 225, 0.52);
+}
+
+@media (max-width: 640px) {
+  .app-header #view-store-btn,
+  .app-header #open-reservations-btn {
+    flex: 1 1 0;
+    max-width: 92px;
+    height: 34px;
+    min-height: 34px;
+    padding-inline: 9px !important;
+    font-size: 10.5px;
+  }
+}
+
+@media (min-width: 641px) {
+  .app-header #view-store-btn,
+  .app-header #open-reservations-btn {
+    min-height: 38px;
+    padding-inline: 14px !important;
+  }
+}
