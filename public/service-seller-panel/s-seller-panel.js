@@ -3377,15 +3377,15 @@ function renderComplimentaryPlan(planRaw) {
   if (tierEl) {
     let tierLabel;
     if (planlessNudge) {
-      tierLabel = 'نیاز به انتخاب پلن';
+      tierLabel = 'نیاز به پلن';
     } else if (plan.activeNow) {
-      tierLabel = plan.title ? `پلن «${plan.title}» فعال است` : 'پلن رایگان فعال است';
+      tierLabel = 'فعال';
     } else if (plan.hasExpired) {
-      tierLabel = plan.title ? `پلن «${plan.title}» منقضی شده` : 'پلن رایگان منقضی شده است';
+      tierLabel = 'منقضی';
     } else if (plan.isActive) {
-      tierLabel = plan.title ? `پلن «${plan.title}» در انتظار شروع` : 'پلن رایگان در انتظار شروع';
+      tierLabel = 'در انتظار شروع';
     } else {
-      tierLabel = plan.title ? `پلن «${plan.title}» غیرفعال است` : 'پلن رایگان غیرفعال شده است';
+      tierLabel = 'غیرفعال';
     }
     tierEl.textContent = tierLabel;
   }
@@ -3407,11 +3407,11 @@ function renderComplimentaryPlan(planRaw) {
       planCtaBtn.textContent = 'مشاهده و خرید پلن';
       planCtaBtn.setAttribute('aria-label', 'مشاهده و خرید پلن مناسب کسب‌وکار');
     } else if (plan.activeNow) {
-    planCtaBtn.textContent = 'فعالسازی پلن';
-    planCtaBtn.setAttribute('aria-label', 'فعالسازی پلن');
+      planCtaBtn.textContent = 'مشاهده و ارتقا پلن';
+      planCtaBtn.setAttribute('aria-label', 'مشاهده و ارتقای پلن فعال');
     } else {
-      planCtaBtn.textContent = 'فعالسازی مجدد / ارتقا';
-      planCtaBtn.setAttribute('aria-label', 'فعالسازی مجدد یا ارتقای پلن متوقف‌شده');
+      planCtaBtn.textContent = 'تمدید یا خرید پلن';
+      planCtaBtn.setAttribute('aria-label', 'تمدید یا خرید پلن جدید');
     }
   }
 
@@ -3455,16 +3455,16 @@ function renderComplimentaryPlan(planRaw) {
   if (statusChip) {
     statusChip.classList.remove('chip-live');
     if (planlessNudge) {
-      statusChip.textContent = 'پلن انتخاب نشده است';
+      statusChip.textContent = 'بدون پلن';
     } else if (plan.activeNow) {
       statusChip.classList.add('chip-live');
-      statusChip.textContent = 'تایید شده';
+      statusChip.textContent = 'فعال و تایید شده';
     } else if (plan.hasExpired) {
-      statusChip.textContent = 'پلن رایگان منقضی شده';
+      statusChip.textContent = 'منقضی شده';
     } else if (plan.isActive) {
-      statusChip.textContent = 'پلن رایگان در انتظار شروع';
+      statusChip.textContent = 'در انتظار شروع';
     } else {
-      statusChip.textContent = 'پلن رایگان غیرفعال';
+      statusChip.textContent = 'غیرفعال';
     }
   }
 
@@ -3472,14 +3472,28 @@ function renderComplimentaryPlan(planRaw) {
     perksList.innerHTML = '';
     const perks = planlessNudge
       ? [
-          'مقایسه پلن‌ها و انتخاب سریع',
-          'پشتیبانی تلفنی ۹۱۰۰-۹۹۰۰ برای راهنمایی',
-          'فعال‌سازی فوری پس از پرداخت'
+          'انتخاب سریع',
+          'پشتیبانی',
+          'فعال‌سازی فوری'
         ]
       : plan.perks;
+    const compactPerkText = (perk) => {
+      const text = String(perk || '').trim();
+      const replacements = new Map([
+        ['نمایش ویژه در نتایج ویترینت', 'نمایش ویژه'],
+        ['پشتیبانی راه‌اندازی رایگان', 'پشتیبانی'],
+        ['دسترسی به ابزارهای فروش حرفه‌ای', 'ابزار فروش']
+      ]);
+      if (replacements.has(text)) return replacements.get(text);
+      return text.length > 28 ? `${text.slice(0, 27)}…` : text;
+    };
     perks.forEach((perk) => {
       const li = document.createElement('li');
-      li.textContent = perk;
+      const label = compactPerkText(perk);
+      li.textContent = label;
+      if (label !== perk) {
+        li.title = perk;
+      }
       perksList.appendChild(li);
     });
   }
@@ -3494,37 +3508,37 @@ function renderComplimentaryPlan(planRaw) {
     if (plan.note) {
       messageEl.textContent = plan.note;
     } else if (planlessNudge) {
-      messageEl.innerHTML = 'هیچ پلنی برای فروشگاه فعال نیست و دسترسی‌ها متوقف شده‌اند. برای فعال شدن همه قابلیت‌ها، از بخش «<a href="#/plans" class="plan-link">پلن‌ها</a>» یکی از گزینه‌ها را انتخاب کنید.';
+      messageEl.innerHTML = 'برای فعال شدن امکانات، از بخش «<a href="#/plans" class="plan-link">پلن‌ها</a>» یک گزینه انتخاب کنید.';
     } else if (plan.activeNow) {
       const remainingText = remainingDays != null ? `${faNumber(remainingDays)} روز` : '';
-      messageEl.innerHTML = `🎉 این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.${remainingText ? ` <strong>${remainingText}</strong> از دوره پلن باقی مانده است.` : ''}`;
+      messageEl.innerHTML = `پلن فعال است.${remainingText ? ` <strong>${remainingText}</strong> باقی مانده.` : ''}`;
     } else if (plan.hasExpired) {
-      messageEl.textContent = 'دوره پلن به پایان رسیده است. برای ادامه از بخش «پلن‌ها» پلن جدیدی انتخاب و فعال کنید.';
+      messageEl.textContent = 'دوره پلن تمام شده؛ برای ادامه یک پلن جدید فعال کنید.';
     } else if (plan.isActive) {
       const startText = startLabel ? `از ${startLabel}` : 'به‌زودی';
-      messageEl.textContent = `پلن رایگان شما ${startText} فعال می‌شود. هنگام شروع، همینجا اطلاع‌رسانی خواهد شد.`;
+      messageEl.textContent = `پلن ${startText} فعال می‌شود.`;
     } else if (plansDisabled) {
-      messageEl.textContent = 'پلن رایگان موقتاً از سمت مدیریت غیرفعال است. با تغییر وضعیت، اطلاع‌رسانی می‌شود.';
+      messageEl.textContent = 'پلن رایگان فعلاً غیرفعال است.';
     } else {
-      messageEl.textContent = 'هنوز پلن رایگان برای فروشگاه شما فعال نشده است. در صورت فعال‌سازی، جزئیات همینجا نمایش داده می‌شود.';
+      messageEl.textContent = 'هنوز پلنی برای فروشگاه فعال نشده است.';
     }
   }
 
-  let subtext = 'وضعیت پلن رایگان توسط تیم مدیریت ویترینت کنترل می‌شود و فعلاً غیرفعال است. برای پیگیری با پشتیبانی در ارتباط باشید.';
+  let subtext = 'برای دسترسی کامل، وضعیت پلن را فعال نگه دارید.';
   if (plan.activeNow) {
-    subtext = 'شما به تمام امکانات پلن دسترسی دارید. از خدمات و نوبت‌دهی استفاده کنید.';
+    subtext = 'دسترسی کامل به خدمات و نوبت‌دهی دارید.';
   } else if (plan.hasExpired) {
-    subtext = 'پلن قبلی منقضی شده است. از بخش «پلن‌ها» یکی از گزینه‌ها را انتخاب کنید تا دسترسی کامل دوباره فعال شود.';
+    subtext = 'برای بازگشت دسترسی کامل، پلن جدید انتخاب کنید.';
   } else if (plan.isActive) {
     subtext = startLabel
       ? `پلن رایگان شما از ${startLabel} فعال می‌شود.`
       : 'پلن رایگان شما زمان‌بندی شده است و به‌زودی فعال خواهد شد.';
   } else if (plansDisabled) {
-    subtext = 'دسترسی رایگان به صورت سراسری غیرفعال شده است؛ با تغییر وضعیت، اطلاع‌رسانی می‌شود.';
+    subtext = 'دسترسی رایگان موقتاً غیرفعال است.';
   }
   if (subtextEl) {
     if (planlessNudge) {
-      subtextEl.innerHTML = 'برای شروع فروش حرفه‌ای، وارد بخش <a href="#/plans" class="plan-link">پلن‌ها</a> شوید، پلن مناسب را انتخاب کنید و در کمتر از یک دقیقه فعال‌سازی را انجام دهید.';
+      subtextEl.innerHTML = 'پلن مناسب را انتخاب کنید و سریع فعال شوید.';
     } else {
       subtextEl.textContent = subtext;
     }
@@ -3537,17 +3551,17 @@ function renderComplimentaryPlan(planRaw) {
     
     if (planlessNudge) {
       // هیچ پلنی انتخاب نشده
-      giftNoteEl.innerHTML = '<span class="gift-note-icon">📋</span> هنوز پلنی برای فروشگاه شما فعال نشده است.';
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">📋</span> بدون پلن فعال';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible', 'is-inactive');
     } else if (plan.activeNow) {
       // پلن فعال است
-      giftNoteEl.innerHTML = '<span class="gift-note-icon">🎁</span> این پلن رایگان به عنوان هدیه مدیریت ویترینت فعال شده است.';
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">🎁</span> هدیه فعال مدیریت';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible', 'is-active');
     } else if (plan.hasExpired) {
       // پلن منقضی شده
-      giftNoteEl.innerHTML = '<span class="gift-note-icon">⏰</span> دوره پلن رایگان به پایان رسیده است. برای ادامه فعالیت، پلن جدیدی تهیه کنید.';
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">⏰</span> دوره پلن تمام شده';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible', 'is-expired');
     } else if (plan.isActive) {
@@ -3558,7 +3572,7 @@ function renderComplimentaryPlan(planRaw) {
       giftNoteEl.classList.add('is-visible', 'is-scheduled');
     } else {
       // پلن غیرفعال شده توسط ادمین
-      giftNoteEl.innerHTML = '<span class="gift-note-icon">🚫</span> پلن رایگان توسط مدیریت غیرفعال شده است. برای پیگیری با پشتیبانی تماس بگیرید.';
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">🚫</span> پلن غیرفعال است';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible', 'is-inactive');
     }
