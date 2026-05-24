@@ -6424,8 +6424,7 @@ if (elements.viewStoreBtn) {
       
       // بارگذاری مجدد با limit جدید
       try {
-        await app.loadTopPeers(true, limit);
-        app.applyTopPeers(app.topPeersData);
+        await app.renderTopPeers(true, limit);
       } catch (err) {
         console.error('Failed to reload leaderboard with new limit:', err);
       }
@@ -6458,19 +6457,24 @@ if (elements.viewStoreBtn) {
     leaderboardRefreshBtn.addEventListener('click', async () => {
       leaderboardRefreshBtn.classList.add('is-loading');
       leaderboardRefreshBtn.disabled = true;
+      leaderboardRefreshBtn.setAttribute('aria-busy', 'true');
       
       try {
         const activeFilter = document.querySelector('[data-leaderboard-limit].active');
         const limit = parseInt(activeFilter?.dataset.leaderboardLimit) || 10;
-        await app.loadTopPeers(true, limit);
-        app.applyTopPeers(app.topPeersData);
-        UIComponents?.showToast?.('رتبه‌بندی بروزرسانی شد', 'success');
+        const refreshed = await app.renderTopPeers(true, limit);
+        if (refreshed !== false) {
+          UIComponents?.showToast?.('رتبه‌بندی بروزرسانی شد', 'success');
+        } else {
+          UIComponents?.showToast?.('خطا در بروزرسانی', 'error');
+        }
       } catch (err) {
         console.error('Failed to refresh leaderboard:', err);
         UIComponents?.showToast?.('خطا در بروزرسانی', 'error');
       } finally {
         leaderboardRefreshBtn.classList.remove('is-loading');
         leaderboardRefreshBtn.disabled = false;
+        leaderboardRefreshBtn.removeAttribute('aria-busy');
       }
     });
   }
@@ -6634,11 +6638,16 @@ destroy() {
         return;
       }
       try {
-        const data = await this.loadTopPeers(true);
+        const data = await this.loadTopPeers(true, this.getActiveLeaderboardLimit());
         this.applyTopPeers(data);
       } catch (err) {
         console.warn('Auto refresh top peers failed', err);
       }
+    }
+
+    getActiveLeaderboardLimit() {
+      const activeFilter = document.querySelector('[data-leaderboard-limit].active');
+      return parseInt(activeFilter?.dataset.leaderboardLimit, 10) || 10;
     }
 
     async loadTopPeers(force = false, limit = 10) {
@@ -6672,9 +6681,6 @@ destroy() {
           return this.topPeersData;
         } catch (err) {
           console.error('loadTopPeers failed', err);
-          if (force) {
-            UIComponents?.showToast?.('خطا در بروزرسانی رتبه‌بندی', 'error');
-          }
           throw err;
         } finally {
           this._topPeersPromise = null;
@@ -7064,56 +7070,83 @@ destroy() {
 
     applyTopPeers(data = this.topPeersData || {}) {
       const list = document.getElementById('top-leaderboard-list');
-      const loadingEl = document.getElementById('top-leaderboard-loading');
-      const errorEl = document.getElementById('top-error');
-      const emptyEl = document.getElementById('top-leaderboard-empty');
       if (!list) return;
 
-      if (loadingEl) loadingEl.hidden = true;
-      if (errorEl) errorEl.hidden = true;
+      this.setTopPeersState('ready');
 
       const top = Array.isArray(data?.top) ? data.top : [];
       if (!top.length) {
         list.innerHTML = '';
-        if (emptyEl) emptyEl.hidden = false;
+        this.setTopPeersState('empty', 'هنوز داده‌ای برای رتبه‌بندی ثبت نشده است.');
       } else {
-        if (emptyEl) emptyEl.hidden = true;
         list.innerHTML = top.map(entry => this.buildLeaderboardItem(entry, data?.mine)).join('');
+        this.setTopPeersState('ready');
       }
 
       this.applyRankCard(data);
       this.applyTopSummary(data);
     }
 
-    async renderTopPeers(force = false) {
+    setTopPeersState(state = 'ready', message = '') {
       const list = document.getElementById('top-leaderboard-list');
       const loadingEl = document.getElementById('top-leaderboard-loading');
       const errorEl = document.getElementById('top-error');
       const emptyEl = document.getElementById('top-leaderboard-empty');
       if (!list) return;
 
-      if (!force && this.topPeersData) {
-        this.applyTopPeers(this.topPeersData);
-        return;
+      const isLoading = state === 'loading';
+      const isError = state === 'error';
+      const isEmpty = state === 'empty';
+
+      if (loadingEl) loadingEl.hidden = !isLoading;
+      if (errorEl) {
+        errorEl.hidden = !isError;
+        if (isError) {
+          errorEl.textContent = message || 'خطا در دریافت اطلاعات رتبه‌بندی. لطفاً دوباره تلاش کنید.';
+        }
+      }
+      if (emptyEl) {
+        emptyEl.hidden = !isEmpty;
+        if (isEmpty && message) {
+          emptyEl.textContent = message;
+        }
       }
 
-      if (loadingEl) loadingEl.hidden = false;
-      if (errorEl) errorEl.hidden = true;
-      if (emptyEl) emptyEl.hidden = true;
-      list.innerHTML = '';
-      list.setAttribute('aria-busy', 'true');
+      list.hidden = isLoading || isError || isEmpty;
+      if (isLoading) {
+        list.setAttribute('aria-busy', 'true');
+      } else {
+        list.removeAttribute('aria-busy');
+      }
+    }
+
+    async renderTopPeers(force = false, limit = this.getActiveLeaderboardLimit()) {
+      const list = document.getElementById('top-leaderboard-list');
+      if (!list) return;
+
+      if (!force && this.topPeersData) {
+        this.applyTopPeers(this.topPeersData);
+        return true;
+      }
+
+      this.setTopPeersState('loading');
+      if (!this.topPeersData || force) {
+        list.innerHTML = '';
+      }
 
       try {
-        const data = await this.loadTopPeers(force);
+        const data = await this.loadTopPeers(force, limit);
         this.applyTopPeers(data);
+        return true;
       } catch (err) {
-        if (errorEl) {
-          errorEl.textContent = 'خطا در دریافت اطلاعات رتبه‌بندی. لطفاً دوباره تلاش کنید.';
-          errorEl.hidden = false;
-        }
+        console.error('renderTopPeers failed', err);
+        list.innerHTML = '';
+        this.setTopPeersState('error', 'دریافت جدول رتبه‌بندی ناموفق بود. دوباره بروزرسانی کنید.');
+        return false;
       } finally {
-        if (loadingEl) loadingEl.hidden = true;
-        list.removeAttribute('aria-busy');
+        if (list.getAttribute('aria-busy') === 'true') {
+          list.removeAttribute('aria-busy');
+        }
       }
     }
 
