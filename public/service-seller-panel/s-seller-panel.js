@@ -144,14 +144,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (streakHintEl) {
       const days = streakData.currentStreak || 0;
       if (days === 0) {
-        streakHintEl.textContent = 'شروع کن! اولین روز استریکت رو ثبت کن.';
+        streakHintEl.textContent = 'شروع امروز';
       } else if (streakData.checkpointReached) {
-        streakHintEl.textContent = `🎉 تبریک! به چک‌پوینت ${toFaDigits(days)} روزه رسیدی!`;
+        streakHintEl.textContent = 'چک‌پوینت فعال';
       } else if (days === streakData.longestStreak && days > 1) {
-        streakHintEl.textContent = `🔥 رکورد جدید! ${toFaDigits(days)} روز متوالی!`;
+        streakHintEl.textContent = 'رکورد جدید';
       } else {
         const daysToCheckpoint = 7 - (days % 7);
-        streakHintEl.textContent = `ادامه بده! ${toFaDigits(daysToCheckpoint)} روز تا چک‌پوینت بعدی`;
+        streakHintEl.textContent = `${toFaDigits(daysToCheckpoint)} روز تا جایزه`;
       }
     }
     
