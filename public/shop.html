@@ -2359,14 +2359,22 @@ body {
 
 .similar-shops-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: .8rem;
+  margin-bottom: 1rem;
 }
 
 .similar-shops-title-wrap {
   min-width: 0;
+}
+
+/* Right-side group: context badge + view-all CTA */
+.similar-shops-head-end {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-shrink: 0;
 }
 
 .similar-shops-eyebrow {
@@ -2390,14 +2398,14 @@ body {
 .similar-shops-context {
   display: inline-flex;
   align-items: center;
-  max-width: 100%;
+  max-width: 180px;
   min-height: 28px;
-  padding: .34rem .64rem;
+  padding: .3rem .6rem;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(124, 131, 253, 0.08), rgba(82, 183, 136, 0.1));
   border: 1px solid rgba(124, 131, 253, 0.14);
   color: #475569;
-  font-size: .72rem;
+  font-size: .71rem;
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
@@ -2471,16 +2479,16 @@ body {
   scroll-snap-align: start;
   scroll-snap-stop: normal;
   display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
-  gap: .78rem;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: .85rem;
   align-items: stretch;
-  min-height: 126px;
-  padding: .86rem;
-  border-radius: 1.1rem;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
-  border: 1px solid rgba(124, 131, 253, 0.12);
-  box-shadow: 0 12px 35px rgba(28, 44, 90, 0.08);
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  min-height: 134px;
+  padding: .95rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  border: 1px solid rgba(124, 131, 253, 0.1);
+  box-shadow: 0 2px 8px rgba(28, 44, 90, 0.04), 0 8px 28px rgba(28, 44, 90, 0.07);
+  transition: transform .22s cubic-bezier(.25,.46,.45,.94), box-shadow .22s cubic-bezier(.25,.46,.45,.94), border-color .22s ease;
   touch-action: pan-x pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
@@ -2497,20 +2505,26 @@ body {
 }
 
 .similar-shop-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(124, 131, 253, 0.3);
-  box-shadow: 0 18px 45px rgba(28, 44, 90, 0.12);
+  transform: translateY(-5px) scale(1.012);
+  border-color: rgba(124, 131, 253, 0.28);
+  box-shadow: 0 4px 12px rgba(28, 44, 90, 0.05), 0 20px 50px rgba(28, 44, 90, 0.13);
 }
 
 .similar-shop-logo {
-  width: 68px;
-  height: 68px;
+  width: 76px;
+  height: 76px;
   align-self: start;
-  border-radius: .95rem;
+  border-radius: 1.1rem;
   object-fit: cover;
   background: linear-gradient(135deg, #eef2ff, #ecfdf5);
-  border: 1px solid rgba(124, 131, 253, 0.12);
-  box-shadow: 0 8px 18px rgba(28, 44, 90, 0.08);
+  border: 1.5px solid rgba(124, 131, 253, 0.14);
+  box-shadow: 0 4px 12px rgba(28, 44, 90, 0.1), 0 1px 3px rgba(28, 44, 90, 0.06);
+  transition: box-shadow .22s ease, transform .22s ease;
+}
+
+.similar-shop-card:hover .similar-shop-logo {
+  box-shadow: 0 6px 18px rgba(124, 131, 253, 0.22), 0 2px 6px rgba(28, 44, 90, 0.08);
+  transform: scale(1.04);
 }
 
 .similar-shop-content,
@@ -2644,15 +2658,15 @@ body {
   justify-content: center;
   gap: .45rem;
   width: 100%;
-  min-height: 38px;
-  margin-top: .08rem;
-  border-radius: 0.9rem;
+  min-height: 36px;
+  margin-top: .1rem;
+  border-radius: 0.85rem;
   background: linear-gradient(135deg, var(--primary) 0%, #5bc4b8 100%);
   color: #fff;
-  font-size: .78rem;
+  font-size: .76rem;
   font-weight: 900;
   text-decoration: none;
-  box-shadow: 0 10px 30px rgba(124, 131, 253, 0.24);
+  box-shadow: 0 6px 20px rgba(124, 131, 253, 0.2);
   transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
 
@@ -2686,46 +2700,37 @@ body {
   outline-offset: 3px;
 }
 
-.similar-shops-view-all-wrap {
-  display: flex;
-  justify-content: center;
-  padding-top: .62rem;
-}
-
+/* "مشاهده همه" — lives in the header, compact pill style */
 .similar-shops-view-all {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 0;
-  min-height: 40px;
-  max-width: 100%;
-  padding: .48rem .9rem;
+  gap: .38rem;
+  min-height: 30px;
+  padding: .28rem .72rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(124, 131, 253, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid rgba(124, 131, 253, 0.22);
   color: var(--primary);
-  box-shadow: 0 8px 22px rgba(28, 44, 90, 0.055);
-  font-size: .78rem;
+  font-size: .73rem;
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
 }
 
 .similar-shops-view-all:hover,
 .similar-shops-view-all:focus-visible {
-  background: linear-gradient(135deg, rgba(124, 131, 253, 0.1), rgba(82, 183, 136, 0.12));
-  border-color: rgba(124, 131, 253, 0.24);
-  color: #172033;
-  box-shadow: 0 10px 26px rgba(124, 131, 253, 0.13);
+  background: linear-gradient(135deg, rgba(124, 131, 253, 0.1), rgba(82, 183, 136, 0.1));
+  border-color: rgba(124, 131, 253, 0.38);
+  box-shadow: 0 4px 14px rgba(124, 131, 253, 0.14);
   transform: translateY(-1px);
 }
 
 .similar-shops-view-all:active {
   transform: translateY(0) scale(.98);
-  box-shadow: 0 5px 14px rgba(28, 44, 90, 0.08);
+  box-shadow: none;
 }
 
 .similar-shops-view-all:focus-visible {
@@ -2733,22 +2738,16 @@ body {
   outline-offset: 3px;
 }
 
-/* Extra-count badge inside the "مشاهده همه" button (shown on desktop only) */
+/* Extra-count badge inside the "مشاهده همه" button */
 .similar-shops-view-all-badge {
-  display: none;
+  display: inline-flex;
   align-items: center;
-  padding: .12rem .48rem;
+  padding: .1rem .42rem;
   border-radius: 999px;
-  background: rgba(124, 131, 253, 0.12);
+  background: rgba(124, 131, 253, 0.13);
   color: var(--primary);
-  font-size: .7rem;
+  font-size: .67rem;
   font-weight: 900;
-}
-
-@media (min-width: 960px) {
-  .similar-shops-view-all-badge {
-    display: inline-flex;
-  }
 }
 
 .similar-shop-action:hover {
@@ -2821,7 +2820,7 @@ body {
   }
 
   .similar-shops-shell {
-    padding: 1.6rem 1.8rem 1.8rem;
+    padding: 1.5rem 1.8rem 1.8rem;
   }
 
   .similar-shops-list {
@@ -2847,22 +2846,20 @@ body {
     display: none;
   }
 
-  .similar-shops-view-all-wrap {
-    padding-top: .9rem;
-  }
-
-  /* More prominent CTA on desktop */
+  /* On desktop the CTA lives in the header — no bottom wrap needed */
   .similar-shops-view-all {
-    min-width: 200px;
-    gap: .6rem;
-    padding: .56rem 1.4rem;
-    font-size: .82rem;
-    border-width: 1.5px;
+    font-size: .75rem;
+    padding: .3rem .78rem;
   }
 
   .similar-shop-card {
     min-width: 0;
-    min-height: 132px;
+    min-height: 138px;
+  }
+
+  /* Hide context badge on very narrow desktop breakpoint to avoid crowding */
+  .similar-shops-context {
+    display: none;
   }
 }
 
@@ -2875,6 +2872,11 @@ body {
   /* 4 cards in one clean row on large desktop */
   .similar-shops-list .similar-shop-card:nth-child(n+5) {
     display: none;
+  }
+
+  /* Restore context badge at wide viewport — enough room */
+  .similar-shops-context {
+    display: inline-flex;
   }
 }
 
@@ -2890,7 +2892,18 @@ body {
 
   .similar-shops-head {
     flex-direction: column;
-    gap: .46rem;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+
+  .similar-shops-head-end {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .similar-shops-context {
+    display: inline-flex;
+    max-width: calc(100% - 110px);
   }
 
   .similar-shops-carousel {
@@ -2901,16 +2914,6 @@ body {
     gap: .68rem;
     padding-inline: 1rem;
     scroll-padding-inline: 1rem;
-  }
-
-  .similar-shops-view-all-wrap {
-    padding-top: .56rem;
-  }
-
-  .similar-shops-view-all {
-    min-height: 42px;
-    padding-inline: .86rem;
-    font-size: .76rem;
   }
 
   .similar-shop-card {
@@ -3286,17 +3289,19 @@ body {
         </p>
         <h2 class="similar-shops-title" id="similarShopsTitle">فروشگاه‌های مشابه</h2>
       </div>
-      <span class="similar-shops-context" id="similarShopsContext">بر اساس دسته‌بندی و موقعیت</span>
+      <div class="similar-shops-head-end">
+        <span class="similar-shops-context" id="similarShopsContext">بر اساس دسته‌بندی و موقعیت</span>
+        <div id="similarShopsViewAllWrap">
+          <a class="similar-shops-view-all" id="similarShopsViewAll" href="/all-shops.html" aria-label="مشاهده همه فروشگاه‌ها">
+            مشاهده همه <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
     </div>
     <div class="similar-shops-carousel">
       <div class="similar-shops-list" id="similarShopsList" aria-live="polite"></div>
     </div>
     <div class="similar-shops-dots" id="similarShopsDots" aria-label="اسلایدهای فروشگاه‌های مشابه"></div>
-    <div class="similar-shops-view-all-wrap" id="similarShopsViewAllWrap">
-      <a class="similar-shops-view-all" id="similarShopsViewAll" href="/all-shops.html" aria-label="مشاهده همه فروشگاه‌ها">
-        مشاهده همه <i class="fas fa-arrow-left" aria-hidden="true"></i>
-      </a>
-    </div>
     <div class="similar-shops-empty" id="similarShopsEmpty" hidden>
       <span class="similar-shops-empty-icon" aria-hidden="true">
         <i class="fas fa-magnifying-glass"></i>
@@ -5222,22 +5227,24 @@ function renderSimilarShops(items = []) {
   if (!items.length) {
     list.innerHTML = '';
     if (dots) dots.hidden = true;
-    if (viewAllWrap) viewAllWrap.hidden = true;
+    /* Keep viewAllWrap hidden when no items */
+    if (viewAllWrap) viewAllWrap.style.visibility = 'hidden';
     empty.hidden = false;
     section.hidden = false;
     return;
   }
 
   empty.hidden = true;
-  if (viewAllWrap) viewAllWrap.hidden = false;
+  /* Reveal header CTA */
+  if (viewAllWrap) viewAllWrap.style.visibility = '';
   section.hidden = false;
 
-  /* Update "مشاهده همه" button: show extra-count hint on desktop when more than 4 exist */
+  /* Update "مشاهده همه" button: show extra-count hint when more than 4 exist */
   const viewAllBtn = document.getElementById('similarShopsViewAll');
   if (viewAllBtn) {
     const extraCount = items.length > 4 ? items.length - 4 : 0;
     const extraHint = extraCount > 0
-      ? ` <span class="similar-shops-view-all-badge">+${toFaNumber(extraCount)} فروشگاه دیگر</span>`
+      ? ` <span class="similar-shops-view-all-badge">+${toFaNumber(extraCount)}</span>`
       : '';
     viewAllBtn.innerHTML = `مشاهده همه${extraHint} <i class="fas fa-arrow-left" aria-hidden="true"></i>`;
   }
