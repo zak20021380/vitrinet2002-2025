@@ -3404,8 +3404,8 @@ function renderComplimentaryPlan(planRaw) {
 
   if (planCtaBtn) {
     if (planlessNudge) {
-      planCtaBtn.textContent = 'مشاهده و خرید پلن';
-      planCtaBtn.setAttribute('aria-label', 'مشاهده و خرید پلن مناسب کسب‌وکار');
+      planCtaBtn.textContent = 'انتخاب پلن';
+      planCtaBtn.setAttribute('aria-label', 'انتخاب پلن برای فعال‌سازی امکانات');
     } else if (plan.activeNow) {
       planCtaBtn.textContent = 'مشاهده و ارتقا پلن';
       planCtaBtn.setAttribute('aria-label', 'مشاهده و ارتقای پلن فعال');
