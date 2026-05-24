@@ -3393,11 +3393,11 @@ function renderComplimentaryPlan(planRaw) {
   if (planNameEl) {
     let planNameLabel;
     if (planlessNudge) {
-      planNameLabel = 'در انتظار انتخاب پلن';
+      planNameLabel = 'هنوز پلنی انتخاب نشده';
     } else if (plan.activeNow) {
-      planNameLabel = plan.title || 'پلن هدیه فعال';
+      planNameLabel = plan.title || 'پلن فعلی فعال';
     } else {
-      planNameLabel = plan.title || 'پلن هدیه غیرفعال شده';
+      planNameLabel = plan.title || 'پلن فعلی غیرفعال';
     }
     planNameEl.textContent = planNameLabel;
   }
@@ -3455,7 +3455,7 @@ function renderComplimentaryPlan(planRaw) {
   if (statusChip) {
     statusChip.classList.remove('chip-live');
     if (planlessNudge) {
-      statusChip.textContent = 'بدون پلن';
+      statusChip.textContent = 'هنوز پلنی انتخاب نشده';
     } else if (plan.activeNow) {
       statusChip.classList.add('chip-live');
       statusChip.textContent = 'فعال و تایید شده';
@@ -3472,9 +3472,9 @@ function renderComplimentaryPlan(planRaw) {
     perksList.innerHTML = '';
     const perks = planlessNudge
       ? [
-          'انتخاب سریع',
-          'پشتیبانی',
-          'فعال‌سازی فوری'
+          'انتخاب پلن مناسب',
+          'فعال‌سازی امکانات',
+          'شروع سریع'
         ]
       : plan.perks;
     const compactPerkText = (perk) => {
@@ -3508,7 +3508,7 @@ function renderComplimentaryPlan(planRaw) {
     if (plan.note) {
       messageEl.textContent = plan.note;
     } else if (planlessNudge) {
-      messageEl.innerHTML = 'برای فعال شدن امکانات، از بخش «<a href="#/plans" class="plan-link">پلن‌ها</a>» یک گزینه انتخاب کنید.';
+      messageEl.innerHTML = 'برای فعال‌سازی امکانات، یک پلن انتخاب کنید.';
     } else if (plan.activeNow) {
       const remainingText = remainingDays != null ? `${faNumber(remainingDays)} روز` : '';
       messageEl.innerHTML = `پلن فعال است.${remainingText ? ` <strong>${remainingText}</strong> باقی مانده.` : ''}`;
@@ -3538,7 +3538,7 @@ function renderComplimentaryPlan(planRaw) {
   }
   if (subtextEl) {
     if (planlessNudge) {
-      subtextEl.innerHTML = 'پلن مناسب را انتخاب کنید و سریع فعال شوید.';
+      subtextEl.innerHTML = 'هنوز پلنی انتخاب نشده؛ از بخش پلن‌ها شروع کنید.';
     } else {
       subtextEl.textContent = subtext;
     }
@@ -3551,7 +3551,7 @@ function renderComplimentaryPlan(planRaw) {
     
     if (planlessNudge) {
       // هیچ پلنی انتخاب نشده
-      giftNoteEl.innerHTML = '<span class="gift-note-icon">📋</span> بدون پلن فعال';
+      giftNoteEl.innerHTML = '<span class="gift-note-icon">📋</span> هنوز پلنی انتخاب نشده';
       giftNoteEl.hidden = false;
       giftNoteEl.classList.add('is-visible', 'is-inactive');
     } else if (plan.activeNow) {
