@@ -3211,18 +3211,42 @@ body {
 
 .similar-shop-action {
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
   margin-top: auto;
-  border-radius: 14px;
-  background: #172033;
+  padding: .55rem .9rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6C7BFF 0%, #45C7B8 100%);
   color: #ffffff;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
+  font-weight: 800;
+  letter-spacing: -0.005em;
+  box-shadow:
+    0 6px 16px rgba(108, 123, 255, 0.22),
+    0 2px 6px rgba(69, 199, 184, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform .2s ease, box-shadow .2s ease, background .25s ease, filter .2s ease;
 }
 
-.similar-shop-action:hover {
-  background: linear-gradient(135deg, #172033 0%, #374151 100%);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.22);
-  filter: none;
+.similar-shop-action:hover,
+.similar-shop-action:focus-visible {
+  color: #ffffff;
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #5b6bff 0%, #38bbac 100%);
+  box-shadow:
+    0 10px 24px rgba(108, 123, 255, 0.3),
+    0 4px 10px rgba(69, 199, 184, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  filter: brightness(1.02);
+}
+
+.similar-shop-action:focus-visible {
+  outline: 2px solid rgba(108, 123, 255, 0.42);
+  outline-offset: 2px;
+}
+
+.similar-shop-action:active {
+  transform: translateY(0) scale(.99);
+  box-shadow: 0 4px 12px rgba(108, 123, 255, 0.22);
+  filter: brightness(.99);
 }
 
 .similar-shop-action i {
@@ -3231,7 +3255,32 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: .72rem;
+  transition: transform .22s ease, background .22s ease;
+}
+
+.similar-shop-action:hover i,
+.similar-shop-action:focus-visible i {
+  background: rgba(255, 255, 255, 0.3);
+  /* RTL: arrow visually points to the shop entry, nudge it inward */
+  transform: translateX(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .similar-shop-action,
+  .similar-shop-action i {
+    transition: none;
+  }
+  .similar-shop-action:hover,
+  .similar-shop-action:focus-visible {
+    transform: none;
+  }
+  .similar-shop-action:hover i,
+  .similar-shop-action:focus-visible i {
+    transform: none;
+  }
 }
 
 @media (min-width: 960px) {
