@@ -1793,32 +1793,13 @@
         </section>
       </div>
     `;
-    const requestsPanel = document.createElement('section');
-    requestsPanel.className = 'ssw-requests-panel ssw-requests-panel--overview';
-    requestsPanel.setAttribute('aria-labelledby', 'similar-sponsored-requests-title');
-    requestsPanel.innerHTML = `
-      <header class="ssw-requests-panel-header">
-        <div class="ssw-requests-panel-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-            <rect x="9" y="3" width="6" height="4" rx="1"/>
-            <path d="M9 12h6M9 16h4"/>
-          </svg>
-        </div>
-        <div class="ssw-requests-panel-copy">
-          <h4 id="similar-sponsored-requests-title" class="ssw-requests-panel-title">وضعیت درخواست‌های شما</h4>
-          <p class="ssw-requests-panel-subtitle">تبلیغات فعال و در انتظار بررسی را قبل از خرید بعدی ببینید.</p>
-        </div>
-      </header>
-      <div class="ssw-requests-summary" id="similar-sponsored-requests-summary" hidden></div>
-      <div class="ssw-requests-grid" id="similar-sponsored-requests"></div>
-    `;
-
+    // Note: The "وضعیت درخواست‌های شما" (requests status) panel was intentionally
+    // removed from the upgrade page. If a legacy anchor exists in the DOM, clear
+    // it so nothing is displayed above the tabs.
     const requestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
     if (requestsAnchor) {
-      requestsAnchor.replaceChildren(requestsPanel);
-    } else {
-      target.prepend(requestsPanel);
+      requestsAnchor.replaceChildren();
+      requestsAnchor.hidden = true;
     }
 
     target.appendChild(root);

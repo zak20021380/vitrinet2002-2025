@@ -963,33 +963,36 @@ function toggleTabs(tab) {
   // پشتیبانی از هر دو نسخه قدیم و جدید
   const tabButtons = document.querySelectorAll('.upgrade-tab, .tab-btn');
   const tabContents = document.querySelectorAll('.upgrade-content, #content-sub, #content-ads, #content-myplans');
-  const specialAdRequestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
-  
+
   tabButtons.forEach(btn => {
     btn.classList.remove('tab-active', 'is-active');
     btn.setAttribute('aria-selected', 'false');
   });
-  
+
   tabContents.forEach(content => {
     content.hidden = true;
     content.classList.add('hidden');
   });
-  
+
   const activeBtn = document.querySelector(`[data-tab="${tab}"], #tab-${tab}`);
   const activeContent = document.getElementById(`content-${tab}`);
-  
+
   if (activeBtn) {
     activeBtn.classList.add('tab-active', 'is-active');
     activeBtn.setAttribute('aria-selected', 'true');
   }
-  
+
   if (activeContent) {
     activeContent.hidden = false;
     activeContent.classList.remove('hidden');
   }
 
-  if (specialAdRequestsAnchor) {
-    specialAdRequestsAnchor.hidden = tab !== 'ads';
+  // Defensive cleanup: ensure the legacy "وضعیت درخواست‌های شما" anchor (if any
+  // is reintroduced later) stays hidden and empty.
+  const legacyRequestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
+  if (legacyRequestsAnchor) {
+    legacyRequestsAnchor.hidden = true;
+    legacyRequestsAnchor.replaceChildren();
   }
 
   // Update hero content dynamically
@@ -1478,10 +1481,8 @@ function handleDeepLink() {
 
     setTimeout(() => {
       const adsSection = document.getElementById('content-ads');
-      const specialAdRequestsAnchor = document.getElementById('similar-sponsored-requests-anchor');
-      const adsScrollTarget = specialAdRequestsAnchor || adsSection;
-      if (adsScrollTarget) {
-        adsScrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (adsSection) {
+        adsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 120);
 
