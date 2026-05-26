@@ -4729,3 +4729,438 @@
     0 16px 38px rgba(16, 185, 129, 0.16),
     0 0 0 3px rgba(16, 185, 129, 0.08);
 }
+
+
+
+/* =============================================================
+   FIX PASS — Seller dashboard "تبلیغات" tab on mobile
+   -------------------------------------------------------------
+   Goals (do NOT change behaviour, only styling/layout):
+     1. Active Ads panel must look fully active (no faded look).
+     2. Empty/request-status card must read as polished & intentional.
+     3. Bottom navigation must not cover the page content.
+     4. Hero ("تبلیغات ویژه") must be compact on small phones.
+     5. Tabs (incl. ads dropdown) must not wrap awkwardly.
+     6. Persian RTL friendly, mobile-first, premium look.
+   ============================================================= */
+
+/* ---------- 1. Active panel is fully active (no opacity/filter inheritance) ---------- */
+.upgrade-section .upgrade-content:not([hidden]):not(.hidden) {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+}
+
+.upgrade-section #content-ads:not([hidden]):not(.hidden),
+.upgrade-section #content-ads:not([hidden]):not(.hidden) * {
+  /* Defensive: nothing inside the ads panel should look disabled when active */
+  opacity: 1;
+}
+
+/* ---------- 2. Bottom navigation clearance for embedded upgrade content ---------- */
+/* When the upgrade content is fetched into seller/dashboard.html (#main-content),
+   the fixed seller-mobile-bottom-nav (~88-94px tall + 10px gap) can crowd the
+   last card. Push the section above it on mobile. */
+@media (max-width: 768px) {
+  .upgrade-section {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  #main-content > .upgrade-section,
+  #main-content .upgrade-section {
+    padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ---------- 3. Compact hero on small phones ---------- */
+@media (max-width: 480px) {
+  .upgrade-hero,
+  .upgrade-hero--premium {
+    padding: 1.1rem 1rem 1rem;
+    margin-bottom: 0.85rem;
+    border-radius: 20px;
+    gap: 0.7rem;
+  }
+
+  .upgrade-hero__glow {
+    top: -50%;
+    width: 220px;
+    height: 140px;
+    filter: blur(28px);
+  }
+
+  .upgrade-hero__icon-ring {
+    width: 70px;
+    height: 70px;
+  }
+
+  .upgrade-hero__icon-container {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+  }
+
+  .upgrade-hero__icon-svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .upgrade-hero__text {
+    gap: 0.2rem;
+  }
+
+  .upgrade-hero__title-premium {
+    font-size: 1.18rem;
+    line-height: 1.25;
+  }
+
+  .upgrade-hero__desc-premium {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #475569;
+  }
+
+  .upgrade-hero__stats {
+    padding: 0.5rem 0.65rem;
+    border-radius: 13px;
+    max-width: 100%;
+  }
+
+  .upgrade-hero__stat {
+    padding: 0.1rem 0.25rem;
+    gap: 0.1rem;
+  }
+
+  .upgrade-hero__stat-value {
+    font-size: 0.95rem;
+  }
+
+  .upgrade-hero__stat-label {
+    font-size: 0.62rem;
+  }
+
+  .upgrade-hero__stat-divider {
+    height: 22px;
+  }
+}
+
+@media (max-width: 360px) {
+  .upgrade-hero,
+  .upgrade-hero--premium {
+    padding: 0.95rem 0.85rem 0.9rem;
+  }
+
+  .upgrade-hero__icon-container {
+    width: 48px;
+    height: 48px;
+  }
+
+  .upgrade-hero__icon-svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .upgrade-hero__title-premium {
+    font-size: 1.08rem;
+  }
+
+  .upgrade-hero__desc-premium {
+    font-size: 0.74rem;
+  }
+
+  .upgrade-hero__stat-value {
+    font-size: 0.9rem;
+  }
+
+  .upgrade-hero__stat-label {
+    font-size: 0.58rem;
+  }
+}
+
+/* ---------- 4. Tabs row — no awkward wrapping on small phones ---------- */
+@media (max-width: 480px) {
+  .upgrade-tabs {
+    gap: 0.3rem;
+    padding: 0.32rem;
+    border-radius: 14px;
+    margin-bottom: 0.95rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(226, 232, 240, 0.85);
+  }
+
+  .upgrade-tab {
+    padding: 0.55rem 0.45rem;
+    font-size: 0.74rem;
+    border-radius: 10px;
+    gap: 0.3rem;
+    min-height: 46px;
+  }
+
+  .upgrade-tab__icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+
+  /* The dropdown ads tab has 2 stacked lines (title + meta).
+     Constrain its width so it never pushes neighbours off-screen. */
+  .upgrade-tab-dropdown {
+    flex: 1.15;
+    min-width: 0;
+  }
+
+  .upgrade-tab--dropdown {
+    padding-inline: 0.55rem;
+  }
+
+  .upgrade-tab__copy {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0.05rem;
+  }
+
+  .upgrade-tab__title {
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .upgrade-tab__meta {
+    font-size: 0.58rem;
+    line-height: 1.15;
+  }
+
+  .upgrade-tab__chevron {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
+  }
+
+  /* Plain (non-copy) labels inside .upgrade-tab — keep on one line */
+  .upgrade-tab > span:not(.upgrade-tab__icon):not(.upgrade-tab__copy) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .upgrade-tab {
+    padding: 0.5rem 0.35rem;
+    font-size: 0.7rem;
+  }
+
+  .upgrade-tab__title {
+    font-size: 0.72rem;
+  }
+
+  .upgrade-tab__meta {
+    font-size: 0.55rem;
+  }
+}
+
+/* ---------- 5. SSW (similar-sponsored) panel — Light-theme overrides ----------
+   The widget ships dark-glass colours (white text on translucent surface).
+   Inside the light dashboard background it reads as faded/disabled.
+   When the panel lives inside the upgrade section we re-skin it for light. */
+.upgrade-section .ssw-requests-panel,
+#main-content .ssw-requests-panel,
+.special-ads-status-anchor .ssw-requests-panel {
+  /* Re-define accent + surface tokens to play well with light backgrounds */
+  --ssw-accent: #7c3aed;
+  --ssw-accent-dark: #6d28d9;
+  --ssw-accent-deeper: #5b21b6;
+  --ssw-accent-soft: rgba(124, 58, 237, 0.08);
+  --ssw-accent-border: rgba(124, 58, 237, 0.22);
+  --ssw-accent-glow: rgba(124, 58, 237, 0.18);
+  --ssw-text-dark: #0f172a;
+  --ssw-text-secondary: #475569;
+  --ssw-surface: rgba(255, 255, 255, 0.95);
+  --ssw-surface-alt: rgba(248, 250, 252, 0.95);
+  --ssw-border: rgba(226, 232, 240, 0.9);
+
+  background: linear-gradient(165deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 250, 252, 0.98) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow:
+    0 6px 22px rgba(15, 23, 42, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.upgrade-section .ssw-requests-panel::before,
+#main-content .ssw-requests-panel::before,
+.special-ads-status-anchor .ssw-requests-panel::before {
+  background: linear-gradient(90deg, #6d28d9, #8b5cf6, #6366f1);
+  opacity: 1;
+}
+
+.upgrade-section .ssw-requests-panel::after,
+#main-content .ssw-requests-panel::after,
+.special-ads-status-anchor .ssw-requests-panel::after {
+  background: radial-gradient(closest-side, rgba(124, 58, 237, 0.08), transparent 70%);
+}
+
+.upgrade-section .ssw-requests-panel-header,
+#main-content .ssw-requests-panel-header,
+.special-ads-status-anchor .ssw-requests-panel-header {
+  border-bottom-color: rgba(226, 232, 240, 0.85);
+}
+
+.upgrade-section .ssw-requests-panel-icon,
+#main-content .ssw-requests-panel-icon,
+.special-ads-status-anchor .ssw-requests-panel-icon {
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.12), rgba(99, 102, 241, 0.08));
+  border-color: rgba(124, 58, 237, 0.25);
+  color: #6d28d9;
+  box-shadow:
+    0 4px 12px rgba(124, 58, 237, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.upgrade-section .ssw-requests-panel-title,
+#main-content .ssw-requests-panel-title,
+.special-ads-status-anchor .ssw-requests-panel-title {
+  color: #0f172a;
+}
+
+.upgrade-section .ssw-requests-panel-subtitle,
+#main-content .ssw-requests-panel-subtitle,
+.special-ads-status-anchor .ssw-requests-panel-subtitle {
+  color: #64748b;
+}
+
+/* Summary stat chips — light variant */
+.upgrade-section .ssw-request-stat,
+#main-content .ssw-request-stat,
+.special-ads-status-anchor .ssw-request-stat {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(99, 102, 241, 0.03));
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  color: #0f172a;
+}
+
+.upgrade-section .ssw-request-stat strong,
+#main-content .ssw-request-stat strong,
+.special-ads-status-anchor .ssw-request-stat strong {
+  color: #4c1d95;
+}
+
+.upgrade-section .ssw-request-stat span,
+#main-content .ssw-request-stat span,
+.special-ads-status-anchor .ssw-request-stat span {
+  color: #475569;
+}
+
+/* ---------- 6. Empty / "no requests yet" card — polished + active ---------- */
+.upgrade-section .ssw-empty,
+.upgrade-section .ssw-request-empty,
+#main-content .ssw-empty,
+#main-content .ssw-request-empty,
+.special-ads-status-anchor .ssw-empty,
+.special-ads-status-anchor .ssw-request-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 84px;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  border-radius: 16px;
+  color: #1e293b;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
+  box-shadow:
+    0 4px 14px rgba(124, 58, 237, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  position: relative;
+  overflow: hidden;
+}
+
+.upgrade-section .ssw-empty::before,
+.upgrade-section .ssw-request-empty::before,
+#main-content .ssw-empty::before,
+#main-content .ssw-request-empty::before,
+.special-ads-status-anchor .ssw-empty::before,
+.special-ads-status-anchor .ssw-request-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #7c3aed, #8b5cf6, #6366f1);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.upgrade-section .ssw-empty svg,
+.upgrade-section .ssw-request-empty svg,
+#main-content .ssw-empty svg,
+#main-content .ssw-request-empty svg,
+.special-ads-status-anchor .ssw-empty svg,
+.special-ads-status-anchor .ssw-request-empty svg {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  padding: 4px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.14), rgba(99, 102, 241, 0.08));
+  color: #6d28d9;
+  opacity: 1;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+
+.upgrade-section .ssw-empty span,
+.upgrade-section .ssw-request-empty span,
+#main-content .ssw-empty span,
+#main-content .ssw-request-empty span,
+.special-ads-status-anchor .ssw-empty span,
+.special-ads-status-anchor .ssw-request-empty span {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .upgrade-section .ssw-empty,
+  .upgrade-section .ssw-request-empty,
+  #main-content .ssw-empty,
+  #main-content .ssw-request-empty,
+  .special-ads-status-anchor .ssw-empty,
+  .special-ads-status-anchor .ssw-request-empty {
+    min-height: 76px;
+    padding: 0.85rem 0.9rem;
+    font-size: 0.8rem;
+    border-radius: 14px;
+  }
+}
+
+/* ---------- 7. Tighter ad-tab content spacing on small screens ---------- */
+@media (max-width: 480px) {
+  .upgrade-content {
+    padding-top: 0;
+  }
+
+  .upgrade-ads-grid {
+    gap: 0.75rem;
+  }
+
+  .upgrade-ad-card {
+    padding: 0.9rem;
+    border-radius: 18px;
+  }
+
+  /* Pull the SSW status anchor close to the cards visually */
+  #similar-sponsored-requests-anchor.special-ads-status-anchor:not([hidden]) {
+    margin: 0 0 0.85rem;
+  }
+}
+
+/* Keep status anchor invisible (no flash of empty box) when hidden */
+.special-ads-status-anchor[hidden] {
+  display: none !important;
+}
