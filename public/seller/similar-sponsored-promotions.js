@@ -178,36 +178,77 @@
   --ssw-radius-btn: 14px;
 }
 .ssw-widget {
+  position: relative;
   direction: rtl;
-  margin: 1.5rem 0 0;
-  padding: .95rem;
+  margin: 2rem 0 0;
+  padding: 1.15rem 1rem 1.05rem;
+  /* Soft purple/indigo tinted glass surface — distinct yet consistent */
   background:
-    linear-gradient(180deg, rgba(124,58,237,.04), rgba(255,255,255,0) 34%),
-    #ffffff;
-  border: 1px solid rgba(124,58,237,.14);
-  border-radius: 22px;
-  box-shadow: 0 14px 38px rgba(15,23,42,.12);
+    radial-gradient(120% 90% at 100% 0%, rgba(124,58,237,.055), transparent 55%),
+    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.05), transparent 55%),
+    linear-gradient(180deg, rgba(124,58,237,.045), rgba(248,250,255,.65) 42%, rgba(255,255,255,.94) 100%);
+  border: 1px solid rgba(124,58,237,.16);
+  border-radius: 24px;
+  /* Slightly deeper, softer shadow with a violet undertone for "lift" */
+  box-shadow:
+    0 22px 52px -22px rgba(76,29,149,.22),
+    0 12px 28px -12px rgba(15,23,42,.10),
+    inset 0 1px 0 rgba(255,255,255,.7);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  backdrop-filter: blur(10px) saturate(1.05);
+  isolation: isolate;
+}
+/* Thin premium gradient accent line at the very top */
+.ssw-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(167,139,250,.45) 22%,
+    rgba(124,58,237,.85) 50%,
+    rgba(99,102,241,.45) 78%,
+    transparent 100%
+  );
+  border-radius: 999px;
+  opacity: .9;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ── Section Header ── */
 .ssw-section-header {
   display: flex;
   align-items: flex-start;
-  gap: .85rem;
-  margin-bottom: 1rem;
-  padding: 0 .1rem;
+  gap: .9rem;
+  margin: .25rem 0 1.1rem;
+  padding: 0 .15rem;
+  position: relative;
+  z-index: 2;
 }
 .ssw-section-header-icon {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
-  border-radius: 16px;
-  background: linear-gradient(145deg, rgba(167,139,250,.18), rgba(99,102,241,.1));
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  border-radius: 17px;
+  /* Subtle inner gradient + highlight for premium glassy feel */
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.55), transparent 55%),
+    linear-gradient(145deg, rgba(167,139,250,.22), rgba(99,102,241,.12));
   border: 1.5px solid var(--ssw-accent-border);
-  box-shadow: 0 4px 14px rgba(167,139,250,.15), inset 0 1px 0 rgba(255,255,255,.1);
+  /* Soft halo glow around the icon */
+  box-shadow:
+    0 0 0 5px rgba(167,139,250,.07),
+    0 8px 22px -4px rgba(124,58,237,.22),
+    inset 0 1px 0 rgba(255,255,255,.55);
   color: var(--ssw-accent);
 }
 .ssw-section-header-icon svg { width: 26px; height: 26px; }
@@ -1636,7 +1677,8 @@
 }
 
 @media (max-width:639px) {
-  .ssw-widget { margin-top: 1rem; }
+  .ssw-widget { margin-top: 1.4rem; padding: 1rem .9rem .95rem; border-radius: 22px; }
+  .ssw-widget::before { left: 18%; right: 18%; }
   .ssw-plan-card { border-radius: 18px; padding: .88rem; }
   .ssw-plan-meta, .ssw-plan-features, .ssw-plan-admin-note { display: none; }
   .ssw-plans-grid { gap: .7rem; }
