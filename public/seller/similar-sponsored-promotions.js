@@ -1609,7 +1609,8 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PREMIUM SIMILAR SHOPS HORIZONTAL CARDS — Final Design
+   PREMIUM SIMILAR SHOPS HORIZONTAL CARDS — Green/White Design
+   Matches the upgrade cards above (green accents, white surface)
    ══════════════════════════════════════════════════════════════ */
 #similar-sponsored-seller-root.ssw-widget {
   width: 100%;
@@ -1654,7 +1655,7 @@
   display: none;
 }
 
-/* ── Card shell — premium gradient + elegant shadow ── */
+/* ── Card shell — white/green gradient matching upgrade cards ── */
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
   flex: 0 0 78%;
   width: 78%;
@@ -1667,23 +1668,23 @@
   flex-direction: column;
   gap: .72rem;
   padding: 1.1rem 1rem 1rem;
-  border-radius: 20px;
-  border: 1.5px solid rgba(99, 102, 241, .14);
-  background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 48%, #ede9fe 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(16, 185, 129, .18);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
   box-shadow:
-    0 2px 6px rgba(99, 102, 241, .06),
-    0 12px 32px rgba(99, 102, 241, .1);
+    0 1px 2px rgba(15, 23, 42, .05),
+    0 12px 28px rgba(15, 23, 42, .09);
   transform: none;
   direction: rtl;
   position: relative;
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(99, 102, 241, .24);
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, .28);
   box-shadow:
-    0 4px 10px rgba(99, 102, 241, .08),
-    0 18px 40px rgba(99, 102, 241, .14);
+    0 2px 4px rgba(15, 23, 42, .04),
+    0 14px 30px rgba(15, 23, 42, .075);
 }
 
 /* ── Header row — title + single small badge ── */
@@ -1700,34 +1701,34 @@
   font-size: .92rem;
   font-weight: 850;
   line-height: 1.4;
-  color: #1e1b4b;
+  color: #0f172a;
   margin: 0;
 }
 #similar-sponsored-seller-root .ssw-plan-desc {
   margin: .15rem 0 0;
-  color: #6366f1;
+  color: #5f6f86;
   font-size: .67rem;
   font-weight: 650;
   line-height: 1.5;
-  opacity: .8;
+  opacity: .85;
   -webkit-line-clamp: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ── Single badge — small, clean ── */
+/* ── Single badge — small, clean, green ── */
 #similar-sponsored-seller-root .ssw-plan-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 20px;
-  max-width: 72px;
+  max-width: 80px;
   padding: .14rem .48rem;
   border-radius: 999px;
-  border: 1px solid rgba(99, 102, 241, .2);
-  background: rgba(99, 102, 241, .08);
-  color: #4f46e5;
+  border: 1px solid rgba(16, 185, 129, .2);
+  background: rgba(16, 185, 129, .09);
+  color: #059669;
   font-size: .58rem;
   font-weight: 850;
   line-height: 1;
@@ -1735,48 +1736,49 @@
   flex-shrink: 0;
 }
 #similar-sponsored-seller-root .ssw-plan-badge--recommended {
-  background: rgba(99, 102, 241, .12);
-  border-color: rgba(99, 102, 241, .28);
-  color: #4338ca;
+  background: rgba(16, 185, 129, .12);
+  border-color: rgba(16, 185, 129, .28);
+  color: #047857;
 }
 
-/* ── Pricing — the visual anchor ── */
+/* ── Pricing — the visual anchor, matching upgrade cards ── */
 #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
   order: 2;
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: .38rem;
-  padding: .62rem .6rem;
-  margin: .1rem 0 0;
+  padding: 0;
+  margin: .26rem 0 0;
   border: 0;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .75);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  border-radius: 0;
+  background: transparent;
   text-align: center;
-  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, .08);
+  direction: ltr;
+  overflow: visible;
 }
 #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
   display: inline;
   width: auto;
-  font-size: clamp(1.55rem, 7vw, 1.85rem);
+  font-size: 1.92rem;
   font-weight: 950;
   line-height: 1;
-  color: #4338ca;
+  color: #059669;
   -webkit-text-fill-color: currentColor;
   background: none;
   direction: ltr;
   unicode-bidi: isolate;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 #similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
   display: inline;
   margin: 0;
-  font-size: .68rem;
-  color: #6366f1;
-  font-weight: 700;
+  font-size: .7rem;
+  color: #53627a;
+  font-weight: 800;
   white-space: nowrap;
-  opacity: .85;
+  direction: rtl;
 }
 
 /* ── Hide extraneous elements ── */
@@ -1787,7 +1789,7 @@
   display: none !important;
 }
 
-/* ── CTA — compact pill button (no dark green!) ── */
+/* ── CTA — transparent green text pill, matching upgrade cards ── */
 #similar-sponsored-seller-root .ssw-plan-actions {
   order: 3;
   display: block;
@@ -1795,21 +1797,19 @@
   padding-top: .15rem;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-  min-height: 38px;
+  min-height: 34px;
   width: 100%;
-  margin: 0;
-  padding: .52rem .6rem;
+  margin: .28rem 0 0;
+  padding: .4rem .25rem;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  box-shadow:
-    0 3px 12px rgba(99, 102, 241, .28),
-    inset 0 1px 0 rgba(255, 255, 255, .18);
-  color: #fff;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: #059669;
   font-size: .8rem;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  transition: transform .2s ease, background .2s ease, color .2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1828,17 +1828,17 @@
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover {
   transform: translateY(-1px);
-  filter: brightness(1.06);
-  box-shadow:
-    0 6px 18px rgba(99, 102, 241, .32),
-    inset 0 1px 0 rgba(255, 255, 255, .22);
+  background: rgba(16, 185, 129, .09);
+  color: #059669;
+  box-shadow: none;
+  filter: none;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover::after {
   transform: translateX(-2px);
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:active {
   transform: translateY(0);
-  filter: brightness(.97);
+  filter: none;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta svg {
   display: none;
@@ -1870,11 +1870,11 @@
     font-size: .96rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    font-size: 1.85rem;
+    font-size: 1.92rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-    min-height: 40px;
-    padding: .56rem .7rem;
+    min-height: 34px;
+    padding: .4rem .25rem;
     font-size: .84rem;
   }
 }
@@ -1885,13 +1885,13 @@
     flex: 0 0 82%;
     width: 82%;
     padding: .92rem .82rem .85rem;
-    border-radius: 18px;
+    border-radius: 16px;
   }
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-    min-height: 36px;
+    min-height: 32px;
     font-size: .76rem;
   }
 }
