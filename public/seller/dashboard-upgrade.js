@@ -887,7 +887,10 @@ function initSpecialAdDropdown() {
   const dropdown = document.querySelector('[data-ad-dropdown]');
   const trigger = document.querySelector('[data-ad-dropdown-trigger]');
   const menu = document.querySelector('[data-ad-dropdown-menu]');
-  if (!dropdown || !trigger || !menu) return;
+  if (!dropdown || !trigger || !menu) {
+    selectSpecialAdSlot(selectedSpecialAdSlot);
+    return;
+  }
 
   if (!dropdown.dataset.listenerAttached) {
     dropdown.dataset.listenerAttached = 'true';
