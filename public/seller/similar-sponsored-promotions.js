@@ -151,8 +151,7 @@
   }
 
   /* ─────────────────────────────────────────────────────
-     PREMIUM CSS — matches upgrade-ad-card design language
-     Purple/Violet accent for Similar Shops identity
+     PREMIUM CSS — mobile-first similar shops pricing cards
      ───────────────────────────────────────────────────── */
   function injectStyles() {
     if (document.getElementById('similar-sponsored-seller-styles')) return;
@@ -163,165 +162,152 @@
 .ssw-widget,
 .ssw-requests-panel {
   font-family: inherit;
-  --ssw-accent: #7c3aed;
-  --ssw-accent-dark: #6d28d9;
-  --ssw-accent-deeper: #5b21b6;
-  --ssw-accent-soft: rgba(124,58,237,.1);
-  --ssw-accent-border: rgba(124,58,237,.24);
-  --ssw-accent-glow: rgba(124,58,237,.18);
-  --ssw-text-dark: #1e293b;
+  --ad-card-radius: 18px;
+  --ad-card-pad: 1rem;
+  --ad-card-gap: 0.65rem;
+  --ad-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+                    0 6px 18px rgba(15, 23, 42, 0.05);
+  --ad-card-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.09),
+                          0 2px 6px rgba(15, 23, 42, 0.04);
+  --ad-card-border: rgba(226, 232, 240, 0.85);
+  --ad-c-search: #10b981;
+  --ad-c-search-2: #059669;
+  --ad-c-search-soft: rgba(16, 185, 129, 0.09);
+  --ad-c-search-line: rgba(16, 185, 129, 0.18);
+  --card-accent: var(--ad-c-search);
+  --card-accent-2: var(--ad-c-search-2);
+  --card-accent-soft: var(--ad-c-search-soft);
+  --card-accent-line: var(--ad-c-search-line);
+  --ssw-accent: #0f766e;
+  --ssw-accent-dark: #115e59;
+  --ssw-accent-deeper: #134e4a;
+  --ssw-accent-soft: rgba(15,118,110,.08);
+  --ssw-accent-border: rgba(15,118,110,.2);
+  --ssw-accent-glow: rgba(15,118,110,.16);
+  --ssw-violet: #6d28d9;
+  --ssw-text-dark: #0f172a;
   --ssw-text-secondary: #475569;
   --ssw-surface: #ffffff;
   --ssw-surface-alt: #f8fafc;
-  --ssw-border: rgba(124,58,237,.16);
-  --ssw-radius-card: 20px;
-  --ssw-radius-btn: 14px;
+  --ssw-border: rgba(15,23,42,.1);
+  --ssw-radius-card: 18px;
+  --ssw-radius-btn: 13px;
+}
+.ssw-widget,
+.ssw-widget *,
+.ssw-widget *::before,
+.ssw-widget *::after {
+  box-sizing: border-box;
 }
 .ssw-widget {
   position: relative;
   direction: rtl;
-  margin: 2rem 0 0;
-  padding: 1.15rem 1rem 1.05rem;
-  /* Soft purple/indigo tinted glass surface — distinct yet consistent */
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgba(124,58,237,.055), transparent 55%),
-    radial-gradient(120% 90% at 0% 0%, rgba(99,102,241,.05), transparent 55%),
-    linear-gradient(180deg, rgba(124,58,237,.045), rgba(248,250,255,.65) 42%, rgba(255,255,255,.94) 100%);
-  border: 1px solid rgba(124,58,237,.16);
-  border-radius: 24px;
-  /* Slightly deeper, softer shadow with a violet undertone for "lift" */
-  box-shadow:
-    0 22px 52px -22px rgba(76,29,149,.22),
-    0 12px 28px -12px rgba(15,23,42,.10),
-    inset 0 1px 0 rgba(255,255,255,.7);
-  -webkit-backdrop-filter: blur(10px) saturate(1.05);
-  backdrop-filter: blur(10px) saturate(1.05);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   isolation: isolate;
 }
-/* Thin premium gradient accent line at the very top */
 .ssw-widget::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14%;
-  right: 14%;
-  height: 1.5px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(167,139,250,.45) 22%,
-    rgba(124,58,237,.85) 50%,
-    rgba(99,102,241,.45) 78%,
-    transparent 100%
-  );
-  border-radius: 999px;
-  opacity: .9;
-  pointer-events: none;
-  z-index: 1;
+  content: none;
 }
 
 /* ── Section Header ── */
 .ssw-section-header {
   display: flex;
-  align-items: flex-start;
-  gap: .9rem;
-  margin: .25rem 0 1.1rem;
-  padding: 0 .15rem;
+  align-items: center;
+  gap: .68rem;
+  margin: 0 0 .55rem;
+  padding: 0 .1rem;
   position: relative;
   z-index: 2;
 }
 .ssw-section-header-icon {
-  position: relative;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
-  width: 54px;
-  height: 54px;
-  min-width: 54px;
-  border-radius: 17px;
-  /* Subtle inner gradient + highlight for premium glassy feel */
-  background:
-    radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.55), transparent 55%),
-    linear-gradient(145deg, rgba(167,139,250,.22), rgba(99,102,241,.12));
-  border: 1.5px solid var(--ssw-accent-border);
-  /* Soft halo glow around the icon */
-  box-shadow:
-    0 0 0 5px rgba(167,139,250,.07),
-    0 8px 22px -4px rgba(124,58,237,.22),
-    inset 0 1px 0 rgba(255,255,255,.55);
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 13px;
+  background: rgba(15,118,110,.08);
+  border: 1px solid rgba(15,118,110,.16);
   color: var(--ssw-accent);
 }
-.ssw-section-header-icon svg { width: 26px; height: 26px; }
+.ssw-section-header-icon svg { width: 21px; height: 21px; }
 .ssw-section-header-meta { flex: 1; min-width: 0; }
 .ssw-section-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: .3rem;
-  padding: .22rem .65rem;
-  background: linear-gradient(135deg, rgba(167,139,250,.14), rgba(99,102,241,.08));
-  border: 1px solid var(--ssw-accent-border);
-  border-radius: 999px;
-  color: var(--ssw-accent);
-  font-size: .68rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: #94a3b8;
+  font-size: .66rem;
   font-weight: 800;
   letter-spacing: 0;
-  margin-bottom: .38rem;
+  margin-bottom: .18rem;
 }
 .ssw-section-eyebrow svg { width: 11px; height: 11px; }
 .ssw-section-title {
-  font-size: 1.02rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 900;
   color: var(--ssw-text-dark);
-  margin: 0 0 .22rem;
+  margin: 0 0 .12rem;
   letter-spacing: 0;
   line-height: 1.3;
 }
 .ssw-section-subtitle {
-  font-size: .78rem;
-  color: var(--ssw-text-secondary);
+  font-size: .74rem;
+  color: #64748b;
   margin: 0;
-  line-height: 1.6;
-  font-weight: 550;
+  line-height: 1.5;
+  font-weight: 650;
 }
 
 /* ── Info Banner ── */
 .ssw-info-banner {
-  display: flex;
-  gap: .65rem;
-  align-items: flex-start;
-  padding: .78rem .92rem;
-  background: linear-gradient(135deg, rgba(167,139,250,.1), rgba(99,102,241,.06));
-  border: 1px solid var(--ssw-accent-border);
-  border-radius: 14px;
-  margin-bottom: .9rem;
+  display: none;
+  gap: .42rem;
+  align-items: center;
+  padding: 0 .12rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  margin: 0 0 .68rem;
 }
 .ssw-info-banner-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  border-radius: 8px;
-  background: linear-gradient(145deg, rgba(167,139,250,.2), rgba(99,102,241,.12));
-  color: var(--ssw-accent);
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 999px;
+  background: rgba(15,118,110,.1);
+  color: var(--ssw-accent-dark);
   flex-shrink: 0;
 }
-.ssw-info-banner-icon svg { width: 14px; height: 14px; }
+.ssw-info-banner-icon svg { width: 10px; height: 10px; }
 .ssw-info-banner-text {
-  font-size: .78rem;
-  font-weight: 700;
-  color: #334155;
-  line-height: 1.75;
+  font-size: .69rem;
+  font-weight: 750;
+  color: #64748b;
+  line-height: 1.55;
 }
 
 /* ── Status Message ── */
 .ssw-message {
-  min-height: 1.1rem;
-  margin: .45rem 0;
+  min-height: 0;
+  margin: .2rem 0;
   color: var(--ssw-text-secondary);
   font-weight: 700;
-  font-size: .82rem;
+  font-size: .76rem;
 }
 .ssw-message--error { color: #f87171; }
 .ssw-message--success { color: #4ade80; }
@@ -330,111 +316,74 @@
 .ssw-plans-grid {
   display: flex;
   flex-direction: column;
-  gap: .85rem;
+  gap: .8rem;
 }
 @media (min-width:640px) {
   .ssw-plans-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px,1fr));
     gap: 1rem;
   }
 }
 
-/* ── Plan Card (matches upgrade-ad-card dark glass) ── */
+/* ── Plan Card ── */
 .ssw-plan-card {
   position: relative;
-  background:
-    linear-gradient(180deg, rgba(124,58,237,.035), rgba(255,255,255,0) 42%),
-    var(--ssw-surface);
-  border: 1.5px solid var(--ssw-border);
-  border-radius: var(--ssw-radius-card);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: .68rem;
-  transition: all .35s cubic-bezier(.4,0,.2,1);
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.75);
-  scroll-margin-top: 1rem;
 }
 .ssw-plan-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--ssw-accent), #6366f1);
+  content: none;
 }
 .ssw-plan-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--ssw-accent-border);
-  box-shadow: 0 18px 42px rgba(15,23,42,.12), 0 6px 16px rgba(124,58,237,.14);
+  transform: translateY(-2px);
 }
-.ssw-plan-card:hover::before { height: 4px; }
 
 /* Priority variant */
 .ssw-plan-card--priority {
-  background:
-    linear-gradient(180deg, rgba(124,58,237,.075), rgba(255,255,255,0) 50%),
-    #ffffff;
-  border-color: rgba(124,58,237,.28);
+  border-color: var(--card-accent-line);
 }
 .ssw-plan-card--priority::before {
-  background: linear-gradient(90deg, var(--ssw-accent-deeper), var(--ssw-accent), #6366f1);
-  height: 4px;
+  content: none;
 }
 .ssw-plan-card--priority:hover {
-  box-shadow: 0 20px 48px rgba(15,23,42,.14), 0 6px 18px rgba(124,58,237,.2);
+  box-shadow: var(--ad-card-shadow-hover);
 }
 
 /* ── Badge ── */
 .ssw-plan-badge {
-  position: absolute;
-  top: .75rem;
-  left: .75rem;
-  padding: .28rem .62rem;
+  display: none;
+  align-items: center;
+  flex-shrink: 0;
+  width: fit-content;
+  padding: .2rem .55rem;
   border-radius: 999px;
-  font-size: .64rem;
+  font-size: .62rem;
   font-weight: 800;
   letter-spacing: 0;
-  color: #fff;
-  background: linear-gradient(135deg, var(--ssw-accent), #6366f1);
-  box-shadow: 0 2px 8px rgba(139,92,246,.28);
-  z-index: 2;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid rgba(15,23,42,.08);
 }
 .ssw-plan-badge--recommended {
-  background: linear-gradient(135deg, var(--ssw-accent-deeper), var(--ssw-accent));
-  box-shadow: 0 2px 10px rgba(124,58,237,.38);
+  color: var(--ssw-accent-deeper);
+  background: rgba(15,118,110,.08);
+  border-color: rgba(15,118,110,.16);
 }
 
 /* ── Card Header ── */
 .ssw-plan-header {
   display: flex;
   align-items: center;
-  gap: .82rem;
-  padding-top: .28rem;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  text-align: center;
 }
 .ssw-plan-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(167,139,250,.18), rgba(99,102,241,.1));
-  border: 1.5px solid var(--ssw-accent-border);
-  box-shadow: 0 4px 12px rgba(167,139,250,.15), inset 0 1px 0 rgba(255,255,255,.08);
-  color: var(--ssw-accent);
-  transition: all .3s ease;
+  display: none;
 }
-.ssw-plan-icon svg { width: 24px; height: 24px; transition: transform .3s ease; }
-.ssw-plan-card:hover .ssw-plan-icon {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(167,139,250,.25), inset 0 1px 0 rgba(255,255,255,.1);
-}
-.ssw-plan-card:hover .ssw-plan-icon svg { transform: rotate(-5deg); }
+.ssw-plan-copy { min-width: 0; }
 .ssw-plan-title {
-  font-size: 1rem;
+  font-size: .98rem;
   font-weight: 800;
   color: var(--ssw-text-dark);
   margin: 0;
@@ -442,197 +391,140 @@
   line-height: 1.3;
 }
 .ssw-plan-desc {
-  margin: .08rem 0 0;
+  margin: .18rem 0 0;
   color: var(--ssw-text-secondary);
-  font-size: .77rem;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: .73rem;
+  font-weight: 500;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── Pricing Block ── */
 .ssw-plan-pricing {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: .38rem;
-  padding: .65rem 0;
-  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(14,165,233,.045));
-  border: 1px solid rgba(124,58,237,.1);
-  border-radius: 12px;
-  margin: .1rem 0;
+  direction: rtl;
 }
 .ssw-plan-price {
-  font-size: 1.35rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0;
+  font-size: clamp(1.45rem, 7vw, 1.75rem);
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 .ssw-plan-unit {
-  font-size: .74rem;
-  color: var(--ssw-text-secondary);
-  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ── Features ── */
 .ssw-plan-features {
   list-style: none;
   margin: 0;
-  padding: .45rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: .45rem;
-  border-top: 1px solid rgba(124,58,237,.14);
+  padding: 0;
+  display: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: .3rem .5rem;
+  border-top: 0;
 }
 .ssw-plan-feature {
   display: flex;
   align-items: center;
-  gap: .48rem;
-  font-size: .77rem;
-  color: #334155;
+  gap: .3rem;
+  font-size: .68rem;
+  color: #475569;
   line-height: 1.4;
 }
 .ssw-plan-feature-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
   border-radius: 5px;
-  background: rgba(167,139,250,.15);
-  color: var(--ssw-accent);
+  background: rgba(15,118,110,.09);
+  color: var(--ssw-accent-dark);
   flex-shrink: 0;
 }
-.ssw-plan-feature-icon svg { width: 11px; height: 11px; }
+.ssw-plan-feature-icon svg { width: 9px; height: 9px; }
 
 /* ── Meta Chips ── */
 .ssw-plan-meta {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: .48rem;
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .28rem .52rem;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 800;
 }
 .ssw-plan-meta-chip {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: row;
   align-items: center;
-  gap: .18rem;
-  padding: .52rem .4rem;
-  background: var(--ssw-surface-alt);
-  border: 1px solid rgba(124,58,237,.12);
-  border-radius: 12px;
-  text-align: center;
+  gap: .22rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  text-align: start;
+}
+.ssw-plan-meta-chip + .ssw-plan-meta-chip::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  margin-left: .24rem;
+  border-radius: 999px;
+  background: #cbd5e1;
 }
 .ssw-plan-meta-chip__label {
-  font-size: .63rem;
+  font-size: .68rem;
   font-weight: 800;
   color: #64748b;
-  text-transform: uppercase;
   letter-spacing: 0;
 }
 .ssw-plan-meta-chip__value {
-  font-size: .8rem;
-  font-weight: 800;
+  font-size: .7rem;
+  font-weight: 900;
   color: var(--ssw-text-dark);
 }
 
 /* ── Admin Note ── */
 .ssw-plan-admin-note {
-  display: flex;
-  align-items: flex-start;
-  gap: .45rem;
-  padding: .58rem .72rem;
-  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(14,165,233,.045));
-  border: 1px solid rgba(124,58,237,.16);
-  border-radius: 10px;
-  font-size: .73rem;
-  color: #5b21b6;
-  line-height: 1.65;
-  font-weight: 700;
+  display: none;
+  align-items: center;
+  gap: .34rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: .68rem;
+  color: #64748b;
+  line-height: 1.45;
+  font-weight: 750;
 }
 .ssw-plan-admin-note svg {
-  width: 13px; height: 13px;
-  min-width: 13px;
-  margin-top: .15rem;
-  color: var(--ssw-accent);
+  width: 12px; height: 12px;
+  min-width: 12px;
+  margin-top: 0;
+  color: var(--ssw-accent-dark);
   flex-shrink: 0;
 }
 
-/* ── CTA Button (matches upgrade-ad-cta) ── */
+.ssw-plan-actions {
+  display: block;
+  margin-top: .1rem;
+}
+
+/* ── CTA Button ── */
 .ssw-plan-guide-btn {
-  width: 100%;
-  min-height: 40px;
-  border-radius: 12px;
-  border: 1px solid rgba(167,139,250,.24);
-  background: linear-gradient(135deg, rgba(167,139,250,.13), rgba(14,165,233,.065));
-  color: #5b21b6;
-  font: inherit;
-  font-size: .78rem;
-  font-weight: 850;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .4rem;
-  cursor: pointer;
-  transition: background .25s ease, border-color .25s ease, transform .25s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.ssw-plan-guide-btn svg {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-}
-.ssw-plan-guide-btn:hover {
-  background: linear-gradient(135deg, rgba(167,139,250,.2), rgba(14,165,233,.1));
-  border-color: rgba(167,139,250,.42);
-  transform: translateY(-1px);
-}
-.ssw-plan-guide-btn:focus-visible {
-  outline: 2px solid rgba(167,139,250,.8);
-  outline-offset: 2px;
+  display: none;
 }
 
 .ssw-plan-cta {
-  margin-top: auto;
   width: 100%;
-  padding: .82rem 1rem;
-  border-radius: var(--ssw-radius-btn);
-  border: none;
-  font-family: inherit;
-  font-size: .9rem;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
-  cursor: pointer;
-  transition: all .3s cubic-bezier(.4,0,.2,1);
-  box-shadow: 0 4px 14px rgba(139,92,246,.28), inset 0 1px 0 rgba(255,255,255,.2);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .45rem;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
 }
-.ssw-plan-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--ssw-accent-dark) 0%, var(--ssw-accent) 100%);
-  opacity: 0;
-  transition: opacity .3s ease;
-}
-.ssw-plan-cta span, .ssw-plan-cta svg { position: relative; z-index: 1; }
-.ssw-plan-cta svg { width: 16px; height: 16px; flex-shrink: 0; }
-.ssw-plan-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(139,92,246,.38), inset 0 1px 0 rgba(255,255,255,.25);
-}
-.ssw-plan-cta:hover::before { opacity: 1; }
-.ssw-plan-cta:active { transform: translateY(0); }
+.ssw-plan-cta svg { display: none; }
 .ssw-plan-cta:disabled {
   opacity: .55;
   cursor: not-allowed;
@@ -1677,11 +1569,24 @@
 }
 
 @media (max-width:639px) {
-  .ssw-widget { margin-top: 1.4rem; padding: 1rem .9rem .95rem; border-radius: 22px; }
-  .ssw-widget::before { left: 18%; right: 18%; }
-  .ssw-plan-card { border-radius: 18px; padding: .88rem; }
-  .ssw-plan-meta, .ssw-plan-features, .ssw-plan-admin-note { display: none; }
-  .ssw-plans-grid { gap: .7rem; }
+  .ssw-widget { margin-top: 1.2rem; padding: .86rem .72rem .82rem; border-radius: 21px; }
+  .ssw-widget::before { left: 22%; right: 22%; }
+  .ssw-plan-card {
+    align-self: center;
+    width: min(100%, calc(100vw - 48px));
+    border-radius: 17px;
+    padding: .78rem .78rem .72rem;
+  }
+  .ssw-plan-features { display: none; }
+  .ssw-plan-admin-note { display: flex; }
+  .ssw-plan-meta { display: flex; }
+  .ssw-plan-guide-btn span { display: none; }
+  .ssw-plan-guide-btn {
+    width: 38px;
+    min-width: 38px;
+    padding: 0;
+  }
+  .ssw-plans-grid { gap: .68rem; }
   .ssw-requests-panel {
     border-radius: 20px;
     padding: 1rem;
@@ -1712,6 +1617,457 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .ssw-request-moment:first-child::after { display: none; }
+}
+
+@media (max-width:639px) {
+  #content-ads #similar-sponsored-seller-root.ssw-widget,
+  #ads-content #similar-sponsored-seller-root.ssw-widget {
+    width: min(100%, calc(100vw - 32px));
+    margin-inline: auto;
+    padding: .86rem .72rem .82rem;
+    background: linear-gradient(180deg, rgba(248,250,252,.96), rgba(255,255,255,.98));
+    border-color: rgba(15,23,42,.08);
+    box-shadow: 0 18px 42px -28px rgba(15,23,42,.36);
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-section-header,
+  #ads-content #similar-sponsored-seller-root .ssw-section-header {
+    display: block;
+    padding: 0 .45rem;
+    text-align: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-section-header-icon,
+  #ads-content #similar-sponsored-seller-root .ssw-section-header-icon {
+    display: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-section-eyebrow,
+  #ads-content #similar-sponsored-seller-root .ssw-section-eyebrow {
+    justify-content: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-section-subtitle,
+  #ads-content #similar-sponsored-seller-root .ssw-section-subtitle {
+    max-width: 28rem;
+    margin-inline: auto;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-info-banner,
+  #ads-content #similar-sponsored-seller-root .ssw-info-banner {
+    align-items: center;
+    gap: .42rem;
+    padding: 0 .12rem;
+    margin: 0 0 .68rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-info-banner-icon,
+  #ads-content #similar-sponsored-seller-root .ssw-info-banner-icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border-radius: 999px;
+    background: rgba(15,118,110,.1);
+    color: var(--ssw-accent-dark);
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-info-banner-text,
+  #ads-content #similar-sponsored-seller-root .ssw-info-banner-text {
+    margin: 0;
+    font-size: .69rem;
+    line-height: 1.55;
+    color: #64748b;
+    font-weight: 750;
+    text-align: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-card,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-card {
+    align-self: center;
+    width: min(100%, calc(100vw - 64px));
+    gap: .58rem;
+    padding: .78rem .78rem .72rem;
+    border-radius: 17px;
+    border-color: rgba(15,23,42,.1);
+    background: #fff;
+    box-shadow: 0 12px 28px -22px rgba(15,23,42,.55), inset 0 1px 0 rgba(255,255,255,.9);
+    transform: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-badge,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-badge {
+    display: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-header,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-header {
+    display: block;
+    padding-top: 0;
+    text-align: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-icon,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-icon {
+    display: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-pricing,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-pricing {
+    display: block;
+    padding: .16rem 0 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-price,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-price {
+    display: block;
+    width: 100%;
+    font-size: clamp(1.55rem, 8vw, 2rem);
+    line-height: 1;
+    color: var(--ssw-text-dark);
+    -webkit-text-fill-color: currentColor;
+    background: none;
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: center;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-unit,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-unit {
+    display: block;
+    margin-top: .18rem;
+    font-size: .68rem;
+    color: #64748b;
+    white-space: normal;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-meta,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-meta {
+    display: flex;
+    grid-template-columns: none;
+    gap: .28rem .52rem;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-meta-chip,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-meta-chip {
+    flex-direction: row;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-admin-note,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-admin-note {
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    line-height: 1.45;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-actions,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-cta,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-cta {
+    background: linear-gradient(135deg, var(--ssw-accent-deeper) 0%, var(--ssw-accent) 100%);
+    box-shadow: 0 10px 18px -12px rgba(15,118,110,.8), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+}
+
+/* Final alignment with the upgrade advertising card system */
+#similar-sponsored-seller-root.ssw-widget {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+#similar-sponsored-seller-root.ssw-widget::before,
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::before,
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::after {
+  content: none;
+  display: none;
+}
+#similar-sponsored-seller-root .ssw-section-header,
+#similar-sponsored-seller-root .ssw-info-banner {
+  display: none;
+}
+#similar-sponsored-seller-root .ssw-message:empty {
+  display: none;
+}
+#similar-sponsored-seller-root .ssw-plans-grid {
+  display: flex;
+  flex-direction: row;
+  gap: .78rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  -webkit-overflow-scrolling: touch;
+  padding: .08rem 1rem .85rem;
+  margin-inline: -1rem;
+  direction: rtl;
+  scrollbar-width: none;
+}
+#similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
+  display: none;
+}
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+  flex: 0 0 calc(100% - 68px);
+  width: calc(100% - 68px);
+  min-width: 0;
+  align-self: stretch;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  padding: .92rem .9rem .82rem;
+  gap: .52rem;
+  border-radius: 18px;
+  border: 1px solid var(--ad-card-border);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(248,253,251,.94)),
+    #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 14px 30px rgba(15, 23, 42, 0.09);
+  transform: none;
+  direction: rtl;
+}
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: var(--ad-card-shadow-hover);
+}
+#similar-sponsored-seller-root .ssw-plan-header {
+  order: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .55rem;
+  padding: 0;
+  text-align: right;
+}
+#similar-sponsored-seller-root .ssw-plan-title {
+  font-size: .95rem;
+  font-weight: 900;
+  line-height: 1.35;
+  color: #0f172a;
+  margin: 0;
+}
+#similar-sponsored-seller-root .ssw-plan-desc {
+  max-width: 24rem;
+  margin: .12rem 0 0;
+  color: #64748b;
+  font-size: .7rem;
+  font-weight: 650;
+  line-height: 1.5;
+  -webkit-line-clamp: 1;
+}
+#similar-sponsored-seller-root .ssw-plan-features,
+#similar-sponsored-seller-root .ssw-plan-meta,
+#similar-sponsored-seller-root .ssw-plan-admin-note,
+#similar-sponsored-seller-root .ssw-plan-guide-btn {
+  display: none;
+}
+#similar-sponsored-seller-root .ssw-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  max-width: 76px;
+  padding: .18rem .5rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-accent-line);
+  background: var(--card-accent-soft);
+  color: var(--card-accent-2);
+  font-size: .61rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+#similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
+  order: 3;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: .4rem;
+  padding: .12rem 0 0;
+  margin: .05rem 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: right;
+}
+#similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
+  display: inline;
+  width: auto;
+  font-size: clamp(1.65rem, 7.8vw, 2rem);
+  font-weight: 950;
+  line-height: 1;
+  color: var(--card-accent-2);
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: center;
+}
+#similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
+  display: inline;
+  margin: 0;
+  font-size: .7rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#similar-sponsored-seller-root .ssw-plan-actions {
+  order: 4;
+  display: block;
+  margin-top: .04rem;
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
+  min-height: 34px;
+  width: 100%;
+  margin: .28rem 0 0;
+  padding: .4rem .25rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--card-accent-2);
+  font-size: .8rem;
+  font-weight: 900;
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta svg {
+  display: none;
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta span {
+  position: static;
+}
+#content-ads #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta,
+#ads-content #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
+  min-height: 34px;
+  width: 100%;
+  margin: .28rem 0 0;
+  padding: .4rem .25rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--card-accent-2);
+  font-size: .8rem;
+  font-weight: 900;
+}
+#content-ads #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover,
+#ads-content #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover {
+  background: var(--card-accent-soft);
+  color: var(--card-accent-2);
+  box-shadow: none;
+}
+@media (max-width:639px) {
+  #content-ads #similar-sponsored-seller-root.ssw-widget,
+  #ads-content #similar-sponsored-seller-root.ssw-widget {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plans-grid,
+  #ads-content #similar-sponsored-seller-root .ssw-plans-grid {
+    display: flex;
+    flex-direction: row;
+    grid-template-columns: none;
+    gap: .78rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    -webkit-overflow-scrolling: touch;
+    padding: .08rem 1rem .85rem;
+    margin-inline: -1rem;
+    direction: rtl;
+    scrollbar-width: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar,
+  #ads-content #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
+    display: none;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+    flex: 0 0 calc(100% - 68px) !important;
+    width: calc(100% - 68px) !important;
+    max-width: calc(100% - 68px) !important;
+    align-self: stretch;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    margin: 0 !important;
+    padding: .92rem .9rem .82rem !important;
+    gap: .52rem;
+    border-radius: 18px;
+    border: 1px solid var(--ad-card-border);
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.98), rgba(248,253,251,.94)),
+      #fff;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.05),
+      0 14px 30px rgba(15, 23, 42, 0.09);
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-header,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: .55rem;
+    text-align: right;
+  }
+  #content-ads #similar-sponsored-seller-root .ssw-plan-badge,
+  #ads-content #similar-sponsored-seller-root .ssw-plan-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    max-width: 76px;
+    padding: .18rem .5rem;
+    border-radius: 999px;
+    border: 1px solid var(--card-accent-line);
+    background: var(--card-accent-soft);
+    color: var(--card-accent-2);
+    font-size: .61rem;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  #content-ads #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing,
+  #ads-content #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: .4rem;
+    padding: .12rem 0 0;
+    margin: .05rem 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: right;
+  }
+  #content-ads #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price,
+  #ads-content #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
+    display: inline;
+    width: auto;
+    font-size: clamp(1.65rem, 7.8vw, 2rem);
+    color: var(--card-accent-2);
+    text-align: right;
+  }
+}
+@media (min-width:640px) {
+  #similar-sponsored-seller-root .ssw-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+    width: 100%;
+    flex-basis: auto;
+  }
 }
     `;
     document.head.appendChild(style);
@@ -1960,74 +2316,41 @@
       return;
     }
 
+    const compactDescriptions = {
+      priority: 'نمایش بالاتر در فروشگاه‌های مشابه',
+      normal: 'نمایش کنار مغازه‌های مشابه'
+    };
+
     container.innerHTML = plans.map((plan, index) => {
       const isPriority = plan.tier === 'priority';
-      const isFirst = index === 0;
       const planTitle = plan.title || tierLabels[plan.tier] || 'پلن تبلیغ مشابه';
-      const planDesc = plan.description || tierDescriptions[plan.tier] || 'نمایش ویژه فروشگاه در بخش فروشگاه‌های مشابه';
-      const features = tierFeatures[plan.tier] || ['نمایش در فروشگاه‌های مشابه', 'فعال‌سازی پس از تأیید مدیر'];
+      const planDesc = compactDescriptions[plan.tier] || 'نمایش هدفمند در مشابه‌ها';
       const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
-      const iconSvg = isPriority ? icons.trendUp : icons.store;
-
-      const metaChips = [
-        { label: 'مدت', value: plan.durationDays ? `${escapeHtml(String(plan.durationDays))} روز` : '—' },
-        { label: 'دوره', value: escapeHtml(durationLabels[plan.durationUnit] || plan.durationUnit || '—') },
-        { label: 'جایگاه', value: escapeHtml(String(plan.slotLimit || '۱')) }
-      ];
+      const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
 
       return `
-        <article class="ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ''}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
-          <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${badgeLabel}">${badgeLabel}</div>
-
+        <article class="upgrade-ad-card upgrade-ad-card--search ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ''}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
           <div class="ssw-plan-header">
-            <div class="ssw-plan-icon" aria-hidden="true">${iconSvg}</div>
-            <div>
+            <div class="ssw-plan-copy">
               <h4 id="ssw-plan-title-${index}" class="ssw-plan-title">${escapeHtml(planTitle)}</h4>
               <p class="ssw-plan-desc">${escapeHtml(planDesc)}</p>
             </div>
+            <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${badgeLabel}">${badgeLabel}</div>
           </div>
 
-          <div class="ssw-plan-pricing" aria-label="قیمت پلن">
-            <span class="ssw-plan-price">${formatMoney(plan.price)}</span>
-            <span class="ssw-plan-unit">تومان / دوره</span>
+          <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت پلن">
+            <span class="upgrade-ad-price ssw-plan-price">${formatMoney(plan.price)}</span>
+            <span class="upgrade-ad-unit ssw-plan-unit">تومان / ${escapeHtml(unitLabel)}</span>
           </div>
 
-          <ul class="ssw-plan-features" aria-label="امکانات پلن">
-            ${features.map(f => `
-              <li class="ssw-plan-feature">
-                <span class="ssw-plan-feature-icon" aria-hidden="true">${icons.check}</span>
-                ${escapeHtml(f)}
-              </li>`).join('')}
-          </ul>
-
-          <div class="ssw-plan-meta" aria-label="مشخصات پلن">
-            ${metaChips.map(chip => `
-              <div class="ssw-plan-meta-chip">
-                <span class="ssw-plan-meta-chip__label">${chip.label}</span>
-                <span class="ssw-plan-meta-chip__value">${chip.value}</span>
-              </div>`).join('')}
+          <div class="ssw-plan-actions">
+            <button type="button" class="upgrade-ad-cta ssw-plan-cta"
+              data-plan-tier="${escapeHtml(plan.tier)}"
+              data-plan-duration="${escapeHtml(plan.durationUnit)}"
+              aria-label="ثبت درخواست برای ${escapeHtml(planTitle)}">
+              <span>ثبت درخواست تبلیغ</span>
+            </button>
           </div>
-
-          <div class="ssw-plan-admin-note">
-            ${icons.shield}
-            <span>زمان‌بندی توسط مدیر تعیین می‌شود. پس از ثبت درخواست و پرداخت، تیم ما آن را فعال خواهد کرد.</span>
-          </div>
-
-          <button type="button" class="ssw-plan-guide-btn"
-            data-plan-guide-tier="${escapeHtml(plan.tier)}"
-            data-plan-guide-duration="${escapeHtml(plan.durationUnit)}"
-            aria-label="اطلاعات و راهنمای ${escapeHtml(planTitle)}">
-            ${icons.info}
-            <span>اطلاعات و راهنمای پلن</span>
-          </button>
-
-          <button type="button" class="ssw-plan-cta"
-            data-plan-tier="${escapeHtml(plan.tier)}"
-            data-plan-duration="${escapeHtml(plan.durationUnit)}"
-            aria-label="ثبت درخواست برای ${escapeHtml(planTitle)}">
-            ${icons.arrowLeft}
-            <span>ثبت درخواست تبلیغ</span>
-          </button>
         </article>
       `;
     }).join('');
