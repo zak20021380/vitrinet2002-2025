@@ -1569,24 +1569,13 @@
 }
 
 @media (max-width:639px) {
-  .ssw-widget { margin-top: 1.2rem; padding: .86rem .72rem .82rem; border-radius: 21px; }
-  .ssw-widget::before { left: 22%; right: 22%; }
-  .ssw-plan-card {
-    align-self: center;
-    width: min(100%, calc(100vw - 48px));
-    border-radius: 17px;
-    padding: .78rem .78rem .72rem;
-  }
-  .ssw-plan-features { display: none; }
-  .ssw-plan-admin-note { display: flex; }
-  .ssw-plan-meta { display: flex; }
-  .ssw-plan-guide-btn span { display: none; }
-  .ssw-plan-guide-btn {
-    width: 38px;
-    min-width: 38px;
-    padding: 0;
-  }
-  .ssw-plans-grid { gap: .68rem; }
+  .ssw-widget { margin-top: 0; padding: 0; border-radius: 0; }
+  .ssw-widget::before { display: none; }
+  .ssw-plan-features { display: none !important; }
+  .ssw-plan-admin-note { display: none !important; }
+  .ssw-plan-meta { display: none !important; }
+  .ssw-plan-guide-btn { display: none !important; }
+  .ssw-plans-grid { gap: .85rem; }
   .ssw-requests-panel {
     border-radius: 20px;
     padding: 1rem;
@@ -1619,155 +1608,9 @@
   .ssw-request-moment:first-child::after { display: none; }
 }
 
-@media (max-width:639px) {
-  #content-ads #similar-sponsored-seller-root.ssw-widget,
-  #ads-content #similar-sponsored-seller-root.ssw-widget {
-    width: min(100%, calc(100vw - 32px));
-    margin-inline: auto;
-    padding: .86rem .72rem .82rem;
-    background: linear-gradient(180deg, rgba(248,250,252,.96), rgba(255,255,255,.98));
-    border-color: rgba(15,23,42,.08);
-    box-shadow: 0 18px 42px -28px rgba(15,23,42,.36);
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-section-header,
-  #ads-content #similar-sponsored-seller-root .ssw-section-header {
-    display: block;
-    padding: 0 .45rem;
-    text-align: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-section-header-icon,
-  #ads-content #similar-sponsored-seller-root .ssw-section-header-icon {
-    display: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-section-eyebrow,
-  #ads-content #similar-sponsored-seller-root .ssw-section-eyebrow {
-    justify-content: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-section-subtitle,
-  #ads-content #similar-sponsored-seller-root .ssw-section-subtitle {
-    max-width: 28rem;
-    margin-inline: auto;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-info-banner,
-  #ads-content #similar-sponsored-seller-root .ssw-info-banner {
-    align-items: center;
-    gap: .42rem;
-    padding: 0 .12rem;
-    margin: 0 0 .68rem;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-info-banner-icon,
-  #ads-content #similar-sponsored-seller-root .ssw-info-banner-icon {
-    width: 16px;
-    height: 16px;
-    min-width: 16px;
-    border-radius: 999px;
-    background: rgba(15,118,110,.1);
-    color: var(--ssw-accent-dark);
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-info-banner-text,
-  #ads-content #similar-sponsored-seller-root .ssw-info-banner-text {
-    margin: 0;
-    font-size: .69rem;
-    line-height: 1.55;
-    color: #64748b;
-    font-weight: 750;
-    text-align: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-card,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-card {
-    align-self: center;
-    width: min(100%, calc(100vw - 64px));
-    gap: .58rem;
-    padding: .78rem .78rem .72rem;
-    border-radius: 17px;
-    border-color: rgba(15,23,42,.1);
-    background: #fff;
-    box-shadow: 0 12px 28px -22px rgba(15,23,42,.55), inset 0 1px 0 rgba(255,255,255,.9);
-    transform: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-badge,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-badge {
-    display: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-header,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-header {
-    display: block;
-    padding-top: 0;
-    text-align: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-icon,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-icon {
-    display: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-pricing,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-pricing {
-    display: block;
-    padding: .16rem 0 0;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    text-align: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-price,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-price {
-    display: block;
-    width: 100%;
-    font-size: clamp(1.55rem, 8vw, 2rem);
-    line-height: 1;
-    color: var(--ssw-text-dark);
-    -webkit-text-fill-color: currentColor;
-    background: none;
-    direction: ltr;
-    unicode-bidi: isolate;
-    text-align: center;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-unit,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-unit {
-    display: block;
-    margin-top: .18rem;
-    font-size: .68rem;
-    color: #64748b;
-    white-space: normal;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-meta,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-meta {
-    display: flex;
-    grid-template-columns: none;
-    gap: .28rem .52rem;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-meta-chip,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-meta-chip {
-    flex-direction: row;
-    padding: 0;
-    border: 0;
-    background: transparent;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-admin-note,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-admin-note {
-    display: flex;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #64748b;
-    line-height: 1.45;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-actions,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-cta,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-cta {
-    background: linear-gradient(135deg, var(--ssw-accent-deeper) 0%, var(--ssw-accent) 100%);
-    box-shadow: 0 10px 18px -12px rgba(15,118,110,.8), inset 0 1px 0 rgba(255,255,255,.18);
-  }
-}
-
-/* Final alignment with the upgrade advertising card system */
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM SIMILAR SHOPS HORIZONTAL CARDS — Final Design
+   ══════════════════════════════════════════════════════════════ */
 #similar-sponsored-seller-root.ssw-widget {
   width: 100%;
   margin: 0;
@@ -1790,146 +1633,212 @@
 #similar-sponsored-seller-root .ssw-message:empty {
   display: none;
 }
+
+/* ── Horizontal scroll rail ── */
 #similar-sponsored-seller-root .ssw-plans-grid {
-  display: flex;
-  flex-direction: row;
-  gap: .78rem;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: .85rem;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 1rem;
+  scroll-padding-inline-start: .5rem;
   -webkit-overflow-scrolling: touch;
-  padding: .08rem 1rem .85rem;
-  margin-inline: -1rem;
+  padding: .35rem .5rem 1rem;
+  margin: 0;
   direction: rtl;
   scrollbar-width: none;
 }
 #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Card shell — premium gradient + elegant shadow ── */
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
-  flex: 0 0 calc(100% - 68px);
-  width: calc(100% - 68px);
+  flex: 0 0 78%;
+  width: 78%;
   min-width: 0;
+  max-width: 300px;
   align-self: stretch;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  padding: .92rem .9rem .82rem;
-  gap: .52rem;
-  border-radius: 18px;
-  border: 1px solid var(--ad-card-border);
-  background:
-    linear-gradient(145deg, rgba(255,255,255,.98), rgba(248,253,251,.94)),
-    #fff;
+  display: flex;
+  flex-direction: column;
+  gap: .72rem;
+  padding: 1.1rem 1rem 1rem;
+  border-radius: 20px;
+  border: 1.5px solid rgba(99, 102, 241, .14);
+  background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 48%, #ede9fe 100%);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 14px 30px rgba(15, 23, 42, 0.09);
+    0 2px 6px rgba(99, 102, 241, .06),
+    0 12px 32px rgba(99, 102, 241, .1);
   transform: none;
   direction: rtl;
+  position: relative;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(15, 23, 42, 0.12);
-  box-shadow: var(--ad-card-shadow-hover);
+  transform: translateY(-3px);
+  border-color: rgba(99, 102, 241, .24);
+  box-shadow:
+    0 4px 10px rgba(99, 102, 241, .08),
+    0 18px 40px rgba(99, 102, 241, .14);
 }
+
+/* ── Header row — title + single small badge ── */
 #similar-sponsored-seller-root .ssw-plan-header {
   order: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: .55rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem;
   padding: 0;
   text-align: right;
 }
 #similar-sponsored-seller-root .ssw-plan-title {
-  font-size: .95rem;
-  font-weight: 900;
-  line-height: 1.35;
-  color: #0f172a;
+  font-size: .92rem;
+  font-weight: 850;
+  line-height: 1.4;
+  color: #1e1b4b;
   margin: 0;
 }
 #similar-sponsored-seller-root .ssw-plan-desc {
-  max-width: 24rem;
-  margin: .12rem 0 0;
-  color: #64748b;
-  font-size: .7rem;
+  margin: .15rem 0 0;
+  color: #6366f1;
+  font-size: .67rem;
   font-weight: 650;
   line-height: 1.5;
+  opacity: .8;
   -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-#similar-sponsored-seller-root .ssw-plan-features,
-#similar-sponsored-seller-root .ssw-plan-meta,
-#similar-sponsored-seller-root .ssw-plan-admin-note,
-#similar-sponsored-seller-root .ssw-plan-guide-btn {
-  display: none;
-}
+
+/* ── Single badge — small, clean ── */
 #similar-sponsored-seller-root .ssw-plan-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 22px;
-  max-width: 76px;
-  padding: .18rem .5rem;
+  min-height: 20px;
+  max-width: 72px;
+  padding: .14rem .48rem;
   border-radius: 999px;
-  border: 1px solid var(--card-accent-line);
-  background: var(--card-accent-soft);
-  color: var(--card-accent-2);
-  font-size: .61rem;
-  font-weight: 900;
+  border: 1px solid rgba(99, 102, 241, .2);
+  background: rgba(99, 102, 241, .08);
+  color: #4f46e5;
+  font-size: .58rem;
+  font-weight: 850;
   line-height: 1;
   white-space: nowrap;
+  flex-shrink: 0;
 }
+#similar-sponsored-seller-root .ssw-plan-badge--recommended {
+  background: rgba(99, 102, 241, .12);
+  border-color: rgba(99, 102, 241, .28);
+  color: #4338ca;
+}
+
+/* ── Pricing — the visual anchor ── */
 #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
-  order: 3;
+  order: 2;
   display: flex;
   align-items: baseline;
-  justify-content: flex-start;
-  gap: .4rem;
-  padding: .12rem 0 0;
-  margin: .05rem 0 0;
+  justify-content: center;
+  gap: .38rem;
+  padding: .62rem .6rem;
+  margin: .1rem 0 0;
   border: 0;
-  border-radius: 0;
-  background: transparent;
-  text-align: right;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, .08);
 }
 #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
   display: inline;
   width: auto;
-  font-size: clamp(1.65rem, 7.8vw, 2rem);
+  font-size: clamp(1.55rem, 7vw, 1.85rem);
   font-weight: 950;
   line-height: 1;
-  color: var(--card-accent-2);
+  color: #4338ca;
   -webkit-text-fill-color: currentColor;
   background: none;
   direction: ltr;
   unicode-bidi: isolate;
-  text-align: center;
 }
 #similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
   display: inline;
   margin: 0;
-  font-size: .7rem;
-  color: #64748b;
-  font-weight: 600;
+  font-size: .68rem;
+  color: #6366f1;
+  font-weight: 700;
   white-space: nowrap;
+  opacity: .85;
 }
+
+/* ── Hide extraneous elements ── */
+#similar-sponsored-seller-root .ssw-plan-features,
+#similar-sponsored-seller-root .ssw-plan-meta,
+#similar-sponsored-seller-root .ssw-plan-admin-note,
+#similar-sponsored-seller-root .ssw-plan-guide-btn {
+  display: none !important;
+}
+
+/* ── CTA — compact pill button (no dark green!) ── */
 #similar-sponsored-seller-root .ssw-plan-actions {
-  order: 4;
+  order: 3;
   display: block;
-  margin-top: .04rem;
+  margin-top: auto;
+  padding-top: .15rem;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-  min-height: 34px;
+  min-height: 38px;
   width: 100%;
-  margin: .28rem 0 0;
-  padding: .4rem .25rem;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  box-shadow: none;
-  color: var(--card-accent-2);
+  margin: 0;
+  padding: .52rem .6rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow:
+    0 3px 12px rgba(99, 102, 241, .28),
+    inset 0 1px 0 rgba(255, 255, 255, .18);
+  color: #fff;
   font-size: .8rem;
-  font-weight: 900;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  letter-spacing: .005em;
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='15 18 9 12 15 6'/></svg>") no-repeat center / contain;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='15 18 9 12 15 6'/></svg>") no-repeat center / contain;
+  flex-shrink: 0;
+  transition: transform .2s ease;
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 6px 18px rgba(99, 102, 241, .32),
+    inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover::after {
+  transform: translateX(-2px);
+}
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:active {
+  transform: translateY(0);
+  filter: brightness(.97);
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta svg {
   display: none;
@@ -1937,136 +1846,53 @@
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta span {
   position: static;
 }
-#content-ads #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta,
-#ads-content #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-  min-height: 34px;
-  width: 100%;
-  margin: .28rem 0 0;
-  padding: .4rem .25rem;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  box-shadow: none;
-  color: var(--card-accent-2);
-  font-size: .8rem;
-  font-weight: 900;
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
 }
-#content-ads #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover,
-#ads-content #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover {
-  background: var(--card-accent-soft);
-  color: var(--card-accent-2);
-  box-shadow: none;
-}
-@media (max-width:639px) {
-  #content-ads #similar-sponsored-seller-root.ssw-widget,
-  #ads-content #similar-sponsored-seller-root.ssw-widget {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plans-grid,
-  #ads-content #similar-sponsored-seller-root .ssw-plans-grid {
-    display: flex;
-    flex-direction: row;
-    grid-template-columns: none;
-    gap: .78rem;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 1rem;
-    -webkit-overflow-scrolling: touch;
-    padding: .08rem 1rem .85rem;
-    margin-inline: -1rem;
-    direction: rtl;
-    scrollbar-width: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar,
-  #ads-content #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
-    display: none;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
-    flex: 0 0 calc(100% - 68px) !important;
-    width: calc(100% - 68px) !important;
-    max-width: calc(100% - 68px) !important;
-    align-self: stretch;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    margin: 0 !important;
-    padding: .92rem .9rem .82rem !important;
-    gap: .52rem;
-    border-radius: 18px;
-    border: 1px solid var(--ad-card-border);
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.98), rgba(248,253,251,.94)),
-      #fff;
-    box-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 14px 30px rgba(15, 23, 42, 0.09);
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-header,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    gap: .55rem;
-    text-align: right;
-  }
-  #content-ads #similar-sponsored-seller-root .ssw-plan-badge,
-  #ads-content #similar-sponsored-seller-root .ssw-plan-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 22px;
-    max-width: 76px;
-    padding: .18rem .5rem;
-    border-radius: 999px;
-    border: 1px solid var(--card-accent-line);
-    background: var(--card-accent-soft);
-    color: var(--card-accent-2);
-    font-size: .61rem;
-    font-weight: 900;
-    line-height: 1;
-    white-space: nowrap;
-  }
-  #content-ads #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing,
-  #ads-content #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
-    display: flex;
-    align-items: baseline;
-    justify-content: flex-start;
-    gap: .4rem;
-    padding: .12rem 0 0;
-    margin: .05rem 0 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    text-align: right;
-  }
-  #content-ads #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price,
-  #ads-content #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    display: inline;
-    width: auto;
-    font-size: clamp(1.65rem, 7.8vw, 2rem);
-    color: var(--card-accent-2);
-    text-align: right;
-  }
-}
+
+/* ── Desktop: slightly larger cards in grid ── */
 @media (min-width:640px) {
   #similar-sponsored-seller-root .ssw-plans-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 1rem;
-    overflow: visible;
-    padding: 0;
-    margin: 0;
+    scroll-padding-inline-start: .75rem;
+    padding: .35rem .75rem 1.1rem;
   }
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
-    width: 100%;
-    flex-basis: auto;
+    flex: 0 0 260px;
+    width: 260px;
+    max-width: 300px;
+    padding: 1.15rem 1.05rem 1.05rem;
+  }
+  #similar-sponsored-seller-root .ssw-plan-title {
+    font-size: .96rem;
+  }
+  #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
+    font-size: 1.85rem;
+  }
+  #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
+    min-height: 40px;
+    padding: .56rem .7rem;
+    font-size: .84rem;
+  }
+}
+
+/* ── Very small screens ── */
+@media (max-width:380px) {
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+    flex: 0 0 82%;
+    width: 82%;
+    padding: .92rem .82rem .85rem;
+    border-radius: 18px;
+  }
+  #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
+    font-size: 1.4rem;
+  }
+  #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
+    min-height: 36px;
+    font-size: .76rem;
   }
 }
     `;
@@ -2114,7 +1940,7 @@
             پیشنهادی
           </span>
           <h3 id="ssw-title" class="ssw-section-title">نمایش در فروشگاه‌های مشابه</h3>
-          <p class="ssw-section-subtitle">فروشگاه شما در بخش فروشگاه‌های هم‌حوزه مشتریان هدف نمایش داده می‌شود</p>
+          <p class="ssw-section-subtitle">دیده‌شدن هدفمند کنار رقبای هم‌حوزه شما</p>
         </div>
       </header>
 
@@ -2317,13 +2143,13 @@
     }
 
     const compactDescriptions = {
-      priority: 'نمایش بالاتر در فروشگاه‌های مشابه',
-      normal: 'نمایش کنار مغازه‌های مشابه'
+      priority: 'جایگاه برتر · دیده‌شدن بیشتر',
+      normal: 'نمایش در بخش مشابه‌ها'
     };
 
     container.innerHTML = plans.map((plan, index) => {
       const isPriority = plan.tier === 'priority';
-      const planTitle = plan.title || tierLabels[plan.tier] || 'پلن تبلیغ مشابه';
+      const planTitle = plan.title || `${tierLabels[plan.tier] || 'پلن تبلیغ'} - ${durationLabels[plan.durationUnit] || ''}`;
       const planDesc = compactDescriptions[plan.tier] || 'نمایش هدفمند در مشابه‌ها';
       const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
       const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
@@ -2348,7 +2174,7 @@
               data-plan-tier="${escapeHtml(plan.tier)}"
               data-plan-duration="${escapeHtml(plan.durationUnit)}"
               aria-label="ثبت درخواست برای ${escapeHtml(planTitle)}">
-              <span>ثبت درخواست تبلیغ</span>
+              <span>ثبت درخواست</span>
             </button>
           </div>
         </article>
