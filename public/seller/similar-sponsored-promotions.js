@@ -1610,7 +1610,7 @@
 
 /* ══════════════════════════════════════════════════════════════
    PREMIUM SIMILAR SHOPS HORIZONTAL CARDS — Green/White Design
-   Matches the upgrade cards above (green accents, white surface)
+   Refined premium feel: layered shadows, glass surface, micro-details
    ══════════════════════════════════════════════════════════════ */
 #similar-sponsored-seller-root.ssw-widget {
   width: 100%;
@@ -1622,8 +1622,7 @@
   box-shadow: none;
 }
 #similar-sponsored-seller-root.ssw-widget::before,
-#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::before,
-#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::after {
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::before {
   content: none;
   display: none;
 }
@@ -1640,13 +1639,13 @@
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
-  gap: .85rem;
+  gap: .95rem;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-padding-inline-start: .5rem;
   -webkit-overflow-scrolling: touch;
-  padding: .35rem .5rem 1rem;
+  padding: .5rem .5rem 1.2rem;
   margin: 0;
   direction: rtl;
   scrollbar-width: none;
@@ -1655,7 +1654,7 @@
   display: none;
 }
 
-/* ── Card shell — white/green gradient matching upgrade cards ── */
+/* ── Card shell — premium elevated white/green surface ── */
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
   flex: 0 0 78%;
   width: 78%;
@@ -1666,25 +1665,74 @@
   scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
-  gap: .72rem;
-  padding: 1.1rem 1rem 1rem;
-  border-radius: 18px;
-  border: 1px solid rgba(16, 185, 129, .18);
-  background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  gap: .78rem;
+  padding: 1.2rem 1.1rem 1.05rem;
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, .15);
+  background:
+    linear-gradient(168deg, rgba(255,255,255,.97) 0%, rgba(248,252,250,.95) 55%, rgba(240,253,244,.6) 100%);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, .05),
-    0 12px 28px rgba(15, 23, 42, .09);
-  transform: none;
+    0 0 0 1px rgba(16, 185, 129, .06),
+    0 1px 3px rgba(15, 23, 42, .04),
+    0 4px 12px rgba(15, 23, 42, .05),
+    0 12px 32px rgba(15, 23, 42, .08);
+  transform: translateY(0);
   direction: rtl;
   position: relative;
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform .3s cubic-bezier(.4,0,.2,1),
+    box-shadow .3s cubic-bezier(.4,0,.2,1),
+    border-color .3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
+/* Subtle inner highlight — glass-like top edge */
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9) 30%, rgba(255,255,255,.95) 50%, rgba(255,255,255,.9) 70%, transparent);
+  border-radius: 0 0 50% 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Hover/touch — stronger elevation feedback */
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: rgba(16, 185, 129, .28);
   box-shadow:
-    0 2px 4px rgba(15, 23, 42, .04),
-    0 14px 30px rgba(15, 23, 42, .075);
+    0 0 0 1px rgba(16, 185, 129, .1),
+    0 2px 4px rgba(15, 23, 42, .03),
+    0 8px 18px rgba(16, 185, 129, .07),
+    0 18px 40px rgba(15, 23, 42, .1);
+}
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card:active {
+  transform: translateY(-1px);
+  transition-duration: .12s;
+}
+
+/* ── Priority card — slightly more distinguished ── */
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority {
+  border-color: rgba(16, 185, 129, .22);
+  background:
+    linear-gradient(168deg, rgba(255,255,255,.98) 0%, rgba(243,252,248,.96) 55%, rgba(236,253,245,.7) 100%);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, .08),
+    0 1px 3px rgba(15, 23, 42, .04),
+    0 5px 14px rgba(16, 185, 129, .06),
+    0 14px 36px rgba(15, 23, 42, .09);
+}
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority:hover {
+  border-color: rgba(16, 185, 129, .35);
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, .12),
+    0 2px 4px rgba(15, 23, 42, .03),
+    0 10px 22px rgba(16, 185, 129, .09),
+    0 20px 44px rgba(15, 23, 42, .11);
 }
 
 /* ── Header row — title + single small badge ── */
@@ -1693,74 +1741,88 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: .5rem;
+  gap: .55rem;
   padding: 0;
   text-align: right;
 }
 #similar-sponsored-seller-root .ssw-plan-title {
-  font-size: .92rem;
+  font-size: .93rem;
   font-weight: 850;
   line-height: 1.4;
   color: #0f172a;
   margin: 0;
+  letter-spacing: -.01em;
 }
 #similar-sponsored-seller-root .ssw-plan-desc {
-  margin: .15rem 0 0;
+  margin: .18rem 0 0;
   color: #5f6f86;
-  font-size: .67rem;
+  font-size: .68rem;
   font-weight: 650;
   line-height: 1.5;
-  opacity: .85;
+  opacity: .88;
   -webkit-line-clamp: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ── Single badge — small, clean, green ── */
+/* ── Single badge — refined, subtle green ── */
 #similar-sponsored-seller-root .ssw-plan-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 20px;
-  max-width: 80px;
-  padding: .14rem .48rem;
+  min-height: 21px;
+  max-width: 82px;
+  padding: .16rem .52rem;
   border-radius: 999px;
-  border: 1px solid rgba(16, 185, 129, .2);
-  background: rgba(16, 185, 129, .09);
+  border: 1px solid rgba(16, 185, 129, .18);
+  background: linear-gradient(135deg, rgba(16, 185, 129, .08), rgba(5, 150, 105, .05));
   color: #059669;
-  font-size: .58rem;
+  font-size: .59rem;
   font-weight: 850;
   line-height: 1;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, .08);
 }
 #similar-sponsored-seller-root .ssw-plan-badge--recommended {
-  background: rgba(16, 185, 129, .12);
-  border-color: rgba(16, 185, 129, .28);
+  background: linear-gradient(135deg, rgba(16, 185, 129, .12), rgba(5, 150, 105, .08));
+  border-color: rgba(16, 185, 129, .26);
   color: #047857;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, .12);
 }
 
-/* ── Pricing — the visual anchor, matching upgrade cards ── */
+/* ── Pricing — the visual anchor with refined spacing ── */
 #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
   order: 2;
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: .38rem;
-  padding: 0;
-  margin: .26rem 0 0;
+  gap: .4rem;
+  padding: .35rem 0 .2rem;
+  margin: .15rem 0 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   text-align: center;
   direction: ltr;
   overflow: visible;
+  position: relative;
+}
+/* Subtle separator line above pricing */
+#similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, .12) 30%, rgba(16, 185, 129, .15) 50%, rgba(16, 185, 129, .12) 70%, transparent);
 }
 #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
   display: inline;
   width: auto;
-  font-size: 1.92rem;
+  font-size: 1.95rem;
   font-weight: 950;
   line-height: 1;
   color: #059669;
@@ -1768,13 +1830,13 @@
   background: none;
   direction: ltr;
   unicode-bidi: isolate;
-  letter-spacing: 0;
+  letter-spacing: -.02em;
   white-space: nowrap;
 }
 #similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
   display: inline;
   margin: 0;
-  font-size: .7rem;
+  font-size: .71rem;
   color: #53627a;
   font-weight: 800;
   white-space: nowrap;
@@ -1789,32 +1851,37 @@
   display: none !important;
 }
 
-/* ── CTA — transparent green text pill, matching upgrade cards ── */
+/* ── CTA — refined green with subtle surface treatment ── */
 #similar-sponsored-seller-root .ssw-plan-actions {
   order: 3;
   display: block;
   margin-top: auto;
-  padding-top: .15rem;
+  padding-top: .25rem;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-  min-height: 34px;
+  min-height: 36px;
   width: 100%;
-  margin: .28rem 0 0;
-  padding: .4rem .25rem;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  box-shadow: none;
+  margin: .2rem 0 0;
+  padding: .45rem .5rem;
+  border: 1px solid rgba(16, 185, 129, .14);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, .04), rgba(5, 150, 105, .02));
+  box-shadow: 0 1px 2px rgba(16, 185, 129, .06);
   color: #059669;
-  font-size: .8rem;
+  font-size: .82rem;
   font-weight: 900;
   cursor: pointer;
-  transition: transform .2s ease, background .2s ease, color .2s ease;
+  transition:
+    transform .25s cubic-bezier(.4,0,.2,1),
+    background .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: .35rem;
   letter-spacing: .005em;
+  -webkit-tap-highlight-color: transparent;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta::after {
   content: '';
@@ -1824,21 +1891,22 @@
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='15 18 9 12 15 6'/></svg>") no-repeat center / contain;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='15 18 9 12 15 6'/></svg>") no-repeat center / contain;
   flex-shrink: 0;
-  transition: transform .2s ease;
+  transition: transform .25s ease;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover {
   transform: translateY(-1px);
-  background: rgba(16, 185, 129, .09);
-  color: #059669;
-  box-shadow: none;
-  filter: none;
+  background: linear-gradient(135deg, rgba(16, 185, 129, .1), rgba(5, 150, 105, .06));
+  border-color: rgba(16, 185, 129, .24);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, .12);
+  color: #047857;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover::after {
-  transform: translateX(-2px);
+  transform: translateX(-3px);
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:active {
   transform: translateY(0);
-  filter: none;
+  box-shadow: 0 1px 2px rgba(16, 185, 129, .08);
+  transition-duration: .1s;
 }
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta svg {
   display: none;
@@ -1851,31 +1919,34 @@
   cursor: not-allowed;
   transform: none;
   filter: none;
+  box-shadow: none;
 }
 
-/* ── Desktop: slightly larger cards in grid ── */
+/* ── Desktop: slightly larger cards ── */
 @media (min-width:640px) {
   #similar-sponsored-seller-root .ssw-plans-grid {
-    gap: 1rem;
+    gap: 1.1rem;
     scroll-padding-inline-start: .75rem;
-    padding: .35rem .75rem 1.1rem;
+    padding: .5rem .75rem 1.3rem;
   }
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
-    flex: 0 0 260px;
-    width: 260px;
-    max-width: 300px;
-    padding: 1.15rem 1.05rem 1.05rem;
+    flex: 0 0 265px;
+    width: 265px;
+    max-width: 310px;
+    padding: 1.25rem 1.15rem 1.1rem;
+    border-radius: 22px;
   }
   #similar-sponsored-seller-root .ssw-plan-title {
-    font-size: .96rem;
+    font-size: .97rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    font-size: 1.92rem;
+    font-size: 1.95rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-    min-height: 34px;
-    padding: .4rem .25rem;
+    min-height: 38px;
+    padding: .48rem .5rem;
     font-size: .84rem;
+    border-radius: 13px;
   }
 }
 
@@ -1884,15 +1955,16 @@
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
     flex: 0 0 82%;
     width: 82%;
-    padding: .92rem .82rem .85rem;
-    border-radius: 16px;
+    padding: 1rem .88rem .9rem;
+    border-radius: 18px;
+    gap: .68rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    font-size: 1.55rem;
+    font-size: 1.6rem;
   }
   #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-    min-height: 32px;
-    font-size: .76rem;
+    min-height: 34px;
+    font-size: .78rem;
   }
 }
     `;
