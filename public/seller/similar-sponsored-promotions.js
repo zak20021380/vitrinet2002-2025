@@ -1905,10 +1905,24 @@
     state.loadPromise = (async () => {
       if (!silent) setMessage('در حال بارگذاری...');
       try {
-        const [plansData, requestsData] = await Promise.all([
+        const [plansResult, requestsResult] = await Promise.allSettled([
           apiJson('/similar-shop-promotions/plans'),
           apiJson('/similar-shop-promotions/seller')
         ]);
+
+        if (plansResult.status === 'rejected') {
+          throw plansResult.reason;
+        }
+
+        const plansData = plansResult.value || {};
+        const requestsData = requestsResult.status === 'fulfilled'
+          ? (requestsResult.value || {})
+          : { promotions: [] };
+
+        if (requestsResult.status === 'rejected') {
+          console.warn('similar sponsored requests unavailable:', requestsResult.reason);
+        }
+
         state.plans = Array.isArray(plansData.plans) ? plansData.plans : [];
         state.requests = Array.isArray(requestsData.promotions) ? requestsData.promotions : [];
         state.planVersion = plansData.meta?.version || plansData.meta?.plansUpdatedAt || null;

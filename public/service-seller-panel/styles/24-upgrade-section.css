@@ -5455,21 +5455,15 @@
 
 @media (max-width: 767px) {
   #content-ads .ssw-plans-grid {
-    display: flex;
-    flex-direction: row;
-    gap: 0.7rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.8rem;
     width: 100%;
     min-width: 0;
-    padding: 0.25rem 0.25rem 0.7rem;
+    padding: 0;
     margin: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-    scroll-padding-inline-end: 1.6rem;
+    overflow: visible;
+    scroll-snap-type: none;
   }
 
   #content-ads .ssw-plans-grid::-webkit-scrollbar {
@@ -5478,23 +5472,21 @@
   }
 
   #content-ads .ssw-plans-grid > .ssw-plan-card {
-    flex: 0 0 auto;
-    width: 82%;
-    max-width: 320px;
+    width: 100%;
+    max-width: none;
     min-width: 0;
     margin: 0;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
+    scroll-snap-align: none;
   }
 
   #content-ads .ssw-plans-grid > .ssw-plan-card:last-child {
-    scroll-snap-align: end;
+    scroll-snap-align: none;
   }
 }
 
 @media (max-width: 360px) {
   #content-ads .ssw-plans-grid > .ssw-plan-card {
-    width: 86%;
+    width: 100%;
   }
 }
 
@@ -5503,6 +5495,259 @@
 @media (max-width: 767px) {
   .upgrade-ad-category--similar + #similar-sponsored-seller-root,
   .upgrade-ad-category--similar ~ #similar-sponsored-seller-root {
-    margin-top: -0.4rem;
+    margin-top: -0.15rem;
+  }
+}
+
+/* Mobile polish for the similar-shops upgrade block.
+   The default widget is dense and carousel-like; in the seller dashboard a
+   complete one-column card stack is easier to scan and avoids clipped cards. */
+@media (max-width: 767px) {
+  #content-ads #similar-sponsored-seller-root {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.85rem;
+    border-radius: 18px;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)),
+      radial-gradient(130% 90% at 100% 0%, rgba(124, 58, 237, 0.08), transparent 58%);
+    border-color: rgba(226, 232, 240, 0.95);
+    box-shadow:
+      0 12px 30px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  #content-ads #similar-sponsored-seller-root::before {
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(20, 184, 166, 0.12), rgba(124, 58, 237, 0.85), rgba(14, 165, 233, 0.22));
+  }
+
+  #content-ads .ssw-section-header {
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 0.72rem;
+    padding: 0;
+  }
+
+  #content-ads .ssw-section-header-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 13px;
+    box-shadow:
+      0 0 0 4px rgba(124, 58, 237, 0.055),
+      0 8px 18px -10px rgba(124, 58, 237, 0.45);
+  }
+
+  #content-ads .ssw-section-header-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  #content-ads .ssw-section-eyebrow {
+    padding: 0.18rem 0.52rem;
+    margin-bottom: 0.24rem;
+    font-size: 0.62rem;
+  }
+
+  #content-ads .ssw-section-title {
+    font-size: 0.94rem;
+    line-height: 1.35;
+    margin-bottom: 0.12rem;
+  }
+
+  #content-ads .ssw-section-subtitle {
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+
+  #content-ads .ssw-info-banner {
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.62rem 0.72rem;
+    margin-bottom: 0.76rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.075), rgba(20, 184, 166, 0.045));
+  }
+
+  #content-ads .ssw-info-banner-icon {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 7px;
+  }
+
+  #content-ads .ssw-info-banner-text {
+    margin: 0;
+    font-size: 0.71rem;
+    line-height: 1.65;
+    font-weight: 750;
+  }
+
+  #content-ads .ssw-message {
+    min-height: 0;
+    margin: 0 0 0.45rem;
+    font-size: 0.76rem;
+  }
+
+  #content-ads .ssw-plan-card {
+    gap: 0.58rem;
+    padding: 0.82rem;
+    border-radius: 16px;
+    border-color: rgba(226, 232, 240, 0.92);
+    background:
+      linear-gradient(180deg, rgba(124, 58, 237, 0.035), rgba(255, 255, 255, 0) 44%),
+      #ffffff;
+    box-shadow:
+      0 10px 22px rgba(15, 23, 42, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    transform: none;
+  }
+
+  #content-ads .ssw-plan-card:hover {
+    transform: none;
+    box-shadow:
+      0 10px 22px rgba(15, 23, 42, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  }
+
+  #content-ads .ssw-plan-badge {
+    position: static;
+    align-self: flex-start;
+    order: -1;
+    padding: 0.24rem 0.58rem;
+    font-size: 0.61rem;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.18);
+  }
+
+  #content-ads .ssw-plan-header {
+    align-items: flex-start;
+    gap: 0.62rem;
+    padding-top: 0;
+  }
+
+  #content-ads .ssw-plan-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 12px;
+  }
+
+  #content-ads .ssw-plan-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  #content-ads .ssw-plan-title {
+    font-size: 0.91rem;
+    line-height: 1.45;
+  }
+
+  #content-ads .ssw-plan-desc {
+    margin-top: 0.08rem;
+    font-size: 0.7rem;
+    line-height: 1.6;
+  }
+
+  #content-ads .ssw-plan-pricing {
+    justify-content: space-between;
+    padding: 0.62rem 0.72rem;
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  #content-ads .ssw-plan-price {
+    font-size: 1.08rem;
+  }
+
+  #content-ads .ssw-plan-unit {
+    font-size: 0.67rem;
+    white-space: nowrap;
+  }
+
+  #content-ads .ssw-plan-features {
+    gap: 0.38rem;
+    padding: 0.48rem 0 0;
+  }
+
+  #content-ads .ssw-plan-feature {
+    align-items: flex-start;
+    font-size: 0.71rem;
+    line-height: 1.55;
+  }
+
+  #content-ads .ssw-plan-feature-icon {
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+    margin-top: 0.12rem;
+  }
+
+  #content-ads .ssw-plan-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.38rem;
+  }
+
+  #content-ads .ssw-plan-meta-chip {
+    padding: 0.46rem 0.28rem;
+    border-radius: 10px;
+  }
+
+  #content-ads .ssw-plan-meta-chip__label {
+    font-size: 0.56rem;
+  }
+
+  #content-ads .ssw-plan-meta-chip__value {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  #content-ads .ssw-plan-admin-note {
+    padding: 0.52rem 0.62rem;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    line-height: 1.6;
+  }
+
+  #content-ads .ssw-plan-guide-btn,
+  #content-ads .ssw-plan-cta {
+    min-height: 42px;
+    border-radius: 12px;
+    font-size: 0.76rem;
+  }
+
+  #content-ads .ssw-plan-cta {
+    padding: 0.7rem 0.8rem;
+    box-shadow: 0 8px 18px rgba(124, 58, 237, 0.24);
+  }
+}
+
+@media (max-width: 360px) {
+  #content-ads #similar-sponsored-seller-root {
+    padding: 0.72rem;
+    border-radius: 16px;
+  }
+
+  #content-ads .ssw-section-header {
+    gap: 0.52rem;
+  }
+
+  #content-ads .ssw-section-header-icon,
+  #content-ads .ssw-plan-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  #content-ads .ssw-plan-card {
+    padding: 0.72rem;
+  }
+
+  #content-ads .ssw-plan-pricing {
+    align-items: center;
+    gap: 0.35rem;
   }
 }
