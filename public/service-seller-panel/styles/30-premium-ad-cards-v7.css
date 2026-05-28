@@ -1,0 +1,678 @@
+/* =============================================================
+   Premium Ad Cards v7 — Distinctive & Professional
+   -------------------------------------------------------------
+   Each card type gets its own visual identity:
+   • Home Page Ad  → Bold gradient header with golden accent
+   • Products Ad   → Glass-morphism with amber/orange energy
+   • Similar Shops → Teal/mint premium with sponsor badge
+   • Search Ad     → Clean emerald with search-focused design
+   
+   Mobile-first, RTL-friendly, visually distinct cards.
+   Must load AFTER 29-upgrade-ad-cards-redesign.css
+   ============================================================= */
+
+/* ── Reset v6 overrides that flatten everything ──────────────── */
+.upgrade-ad-categories .upgrade-ad-card .upgrade-ad-desc {
+  -webkit-line-clamp: 2 !important;
+}
+
+
+/* ── Base card override — restore visual richness ─────────────── */
+.upgrade-ad-rail .upgrade-ad-card,
+.upgrade-ads-grid .upgrade-ad-card,
+.upgrade-ad-card {
+  --ad-card-pad: 0;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.upgrade-ad-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow:
+    0 4px 8px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset !important;
+}
+
+
+/* Remove the old side accent line */
+.upgrade-ad-card::before {
+  display: none !important;
+}
+
+/* ── Card inner content wrapper ─────────────────────────────── */
+.upgrade-ad-card .upgrade-ad-badge {
+  position: absolute !important;
+  top: 0.85rem !important;
+  inset-inline-end: 0.85rem !important;
+  inset-inline-start: auto !important;
+  padding: 0.28rem 0.7rem !important;
+  border-radius: 8px !important;
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  z-index: 5 !important;
+  letter-spacing: 0.02em !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.upgrade-ad-card .upgrade-ad-header {
+  order: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.7rem !important;
+  padding: 1.1rem 1rem 0 !important;
+  min-height: 0 !important;
+}
+
+
+/* Restore the icon */
+.upgrade-ad-card .upgrade-ad-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 13px !important;
+  transition: transform 0.25s ease !important;
+}
+
+.upgrade-ad-card .upgrade-ad-icon svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.upgrade-ad-card .upgrade-ad-title {
+  font-size: 1.02rem !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  line-height: 1.4 !important;
+  text-align: right !important;
+  margin: 0 !important;
+}
+
+.upgrade-ad-card .upgrade-ad-desc {
+  order: 2 !important;
+  padding: 0.35rem 1rem 0 !important;
+  margin: 0 !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
+  text-align: right !important;
+}
+
+
+/* ── Pricing section — the visual anchor ─────────────────────── */
+.upgrade-ad-card .upgrade-ad-pricing {
+  order: 3 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  padding: 0.85rem 1rem !important;
+  margin: 0.6rem 0.8rem 0 !important;
+  border-radius: 14px !important;
+  border: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+  width: auto !important;
+}
+
+.upgrade-ad-card .upgrade-ad-pricing::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0.06 !important;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    currentColor 4px,
+    currentColor 5px
+  ) !important;
+  height: auto !important;
+}
+
+.upgrade-ad-card .upgrade-ad-price {
+  font-size: 1.65rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.upgrade-ad-card .upgrade-ad-unit {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  opacity: 0.8 !important;
+}
+
+
+/* ── CTA button ──────────────────────────────────────────────── */
+.upgrade-ad-card .upgrade-ad-cta {
+  order: 4 !important;
+  width: calc(100% - 1.6rem) !important;
+  margin: 0.65rem 0.8rem 0.9rem !important;
+  padding: 0.72rem 1rem !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+  font-size: 0.86rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  letter-spacing: 0.01em !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.upgrade-ad-card .upgrade-ad-cta::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%) !important;
+  pointer-events: none !important;
+}
+
+.upgrade-ad-card .upgrade-ad-cta:hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(1.05) !important;
+}
+
+.upgrade-ad-card .upgrade-ad-cta:active {
+  transform: translateY(0) !important;
+  filter: brightness(0.97) !important;
+}
+
+
+/* =============================================================
+   HOME PAGE AD — Royal Blue Premium
+   Gradient top banner, deep blue accent, premium feel
+   ============================================================= */
+.upgrade-ad-card--home {
+  background: linear-gradient(180deg, #eef6ff 0%, #ffffff 35%) !important;
+  border-top: 3px solid #0ea5e9 !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-badge {
+  background: rgba(14, 165, 233, 0.12) !important;
+  color: #0369a1 !important;
+  border: 1px solid rgba(14, 165, 233, 0.2) !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-icon {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-icon svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(2, 132, 199, 0.04)) !important;
+  border: 1px solid rgba(14, 165, 233, 0.15) !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-price {
+  color: #0369a1 !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-unit {
+  color: #0c4a6e !important;
+}
+
+
+.upgrade-ad-card--home .upgrade-ad-cta {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35),
+              0 1px 3px rgba(14, 165, 233, 0.2) !important;
+}
+
+.upgrade-ad-card--home .upgrade-ad-cta:hover {
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4),
+              0 2px 4px rgba(14, 165, 233, 0.25) !important;
+}
+
+/* =============================================================
+   PRODUCTS AD — Warm Amber/Orange Energy
+   Diagonal accent stripe, warm gradient, commerce-focused
+   ============================================================= */
+.upgrade-ad-card--products {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 35%) !important;
+  border-top: 3px solid #f59e0b !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-badge {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-icon {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-icon svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+
+.upgrade-ad-card--products .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(217, 119, 6, 0.04)) !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-price {
+  color: #b45309 !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-unit {
+  color: #92400e !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-cta {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35),
+              0 1px 3px rgba(245, 158, 11, 0.2) !important;
+}
+
+.upgrade-ad-card--products .upgrade-ad-cta:hover {
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4),
+              0 2px 4px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* =============================================================
+   SEARCH AD — Fresh Emerald
+   Clean green accents, search-focused identity
+   ============================================================= */
+.upgrade-ad-card--search {
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 35%) !important;
+  border-top: 3px solid #10b981 !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-badge {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #047857 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+
+.upgrade-ad-card--search .upgrade-ad-icon {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-icon svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.04)) !important;
+  border: 1px solid rgba(16, 185, 129, 0.15) !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-price {
+  color: #047857 !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-unit {
+  color: #065f46 !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-cta {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35),
+              0 1px 3px rgba(16, 185, 129, 0.2) !important;
+}
+
+.upgrade-ad-card--search .upgrade-ad-cta:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4),
+              0 2px 4px rgba(16, 185, 129, 0.25) !important;
+}
+
+
+/* =============================================================
+   SIMILAR SHOPS AD — Teal/Purple Premium Sponsor
+   Deep gradient, sponsor-style badge, VIP look
+   ============================================================= */
+.upgrade-ad-card--similar,
+[data-ad-slot="similar_promotions"].upgrade-ad-card {
+  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 35%) !important;
+  border-top: 3px solid #14b8a6 !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-badge,
+.upgrade-ad-card--similar .upgrade-ad-badge {
+  background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3) !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-icon,
+.upgrade-ad-card--similar .upgrade-ad-icon {
+  background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3) !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-icon svg,
+.upgrade-ad-card--similar .upgrade-ad-icon svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-pricing,
+.upgrade-ad-card--similar .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(13, 148, 136, 0.04)) !important;
+  border: 1px solid rgba(20, 184, 166, 0.18) !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-price,
+.upgrade-ad-card--similar .upgrade-ad-price {
+  color: #0f766e !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-unit,
+.upgrade-ad-card--similar .upgrade-ad-unit {
+  color: #115e59 !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-cta,
+.upgrade-ad-card--similar .upgrade-ad-cta {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35),
+              0 1px 3px rgba(20, 184, 166, 0.2) !important;
+}
+
+[data-ad-slot="similar_promotions"] .upgrade-ad-cta:hover,
+.upgrade-ad-card--similar .upgrade-ad-cta:hover {
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4),
+              0 2px 4px rgba(20, 184, 166, 0.25) !important;
+}
+
+
+/* =============================================================
+   POPULAR CARD HIGHLIGHT — Home card gets extra "recommended" feel
+   ============================================================= */
+.upgrade-ad-card--home::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  inset-inline-end: 0 !important;
+  width: 80px !important;
+  height: 80px !important;
+  background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 70%) !important;
+  pointer-events: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* =============================================================
+   CATEGORY SECTION HEADERS — More visual separation
+   ============================================================= */
+.upgrade-ad-category__title--green {
+  color: #047857 !important;
+}
+
+.upgrade-ad-category__title--blue {
+  color: #0369a1 !important;
+}
+
+.upgrade-ad-category__header {
+  padding-bottom: 0.4rem !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+  margin-bottom: 0.3rem !important;
+}
+
+
+/* =============================================================
+   MOBILE RESPONSIVE (≤ 767px) — Full-width stacked, premium
+   ============================================================= */
+@media (max-width: 767px) {
+  .upgrade-ad-rail .upgrade-ad-card,
+  .upgrade-ads-grid .upgrade-ad-card,
+  .upgrade-ad-card {
+    border-radius: 18px !important;
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.04),
+      0 8px 24px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-header {
+    padding: 0.95rem 0.85rem 0 !important;
+    gap: 0.6rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-title {
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-badge {
+    top: 0.75rem !important;
+    inset-inline-end: 0.75rem !important;
+    padding: 0.24rem 0.6rem !important;
+    font-size: 0.62rem !important;
+  }
+
+
+  .upgrade-ad-card .upgrade-ad-desc {
+    padding: 0.3rem 0.85rem 0 !important;
+    font-size: 0.72rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-pricing {
+    margin: 0.5rem 0.7rem 0 !important;
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-price {
+    font-size: 1.5rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-unit {
+    font-size: 0.68rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-cta {
+    width: calc(100% - 1.4rem) !important;
+    margin: 0.55rem 0.7rem 0.8rem !important;
+    padding: 0.68rem 1rem !important;
+    min-height: 42px !important;
+    font-size: 0.84rem !important;
+    border-radius: 12px !important;
+  }
+
+  /* Keep features & capacity hidden on mobile for clean look */
+  .upgrade-ad-card .upgrade-ad-capacity__schedule,
+  .upgrade-ad-card .upgrade-ad-capacity,
+  .upgrade-ad-card .upgrade-ad-frequency-cap,
+  .upgrade-ad-card .upgrade-ad-features {
+    display: none !important;
+  }
+
+  /* Rail stacking */
+  .upgrade-ad-rail {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.85rem !important;
+    padding: 0 !important;
+  }
+
+  .upgrade-ad-rail > .upgrade-ad-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+
+/* =============================================================
+   SMALL PHONES (≤ 360px) — Micro adjustments
+   ============================================================= */
+@media (max-width: 360px) {
+  .upgrade-ad-card .upgrade-ad-header {
+    padding: 0.85rem 0.7rem 0 !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-title {
+    font-size: 0.9rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-desc {
+    padding: 0.25rem 0.7rem 0 !important;
+    font-size: 0.68rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-pricing {
+    margin: 0.4rem 0.6rem 0 !important;
+    padding: 0.65rem 0.75rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-price {
+    font-size: 1.35rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-cta {
+    width: calc(100% - 1.2rem) !important;
+    margin: 0.45rem 0.6rem 0.7rem !important;
+    min-height: 40px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+
+/* =============================================================
+   TABLET+ (≥ 768px) — Side-by-side cards in rail
+   ============================================================= */
+@media (min-width: 768px) {
+  .upgrade-ad-rail {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1rem !important;
+    overflow-x: auto !important;
+    padding: 0.3rem !important;
+  }
+
+  .upgrade-ad-rail > .upgrade-ad-card {
+    flex: 1 1 280px !important;
+    min-width: 260px !important;
+    max-width: 340px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-header {
+    padding: 1.2rem 1.1rem 0 !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    border-radius: 14px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-icon svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-title {
+    font-size: 1.05rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-desc {
+    padding: 0.4rem 1.1rem 0 !important;
+    font-size: 0.78rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-pricing {
+    margin: 0.7rem 1rem 0 !important;
+    padding: 0.9rem 1rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-price {
+    font-size: 1.8rem !important;
+  }
+
+  .upgrade-ad-card .upgrade-ad-cta {
+    width: calc(100% - 2rem) !important;
+    margin: 0.75rem 1rem 1rem !important;
+    min-height: 46px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+
+/* =============================================================
+   REDUCED MOTION
+   ============================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .upgrade-ad-card,
+  .upgrade-ad-card .upgrade-ad-cta,
+  .upgrade-ad-card .upgrade-ad-icon {
+    transition: none !important;
+  }
+  .upgrade-ad-card:hover {
+    transform: none !important;
+  }
+}
+
+/* =============================================================
+   SELECTED STATE — Override for all cards
+   ============================================================= */
+.upgrade-ad-card.is-selected {
+  box-shadow:
+    0 0 0 2px var(--card-accent),
+    0 4px 8px rgba(15, 23, 42, 0.06),
+    0 12px 32px rgba(15, 23, 42, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
