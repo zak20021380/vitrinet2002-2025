@@ -10039,6 +10039,25 @@ body.edit-product-modal-open {
     font-size: 27px;
   }
 
+  .seller-mobile-bottom-nav__item--upgrade {
+    color: #b45309;
+  }
+
+  .seller-mobile-bottom-nav__item--upgrade i {
+    color: #f59e0b;
+    filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.18));
+  }
+
+  .seller-mobile-bottom-nav__item--upgrade.active {
+    color: #92400e;
+    background: linear-gradient(145deg, rgba(245, 158, 11, 0.16), rgba(251, 191, 36, 0.07));
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.22);
+  }
+
+  .seller-mobile-bottom-nav__item--upgrade.active i {
+    text-shadow: 0 4px 10px rgba(245, 158, 11, 0.22);
+  }
+
   .seller-mobile-bottom-nav__badge {
     position: absolute;
     top: 7px;
@@ -10089,6 +10108,10 @@ body.edit-product-modal-open {
 
   .seller-mobile-bottom-nav__item.active {
     box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.16);
+  }
+
+  .seller-mobile-bottom-nav__item--upgrade.active {
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.2);
   }
 }
 
@@ -11355,9 +11378,9 @@ body.edit-product-modal-open {
       <span>پیام‌ها</span>
       <span class="seller-mobile-bottom-nav__badge" id="sellerMobileMsgBadge">0</span>
     </button>
-    <button class="seller-mobile-bottom-nav__item" type="button" data-action="menu" aria-label="منوی بیشتر">
-      <i class="ri-menu-3-line" aria-hidden="true"></i>
-      <span>منو</span>
+    <button class="seller-mobile-bottom-nav__item seller-mobile-bottom-nav__item--upgrade" type="button" data-action="upgrade" aria-label="ارتقا">
+      <i class="ri-vip-crown-2-line" aria-hidden="true"></i>
+      <span>ارتقا</span>
     </button>
   </nav>
 
@@ -17595,20 +17618,27 @@ body.edit-product-modal-open {
     if (!nav) return;
 
     const navItems = Array.from(nav.querySelectorAll('.seller-mobile-bottom-nav__item'));
-    const sectionItems = navItems.filter((item) => item.dataset.section);
+    const getItemKey = (item) => item.dataset.section || (item.dataset.action === 'upgrade' ? 'upgrade' : '');
+    const sectionItems = navItems.filter((item) => getItemKey(item));
     const sidebarButtons = Array.from(document.querySelectorAll('.sidebar-link[data-section]'));
     const sidebarMenuItems = Array.from(document.querySelectorAll('.sidebar-menu-item[data-section]'));
+    const upgradeButton = document.getElementById('menu-upgrade');
 
     function setActiveSection(section) {
       sectionItems.forEach((item) => {
-        const isActive = item.dataset.section === section;
+        const isActive = getItemKey(item) === section;
         item.classList.toggle('active', isActive);
         item.toggleAttribute('aria-current', isActive);
       });
     }
 
     function syncFromSidebar() {
-      const activeButton = document.querySelector('.sidebar-link.active[data-section], .sidebar-menu-item.active[data-section]');
+      const activeButton = document.querySelector('.sidebar-link.active[data-section], .sidebar-menu-item.active[data-section], #menu-upgrade.active');
+      if (activeButton?.id === 'menu-upgrade') {
+        setActiveSection('upgrade');
+        return;
+      }
+
       if (activeButton?.dataset.section) {
         setActiveSection(activeButton.dataset.section);
       }
@@ -17634,6 +17664,12 @@ body.edit-product-modal-open {
           return;
         }
 
+        if (item.dataset.action === 'upgrade') {
+          document.getElementById('menu-upgrade')?.click();
+          setActiveSection('upgrade');
+          return;
+        }
+
         if (!section) return;
 
         const desktopButton = document.getElementById(`menu-${section}`);
@@ -17652,7 +17688,7 @@ body.edit-product-modal-open {
       syncMessageBadge();
     });
 
-    [...sidebarButtons, ...sidebarMenuItems].forEach((button) => {
+    [...sidebarButtons, ...sidebarMenuItems, upgradeButton].filter(Boolean).forEach((button) => {
       observer.observe(button, { attributes: true, attributeFilter: ['class'] });
     });
 

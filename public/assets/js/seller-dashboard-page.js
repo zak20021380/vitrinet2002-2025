@@ -2648,6 +2648,31 @@ function setMainImageIndex(idx) {
       const mainContent = doc.querySelector('main') || doc.querySelector('.upgrade-section') || doc.body;
       main.innerHTML = mainContent ? mainContent.innerHTML : htmlText;
 
+      const makeQueuedUpgradeAction = (actionName) => {
+        const queuedAction = (...args) => {
+          const runWhenReady = () => {
+            const action = window[actionName];
+            if (typeof action === 'function' && action !== queuedAction) {
+              action(...args);
+              return;
+            }
+            setTimeout(runWhenReady, 150);
+          };
+          runWhenReady();
+        };
+        return queuedAction;
+      };
+
+      if (typeof window.selectPlan !== 'function') {
+        window.selectPlan = makeQueuedUpgradeAction('selectPlan');
+      }
+      if (typeof window.selectedPlan !== 'function') {
+        window.selectedPlan = (...args) => window.selectPlan(...args);
+      }
+      if (typeof window.openAdModal !== 'function') {
+        window.openAdModal = makeQueuedUpgradeAction('openAdModal');
+      }
+
       /* 2) اگر اسکریپت قبلاً وجود دارد (ریفرشِ گرم)، حذفش کن تا کش نشود */
       ['upgrade-js-script', 'similar-sponsored-js-script'].forEach((id) => {
         const old = document.getElementById(id);

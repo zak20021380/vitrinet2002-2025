@@ -953,6 +953,18 @@ function initUpgradeDashboard () {
   // پیش‌فرض نمایش اشتراک فروشگاه
   refreshPlanCardRegistry();
   initSpecialAdDropdown();
+
+  document.querySelectorAll('[data-plan-select]').forEach(btn => {
+    btn.removeAttribute('onclick');
+    if (btn.dataset.planSelectListenerAttached) return;
+    btn.dataset.planSelectListenerAttached = 'true';
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const slug = btn.dataset.planSelect;
+      if (slug) window.selectPlan(slug);
+    });
+  });
+
   toggleTabs('sub');
 
   fetchPlanPrices(true);
@@ -1410,6 +1422,8 @@ window.selectPlan = async function (slug) {
     }
   };
 };
+
+window.selectedPlan = window.selectPlan;
 
 
 
