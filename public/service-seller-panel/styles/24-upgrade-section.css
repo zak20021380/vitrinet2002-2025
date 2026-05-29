@@ -1145,13 +1145,13 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   Ad Cards - Premium Professional Design V2
-   Mobile-First, Compact & Modern
+   Ad Cards - Premium Professional Design V3
+   Visually Distinct Cards · Mobile-First · Premium Feel
    ───────────────────────────────────────────────────── */
 .upgrade-ads-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   padding: 0 0.25rem;
 }
 
@@ -1159,27 +1159,25 @@
   .upgrade-ads-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
     padding: 0;
   }
 }
 
 .upgrade-ad-card {
   position: relative;
-  background: linear-gradient(165deg, 
-    rgba(255, 255, 255, 0.95) 0%, 
-    rgba(248, 250, 252, 0.98) 100%);
-  border: 1.5px solid rgba(226, 232, 240, 0.8);
-  border-radius: 20px;
-  padding: 1rem;
+  background: #ffffff;
+  border: 2px solid rgba(226, 232, 240, 0.6);
+  border-radius: 24px;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.62rem;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.75rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 4px 16px rgba(0, 0, 0, 0.02);
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.02);
   scroll-margin-top: 1rem;
 }
 
@@ -1189,29 +1187,48 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(90deg, #10b981, #0ea5e9);
   opacity: 1;
   transition: height 0.3s ease;
 }
 
+/* Decorative background shapes */
+.upgrade-ad-card::after {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  top: -90px;
+  left: -60px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.upgrade-ad-card > * {
+  position: relative;
+  z-index: 1;
+}
+
 .upgrade-ad-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(16, 185, 129, 0.35);
   box-shadow: 
-    0 12px 32px rgba(16, 185, 129, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.06);
+    0 20px 40px rgba(16, 185, 129, 0.12),
+    0 8px 16px rgba(0, 0, 0, 0.06);
 }
 
 .upgrade-ad-card:hover::before {
-  height: 4px;
+  height: 5px;
 }
 
 .upgrade-ad-card.is-selected {
-  border-color: rgba(16, 185, 129, 0.42);
+  border-color: rgba(16, 185, 129, 0.5);
   box-shadow:
-    0 14px 34px rgba(16, 185, 129, 0.14),
-    0 0 0 3px rgba(16, 185, 129, 0.08);
+    0 16px 40px rgba(16, 185, 129, 0.16),
+    0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .upgrade-ad-card.is-selected::after {
@@ -1219,123 +1236,283 @@
   position: absolute;
   top: 0.72rem;
   right: 0.72rem;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   background: #10b981;
-  box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+  z-index: 2;
+  /* Reset decorative blob overrides */
+  left: auto;
+  bottom: auto;
+  animation: none;
+}
+
+/* ── Search Card: Clean green professional ── */
+.upgrade-ad-card--search {
+  background: linear-gradient(170deg, #ffffff 0%, #f0fdf4 100%);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .upgrade-ad-card--search::before {
-  background: linear-gradient(90deg, #10b981, #22c55e);
+  background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+  background-size: 200% 100%;
+  animation: shimmer-green 3s ease-in-out infinite;
+}
+
+.upgrade-ad-card--search::after {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+}
+
+/* ── Home Card: Bold blue with glass-morphism ── */
+.upgrade-ad-card--home {
+  background: linear-gradient(160deg, #ffffff 0%, #eff6ff 40%, #dbeafe 100%);
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow:
+    0 4px 20px rgba(59, 130, 246, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .upgrade-ad-card--home::before {
-  background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+  height: 5px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9, #6366f1);
+  background-size: 200% 100%;
+  animation: shimmer-blue 3s ease-in-out infinite;
+}
+
+.upgrade-ad-card--home::after {
+  width: 220px;
+  height: 220px;
+  top: -100px;
+  left: auto;
+  right: -80px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+}
+
+.upgrade-ad-card--home:hover {
+  transform: translateY(-10px) scale(1.015);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow:
+    0 24px 48px rgba(59, 130, 246, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ── Products Card: Warm amber with diagonal accent ── */
+.upgrade-ad-card--products {
+  background: linear-gradient(160deg, #ffffff 0%, #fffbeb 50%, #fef3c7 100%);
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow:
+    0 4px 20px rgba(245, 158, 11, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .upgrade-ad-card--products::before {
-  background: linear-gradient(90deg, #f59e0b, #f97316);
+  height: 5px;
+  background: linear-gradient(90deg, #f59e0b, #f97316, #ef4444);
+  background-size: 200% 100%;
+  animation: shimmer-amber 3s ease-in-out infinite;
 }
 
-/* Ad Badge - Compact Pill */
+.upgrade-ad-card--products::after {
+  width: 160px;
+  height: 160px;
+  top: auto;
+  bottom: -80px;
+  left: auto;
+  right: -50px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+}
+
+.upgrade-ad-card--products:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow:
+    0 20px 44px rgba(245, 158, 11, 0.14),
+    0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes shimmer-green {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes shimmer-blue {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes shimmer-amber {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Home card "Recommended" ribbon corner decoration ── */
+.upgrade-ad-card--home .upgrade-ad-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 12px 0;
+  padding: 0.4rem 1rem 0.4rem 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── Products card pulsing dot indicator ── */
+.upgrade-ad-card--products .upgrade-ad-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  margin-left: 0.4rem;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* Ad Badge - Premium Pill with distinct styles per card */
 .upgrade-ad-badge {
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  padding: 0.3rem 0.65rem;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 20px;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: #fff;
   background: linear-gradient(135deg, #10b981, #0ea5e9);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-  letter-spacing: 0.02em;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+  letter-spacing: 0.03em;
+  z-index: 2;
 }
 
 .upgrade-ad-card--search .upgrade-ad-badge {
   background: linear-gradient(135deg, #10b981, #22c55e);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
 }
 
 .upgrade-ad-card--home .upgrade-ad-badge {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  box-shadow: 0 3px 12px rgba(99, 102, 241, 0.35);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
 }
 
 .upgrade-ad-card--products .upgrade-ad-badge {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.3);
+  animation: pulse-badge 2s ease-in-out infinite;
 }
 
-/* Ad Header - Horizontal Compact Layout */
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Ad Header - Distinct layout per card type */
 .upgrade-ad-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.85rem;
-  padding-top: 0.25rem;
+  padding-top: 0.35rem;
+}
+
+.upgrade-ad-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
 }
 
 .upgrade-ad-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
   border: 1.5px solid rgba(16, 185, 129, 0.2);
   box-shadow: 
-    0 4px 12px rgba(16, 185, 129, 0.1),
+    0 4px 14px rgba(16, 185, 129, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .upgrade-ad-card:hover .upgrade-ad-icon {
-  transform: scale(1.05);
+  transform: scale(1.08) rotate(-3deg);
   box-shadow: 
-    0 6px 16px rgba(16, 185, 129, 0.15),
+    0 8px 20px rgba(16, 185, 129, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .upgrade-ad-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   color: #10b981;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .upgrade-ad-card:hover .upgrade-ad-icon svg {
-  transform: rotate(-5deg);
+  transform: scale(1.1);
 }
 
+/* Home card icon - larger, circular, prominent */
 .upgrade-ad-card--home .upgrade-ad-icon {
-  background: linear-gradient(145deg, rgba(14, 165, 233, 0.12), rgba(14, 165, 233, 0.06));
-  border-color: rgba(14, 165, 233, 0.2);
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+  border-color: rgba(59, 130, 246, 0.3);
   box-shadow: 
-    0 4px 12px rgba(14, 165, 233, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 6px 18px rgba(59, 130, 246, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9);
 }
 
 .upgrade-ad-card--home .upgrade-ad-icon svg {
-  color: #0ea5e9;
+  width: 28px;
+  height: 28px;
+  color: #2563eb;
 }
 
+.upgrade-ad-card--home:hover .upgrade-ad-icon {
+  box-shadow:
+    0 10px 24px rgba(59, 130, 246, 0.22),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9);
+}
+
+/* Products card icon - rounded square, warm feel */
 .upgrade-ad-card--products .upgrade-ad-icon {
-  background: linear-gradient(145deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
-  border-color: rgba(245, 158, 11, 0.2);
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fef3c7, #fde68a);
+  border-color: rgba(245, 158, 11, 0.3);
   box-shadow: 
-    0 4px 12px rgba(245, 158, 11, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 5px 16px rgba(245, 158, 11, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .upgrade-ad-card--products .upgrade-ad-icon svg {
-  color: #f59e0b;
+  color: #d97706;
+}
+
+.upgrade-ad-card--products:hover .upgrade-ad-icon {
+  box-shadow:
+    0 8px 22px rgba(245, 158, 11, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .upgrade-ad-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
@@ -1343,28 +1520,52 @@
   line-height: 1.3;
 }
 
+.upgrade-ad-card--home .upgrade-ad-title {
+  font-size: 1.1rem;
+  color: #1e3a5f;
+}
+
+.upgrade-ad-card--products .upgrade-ad-title {
+  color: #78350f;
+}
+
 .upgrade-ad-desc {
   margin: -0.1rem 0 0;
   color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 650;
-  line-height: 1.65;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.7;
 }
 
-/* Ad Pricing - Compact Inline */
+.upgrade-ad-card--home .upgrade-ad-desc {
+  color: #475569;
+}
+
+.upgrade-ad-card--products .upgrade-ad-desc {
+  color: #92400e;
+  font-weight: 650;
+}
+
+/* When desc is inside header */
+.upgrade-ad-header .upgrade-ad-desc {
+  margin: 0.15rem 0 0;
+}
+
+/* Ad Pricing - Distinct per card type */
 .upgrade-ad-pricing {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 0.65rem 0;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(14, 165, 233, 0.02));
-  border-radius: 12px;
-  margin: 0.15rem 0;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
+  border-radius: 14px;
+  margin: 0.2rem 0;
+  border: 1px solid rgba(16, 185, 129, 0.08);
 }
 
 .upgrade-ad-price {
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 900;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   -webkit-background-clip: text;
@@ -1373,15 +1574,31 @@
   letter-spacing: -0.02em;
 }
 
+/* Home card pricing - bold blue with a premium box */
+.upgrade-ad-card--home .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(99, 102, 241, 0.03));
+  border-color: rgba(59, 130, 246, 0.12);
+  padding: 0.85rem 0.75rem;
+  border-radius: 16px;
+}
+
 .upgrade-ad-card--home .upgrade-ad-price {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  font-size: 1.55rem;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+/* Products card pricing - warm amber tone */
+.upgrade-ad-card--products .upgrade-ad-pricing {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(249, 115, 22, 0.03));
+  border-color: rgba(245, 158, 11, 0.12);
+}
+
 .upgrade-ad-card--products .upgrade-ad-price {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1393,34 +1610,34 @@
   font-weight: 600;
 }
 
-/* Ad Features - Compact List */
+/* Ad Features - Distinct styling per card */
 .upgrade-ad-features {
   list-style: none;
   margin: 0;
-  padding: 0.5rem 0;
+  padding: 0.6rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
   border-top: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .upgrade-ad-feature {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.78rem;
+  gap: 0.55rem;
+  font-size: 0.8rem;
   color: #475569;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .upgrade-ad-feature__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 6px;
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
 }
@@ -1430,20 +1647,44 @@
   height: 12px;
 }
 
+/* Home card features - pill-shaped icons with blue */
+.upgrade-ad-card--home .upgrade-ad-features {
+  border-color: rgba(59, 130, 246, 0.12);
+}
+
 .upgrade-ad-card--home .upgrade-ad-feature__icon {
-  background: rgba(14, 165, 233, 0.1);
-  color: #0ea5e9;
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+}
+
+.upgrade-ad-card--home .upgrade-ad-feature {
+  color: #334155;
+  font-weight: 550;
+}
+
+/* Products card features - amber squared */
+.upgrade-ad-card--products .upgrade-ad-features {
+  border-color: rgba(245, 158, 11, 0.15);
 }
 
 .upgrade-ad-card--products .upgrade-ad-feature__icon {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border-radius: 4px;
 }
 
-/* Ad CTA - Full Width, Prominent */
+.upgrade-ad-card--products .upgrade-ad-feature {
+  color: #44403c;
+}
+
+/* Ad CTA - Unique button per card type */
 .upgrade-ad-cta {
   margin-top: auto;
-  padding: 0.78rem 1rem;
+  padding: 0.82rem 1.2rem;
   border-radius: 14px;
   border: none;
   font-size: 0.9rem;
@@ -1451,7 +1692,7 @@
   color: #fff;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
     0 4px 14px rgba(16, 185, 129, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1463,7 +1704,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1474,9 +1715,9 @@
 }
 
 .upgrade-ad-cta:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: 
-    0 8px 24px rgba(16, 185, 129, 0.35),
+    0 10px 28px rgba(16, 185, 129, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
@@ -1488,91 +1729,117 @@
   transform: translateY(0);
 }
 
+/* Home CTA - large, prominent, blue-purple gradient */
 .upgrade-ad-card--home .upgrade-ad-cta {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  padding: 0.9rem 1.2rem;
+  border-radius: 16px;
+  font-size: 0.95rem;
   box-shadow: 
-    0 4px 14px rgba(14, 165, 233, 0.25),
+    0 6px 20px rgba(59, 130, 246, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.upgrade-ad-card--home .upgrade-ad-cta::before {
-  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+  letter-spacing: 0.02em;
 }
 
 .upgrade-ad-card--home .upgrade-ad-cta:hover {
   box-shadow: 
-    0 8px 24px rgba(14, 165, 233, 0.35),
+    0 12px 32px rgba(59, 130, 246, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
+/* Products CTA - warm gradient, slightly different radius */
 .upgrade-ad-card--products .upgrade-ad-cta {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  border-radius: 12px;
   box-shadow: 
-    0 4px 14px rgba(245, 158, 11, 0.25),
+    0 4px 16px rgba(245, 158, 11, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.upgrade-ad-card--products .upgrade-ad-cta::before {
-  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
 }
 
 .upgrade-ad-card--products .upgrade-ad-cta:hover {
   box-shadow: 
-    0 8px 24px rgba(245, 158, 11, 0.35),
+    0 10px 28px rgba(245, 158, 11, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 @media (max-width: 639px) {
   .upgrade-ads-grid {
-    gap: 0.7rem;
+    gap: 1rem;
     padding: 0;
   }
 
   .upgrade-ad-card {
-    border-radius: 18px;
-    padding: 0.85rem;
+    border-radius: 20px;
+    padding: 1rem;
+  }
+
+  /* Show features on mobile for distinction */
+  .upgrade-ad-features {
+    display: flex;
   }
 
   .upgrade-ad-capacity__schedule,
   .upgrade-ad-capacity,
-  .upgrade-ad-frequency-cap,
-  .upgrade-ad-features {
+  .upgrade-ad-frequency-cap {
     display: none;
   }
 
   .upgrade-ad-card:not(.is-selected) .upgrade-ad-cta {
-    min-height: 40px;
-    padding-block: 0.62rem;
+    min-height: 44px;
+    padding-block: 0.7rem;
   }
 
   .upgrade-ad-header {
-    gap: 0.65rem;
+    gap: 0.7rem;
   }
 
   .upgrade-ad-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 13px;
+  }
+
+  .upgrade-ad-card--home .upgrade-ad-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
   }
 
   .upgrade-ad-icon svg {
-    width: 21px;
-    height: 21px;
+    width: 22px;
+    height: 22px;
   }
 
   .upgrade-ad-pricing {
-    justify-content: flex-start;
-    padding: 0.5rem 0.65rem;
+    justify-content: center;
+    padding: 0.6rem 0.5rem;
+  }
+
+  .upgrade-ad-card--home .upgrade-ad-pricing {
+    padding: 0.75rem 0.5rem;
   }
 
   .upgrade-ad-price {
-    font-size: 1.18rem;
+    font-size: 1.25rem;
+  }
+
+  .upgrade-ad-card--home .upgrade-ad-price {
+    font-size: 1.35rem;
   }
 
   .upgrade-ad-features {
-    gap: 0.35rem;
-    padding-block: 0.35rem;
+    gap: 0.4rem;
+    padding-block: 0.4rem;
+  }
+
+  .upgrade-ad-feature {
+    font-size: 0.75rem;
+  }
+
+  /* Mobile: Home card gets extra visual prominence */
+  .upgrade-ad-card--home {
+    border-width: 2px;
   }
 }
 
