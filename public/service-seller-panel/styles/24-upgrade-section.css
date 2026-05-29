@@ -5454,39 +5454,57 @@
 }
 
 @media (max-width: 767px) {
+  #content-ads #similar-sponsored-seller-root .ssw-carousel-shell {
+    margin-inline: -0.72rem;
+    overflow: hidden;
+  }
+
   #content-ads .ssw-plans-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: flex !important;
+    grid-template-columns: none;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     gap: 0.8rem;
     width: 100%;
     min-width: 0;
-    padding: 0;
+    padding: 0.14rem 0.82rem 1rem !important;
     margin: 0;
-    overflow: visible;
-    scroll-snap-type: none;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+    scroll-padding-inline: 0.82rem;
+    scroll-behavior: smooth;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
   }
 
   #content-ads .ssw-plans-grid::-webkit-scrollbar {
     display: none;
+    width: 0;
     height: 0;
   }
 
   #content-ads .ssw-plans-grid > .ssw-plan-card {
-    width: 100%;
-    max-width: none;
+    flex: 0 0 clamp(256px, calc(100vw - 68px), 318px) !important;
+    width: clamp(256px, calc(100vw - 68px), 318px) !important;
+    max-width: 318px;
     min-width: 0;
     margin: 0;
-    scroll-snap-align: none;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
   }
 
   #content-ads .ssw-plans-grid > .ssw-plan-card:last-child {
-    scroll-snap-align: none;
+    scroll-snap-align: start;
   }
 }
 
 @media (max-width: 360px) {
   #content-ads .ssw-plans-grid > .ssw-plan-card {
-    width: 100%;
+    flex-basis: clamp(246px, calc(100vw - 56px), 302px) !important;
+    width: clamp(246px, calc(100vw - 56px), 302px) !important;
   }
 }
 
@@ -5499,14 +5517,12 @@
   }
 }
 
-/* Mobile polish for the similar-shops upgrade block.
-   The default widget is dense and carousel-like; in the seller dashboard a
-   complete one-column card stack is easier to scan and avoids clipped cards. */
+/* Mobile polish for the similar-shops upgrade block. */
 @media (max-width: 767px) {
   #content-ads #similar-sponsored-seller-root {
     width: 100%;
     max-width: 100%;
-    padding: 0.85rem;
+    padding: 0.7rem 0.85rem 0.55rem;
     border-radius: 18px;
     overflow: hidden;
     background:
@@ -5526,10 +5542,7 @@
   }
 
   #content-ads .ssw-section-header {
-    align-items: center;
-    gap: 0.65rem;
-    margin: 0 0 0.72rem;
-    padding: 0;
+    display: none;
   }
 
   #content-ads .ssw-section-header-icon {
@@ -5565,12 +5578,7 @@
   }
 
   #content-ads .ssw-info-banner {
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.62rem 0.72rem;
-    margin-bottom: 0.76rem;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.075), rgba(20, 184, 166, 0.045));
+    display: none;
   }
 
   #content-ads .ssw-info-banner-icon {

@@ -1981,6 +1981,42 @@
   --ssw-priority-soft: rgba(79, 70, 229, .12);
 }
 
+#similar-sponsored-seller-root .ssw-carousel-shell {
+  position: relative;
+  max-width: 100%;
+  margin-inline: -.62rem;
+  padding-block: .08rem .18rem;
+  overflow: hidden;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::before,
+#similar-sponsored-seller-root .ssw-carousel-shell::after {
+  content: '';
+  position: absolute;
+  inset-block: .1rem 1.02rem;
+  width: 34px;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity .22s ease;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::before {
+  inset-inline-start: 0;
+  background: linear-gradient(90deg, rgba(248, 250, 252, .98), rgba(248, 250, 252, 0));
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::after {
+  inset-inline-end: 0;
+  background: linear-gradient(270deg, rgba(248, 250, 252, .98), rgba(248, 250, 252, 0));
+}
+
+#similar-sponsored-seller-root.ssw-carousel-static .ssw-carousel-shell::before,
+#similar-sponsored-seller-root.ssw-carousel-static .ssw-carousel-shell::after,
+#similar-sponsored-seller-root.ssw-carousel-at-start .ssw-carousel-shell::before,
+#similar-sponsored-seller-root.ssw-carousel-at-end .ssw-carousel-shell::after {
+  opacity: 0;
+}
+
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
   flex-direction: row !important;
@@ -1989,19 +2025,24 @@
   gap: .8rem !important;
   width: 100%;
   max-width: 100%;
-  padding: .12rem .7rem 1rem !important;
-  margin-inline: -.62rem;
+  padding: .14rem .8rem 1rem !important;
+  margin-inline: 0;
   overflow-x: auto !important;
-  overflow-y: visible !important;
-  scroll-snap-type: x mandatory !important;
-  scroll-padding-inline: .7rem;
+  overflow-y: hidden !important;
+  scroll-snap-type: x proximity !important;
+  scroll-padding-inline: .8rem;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
   direction: ltr;
   overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
 }
 
 #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
+  width: 0;
+  height: 0;
   display: none;
 }
 
@@ -2018,9 +2059,9 @@
     "visual actions";
   column-gap: .74rem;
   row-gap: .58rem;
-  flex: 0 0 clamp(306px, 88vw, 342px) !important;
-  width: clamp(306px, 88vw, 342px) !important;
-  max-width: 342px !important;
+  flex: 0 0 clamp(256px, calc(100vw - 68px), 318px) !important;
+  width: clamp(256px, calc(100vw - 68px), 318px) !important;
+  max-width: 318px !important;
   min-height: 190px;
   padding: .9rem .88rem;
   border-radius: 18px;
@@ -2036,7 +2077,7 @@
   transform: none;
   direction: rtl;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
 }
 
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::before {
@@ -2233,11 +2274,51 @@
     linear-gradient(135deg, var(--plan-accent), var(--plan-accent-deep));
 }
 
+#similar-sponsored-seller-root .ssw-carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .36rem;
+  min-height: 10px;
+  margin: -.34rem 0 .18rem;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dots[hidden] {
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dot {
+  width: 5px;
+  height: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, .55);
+  opacity: .8;
+  cursor: pointer;
+  transition: width .22s ease, background .22s ease, opacity .22s ease;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dot.is-active {
+  width: 17px;
+  background: rgba(15, 118, 110, .86);
+  opacity: 1;
+}
+
 @media (min-width: 760px) {
+  #similar-sponsored-seller-root .ssw-carousel-shell {
+    margin-inline: -.8rem;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-shell::before,
+  #similar-sponsored-seller-root .ssw-carousel-shell::after {
+    width: 26px;
+  }
+
   #similar-sponsored-seller-root .ssw-plans-grid {
     gap: 1rem !important;
     padding-inline: .8rem !important;
-    margin-inline: -.8rem;
+    margin-inline: 0;
     scroll-padding-inline: .8rem;
   }
 
@@ -2245,14 +2326,18 @@
     flex-basis: 334px !important;
     width: 334px !important;
   }
+
+  #similar-sponsored-seller-root .ssw-carousel-dots {
+    display: none;
+  }
 }
 
 @media (max-width: 380px) {
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
     grid-template-columns: 40px minmax(0, 1fr);
     column-gap: .58rem;
-    flex-basis: clamp(284px, 88vw, 312px) !important;
-    width: clamp(284px, 88vw, 312px) !important;
+    flex-basis: clamp(246px, calc(100vw - 56px), 302px) !important;
+    width: clamp(246px, calc(100vw - 56px), 302px) !important;
     min-height: 184px;
     padding: .76rem;
     border-radius: 16px;
@@ -2337,7 +2422,10 @@
       <div id="similar-sponsored-message" class="ssw-message" role="status" aria-live="polite"></div>
 
       <!-- Plans Grid (filled dynamically) -->
-      <div class="ssw-plans-grid" id="similar-sponsored-plans" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
+      <div class="ssw-carousel-shell">
+        <div class="ssw-plans-grid" id="similar-sponsored-plans" role="list" tabindex="0" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
+      </div>
+      <div class="ssw-carousel-dots" id="similar-sponsored-dots" aria-label="نشانگر اسلایدهای پلن‌ها" hidden></div>
 
       <!-- Confirm/Submit Modal -->
       <div class="ssw-modal" id="similar-sponsored-modal" hidden aria-modal="true" role="dialog" aria-labelledby="ssw-modal-title">
@@ -2508,6 +2596,66 @@
     return state.loadPromise;
   }
 
+  function getCarouselParts() {
+    const container = document.getElementById('similar-sponsored-plans');
+    const dots = document.getElementById('similar-sponsored-dots');
+    const cards = container ? [...container.querySelectorAll('.ssw-plan-card')] : [];
+    return { container, dots, cards };
+  }
+
+  function getActiveCarouselIndex(container, cards) {
+    if (!container || !cards.length) return 0;
+    const railRect = container.getBoundingClientRect();
+    const railCenter = railRect.left + (railRect.width / 2);
+    return cards.reduce((bestIndex, card, index) => {
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + (cardRect.width / 2);
+      const distance = Math.abs(cardCenter - railCenter);
+      const bestCard = cards[bestIndex];
+      const bestRect = bestCard.getBoundingClientRect();
+      const bestDistance = Math.abs((bestRect.left + (bestRect.width / 2)) - railCenter);
+      return distance < bestDistance ? index : bestIndex;
+    }, 0);
+  }
+
+  function updateCarouselHints(activeIndex) {
+    const { container, dots, cards } = getCarouselParts();
+    const root = document.getElementById('similar-sponsored-seller-root');
+    if (!container || !root) return;
+
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+    const scrollLeft = Math.max(0, container.scrollLeft);
+    const isStatic = cards.length <= 1 || maxScroll <= 2;
+    const resolvedIndex = Number.isInteger(activeIndex)
+      ? activeIndex
+      : getActiveCarouselIndex(container, cards);
+
+    root.classList.toggle('ssw-carousel-static', isStatic);
+    root.classList.toggle('ssw-carousel-at-start', scrollLeft <= 2);
+    root.classList.toggle('ssw-carousel-at-end', scrollLeft >= maxScroll - 2);
+
+    if (dots) {
+      dots.hidden = cards.length <= 1;
+      dots.querySelectorAll('.ssw-carousel-dot').forEach((dot, index) => {
+        const active = index === resolvedIndex;
+        dot.classList.toggle('is-active', active);
+        dot.setAttribute('aria-current', active ? 'true' : 'false');
+      });
+    }
+  }
+
+  function renderCarouselDots(count) {
+    const dots = document.getElementById('similar-sponsored-dots');
+    if (!dots) return;
+    dots.hidden = count <= 1;
+    dots.innerHTML = Array.from({ length: count }, (_, index) => `
+      <button type="button" class="ssw-carousel-dot${index === 0 ? ' is-active' : ''}"
+        data-carousel-index="${index}"
+        aria-label="اسلاید ${index + 1}"
+        aria-current="${index === 0 ? 'true' : 'false'}"></button>
+    `).join('');
+  }
+
   /* ─────────────────────────────────────────────────────
      RENDER PLANS — premium upgrade-ad-card style
      ───────────────────────────────────────────────────── */
@@ -2522,6 +2670,8 @@
           ${icons.emptyBox}
           <span>فعلاً پلن فعالی برای این جایگاه تعریف نشده است. قیمت و وضعیت پلن‌ها از سمت مدیر کنترل می‌شود.</span>
         </div>`;
+      renderCarouselDots(0);
+      updateCarouselHints(0);
       return;
     }
 
@@ -2570,8 +2720,10 @@
 
     container.dir = 'ltr';
     container.setAttribute('aria-orientation', 'horizontal');
+    renderCarouselDots(plans.length);
     requestAnimationFrame(() => {
       container.scrollLeft = 0;
+      updateCarouselHints(0);
     });
   }
 
@@ -2839,7 +2991,31 @@
      EVENT BINDING
      ───────────────────────────────────────────────────── */
   function bindEvents() {
-    document.getElementById('similar-sponsored-plans')?.addEventListener('click', (event) => {
+    const plansRail = document.getElementById('similar-sponsored-plans');
+    const dots = document.getElementById('similar-sponsored-dots');
+    let carouselRaf = 0;
+    const scheduleCarouselUpdate = () => {
+      if (carouselRaf) return;
+      carouselRaf = requestAnimationFrame(() => {
+        carouselRaf = 0;
+        updateCarouselHints();
+      });
+    };
+
+    plansRail?.addEventListener('scroll', scheduleCarouselUpdate, { passive: true });
+    window.addEventListener('resize', scheduleCarouselUpdate, { passive: true });
+
+    dots?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-carousel-index]');
+      if (!button) return;
+      const index = Number(button.dataset.carouselIndex);
+      const card = plansRail?.querySelectorAll('.ssw-plan-card')[index];
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      updateCarouselHints(index);
+    });
+
+    plansRail?.addEventListener('click', (event) => {
       const guideButton = event.target.closest('[data-plan-guide-tier]');
       if (guideButton) {
         const guidePlan = state.plans.find(
