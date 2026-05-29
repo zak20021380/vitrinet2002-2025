@@ -1985,7 +1985,7 @@
   position: relative;
   max-width: 100%;
   margin-inline: -.62rem;
-  padding-block: .08rem .18rem;
+  padding-block: 0 .08rem;
   overflow: hidden;
 }
 
@@ -1993,21 +1993,21 @@
 #similar-sponsored-seller-root .ssw-carousel-shell::after {
   content: '';
   position: absolute;
-  inset-block: .1rem 1.02rem;
-  width: 34px;
+  inset-block: 0 .6rem;
+  width: 28px;
   z-index: 3;
   pointer-events: none;
-  transition: opacity .22s ease;
+  transition: opacity .25s ease;
 }
 
 #similar-sponsored-seller-root .ssw-carousel-shell::before {
   inset-inline-start: 0;
-  background: linear-gradient(90deg, rgba(248, 250, 252, .98), rgba(248, 250, 252, 0));
+  background: linear-gradient(to right, rgba(248, 250, 252, .95) 0%, rgba(248, 250, 252, .6) 40%, transparent 100%);
 }
 
 #similar-sponsored-seller-root .ssw-carousel-shell::after {
   inset-inline-end: 0;
-  background: linear-gradient(270deg, rgba(248, 250, 252, .98), rgba(248, 250, 252, 0));
+  background: linear-gradient(to left, rgba(248, 250, 252, .95) 0%, rgba(248, 250, 252, .6) 40%, transparent 100%);
 }
 
 #similar-sponsored-seller-root.ssw-carousel-static .ssw-carousel-shell::before,
@@ -2022,25 +2022,20 @@
   flex-direction: row-reverse !important;
   flex-wrap: nowrap !important;
   justify-content: flex-end;
-  gap: .8rem !important;
+  gap: .7rem !important;
   width: 100%;
   max-width: 100%;
-  padding: .14rem .8rem 1rem !important;
+  padding: .1rem .7rem .45rem !important;
   margin-inline: 0;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scroll-snap-type: x proximity !important;
-  scroll-padding-inline: .8rem;
+  scroll-padding-inline: .7rem;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-<<<<<<< HEAD
   scrollbar-width: none !important;
   -ms-overflow-style: none;
-  direction: ltr;
-=======
-  scrollbar-width: none;
   direction: rtl;
->>>>>>> 485eb167dfbe7cb2451145f022736bdcb541dca7
   overscroll-behavior-inline: contain;
   touch-action: pan-x pan-y;
 }
@@ -2063,13 +2058,13 @@
     "visual price"
     "visual actions";
   column-gap: .74rem;
-  row-gap: .58rem;
-  flex: 0 0 clamp(256px, calc(100vw - 68px), 318px) !important;
-  width: clamp(256px, calc(100vw - 68px), 318px) !important;
-  max-width: 318px !important;
-  min-height: 190px;
-  padding: .9rem .88rem;
-  border-radius: 18px;
+  row-gap: .42rem;
+  flex: 0 0 clamp(252px, calc(100vw - 80px), 306px) !important;
+  width: clamp(252px, calc(100vw - 80px), 306px) !important;
+  max-width: 306px !important;
+  min-height: 172px;
+  padding: .78rem .82rem;
+  border-radius: 16px;
   border: 1px solid rgba(226, 232, 240, .82);
   background:
     linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,255,255,.86)),
@@ -2077,8 +2072,8 @@
     #ffffff;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, .95) inset,
-    0 10px 24px rgba(15, 23, 42, .07),
-    0 16px 34px var(--plan-card-shadow);
+    0 8px 20px rgba(15, 23, 42, .06),
+    0 12px 28px var(--plan-card-shadow);
   transform: none;
   direction: rtl;
   scroll-snap-align: start;
@@ -2159,7 +2154,7 @@
 #similar-sponsored-seller-root .ssw-plan-visual__line {
   width: 2px;
   flex: 1;
-  min-height: 48px;
+  min-height: 38px;
   border-radius: 999px;
   background: linear-gradient(180deg, var(--plan-accent-soft), rgba(226,232,240,.9));
 }
@@ -2222,12 +2217,12 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   justify-content: stretch;
-  gap: .42rem;
+  gap: .36rem;
   width: 100%;
-  min-height: 58px;
+  min-height: 50px;
   margin: 0;
-  padding: .58rem .7rem;
-  border-radius: 15px;
+  padding: .48rem .62rem;
+  border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, .8);
   background:
     linear-gradient(135deg, rgba(255,255,255,.76), rgba(255,255,255,.48)),
@@ -2261,10 +2256,10 @@
 }
 
 #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-  min-height: 42px;
+  min-height: 38px;
   margin: 0;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   color: #ffffff;
   background:
     linear-gradient(135deg, rgba(255,255,255,.18), transparent 36%),
@@ -2280,12 +2275,7 @@
 }
 
 #similar-sponsored-seller-root .ssw-carousel-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .36rem;
-  min-height: 10px;
-  margin: -.34rem 0 .18rem;
+  display: none !important;
 }
 
 #similar-sponsored-seller-root .ssw-carousel-dots[hidden] {
@@ -2293,21 +2283,11 @@
 }
 
 #similar-sponsored-seller-root .ssw-carousel-dot {
-  width: 5px;
-  height: 5px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, .55);
-  opacity: .8;
-  cursor: pointer;
-  transition: width .22s ease, background .22s ease, opacity .22s ease;
+  display: none;
 }
 
 #similar-sponsored-seller-root .ssw-carousel-dot.is-active {
-  width: 17px;
-  background: rgba(15, 118, 110, .86);
-  opacity: 1;
+  display: none;
 }
 
 @media (min-width: 760px) {
@@ -2317,51 +2297,52 @@
 
   #similar-sponsored-seller-root .ssw-carousel-shell::before,
   #similar-sponsored-seller-root .ssw-carousel-shell::after {
-    width: 26px;
+    width: 22px;
   }
 
   #similar-sponsored-seller-root .ssw-plans-grid {
-    gap: 1rem !important;
-    padding-inline: .8rem !important;
-    margin-inline: 0;
+    gap: .9rem !important;
+    padding: .1rem .8rem .4rem !important;
     scroll-padding-inline: .8rem;
   }
 
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
-    flex-basis: 334px !important;
-    width: 334px !important;
+    flex-basis: 320px !important;
+    width: 320px !important;
   }
 
   #similar-sponsored-seller-root .ssw-carousel-dots {
-    display: none;
+    display: none !important;
   }
 }
 
 @media (max-width: 380px) {
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
     grid-template-columns: 40px minmax(0, 1fr);
-    column-gap: .58rem;
-    flex-basis: clamp(246px, calc(100vw - 56px), 302px) !important;
-    width: clamp(246px, calc(100vw - 56px), 302px) !important;
-    min-height: 184px;
-    padding: .76rem;
-    border-radius: 16px;
+    column-gap: .52rem;
+    flex-basis: clamp(236px, calc(100vw - 64px), 288px) !important;
+    width: clamp(236px, calc(100vw - 64px), 288px) !important;
+    min-height: 160px;
+    padding: .68rem .7rem;
+    border-radius: 14px;
   }
 
   #similar-sponsored-seller-root .ssw-plan-visual__icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
   }
 
   #similar-sponsored-seller-root .ssw-plan-title {
-    font-size: .88rem;
+    font-size: .86rem;
   }
 
   #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
     grid-template-columns: minmax(0, 1fr);
-    gap: .12rem;
+    gap: .1rem;
     text-align: center;
+    min-height: 48px;
+    padding: .44rem .58rem;
   }
 
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
