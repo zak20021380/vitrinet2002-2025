@@ -1637,7 +1637,7 @@
 /* ── Horizontal scroll rail ── */
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: row-reverse !important;
   flex-wrap: nowrap !important;
   gap: .95rem;
   overflow-x: auto;
@@ -1983,9 +1983,9 @@
 
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: row-reverse !important;
   flex-wrap: nowrap !important;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: .8rem !important;
   width: 100%;
   max-width: 100%;
@@ -1997,7 +1997,7 @@
   scroll-padding-inline: .7rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  direction: ltr;
+  direction: rtl;
   overscroll-behavior-inline: contain;
 }
 
@@ -2568,9 +2568,10 @@
       `;
     }).join('');
 
-    container.dir = 'ltr';
+    container.dir = 'rtl';
     container.setAttribute('aria-orientation', 'horizontal');
     requestAnimationFrame(() => {
+      // In RTL, scrollLeft = 0 is already at the right edge (start)
       container.scrollLeft = 0;
     });
   }
