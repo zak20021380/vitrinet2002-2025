@@ -1,0 +1,413 @@
+/* =============================================================
+   Similar Shop Promotions - Mobile RTL Ad Card Fixes
+   -------------------------------------------------------------
+   Addresses the following issues for Persian (RTL) mobile cards:
+   1. RTL chevron - flip CTA arrow to point left (‹)
+   2. Visual hierarchy - clear spacing: badge → title → price → CTA
+   3. Price layout - baseline alignment (price 28px, unit 13px)
+   4. CTA button - cohesive green palette matching card
+   5. Padding consistency - 16px uniform padding
+   6. Carousel dots - larger (8px), higher contrast
+   7. Badge alignment - right-aligned badge + home icon row
+   
+   Mobile-only, no breakpoints needed.
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   1) Card Shell - Uniform 16px padding, vertical flex layout
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 16px !important;
+  gap: 0 !important;
+  border-radius: 18px !important;
+  min-height: auto !important;
+  
+  /* Reset grid layout */
+  grid-template-columns: unset !important;
+  grid-template-areas: unset !important;
+  
+  /* Clean white background */
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background: #ffffff !important;
+  box-shadow: 
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 8px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Remove decorative pseudo-elements */
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::before,
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Priority card subtle purple tint */
+#similar-sponsored-seller-root .ssw-plan-card--priority.upgrade-ad-card {
+  border-color: rgba(165, 180, 252, 0.5) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fafaff 100%) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2) Badge + Icon Row - Right-aligned, first element
+   ───────────────────────────────────────────────────────────── */
+/* Create a flex container for badge and icon */
+#similar-sponsored-seller-root .ssw-plan-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  width: 100% !important;
+  order: 1 !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+  text-align: right !important;
+}
+
+/* Badge styling - visible, right side */
+#similar-sponsored-seller-root .ssw-plan-badge,
+#similar-sponsored-seller-root .ssw-plan-card .ssw-plan-badge,
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card .ssw-plan-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #059669 !important;
+  order: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card--priority .ssw-plan-badge,
+#similar-sponsored-seller-root .ssw-plan-card--priority.upgrade-ad-card .ssw-plan-badge {
+  border-color: rgba(79, 70, 229, 0.22) !important;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(245, 158, 11, 0.1)) !important;
+  color: #4338ca !important;
+}
+
+/* Visual icon (home icon) - next to badge */
+#similar-sponsored-seller-root .ssw-plan-visual {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+  order: 1 !important;
+  align-self: auto !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-visual__icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  border: 1px solid rgba(16, 185, 129, 0.15) !important;
+  color: #059669 !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-visual__icon svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Hide the vertical line */
+#similar-sponsored-seller-root .ssw-plan-visual__line {
+  display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3) Title & Subtitle - Clear visual hierarchy
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-plan-copy {
+  width: 100% !important;
+  text-align: right !important;
+  order: 2 !important;
+  margin-bottom: 12px !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+  color: #0f172a !important;
+  margin: 0 0 4px 0 !important;
+  text-align: right !important;
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  overflow: visible !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-desc {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.6 !important;
+  color: #64748b !important;
+  margin: 0 !important;
+  text-align: right !important;
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  overflow: visible !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4) Price Layout - Baseline alignment
+   Large price (28px) + unit label (13px) on same baseline
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 14px 0 !important;
+  margin: 0 0 12px 0 !important;
+  border: none !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.7) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  direction: rtl !important;
+  order: 3 !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing::before {
+  content: none !important;
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  direction: rtl !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5) CTA Button - Cohesive soft green, matching card palette
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-plan-actions {
+  order: 4 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.06) 0%, 
+    rgba(16, 185, 129, 0.02) 100%) !important;
+  color: #059669 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover,
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:focus {
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.12) 0%, 
+    rgba(16, 185, 129, 0.06) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  transform: translateY(-1px) !important;
+  color: #047857 !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:active {
+  transform: translateY(0) !important;
+}
+
+/* Priority card CTA - purple tint */
+#similar-sponsored-seller-root .ssw-plan-card--priority .upgrade-ad-cta.ssw-plan-cta {
+  border-color: rgba(79, 70, 229, 0.25) !important;
+  background: linear-gradient(135deg, 
+    rgba(79, 70, 229, 0.06) 0%, 
+    rgba(79, 70, 229, 0.02) 100%) !important;
+  color: #4338ca !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card--priority .upgrade-ad-cta.ssw-plan-cta:hover {
+  background: linear-gradient(135deg, 
+    rgba(79, 70, 229, 0.12) 0%, 
+    rgba(79, 70, 229, 0.06) 100%) !important;
+  border-color: rgba(79, 70, 229, 0.35) !important;
+  color: #3730a3 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6) RTL Chevron - Use ‹ character pointing left for RTL
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta::after {
+  content: '‹' !important;
+  width: auto !important;
+  height: auto !important;
+  font-size: 22px !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+  background: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+  color: inherit !important;
+  margin-inline-start: 4px !important;
+  transition: transform 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+#similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta:hover::after {
+  transform: translateX(-3px) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7) Carousel Dots - Larger (8px), higher contrast, visible
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-carousel-dots {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 0 4px !important;
+  margin: 0 !important;
+  min-height: 20px !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dots[hidden] {
+  display: flex !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dot {
+  width: 8px !important;
+  height: 8px !important;
+  min-width: 8px !important;
+  min-height: 8px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 42, 0.25) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dot.is-active {
+  width: 24px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: #059669 !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-dot:hover:not(.is-active) {
+  background: rgba(15, 23, 42, 0.4) !important;
+  transform: scale(1.1) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8) Carousel Grid - Horizontal scroll for mobile
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-plans-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 12px !important;
+  padding: 8px 16px 16px !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-padding-inline: 16px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  direction: rtl !important;
+}
+
+#similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+  flex: 0 0 calc(100vw - 64px) !important;
+  width: calc(100vw - 64px) !important;
+  max-width: 300px !important;
+  min-width: 260px !important;
+  scroll-snap-align: center !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   9) Carousel Shell - Edge fade indicators
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-carousel-shell {
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::before,
+#similar-sponsored-seller-root .ssw-carousel-shell::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 20px !important;
+  width: 24px !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::before {
+  right: 0 !important;
+  left: auto !important;
+  background: linear-gradient(to left, rgba(248, 250, 252, 0.95), transparent) !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::after {
+  left: 0 !important;
+  right: auto !important;
+  background: linear-gradient(to right, rgba(248, 250, 252, 0.95), transparent) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   10) Ensure proper z-index stacking
+   ───────────────────────────────────────────────────────────── */
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
