@@ -1637,7 +1637,7 @@
 /* ── Horizontal scroll rail ── */
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: row-reverse !important;
   flex-wrap: nowrap !important;
   gap: .95rem;
   overflow-x: auto;
@@ -2019,9 +2019,9 @@
 
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: row-reverse !important;
   flex-wrap: nowrap !important;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: .8rem !important;
   width: 100%;
   max-width: 100%;
@@ -2033,9 +2033,14 @@
   scroll-padding-inline: .8rem;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+<<<<<<< HEAD
   scrollbar-width: none !important;
   -ms-overflow-style: none;
   direction: ltr;
+=======
+  scrollbar-width: none;
+  direction: rtl;
+>>>>>>> 485eb167dfbe7cb2451145f022736bdcb541dca7
   overscroll-behavior-inline: contain;
   touch-action: pan-x pan-y;
 }
@@ -2718,10 +2723,11 @@
       `;
     }).join('');
 
-    container.dir = 'ltr';
+    container.dir = 'rtl';
     container.setAttribute('aria-orientation', 'horizontal');
     renderCarouselDots(plans.length);
     requestAnimationFrame(() => {
+      // In RTL, scrollLeft = 0 is already at the right edge (start)
       container.scrollLeft = 0;
       updateCarouselHints(0);
     });
