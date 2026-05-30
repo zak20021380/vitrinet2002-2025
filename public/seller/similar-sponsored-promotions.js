@@ -1637,7 +1637,7 @@
 /* ── Horizontal scroll rail ── */
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row-reverse !important;
+  flex-direction: row !important;
   flex-wrap: nowrap !important;
   gap: .95rem;
   overflow-x: auto;
@@ -1645,13 +1645,16 @@
   scroll-snap-type: x mandatory;
   scroll-padding-inline-start: .5rem;
   -webkit-overflow-scrolling: touch;
-  padding: .5rem .5rem 1.2rem;
+  padding: .5rem .5rem .25rem;
   margin: 0;
   direction: rtl;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
-  display: none;
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
 /* ── Card shell — overridden by v2 below ── */
@@ -1910,7 +1913,7 @@
   position: relative;
   max-width: 100%;
   margin-inline: -.5rem;
-  padding-block: 0 .08rem;
+  padding-block: 0;
   overflow: hidden;
 }
 
@@ -1944,13 +1947,13 @@
 
 #similar-sponsored-seller-root .ssw-plans-grid {
   display: flex !important;
-  flex-direction: row-reverse !important;
+  flex-direction: row !important;
   flex-wrap: nowrap !important;
   justify-content: flex-start;
   gap: .75rem !important;
   width: 100%;
   max-width: 100%;
-  padding: .45rem 1rem .6rem !important;
+  padding: .45rem 1rem .2rem !important;
   margin-inline: 0;
   overflow-x: auto !important;
   overflow-y: hidden !important;
@@ -1966,9 +1969,10 @@
 }
 
 #similar-sponsored-seller-root .ssw-plans-grid::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  -webkit-appearance: none;
 }
 
 #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
@@ -2238,7 +2242,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: .45rem 0 .1rem;
+  padding: .3rem 0 0;
   margin: 0;
 }
 
@@ -2280,7 +2284,7 @@
 
   #similar-sponsored-seller-root .ssw-plans-grid {
     gap: .85rem !important;
-    padding: .45rem 1rem .5rem !important;
+    padding: .45rem 1rem .25rem !important;
     scroll-padding-inline: 1rem;
   }
 
@@ -2292,7 +2296,7 @@
   #similar-sponsored-seller-root .ssw-carousel-dots {
     display: flex;
     gap: 7px;
-    padding-top: .5rem;
+    padding-top: .35rem;
   }
 }
 
@@ -2348,7 +2352,7 @@
 @media (max-width: 759px) {
   #similar-sponsored-seller-root .ssw-carousel-shell {
     margin-inline: 0;
-    padding-block: .25rem 0;
+    padding-block: 0;
     overflow: hidden;
   }
 
@@ -2368,7 +2372,7 @@
   /* Track: balanced horizontal padding + tighter gap, smooth swipe */
   #similar-sponsored-seller-root .ssw-plans-grid {
     gap: .68rem !important;
-    padding: .55rem 1rem .55rem !important;
+    padding: .4rem 1rem .15rem !important;
     scroll-padding-inline: 1rem;
     scroll-snap-type: x mandatory !important;
     scrollbar-width: none !important;
@@ -2535,8 +2539,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 14px;
-    padding: .55rem 0 .15rem;
+    padding: .25rem 0 0;
     margin: 0;
   }
 
