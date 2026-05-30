@@ -1168,9 +1168,9 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(15,23,42,.52);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(7,10,22,.74);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 .ssw-modal[hidden] { display: none; }
 .ssw-modal__dialog {
@@ -1180,7 +1180,7 @@
   overflow: auto;
   background: linear-gradient(180deg, #1e1b2e 0%, #13111c 100%);
   border-radius: 28px 28px 0 0;
-  padding: 1.5rem 1.4rem 1.6rem;
+  padding: 1.5rem 1.4rem calc(1.85rem + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -16px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
   border-top: 1px solid rgba(255,255,255,.08);
 }
@@ -1188,9 +1188,27 @@
   .ssw-modal { align-items: center; padding: 1.5rem; }
   .ssw-modal__dialog {
     border-radius: 24px;
-    padding: 1.65rem 1.6rem 1.6rem;
+    padding: 1.65rem 1.6rem 1.85rem;
     box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05);
   }
+}
+
+/* When the payment modal is open, suppress competing UI for premium focus */
+body.ssw-modal-open { overflow: hidden; }
+body.ssw-modal-open .seller-mobile-bottom-nav {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateY(28px);
+}
+body.ssw-modal-open .notif-btn,
+body.ssw-modal-open #notificationFab,
+body.ssw-modal-open .sidebar-hamburger {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateY(-12px) scale(0.96);
+  transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
 }
 .ssw-modal__handle {
   width: 40px; height: 4px;
@@ -1304,19 +1322,20 @@
   display: flex;
   align-items: center;
   gap: .85rem;
-  padding: .9rem 1rem;
-  background: rgba(255,255,255,.035);
-  border: 1.5px solid var(--ssw-accent-border);
+  padding: .95rem 1.05rem;
+  background: linear-gradient(150deg, rgba(40,33,72,.85), rgba(28,24,52,.78));
+  border: 1.5px solid rgba(167,139,250,.32);
   border-radius: 16px;
   position: relative;
   transition: border-color .25s ease, background .25s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .ssw-modal__pay-method::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(167,139,250,.08), rgba(99,102,241,.02));
+  background: linear-gradient(135deg, rgba(167,139,250,.10), rgba(99,102,241,.03));
   pointer-events: none;
 }
 .ssw-modal__pay-icon {
@@ -1372,11 +1391,12 @@
   display: flex;
   align-items: flex-start;
   gap: .55rem;
-  padding: .7rem .9rem;
-  background: rgba(255,255,255,.025);
-  border-radius: 12px;
-  margin-bottom: 1.25rem;
-  border: 1px solid rgba(255,255,255,.05);
+  padding: .8rem .95rem;
+  background: linear-gradient(150deg, rgba(40,33,72,.55), rgba(28,24,52,.45));
+  border-radius: 14px;
+  margin-bottom: 1.35rem;
+  border: 1px solid rgba(167,139,250,.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
 .ssw-modal__note-icon {
   display: flex;
@@ -1400,20 +1420,23 @@
   display: flex;
   flex-direction: column;
   gap: .55rem;
+  margin-top: .35rem;
+  padding-top: .25rem;
+  padding-bottom: .35rem;
 }
 .ssw-modal__submit {
   width: 100%;
   padding: .95rem 1.1rem;
   border-radius: 14px;
-  border: none;
+  border: 1px solid rgba(167,139,250,.35);
   font-family: inherit;
-  font-size: .92rem;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
+  font-size: .9rem;
+  font-weight: 700;
+  color: #f5f3ff;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .25s ease, opacity .2s ease;
-  box-shadow: 0 6px 18px rgba(139,92,246,.32), inset 0 1px 0 rgba(255,255,255,.18);
+  transition: transform .2s ease, box-shadow .25s ease, opacity .2s ease, background .25s ease;
+  box-shadow: 0 4px 14px rgba(124,58,237,.22), inset 0 1px 0 rgba(255,255,255,.10);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1423,7 +1446,7 @@
 }
 .ssw-modal__submit:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(139,92,246,.42), inset 0 1px 0 rgba(255,255,255,.2);
+  box-shadow: 0 8px 20px rgba(124,58,237,.30), inset 0 1px 0 rgba(255,255,255,.12);
 }
 .ssw-modal__submit:active { transform: translateY(0); }
 .ssw-modal__submit:disabled { opacity: .55; cursor: not-allowed; transform: none; }
@@ -3260,6 +3283,9 @@
       price.textContent = formatMoney(plan.price);
     }
     if (modal) modal.hidden = false;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.add('ssw-modal-open');
+    }
   }
 
   function closeModal() {
@@ -3267,6 +3293,9 @@
     const form = document.getElementById('similar-sponsored-form');
     if (form) form.reset();
     if (modal) modal.hidden = true;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.remove('ssw-modal-open');
+    }
     state.selectedPlan = null;
   }
 
