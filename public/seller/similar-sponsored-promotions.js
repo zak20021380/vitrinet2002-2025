@@ -1174,98 +1174,237 @@
 }
 .ssw-modal[hidden] { display: none; }
 .ssw-modal__dialog {
-  width: min(520px, 100%);
+  position: relative;
+  width: min(460px, 100%);
   max-height: 92vh;
   overflow: auto;
   background: linear-gradient(180deg, #1e1b2e 0%, #13111c 100%);
   border-radius: 28px 28px 0 0;
-  padding: 1.25rem 1.35rem 1.5rem;
-  box-shadow: 0 -8px 40px rgba(0,0,0,.5);
-  border-top: 1px solid rgba(255,255,255,.1);
+  padding: 1.5rem 1.4rem 1.6rem;
+  box-shadow: 0 -16px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+  border-top: 1px solid rgba(255,255,255,.08);
 }
 @media (min-width:640px) {
   .ssw-modal { align-items: center; padding: 1.5rem; }
-  .ssw-modal__dialog { border-radius: 24px; }
+  .ssw-modal__dialog {
+    border-radius: 24px;
+    padding: 1.65rem 1.6rem 1.6rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05);
+  }
 }
 .ssw-modal__handle {
-  width: 36px; height: 4px;
-  background: rgba(255,255,255,.15);
+  width: 40px; height: 4px;
+  background: rgba(255,255,255,.18);
   border-radius: 3px;
-  margin: 0 auto 1.15rem;
+  margin: 0 auto 1.1rem;
   display: block;
 }
 @media (min-width:640px) { .ssw-modal__handle { display: none; } }
-.ssw-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-.ssw-modal__title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--ssw-text-dark);
-  margin: 0 0 .28rem;
-}
-.ssw-modal__plan-label { font-size: .8rem; color: var(--ssw-text-secondary); margin: 0; }
+
 .ssw-modal__close-btn {
+  position: absolute;
+  top: .9rem;
+  inset-inline-end: .9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,.08);
-  color: rgba(255,255,255,.5);
+  background: rgba(255,255,255,.06);
+  color: rgba(226,232,240,.65);
   cursor: pointer;
-  transition: all .25s ease;
+  transition: background .25s ease, color .25s ease, transform .2s ease;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-modal__close-btn:hover {
+  background: rgba(239,68,68,.18);
+  color: #fca5a5;
+}
+.ssw-modal__close-btn:active { transform: scale(.94); }
+.ssw-modal__close-btn svg { width: 15px; height: 15px; }
+@media (min-width:640px) {
+  .ssw-modal__close-btn { top: 1.1rem; inset-inline-end: 1.1rem; }
+}
+
+.ssw-modal__header {
+  text-align: center;
+  padding: 0 2.5rem;
+  margin-bottom: 1.25rem;
+}
+.ssw-modal__title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ssw-text-dark);
+  margin: 0 0 .35rem;
+  letter-spacing: -.01em;
+}
+.ssw-modal__plan-label {
+  font-size: .78rem;
+  color: rgba(203,213,225,.7);
+  margin: 0;
+  font-weight: 600;
+}
+.ssw-modal__plan-label:empty { display: none; }
+
+/* Price card */
+.ssw-modal__price-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  padding: 1.1rem 1rem;
+  background: linear-gradient(145deg, rgba(167,139,250,.14), rgba(99,102,241,.06));
+  border: 1px solid var(--ssw-accent-border);
+  border-radius: 18px;
+  margin-bottom: 1.1rem;
+}
+.ssw-modal__price-label {
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(196,181,253,.85);
+  letter-spacing: .01em;
+}
+.ssw-modal__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  direction: ltr;
+}
+.ssw-modal__price-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ssw-modal__price-currency {
+  font-size: .78rem;
+  font-weight: 700;
+  color: rgba(226,232,240,.7);
+}
+
+/* Section wrapper */
+.ssw-modal__section {
+  margin-bottom: 1rem;
+}
+.ssw-modal__section-title {
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(203,213,225,.55);
+  margin-bottom: .5rem;
+  padding-inline-start: .15rem;
+  letter-spacing: .02em;
+}
+
+/* Payment method card */
+.ssw-modal__pay-method {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .9rem 1rem;
+  background: rgba(255,255,255,.035);
+  border: 1.5px solid var(--ssw-accent-border);
+  border-radius: 16px;
+  position: relative;
+  transition: border-color .25s ease, background .25s ease;
+}
+.ssw-modal__pay-method::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(167,139,250,.08), rgba(99,102,241,.02));
+  pointer-events: none;
+}
+.ssw-modal__pay-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  min-width: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(167,139,250,.25), rgba(99,102,241,.14));
+  color: #c4b5fd;
   flex-shrink: 0;
 }
-.ssw-modal__close-btn:hover { background: rgba(239,68,68,.2); color: #f87171; }
-.ssw-modal__close-btn svg { width: 16px; height: 16px; }
-.ssw-modal__payment-note {
+.ssw-modal__pay-icon svg { width: 18px; height: 18px; }
+.ssw-modal__pay-text {
+  position: relative;
   display: flex;
-  gap: .72rem;
+  flex-direction: column;
+  gap: .15rem;
+  flex: 1;
+  min-width: 0;
+}
+.ssw-modal__pay-text strong {
+  font-size: .9rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.3;
+}
+.ssw-modal__pay-text span {
+  font-size: .73rem;
+  color: rgba(203,213,225,.7);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.ssw-modal__pay-check {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ssw-accent), var(--ssw-accent-dark));
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(139,92,246,.4);
+}
+.ssw-modal__pay-check svg { width: 11px; height: 11px; }
+
+/* Important note */
+.ssw-modal__note {
+  display: flex;
   align-items: flex-start;
-  padding: .88rem 1rem;
-  background: linear-gradient(135deg, rgba(167,139,250,.1), rgba(99,102,241,.06));
-  border: 1px solid var(--ssw-accent-border);
-  border-radius: 16px;
-  margin-bottom: 1rem;
+  gap: .55rem;
+  padding: .7rem .9rem;
+  background: rgba(255,255,255,.025);
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(255,255,255,.05);
 }
 .ssw-modal__note-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
-  min-width: 36px;
-  border-radius: 10px;
-  background: linear-gradient(145deg, rgba(167,139,250,.2), rgba(99,102,241,.12));
-  color: var(--ssw-accent);
   flex-shrink: 0;
+  color: rgba(167,139,250,.85);
+  margin-top: 2px;
 }
-.ssw-modal__note-icon svg { width: 18px; height: 18px; }
-.ssw-modal__note-strong {
-  display: block;
-  font-size: .88rem;
-  font-weight: 800;
-  color: #c4b5fd;
-  margin-bottom: .28rem;
-}
-.ssw-modal__note-span {
-  display: block;
-  font-size: .77rem;
-  line-height: 1.75;
-  color: rgba(226,232,240,.75);
+.ssw-modal__note-icon svg { width: 14px; height: 14px; }
+.ssw-modal__note-text {
+  margin: 0;
+  font-size: .76rem;
+  line-height: 1.7;
+  color: rgba(203,213,225,.78);
   font-weight: 600;
 }
-.ssw-modal__actions { display: flex; gap: .65rem; flex-wrap: wrap; }
+
+/* Actions */
+.ssw-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
 .ssw-modal__submit {
-  flex: 1;
-  min-width: 180px;
-  padding: .84rem 1rem;
-  border-radius: var(--ssw-radius-btn);
+  width: 100%;
+  padding: .95rem 1.1rem;
+  border-radius: 14px;
   border: none;
   font-family: inherit;
   font-size: .92rem;
@@ -1273,34 +1412,45 @@
   color: #fff;
   background: linear-gradient(135deg, var(--ssw-accent) 0%, var(--ssw-accent-dark) 100%);
   cursor: pointer;
-  transition: all .3s ease;
-  box-shadow: 0 4px 14px rgba(139,92,246,.3);
+  transition: transform .2s ease, box-shadow .25s ease, opacity .2s ease;
+  box-shadow: 0 6px 18px rgba(139,92,246,.32), inset 0 1px 0 rgba(255,255,255,.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: .45rem;
+  gap: .5rem;
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: -.005em;
 }
-.ssw-modal__submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(139,92,246,.4); }
+.ssw-modal__submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(139,92,246,.42), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.ssw-modal__submit:active { transform: translateY(0); }
 .ssw-modal__submit:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 .ssw-modal__submit svg { width: 16px; height: 16px; }
 .ssw-modal__cancel {
-  padding: .84rem 1.25rem;
-  border-radius: var(--ssw-radius-btn);
-  border: 1.5px solid rgba(255,255,255,.12);
+  width: 100%;
+  padding: .8rem 1.1rem;
+  border-radius: 14px;
+  border: none;
   font-family: inherit;
-  font-size: .88rem;
+  font-size: .85rem;
   font-weight: 700;
-  color: var(--ssw-text-secondary);
-  background: rgba(255,255,255,.06);
+  color: rgba(203,213,225,.7);
+  background: transparent;
   cursor: pointer;
-  transition: all .25s ease;
+  transition: color .2s ease, background .2s ease;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
-.ssw-modal__cancel:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.1); }
-@media (max-width:480px) {
-  .ssw-modal__actions { flex-direction: column; }
-  .ssw-modal__submit { min-width: 0; }
+.ssw-modal__cancel:hover {
+  color: #f8fafc;
+  background: rgba(255,255,255,.04);
+}
+@media (min-width:640px) {
+  .ssw-modal__actions { flex-direction: row-reverse; gap: .65rem; }
+  .ssw-modal__submit { flex: 1.6; }
+  .ssw-modal__cancel { width: auto; flex: 1; }
 }
 
 .ssw-guide-modal {
@@ -2650,28 +2800,48 @@
         <form class="ssw-modal__dialog" id="similar-sponsored-form" novalidate>
           <span class="ssw-modal__handle" aria-hidden="true"></span>
 
-          <div class="ssw-modal__header">
-            <div>
-              <h3 id="ssw-modal-title" class="ssw-modal__title">ثبت درخواست تبلیغ</h3>
-              <p id="similar-sponsored-modal-plan" class="ssw-modal__plan-label"></p>
+          <button type="button" class="ssw-modal__close-btn" data-similar-sponsored-close aria-label="بستن">
+            ${icons.close}
+          </button>
+
+          <header class="ssw-modal__header">
+            <h3 id="ssw-modal-title" class="ssw-modal__title">ثبت درخواست تبلیغ</h3>
+            <p id="similar-sponsored-modal-plan" class="ssw-modal__plan-label"></p>
+          </header>
+
+          <!-- Price Display -->
+          <div class="ssw-modal__price-card" aria-live="polite">
+            <span class="ssw-modal__price-label">مبلغ قابل پرداخت</span>
+            <div class="ssw-modal__price-row">
+              <strong class="ssw-modal__price-value" id="similar-sponsored-modal-price">۰</strong>
+              <span class="ssw-modal__price-currency">تومان</span>
             </div>
-            <button type="button" class="ssw-modal__close-btn" data-similar-sponsored-close aria-label="بستن">
-              ${icons.close}
-            </button>
           </div>
 
-          <div class="ssw-modal__payment-note">
-            <div class="ssw-modal__note-icon" aria-hidden="true">${icons.creditCard}</div>
-            <div>
-              <strong class="ssw-modal__note-strong">پرداخت فقط آنلاین انجام می‌شود</strong>
-              <span class="ssw-modal__note-span">بعد از ثبت درخواست، به درگاه پرداخت هدایت می‌شوید. نمایش تبلیغ پس از پرداخت موفق و تأیید مدیر فعال خواهد شد.</span>
+          <!-- Payment Method -->
+          <div class="ssw-modal__section" role="group" aria-label="روش پرداخت">
+            <span class="ssw-modal__section-title">روش پرداخت</span>
+            <div class="ssw-modal__pay-method" aria-pressed="true">
+              <div class="ssw-modal__pay-icon" aria-hidden="true">${icons.creditCard}</div>
+              <div class="ssw-modal__pay-text">
+                <strong>پرداخت آنلاین</strong>
+                <span>هدایت به درگاه امن بانکی</span>
+              </div>
+              <div class="ssw-modal__pay-check" aria-hidden="true">${icons.check}</div>
             </div>
           </div>
 
+          <!-- Important Note -->
+          <div class="ssw-modal__note" role="note">
+            <span class="ssw-modal__note-icon" aria-hidden="true">${icons.shield}</span>
+            <p class="ssw-modal__note-text">پس از پرداخت موفق، درخواست برای تأیید مدیر ارسال می‌شود و سپس تبلیغ فعال خواهد شد.</p>
+          </div>
+
+          <!-- CTA -->
           <div class="ssw-modal__actions">
             <button type="submit" class="ssw-modal__submit">
+              <span>ثبت درخواست و پرداخت</span>
               ${icons.arrowLeft}
-              <span>ثبت درخواست و پرداخت آنلاین</span>
             </button>
             <button type="button" class="ssw-modal__cancel" data-similar-sponsored-close>انصراف</button>
           </div>
@@ -3080,8 +3250,14 @@
     state.selectedPlan = plan;
     const modal = document.getElementById('similar-sponsored-modal');
     const label = document.getElementById('similar-sponsored-modal-plan');
+    const price = document.getElementById('similar-sponsored-modal-price');
     if (label) {
-      label.textContent = `${plan.title || tierLabels[plan.tier] || ''} | ${durationLabels[plan.durationUnit] || ''} | ${formatMoney(plan.price)} تومان`;
+      const tier = plan.title || tierLabels[plan.tier] || '';
+      const duration = durationLabels[plan.durationUnit] || '';
+      label.textContent = duration ? `${tier} • ${duration}` : tier;
+    }
+    if (price) {
+      price.textContent = formatMoney(plan.price);
     }
     if (modal) modal.hidden = false;
   }
