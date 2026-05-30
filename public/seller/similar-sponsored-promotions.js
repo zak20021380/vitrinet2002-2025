@@ -2344,24 +2344,32 @@
   }
 }
 
-/* Mobile carousel polish: intentional peek, tighter rhythm, stronger hierarchy */
+/* Mobile carousel polish: intentional peek, premium focus, refined rhythm */
 @media (max-width: 759px) {
   #similar-sponsored-seller-root .ssw-carousel-shell {
-    margin-inline: -.42rem;
-    padding-block: .12rem 0;
+    margin-inline: 0;
+    padding-block: .25rem 0;
     overflow: hidden;
   }
 
+  /* Side fades — softer and intentional, not harsh cut-offs */
   #similar-sponsored-seller-root .ssw-carousel-shell::before,
   #similar-sponsored-seller-root .ssw-carousel-shell::after {
-    inset-block: .2rem .35rem;
-    width: 12px;
+    inset-block: 0 .25rem;
+    width: 24px;
+  }
+  #similar-sponsored-seller-root .ssw-carousel-shell::before {
+    background: linear-gradient(to right, rgba(248, 250, 252, .98) 0%, rgba(248, 250, 252, .55) 60%, transparent 100%);
+  }
+  #similar-sponsored-seller-root .ssw-carousel-shell::after {
+    background: linear-gradient(to left, rgba(248, 250, 252, .98) 0%, rgba(248, 250, 252, .55) 60%, transparent 100%);
   }
 
+  /* Track: balanced horizontal padding + tighter gap, smooth swipe */
   #similar-sponsored-seller-root .ssw-plans-grid {
-    gap: .58rem !important;
-    padding: .35rem .82rem .32rem !important;
-    scroll-padding-inline: .82rem;
+    gap: .68rem !important;
+    padding: .55rem 1rem .55rem !important;
+    scroll-padding-inline: 1rem;
     scroll-snap-type: x mandatory !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
@@ -2373,33 +2381,58 @@
     display: none !important;
   }
 
+  /* Cards: ~78% width => ~15% peek of next card visible */
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
     grid-template-columns: 42px minmax(0, 1fr);
     column-gap: .62rem;
-    row-gap: .34rem;
-    flex: 0 0 min(80%, 286px) !important;
-    width: min(80%, 286px) !important;
-    max-width: 286px !important;
-    min-height: 162px;
-    padding: .78rem .82rem .76rem;
+    row-gap: .3rem;
+    flex: 0 0 min(78%, 282px) !important;
+    width: min(78%, 282px) !important;
+    max-width: 282px !important;
+    min-height: 158px;
+    padding: .76rem .82rem .72rem;
     border-radius: 17px;
-    border-color: rgba(203, 213, 225, .82);
+    border-color: rgba(203, 213, 225, .78);
     background:
       radial-gradient(circle at 16% 12%, rgba(255,255,255,.94) 0 18%, transparent 42%),
       linear-gradient(145deg, #ffffff 0%, #f8fafc 54%, #eef2ff 100%);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, .98) inset,
-      0 7px 18px rgba(15, 23, 42, .09),
-      0 18px 34px rgba(15, 23, 42, .10);
+      0 4px 10px rgba(15, 23, 42, .05),
+      0 12px 24px rgba(15, 23, 42, .07);
     scroll-snap-align: start;
+    scroll-snap-stop: always;
+    /* Subtle de-emphasis for non-active cards: layering effect */
+    transform: scale(.97);
+    opacity: .78;
+    transition:
+      transform .35s cubic-bezier(.4,0,.2,1),
+      box-shadow .35s cubic-bezier(.4,0,.2,1),
+      opacity .35s ease,
+      border-color .3s ease;
+  }
+
+  /* Active card: premium focus state — scale, opacity, prominent shadow */
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.is-active {
+    transform: scale(1);
+    opacity: 1;
+    z-index: 2;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, .98) inset,
+      0 8px 18px rgba(15, 23, 42, .09),
+      0 22px 40px rgba(15, 23, 42, .12);
   }
 
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority {
-    border-color: rgba(129, 140, 248, .52);
+    border-color: rgba(129, 140, 248, .42);
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority.is-active {
+    border-color: rgba(129, 140, 248, .55);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, .98) inset,
-      0 8px 20px rgba(79, 70, 229, .11),
-      0 18px 34px rgba(15, 23, 42, .10);
+      0 10px 22px rgba(79, 70, 229, .14),
+      0 22px 40px rgba(15, 23, 42, .12);
   }
 
   #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card::after {
@@ -2407,11 +2440,11 @@
     inset-inline-end: .58rem;
     width: 46px;
     height: 46px;
-    opacity: .62;
+    opacity: .55;
   }
 
   #similar-sponsored-seller-root .ssw-plan-visual {
-    gap: .36rem;
+    gap: .34rem;
   }
 
   #similar-sponsored-seller-root .ssw-plan-visual__icon {
@@ -2420,7 +2453,7 @@
     border-radius: 13px;
     box-shadow:
       0 1px 0 rgba(255,255,255,.9) inset,
-      0 7px 16px var(--plan-card-shadow);
+      0 6px 14px var(--plan-card-shadow);
   }
 
   #similar-sponsored-seller-root .ssw-plan-visual__icon svg {
@@ -2429,22 +2462,22 @@
   }
 
   #similar-sponsored-seller-root .ssw-plan-visual__line {
-    min-height: 28px;
+    min-height: 26px;
   }
 
   #similar-sponsored-seller-root .ssw-plan-header {
-    gap: .26rem;
+    gap: .22rem;
   }
 
   #similar-sponsored-seller-root .ssw-plan-title {
     margin: 0;
     font-size: .88rem;
-    line-height: 1.42;
+    line-height: 1.4;
     letter-spacing: 0;
   }
 
   #similar-sponsored-seller-root .ssw-plan-desc {
-    margin-top: .12rem;
+    margin-top: .1rem;
     font-size: .66rem;
     line-height: 1.45;
     -webkit-line-clamp: 1;
@@ -2459,8 +2492,9 @@
   }
 
   #similar-sponsored-seller-root .upgrade-ad-pricing.ssw-plan-pricing {
-    min-height: 46px;
-    padding: .45rem .58rem;
+    min-height: 44px;
+    padding: .42rem .58rem;
+    margin-top: .04rem;
     border-radius: 12px;
     background:
       linear-gradient(135deg, rgba(255, 255, 255, .92), rgba(248, 250, 252, .76));
@@ -2468,17 +2502,23 @@
   }
 
   #similar-sponsored-seller-root .upgrade-ad-price.ssw-plan-price {
-    font-size: clamp(1.24rem, 5.6vw, 1.54rem);
+    font-size: clamp(1.22rem, 5.4vw, 1.5rem);
   }
 
   #similar-sponsored-seller-root .upgrade-ad-unit.ssw-plan-unit {
     font-size: .61rem;
   }
 
+  /* CTA — give breathing room so it doesn't feel cramped */
+  #similar-sponsored-seller-root .ssw-plan-actions {
+    margin-top: .12rem;
+  }
+
   #similar-sponsored-seller-root .upgrade-ad-cta.ssw-plan-cta {
-    min-height: 41px;
+    min-height: 42px;
+    padding: .55rem .7rem;
     border-radius: 12px;
-    font-size: .81rem;
+    font-size: .82rem;
     font-weight: 900;
     background:
       linear-gradient(135deg, rgba(255,255,255,.24), transparent 38%),
@@ -2489,32 +2529,53 @@
       0 12px 24px rgba(15, 23, 42, .11);
   }
 
+  /* Pagination dots: aligned, breathable, premium active state */
   #similar-sponsored-seller-root .ssw-carousel-dots {
-    gap: 4px;
-    min-height: 12px;
-    padding: .22rem 0 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 14px;
+    padding: .55rem 0 .15rem;
     margin: 0;
   }
 
   #similar-sponsored-seller-root .ssw-carousel-dot {
-    width: 5px;
-    height: 5px;
-    min-width: 0;
-    min-height: 0;
-    max-width: 16px;
-    max-height: 5px;
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
+    min-height: 6px;
+    max-width: 22px;
+    max-height: 6px;
     flex: 0 0 auto;
     appearance: none;
     line-height: 0;
     overflow: hidden;
-    background: rgba(148, 163, 184, .34);
+    border-radius: 999px;
+    background: rgba(148, 163, 184, .32);
+    transition:
+      width .35s cubic-bezier(.4,0,.2,1),
+      background .3s ease,
+      box-shadow .3s ease;
   }
 
   #similar-sponsored-seller-root .ssw-carousel-dot.is-active {
-    width: 16px;
-    height: 5px;
+    width: 22px;
+    height: 6px;
     background: linear-gradient(135deg, #0f766e, #2563eb);
-    box-shadow: 0 1px 5px rgba(15, 118, 110, .28);
+    box-shadow: 0 2px 6px rgba(15, 118, 110, .3);
+  }
+}
+
+/* Respect users who prefer reduced motion: drop transform/opacity de-emphasis */
+@media (max-width: 759px) and (prefers-reduced-motion: reduce) {
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card,
+  #similar-sponsored-seller-root .ssw-carousel-dot {
+    transition: none;
+  }
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+    transform: none;
+    opacity: 1;
   }
 }
     `;
@@ -2796,6 +2857,17 @@
         dot.setAttribute('aria-current', active ? 'true' : 'false');
       });
     }
+
+    // Mark the centered card as active so we can give it premium prominence
+    cards.forEach((card, index) => {
+      const active = index === resolvedIndex;
+      card.classList.toggle('is-active', active);
+      if (active) {
+        card.setAttribute('aria-current', 'true');
+      } else {
+        card.removeAttribute('aria-current');
+      }
+    });
   }
 
   function renderCarouselDots(count) {
