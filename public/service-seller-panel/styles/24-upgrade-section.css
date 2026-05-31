@@ -6542,3 +6542,433 @@
     transform: none;
   }
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ▌ SUBSCRIPTION PLAN CARDS — PREMIUM SAAS REDESIGN (FINAL LAYER)
+   ▌ Section: «اشتراک فروشگاه»
+   ▌ Targets:  .upgrade-plan-card.upgrade-plan-card--v2
+   ▌ Goals:
+   ▌   • Mobile-first, compact, professional
+   ▌   • Single accent color (emerald) – no competing tier hues
+   ▌   • Badge integrated into header flow (no floating sticker)
+   ▌   • Center icon removed (wasted space)
+   ▌   • Solid, polished CTA
+   ▌   • Subtle border + soft shadow + clean spacing
+   ▌   • RTL preserved
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Local tokens — single accent system */
+.upgrade-plans-grid {
+  --pp-accent: #10b981;
+  --pp-accent-strong: #059669;
+  --pp-accent-soft: rgba(16, 185, 129, 0.10);
+  --pp-accent-ring: rgba(16, 185, 129, 0.22);
+  --pp-surface: #ffffff;
+  --pp-border: #e6e8ec;
+  --pp-divider: #eef0f3;
+  --pp-text: #0f172a;
+  --pp-text-soft: #475569;
+  --pp-text-muted: #6b7280;
+  --pp-cta-bg: #0f172a;
+  --pp-cta-bg-hover: #111c30;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  padding: 0;
+}
+
+/* ─── Card shell — clean, neutral, elevated ────────────────────────── */
+.upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2 {
+  position: relative;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-border);
+  border-radius: 18px;
+  padding: 1.25rem 1.15rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 24px -16px rgba(15, 23, 42, 0.16);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Strip every legacy decorative layer (top stripes, glows, rings) */
+.upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2::before,
+.upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Variants share the same neutral surface (no warm cream / pale blue tints) */
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular,
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--best {
+  background: var(--pp-surface);
+}
+
+/* Popular plan = the only emphasized one (matches SaaS convention) */
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular {
+  border-color: var(--pp-accent-ring);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 32px -14px rgba(16, 185, 129, 0.32);
+}
+
+/* Hover — subtle lift, no scale */
+.upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2:hover {
+  transform: translateY(-2px);
+  border-color: var(--pp-accent-ring);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 4px 8px rgba(15, 23, 42, 0.05),
+    0 18px 36px -16px rgba(15, 23, 42, 0.20);
+}
+
+/* Hide ribbon star — badge alone communicates "popular" */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-ribbon {
+  display: none !important;
+}
+
+/* ─── Center icon → removed (wasted space, was the main "cheap" cue) ─ */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-icon {
+  display: none !important;
+}
+
+/* ─── Header — start-aligned for clean type hierarchy in RTL ───────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+  gap: 0.4rem;
+  padding-top: 0;
+}
+
+/* ─── Badge — flows inside header as a small text pill ─────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-badge,
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-badge--popular,
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-badge--best {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.1rem;
+  padding: 0.28rem 0.65rem 0.3rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--pp-accent-strong);
+  background: var(--pp-accent-soft);
+  border: 1px solid var(--pp-accent-ring);
+  box-shadow: none;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pp-accent);
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+/* ─── Title ─────────────────────────────────────────────────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--pp-text);
+  margin: 0;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  text-align: start;
+}
+
+/* ─── Duration — quiet meta line, no chip ──────────────────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--pp-text-muted);
+  border-radius: 0;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-duration svg {
+  width: 13px;
+  height: 13px;
+  color: var(--pp-text-muted);
+  opacity: 1;
+}
+
+/* ─── Pricing — solid, prominent, no rainbow gradient ──────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-pricing {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  padding: 0.6rem 0 0.2rem;
+  margin: 0;
+  border-top: 1px solid var(--pp-divider);
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-pricing::before,
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-pricing::after {
+  content: none !important;
+  display: none !important;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--pp-text) !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+          background-clip: border-box !important;
+  -webkit-text-fill-color: var(--pp-text) !important;
+  text-shadow: none !important;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price__unit {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--pp-text-muted);
+}
+
+/* ─── Description ─────────────────────────────────────────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-desc {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--pp-text-soft);
+  line-height: 1.65;
+  text-align: start;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+/* ─── Features list — clean, scannable, single accent ──────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-features {
+  list-style: none;
+  margin: 0;
+  padding: 0.65rem 0 0.2rem;
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-top: 1px solid var(--pp-divider) !important;
+  border-bottom: 0 !important;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--pp-text);
+  line-height: 1.5;
+  text-align: start;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-feature > span:last-child {
+  color: var(--pp-text);
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-feature__icon {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--pp-accent-soft);
+  border: 0;
+  box-shadow: none;
+  color: var(--pp-accent-strong);
+  margin-top: 0;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-feature__icon svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3;
+  color: var(--pp-accent-strong);
+}
+
+/* ─── CTA — solid, premium, no shimmer/sweep noise ─────────────────── */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta {
+  margin-top: 0.45rem;
+  position: relative;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #ffffff;
+  background: var(--pp-cta-bg);
+  background-image: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 6px 14px -8px rgba(15, 23, 42, 0.35);
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta::before,
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta::after {
+  content: none !important;
+  display: none !important;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta:hover {
+  background: var(--pp-cta-bg-hover);
+  background-image: none;
+  transform: translateY(-1px);
+  filter: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.10) inset,
+    0 10px 20px -10px rgba(15, 23, 42, 0.45);
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta:active {
+  transform: translateY(0);
+}
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta span {
+  position: relative;
+  z-index: 1;
+}
+/* Drop the busy SVG icon next to the CTA label */
+.upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta svg {
+  display: none !important;
+}
+
+/* Popular plan = filled emerald CTA (the only cross-card differentiator) */
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta {
+  background: var(--pp-accent);
+  background-image: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.20) inset,
+    0 8px 18px -8px rgba(16, 185, 129, 0.50);
+}
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta:hover {
+  background: var(--pp-accent-strong);
+  background-image: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 12px 24px -10px rgba(16, 185, 129, 0.60);
+}
+
+/* Best plan = same neutral CTA as default (consistency over color noise) */
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--best .upgrade-plan-cta {
+  background: var(--pp-cta-bg);
+  background-image: none;
+}
+.upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--best .upgrade-plan-cta:hover {
+  background: var(--pp-cta-bg-hover);
+  background-image: none;
+}
+
+/* ─── Tablet ───────────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .upgrade-plans-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 1.4rem 1.25rem 1.25rem;
+    border-radius: 20px;
+    gap: 0.95rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-title {
+    font-size: 1.15rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 2rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-feature {
+    font-size: 0.85rem;
+  }
+}
+
+/* ─── Desktop ──────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .upgrade-plans-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 1.55rem 1.35rem 1.35rem;
+    transform: none;
+  }
+  /* No translate-up on popular — keep alignment clean for SaaS feel */
+  .upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular {
+    transform: none;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular:hover {
+    transform: translateY(-2px);
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 2.05rem;
+  }
+}
+
+/* ─── Tiny phones ──────────────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 1.05rem 0.95rem 1rem;
+    border-radius: 16px;
+    gap: 0.7rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-title {
+    font-size: 1rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 1.65rem;
+  }
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta {
+    padding: 0.78rem 0.9rem;
+    font-size: 0.88rem;
+    border-radius: 11px;
+  }
+}
+
+/* ─── Reduced motion ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2,
+  .upgrade-plans-grid .upgrade-plan-card--v2 .upgrade-plan-cta {
+    transition: none !important;
+    animation: none !important;
+  }
+  .upgrade-plans-grid .upgrade-plan-card.upgrade-plan-card--v2:hover,
+  .upgrade-plans-grid .upgrade-plan-card--v2.upgrade-plan-card--popular:hover {
+    transform: none;
+  }
+}
