@@ -1203,7 +1203,13 @@ body.ssw-modal-open .seller-mobile-bottom-nav {
 }
 body.ssw-modal-open .notif-btn,
 body.ssw-modal-open #notificationFab,
-body.ssw-modal-open .sidebar-hamburger {
+body.ssw-modal-open .notification-fab,
+body.ssw-modal-open .product-floating-add,
+body.ssw-modal-open #productAddFloatingBtn,
+body.ssw-modal-open .home-btn,
+body.ssw-modal-open #sidebarHamburger,
+body.ssw-modal-open .sidebar-hamburger,
+body.ssw-modal-open .hamburger-menu {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -1413,6 +1419,86 @@ body.ssw-modal-open .sidebar-hamburger {
   line-height: 1.7;
   color: rgba(203,213,225,.78);
   font-weight: 600;
+}
+.ssw-modal__result {
+  display: grid;
+  gap: .75rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1.05rem .95rem;
+  margin: 0 0 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(16,185,129,.24);
+  background: linear-gradient(150deg, rgba(16,185,129,.13), rgba(20,184,166,.06));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 34px rgba(2,6,23,.18);
+}
+.ssw-modal__result[hidden] { display: none; }
+.ssw-modal__result-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  color: #d1fae5;
+  background: linear-gradient(135deg, #10b981, #0f766e);
+  box-shadow: 0 10px 26px rgba(16,185,129,.24);
+}
+.ssw-modal__result-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.ssw-modal__result-title {
+  margin: 0;
+  color: #f8fafc;
+  font-size: .98rem;
+  line-height: 1.55;
+  font-weight: 900;
+}
+.ssw-modal__result-text {
+  margin: 0;
+  color: rgba(226,232,240,.78);
+  font-size: .78rem;
+  line-height: 1.85;
+  font-weight: 650;
+}
+.ssw-modal__result-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  max-width: 100%;
+  padding: .5rem .7rem;
+  border-radius: 999px;
+  color: #bbf7d0;
+  background: rgba(16,185,129,.1);
+  border: 1px solid rgba(16,185,129,.2);
+  font-size: .7rem;
+  font-weight: 800;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ssw-modal__dialog.is-result .ssw-modal__confirm {
+  display: none;
+}
+.ssw-modal__dialog.is-result .ssw-modal__result {
+  margin-top: .35rem;
+}
+.ssw-modal__dialog.is-result .ssw-modal__cancel {
+  display: none;
+}
+.ssw-modal__dialog.is-error .ssw-modal__result {
+  border-color: rgba(248,113,113,.26);
+  background: linear-gradient(150deg, rgba(248,113,113,.14), rgba(124,45,18,.07));
+}
+.ssw-modal__dialog.is-error .ssw-modal__result-icon {
+  color: #fee2e2;
+  background: linear-gradient(135deg, #f97316, #dc2626);
+  box-shadow: 0 10px 26px rgba(248,113,113,.18);
+}
+.ssw-modal__dialog.is-error .ssw-modal__result-meta {
+  color: #fecaca;
+  background: rgba(248,113,113,.1);
+  border-color: rgba(248,113,113,.18);
 }
 
 /* Actions */
@@ -2833,7 +2919,7 @@ body.ssw-modal-open .sidebar-hamburger {
           </header>
 
           <!-- Price Display -->
-          <div class="ssw-modal__price-card" aria-live="polite">
+          <div class="ssw-modal__price-card ssw-modal__confirm" aria-live="polite">
             <span class="ssw-modal__price-label">مبلغ قابل پرداخت</span>
             <div class="ssw-modal__price-row">
               <strong class="ssw-modal__price-value" id="similar-sponsored-modal-price">۰</strong>
@@ -2842,28 +2928,30 @@ body.ssw-modal-open .sidebar-hamburger {
           </div>
 
           <!-- Payment Method -->
-          <div class="ssw-modal__section" role="group" aria-label="روش پرداخت">
-            <span class="ssw-modal__section-title">روش پرداخت</span>
+          <div class="ssw-modal__section ssw-modal__confirm" role="group" aria-label="ثبت درخواست">
+            <span class="ssw-modal__section-title">فرایند ثبت</span>
             <div class="ssw-modal__pay-method" aria-pressed="true">
               <div class="ssw-modal__pay-icon" aria-hidden="true">${icons.creditCard}</div>
               <div class="ssw-modal__pay-text">
-                <strong>پرداخت آنلاین</strong>
-                <span>هدایت به درگاه امن بانکی</span>
+                <strong>ثبت امن داخل داشبورد</strong>
+                <span>بدون خروج از صفحه، درخواست برای بررسی ارسال می‌شود</span>
               </div>
               <div class="ssw-modal__pay-check" aria-hidden="true">${icons.check}</div>
             </div>
           </div>
 
           <!-- Important Note -->
-          <div class="ssw-modal__note" role="note">
+          <div class="ssw-modal__note ssw-modal__confirm" role="note">
             <span class="ssw-modal__note-icon" aria-hidden="true">${icons.shield}</span>
-            <p class="ssw-modal__note-text">پس از پرداخت موفق، درخواست برای تأیید مدیر ارسال می‌شود و سپس تبلیغ فعال خواهد شد.</p>
+            <p class="ssw-modal__note-text">پس از ثبت موفق، درخواست در وضعیت در انتظار بررسی مدیر قرار می‌گیرد و زمان نمایش پس از تأیید مشخص می‌شود.</p>
           </div>
+
+          <div id="similar-sponsored-result" class="ssw-modal__result" role="status" aria-live="polite" hidden></div>
 
           <!-- CTA -->
           <div class="ssw-modal__actions">
-            <button type="submit" class="ssw-modal__submit">
-              <span>ثبت درخواست و پرداخت</span>
+            <button type="button" class="ssw-modal__submit" data-similar-sponsored-submit>
+              <span>ثبت درخواست</span>
               ${icons.arrowLeft}
             </button>
             <button type="button" class="ssw-modal__cancel" data-similar-sponsored-close>انصراف</button>
@@ -3269,11 +3357,83 @@ body.ssw-modal-open .sidebar-hamburger {
   /* ─────────────────────────────────────────────────────
      MODAL LOGIC
      ───────────────────────────────────────────────────── */
+  function setModalSubmitLabel(label) {
+    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
+    const submitText = submitButton?.querySelector('span');
+    if (submitText) submitText.textContent = label;
+  }
+
+  function resetModalState() {
+    const dialog = document.getElementById('similar-sponsored-form');
+    const result = document.getElementById('similar-sponsored-result');
+    const title = document.getElementById('ssw-modal-title');
+    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
+    const cancelButton = document.querySelector('#similar-sponsored-form .ssw-modal__cancel');
+
+    if (dialog) dialog.classList.remove('is-result', 'is-success', 'is-error');
+    if (result) {
+      result.hidden = true;
+      result.replaceChildren();
+    }
+    if (title) title.textContent = 'ثبت درخواست تبلیغ';
+    if (submitButton) submitButton.disabled = false;
+    if (cancelButton) cancelButton.textContent = 'انصراف';
+    setModalSubmitLabel('ثبت درخواست');
+  }
+
+  function setModalBusy(isBusy) {
+    const dialog = document.getElementById('similar-sponsored-form');
+    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
+    if (submitButton) submitButton.disabled = !!isBusy;
+    if (isBusy) {
+      setModalSubmitLabel('در حال ثبت درخواست...');
+    } else if (dialog?.classList.contains('is-success')) {
+      setModalSubmitLabel('متوجه شدم');
+    } else if (dialog?.classList.contains('is-error')) {
+      setModalSubmitLabel('تلاش دوباره');
+    } else {
+      setModalSubmitLabel('ثبت درخواست');
+    }
+  }
+
+  function showModalResult(type, options = {}) {
+    const dialog = document.getElementById('similar-sponsored-form');
+    const result = document.getElementById('similar-sponsored-result');
+    const titleEl = document.getElementById('ssw-modal-title');
+    const cancelButton = document.querySelector('#similar-sponsored-form .ssw-modal__cancel');
+    const isSuccess = type === 'success';
+
+    if (dialog) {
+      dialog.classList.toggle('is-result', isSuccess);
+      dialog.classList.toggle('is-success', isSuccess);
+      dialog.classList.toggle('is-error', !isSuccess);
+    }
+    if (titleEl) titleEl.textContent = isSuccess ? 'درخواست ثبت شد' : 'ثبت درخواست انجام نشد';
+    if (cancelButton) cancelButton.textContent = isSuccess ? 'بستن' : 'بستن';
+    setModalSubmitLabel(isSuccess ? 'متوجه شدم' : 'تلاش دوباره');
+
+    if (!result) return;
+    const resultTitle = options.title || (isSuccess ? 'درخواست تبلیغ با موفقیت ثبت شد' : 'خطا در ثبت درخواست');
+    const resultText = options.message || (isSuccess
+      ? 'درخواست شما ثبت شد و اکنون در انتظار بررسی مدیر است. پس از تأیید، زمان نمایش تبلیغ مشخص می‌شود.'
+      : 'لطفاً چند لحظه بعد دوباره تلاش کنید.');
+    const meta = options.meta || (isSuccess ? 'وضعیت: در انتظار بررسی مدیر' : 'خطا داخل همین صفحه نمایش داده شد');
+
+    result.innerHTML = `
+      <span class="ssw-modal__result-icon" aria-hidden="true">${isSuccess ? icons.check : icons.info}</span>
+      <strong class="ssw-modal__result-title">${escapeHtml(resultTitle)}</strong>
+      <p class="ssw-modal__result-text">${escapeHtml(resultText)}</p>
+      <span class="ssw-modal__result-meta">${escapeHtml(meta)}</span>
+    `;
+    result.hidden = false;
+  }
+
   function openModal(plan) {
     state.selectedPlan = plan;
     const modal = document.getElementById('similar-sponsored-modal');
     const label = document.getElementById('similar-sponsored-modal-plan');
     const price = document.getElementById('similar-sponsored-modal-price');
+    resetModalState();
     if (label) {
       const tier = plan.title || tierLabels[plan.tier] || '';
       const duration = durationLabels[plan.durationUnit] || '';
@@ -3297,6 +3457,7 @@ body.ssw-modal-open .sidebar-hamburger {
       document.body.classList.remove('ssw-modal-open');
     }
     state.selectedPlan = null;
+    resetModalState();
   }
 
   function getPlanGuideFeatures(plan) {
@@ -3355,26 +3516,45 @@ body.ssw-modal-open .sidebar-hamburger {
     }
 
     modal.hidden = false;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.add('ssw-modal-open');
+    }
   }
 
   function closeGuideModal() {
     const modal = document.getElementById('similar-sponsored-guide-modal');
     if (modal) modal.hidden = true;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.remove('ssw-modal-open');
+    }
     state.guidePlan = null;
   }
 
   async function submitRequest(event) {
-    event.preventDefault();
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const dialog = document.getElementById('similar-sponsored-form');
+    if (dialog?.classList.contains('is-success')) {
+      closeModal();
+      return;
+    }
     if (state.submitting) return;
     const plan = state.selectedPlan;
     if (!plan) return;
-    const submitButton = event.currentTarget?.querySelector('[type="submit"]');
+    const result = document.getElementById('similar-sponsored-result');
+    const title = document.getElementById('ssw-modal-title');
+    dialog?.classList.remove('is-error');
+    if (result) {
+      result.hidden = true;
+      result.replaceChildren();
+    }
+    if (title) title.textContent = 'ثبت درخواست تبلیغ';
     const formData = new FormData();
     formData.set('planTier', plan.tier);
     formData.set('durationUnit', plan.durationUnit);
     state.submitting = true;
-    if (submitButton) submitButton.disabled = true;
-    setMessage('در حال ثبت درخواست و آماده‌سازی درگاه پرداخت...');
+    setModalBusy(true);
+    setMessage('');
     try {
       const token = await csrfToken();
       const res = await fetch(`${API_BASE}/similar-shop-promotions/requests`, {
@@ -3405,21 +3585,52 @@ body.ssw-modal-open .sidebar-hamburger {
         throw new Error(paymentData.message || 'خطا در اتصال به درگاه پرداخت');
       }
 
-      closeModal();
-      await loadData();
       if (paymentData.url) {
-        setMessage(paymentData.message || 'در حال انتقال به درگاه پرداخت...', 'success');
-        window.location.assign(paymentData.url);
-        return;
+        const paymentCallbackUrl = new URL(paymentData.url, API_BASE.replace(/\/api$/, '') + '/');
+        const callbackRes = await fetch(paymentCallbackUrl.toString(), {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-cache',
+          headers: authHeaders({
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json',
+            ...(token ? { 'X-CSRF-Token': token } : {})
+          })
+        });
+        const callbackData = await callbackRes.json().catch(() => ({}));
+        if (!callbackRes.ok || callbackData.success === false) {
+          throw new Error(callbackData.message || 'پرداخت تستی یا ثبت نهایی درخواست کامل نشد.');
+        }
       }
-      setMessage(paymentData.message || 'درخواست ثبت شد، اما لینک درگاه دریافت نشد.', 'success');
+
+      await loadData({ force: true, silent: true });
+      showModalResult('success', {
+        title: 'درخواست تبلیغ با موفقیت ثبت شد',
+        message: 'درخواست شما داخل داشبورد ثبت شد و اکنون در انتظار بررسی مدیر است. پس از تأیید، زمان شروع و پایان نمایش مشخص می‌شود.',
+        meta: 'وضعیت: در انتظار بررسی مدیر'
+      });
     } catch (err) {
       console.error('similar sponsored submitRequest failed:', err);
-      setMessage(err.message || 'خطا در ثبت درخواست یا اتصال به درگاه', 'error');
+      showModalResult('error', {
+        title: 'ثبت درخواست ناموفق بود',
+        message: err.message || 'خطا در ثبت درخواست یا اتصال به سرور. لطفاً دوباره تلاش کنید.',
+        meta: 'در همین صفحه بمانید و دوباره تلاش کنید'
+      });
     } finally {
       state.submitting = false;
-      if (submitButton) submitButton.disabled = false;
+      setModalBusy(false);
     }
+  }
+
+  function handleSubmitAction(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const dialog = document.getElementById('similar-sponsored-form');
+    if (dialog?.classList.contains('is-success')) {
+      closeModal();
+      return;
+    }
+    submitRequest(event);
   }
 
   /* ─────────────────────────────────────────────────────
@@ -3462,6 +3673,8 @@ body.ssw-modal-open .sidebar-hamburger {
 
       const button = event.target.closest('[data-plan-tier]');
       if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
       const plan = state.plans.find(
         (item) => item.tier === button.dataset.planTier && item.durationUnit === button.dataset.planDuration
       );
@@ -3476,6 +3689,7 @@ body.ssw-modal-open .sidebar-hamburger {
     });
 
     document.getElementById('similar-sponsored-form')?.addEventListener('submit', submitRequest);
+    document.querySelector('[data-similar-sponsored-submit]')?.addEventListener('click', handleSubmitAction);
     document.querySelector('[data-similar-sponsored-guide-select]')?.addEventListener('click', () => {
       const plan = state.guidePlan;
       closeGuideModal();
