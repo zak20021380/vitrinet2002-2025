@@ -897,6 +897,8 @@ handleSidebarOnResize();
 
 // ----------- بخش سوییچ بین بخش‌ها و چارت بازدید ----------
 function showSection(section) {
+  document.body.dataset.activeSellerSection = section;
+  document.body.classList.toggle('seller-section-upgrade', section === 'upgrade');
   if (section === 'msg') {
     const perf = document.getElementById('performance-container');
     if (perf) perf.style.display = 'none';
@@ -960,6 +962,19 @@ function showSection(section) {
   }
   if (section === "products") setupProductSection();
 }
+
+document.addEventListener('click', (event) => {
+  const trigger = event.target.closest(
+    '#menu-upgrade, .sidebar-link[data-section], .sidebar-menu-item[data-section], .seller-mobile-bottom-nav__item[data-section], .seller-mobile-bottom-nav__item[data-action="upgrade"]'
+  );
+  if (!trigger) return;
+  const section = trigger.id === 'menu-upgrade' || trigger.dataset.action === 'upgrade'
+    ? 'upgrade'
+    : (trigger.dataset.section || '');
+  if (!section) return;
+  document.body.dataset.activeSellerSection = section;
+  document.body.classList.toggle('seller-section-upgrade', section === 'upgrade');
+}, true);
 
 function switchChart(type) {
   if (currentChart === type) return;
@@ -2712,6 +2727,8 @@ function setMainImageIndex(idx) {
     if (!btn || btn.dataset.listener) return;      // دوبار ثبت نشود
 
     btn.addEventListener('click', () => {
+      document.body.dataset.activeSellerSection = 'upgrade';
+      document.body.classList.add('seller-section-upgrade');
       /* هایلایت منو و مخفی‌کردن سایر سکشن‌ها */
       document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
       btn.classList.add('active');

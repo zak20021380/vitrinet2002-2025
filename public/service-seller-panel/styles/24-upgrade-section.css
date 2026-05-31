@@ -6972,3 +6972,440 @@
     transform: none;
   }
 }
+
+/* Shop subscription cards: premium compact mobile layer */
+#content-sub .upgrade-plans-grid {
+  --sub-plan-text: #0f172a;
+  --sub-plan-soft: #475569;
+  --sub-plan-muted: #64748b;
+  --sub-plan-border: rgba(148, 163, 184, 0.24);
+  --sub-plan-shadow: 0 1px 0 rgba(255, 255, 255, 0.86) inset,
+    0 14px 32px -24px rgba(15, 23, 42, 0.42),
+    0 8px 18px -16px rgba(15, 118, 110, 0.32);
+  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0.1rem 0.1rem 1.15rem;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  direction: ltr;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+  --sub-plan-accent: #0f766e;
+  --sub-plan-accent-rgb: 15, 118, 110;
+  --sub-plan-wash: #f0fdfa;
+  position: relative;
+  gap: 0.62rem;
+  padding: 0.82rem;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.18);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(var(--sub-plan-accent-rgb), 0.13), transparent 38%),
+    linear-gradient(180deg, rgba(var(--sub-plan-accent-rgb), 0.075) 0%, #ffffff 42%, #ffffff 100%);
+  box-shadow: var(--sub-plan-shadow);
+  overflow: hidden;
+  transform: none;
+  width: min(100%, calc(100vw - 32px)) !important;
+  max-width: min(100%, calc(100vw - 32px)) !important;
+  min-width: 0;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 > * {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  inset-inline: 14px;
+  top: 8px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(var(--sub-plan-accent-rgb), 0.48), transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2::after {
+  content: "";
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.62);
+  pointer-events: none;
+}
+
+#content-sub .upgrade-plan-card[data-plan-card="1month"] {
+  --sub-plan-accent: #0f766e;
+  --sub-plan-accent-rgb: 15, 118, 110;
+  --sub-plan-wash: #f0fdfa;
+}
+
+#content-sub .upgrade-plan-card[data-plan-card="3month"] {
+  --sub-plan-accent: #059669;
+  --sub-plan-accent-rgb: 5, 150, 105;
+  --sub-plan-wash: #ecfdf5;
+}
+
+#content-sub .upgrade-plan-card[data-plan-card="12month"] {
+  --sub-plan-accent: #334155;
+  --sub-plan-accent-rgb: 51, 65, 85;
+  --sub-plan-wash: #f8fafc;
+}
+
+#content-sub .upgrade-plan-card--v2.upgrade-plan-card--popular {
+  border-color: rgba(var(--sub-plan-accent-rgb), 0.32);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(var(--sub-plan-accent-rgb), 0.17), transparent 38%),
+    linear-gradient(180deg, rgba(var(--sub-plan-accent-rgb), 0.11) 0%, #ffffff 46%, #ffffff 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.88) inset,
+    0 18px 38px -23px rgba(5, 150, 105, 0.58),
+    0 0 0 4px rgba(5, 150, 105, 0.045);
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-ribbon {
+  display: none !important;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-badge,
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-badge--popular,
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-badge--best {
+  position: static;
+  inset: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  margin: 0.25rem 0 0.02rem;
+  padding: 0.24rem 0.58rem 0.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.17);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--sub-plan-accent);
+  box-shadow: 0 7px 18px -16px rgba(var(--sub-plan-accent-rgb), 0.55);
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1.45;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(var(--sub-plan-accent-rgb), 0.1);
+  flex: 0 0 auto;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.66rem;
+  padding: 0.58rem 0.62rem;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.11);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(var(--sub-plan-accent-rgb), 0.055));
+  text-align: start;
+  min-width: 0;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-icon {
+  display: grid !important;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  place-items: center;
+  color: var(--sub-plan-accent);
+  background: linear-gradient(145deg, #ffffff, rgba(var(--sub-plan-accent-rgb), 0.1));
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.13);
+  box-shadow: 0 10px 20px -16px rgba(var(--sub-plan-accent-rgb), 0.75);
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-icon svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.9;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-title {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  color: var(--sub-plan-text);
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-duration {
+  grid-column: 2;
+  grid-row: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.14rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--sub-plan-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.55;
+  min-width: 0;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-duration svg {
+  width: 12px;
+  height: 12px;
+  color: var(--sub-plan-accent);
+  opacity: 0.72;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-pricing {
+  display: block;
+  margin: 0;
+  padding: 0.56rem 0.68rem;
+  border: 0 !important;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(var(--sub-plan-accent-rgb), 0.07), rgba(248, 250, 252, 0.9));
+  min-width: 0;
+  overflow: hidden;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-pricing::before,
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-pricing::after {
+  content: none !important;
+  display: none !important;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+  color: var(--sub-plan-text) !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: var(--sub-plan-text) !important;
+  font-size: 1.78rem;
+  font-weight: 950;
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-shadow: none !important;
+  min-width: 0;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-price__unit {
+  color: var(--sub-plan-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-desc {
+  margin: 0;
+  padding: 0 0.1rem;
+  color: var(--sub-plan-soft);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.75;
+  text-align: start;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-features {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.34rem;
+  margin: 0.04rem 0 0;
+  padding: 0.5rem;
+  border: 0 !important;
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.84);
+  list-style: none;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.48rem;
+  min-height: 0;
+  padding: 0.18rem 0.08rem;
+  color: var(--sub-plan-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.65;
+  text-align: start;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-feature > span:last-child {
+  color: var(--sub-plan-text);
+  min-width: 0;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-feature__icon {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  margin-top: 0.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--sub-plan-accent);
+  background: rgba(var(--sub-plan-accent-rgb), 0.1);
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.08);
+  box-shadow: none;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-feature__icon svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 3;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-cta {
+  min-height: 43px;
+  margin-top: 0.12rem;
+  padding: 0.76rem 0.9rem;
+  border: 1px solid rgba(var(--sub-plan-accent-rgb), 0.2);
+  border-radius: 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(var(--sub-plan-accent-rgb), 0.96), rgba(15, 118, 110, 0.96));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 12px 22px -14px rgba(var(--sub-plan-accent-rgb), 0.72);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-cta:hover {
+  background: linear-gradient(135deg, rgba(var(--sub-plan-accent-rgb), 1), rgba(15, 118, 110, 1));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 14px 26px -14px rgba(var(--sub-plan-accent-rgb), 0.8);
+  transform: translateY(-1px);
+}
+
+#content-sub .upgrade-plan-card--v2 .upgrade-plan-cta svg {
+  display: inline-block !important;
+  width: 16px;
+  height: 16px;
+  opacity: 0.82;
+}
+
+#content-sub .upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: rgba(5, 150, 105, 0.28);
+}
+
+body.seller-section-upgrade .notif-btn,
+body[data-active-seller-section="upgrade"] .notif-btn {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.94);
+}
+
+@media (max-width: 639px) {
+  .upgrade-section,
+  #main-content > .upgrade-section,
+  #main-content .upgrade-section {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-inline: auto;
+    overflow-x: hidden;
+  }
+
+  #content-sub .upgrade-plans-grid {
+    justify-items: center;
+    overflow: visible;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+    width: min(100%, calc(100vw - 32px)) !important;
+    max-width: min(100%, calc(100vw - 32px)) !important;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 640px) {
+  #content-sub .upgrade-plans-grid {
+    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+    gap: 1rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 0.95rem;
+    gap: 0.72rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #content-sub .upgrade-plans-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #content-sub .upgrade-plan-card--v2.upgrade-plan-card--popular,
+  #content-sub .upgrade-plan-card--v2.upgrade-plan-card--popular:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 360px) {
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 0.72rem;
+    border-radius: 18px;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-header {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 0.55rem;
+    padding: 0.52rem;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-title {
+    font-size: 0.95rem;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 1.56rem;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-feature {
+    font-size: 0.71rem;
+  }
+
+  #content-sub .upgrade-plan-card--v2 .upgrade-plan-cta {
+    min-height: 40px;
+    font-size: 0.8rem;
+  }
+}
