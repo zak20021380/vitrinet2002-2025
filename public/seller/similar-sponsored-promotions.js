@@ -2372,6 +2372,237 @@ body.ssw-modal-open .hamburger-menu {
   }
 }
 
+/* Compact selected product + mobile product picker sheet */
+.ssw-modal__product-summary {
+  min-width: 0;
+}
+.ssw-modal__product-summary-empty {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 15px 12px 13px;
+  border: 1px dashed rgba(13,148,136,.24);
+  border-radius: 15px;
+  color: #64748b;
+  background: linear-gradient(145deg, rgba(240,253,250,.82), rgba(255,255,255,.86));
+  text-align: center;
+}
+.ssw-modal__product-summary-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  color: #0f766e;
+  background: #ccfbf1;
+}
+.ssw-modal__product-summary-empty-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.ssw-modal__product-summary-empty strong {
+  color: #355e59;
+  font-size: .78rem;
+  font-weight: 900;
+}
+.ssw-modal__product-summary-empty span:not(.ssw-modal__product-summary-empty-icon) {
+  color: #718096;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.ssw-modal__product-summary-action,
+.ssw-modal__product-summary-change {
+  min-height: 36px;
+  border: 1px solid rgba(5,150,105,.2);
+  border-radius: 11px;
+  color: #047857;
+  background: rgba(209,250,229,.86);
+  font: inherit;
+  font-size: .73rem;
+  font-weight: 900;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease, background .2s ease, border-color .2s ease;
+}
+.ssw-modal__product-summary-action {
+  min-width: 112px;
+  margin-top: 2px;
+  padding: 7px 16px;
+}
+.ssw-modal__product-summary-change {
+  flex: 0 0 auto;
+  min-width: 76px;
+  padding: 7px 9px;
+}
+.ssw-modal__product-summary-action:hover,
+.ssw-modal__product-summary-change:hover {
+  border-color: rgba(5,150,105,.36);
+  background: #d1fae5;
+}
+.ssw-modal__product-summary-action:active,
+.ssw-modal__product-summary-change:active {
+  transform: scale(.97);
+}
+.ssw-modal__product-summary-card {
+  display: flex;
+  align-items: center;
+  direction: rtl;
+  gap: 9px;
+  min-height: 72px;
+  padding: 9px;
+  border: 1px solid rgba(5,150,105,.2);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(236,253,245,.98), rgba(255,255,255,.95));
+  box-shadow: 0 8px 18px rgba(5,150,105,.08), inset 0 1px 0 #fff;
+}
+.ssw-modal__product-summary-card .ssw-modal__product-media {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+}
+.ssw-modal__product-summary-card .ssw-modal__product-copy {
+  gap: 4px;
+}
+.ssw-modal__product-summary-card .ssw-modal__product-title {
+  font-size: .79rem;
+}
+
+.ssw-product-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: 18px;
+  background: rgba(2,44,43,.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ssw-product-sheet[hidden] {
+  display: none;
+}
+.ssw-product-sheet__dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100%);
+  max-height: min(82vh, 720px);
+  max-height: min(82dvh, 720px);
+  min-height: 0;
+  padding: 11px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  border: 1px solid rgba(255,255,255,.78);
+  border-bottom: 0;
+  border-radius: 25px 25px 0 0;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(45,212,191,.18), transparent 28%),
+    linear-gradient(180deg, #fbfffe 0%, #f1fdf9 100%);
+  box-shadow: 0 -18px 46px rgba(2,44,43,.2), inset 0 1px 0 #fff;
+}
+.ssw-product-sheet__handle {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 11px;
+  border-radius: 999px;
+  background: rgba(13,148,136,.24);
+}
+.ssw-product-sheet__close {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(13,148,136,.12);
+  border-radius: 50%;
+  color: #64748b;
+  background: rgba(255,255,255,.82);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-product-sheet__close:active {
+  transform: scale(.94);
+}
+.ssw-product-sheet__header {
+  padding: 0 44px 0 4px;
+  margin-bottom: 12px;
+}
+.ssw-product-sheet__title {
+  margin: 0 0 3px;
+  color: #134e4a;
+  font-size: 1.02rem;
+  font-weight: 900;
+}
+.ssw-product-sheet__hint {
+  margin: 0;
+  color: #64748b;
+  font-size: .7rem;
+  font-weight: 700;
+}
+.ssw-product-sheet__search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.ssw-product-sheet__search-icon {
+  position: absolute;
+  inset-inline-start: 12px;
+  display: grid;
+  place-items: center;
+  color: #0f766e;
+  pointer-events: none;
+}
+.ssw-product-sheet__search-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.ssw-product-sheet__search {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 40px 10px 12px;
+  border: 1px solid rgba(13,148,136,.16);
+  border-radius: 14px;
+  outline: none;
+  color: #134e4a;
+  background: rgba(255,255,255,.92);
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 14px rgba(15,118,110,.05);
+}
+.ssw-product-sheet__search::placeholder {
+  color: #94a3b8;
+}
+.ssw-product-sheet__search:focus {
+  border-color: rgba(5,150,105,.5);
+  box-shadow: 0 0 0 3px rgba(16,185,129,.11);
+}
+.ssw-product-sheet__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  padding: 1px 1px 2px 5px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.ssw-product-sheet__list .ssw-modal__product-card {
+  min-height: 72px;
+}
+@media (min-width:640px) {
+  .ssw-product-sheet {
+    align-items: center;
+    padding: 24px;
+  }
+  .ssw-product-sheet__dialog {
+    max-height: min(76vh, 720px);
+    border-bottom: 1px solid rgba(255,255,255,.78);
+    border-radius: 24px;
+  }
+}
+
 .ssw-guide-modal {
   --ssw-accent: #a78bfa;
   --ssw-accent-dark: #8b5cf6;
@@ -3671,6 +3902,7 @@ body.ssw-modal-open .hamburger-menu {
     arrowLeft: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
     creditCard: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
     close: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    search: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`,
     emptyBox: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`
   };
 
@@ -3744,10 +3976,10 @@ body.ssw-modal-open .hamburger-menu {
               <span class="ssw-modal__product-picker-icon" aria-hidden="true">${icons.emptyBox}</span>
               <div class="ssw-modal__product-picker-copy">
                 <h4 class="ssw-modal__product-picker-title" id="similar-sponsored-product-picker-title">انتخاب کالا برای تبلیغ</h4>
-                <span class="ssw-modal__product-picker-hint">یکی از کالاهای فعال فروشگاه را برای تبلیغ انتخاب کنید</span>
+                <span class="ssw-modal__product-picker-hint">کالای انتخابی شما برای این درخواست</span>
               </div>
             </div>
-            <div class="ssw-modal__product-list" id="similar-sponsored-product-list" role="listbox" tabindex="-1" aria-labelledby="similar-sponsored-product-picker-title" aria-describedby="similar-sponsored-product-error"></div>
+            <div class="ssw-modal__product-summary" id="similar-sponsored-product-summary" aria-live="polite"></div>
             <p class="ssw-modal__product-error" id="similar-sponsored-product-error" role="alert" hidden>لطفاً یک کالا را برای تبلیغ انتخاب کنید.</p>
           </section>
 
@@ -3782,6 +4014,24 @@ body.ssw-modal-open .hamburger-menu {
             <button type="button" class="ssw-modal__cancel" data-similar-sponsored-close>انصراف</button>
           </div>
         </form>
+      </div>
+
+      <div class="ssw-product-sheet" id="similar-sponsored-product-sheet" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-product-sheet-title">
+        <section class="ssw-product-sheet__dialog" role="document">
+          <span class="ssw-product-sheet__handle" aria-hidden="true"></span>
+          <button type="button" class="ssw-product-sheet__close" data-similar-sponsored-product-picker-close aria-label="بستن انتخاب کالا">
+            ${icons.close}
+          </button>
+          <header class="ssw-product-sheet__header">
+            <h3 class="ssw-product-sheet__title" id="similar-sponsored-product-sheet-title">انتخاب کالا</h3>
+            <p class="ssw-product-sheet__hint">کالای موردنظر را برای تبلیغ انتخاب کنید</p>
+          </header>
+          <label class="ssw-product-sheet__search-wrap">
+            <span class="ssw-product-sheet__search-icon" aria-hidden="true">${icons.search}</span>
+            <input type="search" class="ssw-product-sheet__search" id="similar-sponsored-product-search" placeholder="جستجوی کالا..." autocomplete="off">
+          </label>
+          <div class="ssw-modal__product-list ssw-product-sheet__list" id="similar-sponsored-product-list" role="listbox" tabindex="-1" aria-labelledby="similar-sponsored-product-sheet-title"></div>
+        </section>
       </div>
 
       <div class="ssw-guide-modal" id="similar-sponsored-guide-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-guide-title">
@@ -4203,14 +4453,73 @@ body.ssw-modal-open .hamburger-menu {
     submitButton.disabled = state.submitting || (!isResult && !state.selectedProduct);
   }
 
-  function renderProductPicker(products) {
-    state.availableProducts = getAvailableProducts(products);
+  function productMediaMarkup(product) {
+    const hasImage = product.image && product.image !== '/assets/images/placeholder-product.svg';
+    return `
+      <span class="ssw-modal__product-media${hasImage ? '' : ' is-placeholder'}">
+        <img
+          class="ssw-modal__product-thumb"
+          src="${escapeHtml(product.image)}"
+          alt=""
+          onerror="this.parentElement.classList.add('is-placeholder')">
+        <span class="ssw-modal__product-placeholder" aria-hidden="true">${icons.emptyBox}</span>
+      </span>
+    `;
+  }
+
+  function renderProductSummary() {
+    const summary = document.getElementById('similar-sponsored-product-summary');
+    if (!summary) return;
+
+    if (!state.availableProducts.length) {
+      summary.innerHTML = `
+        <div class="ssw-modal__product-summary-empty">
+          <span class="ssw-modal__product-summary-empty-icon" aria-hidden="true">${icons.emptyBox}</span>
+          <strong>کالایی برای انتخاب وجود ندارد</strong>
+          <span>ابتدا یک کالای فعال در فروشگاه ثبت کنید</span>
+        </div>
+      `;
+      return;
+    }
+
+    if (!state.selectedProduct) {
+      summary.innerHTML = `
+        <div class="ssw-modal__product-summary-empty">
+          <span class="ssw-modal__product-summary-empty-icon" aria-hidden="true">${icons.emptyBox}</span>
+          <strong>هنوز کالایی انتخاب نشده</strong>
+          <button type="button" class="ssw-modal__product-summary-action" data-similar-sponsored-product-picker-open>
+            انتخاب کالا
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const product = state.selectedProduct;
+    summary.innerHTML = `
+      <div class="ssw-modal__product-summary-card">
+        ${productMediaMarkup(product)}
+        <span class="ssw-modal__product-copy">
+          <strong class="ssw-modal__product-title">${escapeHtml(product.title)}</strong>
+          <span class="ssw-modal__product-meta">
+            <span class="ssw-modal__product-price">${formatMoney(product.price)} تومان</span>
+            ${product.status ? `<span class="ssw-modal__product-status">${escapeHtml(product.status)}</span>` : ''}
+          </span>
+        </span>
+        <button type="button" class="ssw-modal__product-summary-change" data-similar-sponsored-product-picker-open>
+          تغییر کالا
+        </button>
+      </div>
+    `;
+  }
+
+  function renderProductPickerList(query = '') {
     const list = document.getElementById('similar-sponsored-product-list');
     if (!list) return;
-
-    if (state.selectedProduct && !state.availableProducts.some((item) => item.id === state.selectedProduct.id)) {
-      state.selectedProduct = null;
-    }
+    const normalizedQuery = String(query).trim().toLocaleLowerCase('fa-IR');
+    const products = normalizedQuery
+      ? state.availableProducts.filter((product) => product.title.toLocaleLowerCase('fa-IR').includes(normalizedQuery))
+      : state.availableProducts;
 
     if (!state.availableProducts.length) {
       list.innerHTML = `
@@ -4219,14 +4528,21 @@ body.ssw-modal-open .hamburger-menu {
           <strong>برای ثبت تبلیغ ابتدا یک کالا ثبت کنید</strong>
         </div>
       `;
-      setProductError('');
-      updateModalSubmitAvailability();
       return;
     }
 
-    list.innerHTML = state.availableProducts.map((product) => {
+    if (!products.length) {
+      list.innerHTML = `
+        <div class="ssw-modal__product-empty" role="status">
+          ${icons.search}
+          <strong>کالایی با این عبارت پیدا نشد</strong>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = products.map((product) => {
       const selected = state.selectedProduct?.id === product.id;
-      const hasImage = product.image && product.image !== '/assets/images/placeholder-product.svg';
       return `
         <button
           type="button"
@@ -4234,14 +4550,7 @@ body.ssw-modal-open .hamburger-menu {
           data-similar-sponsored-product="${escapeHtml(product.id)}"
           role="option"
           aria-selected="${selected ? 'true' : 'false'}">
-          <span class="ssw-modal__product-media${hasImage ? '' : ' is-placeholder'}">
-            <img
-              class="ssw-modal__product-thumb"
-              src="${escapeHtml(product.image)}"
-              alt=""
-              onerror="this.parentElement.classList.add('is-placeholder')">
-            <span class="ssw-modal__product-placeholder" aria-hidden="true">${icons.emptyBox}</span>
-          </span>
+          ${productMediaMarkup(product)}
           <span class="ssw-modal__product-copy">
             <strong class="ssw-modal__product-title">${escapeHtml(product.title)}</strong>
             <span class="ssw-modal__product-meta">
@@ -4253,23 +4562,53 @@ body.ssw-modal-open .hamburger-menu {
         </button>
       `;
     }).join('');
+  }
+
+  function renderProductPicker(products) {
+    state.availableProducts = getAvailableProducts(products);
+    if (state.selectedProduct && !state.availableProducts.some((item) => item.id === state.selectedProduct.id)) {
+      state.selectedProduct = null;
+    }
+    const searchInput = document.getElementById('similar-sponsored-product-search');
+    renderProductSummary();
+    renderProductPickerList(searchInput?.value || '');
+    setProductError('');
     updateModalSubmitAvailability();
   }
 
   function selectProduct(productId) {
     state.selectedProduct = state.availableProducts.find((item) => item.id === productId) || null;
     setProductError('');
-    const cards = document.querySelectorAll('[data-similar-sponsored-product]');
-    if (!cards.length) {
-      renderProductPicker(state.availableProducts);
-      return;
-    }
-    cards.forEach((card) => {
-      const selected = card.dataset.similarSponsoredProduct === productId;
-      card.classList.toggle('is-selected', selected);
-      card.setAttribute('aria-selected', selected ? 'true' : 'false');
-    });
+    renderProductSummary();
+    renderProductPickerList(document.getElementById('similar-sponsored-product-search')?.value || '');
     updateModalSubmitAvailability();
+    closeProductPicker();
+  }
+
+  function openProductPicker() {
+    if (!state.availableProducts.length) return;
+    const sheet = document.getElementById('similar-sponsored-product-sheet');
+    const modal = document.getElementById('similar-sponsored-modal');
+    const searchInput = document.getElementById('similar-sponsored-product-search');
+    if (!sheet) return;
+    if (searchInput) searchInput.value = '';
+    renderProductPickerList();
+    sheet.hidden = false;
+    modal?.setAttribute('aria-hidden', 'true');
+    document.body?.classList.add('ssw-product-sheet-open');
+    window.setTimeout(() => searchInput?.focus(), 0);
+  }
+
+  function closeProductPicker({ restoreFocus = true } = {}) {
+    const sheet = document.getElementById('similar-sponsored-product-sheet');
+    const modal = document.getElementById('similar-sponsored-modal');
+    if (!sheet || sheet.hidden) return;
+    sheet.hidden = true;
+    modal?.removeAttribute('aria-hidden');
+    document.body?.classList.remove('ssw-product-sheet-open');
+    if (restoreFocus) {
+      window.setTimeout(() => document.querySelector('[data-similar-sponsored-product-picker-open]')?.focus(), 0);
+    }
   }
 
   function resetModalState() {
@@ -4361,6 +4700,7 @@ body.ssw-modal-open .hamburger-menu {
   function closeModal() {
     const modal = document.getElementById('similar-sponsored-modal');
     const form = document.getElementById('similar-sponsored-form');
+    closeProductPicker({ restoreFocus: false });
     if (form) form.reset();
     if (modal) modal.hidden = true;
     if (typeof document !== 'undefined' && document.body) {
@@ -4461,7 +4801,7 @@ body.ssw-modal-open .hamburger-menu {
     if (title) title.textContent = 'ثبت درخواست تبلیغ';
     if (!state.selectedProduct) {
       setProductError('لطفاً یک کالا را برای تبلیغ انتخاب کنید.');
-      document.getElementById('similar-sponsored-product-list')?.focus?.();
+      document.querySelector('[data-similar-sponsored-product-picker-open]')?.focus?.();
       updateModalSubmitAvailability();
       return;
     }
@@ -4620,6 +4960,15 @@ body.ssw-modal-open .hamburger-menu {
       if (!button) return;
       selectProduct(button.dataset.similarSponsoredProduct);
     });
+    document.getElementById('similar-sponsored-product-summary')?.addEventListener('click', (event) => {
+      if (event.target.closest('[data-similar-sponsored-product-picker-open]')) openProductPicker();
+    });
+    document.getElementById('similar-sponsored-product-search')?.addEventListener('input', (event) => {
+      renderProductPickerList(event.target.value);
+    });
+    document.querySelectorAll('[data-similar-sponsored-product-picker-close]').forEach((button) => {
+      button.addEventListener('click', () => closeProductPicker());
+    });
     document.addEventListener('products:updated', (event) => {
       renderProductPicker(event.detail?.products);
     });
@@ -4632,6 +4981,9 @@ body.ssw-modal-open .hamburger-menu {
     document.getElementById('similar-sponsored-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-modal') closeModal();
     });
+    document.getElementById('similar-sponsored-product-sheet')?.addEventListener('click', (event) => {
+      if (event.target.id === 'similar-sponsored-product-sheet') closeProductPicker();
+    });
     document.getElementById('similar-sponsored-guide-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-guide-modal') closeGuideModal();
     });
@@ -4639,7 +4991,12 @@ body.ssw-modal-open .hamburger-menu {
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const modal = document.getElementById('similar-sponsored-modal');
+        const productSheet = document.getElementById('similar-sponsored-product-sheet');
         const guideModal = document.getElementById('similar-sponsored-guide-modal');
+        if (productSheet && !productSheet.hidden) {
+          closeProductPicker();
+          return;
+        }
         if (guideModal && !guideModal.hidden) {
           closeGuideModal();
           return;
