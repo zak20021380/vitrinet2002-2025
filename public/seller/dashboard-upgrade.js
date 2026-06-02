@@ -1263,6 +1263,189 @@ function getEffectivePlanPrice(plan, adPriceMap) {
 // زکی – نسخه نهایی با پاپ‌آپ تأیید پرداخت پلن اشتراک و تبلیغ
 // زکی – نسخه نهایی selectPlan با تشخیص تبلیغ و بازکردن مدال تبلیغ ویژه
 
+let subscriptionCheckoutSimulationTimer = null;
+
+function getSubscriptionCheckoutDetails(slug) {
+  const defaults = PLAN_DEFAULTS[slug] || {};
+  const planData = subscriptionPlanStore[slug] || {};
+  const card = document.querySelector(`[data-plan-card="${slug}"]`);
+  const durationDays = planData.durationDays ?? defaults.durationDays;
+  const title = planData.title ?? defaults.title ?? slug;
+  const features = (Array.isArray(planData.features) && planData.features.length)
+    ? planData.features
+    : (Array.isArray(defaults.features) ? defaults.features : []);
+  let price = planData.price != null ? Number(planData.price) : Number(defaults.price ?? 0);
+
+  if (!price) {
+    const cardPrice = card?.querySelector(`[data-plan-price="${slug}"]`)?.textContent
+      || document.getElementById(`price-${slug}`)?.textContent
+      || '';
+    price = Number(faToEn(cardPrice).replace(/,/g, '')) || 0;
+  }
+
+  return {
+    slug,
+    title,
+    duration: durationDays ? `${toFaDigits(durationDays)} روز اعتبار` : 'مدت اشتراک',
+    price: price ? `${toFaPrice(price)} تومان` : 'قیمت ثبت نشده',
+    features
+  };
+}
+
+function closeSubscriptionCheckout(force = false) {
+  const overlay = document.getElementById('subscriptionCheckoutSheet');
+  if (!overlay || (!force && overlay.dataset.state === 'loading')) return;
+
+  clearTimeout(subscriptionCheckoutSimulationTimer);
+  subscriptionCheckoutSimulationTimer = null;
+  overlay.classList.remove('is-open');
+  overlay.classList.add('is-closing');
+  document.body.classList.remove('subscription-checkout-open');
+  document.removeEventListener('keydown', overlay._escapeHandler);
+
+  const returnFocus = overlay._returnFocus;
+  setTimeout(() => {
+    overlay.remove();
+    returnFocus?.focus?.();
+  }, 280);
+}
+
+function setSubscriptionCheckoutState(overlay, state) {
+  overlay.dataset.state = state;
+  overlay.querySelector('[data-checkout-panel="review"]').hidden = state !== 'review';
+  overlay.querySelector('[data-checkout-panel="loading"]').hidden = state !== 'loading';
+  overlay.querySelector('[data-checkout-panel="success"]').hidden = state !== 'success';
+
+  if (state === 'success') {
+    overlay.querySelector('[data-sub-checkout-finish]')?.focus();
+  }
+}
+
+window.openSubscriptionCheckout = function(slug) {
+  closeSubscriptionCheckout(true);
+
+  const details = getSubscriptionCheckoutDetails(slug);
+  const overlay = document.createElement('div');
+  overlay.id = 'subscriptionCheckoutSheet';
+  overlay.className = 'subscription-checkout';
+  overlay.dataset.state = 'review';
+  overlay.innerHTML = `
+    <div class="subscription-checkout__backdrop"></div>
+    <section class="subscription-checkout__sheet" role="dialog" aria-modal="true" aria-labelledby="subscriptionCheckoutTitle" aria-describedby="subscriptionCheckoutDescription">
+      <div class="subscription-checkout__handle" aria-hidden="true"></div>
+      <button type="button" class="subscription-checkout__close" data-sub-checkout-close aria-label="بستن">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <div class="subscription-checkout__panel" data-checkout-panel="review">
+        <header class="subscription-checkout__header">
+          <div class="subscription-checkout__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7l2-3h12l2 3M4 7v12a1 1 0 001 1h14a1 1 0 001-1V7"/>
+              <path d="M4 7c0 1.5 1.5 2.7 3 2.7S10 8.5 10 7c0 1.5 1.5 2.7 3 2.7S16 8.5 16 7c0 1.5 1.5 2.7 3 2.7"/>
+              <path d="M9 20v-6h6v6"/>
+            </svg>
+          </div>
+          <p class="subscription-checkout__eyebrow">خرید اشتراک فروشگاه</p>
+          <h2 class="subscription-checkout__title" id="subscriptionCheckoutTitle">تأیید و ادامه خرید</h2>
+          <p class="subscription-checkout__description" id="subscriptionCheckoutDescription">جزئیات پلن انتخابی را بررسی کنید.</p>
+        </header>
+
+        <div class="subscription-checkout__summary">
+          <div>
+            <span class="subscription-checkout__summary-label">پلن انتخابی</span>
+            <strong data-sub-checkout-title></strong>
+          </div>
+          <span class="subscription-checkout__duration" data-sub-checkout-duration></span>
+        </div>
+
+        <div class="subscription-checkout__price-box">
+          <span>مبلغ قابل پرداخت</span>
+          <strong data-sub-checkout-price></strong>
+        </div>
+
+        <div class="subscription-checkout__benefits">
+          <h3>مزایای این اشتراک</h3>
+          <ul data-sub-checkout-benefits></ul>
+        </div>
+
+        <p class="subscription-checkout__local-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          پرداخت در این نسخه به‌صورت آزمایشی و محلی شبیه‌سازی می‌شود.
+        </p>
+
+        <div class="subscription-checkout__actions">
+          <button type="button" class="subscription-checkout__primary" data-sub-checkout-continue>
+            <span>ادامه خرید</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <button type="button" class="subscription-checkout__secondary" data-sub-checkout-close>انصراف</button>
+        </div>
+      </div>
+
+      <div class="subscription-checkout__panel subscription-checkout__status" data-checkout-panel="loading" hidden>
+        <div class="subscription-checkout__spinner" aria-hidden="true"></div>
+        <p class="subscription-checkout__eyebrow">در حال پردازش آزمایشی</p>
+        <h2 class="subscription-checkout__status-title">در حال آماده‌سازی اشتراک شما</h2>
+        <p class="subscription-checkout__status-copy">لطفاً چند لحظه صبر کنید...</p>
+      </div>
+
+      <div class="subscription-checkout__panel subscription-checkout__status" data-checkout-panel="success" hidden>
+        <div class="subscription-checkout__success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p class="subscription-checkout__eyebrow">عملیات آزمایشی موفق</p>
+        <h2 class="subscription-checkout__status-title">خرید با موفقیت شبیه‌سازی شد</h2>
+        <p class="subscription-checkout__status-copy"><strong data-sub-checkout-success-title></strong> برای فروشگاه شما آماده شد.</p>
+        <button type="button" class="subscription-checkout__primary subscription-checkout__primary--finish" data-sub-checkout-finish>متوجه شدم</button>
+      </div>
+    </section>
+  `;
+
+  overlay._returnFocus = document.activeElement;
+  overlay.querySelector('[data-sub-checkout-title]').textContent = details.title;
+  overlay.querySelector('[data-sub-checkout-success-title]').textContent = details.title;
+  overlay.querySelector('[data-sub-checkout-duration]').textContent = details.duration;
+  overlay.querySelector('[data-sub-checkout-price]').textContent = details.price;
+
+  const benefitsList = overlay.querySelector('[data-sub-checkout-benefits]');
+  const benefits = details.features.length ? details.features : ['فعال‌سازی امکانات اشتراک فروشگاه'];
+  benefits.forEach(benefit => {
+    const item = document.createElement('li');
+    item.innerHTML = '<span aria-hidden="true">✓</span>';
+    item.appendChild(document.createTextNode(benefit));
+    benefitsList.appendChild(item);
+  });
+
+  overlay.querySelectorAll('[data-sub-checkout-close]').forEach(button => {
+    button.addEventListener('click', () => closeSubscriptionCheckout());
+  });
+  overlay.querySelector('[data-sub-checkout-finish]').addEventListener('click', () => closeSubscriptionCheckout());
+  overlay.querySelector('[data-sub-checkout-continue]').addEventListener('click', () => {
+    setSubscriptionCheckoutState(overlay, 'loading');
+    subscriptionCheckoutSimulationTimer = setTimeout(() => {
+      subscriptionCheckoutSimulationTimer = null;
+      setSubscriptionCheckoutState(overlay, 'success');
+    }, 1500);
+  });
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay || event.target.classList.contains('subscription-checkout__backdrop')) {
+      closeSubscriptionCheckout();
+    }
+  });
+  overlay._escapeHandler = event => {
+    if (event.key === 'Escape') closeSubscriptionCheckout();
+  };
+
+  document.body.appendChild(overlay);
+  document.body.classList.add('subscription-checkout-open');
+  document.addEventListener('keydown', overlay._escapeHandler);
+  requestAnimationFrame(() => {
+    overlay.classList.add('is-open');
+    overlay.querySelector('[data-sub-checkout-continue]')?.focus();
+  });
+};
+
 window.selectPlan = async function (slug) {
   if (slug === 'ad_search' || slug === 'ad_home' || slug === 'ad_products') {
     window.openAdModal(slug);
@@ -1271,6 +1454,10 @@ window.selectPlan = async function (slug) {
 
   // Check if this is a subscription plan (cash-only)
   const isSubscriptionPlan = SUBSCRIPTION_PLAN_SLUGS.includes(slug);
+  if (isSubscriptionPlan) {
+    window.openSubscriptionCheckout(slug);
+    return;
+  }
 
   const defaults = PLAN_DEFAULTS[slug] || {};
   const fallbackBadge = defaults.badge ? {
@@ -1405,24 +1592,11 @@ window.selectPlan = async function (slug) {
   modal.querySelector('#closePaymentModalBtn').onclick = closeModal;
   modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
-  modal.querySelector('#goToPaymentBtn').onclick = async function() {
+  modal.querySelector('#goToPaymentBtn').onclick = function() {
     closeModal();
-    try {
-      const res = await fetch(`${API_BASE}/seller/upgrade`, withCreds({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSlug: slug })
-      }));
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showToast('اشتراک شما با موفقیت فعال شد.');
-        updatePremiumBadge(data.seller?.isPremium);
-      } else {
-        showToast(data.message || 'خطا در پرداخت', true);
-      }
-    } catch (err) {
-      showToast('خطا در ارتباط با سرور', true);
-    }
+    setTimeout(() => {
+      showToast('خرید آزمایشی با موفقیت شبیه‌سازی شد.');
+    }, 1500);
   };
 };
 
