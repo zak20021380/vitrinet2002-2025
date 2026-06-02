@@ -23,6 +23,10 @@
     plans: [],
     requests: [],
     selectedPlan: null,
+    availableProducts: [],
+    selectedProduct: null,
+    lastSubmittedProduct: null,
+    lastSubmissionPayload: null,
     planVersion: null,
     lastLoadedAt: 0,
     loadPromise: null,
@@ -131,6 +135,57 @@
     const num = Number(value);
     if (!Number.isFinite(num)) return '۰';
     return num.toLocaleString('fa-IR');
+  }
+
+  const MOCK_PRODUCTS = [
+    {
+      id: 'mock-product-1',
+      title: 'کفش روزمره مدل کلاسیک',
+      price: 1290000,
+      image: '/assets/images/placeholder-product.svg',
+      status: 'موجود'
+    },
+    {
+      id: 'mock-product-2',
+      title: 'کیف دوشی مینیمال',
+      price: 890000,
+      image: '/assets/images/placeholder-product.svg',
+      status: 'موجود'
+    },
+    {
+      id: 'mock-product-3',
+      title: 'ساعت مچی اسپرت',
+      price: 1750000,
+      image: '/assets/images/placeholder-product.svg',
+      status: 'موجود'
+    }
+  ];
+
+  function normaliseProduct(product, index = 0) {
+    if (!product) return null;
+    const id = product._id || product.id || `modal-product-${index + 1}`;
+    const images = Array.isArray(product.images) ? product.images : [];
+    const mainImageIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
+    const image = images[mainImageIndex] || images[0] || product.image || '/assets/images/placeholder-product.svg';
+    const status = product.status
+      || (product.inStock === false ? 'ناموجود' : '')
+      || (product.active === false ? 'غیرفعال' : '')
+      || (product.inStock === true ? 'موجود' : '');
+
+    return {
+      id: String(id),
+      title: String(product.title || product.name || 'کالای بدون نام'),
+      price: Number(product.price) || 0,
+      image: String(image),
+      status: String(status || '')
+    };
+  }
+
+  function getAvailableProducts(products) {
+    const source = Array.isArray(products)
+      ? products
+      : (Array.isArray(window._allProducts) ? window._allProducts : MOCK_PRODUCTS);
+    return source.map(normaliseProduct).filter(Boolean);
   }
 
   function formatDate(value) {
@@ -1641,6 +1696,152 @@ body.ssw-modal-open .hamburger-menu {
   color: #0f766e;
   font-weight: 800;
 }
+.ssw-modal__product-picker {
+  margin-bottom: 1rem;
+}
+.ssw-modal__product-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  margin-bottom: .5rem;
+}
+.ssw-modal__product-picker-title {
+  margin: 0;
+  color: #134e4a;
+  font-size: .78rem;
+  font-weight: 900;
+}
+.ssw-modal__product-picker-hint {
+  color: #64748b;
+  font-size: .66rem;
+  font-weight: 700;
+}
+.ssw-modal__product-list {
+  display: grid;
+  gap: .45rem;
+  max-height: 228px;
+  overflow-y: auto;
+  padding: .12rem .08rem .12rem .18rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13,148,136,.26) transparent;
+}
+.ssw-modal__product-list::-webkit-scrollbar { width: 5px; }
+.ssw-modal__product-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(13,148,136,.26);
+}
+.ssw-modal__product-card {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  width: 100%;
+  padding: .56rem;
+  border: 1px solid rgba(15,118,110,.13);
+  border-radius: 14px;
+  background: rgba(255,255,255,.76);
+  color: #134e4a;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssw-modal__product-card:hover {
+  border-color: rgba(13,148,136,.32);
+  background: rgba(240,253,250,.94);
+}
+.ssw-modal__product-card:active { transform: scale(.992); }
+.ssw-modal__product-card.is-selected {
+  border-color: rgba(5,150,105,.72);
+  background: linear-gradient(135deg, rgba(209,250,229,.94), rgba(240,253,250,.96));
+  box-shadow: 0 6px 16px rgba(5,150,105,.1), inset 0 0 0 1px rgba(16,185,129,.13);
+}
+.ssw-modal__product-thumb {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 11px;
+  object-fit: cover;
+  border: 1px solid rgba(15,118,110,.1);
+  background: #ecfdf5;
+}
+.ssw-modal__product-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: .18rem;
+}
+.ssw-modal__product-title {
+  overflow: hidden;
+  color: #134e4a;
+  font-size: .76rem;
+  font-weight: 900;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ssw-modal__product-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .25rem .4rem;
+  color: #64748b;
+  font-size: .67rem;
+  font-weight: 750;
+}
+.ssw-modal__product-price { color: #047857; }
+.ssw-modal__product-status {
+  padding: .1rem .34rem;
+  border-radius: 999px;
+  color: #0f766e;
+  background: rgba(204,251,241,.78);
+}
+.ssw-modal__product-check {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border: 1px solid rgba(13,148,136,.18);
+  border-radius: 50%;
+  color: transparent;
+  background: rgba(255,255,255,.82);
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+.ssw-modal__product-check svg { width: 12px; height: 12px; }
+.ssw-modal__product-card.is-selected .ssw-modal__product-check {
+  border-color: #059669;
+  color: #ffffff;
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+.ssw-modal__product-empty {
+  display: grid;
+  justify-items: center;
+  gap: .42rem;
+  padding: .9rem .75rem;
+  border: 1px dashed rgba(13,148,136,.25);
+  border-radius: 14px;
+  color: #475569;
+  background: rgba(240,253,250,.72);
+  text-align: center;
+}
+.ssw-modal__product-empty svg {
+  width: 22px;
+  height: 22px;
+  color: #0f766e;
+}
+.ssw-modal__product-empty strong {
+  color: #134e4a;
+  font-size: .75rem;
+}
+.ssw-modal__product-error {
+  margin: .42rem .1rem 0;
+  color: #dc2626;
+  font-size: .69rem;
+  font-weight: 800;
+}
+.ssw-modal__product-error[hidden] { display: none; }
 .ssw-modal__section-title {
   padding-inline: 0;
   color: #64748b;
@@ -3099,6 +3300,16 @@ body.ssw-modal-open .hamburger-menu {
             </div>
           </div>
 
+          <!-- Product / Listing Picker -->
+          <section class="ssw-modal__product-picker ssw-modal__confirm" aria-labelledby="similar-sponsored-product-picker-title">
+            <div class="ssw-modal__product-picker-head">
+              <h4 class="ssw-modal__product-picker-title" id="similar-sponsored-product-picker-title">انتخاب کالا برای تبلیغ</h4>
+              <span class="ssw-modal__product-picker-hint">یک مورد را انتخاب کنید</span>
+            </div>
+            <div class="ssw-modal__product-list" id="similar-sponsored-product-list" role="listbox" tabindex="-1" aria-labelledby="similar-sponsored-product-picker-title" aria-describedby="similar-sponsored-product-error"></div>
+            <p class="ssw-modal__product-error" id="similar-sponsored-product-error" role="alert" hidden>لطفاً یک کالا را برای تبلیغ انتخاب کنید.</p>
+          </section>
+
           <!-- Payment Method -->
           <div class="ssw-modal__section ssw-modal__confirm" role="group" aria-label="ثبت درخواست">
             <span class="ssw-modal__section-title">فرایند ثبت</span>
@@ -3535,11 +3746,80 @@ body.ssw-modal-open .hamburger-menu {
     if (submitText) submitText.textContent = label;
   }
 
+  function setProductError(message = '') {
+    const error = document.getElementById('similar-sponsored-product-error');
+    if (!error) return;
+    error.textContent = message;
+    error.hidden = !message;
+  }
+
+  function updateModalSubmitAvailability() {
+    const dialog = document.getElementById('similar-sponsored-form');
+    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
+    if (!submitButton) return;
+    const isResult = dialog?.classList.contains('is-success') || dialog?.classList.contains('is-error');
+    submitButton.disabled = state.submitting || (!isResult && !state.selectedProduct);
+  }
+
+  function renderProductPicker(products) {
+    state.availableProducts = getAvailableProducts(products);
+    const list = document.getElementById('similar-sponsored-product-list');
+    if (!list) return;
+
+    if (state.selectedProduct && !state.availableProducts.some((item) => item.id === state.selectedProduct.id)) {
+      state.selectedProduct = null;
+    }
+
+    if (!state.availableProducts.length) {
+      list.innerHTML = `
+        <div class="ssw-modal__product-empty" role="status">
+          ${icons.emptyBox}
+          <strong>برای ثبت تبلیغ ابتدا یک کالا ثبت کنید</strong>
+        </div>
+      `;
+      setProductError('');
+      updateModalSubmitAvailability();
+      return;
+    }
+
+    list.innerHTML = state.availableProducts.map((product) => {
+      const selected = state.selectedProduct?.id === product.id;
+      return `
+        <button
+          type="button"
+          class="ssw-modal__product-card${selected ? ' is-selected' : ''}"
+          data-similar-sponsored-product="${escapeHtml(product.id)}"
+          role="option"
+          aria-selected="${selected ? 'true' : 'false'}">
+          <img
+            class="ssw-modal__product-thumb"
+            src="${escapeHtml(product.image)}"
+            alt=""
+            onerror="this.src='/assets/images/placeholder-product.svg'">
+          <span class="ssw-modal__product-copy">
+            <strong class="ssw-modal__product-title">${escapeHtml(product.title)}</strong>
+            <span class="ssw-modal__product-meta">
+              <span class="ssw-modal__product-price">${formatMoney(product.price)} تومان</span>
+              ${product.status ? `<span class="ssw-modal__product-status">${escapeHtml(product.status)}</span>` : ''}
+            </span>
+          </span>
+          <span class="ssw-modal__product-check" aria-hidden="true">${icons.check}</span>
+        </button>
+      `;
+    }).join('');
+    updateModalSubmitAvailability();
+  }
+
+  function selectProduct(productId) {
+    state.selectedProduct = state.availableProducts.find((item) => item.id === productId) || null;
+    setProductError('');
+    renderProductPicker(state.availableProducts);
+  }
+
   function resetModalState() {
     const dialog = document.getElementById('similar-sponsored-form');
     const result = document.getElementById('similar-sponsored-result');
     const title = document.getElementById('ssw-modal-title');
-    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
     const cancelButton = document.querySelector('#similar-sponsored-form .ssw-modal__cancel');
 
     if (dialog) dialog.classList.remove('is-result', 'is-success', 'is-error');
@@ -3547,16 +3827,17 @@ body.ssw-modal-open .hamburger-menu {
       result.hidden = true;
       result.replaceChildren();
     }
+    state.selectedProduct = null;
+    setProductError('');
+    renderProductPicker();
     if (title) title.textContent = 'ثبت درخواست تبلیغ';
-    if (submitButton) submitButton.disabled = false;
     if (cancelButton) cancelButton.textContent = 'انصراف';
     setModalSubmitLabel('ثبت درخواست');
+    updateModalSubmitAvailability();
   }
 
   function setModalBusy(isBusy) {
     const dialog = document.getElementById('similar-sponsored-form');
-    const submitButton = document.querySelector('[data-similar-sponsored-submit]');
-    if (submitButton) submitButton.disabled = !!isBusy;
     if (isBusy) {
       setModalSubmitLabel('در حال ثبت درخواست...');
     } else if (dialog?.classList.contains('is-success')) {
@@ -3566,6 +3847,7 @@ body.ssw-modal-open .hamburger-menu {
     } else {
       setModalSubmitLabel('ثبت درخواست');
     }
+    updateModalSubmitAvailability();
   }
 
   function showModalResult(type, options = {}) {
@@ -3721,9 +4003,24 @@ body.ssw-modal-open .hamburger-menu {
       result.replaceChildren();
     }
     if (title) title.textContent = 'ثبت درخواست تبلیغ';
+    if (!state.selectedProduct) {
+      setProductError('لطفاً یک کالا را برای تبلیغ انتخاب کنید.');
+      document.getElementById('similar-sponsored-product-list')?.focus?.();
+      updateModalSubmitAvailability();
+      return;
+    }
     const formData = new FormData();
     formData.set('planTier', plan.tier);
     formData.set('durationUnit', plan.durationUnit);
+    formData.set('productId', state.selectedProduct.id);
+    formData.set('productTitle', state.selectedProduct.title);
+    formData.set('productPrice', String(state.selectedProduct.price));
+    state.lastSubmittedProduct = { ...state.selectedProduct };
+    state.lastSubmissionPayload = {
+      planTier: plan.tier,
+      durationUnit: plan.durationUnit,
+      selectedProduct: { ...state.selectedProduct }
+    };
     state.submitting = true;
     setModalBusy(true);
     setMessage('');
@@ -3862,6 +4159,14 @@ body.ssw-modal-open .hamburger-menu {
 
     document.getElementById('similar-sponsored-form')?.addEventListener('submit', submitRequest);
     document.querySelector('[data-similar-sponsored-submit]')?.addEventListener('click', handleSubmitAction);
+    document.getElementById('similar-sponsored-product-list')?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-similar-sponsored-product]');
+      if (!button) return;
+      selectProduct(button.dataset.similarSponsoredProduct);
+    });
+    document.addEventListener('products:updated', (event) => {
+      renderProductPicker(event.detail?.products);
+    });
     document.querySelector('[data-similar-sponsored-guide-select]')?.addEventListener('click', () => {
       const plan = state.guidePlan;
       closeGuideModal();
@@ -3913,6 +4218,12 @@ body.ssw-modal-open .hamburger-menu {
       getState: () => ({
         plans: [...state.plans],
         requests: [...state.requests],
+        availableProducts: [...state.availableProducts],
+        selectedProduct: state.selectedProduct ? { ...state.selectedProduct } : null,
+        lastSubmittedProduct: state.lastSubmittedProduct ? { ...state.lastSubmittedProduct } : null,
+        lastSubmissionPayload: state.lastSubmissionPayload
+          ? { ...state.lastSubmissionPayload, selectedProduct: { ...state.lastSubmissionPayload.selectedProduct } }
+          : null,
         version: state.planVersion,
         lastLoadedAt: state.lastLoadedAt
       }),
