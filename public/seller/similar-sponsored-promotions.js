@@ -1697,34 +1697,62 @@ body.ssw-modal-open .hamburger-menu {
   font-weight: 800;
 }
 .ssw-modal__product-picker {
-  margin-bottom: 1rem;
+  margin-bottom: 1.05rem;
+  padding: .78rem;
+  border: 1px solid rgba(13,148,136,.12);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(240,253,250,.72), rgba(255,255,255,.78));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 8px 20px rgba(15,118,110,.045);
 }
 .ssw-modal__product-picker-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: .65rem;
-  margin-bottom: .5rem;
+  gap: .58rem;
+  margin-bottom: .7rem;
+}
+.ssw-modal__product-picker-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 11px;
+  color: #047857;
+  background: linear-gradient(145deg, #d1fae5, #ccfbf1);
+  border: 1px solid rgba(16,185,129,.16);
+  box-shadow: 0 4px 10px rgba(5,150,105,.08);
+}
+.ssw-modal__product-picker-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.ssw-modal__product-picker-copy {
+  display: grid;
+  gap: .12rem;
+  min-width: 0;
 }
 .ssw-modal__product-picker-title {
   margin: 0;
   color: #134e4a;
-  font-size: .78rem;
+  font-size: .88rem;
   font-weight: 900;
+  line-height: 1.5;
 }
 .ssw-modal__product-picker-hint {
   color: #64748b;
-  font-size: .66rem;
+  font-size: .69rem;
   font-weight: 700;
+  line-height: 1.65;
 }
 .ssw-modal__product-list {
   display: grid;
-  gap: .45rem;
-  max-height: 228px;
+  gap: .58rem;
+  max-height: min(43vh, 296px);
   overflow-y: auto;
-  padding: .12rem .08rem .12rem .18rem;
+  padding: .08rem .02rem .12rem .2rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(13,148,136,.26) transparent;
+  overscroll-behavior: contain;
 }
 .ssw-modal__product-list::-webkit-scrollbar { width: 5px; }
 .ssw-modal__product-list::-webkit-scrollbar-thumb {
@@ -1734,50 +1762,86 @@ body.ssw-modal-open .hamburger-menu {
 .ssw-modal__product-card {
   display: flex;
   align-items: center;
-  gap: .65rem;
+  direction: rtl;
+  gap: .7rem;
   width: 100%;
-  padding: .56rem;
-  border: 1px solid rgba(15,118,110,.13);
-  border-radius: 14px;
-  background: rgba(255,255,255,.76);
+  min-height: 82px;
+  padding: .68rem .64rem;
+  border: 1.5px solid rgba(15,118,110,.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,.9);
   color: #134e4a;
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+  touch-action: manipulation;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .ssw-modal__product-card:hover {
-  border-color: rgba(13,148,136,.32);
-  background: rgba(240,253,250,.94);
+  border-color: rgba(13,148,136,.34);
+  background: rgba(248,255,253,.98);
 }
-.ssw-modal__product-card:active { transform: scale(.992); }
+.ssw-modal__product-card:focus-visible {
+  outline: 3px solid rgba(45,212,191,.3);
+  outline-offset: 2px;
+}
+.ssw-modal__product-card:active { transform: scale(.985); }
 .ssw-modal__product-card.is-selected {
-  border-color: rgba(5,150,105,.72);
-  background: linear-gradient(135deg, rgba(209,250,229,.94), rgba(240,253,250,.96));
-  box-shadow: 0 6px 16px rgba(5,150,105,.1), inset 0 0 0 1px rgba(16,185,129,.13);
+  border-color: rgba(5,150,105,.9);
+  background: linear-gradient(135deg, rgba(209,250,229,.94), rgba(240,253,250,.99));
+  box-shadow: 0 9px 20px rgba(5,150,105,.14), 0 0 0 2px rgba(16,185,129,.08);
+}
+.ssw-modal__product-media {
+  order: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(13,148,136,.14);
+  background: linear-gradient(145deg, #ecfdf5, #ccfbf1);
+  box-shadow: 0 4px 11px rgba(15,118,110,.09), inset 0 1px 0 rgba(255,255,255,.82);
 }
 .ssw-modal__product-thumb {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  border-radius: 11px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid rgba(15,118,110,.1);
-  background: #ecfdf5;
+}
+.ssw-modal__product-placeholder {
+  display: none;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #0f766e;
+  background: linear-gradient(145deg, #ecfdf5, #ccfbf1);
+}
+.ssw-modal__product-placeholder svg {
+  width: 23px;
+  height: 23px;
+}
+.ssw-modal__product-media.is-placeholder .ssw-modal__product-thumb { display: none; }
+.ssw-modal__product-media.is-placeholder .ssw-modal__product-placeholder { display: grid; }
+.ssw-modal__product-card.is-selected .ssw-modal__product-media {
+  border-color: rgba(5,150,105,.36);
+  box-shadow: 0 5px 13px rgba(5,150,105,.13), inset 0 1px 0 rgba(255,255,255,.86);
 }
 .ssw-modal__product-copy {
+  order: 2;
   display: grid;
   min-width: 0;
   flex: 1;
-  gap: .18rem;
+  gap: .34rem;
 }
 .ssw-modal__product-title {
   overflow: hidden;
   color: #134e4a;
-  font-size: .76rem;
+  font-size: .85rem;
   font-weight: 900;
-  line-height: 1.45;
+  line-height: 1.55;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1785,35 +1849,59 @@ body.ssw-modal-open .hamburger-menu {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: .25rem .4rem;
+  gap: .28rem .44rem;
   color: #64748b;
-  font-size: .67rem;
-  font-weight: 750;
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1.5;
 }
-.ssw-modal__product-price { color: #047857; }
+.ssw-modal__product-price {
+  color: #047857;
+  font-size: .75rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
 .ssw-modal__product-status {
-  padding: .1rem .34rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .22rem;
+  padding: .13rem .4rem;
   border-radius: 999px;
   color: #0f766e;
-  background: rgba(204,251,241,.78);
+  background: rgba(204,251,241,.92);
+  border: 1px solid rgba(13,148,136,.1);
+  font-size: .67rem;
+  font-weight: 850;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.ssw-modal__product-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16,185,129,.12);
 }
 .ssw-modal__product-check {
+  order: 3;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  border: 1px solid rgba(13,148,136,.18);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border: 1.5px solid rgba(13,148,136,.2);
   border-radius: 50%;
   color: transparent;
-  background: rgba(255,255,255,.82);
-  transition: border-color .2s ease, color .2s ease, background .2s ease;
+  background: rgba(255,255,255,.9);
+  transition: border-color .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease;
 }
-.ssw-modal__product-check svg { width: 12px; height: 12px; }
+.ssw-modal__product-check svg { width: 14px; height: 14px; }
 .ssw-modal__product-card.is-selected .ssw-modal__product-check {
   border-color: #059669;
   color: #ffffff;
   background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 10px rgba(5,150,105,.26);
 }
 .ssw-modal__product-empty {
   display: grid;
@@ -1918,14 +2006,22 @@ body.ssw-modal-open .hamburger-menu {
   border-color: rgba(248,113,113,.22);
 }
 .ssw-modal__submit {
+  min-height: 54px;
+  border-radius: 15px;
   border-color: rgba(5,150,105,.3);
   color: #ffffff;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 8px 18px rgba(5,150,105,.22), inset 0 1px 0 rgba(255,255,255,.18);
+  font-size: .94rem;
+  font-weight: 900;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.14), transparent 42%),
+    linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 10px 21px rgba(5,150,105,.25), inset 0 1px 0 rgba(255,255,255,.2);
 }
 .ssw-modal__submit:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  box-shadow: 0 11px 24px rgba(5,150,105,.28), inset 0 1px 0 rgba(255,255,255,.2);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.13), transparent 42%),
+    linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 13px 27px rgba(5,150,105,.3), inset 0 1px 0 rgba(255,255,255,.22);
 }
 .ssw-modal__cancel {
   color: #64748b;
@@ -3303,8 +3399,11 @@ body.ssw-modal-open .hamburger-menu {
           <!-- Product / Listing Picker -->
           <section class="ssw-modal__product-picker ssw-modal__confirm" aria-labelledby="similar-sponsored-product-picker-title">
             <div class="ssw-modal__product-picker-head">
-              <h4 class="ssw-modal__product-picker-title" id="similar-sponsored-product-picker-title">انتخاب کالا برای تبلیغ</h4>
-              <span class="ssw-modal__product-picker-hint">یک مورد را انتخاب کنید</span>
+              <span class="ssw-modal__product-picker-icon" aria-hidden="true">${icons.emptyBox}</span>
+              <div class="ssw-modal__product-picker-copy">
+                <h4 class="ssw-modal__product-picker-title" id="similar-sponsored-product-picker-title">انتخاب کالا برای تبلیغ</h4>
+                <span class="ssw-modal__product-picker-hint">یکی از کالاهای فعال فروشگاه را برای تبلیغ انتخاب کنید</span>
+              </div>
             </div>
             <div class="ssw-modal__product-list" id="similar-sponsored-product-list" role="listbox" tabindex="-1" aria-labelledby="similar-sponsored-product-picker-title" aria-describedby="similar-sponsored-product-error"></div>
             <p class="ssw-modal__product-error" id="similar-sponsored-product-error" role="alert" hidden>لطفاً یک کالا را برای تبلیغ انتخاب کنید.</p>
@@ -3784,6 +3883,7 @@ body.ssw-modal-open .hamburger-menu {
 
     list.innerHTML = state.availableProducts.map((product) => {
       const selected = state.selectedProduct?.id === product.id;
+      const hasImage = product.image && product.image !== '/assets/images/placeholder-product.svg';
       return `
         <button
           type="button"
@@ -3791,11 +3891,14 @@ body.ssw-modal-open .hamburger-menu {
           data-similar-sponsored-product="${escapeHtml(product.id)}"
           role="option"
           aria-selected="${selected ? 'true' : 'false'}">
-          <img
-            class="ssw-modal__product-thumb"
-            src="${escapeHtml(product.image)}"
-            alt=""
-            onerror="this.src='/assets/images/placeholder-product.svg'">
+          <span class="ssw-modal__product-media${hasImage ? '' : ' is-placeholder'}">
+            <img
+              class="ssw-modal__product-thumb"
+              src="${escapeHtml(product.image)}"
+              alt=""
+              onerror="this.parentElement.classList.add('is-placeholder')">
+            <span class="ssw-modal__product-placeholder" aria-hidden="true">${icons.emptyBox}</span>
+          </span>
           <span class="ssw-modal__product-copy">
             <strong class="ssw-modal__product-title">${escapeHtml(product.title)}</strong>
             <span class="ssw-modal__product-meta">
