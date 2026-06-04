@@ -14555,3 +14555,344 @@ function getMissionCardsForPreview(tabType) {
 document.addEventListener('DOMContentLoaded', () => {
   initMissionsPanel();
 });
+
+(() => {
+  const READ_STORAGE_KEY = 'vitrinet_admin_notification_read_ids';
+  const MAX_BADGE_COUNT = 99;
+
+  const typeConfig = {
+    user: { icon: 'ri-user-add-line', label: 'کاربر' },
+    seller: { icon: 'ri-store-2-line', label: 'فروشنده' },
+    product: { icon: 'ri-box-3-line', label: 'محصول' },
+    service: { icon: 'ri-hand-heart-line', label: 'خدمات' },
+    campaign: { icon: 'ri-gift-line', label: 'کمپین' },
+    system_success: { icon: 'ri-checkbox-circle-line', label: 'سیستم' },
+    system_failed: { icon: 'ri-error-warning-line', label: 'سیستم' }
+  };
+
+  const createOffsetDate = (minutesAgo) => new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
+
+  // TODO: Replace this temporary marketplace event feed with a real admin notification API/store.
+  // Expected item shape: { id, type, title, description, createdAt, read }.
+  const getMockAdminNotifications = () => [
+    {
+      id: 'admin-event-user-registration',
+      type: 'user',
+      title: 'ثبت‌نام کاربر جدید',
+      description: 'یک کاربر تازه حساب خود را در ویترینت فعال کرده است.',
+      createdAt: createOffsetDate(8)
+    },
+    {
+      id: 'admin-event-seller-registration',
+      type: 'seller',
+      title: 'درخواست فروشنده جدید',
+      description: 'یک فروشنده برای بررسی و تکمیل اطلاعات فروشگاه ثبت‌نام کرده است.',
+      createdAt: createOffsetDate(22)
+    },
+    {
+      id: 'admin-event-product-created',
+      type: 'product',
+      title: 'محصول جدید ایجاد شد',
+      description: 'محصول تازه‌ای در بازار ثبت شده و آماده بازبینی محتوایی است.',
+      createdAt: createOffsetDate(48)
+    },
+    {
+      id: 'admin-event-service-request',
+      type: 'service',
+      title: 'درخواست دسته یا خدمت جدید',
+      description: 'یک فروشگاه خدماتی درخواست افزودن خدمت/دسته تازه ارسال کرده است.',
+      createdAt: createOffsetDate(95)
+    },
+    {
+      id: 'admin-event-campaign-activity',
+      type: 'campaign',
+      title: 'فعالیت جدید در کمپین جایزه',
+      description: 'کد جایزه جدیدی مصرف شده و ظرفیت کمپین نیاز به پایش دارد.',
+      createdAt: createOffsetDate(170),
+      read: true
+    },
+    {
+      id: 'admin-event-system-success',
+      type: 'system_success',
+      title: 'پردازش مدیریتی موفق',
+      description: 'همگام‌سازی شمارنده‌های داشبورد با موفقیت انجام شد.',
+      createdAt: createOffsetDate(260),
+      read: true
+    },
+    {
+      id: 'admin-event-system-failed',
+      type: 'system_failed',
+      title: 'خطای موقت در رویداد سیستمی',
+      description: 'یکی از پردازش‌های پس‌زمینه با خطا مواجه شد و نیاز به بررسی دارد.',
+      createdAt: createOffsetDate(390)
+    }
+  ];
+
+  function readStoredIds() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]');
+      return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch (error) {
+      console.warn('Failed to read admin notification state:', error);
+      return new Set();
+    }
+  }
+
+  function storeReadIds(ids) {
+    try {
+      localStorage.setItem(READ_STORAGE_KEY, JSON.stringify([...ids]));
+    } catch (error) {
+      console.warn('Failed to store admin notification state:', error);
+    }
+  }
+
+  function getRelativeTime(dateValue) {
+    const timestamp = new Date(dateValue).getTime();
+    const now = Date.now();
+    if (!Number.isFinite(timestamp)) return '';
+
+    const diffMinutes = Math.max(0, Math.round((now - timestamp) / 60000));
+    const formatter = new Intl.NumberFormat('fa-IR');
+
+    if (diffMinutes < 1) return 'همین حالا';
+    if (diffMinutes < 60) return `${formatter.format(diffMinutes)} دقیقه پیش`;
+
+    const diffHours = Math.round(diffMinutes / 60);
+    if (diffHours < 24) return `${formatter.format(diffHours)} ساعت پیش`;
+
+    const diffDays = Math.round(diffHours / 24);
+    return `${formatter.format(diffDays)} روز پیش`;
+  }
+
+  function getFocusableElements(panel) {
+    if (!panel) return [];
+    return Array.from(
+      panel.querySelectorAll('button:not(:disabled), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    ).filter((element) => !element.hasAttribute('hidden') && element.offsetParent !== null);
+  }
+
+  function initAdminNotificationWidget() {
+    const fab = document.getElementById('adminNotificationFab');
+    const badge = document.getElementById('adminNotificationBadge');
+    const panel = document.getElementById('adminNotificationPanel');
+    const backdrop = document.getElementById('adminNotificationBackdrop');
+    const closeBtn = document.getElementById('adminNotificationClose');
+    const listEl = document.getElementById('adminNotificationList');
+    const markAllBtn = document.getElementById('adminNotificationMarkAll');
+    const unreadLabel = document.getElementById('adminNotificationUnreadLabel');
+
+    if (!fab || !badge || !panel || !backdrop || !closeBtn || !listEl || !markAllBtn || !unreadLabel) {
+      return;
+    }
+
+    let isOpen = false;
+    let readIds = readStoredIds();
+    let notifications = getMockAdminNotifications().map((item) => ({
+      ...item,
+      read: Boolean(item.read || readIds.has(String(item.id)))
+    }));
+
+    function syncStoredReadIds() {
+      readIds = new Set(notifications.filter((item) => item.read).map((item) => String(item.id)));
+      storeReadIds(readIds);
+    }
+
+    function getUnreadCount() {
+      return notifications.filter((item) => !item.read).length;
+    }
+
+    function updateBadge() {
+      const unread = getUnreadCount();
+      const formatted = unread > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : new Intl.NumberFormat('fa-IR').format(unread);
+
+      badge.hidden = unread === 0;
+      badge.textContent = formatted;
+      fab.setAttribute(
+        'aria-label',
+        unread > 0 ? `مشاهده اعلان‌های مدیریت، ${formatted} اعلان خوانده‌نشده` : 'مشاهده اعلان‌های مدیریت'
+      );
+
+      unreadLabel.textContent = unread > 0
+        ? `${new Intl.NumberFormat('fa-IR').format(unread)} اعلان خوانده‌نشده`
+        : 'اعلان خوانده‌نشده‌ای وجود ندارد';
+      markAllBtn.disabled = unread === 0;
+    }
+
+    function renderEmptyState() {
+      listEl.innerHTML = '';
+
+      const empty = document.createElement('div');
+      empty.className = 'admin-notification-empty';
+
+      const icon = document.createElement('i');
+      icon.className = 'ri-notification-off-line';
+      icon.setAttribute('aria-hidden', 'true');
+
+      const text = document.createElement('span');
+      text.textContent = 'اعلان جدیدی وجود ندارد';
+
+      empty.append(icon, text);
+      listEl.appendChild(empty);
+    }
+
+    function renderNotifications() {
+      updateBadge();
+
+      if (!notifications.length) {
+        renderEmptyState();
+        return;
+      }
+
+      listEl.innerHTML = '';
+
+      notifications.forEach((item) => {
+        const config = typeConfig[item.type] || { icon: 'ri-notification-3-line', label: 'اعلان' };
+        const wrapper = document.createElement('article');
+        wrapper.className = `admin-notification-item admin-notification-item--${item.type || 'default'}`;
+        wrapper.classList.toggle('is-unread', !item.read);
+
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'admin-notification-item__icon';
+        iconWrap.setAttribute('aria-hidden', 'true');
+        const icon = document.createElement('i');
+        icon.className = config.icon;
+        iconWrap.appendChild(icon);
+
+        const content = document.createElement('div');
+        content.className = 'admin-notification-item__content';
+
+        const top = document.createElement('div');
+        top.className = 'admin-notification-item__top';
+
+        const title = document.createElement('h4');
+        title.className = 'admin-notification-item__title';
+        title.textContent = item.title || 'اعلان جدید';
+
+        const time = document.createElement('span');
+        time.className = 'admin-notification-item__time';
+        time.textContent = getRelativeTime(item.createdAt);
+
+        top.append(title, time);
+
+        const desc = document.createElement('p');
+        desc.className = 'admin-notification-item__desc';
+        desc.textContent = item.description || '';
+
+        const footer = document.createElement('div');
+        footer.className = 'admin-notification-item__footer';
+
+        const state = document.createElement('span');
+        state.className = 'admin-notification-item__state';
+        state.innerHTML = item.read
+          ? '<i class="ri-check-double-line" aria-hidden="true"></i> خوانده‌شده'
+          : `<i class="${config.icon}" aria-hidden="true"></i> ${config.label}`;
+
+        const readBtn = document.createElement('button');
+        readBtn.type = 'button';
+        readBtn.className = 'admin-notification-item__read';
+        readBtn.textContent = item.read ? 'خوانده شده' : 'خواندم';
+        readBtn.disabled = Boolean(item.read);
+        readBtn.addEventListener('click', () => {
+          notifications = notifications.map((notification) => (
+            notification.id === item.id ? { ...notification, read: true } : notification
+          ));
+          syncStoredReadIds();
+          renderNotifications();
+        });
+
+        footer.append(state, readBtn);
+        content.append(top, desc, footer);
+        wrapper.append(iconWrap, content);
+        listEl.appendChild(wrapper);
+      });
+    }
+
+    function openPanel() {
+      if (isOpen) return;
+      isOpen = true;
+      panel.classList.add('is-open');
+      panel.setAttribute('aria-hidden', 'false');
+      fab.setAttribute('aria-expanded', 'true');
+      backdrop.hidden = false;
+      requestAnimationFrame(() => backdrop.classList.add('is-open'));
+      renderNotifications();
+      setTimeout(() => closeBtn.focus(), 30);
+    }
+
+    function closePanel() {
+      if (!isOpen) return;
+      isOpen = false;
+      panel.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+      fab.setAttribute('aria-expanded', 'false');
+      backdrop.classList.remove('is-open');
+      setTimeout(() => {
+        if (!isOpen) backdrop.hidden = true;
+      }, 240);
+      fab.focus();
+    }
+
+    fab.addEventListener('click', () => {
+      if (isOpen) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    });
+
+    closeBtn.addEventListener('click', closePanel);
+    backdrop.addEventListener('click', closePanel);
+
+    markAllBtn.addEventListener('click', () => {
+      notifications = notifications.map((item) => ({ ...item, read: true }));
+      syncStoredReadIds();
+      renderNotifications();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (!isOpen) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closePanel();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusableElements(panel);
+      if (!focusable.length) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    window.VitrinetAdminNotifications = {
+      push(event) {
+        if (!event || !event.id) return;
+        notifications = [{ ...event, read: Boolean(event.read) }, ...notifications.filter((item) => item.id !== event.id)];
+        if (event.read) syncStoredReadIds();
+        renderNotifications();
+      },
+      markAllRead() {
+        markAllBtn.click();
+      }
+    };
+
+    renderNotifications();
+  }
+
+  document.addEventListener('DOMContentLoaded', initAdminNotificationWidget);
+})();
