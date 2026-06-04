@@ -12911,6 +12911,16 @@ tr:last-child td {
   border-color: rgba(14, 165, 233, 0.36);
 }
 
+.admin-notification-item.is-clickable {
+  cursor: pointer;
+}
+
+.admin-notification-item.is-clickable:focus-visible {
+  outline: none;
+  border-color: rgba(14, 165, 233, 0.55);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.14);
+}
+
 .admin-notification-item__icon {
   width: 42px;
   height: 42px;
@@ -12993,6 +13003,17 @@ tr:last-child td {
   font-weight: 800;
 }
 
+.admin-notification-item__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  margin-inline-start: auto;
+  color: #0ea5e9;
+  font-size: 0.73rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .admin-notification-item:not(.is-unread) .admin-notification-item__state {
   color: #94a3b8;
 }
@@ -13014,6 +13035,28 @@ tr:last-child td {
 .admin-notification-empty i {
   color: #94a3b8;
   font-size: 2rem;
+}
+
+.admin-deep-link-highlight {
+  position: relative;
+  animation: adminDeepLinkPulse 2.8s ease both;
+  scroll-margin: 7rem;
+}
+
+tr.admin-deep-link-highlight > td {
+  background: rgba(236, 253, 245, 0.92) !important;
+}
+
+@keyframes adminDeepLinkPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.42);
+  }
+  18% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.16), 0 14px 34px rgba(14, 165, 233, 0.13);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 @media (max-width: 640px) {
@@ -13095,6 +13138,10 @@ tr:last-child td {
 
   .admin-notification-item__read {
     width: 100%;
+  }
+
+  .admin-notification-item__hint {
+    margin-inline-start: 0;
   }
 }
 

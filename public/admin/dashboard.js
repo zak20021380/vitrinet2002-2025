@@ -4797,6 +4797,8 @@ function renderSupportTickets(list = supportTickets) {
 
   filtered.forEach(ticket => {
     const row = document.createElement('tr');
+    row.dataset.adminRecordId = toIdString(ticket._id || ticket.id || '');
+    row.dataset.adminRecordType = 'ticket';
     const sellerLabel = ticket.sellerName || 'فروشنده خدماتی';
     const createdAt = formatDateTime(ticket.createdAt) || '';
     const shortMessage = (ticket.message || '').slice(0, 70);
@@ -6850,6 +6852,8 @@ function renderUsers(filteredUsers = usersList) {
     }
     
     let tr = document.createElement('tr');
+    tr.dataset.adminRecordId = toIdString(user._id || user.id || user.phone || contact || '');
+    tr.dataset.adminRecordType = 'user';
     tr.innerHTML = `
       <td class="user-cell user-modal-trigger" style="cursor:pointer;color:#10b981;font-weight:bold">${fullName}</td>
       <td class="user-cell user-modal-trigger" style="cursor:pointer">${birthDateDisplay}</td>
@@ -7286,6 +7290,8 @@ function renderProducts() {
     const linkHTML = shopUrl ? `<a href="/shop.html?shopurl=${encodeURIComponent(shopUrl)}" target="_blank" style="color:#0ea5e9;text-decoration:underline">${shopUrl}</a>` : '-';
 
     const tr = document.createElement('tr');
+    tr.dataset.adminRecordId = toIdString(prod._id || prod.id || prod.slug || productName || '');
+    tr.dataset.adminRecordType = 'product';
     tr.innerHTML = `
       <td>${productName}</td>
       <td>${storeName}</td>
@@ -10393,7 +10399,10 @@ function renderSellers() {
     `;
 
     let tr = document.createElement('tr');
+    tr.dataset.adminRecordId = sellerActionKey || sid || sellerKey || '';
+    tr.dataset.adminRecordType = 'seller';
     tr.dataset.sellerKey = sellerKey || '';
+    tr.dataset.sellerId = sid || '';
     tr.dataset.sellerBlocked = isBlocked ? 'true' : 'false';
     tr.innerHTML = `
       <td class="seller-cell seller-modal-trigger">
@@ -14566,6 +14575,8 @@ document.addEventListener('DOMContentLoaded', () => {
     product: { icon: 'ri-box-3-line', label: 'محصول' },
     service: { icon: 'ri-hand-heart-line', label: 'خدمات' },
     campaign: { icon: 'ri-gift-line', label: 'کمپین' },
+    support: { icon: 'ri-customer-service-2-line', label: 'تیکت' },
+    report: { icon: 'ri-file-list-3-line', label: 'گزارش' },
     system_success: { icon: 'ri-checkbox-circle-line', label: 'سیستم' },
     system_failed: { icon: 'ri-error-warning-line', label: 'سیستم' }
   };
@@ -14573,35 +14584,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const createOffsetDate = (minutesAgo) => new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
 
   // TODO: Replace this temporary marketplace event feed with a real admin notification API/store.
-  // Expected item shape: { id, type, title, description, createdAt, read }.
+  // Expected item shape: { id, type, title, description, createdAt, read, targetRoute, targetId, metadata }.
+  // TODO: Backend notification payloads should provide targetRoute and targetId for exact record jumps.
   const getMockAdminNotifications = () => [
     {
       id: 'admin-event-user-registration',
       type: 'user',
       title: 'ثبت‌نام کاربر جدید',
       description: 'یک کاربر تازه حساب خود را در ویترینت فعال کرده است.',
-      createdAt: createOffsetDate(8)
+      createdAt: createOffsetDate(8),
+      targetRoute: 'users',
+      targetId: 'mock-user-registration',
+      metadata: { source: 'mock', fallbackLabel: 'بخش مدیریت کاربران' }
     },
     {
       id: 'admin-event-seller-registration',
       type: 'seller',
       title: 'درخواست فروشنده جدید',
       description: 'یک فروشنده برای بررسی و تکمیل اطلاعات فروشگاه ثبت‌نام کرده است.',
-      createdAt: createOffsetDate(22)
+      createdAt: createOffsetDate(22),
+      targetRoute: 'sellers',
+      targetId: 'mock-seller-registration',
+      metadata: { action: 'review', source: 'mock', fallbackLabel: 'بخش بررسی فروشندگان' }
     },
     {
       id: 'admin-event-product-created',
       type: 'product',
       title: 'محصول جدید ایجاد شد',
       description: 'محصول تازه‌ای در بازار ثبت شده و آماده بازبینی محتوایی است.',
-      createdAt: createOffsetDate(48)
+      createdAt: createOffsetDate(48),
+      targetRoute: 'products',
+      targetId: 'mock-product-created',
+      metadata: { action: 'moderate', source: 'mock', fallbackLabel: 'بخش مدیریت محصولات' }
     },
     {
       id: 'admin-event-service-request',
       type: 'service',
       title: 'درخواست دسته یا خدمت جدید',
       description: 'یک فروشگاه خدماتی درخواست افزودن خدمت/دسته تازه ارسال کرده است.',
-      createdAt: createOffsetDate(95)
+      createdAt: createOffsetDate(95),
+      targetRoute: 'service-shops',
+      targetId: 'mock-service-request',
+      metadata: { source: 'mock', fallbackLabel: 'بخش مغازه‌های خدماتی' }
     },
     {
       id: 'admin-event-campaign-activity',
@@ -14609,7 +14633,30 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'فعالیت جدید در کمپین جایزه',
       description: 'کد جایزه جدیدی مصرف شده و ظرفیت کمپین نیاز به پایش دارد.',
       createdAt: createOffsetDate(170),
-      read: true
+      read: true,
+      targetRoute: 'rewards',
+      targetId: null,
+      metadata: { source: 'mock', fallbackLabel: 'کمپین جوایز' }
+    },
+    {
+      id: 'admin-event-support-ticket',
+      type: 'support',
+      title: 'درخواست پشتیبانی جدید',
+      description: 'یک تیکت پشتیبانی تازه برای پیگیری ادمین ثبت شده است.',
+      createdAt: createOffsetDate(210),
+      targetRoute: 'tickets',
+      targetId: 'mock-support-ticket',
+      metadata: { action: 'openTicketModal', source: 'mock', fallbackLabel: 'بخش تیکت‌های پشتیبانی' }
+    },
+    {
+      id: 'admin-event-report-violation',
+      type: 'report',
+      title: 'گزارش تخلف جدید',
+      description: 'یک گزارش تخلف برای بازبینی محتوایی دریافت شده است.',
+      createdAt: createOffsetDate(240),
+      targetRoute: 'reports',
+      targetId: 'mock-report-violation',
+      metadata: { action: 'moderate', source: 'mock', fallbackLabel: 'بخش گزارشات' }
     },
     {
       id: 'admin-event-system-success',
@@ -14617,14 +14664,20 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'پردازش مدیریتی موفق',
       description: 'همگام‌سازی شمارنده‌های داشبورد با موفقیت انجام شد.',
       createdAt: createOffsetDate(260),
-      read: true
+      read: true,
+      targetRoute: 'dashboard',
+      targetId: null,
+      metadata: { source: 'mock', fallbackLabel: 'داشبورد آماری' }
     },
     {
       id: 'admin-event-system-failed',
       type: 'system_failed',
       title: 'خطای موقت در رویداد سیستمی',
       description: 'یکی از پردازش‌های پس‌زمینه با خطا مواجه شد و نیاز به بررسی دارد.',
-      createdAt: createOffsetDate(390)
+      createdAt: createOffsetDate(390),
+      targetRoute: 'dashboard',
+      targetId: null,
+      metadata: { source: 'mock', fallbackLabel: 'داشبورد آماری' }
     }
   ];
 
@@ -14671,6 +14724,204 @@ document.addEventListener('DOMContentLoaded', () => {
     ).filter((element) => !element.hasAttribute('hidden') && element.offsetParent !== null);
   }
 
+  function showDeepLinkToast(message, type = 'info') {
+    const toast = window.showAdminToast || window.UIComponents?.showToast;
+    if (typeof toast === 'function') {
+      toast(message, type);
+    }
+  }
+
+  function normalizeNotificationRoute(route, type) {
+    const routeMap = {
+      'users-management': 'users',
+      'user-management': 'users',
+      'seller-review': 'sellers',
+      'seller-requests': 'sellers',
+      'product-details': 'products',
+      'product-moderation': 'products',
+      'campaign-management': 'rewards',
+      'support-ticket': 'tickets',
+      'support-tickets': 'tickets',
+      'reports-moderation': 'reports',
+      reports: 'reports'
+    };
+    const fallbackByType = {
+      user: 'users',
+      seller: 'sellers',
+      product: 'products',
+      service: 'service-shops',
+      campaign: 'rewards',
+      support: 'tickets',
+      report: 'reports',
+      system_success: 'dashboard',
+      system_failed: 'dashboard'
+    };
+    const raw = String(route || '').trim();
+    return routeMap[raw] || raw || fallbackByType[type] || 'dashboard';
+  }
+
+  function cssEscape(value) {
+    const text = String(value || '');
+    if (window.CSS && typeof window.CSS.escape === 'function') {
+      return window.CSS.escape(text);
+    }
+    return text.replace(/["\\]/g, '\\$&');
+  }
+
+  function getRecordContainer(element) {
+    if (!element) return null;
+    return element.closest('tr, .homepage-section-item, .similar-promotions-request, .reward-code-card, .reward-winner-card, .service-shop-row, .service-shop-card, .card, article, li') || element;
+  }
+
+  function findDeepLinkTarget(section, targetId, metadata = {}) {
+    if (!targetId) return null;
+    const escaped = cssEscape(targetId);
+    const panel = panels?.[section] || document;
+    const selectors = [
+      `[data-admin-record-id="${escaped}"]`,
+      `[data-admin-target-id="${escaped}"]`,
+      `[data-id="${escaped}"]`,
+      `[data-record-id="${escaped}"]`,
+      `[data-ticket-open="${escaped}"]`,
+      `[data-ticket-status="${escaped}"]`,
+      `[data-seller-key="${escaped}"]`,
+      `[data-seller-id="${escaped}"]`,
+      `[data-score-key="${escaped}"]`,
+      `[id="${escaped}"]`,
+      `#${escaped}`
+    ];
+
+    if (metadata?.sellerKey) selectors.push(`[data-seller-key="${cssEscape(metadata.sellerKey)}"]`);
+    if (metadata?.shopurl) selectors.push(`[data-seller-key="shopurl:${cssEscape(metadata.shopurl)}"]`);
+
+    for (const selector of selectors) {
+      try {
+        const found = panel.querySelector(selector);
+        if (found) return getRecordContainer(found);
+      } catch {
+        // Ignore invalid selectors from legacy IDs.
+      }
+    }
+
+    return null;
+  }
+
+  function highlightDeepLinkTarget(element) {
+    if (!element) return;
+    document.querySelectorAll('.admin-deep-link-highlight').forEach((node) => {
+      node.classList.remove('admin-deep-link-highlight');
+    });
+    element.classList.add('admin-deep-link-highlight');
+    if (!element.matches('button, [href], input, select, textarea, [tabindex]')) {
+      element.setAttribute('tabindex', '-1');
+    }
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    setTimeout(() => element.focus({ preventScroll: true }), 260);
+    setTimeout(() => element.classList.remove('admin-deep-link-highlight'), 3600);
+  }
+
+  function resetSectionFiltersForDeepLink(section) {
+    try {
+      if (section === 'users') {
+        const searchInput = document.getElementById('userSearch');
+        if (searchInput) searchInput.value = '';
+        birthdayFilter = { today: false, month: '' };
+        renderUsers();
+      } else if (section === 'products') {
+        const searchInput = document.getElementById('productSearch');
+        if (searchInput) searchInput.value = '';
+        productSearchQuery = '';
+        renderProducts();
+      } else if (section === 'sellers') {
+        const searchInput = document.getElementById('sellerSearch');
+        if (searchInput) searchInput.value = '';
+        sellerSearchQuery = '';
+        sellersTypeFilter = 'all';
+        sellerCategoryFilter = new Set(['all']);
+        renderSellers();
+      } else if (section === 'tickets') {
+        ticketFilterMode = 'all';
+        document.querySelectorAll('.ticket-filter-btn').forEach((button) => {
+          button.classList.toggle('active', button.dataset.filter === 'all');
+        });
+        renderSupportTickets();
+      }
+    } catch (error) {
+      console.warn('Notification deep link filter reset failed:', error);
+    }
+  }
+
+  function activateAdminSection(section) {
+    return new Promise((resolve) => {
+      const targetLink = document.querySelector(`.sidebar-menu a[data-section="${cssEscape(section)}"]`);
+      if (!targetLink) {
+        resolve(false);
+        return;
+      }
+
+      targetLink.click();
+
+      const finish = async () => {
+        try {
+          if (section === 'tickets' && typeof ensureSupportTicketsLoaded === 'function') {
+            await ensureSupportTicketsLoaded();
+          } else if (section === 'service-shops' && typeof ensureServiceShopsData === 'function') {
+            await ensureServiceShopsData();
+          } else if (section === 'homepage-manager' && typeof ensureHomepageSectionsLoaded === 'function') {
+            await ensureHomepageSectionsLoaded();
+          } else if (section === 'ad-orders' && typeof loadAdOrders === 'function') {
+            await loadAdOrders();
+          } else if (section === 'similar-promotions' && typeof ensureSimilarPromotionsAdmin === 'function') {
+            await ensureSimilarPromotionsAdmin();
+          }
+        } catch (error) {
+          console.warn('Notification deep link section load failed:', error);
+        }
+        resolve(true);
+      };
+
+      setTimeout(finish, section === 'reports' ? 700 : 120);
+    });
+  }
+
+  async function navigateToNotificationTarget(item) {
+    const section = normalizeNotificationRoute(item.targetRoute, item.type);
+    const metadata = item.metadata || {};
+    const navigated = await activateAdminSection(section);
+
+    if (!navigated) {
+      showDeepLinkToast('مسیر این اعلان در داشبورد پیدا نشد.', 'warning');
+      return;
+    }
+
+    resetSectionFiltersForDeepLink(section);
+
+    if (!item.targetId) {
+      const panel = panels?.[section];
+      panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    let target = null;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      target = findDeepLinkTarget(section, item.targetId, metadata);
+      if (target) break;
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+
+    if (target) {
+      highlightDeepLinkTarget(target);
+      if (metadata.action === 'openTicketModal' && section === 'tickets' && typeof openTicketModal === 'function') {
+        setTimeout(() => openTicketModal(item.targetId), 320);
+      }
+      return;
+    }
+
+    const fallbackLabel = metadata.fallbackLabel || 'بخش مرتبط';
+    showDeepLinkToast(`مورد مرتبط پیدا نشد؛ به ${fallbackLabel} منتقل شدید.`, 'info');
+    panels?.[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function initAdminNotificationWidget() {
     const fab = document.getElementById('adminNotificationFab');
     const badge = document.getElementById('adminNotificationBadge');
@@ -14699,6 +14950,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getUnreadCount() {
       return notifications.filter((item) => !item.read).length;
+    }
+
+    function markNotificationRead(id) {
+      let changed = false;
+      notifications = notifications.map((notification) => {
+        if (notification.id !== id || notification.read) return notification;
+        changed = true;
+        return { ...notification, read: true };
+      });
+      if (changed) syncStoredReadIds();
+      return changed;
     }
 
     function updateBadge() {
@@ -14750,6 +15012,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const wrapper = document.createElement('article');
         wrapper.className = `admin-notification-item admin-notification-item--${item.type || 'default'}`;
         wrapper.classList.toggle('is-unread', !item.read);
+        wrapper.classList.toggle('is-clickable', Boolean(item.targetRoute || item.type));
+        wrapper.setAttribute('role', 'button');
+        wrapper.setAttribute('tabindex', '0');
+        wrapper.setAttribute('aria-label', `${item.title || 'اعلان جدید'}؛ رفتن به بخش مرتبط`);
 
         const iconWrap = document.createElement('div');
         iconWrap.className = 'admin-notification-item__icon';
@@ -14787,20 +15053,41 @@ document.addEventListener('DOMContentLoaded', () => {
           ? '<i class="ri-check-double-line" aria-hidden="true"></i> خوانده‌شده'
           : `<i class="${config.icon}" aria-hidden="true"></i> ${config.label}`;
 
+        const actionHint = document.createElement('span');
+        actionHint.className = 'admin-notification-item__hint';
+        actionHint.innerHTML = '<i class="ri-arrow-left-line" aria-hidden="true"></i> رفتن به مقصد';
+
         const readBtn = document.createElement('button');
         readBtn.type = 'button';
         readBtn.className = 'admin-notification-item__read';
         readBtn.textContent = item.read ? 'خوانده شده' : 'خواندم';
         readBtn.disabled = Boolean(item.read);
-        readBtn.addEventListener('click', () => {
-          notifications = notifications.map((notification) => (
-            notification.id === item.id ? { ...notification, read: true } : notification
-          ));
-          syncStoredReadIds();
+        readBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          markNotificationRead(item.id);
           renderNotifications();
         });
 
-        footer.append(state, readBtn);
+        const itemClickHandler = async () => {
+          markNotificationRead(item.id);
+          renderNotifications();
+          closePanel(false);
+          await navigateToNotificationTarget(item);
+        };
+
+        wrapper.addEventListener('click', (event) => {
+          if (event.target.closest('.admin-notification-item__read')) return;
+          itemClickHandler();
+        });
+
+        wrapper.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          if (event.target.closest('.admin-notification-item__read')) return;
+          event.preventDefault();
+          itemClickHandler();
+        });
+
+        footer.append(state, actionHint, readBtn);
         content.append(top, desc, footer);
         wrapper.append(iconWrap, content);
         listEl.appendChild(wrapper);
@@ -14819,7 +15106,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => closeBtn.focus(), 30);
     }
 
-    function closePanel() {
+    function closePanel(restoreFocus = true) {
       if (!isOpen) return;
       isOpen = false;
       panel.classList.remove('is-open');
@@ -14829,7 +15116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         if (!isOpen) backdrop.hidden = true;
       }, 240);
-      fab.focus();
+      if (restoreFocus) fab.focus();
     }
 
     fab.addEventListener('click', () => {
