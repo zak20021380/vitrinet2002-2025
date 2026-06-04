@@ -260,12 +260,12 @@ async function findOverlappingPromotion({ sellerId, startAt, endAt, excludeId = 
 }
 
 async function hasCurrentActivePromotion(sellerId, now = new Date()) {
-  return SimilarShopPromotion.exists({
+  return SimilarShopPromotion.findOne({
     sellerId,
     status: 'approved',
     startAt: { $lte: now },
     endAt: { $gt: now }
-  });
+  }).lean();
 }
 
 async function findPendingPlanRequest(sellerId, planTier, durationUnit) {
@@ -275,7 +275,7 @@ async function findPendingPlanRequest(sellerId, planTier, durationUnit) {
     durationUnit,
     status: 'pending',
     paymentStatus: { $ne: 'rejected' }
-  }).select('_id').lean();
+  }).lean();
 }
 
 function getAdminId(req) {
@@ -388,17 +388,22 @@ exports.createSellerRequest = async (req, res) => {
 
     const activeDuplicate = await hasCurrentActivePromotion(seller._id);
     if (activeDuplicate) {
-      return res.status(409).json({
-        success: false,
-        message: 'این فروشگاه در حال حاضر یک تبلیغ فعال در بخش مغازه‌های مشابه دارد.'
+      return res.status(200).json({
+        success: true,
+        reused: true,
+        alreadyActive: true,
+        message: 'این فروشگاه در حال حاضر یک تبلیغ فعال در بخش مغازه‌های مشابه دارد.',
+        promotion: serializePromotion(activeDuplicate)
       });
     }
 
     const pendingDuplicate = await findPendingPlanRequest(seller._id, planTier, durationUnit);
     if (pendingDuplicate) {
-      return res.status(409).json({
-        success: false,
-        message: 'برای این پلن یک درخواست در انتظار بررسی یا پرداخت وجود دارد.'
+      return res.status(200).json({
+        success: true,
+        reused: true,
+        message: 'برای این پلن یک درخواست در انتظار بررسی یا پرداخت وجود دارد.',
+        promotion: serializePromotion(pendingDuplicate)
       });
     }
 

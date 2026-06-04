@@ -30,6 +30,7 @@
     planVersion: null,
     lastLoadedAt: 0,
     loadPromise: null,
+    productsLoadPromise: null,
     csrfPromise: null,
     submitting: false,
     guidePlan: null
@@ -137,36 +138,12 @@
     return num.toLocaleString('fa-IR');
   }
 
-  const MOCK_PRODUCTS = [
-    {
-      id: 'mock-product-1',
-      title: 'کفش روزمره مدل کلاسیک',
-      price: 1290000,
-      image: '/assets/images/placeholder-product.svg',
-      status: 'موجود'
-    },
-    {
-      id: 'mock-product-2',
-      title: 'کیف دوشی مینیمال',
-      price: 890000,
-      image: '/assets/images/placeholder-product.svg',
-      status: 'موجود'
-    },
-    {
-      id: 'mock-product-3',
-      title: 'ساعت مچی اسپرت',
-      price: 1750000,
-      image: '/assets/images/placeholder-product.svg',
-      status: 'موجود'
-    }
-  ];
-
   function normaliseProduct(product, index = 0) {
     if (!product) return null;
     const id = product._id || product.id || `modal-product-${index + 1}`;
     const images = Array.isArray(product.images) ? product.images : [];
     const mainImageIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
-    const image = images[mainImageIndex] || images[0] || product.image || '/assets/images/placeholder-product.svg';
+    const image = product.image || images[mainImageIndex] || images[0] || '/assets/images/placeholder-product.svg';
     const status = product.status
       || (product.inStock === false ? 'ناموجود' : '')
       || (product.active === false ? 'غیرفعال' : '')
@@ -181,11 +158,35 @@
     };
   }
 
+  function parseProducts(products) {
+    if (Array.isArray(products)) return products;
+    if (Array.isArray(products?.products)) return products.products;
+    if (typeof products === 'string') {
+      try {
+        return parseProducts(JSON.parse(products));
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+
   function getAvailableProducts(products) {
-    const source = Array.isArray(products)
-      ? products
-      : (Array.isArray(window._allProducts) ? window._allProducts : MOCK_PRODUCTS);
+    const source = products == null
+      ? parseProducts(window._allProducts)
+      : parseProducts(products);
     return source.map(normaliseProduct).filter(Boolean);
+  }
+
+  function getCurrentSellerId() {
+    const seller = window.seller || (() => {
+      try {
+        return JSON.parse(localStorage.getItem('seller') || 'null');
+      } catch {
+        return null;
+      }
+    })();
+    return seller?.id || seller?._id || seller?.sellerId || '';
   }
 
   function formatDate(value) {
@@ -2447,24 +2448,50 @@ body.ssw-modal-open .hamburger-menu {
   display: flex;
   align-items: center;
   direction: rtl;
-  gap: 9px;
-  min-height: 72px;
-  padding: 9px;
+  gap: 11px;
+  min-height: 94px;
+  padding: 10px;
   border: 1px solid rgba(5,150,105,.2);
   border-radius: 15px;
   background: linear-gradient(135deg, rgba(236,253,245,.98), rgba(255,255,255,.95));
   box-shadow: 0 8px 18px rgba(5,150,105,.08), inset 0 1px 0 #fff;
 }
 .ssw-modal__product-summary-card .ssw-modal__product-media {
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
+  width: 74px;
+  height: 74px;
+  min-width: 74px;
+  border-radius: 14px;
+  border-color: rgba(5,150,105,.24);
+  background: #fff;
+  box-shadow: 0 7px 16px rgba(15,118,110,.14), inset 0 1px 0 rgba(255,255,255,.9);
 }
 .ssw-modal__product-summary-card .ssw-modal__product-copy {
   gap: 4px;
 }
 .ssw-modal__product-summary-card .ssw-modal__product-title {
   font-size: .79rem;
+}
+.ssw-modal__product-summary-card .ssw-modal__product-thumb {
+  object-fit: cover;
+}
+.ssw-modal__product-image-label {
+  position: absolute;
+  inset-inline: 5px;
+  bottom: 5px;
+  z-index: 2;
+  padding: 2px 5px;
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(6,78,59,.76);
+  font-size: .56rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.ssw-modal__product-media.is-placeholder .ssw-modal__product-image-label {
+  display: none;
 }
 
 .ssw-product-sheet {
@@ -4125,6 +4152,39 @@ body.ssw-modal-open .hamburger-menu {
     return data;
   }
 
+  async function loadAvailableProducts(options = {}) {
+    const { force = false } = options;
+    if (!force && Array.isArray(window._allProducts)) {
+      renderProductPicker(window._allProducts);
+      return window._allProducts;
+    }
+    if (!force && state.productsLoadPromise) return state.productsLoadPromise;
+
+    const sellerId = getCurrentSellerId();
+    if (!sellerId) {
+      renderProductPicker([]);
+      return [];
+    }
+
+    state.productsLoadPromise = apiJson(`/products?sellerId=${encodeURIComponent(sellerId)}`)
+      .then((products) => {
+        const safeProducts = parseProducts(products);
+        window._allProducts = safeProducts;
+        renderProductPicker(safeProducts);
+        return safeProducts;
+      })
+      .catch((err) => {
+        console.warn('similar sponsored products unavailable:', err);
+        renderProductPicker([]);
+        return [];
+      })
+      .finally(() => {
+        state.productsLoadPromise = null;
+      });
+
+    return state.productsLoadPromise;
+  }
+
   async function loadData(options = {}) {
     const { force = false, silent = false } = options;
     if (!force && state.loadPromise) return state.loadPromise;
@@ -4453,16 +4513,20 @@ body.ssw-modal-open .hamburger-menu {
     submitButton.disabled = state.submitting || (!isResult && !state.selectedProduct);
   }
 
-  function productMediaMarkup(product) {
+  function productMediaMarkup(product, options = {}) {
+    const { featured = false } = options;
     const hasImage = product.image && product.image !== '/assets/images/placeholder-product.svg';
     return `
       <span class="ssw-modal__product-media${hasImage ? '' : ' is-placeholder'}">
         <img
           class="ssw-modal__product-thumb"
           src="${escapeHtml(product.image)}"
-          alt=""
+          alt="${escapeHtml(product.title)}"
+          loading="${featured ? 'eager' : 'lazy'}"
+          decoding="async"
           onerror="this.parentElement.classList.add('is-placeholder')">
         <span class="ssw-modal__product-placeholder" aria-hidden="true">${icons.emptyBox}</span>
+        ${featured && hasImage ? '<span class="ssw-modal__product-image-label">تصویر کالا</span>' : ''}
       </span>
     `;
   }
@@ -4498,7 +4562,7 @@ body.ssw-modal-open .hamburger-menu {
     const product = state.selectedProduct;
     summary.innerHTML = `
       <div class="ssw-modal__product-summary-card">
-        ${productMediaMarkup(product)}
+        ${productMediaMarkup(product, { featured: true })}
         <span class="ssw-modal__product-copy">
           <strong class="ssw-modal__product-title">${escapeHtml(product.title)}</strong>
           <span class="ssw-modal__product-meta">
@@ -4596,7 +4660,6 @@ body.ssw-modal-open .hamburger-menu {
     sheet.hidden = false;
     modal?.setAttribute('aria-hidden', 'true');
     document.body?.classList.add('ssw-product-sheet-open');
-    window.setTimeout(() => searchInput?.focus(), 0);
   }
 
   function closeProductPicker({ restoreFocus = true } = {}) {
@@ -4643,6 +4706,34 @@ body.ssw-modal-open .hamburger-menu {
       setModalSubmitLabel('ثبت درخواست');
     }
     updateModalSubmitAvailability();
+  }
+
+  function getPromotionId(promotion) {
+    return promotion?.id || promotion?._id || '';
+  }
+
+  function findReusablePlanRequest(plan) {
+    return state.requests.find((item) => (
+      item.status === 'pending'
+      && item.paymentStatus !== 'rejected'
+      && item.planTier === plan.tier
+      && item.durationUnit === plan.durationUnit
+    )) || null;
+  }
+
+  function findActivePromotion() {
+    return state.requests.find((item) => item.isActive) || null;
+  }
+
+  function showExistingPromotionResult(promotion, options = {}) {
+    const isActive = options.isActive || promotion?.isActive;
+    showModalResult('success', {
+      title: isActive ? 'تبلیغ شما در حال نمایش است' : 'درخواست تبلیغ قبلاً ثبت شده است',
+      message: isActive
+        ? 'فروشگاه شما در حال حاضر در بخش فروشگاه‌های مشابه نمایش داده می‌شود و نیازی به ثبت درخواست جدید نیست.'
+        : 'این درخواست قبلاً ثبت و پرداخت آن تأیید شده است. اکنون درخواست شما در انتظار بررسی مدیر قرار دارد.',
+      meta: isActive ? 'وضعیت: تبلیغ فعال' : 'وضعیت: در انتظار بررسی مدیر'
+    });
   }
 
   function showModalResult(type, options = {}) {
@@ -4695,6 +4786,7 @@ body.ssw-modal-open .hamburger-menu {
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.add('ssw-modal-open');
     }
+    loadAvailableProducts().catch(() => null);
   }
 
   function closeModal() {
@@ -4822,19 +4914,44 @@ body.ssw-modal-open .hamburger-menu {
     setMessage('');
     try {
       const token = await csrfToken();
-      const res = await fetch(`${API_BASE}/similar-shop-promotions/requests`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: authHeaders({
-          'X-Requested-With': 'XMLHttpRequest',
-          ...(token ? { 'X-CSRF-Token': token } : {})
-        }),
-        body: formData
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.success === false) throw new Error(data.message || 'خطا در ثبت درخواست');
-      const promotionId = data.promotion?.id || data.promotion?._id;
+      const activePromotion = findActivePromotion();
+      if (activePromotion) {
+        showExistingPromotionResult(activePromotion, { isActive: true });
+        return;
+      }
+
+      let promotion = findReusablePlanRequest(plan);
+      if (!promotion) {
+        const res = await fetch(`${API_BASE}/similar-shop-promotions/requests`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: authHeaders({
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(token ? { 'X-CSRF-Token': token } : {})
+          }),
+          body: formData
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          const requestError = new Error(data.message || 'خطا در ثبت درخواست');
+          requestError.status = res.status;
+          throw requestError;
+        }
+        promotion = data.promotion;
+        if (data.alreadyActive) {
+          await loadData({ force: true, silent: true });
+          showExistingPromotionResult(promotion, { isActive: true });
+          return;
+        }
+      }
+
+      const promotionId = getPromotionId(promotion);
       if (!promotionId) throw new Error('شناسه درخواست تبلیغ دریافت نشد.');
+      if (['verified', 'waived'].includes(promotion.paymentStatus)) {
+        await loadData({ force: true, silent: true });
+        showExistingPromotionResult(promotion);
+        return;
+      }
 
       const paymentRes = await fetch(`${API_BASE}/payment/request`, {
         method: 'POST',
@@ -4875,11 +4992,16 @@ body.ssw-modal-open .hamburger-menu {
         meta: 'وضعیت: در انتظار بررسی مدیر'
       });
     } catch (err) {
-      console.error('similar sponsored submitRequest failed:', err);
+      const expectedConflict = err.status === 409;
+      if (expectedConflict) {
+        console.warn('similar sponsored request already exists:', err.message);
+      } else {
+        console.error('similar sponsored submitRequest failed:', err);
+      }
       showModalResult('error', {
-        title: 'ثبت درخواست ناموفق بود',
+        title: expectedConflict ? 'درخواست تکراری است' : 'ثبت درخواست ناموفق بود',
         message: err.message || 'خطا در ثبت درخواست یا اتصال به سرور. لطفاً دوباره تلاش کنید.',
-        meta: 'در همین صفحه بمانید و دوباره تلاش کنید'
+        meta: expectedConflict ? 'وضعیت درخواست‌های قبلی خود را بررسی کنید' : 'در همین صفحه بمانید و دوباره تلاش کنید'
       });
     } finally {
       state.submitting = false;
@@ -4972,6 +5094,9 @@ body.ssw-modal-open .hamburger-menu {
     document.addEventListener('products:updated', (event) => {
       renderProductPicker(event.detail?.products);
     });
+    document.addEventListener('seller:ready', () => {
+      loadAvailableProducts().catch(() => null);
+    });
     document.querySelector('[data-similar-sponsored-guide-select]')?.addEventListener('click', () => {
       const plan = state.guidePlan;
       closeGuideModal();
@@ -5057,4 +5182,5 @@ body.ssw-modal-open .hamburger-menu {
   bindEvents();
   setupPlanSync();
   loadData({ force: true }).catch(() => null);
+  loadAvailableProducts().catch(() => null);
 })();
