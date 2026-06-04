@@ -3,6 +3,7 @@
 const Product = require('../models/product');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const { createAdminNotification } = require('./notificationController');
 // تبدیل مسیر نسبى → آدرس کامل (نسبى، http/https یا data:)
 function makeFullUrl(req, path = '') {
   if (!path) return '';
@@ -158,6 +159,21 @@ exports.addProduct = async (req, res) => {
     const product = new Product(productData);
 
     await product.save();
+    await createAdminNotification({
+      type: 'product',
+      title: 'محصول جدید ثبت شد',
+      message: `محصول «${title}» برای بررسی در مدیریت محصولات ثبت شد.`,
+      priority: 'normal',
+      targetRoute: 'products',
+      targetId: product._id,
+      metadata: {
+        productId: String(product._id),
+        sellerId: String(sellerId),
+        title,
+        category,
+        source: 'product.addProduct'
+      }
+    });
     // TODO: ثبت محصول منتشر شده در PostHog بعد از فعال‌سازی | TODO: Capture product_published after enabling PostHog
     // const { trackProductPublished } = require('../utils/posthog-tracking');
     // await trackProductPublished(product);

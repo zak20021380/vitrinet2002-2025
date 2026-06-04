@@ -3,6 +3,7 @@
 const mongoose          = require('mongoose');
 const Report            = require('../models/Report');
 const { REPORT_TYPES }  = require('../models/Report');
+const { createAdminNotification } = require('./notificationController');
 
 // ➊ ثبت گزارش
 exports.createReport = async (req, res) => {
@@ -66,6 +67,21 @@ exports.createReport = async (req, res) => {
     // ۵) ایجاد گزارش جدید
     const report = await Report.create({
       ...payload
+    });
+    await createAdminNotification({
+      type: 'report',
+      title: 'گزارش تخلف جدید',
+      message: `گزارش جدید از نوع ${type} ثبت شد.`,
+      priority: 'high',
+      targetRoute: 'reports',
+      targetId: report._id,
+      metadata: {
+        reportId: String(report._id),
+        sellerId: normalizedSellerId || null,
+        shopurl: normalizedShopurl || null,
+        reportType: type,
+        source: 'report.createReport'
+      }
     });
 
     // ۶) پاسخ موفق

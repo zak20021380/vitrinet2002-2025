@@ -14588,7 +14588,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const createOffsetDate = (minutesAgo) => new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
 
   // Development fallback only. The live backend should return the normalized payload shape below.
-  // TODO: Replace fallback items with backend-created marketplace/admin events once /api/admin/notifications exists.
+  // Development fallback used only when /api/admin/notifications is unavailable.
   const getDevelopmentFallbackNotifications = () => [
     {
       id: 'admin-event-user-registration',
@@ -14785,24 +14785,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchAdminNotificationsFromApi(readIds) {
-    // TODO: Backend endpoint: GET /api/admin/notifications?limit=40
+    // Backend endpoint: GET /api/admin/notifications?limit=40
     const payload = await adminNotificationRequest(`?limit=${ADMIN_NOTIFICATION_LIMIT}`);
     return normalizeAdminNotificationList(payload, readIds);
   }
 
   async function markAdminNotificationReadInApi(id) {
     if (!id) return null;
-    // TODO: Backend endpoint: PUT /api/admin/notifications/:id/read
+    // Backend endpoint: PUT /api/admin/notifications/:id/read
     return adminNotificationRequest(`/${encodeURIComponent(id)}/read`, { method: 'PUT' });
   }
 
   async function markAllAdminNotificationsReadInApi() {
-    // TODO: Backend endpoint: PUT /api/admin/notifications/mark-all-read
+    // Backend endpoint: PUT /api/admin/notifications/mark-all-read
     return adminNotificationRequest('/mark-all-read', { method: 'PUT' });
   }
 
   async function clearReadAdminNotificationsInApi() {
-    // TODO: Backend endpoint: DELETE /api/admin/notifications/read
+    // Backend endpoint: DELETE /api/admin/notifications/read
     return adminNotificationRequest('/read', { method: 'DELETE' });
   }
 

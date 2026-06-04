@@ -6,6 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const { csrfProtection } = require('../middlewares/csrfMiddleware');
 const Admin = require('../models/admin');
 const userWalletController = require('../controllers/userWalletController');
+const notificationController = require('../controllers/notificationController');
 
 const authCsrfProtection = csrfProtection({ strictMode: true });
 
@@ -57,6 +58,11 @@ router.get('/profile', authMiddleware('admin'), adminController.profile);
 // آمار داشبورد ادمین
 router.get('/dashboard/stats', authMiddleware('admin'), adminController.getDashboardStats);
 router.get('/dashboard/income', authMiddleware('admin'), adminController.getIncomeInsights);
+
+router.get('/notifications', authMiddleware('admin'), notificationController.listAdminNotifications);
+router.put('/notifications/:id/read', authMiddleware('admin'), notificationController.markAdminNotificationAsRead);
+router.put('/notifications/mark-all-read', authMiddleware('admin'), notificationController.markAllAdminNotificationsAsRead);
+router.delete('/notifications/read', authMiddleware('admin'), notificationController.clearReadAdminNotifications);
 
 // حذف تراکنش‌های قدیمی کیف پول کاربران
 // DELETE /api/admin/wallet/cleanup?days=90

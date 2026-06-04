@@ -1,5 +1,6 @@
 const express = require('express');
 const RewardCampaign = require('../models/RewardCampaign');
+const { createAdminNotification } = require('../controllers/notificationController');
 
 const router = express.Router();
 
@@ -175,6 +176,21 @@ router.put('/campaign', async (req, res, next) => {
     }
 
     await doc.save();
+    await createAdminNotification({
+      type: 'campaign',
+      title: 'کمپین جایزه به‌روزرسانی شد',
+      message: `کمپین «${doc.title || 'جوایز'}» ${doc.active ? 'فعال' : 'غیرفعال'} شد.`,
+      priority: 'normal',
+      targetRoute: 'rewards',
+      targetId: doc._id,
+      metadata: {
+        campaignId: String(doc._id),
+        active: Boolean(doc.active),
+        capacity: doc.capacity,
+        winnersClaimed: doc.winnersClaimed,
+        source: 'rewardCampaign.updateCampaign'
+      }
+    });
     res.json({ campaign: normaliseCampaign(doc) });
   } catch (error) {
     next(error);
@@ -218,6 +234,20 @@ router.post('/winners', async (req, res, next) => {
 
     const winners = buildWinnerList(doc, true);
     const latestWinner = winners[winners.length - 1] || null;
+    await createAdminNotification({
+      type: 'campaign',
+      title: 'برنده جدید کمپین ثبت شد',
+      message: `برنده ${normalisedFirstName} ${normalisedLastName} به کمپین اضافه شد.`,
+      priority: 'normal',
+      targetRoute: 'rewards',
+      targetId: latestWinner?.id || doc._id,
+      metadata: {
+        campaignId: String(doc._id),
+        winnerId: latestWinner?.id || null,
+        phone: phoneDigits,
+        source: 'rewardCampaign.createWinner'
+      }
+    });
 
     res.status(201).json({
       message: 'برنده جدید با موفقیت ثبت شد.',
@@ -252,6 +282,19 @@ router.post('/codes', async (req, res, next) => {
     });
     doc.updatedAt = new Date();
     await doc.save();
+    await createAdminNotification({
+      type: 'campaign',
+      title: 'کد جایزه جدید اضافه شد',
+      message: `کد جایزه ${normalisedCode} به کمپین اضافه شد.`,
+      priority: 'low',
+      targetRoute: 'rewards',
+      targetId: normalisedCode,
+      metadata: {
+        campaignId: String(doc._id),
+        code: normalisedCode,
+        source: 'rewardCampaign.createCode'
+      }
+    });
 
     res.status(201).json({
       campaign: normaliseCampaign(doc),
@@ -294,6 +337,24 @@ router.patch('/codes/:code', async (req, res, next) => {
     }
 
     await doc.save();
+    if (action === 'toggle') {
+      await createAdminNotification({
+        type: 'campaign',
+        title: entry.used ? 'کد جایزه استفاده شد' : 'کد جایزه دوباره فعال شد',
+        message: entry.used
+          ? `کد جایزه ${codeValue} به عنوان استفاده‌شده ثبت شد.`
+          : `کد جایزه ${codeValue} دوباره فعال شد.`,
+        priority: entry.used ? 'normal' : 'low',
+        targetRoute: 'rewards',
+        targetId: codeValue,
+        metadata: {
+          campaignId: String(doc._id),
+          code: codeValue,
+          used: Boolean(entry.used),
+          source: 'rewardCampaign.toggleCode'
+        }
+      });
+    }
     res.json({
       campaign: normaliseCampaign(doc),
       message: action === 'toggle'
@@ -413,6 +474,20 @@ router.post('/claim', async (req, res, next) => {
     doc.updatedAt = new Date();
 
     await doc.save();
+    await createAdminNotification({
+      type: 'campaign',
+      title: 'فعالیت جدید کمپین جایزه',
+      message: `کد جایزه ${normalisedCode} توسط کاربر ثبت شد.`,
+      priority: 'normal',
+      targetRoute: 'rewards',
+      targetId: normalisedCode,
+      metadata: {
+        campaignId: String(doc._id),
+        code: normalisedCode,
+        usedAt: entry.usedAt,
+        source: 'rewardCampaign.claim'
+      }
+    });
 
     res.json({
       campaign: normaliseCampaign(doc),

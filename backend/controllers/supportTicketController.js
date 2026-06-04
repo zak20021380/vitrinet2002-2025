@@ -1,6 +1,6 @@
 const SupportTicket = require('../models/SupportTicket');
 const Seller = require('../models/Seller');
-const { createNotification } = require('./notificationController');
+const { createNotification, createAdminNotification } = require('./notificationController');
 
 function normalizeSellerName(seller) {
   if (!seller) return '';
@@ -40,6 +40,21 @@ exports.createTicket = async (req, res) => {
       category: (category || 'عمومی').toString().trim(),
       message: String(message).trim(),
       priority: priority === 'high' ? 'high' : 'normal'
+    });
+    await createAdminNotification({
+      type: 'support',
+      title: 'تیکت پشتیبانی جدید',
+      message: `تیکت «${ticket.subject}» توسط ${sellerInfo.name || 'فروشنده'} ثبت شد.`,
+      priority: ticket.priority === 'high' ? 'high' : 'normal',
+      targetRoute: 'tickets',
+      targetId: ticket._id,
+      metadata: {
+        ticketId: String(ticket._id),
+        sellerId: sellerInfo.id ? String(sellerInfo.id) : null,
+        shopurl: sellerInfo.shopurl || null,
+        action: 'openTicketModal',
+        source: 'supportTicket.createTicket'
+      }
     });
 
     res.status(201).json({ ticket });

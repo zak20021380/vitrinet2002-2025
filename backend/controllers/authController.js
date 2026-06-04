@@ -9,6 +9,7 @@ const User = require('../models/user');
 const Admin = require('../models/admin'); // اگه مدل جدا داری
 const BannedPhone = require('../models/BannedPhone');     // ⬅︎ مدل لیست سیاه
 const { buildPhoneCandidates, buildDigitInsensitiveRegex } = require('../utils/phone');
+const { createAdminNotification } = require('./notificationController');
 
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
@@ -856,6 +857,21 @@ exports.register = async (req, res) => {
     }
 
     // OTP sent to user via SMS (not logged for security)
+    await createAdminNotification({
+      type: 'seller',
+      title: 'درخواست ثبت‌نام فروشنده جدید',
+      message: `فروشگاه ${normalizedStorename} ثبت‌نام کرد و آماده بررسی است.`,
+      priority: 'high',
+      targetRoute: 'sellers',
+      targetId: seller._id,
+      metadata: {
+        sellerId: String(seller._id),
+        storename: normalizedStorename,
+        phone,
+        shopurl: generatedShopurl,
+        source: 'auth.register'
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -1060,6 +1076,7 @@ async function prepareUserForOtp(phone, { termsAccepted } = {}) {
       referralCode: await generateUniqueReferralCode(),
       termsAcceptedAt: termsAccepted === true ? new Date() : null
     });
+    user.$locals.createdForAdminNotification = true;
   } else {
     hydrateExistingUserForOtp(user, phone, { termsAccepted });
     if (!user.referralCode) {
@@ -1117,7 +1134,21 @@ exports.registerUser = async (req, res) => {
     if (canIssueOtp) {
       try {
         await ensurePhoneAllowed(phone);
-        await prepareUserForOtp(phone, { termsAccepted });
+        const preparedUser = await prepareUserForOtp(phone, { termsAccepted });
+        if (preparedUser?.$locals?.createdForAdminNotification) {
+          await createAdminNotification({
+            type: 'user',
+            title: 'ثبت‌نام کاربر جدید',
+            message: `کاربر جدید با شماره ${phone} ثبت‌نام کرد.`,
+            priority: 'normal',
+            targetRoute: 'users',
+            targetId: preparedUser._id,
+            metadata: {
+              phone,
+              source: 'auth.registerUser'
+            }
+          });
+        }
       } catch (err) {
         // Anti-enumeration: پاسخ همیشه یکسان بماند
         if (!/مسدود/.test(err?.message || '')) {

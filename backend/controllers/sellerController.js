@@ -17,6 +17,7 @@ const { calcPremiumUntil } = require('../utils/premium');
 const { clampAdminScore, evaluatePerformance } = require('../utils/performanceStatus');
 const { normalizePhone, buildDigitInsensitiveRegex, buildPhoneCandidates } = require('../utils/phone');
 const { cascadeDeleteSeller, cascadeDeleteSellerById } = require('../utils/sellerDeletion');
+const { createAdminNotification } = require('./notificationController');
 
 const escapeRegExp = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const normalizeString = (value) => (value || '').toString().trim().toLowerCase();
@@ -167,6 +168,21 @@ exports.registerSeller = async (req, res) => {
     });
 
     await seller.save();
+    await createAdminNotification({
+      type: 'seller',
+      title: 'درخواست ثبت‌نام فروشنده جدید',
+      message: `فروشگاه ${storename || shopurl || 'جدید'} ثبت‌نام کرد و آماده بررسی است.`,
+      priority: 'high',
+      targetRoute: 'sellers',
+      targetId: seller._id,
+      metadata: {
+        sellerId: String(seller._id),
+        storename,
+        phone,
+        shopurl,
+        source: 'seller.registerSeller'
+      }
+    });
     res.status(201).json({ message: 'ثبت‌نام فروشنده با موفقیت انجام شد.' });
   } catch (err) {
     console.error(err);
