@@ -14567,7 +14567,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 (() => {
   const READ_STORAGE_KEY = 'vitrinet_admin_notification_read_ids';
+  const CLEARED_READ_STORAGE_KEY = 'vitrinet_admin_notification_cleared_read_ids';
+  const ADMIN_NOTIFICATION_LIMIT = 40;
+  const ADMIN_NOTIFICATION_POLL_MS = 30000;
   const MAX_BADGE_COUNT = 99;
+  const ADMIN_NOTIFICATION_API_BASE = `${ADMIN_API_BASE}/admin/notifications`;
 
   const typeConfig = {
     user: { icon: 'ri-user-add-line', label: 'کاربر' },
@@ -14583,10 +14587,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const createOffsetDate = (minutesAgo) => new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
 
-  // TODO: Replace this temporary marketplace event feed with a real admin notification API/store.
-  // Expected item shape: { id, type, title, description, createdAt, read, targetRoute, targetId, metadata }.
-  // TODO: Backend notification payloads should provide targetRoute and targetId for exact record jumps.
-  const getMockAdminNotifications = () => [
+  // Development fallback only. The live backend should return the normalized payload shape below.
+  // TODO: Replace fallback items with backend-created marketplace/admin events once /api/admin/notifications exists.
+  const getDevelopmentFallbackNotifications = () => [
     {
       id: 'admin-event-user-registration',
       type: 'user',
@@ -14697,6 +14700,110 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.warn('Failed to store admin notification state:', error);
     }
+  }
+
+  function readStoredClearedIds() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CLEARED_READ_STORAGE_KEY) || '[]');
+      return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch (error) {
+      console.warn('Failed to read cleared admin notification state:', error);
+      return new Set();
+    }
+  }
+
+  function storeClearedReadIds(ids) {
+    try {
+      localStorage.setItem(CLEARED_READ_STORAGE_KEY, JSON.stringify([...ids]));
+    } catch (error) {
+      console.warn('Failed to store cleared admin notification state:', error);
+    }
+  }
+
+  function normalizeMetadata(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return value;
+  }
+
+  function normalizeAdminNotification(raw, readIds = new Set()) {
+    if (!raw || typeof raw !== 'object') return null;
+    const id = toIdString(raw.id || raw._id || raw.notificationId || '');
+    if (!id) return null;
+
+    const readAt = raw.readAt || raw.read_at || null;
+    const localRead = readIds.has(String(id));
+    const read = Boolean(raw.read || readAt || localRead);
+    const message = String(raw.message || raw.description || '').trim();
+
+    return {
+      id,
+      type: String(raw.type || 'system_success').trim(),
+      title: String(raw.title || 'اعلان جدید').trim(),
+      message,
+      description: message,
+      createdAt: raw.createdAt || raw.created_at || new Date().toISOString(),
+      readAt: readAt || (read ? new Date().toISOString() : null),
+      read,
+      priority: String(raw.priority || 'normal').trim(),
+      targetRoute: raw.targetRoute || raw.target_route || '',
+      targetId: raw.targetId || raw.target_id || null,
+      metadata: normalizeMetadata(raw.metadata)
+    };
+  }
+
+  function normalizeAdminNotificationList(payload, readIds = new Set()) {
+    const source = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.notifications)
+        ? payload.notifications
+        : Array.isArray(payload?.items)
+          ? payload.items
+          : [];
+
+    return source
+      .map((item) => normalizeAdminNotification(item, readIds))
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async function adminNotificationRequest(path = '', options = {}) {
+    const response = await fetch(`${ADMIN_NOTIFICATION_API_BASE}${path}`, {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {})
+      },
+      ...options
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload?.message || payload?.error || `Admin notification API failed (${response.status})`);
+    }
+    return payload;
+  }
+
+  async function fetchAdminNotificationsFromApi(readIds) {
+    // TODO: Backend endpoint: GET /api/admin/notifications?limit=40
+    const payload = await adminNotificationRequest(`?limit=${ADMIN_NOTIFICATION_LIMIT}`);
+    return normalizeAdminNotificationList(payload, readIds);
+  }
+
+  async function markAdminNotificationReadInApi(id) {
+    if (!id) return null;
+    // TODO: Backend endpoint: PUT /api/admin/notifications/:id/read
+    return adminNotificationRequest(`/${encodeURIComponent(id)}/read`, { method: 'PUT' });
+  }
+
+  async function markAllAdminNotificationsReadInApi() {
+    // TODO: Backend endpoint: PUT /api/admin/notifications/mark-all-read
+    return adminNotificationRequest('/mark-all-read', { method: 'PUT' });
+  }
+
+  async function clearReadAdminNotificationsInApi() {
+    // TODO: Backend endpoint: DELETE /api/admin/notifications/read
+    return adminNotificationRequest('/read', { method: 'DELETE' });
   }
 
   function getRelativeTime(dateValue) {
@@ -14930,18 +15037,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('adminNotificationClose');
     const listEl = document.getElementById('adminNotificationList');
     const markAllBtn = document.getElementById('adminNotificationMarkAll');
+    const clearReadBtn = document.getElementById('adminNotificationClearRead');
     const unreadLabel = document.getElementById('adminNotificationUnreadLabel');
 
-    if (!fab || !badge || !panel || !backdrop || !closeBtn || !listEl || !markAllBtn || !unreadLabel) {
+    if (!fab || !badge || !panel || !backdrop || !closeBtn || !listEl || !markAllBtn || !clearReadBtn || !unreadLabel) {
       return;
     }
 
     let isOpen = false;
     let readIds = readStoredIds();
-    let notifications = getMockAdminNotifications().map((item) => ({
-      ...item,
-      read: Boolean(item.read || readIds.has(String(item.id)))
-    }));
+    let clearedReadIds = readStoredClearedIds();
+    let notifications = [];
+    let notificationLoadInFlight = null;
+    let usingDevelopmentFallback = false;
+    let pollTimer = null;
 
     function syncStoredReadIds() {
       readIds = new Set(notifications.filter((item) => item.read).map((item) => String(item.id)));
@@ -14952,12 +15061,59 @@ document.addEventListener('DOMContentLoaded', () => {
       return notifications.filter((item) => !item.read).length;
     }
 
+    function getReadCount() {
+      return notifications.filter((item) => item.read).length;
+    }
+
+    function applyNotifications(nextNotifications) {
+      notifications = Array.isArray(nextNotifications) ? nextNotifications : [];
+      syncStoredReadIds();
+      renderNotifications();
+    }
+
+    async function loadAdminNotifications({ silent = false, forceFallback = false } = {}) {
+      if (notificationLoadInFlight && !forceFallback) return notificationLoadInFlight;
+
+      notificationLoadInFlight = (async () => {
+        try {
+          if (forceFallback) throw new Error('Using development fallback notifications');
+          const items = await fetchAdminNotificationsFromApi(readIds);
+          usingDevelopmentFallback = false;
+          applyNotifications(items);
+          return items;
+        } catch (error) {
+          if (!silent) {
+            console.warn('Admin notification API unavailable, using development fallback:', error);
+          }
+          usingDevelopmentFallback = true;
+          const fallbackItems = normalizeAdminNotificationList(getDevelopmentFallbackNotifications(), readIds)
+            .filter((item) => !clearedReadIds.has(String(item.id)));
+          applyNotifications(fallbackItems);
+          return fallbackItems;
+        } finally {
+          notificationLoadInFlight = null;
+        }
+      })();
+
+      return notificationLoadInFlight;
+    }
+
+    function startNotificationPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(() => {
+        if (document.hidden) return;
+        loadAdminNotifications({ silent: true }).catch((error) => {
+          console.warn('Admin notification refresh failed:', error);
+        });
+      }, ADMIN_NOTIFICATION_POLL_MS);
+    }
+
     function markNotificationRead(id) {
       let changed = false;
       notifications = notifications.map((notification) => {
         if (notification.id !== id || notification.read) return notification;
         changed = true;
-        return { ...notification, read: true };
+        return { ...notification, read: true, readAt: notification.readAt || new Date().toISOString() };
       });
       if (changed) syncStoredReadIds();
       return changed;
@@ -14965,6 +15121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateBadge() {
       const unread = getUnreadCount();
+      const read = getReadCount();
       const formatted = unread > MAX_BADGE_COUNT ? `${MAX_BADGE_COUNT}+` : new Intl.NumberFormat('fa-IR').format(unread);
 
       badge.hidden = unread === 0;
@@ -14978,6 +15135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ? `${new Intl.NumberFormat('fa-IR').format(unread)} اعلان خوانده‌نشده`
         : 'اعلان خوانده‌نشده‌ای وجود ندارد';
       markAllBtn.disabled = unread === 0;
+      clearReadBtn.disabled = read === 0;
     }
 
     function renderEmptyState() {
@@ -15062,15 +15220,27 @@ document.addEventListener('DOMContentLoaded', () => {
         readBtn.className = 'admin-notification-item__read';
         readBtn.textContent = item.read ? 'خوانده شده' : 'خواندم';
         readBtn.disabled = Boolean(item.read);
-        readBtn.addEventListener('click', (event) => {
+        readBtn.addEventListener('click', async (event) => {
           event.stopPropagation();
-          markNotificationRead(item.id);
+          if (!markNotificationRead(item.id)) return;
           renderNotifications();
+          if (!usingDevelopmentFallback) {
+            try {
+              await markAdminNotificationReadInApi(item.id);
+            } catch (error) {
+              console.warn('Admin notification mark-read API unavailable:', error);
+            }
+          }
         });
 
         const itemClickHandler = async () => {
-          markNotificationRead(item.id);
+          const changed = markNotificationRead(item.id);
           renderNotifications();
+          if (changed && !usingDevelopmentFallback) {
+            markAdminNotificationReadInApi(item.id).catch((error) => {
+              console.warn('Admin notification mark-read API unavailable:', error);
+            });
+          }
           closePanel(false);
           await navigateToNotificationTarget(item);
         };
@@ -15130,10 +15300,44 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn.addEventListener('click', closePanel);
     backdrop.addEventListener('click', closePanel);
 
-    markAllBtn.addEventListener('click', () => {
-      notifications = notifications.map((item) => ({ ...item, read: true }));
+    markAllBtn.addEventListener('click', async () => {
+      const readAt = new Date().toISOString();
+      notifications = notifications.map((item) => ({ ...item, read: true, readAt: item.readAt || readAt }));
       syncStoredReadIds();
       renderNotifications();
+      if (!usingDevelopmentFallback) {
+        try {
+          await markAllAdminNotificationsReadInApi();
+          await loadAdminNotifications({ silent: true });
+        } catch (error) {
+          console.warn('Admin notification mark-all API unavailable:', error);
+        }
+      }
+    });
+
+    clearReadBtn.addEventListener('click', async () => {
+      const previous = notifications.slice();
+      if (usingDevelopmentFallback) {
+        notifications
+          .filter((item) => item.read)
+          .forEach((item) => clearedReadIds.add(String(item.id)));
+        storeClearedReadIds(clearedReadIds);
+      }
+      notifications = notifications.filter((item) => !item.read);
+      syncStoredReadIds();
+      renderNotifications();
+      if (!usingDevelopmentFallback) {
+        try {
+          await clearReadAdminNotificationsInApi();
+          await loadAdminNotifications({ silent: true });
+        } catch (error) {
+          console.warn('Admin notification clear-read API unavailable:', error);
+          notifications = previous;
+          syncStoredReadIds();
+          renderNotifications();
+          showDeepLinkToast('پاک‌سازی اعلان‌های خوانده‌شده فعلاً از سمت سرور پشتیبانی نمی‌شود.', 'info');
+        }
+      }
     });
 
     document.addEventListener('keydown', (event) => {
@@ -15168,17 +15372,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.VitrinetAdminNotifications = {
       push(event) {
-        if (!event || !event.id) return;
-        notifications = [{ ...event, read: Boolean(event.read) }, ...notifications.filter((item) => item.id !== event.id)];
-        if (event.read) syncStoredReadIds();
+        const item = normalizeAdminNotification(event, readIds);
+        if (!item) return;
+        notifications = [item, ...notifications.filter((notification) => notification.id !== item.id)];
+        if (item.read) syncStoredReadIds();
         renderNotifications();
+      },
+      refresh() {
+        return loadAdminNotifications({ silent: false });
       },
       markAllRead() {
         markAllBtn.click();
+      },
+      clearRead() {
+        clearReadBtn.click();
       }
     };
 
     renderNotifications();
+    loadAdminNotifications({ silent: false }).catch((error) => {
+      console.warn('Initial admin notification load failed:', error);
+    });
+    startNotificationPolling();
   }
 
   document.addEventListener('DOMContentLoaded', initAdminNotificationWidget);
