@@ -4,6 +4,7 @@ const SimilarPromotionPlan = require('../models/SimilarPromotionPlan');
 const SimilarShopPromotion = require('../models/SimilarShopPromotion');
 const Seller = require('../models/Seller');
 const ServiceShop = require('../models/serviceShop');
+const Product = require('../models/product');
 const ShopAppearance = require('../models/ShopAppearance');
 const Payment = require('../models/payment');
 const SellerNotification = require('../models/SellerNotification');
@@ -231,6 +232,42 @@ async function findShopSnapshotForSeller(seller) {
   };
 }
 
+async function findProductSnapshotForSeller(sellerId, rawProductId) {
+  const value = firstFieldValue(rawProductId);
+  if (!value) {
+    return { productId: null, productSnapshot: {} };
+  }
+
+  const productId = toObjectId(value);
+  if (!productId) {
+    const error = new Error('شناسه کالای انتخاب‌شده معتبر نیست.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const product = await Product.findOne({ _id: productId, sellerId })
+    .select('title price images mainImageIndex')
+    .lean();
+  if (!product) {
+    const error = new Error('کالای انتخاب‌شده برای این فروشگاه پیدا نشد.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const images = Array.isArray(product.images) ? product.images : [];
+  const mainImageIndex = Number.isInteger(product.mainImageIndex) ? product.mainImageIndex : 0;
+  const imageUrl = images[mainImageIndex] || images[0] || '';
+
+  return {
+    productId: product._id,
+    productSnapshot: {
+      title: normaliseText(product.title || '', 180),
+      price: Math.max(0, Number(product.price) || 0),
+      imageUrl: normaliseText(imageUrl, 500)
+    }
+  };
+}
+
 async function expireExpiredPromotions(referenceDate = new Date()) {
   const now = referenceDate instanceof Date ? referenceDate : new Date(referenceDate);
   if (Number.isNaN(now.getTime())) return { modifiedCount: 0 };
@@ -414,11 +451,15 @@ exports.createSellerRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: 'پلن انتخابی فعال نیست.' });
     }
 
-    const { serviceShopId, snapshot } = await findShopSnapshotForSeller(seller);
+    const [{ serviceShopId, snapshot }, { productId, productSnapshot }] = await Promise.all([
+      findShopSnapshotForSeller(seller),
+      findProductSnapshotForSeller(seller._id, body.productId)
+    ]);
 
     const promotion = await SimilarShopPromotion.create({
       sellerId: seller._id,
       serviceShopId,
+      productId,
       planTier,
       durationUnit,
       durationDays: plan.durationDays,
@@ -429,7 +470,8 @@ exports.createSellerRequest = async (req, res) => {
       paymentProof: {},
       status: 'pending',
       priorityOrder: planTier === 'priority' ? 10 : 100,
-      shopSnapshot: snapshot
+      shopSnapshot: snapshot,
+      productSnapshot
     });
 
     await createAdminNotification({

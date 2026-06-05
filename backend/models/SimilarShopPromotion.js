@@ -22,6 +22,12 @@ const shopSnapshotSchema = new mongoose.Schema({
   imageUrl: { type: String, default: '', trim: true }
 }, { _id: false });
 
+const productSnapshotSchema = new mongoose.Schema({
+  title: { type: String, default: '', trim: true },
+  price: { type: Number, default: 0, min: 0 },
+  imageUrl: { type: String, default: '', trim: true }
+}, { _id: false });
+
 const metricsSchema = new mongoose.Schema({
   impressions: { type: Number, default: 0, min: 0 },
   clicks: { type: Number, default: 0, min: 0 },
@@ -39,6 +45,12 @@ const similarShopPromotionSchema = new mongoose.Schema({
   serviceShopId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ServiceShop',
+    default: null,
+    index: true
+  },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
     default: null,
     index: true
   },
@@ -98,6 +110,10 @@ const similarShopPromotionSchema = new mongoose.Schema({
   adminNote: { type: String, default: '', trim: true, maxlength: 1000 },
   shopSnapshot: {
     type: shopSnapshotSchema,
+    default: () => ({})
+  },
+  productSnapshot: {
+    type: productSnapshotSchema,
     default: () => ({})
   },
   metrics: {

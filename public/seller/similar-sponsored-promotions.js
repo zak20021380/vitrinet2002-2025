@@ -110,6 +110,22 @@
     };
   }
 
+  async function refreshSellerAdvertisingPlans(promotion) {
+    const detail = {
+      source: 'similar_shop_promotion',
+      id: promotion?.id || promotion?._id || ''
+    };
+    try {
+      if (typeof window.refreshSellerAdvertisingPlans === 'function') {
+        return await window.refreshSellerAdvertisingPlans(detail);
+      }
+      window.dispatchEvent(new CustomEvent('seller:advertising-requests-updated', { detail }));
+    } catch (err) {
+      console.warn('Failed to refresh My Plans after similar promotion submit:', err);
+    }
+    return null;
+  }
+
   async function csrfToken() {
     const cookieToken = readCookie('csrf_token');
     if (cookieToken) return cookieToken;
@@ -5000,6 +5016,7 @@ body.ssw-modal-open .hamburger-menu {
       const token = await csrfToken();
       const activePromotion = findActivePromotion();
       if (activePromotion) {
+        await refreshSellerAdvertisingPlans(activePromotion);
         showExistingPromotionResult(activePromotion, { isActive: true });
         return;
       }
@@ -5023,12 +5040,14 @@ body.ssw-modal-open .hamburger-menu {
         }
         promotion = data.promotion;
         if (data.alreadyActive) {
+          await refreshSellerAdvertisingPlans(promotion);
           await loadData({ force: true, silent: true });
           showExistingPromotionResult(promotion, { isActive: true });
           return;
         }
       }
 
+      await refreshSellerAdvertisingPlans(promotion);
       const promotionId = getPromotionId(promotion);
       if (!promotionId) throw new Error('شناسه درخواست تبلیغ دریافت نشد.');
       if (['verified', 'waived'].includes(promotion.paymentStatus)) {

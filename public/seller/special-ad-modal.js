@@ -37,6 +37,18 @@
     return init;
   };
 
+  const refreshSellerAdvertisingPlans = async (detail = {}) => {
+    try {
+      if (typeof window.refreshSellerAdvertisingPlans === 'function') {
+        return await window.refreshSellerAdvertisingPlans(detail);
+      }
+      window.dispatchEvent(new CustomEvent('seller:advertising-requests-updated', { detail }));
+    } catch (err) {
+      console.warn('Failed to refresh My Plans after advertising submit:', err);
+    }
+    return null;
+  };
+
   // Ad Plan Prices (will be fetched from server)
   const AD_PLAN_PRICES = {
     ad_search: 79000,
@@ -2152,6 +2164,11 @@
         setLoading(false);
         return;
       }
+
+      await refreshSellerAdvertisingPlans({
+        source: 'ad_order',
+        id: result.adOrder?._id || result.adOrder?.id || ''
+      });
       
       // Extract scheduling info from response
       const scheduling = result.adOrder?.scheduling || {};

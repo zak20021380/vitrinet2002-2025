@@ -13,6 +13,13 @@ const withCreds = (init = {}) => {
   return init;
 };
 
+const escapeMyPlansHtml = (value = '') => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 /* span های قیمت تبلیغ در صفحه */
 const adPriceElems = {
   search   : document.getElementById("price-ad_search"),
@@ -2029,9 +2036,10 @@ window.submitAdForm = async function(e) {
         if (productWrap) productWrap.style.display = 'block';
       }
 
-      const myPlansSection = document.getElementById('content-myplans');
-      if (myPlansSection && !myPlansSection.classList.contains('hidden')) {
-        fetchMyPlans();
+      try {
+        await fetchMyPlans();
+      } catch (refreshError) {
+        console.warn('Failed to refresh My Plans after advertising submit:', refreshError);
       }
 
     } catch (err) {
@@ -2060,7 +2068,7 @@ async function fetchMyPlans() {
   let summaryError = false;
   
   try {
-    const summaryRes = await fetch(`${API_BASE}/sellerPlans/summary`, withCreds());
+    const summaryRes = await fetch(`${API_BASE}/sellerPlans/summary`, withCreds({ cache: 'no-store' }));
     if (summaryRes.ok) {
       summaryData = await summaryRes.json();
     } else {
@@ -2327,6 +2335,7 @@ async function fetchMyPlans() {
       case "ad_home":     return "تبلیغ صفحه اول";
       case "ad_search":   return "تبلیغ جستجو";
       case "ad_products": return "تبلیغ محصولات";
+      case "similar_stores": return "تبلیغ فروشگاه‌های مشابه";
       default:            return "تبلیغ ویژه";
     }
   }
@@ -2377,6 +2386,11 @@ async function fetchMyPlans() {
       case 'expired': return 'myplans-card__status--expired';
       case 'pending': return 'myplans-card__status--pending';
       case 'paid': return 'myplans-card__status--paid';
+      case 'rejected': return 'myplans-card__status--rejected';
+      case 'paused': return 'myplans-card__status--paused';
+      case 'cancelled':
+      case 'canceled':
+      case 'removed': return 'myplans-card__status--cancelled';
       default: return 'myplans-card__status--pending';
     }
   }
@@ -2388,6 +2402,11 @@ async function fetchMyPlans() {
       case 'expired': return 'منقضی';
       case 'pending': return 'در انتظار';
       case 'paid': return 'پرداخت شده';
+      case 'rejected': return 'رد شده';
+      case 'paused': return 'متوقف شده';
+      case 'cancelled':
+      case 'canceled':
+      case 'removed': return 'لغو شده';
       default: return status || 'نامشخص';
     }
   }
@@ -2397,7 +2416,8 @@ async function fetchMyPlans() {
     const map = {
       ad_home: 'نمایش در صفحه اصلی',
       ad_search: 'نمایش در جستجو',
-      ad_products: 'نمایش در لیست محصولات'
+      ad_products: 'نمایش در لیست محصولات',
+      similar_stores: 'نمایش در بخش فروشگاه‌های مشابه'
     };
     if (map[slug]) return map[slug];
     if (plan.productId) return 'نمایش در صفحه محصول';
@@ -2503,7 +2523,7 @@ async function fetchMyPlans() {
 
   try {
     const adPriceMapPromise = fetchAdPrices();
-    const res = await fetch(`${API_BASE}/sellerPlans/my`, withCreds());
+    const res = await fetch(`${API_BASE}/sellerPlans/my`, withCreds({ cache: 'no-store' }));
     const json = await res.json();
     const adPriceMap = (await adPriceMapPromise) || {};
 
@@ -2589,7 +2609,7 @@ async function fetchMyPlans() {
                 <path d="M12 8v8M8 12h8"/>
               </svg>
             </div>
-            <h3 class="myplans-section__title">پلن‌های تبلیغات ویژه</h3>
+            <h3 class="myplans-section__title">پلن‌های تبلیغاتی</h3>
           </div>
           <div class="myplans-empty myplans-empty--ad">
             <div class="myplans-empty__icon">
@@ -2619,6 +2639,7 @@ async function fetchMyPlans() {
     const adPlans = [];
     json.plans.forEach(plan => {
       if (
+        plan.type === 'subscription' ||
         (plan.title && plan.title.includes('اشتراک')) ||
         ['1month', '3month', '12month'].includes(plan.slug)
       ) {
@@ -2634,7 +2655,7 @@ async function fetchMyPlans() {
     const adCount = adPlans.length;
     
     // Count active ads for hero stats
-    const activeAdCount = adPlans.filter(p => p.status === 'approved' || p.status === 'active' || p.status === 'paid').length;
+    const activeAdCount = adPlans.filter(p => p.active || p.status === 'active' || p.status === 'paid').length;
     
     // Update hero stats with real data
     updateMyPlansHeroStats(subscriptionStatus, activeAdCount);
@@ -2807,8 +2828,8 @@ async function fetchMyPlans() {
 
     // کارت‌های تبلیغات
     // Check if any ad plan is pending (for guard flow)
-    const hasPendingAdPlan = adPlans.some(p => p.status === 'pending');
-    const pendingAdPlan = adPlans.find(p => p.status === 'pending');
+    const hasPendingAdPlan = adPlans.some(p => p.source !== 'similar_shop_promotion' && p.status === 'pending');
+    const pendingAdPlan = adPlans.find(p => p.source !== 'similar_shop_promotion' && p.status === 'pending');
 
     const adCards = adPlans.length
       ? adPlans.map(plan => {
@@ -2817,13 +2838,32 @@ async function fetchMyPlans() {
           const statusLabel = getStatusLabel(status);
           const adType = getAdTypeLabel(plan);
           const locationHint = getAdLocationHint(plan);
-          const viewLink = plan.status === 'approved' ? resolveAdViewLink(plan) : '';
-          const endDate = getAdEndDate(plan);
+          const viewLink = ['approved', 'paid', 'active'].includes(status) ? resolveAdViewLink(plan) : '';
+          const detailsUrl = plan.source === 'similar_shop_promotion' ? plan.detailsUrl : '';
+          const submittedAt = plan.submittedAt || plan.createdAt || plan.startDate;
+          const submittedDate = submittedAt ? toJalaliDate(submittedAt) : '-';
+          const reviewDate = plan.rejectedAt || plan.approvedAt || plan.statusDate || plan.reviewedAt;
+          const reviewDateValue = reviewDate ? toJalaliDate(reviewDate) : 'هنوز بررسی نشده';
+          const reviewDateLabel = status === 'rejected'
+            ? 'تاریخ رد'
+            : (plan.approvedAt
+              ? 'تاریخ تأیید'
+              : (['cancelled', 'canceled', 'removed'].includes(status) ? 'تاریخ لغو' : 'آخرین بررسی'));
+          const relatedItems = [
+            plan.relatedStoreTitle ? `فروشگاه: ${plan.relatedStoreTitle}` : '',
+            plan.relatedProductTitle ? `کالا: ${plan.relatedProductTitle}` : ''
+          ].filter(Boolean);
+          const relatedSection = relatedItems.length
+            ? `<div class="myplans-card__related">${relatedItems.map(item => `<span>${escapeMyPlansHtml(item)}</span>`).join('')}</div>`
+            : '';
+          const rejectionSection = plan.rejectionReason
+            ? `<div class="myplans-card__rejection"><strong>دلیل رد:</strong><span>${escapeMyPlansHtml(plan.rejectionReason)}</span></div>`
+            : '';
 
           // Guard flow: if pending, show modal instead of navigating
           let actionBtn;
           if (viewLink) {
-            actionBtn = `<a href="${viewLink}" target="_blank" rel="noopener" class="myplans-card__action myplans-card__action--primary">
+            actionBtn = `<a href="${escapeMyPlansHtml(viewLink)}" target="_blank" rel="noopener" class="myplans-card__action myplans-card__action--primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
                   <path d="M15 3h6v6"/>
@@ -2831,13 +2871,20 @@ async function fetchMyPlans() {
                 </svg>
                 مشاهده تبلیغ
               </a>`;
+          } else if (detailsUrl) {
+            actionBtn = `<a href="${escapeMyPlansHtml(detailsUrl)}" class="myplans-card__action myplans-card__action--secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 11v5M12 8h.01"/>
+                </svg>
+                مشاهده جزئیات درخواست
+              </a>`;
           } else if (status === 'pending') {
             // Pending plan - show guard modal on click
-            const planName = plan.title || adType;
-            const submittedDate = plan.createdAt ? toJalaliDate(plan.createdAt) : '';
+            const planName = escapeMyPlansHtml(plan.title || adType);
             actionBtn = `<button class="myplans-card__action myplans-card__action--secondary myplans-card__action--pending" 
                 data-pending-plan-name="${planName}" 
-                data-pending-plan-date="${submittedDate}"
+                data-pending-plan-date="${escapeMyPlansHtml(submittedDate)}"
                 onclick="showPendingAdGuardModal(this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/>
@@ -2856,14 +2903,6 @@ async function fetchMyPlans() {
 
           // Get ad ID for deep-linking
           const adId = plan._id || plan.id || '';
-
-          // تاریخ فعالسازی (شروع نمایش) - use scheduledStartDate if available
-          const startDate = plan.scheduledStartDate || plan.displayedAt || plan.approvedAt || plan.startDate;
-          const startDateFormatted = startDate ? toJalaliDate(startDate) : '-';
-          
-          // تاریخ پایان - use scheduledEndDate if available
-          const scheduledEndDate = plan.scheduledEndDate || null;
-          const endDateValue = scheduledEndDate ? toJalaliDate(scheduledEndDate) : getAdEndDate(plan);
           
           // Build scheduling info section for reserved ads
           let schedulingSection = '';
@@ -2918,8 +2957,8 @@ async function fetchMyPlans() {
                   </svg>
                 </div>
                 <div class="myplans-card__date-content">
-                  <span class="myplans-card__date-label">تاریخ فعالسازی</span>
-                  <span class="myplans-card__date-value">${startDateFormatted}</span>
+                  <span class="myplans-card__date-label">تاریخ ثبت درخواست</span>
+                  <span class="myplans-card__date-value">${escapeMyPlansHtml(submittedDate)}</span>
                 </div>
               </div>
               <div class="myplans-card__date-divider">
@@ -2936,36 +2975,38 @@ async function fetchMyPlans() {
                   </svg>
                 </div>
                 <div class="myplans-card__date-content">
-                  <span class="myplans-card__date-label">تاریخ پایان</span>
-                  <span class="myplans-card__date-value">${endDateValue}</span>
+                  <span class="myplans-card__date-label">${reviewDateLabel}</span>
+                  <span class="myplans-card__date-value">${escapeMyPlansHtml(reviewDateValue)}</span>
                 </div>
               </div>
             </div>
           `;
 
           return `
-            <article class="myplans-card myplans-card--ad" data-plan-status="${status}" data-ad-id="${adId}">
+            <article class="myplans-card myplans-card--ad" data-plan-status="${escapeMyPlansHtml(status)}" data-ad-id="${escapeMyPlansHtml(adId)}">
               <div class="myplans-card__header">
                 <span class="myplans-card__type">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 7v6l3 2"/>
                   </svg>
-                  ${adType}
+                  ${escapeMyPlansHtml(adType)}
                 </span>
-                <span class="myplans-card__status ${statusClass}">${statusLabel}</span>
+                <span class="myplans-card__status ${statusClass}">${escapeMyPlansHtml(statusLabel)}</span>
               </div>
               <div class="myplans-card__body">
-                <h3 class="myplans-card__name">${plan.title || plan.adTitle || adType}</h3>
+                <h3 class="myplans-card__name">${escapeMyPlansHtml(plan.title || plan.adTitle || adType)}</h3>
                 <div class="myplans-card__benefit">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M5 12l5 5L20 7"/>
                   </svg>
-                  ${locationHint || 'نمایش ویژه در ویترینت'}
+                  ${escapeMyPlansHtml(locationHint || 'نمایش ویژه در ویترینت')}
                 </div>
+                ${relatedSection}
               </div>
               ${schedulingSection}
               ${datesSection}
+              ${rejectionSection}
               ${actionBtn}
             </article>
           `;
@@ -3024,7 +3065,7 @@ async function fetchMyPlans() {
               <path d="M12 8v8M8 12h8"/>
             </svg>
           </div>
-          <h3 class="myplans-section__title">پلن‌های تبلیغات ویژه</h3>
+          <h3 class="myplans-section__title">پلن‌های تبلیغاتی</h3>
           ${adPlans.length ? `<span class="myplans-section__count">${toFaDigits(adCount)} پلن</span>` : ''}
         </div>
         <div class="myplans-grid">
@@ -3079,6 +3120,15 @@ async function fetchMyPlans() {
     `;
   }
 }
+
+window.refreshSellerAdvertisingPlans = async function refreshSellerAdvertisingPlans(options = {}) {
+  if (!document.getElementById('myPlansBox')) return null;
+  const result = await fetchMyPlans();
+  if (options.focus && options.id) {
+    focusMyPlans(String(options.id));
+  }
+  return result;
+};
 
 
 
