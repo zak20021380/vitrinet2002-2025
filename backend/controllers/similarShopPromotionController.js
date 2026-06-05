@@ -7,6 +7,7 @@ const ServiceShop = require('../models/serviceShop');
 const ShopAppearance = require('../models/ShopAppearance');
 const Payment = require('../models/payment');
 const SellerNotification = require('../models/SellerNotification');
+const { createAdminNotification } = require('./notificationController');
 
 const TIER_LABELS = {
   normal: 'اسپانسری معمولی',
@@ -428,6 +429,25 @@ exports.createSellerRequest = async (req, res) => {
       status: 'pending',
       priorityOrder: planTier === 'priority' ? 10 : 100,
       shopSnapshot: snapshot
+    });
+
+    await createAdminNotification({
+      type: 'advertising_request',
+      title: 'درخواست تبلیغ جدید',
+      message: `فروشگاه ${snapshot.name || seller.storename || seller.shopurl || 'بدون نام'} درخواست ${plan.title || `${planTier} ${durationUnit}`} را ثبت کرد.`,
+      priority: 'high',
+      targetRoute: 'similar-promotions',
+      targetId: promotion._id,
+      metadata: {
+        sellerId: String(seller._id),
+        storeId: String(serviceShopId || seller._id),
+        adRequestId: String(promotion._id),
+        adType: 'similar_shop_promotion',
+        planTier,
+        durationUnit,
+        createdAt: promotion.createdAt,
+        source: 'similarShopPromotion.createSellerRequest'
+      }
     });
 
     return res.status(201).json({

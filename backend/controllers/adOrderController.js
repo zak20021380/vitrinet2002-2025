@@ -9,6 +9,7 @@ const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
 const { parseDurationHours } = require('../utils/adDisplayConfig');
 const { createAdApprovedNotification } = require('./sellerNotificationController');
+const { createAdminNotification } = require('./notificationController');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
 const POPULATE_SPEC = [
@@ -491,6 +492,23 @@ exports.createAdOrder = async (req, res) => {
       adOrder.paymentId = payment._id;
       await adOrder.save();
     }
+
+    await createAdminNotification({
+      type: 'advertising_request',
+      title: 'درخواست تبلیغ جدید',
+      message: `فروشگاه ${seller.storename || seller.shopurl || 'بدون نام'} درخواست ${plan.title || planSlug} را ثبت کرد.`,
+      priority: 'high',
+      targetRoute: 'ad-orders',
+      targetId: adOrder._id,
+      metadata: {
+        sellerId: String(seller._id),
+        storeId: String(seller._id),
+        adRequestId: String(adOrder._id),
+        adType: planSlug,
+        createdAt: adOrder.createdAt,
+        source: 'adOrder.createAdOrder'
+      }
+    });
 
     // TODO: ارسال رخداد ایجاد سفارش به PostHog پس از فعال‌سازی | TODO: Send order_created event to PostHog once enabled
     // const { trackOrderCreated } = require('../utils/posthog-tracking');

@@ -14581,6 +14581,7 @@ document.addEventListener('DOMContentLoaded', () => {
     campaign: { icon: 'ri-gift-line', label: 'کمپین' },
     support: { icon: 'ri-customer-service-2-line', label: 'تیکت' },
     report: { icon: 'ri-file-list-3-line', label: 'گزارش' },
+    advertising_request: { icon: 'ri-advertisement-line', label: 'تبلیغات' },
     system_success: { icon: 'ri-checkbox-circle-line', label: 'سیستم' },
     system_failed: { icon: 'ri-error-warning-line', label: 'سیستم' }
   };
@@ -14850,6 +14851,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'support-ticket': 'tickets',
       'support-tickets': 'tickets',
       'reports-moderation': 'reports',
+      'advertising-management': 'ad-orders',
+      'advertising-requests': 'ad-orders',
       reports: 'reports'
     };
     const fallbackByType = {
@@ -14860,6 +14863,7 @@ document.addEventListener('DOMContentLoaded', () => {
       campaign: 'rewards',
       support: 'tickets',
       report: 'reports',
+      advertising_request: 'ad-orders',
       system_success: 'dashboard',
       system_failed: 'dashboard'
     };
@@ -14888,6 +14892,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `[data-admin-record-id="${escaped}"]`,
       `[data-admin-target-id="${escaped}"]`,
       `[data-id="${escaped}"]`,
+      `[data-order-id="${escaped}"]`,
       `[data-record-id="${escaped}"]`,
       `[data-ticket-open="${escaped}"]`,
       `[data-ticket-status="${escaped}"]`,
@@ -14952,6 +14957,22 @@ document.addEventListener('DOMContentLoaded', () => {
           button.classList.toggle('active', button.dataset.filter === 'all');
         });
         renderSupportTickets();
+      } else if (section === 'ad-orders') {
+        adOrdersFilter = 'all';
+        adOrdersPlanFilter = 'all';
+        adOrdersSearchTerm = '';
+        if (adOrdersPlanFilterEl) adOrdersPlanFilterEl.value = 'all';
+        if (adOrdersSearchEl) adOrdersSearchEl.value = '';
+        document.querySelectorAll('.ad-filter-btn').forEach((button) => {
+          button.classList.toggle('active', button.dataset.filter === 'all');
+        });
+        renderAdOrders();
+      } else if (section === 'similar-promotions') {
+        similarPromotionsFilter = 'all';
+        similarPromotionsSearchTerm = '';
+        if (similarPromotionsStatusFilterEl) similarPromotionsStatusFilterEl.value = 'all';
+        if (similarPromotionsSearchEl) similarPromotionsSearchEl.value = '';
+        renderSimilarPromotionRequests();
       }
     } catch (error) {
       console.warn('Notification deep link filter reset failed:', error);
@@ -15002,6 +15023,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     resetSectionFiltersForDeepLink(section);
+
+    try {
+      if (section === 'ad-orders' && typeof loadAdOrders === 'function') {
+        await loadAdOrders(true);
+      } else if (section === 'similar-promotions' && typeof loadSimilarPromotionRequests === 'function') {
+        await loadSimilarPromotionRequests();
+      }
+    } catch (error) {
+      console.warn('Notification deep link refresh failed:', error);
+    }
 
     if (!item.targetId) {
       const panel = panels?.[section];
