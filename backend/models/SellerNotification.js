@@ -12,10 +12,32 @@ const sellerNotificationSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  recipientRole: {
+    type: String,
+    enum: ['seller'],
+    default: 'seller',
+    index: true
+  },
+  recipientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Seller',
+    index: true
+  },
   // نوع اعلان
   type: {
     type: String,
-    enum: ['customer_message', 'product_like', 'order', 'review', 'admin_message', 'system', 'info', 'ad_approved'],
+    enum: [
+      'customer_message',
+      'product_like',
+      'order',
+      'review',
+      'admin_message',
+      'system',
+      'info',
+      'ad_approved',
+      'advertising_request_approved',
+      'advertising_request_rejected'
+    ],
     default: 'info'
   },
   // عنوان اعلان
@@ -39,7 +61,28 @@ const sellerNotificationSchema = new mongoose.Schema({
   },
   // تاریخ خوانده شدن
   readAt: {
-    type: Date
+    type: Date,
+    default: null
+  },
+  targetRoute: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  targetId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: () => ({})
+  },
+  dedupeKey: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true
   },
   // اطلاعات مرتبط
   relatedData: {
@@ -63,12 +106,21 @@ const sellerNotificationSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AdOrder'
     },
+    similarPromotionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SimilarShopPromotion'
+    },
     // نام مشتری
     customerName: String,
     // عنوان محصول
     productTitle: String,
     // عنوان تبلیغ
-    adTitle: String
+    adTitle: String,
+    actionUrl: String,
+    status: String,
+    rejectionReason: String,
+    adType: String,
+    storeName: String
   }
 }, {
   timestamps: true

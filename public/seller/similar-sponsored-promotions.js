@@ -4400,7 +4400,7 @@ body.ssw-modal-open .hamburger-menu {
       const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
 
       return `
-        <article class="upgrade-ad-card upgrade-ad-card--search ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ' ssw-plan-card--standard'}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
+        <article class="upgrade-ad-card upgrade-ad-card--search ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ' ssw-plan-card--standard'}" data-plan-tier="${escapeHtml(plan.tier)}" data-plan-duration="${escapeHtml(plan.durationUnit)}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
           <div class="ssw-plan-visual" aria-hidden="true">
             <div class="ssw-plan-visual__icon">${isPriority ? icons.trendUp : icons.storeSmall}</div>
             <span class="ssw-plan-visual__line"></span>
@@ -5218,6 +5218,34 @@ body.ssw-modal-open .hamburger-menu {
   /* ─────────────────────────────────────────────────────
      PLAN SYNC & LIFECYCLE
      ───────────────────────────────────────────────────── */
+  async function focusRequest(options = {}) {
+    await loadData({ force: true, silent: true }).catch(() => null);
+
+    const promotionId = String(options.promotionId || '');
+    const request = state.requests.find((item) => String(item._id || item.id || '') === promotionId);
+    const planTier = request?.planTier || options.planTier || '';
+    const durationUnit = request?.durationUnit || options.durationUnit || '';
+    const cards = [...document.querySelectorAll('#similar-sponsored-plans .ssw-plan-card')];
+    const card = cards.find((item) => (
+      item.dataset.planTier === planTier
+      && item.dataset.planDuration === durationUnit
+    ));
+    const target = card || document.getElementById('similar-sponsored-seller-root');
+
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    if (!card) return false;
+
+    card.classList.add('is-active');
+    card.style.setProperty('outline', '3px solid rgba(14, 165, 233, .65)');
+    card.style.setProperty('outline-offset', '4px');
+    card.querySelector('[data-plan-tier]')?.focus({ preventScroll: true });
+    window.setTimeout(() => {
+      card.style.removeProperty('outline');
+      card.style.removeProperty('outline-offset');
+    }, 3500);
+    return true;
+  }
+
   function setupPlanSync() {
     const refresh = (options = {}) => loadData({ force: true, silent: !!options.silent }).catch(() => null);
     const handleVisibility = () => {
@@ -5237,6 +5265,7 @@ body.ssw-modal-open .hamburger-menu {
 
     window.SimilarSponsoredPromotions = {
       refresh,
+      focusRequest,
       getState: () => ({
         plans: [...state.plans],
         requests: [...state.requests],

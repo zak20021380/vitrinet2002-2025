@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { calculateExpiry } = require('../utils/adDisplay');
 const { parseDurationHours } = require('../utils/adDisplayConfig');
-const { createAdApprovedNotification } = require('./sellerNotificationController');
+const { createAdvertisingRequestStatusNotification } = require('./sellerNotificationController');
 const { createAdminNotification } = require('./notificationController');
 
 const ALLOWED_STATUSES = ['pending', 'approved', 'paid', 'rejected', 'expired'];
@@ -665,19 +665,6 @@ exports.updateAdOrderStatus = async (req, res) => {
       adOrder.expiredAt = undefined;
       refreshExpiryMetadata(adOrder, { force: true });
 
-      // ارسال اعلان به فروشنده در صورت تغییر از pending به approved
-      if (previousStatus === 'pending') {
-        try {
-          await createAdApprovedNotification(
-            adOrder.sellerId,
-            adOrder._id,
-            adOrder.adTitle || adOrder.planTitle || ''
-          );
-        } catch (notifErr) {
-          console.error('⚠️ خطا در ارسال اعلان تایید تبلیغ:', notifErr);
-          // ادامه عملیات حتی در صورت خطای اعلان
-        }
-      }
     } else if (status === 'paid') {
       if (!adOrder.approvedAt) {
         adOrder.approvedAt = now;
@@ -706,6 +693,26 @@ exports.updateAdOrderStatus = async (req, res) => {
 
     await adOrder.save();
     await populateAdOrder(adOrder);
+
+    if (previousStatus !== status && ['approved', 'rejected'].includes(status)) {
+      await createAdvertisingRequestStatusNotification(
+        adOrder.sellerId?._id || adOrder.sellerId,
+        {
+          requestId: adOrder._id,
+          status,
+          storeName: adOrder.sellerId?.storename || adOrder.shopTitle || '',
+          productTitle: adOrder.productId?.title || '',
+          adTitle: adOrder.adTitle || '',
+          adType: adOrder.planTitle || adOrder.planSlug || '',
+          rejectionReason: status === 'rejected' ? adOrder.adminNote : '',
+          targetRoute: 'seller-advertising-requests',
+          actionUrl: `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${adOrder._id}`,
+          relatedData: { adId: adOrder._id },
+          metadata: { source: 'ad_order' }
+        }
+      );
+    }
+
     const responseOrder = await buildAdOrderResponse(adOrder);
 
     res.json({

@@ -8,6 +8,7 @@ const ShopAppearance = require('../models/ShopAppearance');
 const Payment = require('../models/payment');
 const SellerNotification = require('../models/SellerNotification');
 const { createAdminNotification } = require('./notificationController');
+const { createAdvertisingRequestStatusNotification } = require('./sellerNotificationController');
 
 const TIER_LABELS = {
   normal: 'اسپانسری معمولی',
@@ -521,6 +522,7 @@ exports.updateAdminRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: 'درخواست تبلیغ پیدا نشد.' });
     }
 
+    const previousStatus = promotion.status;
     const now = new Date();
     const adminId = getAdminId(req);
 
@@ -673,6 +675,39 @@ exports.updateAdminRequest = async (req, res) => {
       { path: 'serviceShopId', select: 'name shopUrl category city coverImage' },
       { path: 'reviewedBy', select: 'name phone' }
     ]);
+
+    if (
+      previousStatus !== promotion.status
+      && ['approve', 'reject'].includes(action)
+      && ['approved', 'rejected'].includes(promotion.status)
+    ) {
+      const actionUrl = [
+        '/seller/dashboard.html#upgrade-special-ads?focus=similar_promotions',
+        `promotion_id=${promotion._id}`,
+        `plan_tier=${encodeURIComponent(promotion.planTier || '')}`,
+        `duration_unit=${encodeURIComponent(promotion.durationUnit || '')}`
+      ].join('&');
+
+      await createAdvertisingRequestStatusNotification(
+        promotion.sellerId?._id || promotion.sellerId,
+        {
+          requestId: promotion._id,
+          status: promotion.status,
+          storeName: promotion.sellerId?.storename || promotion.shopSnapshot?.name || '',
+          adTitle: promotion.planTitle || '',
+          adType: TIER_LABELS[promotion.planTier] || promotion.planTier || '',
+          rejectionReason: promotion.status === 'rejected' ? promotion.adminNote : '',
+          targetRoute: 'seller-similar-advertising-requests',
+          actionUrl,
+          relatedData: { similarPromotionId: promotion._id },
+          metadata: {
+            source: 'similar_shop_promotion',
+            planTier: promotion.planTier,
+            durationUnit: promotion.durationUnit
+          }
+        }
+      );
+    }
 
     return res.json({
       success: true,

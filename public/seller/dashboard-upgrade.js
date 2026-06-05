@@ -1660,12 +1660,15 @@ function parseUpgradeDeepLink() {
   return {
     section: section.replace('#', ''),
     adId: hashParams.get('ad_id') || searchParams.get('ad_id'),
+    promotionId: hashParams.get('promotion_id') || searchParams.get('promotion_id'),
+    planTier: hashParams.get('plan_tier') || searchParams.get('plan_tier'),
+    durationUnit: hashParams.get('duration_unit') || searchParams.get('duration_unit'),
     focus: hashParams.get('focus') || searchParams.get('focus')
   };
 }
 
 function handleDeepLink() {
-  const { section, adId, focus } = parseUpgradeDeepLink();
+  const { section, adId, promotionId, planTier, durationUnit, focus } = parseUpgradeDeepLink();
 
   if (section === 'upgrade-special-ads') {
     toggleTabs('ads');
@@ -1682,6 +1685,8 @@ function handleDeepLink() {
         toggleTabs('myplans');
         focusMyPlans(adId);
       }, 260);
+    } else if (focus === 'similar_promotions' || promotionId) {
+      focusSimilarPromotion({ promotionId, planTier, durationUnit });
     }
   }
 
@@ -1689,6 +1694,19 @@ function handleDeepLink() {
     toggleTabs('myplans');
     setTimeout(() => focusMyPlans(adId), 260);
   }
+}
+
+function focusSimilarPromotion(options = {}) {
+  let attempts = 0;
+  const tryFocus = () => {
+    if (typeof window.SimilarSponsoredPromotions?.focusRequest === 'function') {
+      window.SimilarSponsoredPromotions.focusRequest(options);
+      return;
+    }
+    attempts += 1;
+    if (attempts < 16) setTimeout(tryFocus, 250);
+  };
+  setTimeout(tryFocus, 260);
 }
 
 function showMyPlansHint(message) {
@@ -1718,7 +1736,7 @@ function showMyPlansHint(message) {
 
 function focusMyPlans(adId) {
   let attempts = 0;
-  const maxAttempts = 12;
+  const maxAttempts = 24;
   const retryDelay = 250;
   let hasScrolled = false;
 
@@ -1743,7 +1761,8 @@ function focusMyPlans(adId) {
 
     attempts += 1;
     const contentReady = Boolean(grid && grid.children.length);
-    if (attempts < maxAttempts && (!myPlansContent || !contentReady)) {
+    const targetStillLoading = Boolean(adId && !adCard);
+    if (attempts < maxAttempts && (!myPlansContent || !contentReady || targetStillLoading)) {
       setTimeout(tryFocus, retryDelay);
       return;
     }

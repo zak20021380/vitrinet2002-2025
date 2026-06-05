@@ -147,15 +147,97 @@ exports.createNotification = async (sellerId, data) => {
   try {
     const notification = new SellerNotification({
       sellerId,
+      recipientRole: 'seller',
+      recipientId: sellerId,
       type: data.type || 'info',
       title: data.title,
       message: data.message,
+      read: data.read === true,
+      readAt: data.readAt || null,
+      targetRoute: data.targetRoute || '',
+      targetId: data.targetId ? String(data.targetId) : '',
+      metadata: data.metadata || {},
+      dedupeKey: data.dedupeKey,
       relatedData: data.relatedData || {}
     });
     await notification.save();
     return notification;
   } catch (err) {
     console.error('createNotification error:', err);
+    return null;
+  }
+};
+
+/**
+ * Create a persisted, deduplicated advertising status notification.
+ */
+exports.createAdvertisingRequestStatusNotification = async (sellerId, data = {}) => {
+  try {
+    const requestId = String(data.requestId || '');
+    const status = data.status;
+    if (!sellerId || !requestId || !['approved', 'rejected'].includes(status)) {
+      return null;
+    }
+
+    const isApproved = status === 'approved';
+    const type = isApproved
+      ? 'advertising_request_approved'
+      : 'advertising_request_rejected';
+    const title = isApproved
+      ? 'درخواست تبلیغ شما تایید شد'
+      : 'درخواست تبلیغ شما رد شد';
+    const details = [data.storeName, data.productTitle || data.adTitle, data.adType]
+      .map((value) => String(value || '').trim())
+      .filter(Boolean);
+    const detailText = details.length ? ` (${details.join(' - ')})` : '';
+    const rejectionReason = String(data.rejectionReason || '').trim();
+    const message = isApproved
+      ? `درخواست تبلیغ شما${detailText} تایید شد.`
+      : `درخواست تبلیغ شما${detailText} رد شد.${rejectionReason ? ` دلیل: ${rejectionReason}` : ''}`;
+    const dedupeKey = `advertising-request:${requestId}:${status}`;
+
+    return await SellerNotification.findOneAndUpdate(
+      { dedupeKey },
+      {
+        $setOnInsert: {
+          sellerId,
+          recipientRole: 'seller',
+          recipientId: sellerId,
+          type,
+          title,
+          message,
+          read: false,
+          readAt: null,
+          targetRoute: data.targetRoute || 'seller-advertising-requests',
+          targetId: requestId,
+          metadata: {
+            sellerId: String(sellerId),
+            storeName: data.storeName || '',
+            adRequestId: requestId,
+            adType: data.adType || '',
+            productTitle: data.productTitle || '',
+            status,
+            rejectionReason,
+            createdAt: new Date(),
+            ...(data.metadata || {})
+          },
+          dedupeKey,
+          relatedData: {
+            ...(data.relatedData || {}),
+            adTitle: data.adTitle || data.productTitle || data.adType || '',
+            productTitle: data.productTitle || '',
+            actionUrl: data.actionUrl || '',
+            status,
+            rejectionReason,
+            adType: data.adType || '',
+            storeName: data.storeName || ''
+          }
+        }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+  } catch (err) {
+    console.error('createAdvertisingRequestStatusNotification error:', err);
     return null;
   }
 };
@@ -195,26 +277,13 @@ exports.createCustomerMessageNotification = async (sellerId, customerName, produ
  * @param {string} adTitle - عنوان تبلیغ
  */
 exports.createAdApprovedNotification = async (sellerId, adId, adTitle) => {
-  try {
-    const notification = new SellerNotification({
-      sellerId,
-      type: 'ad_approved',
-      title: 'تبلیغ شما تأیید شد',
-      message: 'تبلیغ شما آماده نمایش است.  برای مشاهده جزئیات، به بخش «ارتقا» و سپس «پلن‌های من» مراجعه کنید.',
-      relatedData: {
-        adId,
-        adTitle: adTitle || '',
-        // Deep-link URL - همیشه به داشبورد فروشنده محصول هدایت می‌کند
-        // هرگز به s-seller-panel یا service-seller-panel هدایت نمی‌شود
-        actionUrl: `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${adId}`
-      }
-    });
-    await notification.save();
-    return notification;
-  } catch (err) {
-    console.error('createAdApprovedNotification error:', err);
-    return null;
-  }
+  return exports.createAdvertisingRequestStatusNotification(sellerId, {
+    requestId: adId,
+    status: 'approved',
+    adTitle,
+    actionUrl: `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${adId}`,
+    relatedData: { adId }
+  });
 };
 
 /**

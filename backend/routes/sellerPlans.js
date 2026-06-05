@@ -106,6 +106,8 @@ router.get('/my', auth('seller'), async (req, res) => {
 
     // تبدیل تبلیغات خریداری شده به خروجی استاندارد
     const adsMapped = ads.map(ad => ({
+      _id: String(ad._id),
+      id: String(ad._id),
       title: ad.planTitle || ad.adTitle || 'تبلیغ ویژه',
       price: ad.price,
       startDate: ad.createdAt,

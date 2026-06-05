@@ -14820,6 +14820,11 @@ body.edit-product-modal-open {
     let notifications = [];
     let loading = false;
     let errorMessage = '';
+    const advertisingNotificationTypes = new Set([
+      'ad_approved',
+      'advertising_request_approved',
+      'advertising_request_rejected'
+    ]);
 
     const buildApiUrl = (path) => {
       if (!path) return '';
@@ -14890,6 +14895,8 @@ body.edit-product-modal-open {
           admin_message: 'ri-admin-fill',
           system: 'ri-settings-3-fill',
           ad_approved: 'ri-checkbox-circle-fill',
+          advertising_request_approved: 'ri-checkbox-circle-fill',
+          advertising_request_rejected: 'ri-close-circle-fill',
           info: 'ri-information-fill'
         };
         return icons[type] || 'ri-notification-3-line';
@@ -14898,6 +14905,8 @@ body.edit-product-modal-open {
       // تابع برای تعیین متن وضعیت بر اساس نوع
       const getStatusText = (item) => {
         if (item.read) return 'خوانده شده';
+        if (item.type === 'advertising_request_approved') return 'تایید شده';
+        if (item.type === 'advertising_request_rejected') return 'رد شده';
         const statusTexts = {
           review: 'نظر جدید',
           customer_message: 'پیام جدید',
@@ -14911,14 +14920,15 @@ body.edit-product-modal-open {
 
       // تابع برای تعیین اینکه آیا اعلان قابل کلیک است
       const isClickable = (type, item) => {
-        if (type === 'ad_approved') {
-          return Boolean(item?.relatedData?.actionUrl);
+        if (advertisingNotificationTypes.has(type)) {
+          return Boolean(item?.relatedData?.actionUrl || item?.targetRoute);
         }
         return ['review', 'customer_message', 'product_like'].includes(type);
       };
 
       // تابع برای تعیین متن راهنمای عمل
       const getActionHint = (type) => {
+        if (advertisingNotificationTypes.has(type)) return 'مشاهده درخواست تبلیغ';
         const hints = {
           review: 'مشاهده و مدیریت نظرات',
           customer_message: 'مشاهده پیام‌ها',
@@ -14938,11 +14948,18 @@ body.edit-product-modal-open {
         if (item.relatedData?.actionUrl) {
           wrapper.setAttribute('data-action-url', item.relatedData.actionUrl);
         }
+        if (item.targetRoute) wrapper.setAttribute('data-target-route', item.targetRoute);
+        if (item.targetId) wrapper.setAttribute('data-target-id', item.targetId);
 
         // برای اعلان تایید تبلیغ، رنگ سبز موفقیت
-        const isAdApproved = item.type === 'ad_approved';
+        const isAdvertisingStatus = advertisingNotificationTypes.has(item.type);
+        const isAdApproved = ['ad_approved', 'advertising_request_approved'].includes(item.type);
+        const isAdRejected = item.type === 'advertising_request_rejected';
         let accent, accentSoft;
-        if (isAdApproved) {
+        if (isAdRejected) {
+          accent = item.read ? '#94a3b8' : '#ef4444';
+          accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(239, 68, 68, 0.14)';
+        } else if (isAdApproved) {
           accent = item.read ? '#94a3b8' : '#10b981';
           accentSoft = item.read ? 'rgba(148, 163, 184, 0.18)' : 'rgba(16, 185, 129, 0.16)';
         } else {
@@ -14955,13 +14972,16 @@ body.edit-product-modal-open {
         const icon = getNotificationIcon(item.type);
         const statusText = getStatusText(item);
         const actionHint = getActionHint(item.type);
+        const fallbackTitle = isAdRejected ? 'درخواست تبلیغ شما رد شد' : 'درخواست تبلیغ شما تایید شد';
+        const fallbackMessage = isAdRejected ? 'برای مشاهده جزئیات درخواست کلیک کنید.' : 'درخواست تبلیغ شما آماده نمایش است.';
+        const statusIcon = isAdRejected ? 'ri-close-circle-fill' : 'ri-checkbox-circle-fill';
 
         // ساختار ویژه برای اعلان تایید تبلیغ - کارت یکپارچه کلیک‌پذیر
-        if (isAdApproved) {
+        if (isAdvertisingStatus) {
           // اعلان تایید تبلیغ با طراحی پریمیوم
           wrapper.setAttribute('tabindex', '0');
           wrapper.setAttribute('role', 'button');
-          wrapper.setAttribute('aria-label', `${item.title || 'تبلیغ شما تایید شد'} - برای مشاهده پلن‌ها کلیک کنید`);
+          wrapper.setAttribute('aria-label', `${item.title || fallbackTitle} - برای مشاهده درخواست کلیک کنید`);
           
           wrapper.innerHTML = `
             <div class="notification-icon">
@@ -14969,12 +14989,12 @@ body.edit-product-modal-open {
             </div>
             <div class="notification-body">
               <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <h4>${item.title || 'تبلیغ شما تایید شد'}</h4>
+                <h4>${item.title || fallbackTitle}</h4>
                 <span class="notification-chevron"><i class="ri-arrow-left-s-line"></i></span>
               </div>
-              <p>${item.message || 'تبلیغ شما آماده نمایش است. برای انتخاب پلن کلیک کنید.'}</p>
+              <p>${item.message || fallbackMessage}</p>
               <div class="notification-meta">
-                <span class="notification-chip"><i class="ri-checkbox-circle-fill"></i>${statusText}</span>
+                <span class="notification-chip"><i class="${statusIcon}"></i>${statusText}</span>
                 <span class="notification-time"><i class="ri-time-line"></i>${item.time || ''}</span>
               </div>
             </div>
@@ -15047,6 +15067,9 @@ body.edit-product-modal-open {
             read: Boolean(item.read),
             time: formatRelativeTime(item.createdAt || item.updatedAt),
             title: item.title || '',
+            targetRoute: item.targetRoute || '',
+            targetId: item.targetId || '',
+            metadata: item.metadata || {},
             relatedData: item.relatedData || {}
           }))
           .filter((item) => item.id);
@@ -15182,9 +15205,15 @@ body.edit-product-modal-open {
     /**
      * هندل کلیک/کیبورد روی اعلان تایید تبلیغ
      */
-    const handleAdApprovedAction = (notificationItem) => {
-      const actionUrl = notificationItem.getAttribute('data-action-url');
+    const handleAdvertisingRequestAction = async (notificationItem) => {
+      const storedActionUrl = notificationItem.getAttribute('data-action-url');
       const id = notificationItem.getAttribute('data-id');
+      const targetRoute = notificationItem.getAttribute('data-target-route');
+      const targetId = notificationItem.getAttribute('data-target-id');
+      const fallbackActionUrl = targetRoute === 'seller-similar-advertising-requests'
+        ? `/seller/dashboard.html#upgrade-special-ads?focus=similar_promotions&promotion_id=${targetId || ''}`
+        : `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${targetId || ''}`;
+      const actionUrl = storedActionUrl || fallbackActionUrl;
       
       // استخراج ad_id از relatedData یا URL
       let adId = null;
@@ -15192,18 +15221,16 @@ body.edit-product-modal-open {
         const urlParams = new URLSearchParams(actionUrl?.split('?')[1] || '');
         adId = urlParams.get('ad_id');
       } catch (e) {}
+
+      await markNotificationRead(id);
+      updateBadge();
       
       // بستن مدال
       closeModal();
       
       // هدایت امن به بخش ارتقا
       setTimeout(() => {
-        if (actionUrl) {
-          navigateToNotificationAction(actionUrl, adId);
-        } else {
-          // اگر URL نداشت، به صفحه پیش‌فرض ارتقا برو
-          window.location.href = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
-        }
+        navigateToNotificationAction(actionUrl, adId);
       }, 150);
     };
 
@@ -15216,13 +15243,11 @@ body.edit-product-modal-open {
       if (!notificationItem) return;
       
       const type = notificationItem.getAttribute('data-type');
-      const id = notificationItem.getAttribute('data-id');
-      const actionUrl = notificationItem.getAttribute('data-action-url');
       
       // هدایت به بخش مربوطه بر اساس نوع اعلان
-      if (type === 'ad_approved') {
+      if (advertisingNotificationTypes.has(type)) {
         // استفاده از هندلر ویژه با گارد امنیتی
-        handleAdApprovedAction(notificationItem);
+        handleAdvertisingRequestAction(notificationItem);
         return;
       }
       
@@ -15258,17 +15283,24 @@ body.edit-product-modal-open {
     listContainer.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       
-      const notificationItem = event.target.closest('.notification-item--ad_approved.notification-item--clickable');
+      const notificationItem = event.target.closest('.notification-item--clickable');
       if (!notificationItem) return;
+      if (!advertisingNotificationTypes.has(notificationItem.getAttribute('data-type'))) return;
       
       // جلوگیری از اسکرول با Space
       event.preventDefault();
       
       // اجرای عمل کلیک
-      handleAdApprovedAction(notificationItem);
+      handleAdvertisingRequestAction(notificationItem);
     });
 
     fetchNotifications();
+    window.setInterval(() => {
+      if (!document.hidden) fetchNotifications();
+    }, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) fetchNotifications();
+    });
   })();
 </script>
 
