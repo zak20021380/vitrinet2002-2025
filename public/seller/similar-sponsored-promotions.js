@@ -1703,6 +1703,60 @@ body.ssw-modal-open .hamburger-menu {
   color: #0f766e;
   font-weight: 800;
 }
+.ssw-modal__validation-notice {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(244,63,94,.18);
+  border-radius: 16px;
+  color: #9f1239;
+  background:
+    radial-gradient(circle at 8% 15%, rgba(255,255,255,.92), transparent 34%),
+    linear-gradient(135deg, #fff1f2 0%, #fff7ed 100%);
+  box-shadow: 0 12px 28px rgba(244,63,94,.08), inset 0 1px 0 rgba(255,255,255,.92);
+  animation: sswValidationNoticeIn .2s ease both;
+}
+.ssw-modal__validation-notice[hidden] {
+  display: none;
+}
+.ssw-modal__validation-notice-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  color: #e11d48;
+  background: rgba(255,228,230,.9);
+  border: 1px solid rgba(244,63,94,.16);
+}
+.ssw-modal__validation-notice-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.ssw-modal__validation-notice-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.ssw-modal__validation-notice-title {
+  color: #9f1239;
+  font-size: .78rem;
+  font-weight: 950;
+  line-height: 1.55;
+}
+.ssw-modal__validation-notice-text {
+  color: #be123c;
+  font-size: .68rem;
+  font-weight: 750;
+  line-height: 1.65;
+}
+@keyframes sswValidationNoticeIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 .ssw-modal__product-picker {
   margin-bottom: 1.05rem;
   padding: .78rem;
@@ -1710,6 +1764,11 @@ body.ssw-modal-open .hamburger-menu {
   border-radius: 18px;
   background: linear-gradient(145deg, rgba(240,253,250,.72), rgba(255,255,255,.78));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 8px 20px rgba(15,118,110,.045);
+}
+.ssw-modal__product-picker.has-error {
+  border-color: rgba(244,63,94,.34);
+  background: linear-gradient(145deg, rgba(255,241,242,.78), rgba(255,255,255,.88));
+  box-shadow: 0 12px 24px rgba(244,63,94,.08), 0 0 0 3px rgba(244,63,94,.07), inset 0 1px 0 rgba(255,255,255,.92);
 }
 .ssw-modal__product-picker-head {
   display: flex;
@@ -3997,6 +4056,14 @@ body.ssw-modal-open .hamburger-menu {
             </div>
           </div>
 
+          <div class="ssw-modal__validation-notice" id="similar-sponsored-validation-notice" role="alert" hidden>
+            <span class="ssw-modal__validation-notice-icon" aria-hidden="true">${icons.info}</span>
+            <span class="ssw-modal__validation-notice-copy">
+              <strong class="ssw-modal__validation-notice-title">انتخاب کالا لازم است</strong>
+              <span class="ssw-modal__validation-notice-text">برای ثبت درخواست، ابتدا کالایی را که می‌خواهید تبلیغ شود انتخاب کنید.</span>
+            </span>
+          </div>
+
           <!-- Product / Listing Picker -->
           <section class="ssw-modal__product-picker ssw-modal__confirm" aria-labelledby="similar-sponsored-product-picker-title">
             <div class="ssw-modal__product-picker-head">
@@ -4500,17 +4567,27 @@ body.ssw-modal-open .hamburger-menu {
 
   function setProductError(message = '') {
     const error = document.getElementById('similar-sponsored-product-error');
-    if (!error) return;
-    error.textContent = message;
-    error.hidden = !message;
+    const picker = document.querySelector('.ssw-modal__product-picker');
+    if (error) {
+      error.textContent = message;
+      error.hidden = !message;
+    }
+    picker?.classList.toggle('has-error', Boolean(message));
+  }
+
+  function setValidationNotice(isVisible) {
+    const notice = document.getElementById('similar-sponsored-validation-notice');
+    if (!notice) return;
+    notice.hidden = !isVisible;
+    if (isVisible) {
+      notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   function updateModalSubmitAvailability() {
-    const dialog = document.getElementById('similar-sponsored-form');
     const submitButton = document.querySelector('[data-similar-sponsored-submit]');
     if (!submitButton) return;
-    const isResult = dialog?.classList.contains('is-success') || dialog?.classList.contains('is-error');
-    submitButton.disabled = state.submitting || (!isResult && !state.selectedProduct);
+    submitButton.disabled = state.submitting;
   }
 
   function productMediaMarkup(product, options = {}) {
@@ -4637,12 +4714,14 @@ body.ssw-modal-open .hamburger-menu {
     renderProductSummary();
     renderProductPickerList(searchInput?.value || '');
     setProductError('');
+    setValidationNotice(false);
     updateModalSubmitAvailability();
   }
 
   function selectProduct(productId) {
     state.selectedProduct = state.availableProducts.find((item) => item.id === productId) || null;
     setProductError('');
+    setValidationNotice(false);
     renderProductSummary();
     renderProductPickerList(document.getElementById('similar-sponsored-product-search')?.value || '');
     updateModalSubmitAvailability();
@@ -4687,6 +4766,7 @@ body.ssw-modal-open .hamburger-menu {
     }
     state.selectedProduct = null;
     setProductError('');
+    setValidationNotice(false);
     renderProductPicker();
     if (title) title.textContent = 'ثبت درخواست تبلیغ';
     if (cancelButton) cancelButton.textContent = 'انصراف';
@@ -4893,10 +4973,14 @@ body.ssw-modal-open .hamburger-menu {
     if (title) title.textContent = 'ثبت درخواست تبلیغ';
     if (!state.selectedProduct) {
       setProductError('لطفاً یک کالا را برای تبلیغ انتخاب کنید.');
-      document.querySelector('[data-similar-sponsored-product-picker-open]')?.focus?.();
+      setValidationNotice(true);
+      const pickerButton = document.querySelector('[data-similar-sponsored-product-picker-open]');
+      pickerButton?.focus?.({ preventScroll: true });
       updateModalSubmitAvailability();
       return;
     }
+    setProductError('');
+    setValidationNotice(false);
     const formData = new FormData();
     formData.set('planTier', plan.tier);
     formData.set('durationUnit', plan.durationUnit);
