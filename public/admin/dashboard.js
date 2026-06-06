@@ -14807,6 +14807,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return adminNotificationRequest('/read', { method: 'DELETE' });
   }
 
+  async function removeAdminNotificationInApi(id) {
+    if (!id) return null;
+    // Backend endpoint: DELETE /api/admin/notifications/:id
+    return adminNotificationRequest(`/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  }
+
   function getRelativeTime(dateValue) {
     const timestamp = new Date(dateValue).getTime();
     const now = Date.now();
@@ -15082,6 +15088,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let notificationLoadInFlight = null;
     let usingDevelopmentFallback = false;
     let pollTimer = null;
+    const deletingIds = new Set();
 
     function syncStoredReadIds() {
       readIds = new Set(notifications.filter((item) => item.read).map((item) => String(item.id)));
@@ -15097,7 +15104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyNotifications(nextNotifications) {
-      notifications = Array.isArray(nextNotifications) ? nextNotifications : [];
+      notifications = Array.isArray(nextNotifications)
+        ? nextNotifications.filter((item) => !deletingIds.has(String(item.id)))
+        : [];
       syncStoredReadIds();
       renderNotifications();
     }
@@ -15148,6 +15157,35 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (changed) syncStoredReadIds();
       return changed;
+    }
+
+    async function removeNotification(item) {
+      const id = String(item.id);
+      if (deletingIds.has(id)) return;
+
+      const previous = notifications.slice();
+      deletingIds.add(id);
+      notifications = notifications.filter((notification) => String(notification.id) !== id);
+      syncStoredReadIds();
+      renderNotifications();
+
+      try {
+        if (usingDevelopmentFallback) {
+          clearedReadIds.add(id);
+          storeClearedReadIds(clearedReadIds);
+        } else {
+          await removeAdminNotificationInApi(id);
+        }
+        showDeepLinkToast('اعلان با موفقیت حذف شد.', 'success');
+      } catch (error) {
+        console.warn('Admin notification delete API unavailable:', error);
+        notifications = previous;
+        syncStoredReadIds();
+        renderNotifications();
+        showDeepLinkToast(error?.message || 'حذف اعلان انجام نشد.', 'error');
+      } finally {
+        deletingIds.delete(id);
+      }
     }
 
     function updateBadge() {
@@ -15264,6 +15302,33 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'admin-notification-item__delete';
+        deleteBtn.innerHTML = '<i class="ri-delete-bin-6-line" aria-hidden="true"></i><span>حذف</span>';
+        deleteBtn.setAttribute('aria-label', `حذف اعلان ${item.title || 'انتخاب‌شده'}`);
+        deleteBtn.addEventListener('click', async (event) => {
+          event.stopPropagation();
+
+          if (deleteBtn.dataset.confirming !== 'true') {
+            deleteBtn.dataset.confirming = 'true';
+            deleteBtn.classList.add('is-confirming');
+            deleteBtn.innerHTML = '<i class="ri-alert-line" aria-hidden="true"></i><span>تأیید حذف</span>';
+            deleteBtn.setAttribute('aria-label', `تأیید حذف اعلان ${item.title || 'انتخاب‌شده'}`);
+            setTimeout(() => {
+              if (!deleteBtn.isConnected || deleteBtn.dataset.confirming !== 'true') return;
+              deleteBtn.dataset.confirming = 'false';
+              deleteBtn.classList.remove('is-confirming');
+              deleteBtn.innerHTML = '<i class="ri-delete-bin-6-line" aria-hidden="true"></i><span>حذف</span>';
+              deleteBtn.setAttribute('aria-label', `حذف اعلان ${item.title || 'انتخاب‌شده'}`);
+            }, 4000);
+            return;
+          }
+
+          deleteBtn.disabled = true;
+          await removeNotification(item);
+        });
+
         const itemClickHandler = async () => {
           const changed = markNotificationRead(item.id);
           renderNotifications();
@@ -15277,18 +15342,22 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         wrapper.addEventListener('click', (event) => {
-          if (event.target.closest('.admin-notification-item__read')) return;
+          if (event.target.closest('.admin-notification-item__actions')) return;
           itemClickHandler();
         });
 
         wrapper.addEventListener('keydown', (event) => {
           if (event.key !== 'Enter' && event.key !== ' ') return;
-          if (event.target.closest('.admin-notification-item__read')) return;
+          if (event.target.closest('.admin-notification-item__actions')) return;
           event.preventDefault();
           itemClickHandler();
         });
 
-        footer.append(state, actionHint, readBtn);
+        const actions = document.createElement('div');
+        actions.className = 'admin-notification-item__actions';
+        actions.append(readBtn, deleteBtn);
+
+        footer.append(state, actionHint, actions);
         content.append(top, desc, footer);
         wrapper.append(iconWrap, content);
         listEl.appendChild(wrapper);

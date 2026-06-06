@@ -63,6 +63,7 @@ router.get('/notifications', authMiddleware('admin'), notificationController.lis
 router.put('/notifications/:id/read', authMiddleware('admin'), notificationController.markAdminNotificationAsRead);
 router.put('/notifications/mark-all-read', authMiddleware('admin'), notificationController.markAllAdminNotificationsAsRead);
 router.delete('/notifications/read', authMiddleware('admin'), notificationController.clearReadAdminNotifications);
+router.delete('/notifications/:id', authMiddleware('admin'), notificationController.removeAdminNotification);
 
 // حذف تراکنش‌های قدیمی کیف پول کاربران
 // DELETE /api/admin/wallet/cleanup?days=90

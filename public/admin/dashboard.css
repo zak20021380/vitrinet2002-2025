@@ -12843,7 +12843,8 @@ tr:last-child td {
 }
 
 .admin-notification-panel__toolbar button,
-.admin-notification-item__read {
+.admin-notification-item__read,
+.admin-notification-item__delete {
   border: 0;
   border-radius: 999px;
   padding: 0.36rem 0.78rem;
@@ -12865,14 +12866,17 @@ tr:last-child td {
 .admin-notification-panel__toolbar button:hover,
 .admin-notification-panel__toolbar button:focus-visible,
 .admin-notification-item__read:hover,
-.admin-notification-item__read:focus-visible {
+.admin-notification-item__read:focus-visible,
+.admin-notification-item__delete:hover,
+.admin-notification-item__delete:focus-visible {
   outline: none;
   color: #075985;
   background: rgba(14, 165, 233, 0.14);
 }
 
 .admin-notification-panel__toolbar button:disabled,
-.admin-notification-item__read:disabled {
+.admin-notification-item__read:disabled,
+.admin-notification-item__delete:disabled {
   cursor: default;
   opacity: 0.48;
 }
@@ -13001,7 +13005,29 @@ tr:last-child td {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.55rem;
+}
+
+.admin-notification-item__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-notification-item__delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.09);
+}
+
+.admin-notification-item__delete:hover,
+.admin-notification-item__delete:focus-visible,
+.admin-notification-item__delete.is-confirming {
+  color: #991b1b;
+  background: rgba(239, 68, 68, 0.16);
 }
 
 .admin-notification-item__state {
@@ -13146,8 +13172,20 @@ tr.admin-deep-link-highlight > td {
     flex-direction: column;
   }
 
-  .admin-notification-item__read {
+  .admin-notification-item__actions,
+  .admin-notification-item__read,
+  .admin-notification-item__delete {
     width: 100%;
+  }
+
+  .admin-notification-item__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-notification-item__read,
+  .admin-notification-item__delete {
+    justify-content: center;
   }
 
   .admin-notification-item__hint {
@@ -13162,7 +13200,8 @@ tr.admin-deep-link-highlight > td {
   .admin-notification-item,
   .admin-notification-panel__close,
   .admin-notification-panel__toolbar button,
-  .admin-notification-item__read {
+  .admin-notification-item__read,
+  .admin-notification-item__delete {
     transition: none;
   }
 }

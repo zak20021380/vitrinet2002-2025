@@ -241,6 +241,27 @@ exports.clearReadAdminNotifications = async (_req, res) => {
   }
 };
 
+exports.removeAdminNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Notification.findOneAndDelete({ _id: id, recipientRole: 'admin' });
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    const unreadCount = await Notification.countDocuments({ recipientRole: 'admin', read: { $ne: true } });
+    return res.json({
+      success: true,
+      deletedId: String(deleted._id),
+      unreadCount
+    });
+  } catch (err) {
+    console.error('removeAdminNotification error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 exports.createNotification = async (userId, message, options = {}) => {
   try {
     const payload = { recipientRole: 'user', userId, message };
