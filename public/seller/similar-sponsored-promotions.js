@@ -3983,6 +3983,320 @@ body.ssw-modal-open .hamburger-menu {
     opacity: 1;
   }
 }
+
+/* Mobile-first plan comparison: stacked preview + all plans sheet */
+body.ssw-all-plans-open {
+  overflow: hidden;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell {
+  margin-inline: 0 !important;
+  overflow: visible !important;
+}
+
+#similar-sponsored-seller-root .ssw-carousel-shell::before,
+#similar-sponsored-seller-root .ssw-carousel-shell::after,
+#similar-sponsored-seller-root .ssw-carousel-dots {
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-plans-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .78rem !important;
+  width: 100%;
+  padding: .35rem .1rem .25rem !important;
+  overflow: visible !important;
+  scroll-snap-type: none !important;
+  touch-action: auto;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--preview,
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--full {
+  flex: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+  scroll-snap-align: none;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--preview {
+  min-height: 154px;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-trigger-wrap {
+  display: flex;
+  justify-content: center;
+  padding: .65rem .1rem .15rem;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-trigger-wrap[hidden] {
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-trigger {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border: 1px solid rgba(15, 118, 110, .18);
+  border-radius: 14px;
+  color: #0f766e;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(240, 253, 250, .78));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.95) inset,
+    0 8px 18px rgba(15, 118, 110, .08);
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 900;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-trigger:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, .3);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.98) inset,
+    0 12px 24px rgba(15, 118, 110, .12);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-trigger svg {
+  width: 16px;
+  height: 16px;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-modal[hidden] {
+  display: none !important;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding: 0;
+  background: rgba(15, 23, 42, .46);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-dialog {
+  width: 100%;
+  height: min(94dvh, 760px);
+  max-height: 94dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  direction: rtl;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, .88);
+  border-radius: 24px 24px 0 0;
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,.9) inset,
+    0 -24px 55px rgba(15, 23, 42, .2);
+  overflow: hidden;
+  animation: sswAllPlansSlideUp .32s cubic-bezier(.22,1,.36,1);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .88rem 1rem .8rem;
+  border-bottom: 1px solid rgba(226, 232, 240, .78);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-header::before {
+  content: '';
+  position: absolute;
+  top: .42rem;
+  left: 50%;
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, .42);
+  transform: translateX(-50%);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-title {
+  margin: .45rem 0 0;
+  color: #0f172a;
+  font-size: .98rem;
+  font-weight: 950;
+  line-height: 1.55;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-close {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(226, 232, 240, .86);
+  border-radius: 12px;
+  color: #334155;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-content {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: .92rem 1rem max(1rem, env(safe-area-inset-bottom));
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .88rem;
+  width: 100%;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-card.upgrade-ad-card {
+  min-height: auto;
+  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-areas:
+    "visual head"
+    "visual price"
+    "features features"
+    "actions actions";
+  row-gap: .72rem;
+  padding: 1rem;
+  border-radius: 20px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.96) inset,
+    0 10px 28px rgba(15, 23, 42, .08);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-title {
+  font-size: 1rem;
+  -webkit-line-clamp: 3;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-desc {
+  font-size: .75rem;
+  -webkit-line-clamp: 3;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .upgrade-ad-pricing.ssw-plan-pricing {
+  min-height: 58px;
+  padding: .62rem .75rem;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .upgrade-ad-price.ssw-plan-price {
+  font-size: clamp(1.7rem, 8vw, 2.1rem);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-features {
+  grid-area: features;
+  display: grid !important;
+  gap: .46rem;
+  margin: 0;
+  padding: .05rem 0 0;
+  list-style: none;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: .42rem;
+  color: #475569;
+  font-size: .76rem;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-features span {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: .15rem;
+  border-radius: 7px;
+  color: var(--plan-accent-deep);
+  background: var(--plan-accent-soft);
+}
+
+#similar-sponsored-seller-root .ssw-all-plans-list .upgrade-ad-cta.ssw-plan-cta {
+  min-height: 46px;
+}
+
+@media (min-width: 760px) {
+  #similar-sponsored-seller-root .ssw-plans-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .9rem !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-trigger {
+    max-width: 360px;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-modal {
+    align-items: center;
+    padding: 2rem;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-dialog {
+    max-width: 720px;
+    height: auto;
+    max-height: 88vh;
+    border-radius: 24px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.95) inset,
+      0 28px 80px rgba(15, 23, 42, .28);
+    animation: sswAllPlansScaleIn .24s ease-out;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-content {
+    padding: 1rem 1.1rem 1.15rem;
+  }
+}
+
+@media (min-width: 1120px) {
+  #similar-sponsored-seller-root .ssw-plans-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #similar-sponsored-seller-root .ssw-all-plans-dialog,
+  #similar-sponsored-seller-root .ssw-all-plans-trigger {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes sswAllPlansSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes sswAllPlansScaleIn {
+  from { opacity: .75; transform: translateY(14px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
     `;
     document.head.appendChild(style);
   }
@@ -4047,6 +4361,28 @@ body.ssw-modal-open .hamburger-menu {
         <div class="ssw-plans-grid" id="similar-sponsored-plans" role="list" tabindex="0" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
       </div>
       <div class="ssw-carousel-dots" id="similar-sponsored-dots" aria-label="نشانگر اسلایدهای پلن‌ها" hidden></div>
+
+      <div class="ssw-all-plans-trigger-wrap" id="similar-sponsored-all-plans-trigger-wrap" hidden>
+        <button type="button" class="ssw-all-plans-trigger" data-similar-sponsored-all-plans-open>
+          <span>مشاهده همه پلن‌ها</span>
+          ${icons.arrowLeft}
+        </button>
+      </div>
+
+      <!-- All Plans Modal -->
+      <div class="ssw-all-plans-modal" id="similar-sponsored-all-plans-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-all-plans-title">
+        <section class="ssw-all-plans-dialog" role="document">
+          <header class="ssw-all-plans-header">
+            <h3 class="ssw-all-plans-title" id="similar-sponsored-all-plans-title">پلن‌های تبلیغات فروشگاه‌های مشابه</h3>
+            <button type="button" class="ssw-all-plans-close" data-similar-sponsored-all-plans-close aria-label="بستن">
+              ${icons.close}
+            </button>
+          </header>
+          <div class="ssw-all-plans-content">
+            <div class="ssw-all-plans-list" id="similar-sponsored-all-plans-list" role="list" aria-label="پلن‌های تبلیغات فروشگاه‌های مشابه"></div>
+          </div>
+        </section>
+      </div>
 
       <!-- Confirm/Submit Modal -->
       <div class="ssw-modal" id="similar-sponsored-modal" hidden aria-modal="true" role="dialog" aria-labelledby="ssw-modal-title">
@@ -4387,7 +4723,7 @@ body.ssw-modal-open .hamburger-menu {
   /* ─────────────────────────────────────────────────────
      RENDER PLANS — premium upgrade-ad-card style
      ───────────────────────────────────────────────────── */
-  function renderPlans() {
+  function renderPlansLegacyCarousel() {
     const container = document.getElementById('similar-sponsored-plans');
     if (!container) return;
     const plans = sortPlans(state.plans);
@@ -4459,6 +4795,95 @@ body.ssw-modal-open .hamburger-menu {
   /* ─────────────────────────────────────────────────────
      RENDER REQUESTS
      ───────────────────────────────────────────────────── */
+  function getPlanCardDetails(plan) {
+    const compactDescriptions = {
+      priority: 'جایگاه برتر · دیده‌شدن بیشتر',
+      normal: 'نمایش در بخش مشابه‌ها'
+    };
+    const isPriority = plan.tier === 'priority';
+    const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
+    const planTitle = plan.title || `${tierLabels[plan.tier] || 'پلن تبلیغ'} - ${unitLabel}`;
+    const planDesc = plan.description || compactDescriptions[plan.tier] || 'نمایش هدفمند در مشابه‌ها';
+    const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
+    const features = getPlanGuideFeatures(plan);
+    return { isPriority, unitLabel, planTitle, planDesc, badgeLabel, features };
+  }
+
+  function renderPlanCard(plan, index, options = {}) {
+    const { mode = 'preview' } = options;
+    const { isPriority, unitLabel, planTitle, planDesc, badgeLabel, features } = getPlanCardDetails(plan);
+    const titleId = `ssw-plan-title-${mode}-${index}`;
+    const featureMarkup = mode === 'full'
+      ? `<ul class="ssw-plan-features">
+          ${features.map((feature) => `<li><span aria-hidden="true">${icons.check}</span>${escapeHtml(feature)}</li>`).join('')}
+        </ul>`
+      : '';
+
+    return `
+      <article class="upgrade-ad-card upgrade-ad-card--search ssw-plan-card ssw-plan-card--${mode}${isPriority ? ' ssw-plan-card--priority' : ' ssw-plan-card--standard'}" data-plan-tier="${escapeHtml(plan.tier)}" data-plan-duration="${escapeHtml(plan.durationUnit)}" role="listitem" aria-labelledby="${titleId}">
+        <div class="ssw-plan-visual" aria-hidden="true">
+          <div class="ssw-plan-visual__icon">${isPriority ? icons.trendUp : icons.storeSmall}</div>
+          <span class="ssw-plan-visual__line"></span>
+        </div>
+        <div class="ssw-plan-header">
+          <div class="ssw-plan-copy">
+            <h4 id="${titleId}" class="ssw-plan-title">${escapeHtml(planTitle)}</h4>
+            <p class="ssw-plan-desc">${escapeHtml(planDesc)}</p>
+          </div>
+          <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${escapeHtml(badgeLabel)}">${escapeHtml(badgeLabel)}</div>
+        </div>
+
+        <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت پلن">
+          <span class="upgrade-ad-price ssw-plan-price">${formatMoney(plan.price)}</span>
+          <span class="upgrade-ad-unit ssw-plan-unit">تومان / ${escapeHtml(unitLabel)}</span>
+        </div>
+
+        ${featureMarkup}
+
+        <div class="ssw-plan-actions">
+          <button type="button" class="upgrade-ad-cta ssw-plan-cta"
+            data-plan-tier="${escapeHtml(plan.tier)}"
+            data-plan-duration="${escapeHtml(plan.durationUnit)}"
+            aria-label="ثبت درخواست برای ${escapeHtml(planTitle)}">
+            <span>ثبت درخواست</span>
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderAllPlans(plans) {
+    const list = document.getElementById('similar-sponsored-all-plans-list');
+    const triggerWrap = document.getElementById('similar-sponsored-all-plans-trigger-wrap');
+    if (triggerWrap) triggerWrap.hidden = !plans.length;
+    if (!list) return;
+    list.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index, { mode: 'full' })).join('');
+  }
+
+  function renderPlans() {
+    const container = document.getElementById('similar-sponsored-plans');
+    if (!container) return;
+    const plans = sortPlans(state.plans);
+
+    if (!plans.length) {
+      container.innerHTML = `
+        <div class="ssw-empty">
+          ${icons.emptyBox}
+          <span>فعلاً پلن فعالی برای این جایگاه تعریف نشده است. قیمت و وضعیت پلن‌ها از سمت مدیر کنترل می‌شود.</span>
+        </div>`;
+      renderAllPlans([]);
+      renderCarouselDots(0);
+      return;
+    }
+
+    const previewPlans = plans.slice(0, Math.min(3, plans.length));
+    container.innerHTML = previewPlans.map((plan, index) => renderPlanCard(plan, index, { mode: 'preview' })).join('');
+    container.dir = 'rtl';
+    container.setAttribute('aria-orientation', 'vertical');
+    renderAllPlans(plans);
+    renderCarouselDots(0);
+  }
+
   function renderRequests() {
     const container = document.getElementById('similar-sponsored-requests');
     const summary = document.getElementById('similar-sponsored-requests-summary');
@@ -4864,6 +5289,35 @@ body.ssw-modal-open .hamburger-menu {
     result.hidden = false;
   }
 
+  function openAllPlansModal() {
+    const modal = document.getElementById('similar-sponsored-all-plans-modal');
+    if (!modal) return;
+    modal.hidden = false;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.add('ssw-modal-open', 'ssw-all-plans-open');
+    }
+    window.setTimeout(() => {
+      modal.querySelector('[data-similar-sponsored-all-plans-close]')?.focus?.({ preventScroll: true });
+    }, 0);
+  }
+
+  function closeAllPlansModal({ restoreFocus = true } = {}) {
+    const modal = document.getElementById('similar-sponsored-all-plans-modal');
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.remove('ssw-all-plans-open');
+      const requestModal = document.getElementById('similar-sponsored-modal');
+      const guideModal = document.getElementById('similar-sponsored-guide-modal');
+      if ((!requestModal || requestModal.hidden) && (!guideModal || guideModal.hidden)) {
+        document.body.classList.remove('ssw-modal-open');
+      }
+    }
+    if (restoreFocus) {
+      window.setTimeout(() => document.querySelector('[data-similar-sponsored-all-plans-open]')?.focus?.({ preventScroll: true }), 0);
+    }
+  }
+
   function openModal(plan) {
     state.selectedPlan = plan;
     const modal = document.getElementById('similar-sponsored-modal');
@@ -5129,6 +5583,7 @@ body.ssw-modal-open .hamburger-menu {
   function bindEvents() {
     const plansRail = document.getElementById('similar-sponsored-plans');
     const dots = document.getElementById('similar-sponsored-dots');
+    const allPlansList = document.getElementById('similar-sponsored-all-plans-list');
     let carouselRaf = 0;
     const scheduleCarouselUpdate = () => {
       if (carouselRaf) return;
@@ -5151,6 +5606,17 @@ body.ssw-modal-open .hamburger-menu {
       updateCarouselHints(index);
     });
 
+    const selectPlanFromButton = (button, options = {}) => {
+      if (!button) return false;
+      const plan = state.plans.find(
+        (item) => item.tier === button.dataset.planTier && item.durationUnit === button.dataset.planDuration
+      );
+      if (!plan) return false;
+      if (options.closeAllPlans) closeAllPlansModal({ restoreFocus: false });
+      openModal(plan);
+      return true;
+    };
+
     plansRail?.addEventListener('click', (event) => {
       const guideButton = event.target.closest('[data-plan-guide-tier]');
       if (guideButton) {
@@ -5165,10 +5631,20 @@ body.ssw-modal-open .hamburger-menu {
       if (!button) return;
       event.preventDefault();
       event.stopPropagation();
-      const plan = state.plans.find(
-        (item) => item.tier === button.dataset.planTier && item.durationUnit === button.dataset.planDuration
-      );
-      if (plan) openModal(plan);
+      selectPlanFromButton(button);
+    });
+
+    document.querySelector('[data-similar-sponsored-all-plans-open]')?.addEventListener('click', openAllPlansModal);
+    document.querySelectorAll('[data-similar-sponsored-all-plans-close]').forEach((button) => {
+      button.addEventListener('click', () => closeAllPlansModal());
+    });
+
+    allPlansList?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-plan-tier]');
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      selectPlanFromButton(button, { closeAllPlans: true });
     });
 
     document.querySelectorAll('[data-similar-sponsored-close]').forEach((button) => {
@@ -5215,14 +5691,22 @@ body.ssw-modal-open .hamburger-menu {
     document.getElementById('similar-sponsored-guide-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-guide-modal') closeGuideModal();
     });
+    document.getElementById('similar-sponsored-all-plans-modal')?.addEventListener('click', (event) => {
+      if (event.target.id === 'similar-sponsored-all-plans-modal') closeAllPlansModal();
+    });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const modal = document.getElementById('similar-sponsored-modal');
         const productSheet = document.getElementById('similar-sponsored-product-sheet');
         const guideModal = document.getElementById('similar-sponsored-guide-modal');
+        const allPlansModal = document.getElementById('similar-sponsored-all-plans-modal');
         if (productSheet && !productSheet.hidden) {
           closeProductPicker();
+          return;
+        }
+        if (allPlansModal && !allPlansModal.hidden) {
+          closeAllPlansModal();
           return;
         }
         if (guideModal && !guideModal.hidden) {
@@ -5244,11 +5728,19 @@ body.ssw-modal-open .hamburger-menu {
     const request = state.requests.find((item) => String(item._id || item.id || '') === promotionId);
     const planTier = request?.planTier || options.planTier || '';
     const durationUnit = request?.durationUnit || options.durationUnit || '';
-    const cards = [...document.querySelectorAll('#similar-sponsored-plans .ssw-plan-card')];
-    const card = cards.find((item) => (
+    let cards = [...document.querySelectorAll('#similar-sponsored-plans .ssw-plan-card')];
+    let card = cards.find((item) => (
       item.dataset.planTier === planTier
       && item.dataset.planDuration === durationUnit
     ));
+    if (!card && planTier && durationUnit) {
+      openAllPlansModal();
+      cards = [...document.querySelectorAll('#similar-sponsored-all-plans-list .ssw-plan-card')];
+      card = cards.find((item) => (
+        item.dataset.planTier === planTier
+        && item.dataset.planDuration === durationUnit
+      ));
+    }
     const target = card || document.getElementById('similar-sponsored-seller-root');
 
     target?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
