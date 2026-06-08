@@ -37,28 +37,25 @@
   };
 
   const tierLabels = {
-    normal: 'پلن استاندارد',
-    priority: 'پلن اولویت‌دار'
+    normal: 'نمایش عادی',
+    priority: '⭐ نمایش ویژه'
   };
 
   const tierDescriptions = {
-    normal: 'نمایش هدفمند در کنار فروشگاه‌های هم‌حوزه شما',
-    priority: 'جایگاه برتر و دیده‌شدن بیشتر نسبت به پلن عادی'
+    normal: 'فروشگاه شما قبل از فروشگاه‌های عادی در بخش فروشگاه‌های مشابه نمایش داده می‌شود.',
+    priority: 'فروشگاه شما در بالاترین جایگاه تبلیغاتی بخش فروشگاه‌های مشابه نمایش داده می‌شود.'
   };
 
   const tierFeatures = {
     normal: [
-      'نمایش در بخش فروشگاه‌های مشابه',
-      'هدف‌گیری هم‌حوزه و رقبای هم‌نوع',
-      'فعال‌سازی پس از تأیید مدیر',
-      'تعریف مدت نمایش توسط مدیر'
+      'فروشگاه شما در بخش فروشگاه‌های مشابه دیده می‌شود.',
+      'بازدیدکنندگان فروشگاه‌های هم‌حوزه راحت‌تر شما را پیدا می‌کنند.',
+      'پس از بررسی مدیر، نمایش شما فعال می‌شود.'
     ],
     priority: [
-      'نمایش اولویت‌دار بالاتر از پلن عادی',
-      'هدف‌گیری دقیق‌تر هم‌حوزه',
-      'جایگاه ممتاز در فروشگاه‌های مشابه',
-      'فعال‌سازی سریع‌تر پس از تأیید',
-      'دیده‌شدن بیشتر توسط مشتریان هدف'
+      'فروشگاه شما در بالاترین جایگاه تبلیغاتی دیده می‌شود.',
+      'برای جذب بازدیدکننده بیشتر نسبت به نمایش عادی ساخته شده است.',
+      'پس از بررسی مدیر، نمایش ویژه شما فعال می‌شود.'
     ]
   };
 
@@ -210,6 +207,34 @@
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return 'پس از تایید مدیر';
     return date.toLocaleString('fa-IR', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function getMarketingDurationLabel(plan = {}) {
+    const labels = {
+      daily: '۱ روزه',
+      weekly: '۷ روزه',
+      monthly: '۳۰ روزه'
+    };
+    if (labels[plan.durationUnit]) return labels[plan.durationUnit];
+    if (plan.durationDays) return `${Number(plan.durationDays).toLocaleString('fa-IR')} روزه`;
+    return durationLabels[plan.durationUnit] || 'دوره‌ای';
+  }
+
+  function getMarketingPlanTitle(plan = {}) {
+    const prefix = plan.tier === 'priority' ? '⭐ نمایش ویژه' : 'نمایش عادی';
+    return `${prefix} ${getMarketingDurationLabel(plan)}`;
+  }
+
+  function getMarketingBadgeLabel(plan = {}) {
+    if (plan.tier === 'priority') {
+      const badges = {
+        daily: 'جایگاه شماره ۱',
+        weekly: 'بیشترین بازدید',
+        monthly: 'پیشنهاد ویژه'
+      };
+      return badges[plan.durationUnit] || 'پیشنهاد ویژه';
+    }
+    return 'شروع ساده';
   }
 
   function sortPlans(plans) {
@@ -4297,6 +4322,108 @@ body.ssw-all-plans-open {
   from { opacity: .75; transform: translateY(14px) scale(.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Seller-friendly similar store display offers */
+#similar-sponsored-seller-root .ssw-section-subtitle {
+  max-width: 44rem;
+  color: #475569;
+  font-size: .84rem;
+  line-height: 1.9;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+  min-height: 188px !important;
+  grid-template-columns: 42px minmax(0, 1fr);
+  border-color: rgba(20, 184, 166, .24) !important;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(255,255,255,.96) 0 18%, transparent 42%),
+    linear-gradient(145deg, #ffffff 0%, #f8fafc 58%, rgba(240, 253, 250, .92) 100%) !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority {
+  border-width: 1.5px;
+  border-color: rgba(79, 70, 229, .42) !important;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255,255,255,.98) 0 17%, transparent 42%),
+    linear-gradient(145deg, #ffffff 0%, #f8f7ff 50%, rgba(238, 242, 255, .96) 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.98) inset,
+    0 10px 28px rgba(79, 70, 229, .12),
+    0 3px 10px rgba(15, 23, 42, .06) !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card.ssw-plan-card--priority::after {
+  opacity: .82;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card--priority .ssw-plan-visual__icon {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.28) inset,
+    0 10px 20px rgba(79, 70, 229, .24) !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-title {
+  font-size: .96rem !important;
+  line-height: 1.55 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-desc {
+  color: #475569 !important;
+  font-size: .72rem !important;
+  font-weight: 750 !important;
+  line-height: 1.75 !important;
+  -webkit-line-clamp: 3 !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-badge {
+  width: fit-content;
+  max-width: 100%;
+  align-self: flex-start;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.55;
+  color: #0f766e;
+  background: rgba(240, 253, 250, .96);
+  border-color: rgba(20, 184, 166, .2);
+}
+
+#similar-sponsored-seller-root .ssw-plan-card--priority .ssw-plan-badge,
+#similar-sponsored-seller-root .ssw-plan-badge--recommended {
+  color: #7c2d12 !important;
+  border-color: rgba(245, 158, 11, .42) !important;
+  background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.8) inset,
+    0 6px 14px rgba(245, 158, 11, .14) !important;
+}
+
+#similar-sponsored-seller-root .ssw-plan-card--priority .upgrade-ad-cta.ssw-plan-cta {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.2), transparent 38%),
+    linear-gradient(135deg, #4f46e5 0%, #312e81 100%) !important;
+}
+
+@media (max-width: 420px) {
+  #similar-sponsored-seller-root .ssw-section-subtitle {
+    font-size: .78rem;
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-card.upgrade-ad-card {
+    min-height: 196px !important;
+    padding: .84rem .78rem .78rem !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-title {
+    font-size: .9rem !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-desc {
+    font-size: .69rem !important;
+  }
+}
     `;
     document.head.appendChild(style);
   }
@@ -4340,10 +4467,10 @@ body.ssw-all-plans-open {
         <div class="ssw-section-header-meta">
           <span class="ssw-section-eyebrow" aria-label="پیشنهادی">
             ${icons.zapSmall}
-            پیشنهادی
+            جذب بازدیدکننده جدید
           </span>
           <h3 id="ssw-title" class="ssw-section-title">نمایش در فروشگاه‌های مشابه</h3>
-          <p class="ssw-section-subtitle">دیده‌شدن هدفمند کنار رقبای هم‌حوزه شما</p>
+          <p class="ssw-section-subtitle">فروشگاه خود را در بخش فروشگاه‌های مشابه سایر فروشندگان نمایش دهید و بازدیدکنندگان جدید جذب کنید.</p>
         </div>
       </header>
 
@@ -4358,13 +4485,13 @@ body.ssw-all-plans-open {
 
       <!-- Plans Grid (filled dynamically) -->
       <div class="ssw-carousel-shell">
-        <div class="ssw-plans-grid" id="similar-sponsored-plans" role="list" tabindex="0" aria-label="پلن‌های تبلیغاتی فروشگاه‌های مشابه"></div>
+        <div class="ssw-plans-grid" id="similar-sponsored-plans" role="list" tabindex="0" aria-label="گزینه‌های نمایش در فروشگاه‌های مشابه"></div>
       </div>
-      <div class="ssw-carousel-dots" id="similar-sponsored-dots" aria-label="نشانگر اسلایدهای پلن‌ها" hidden></div>
+      <div class="ssw-carousel-dots" id="similar-sponsored-dots" aria-label="نشانگر گزینه‌های نمایش" hidden></div>
 
       <div class="ssw-all-plans-trigger-wrap" id="similar-sponsored-all-plans-trigger-wrap" hidden>
         <button type="button" class="ssw-all-plans-trigger" data-similar-sponsored-all-plans-open>
-          <span>مشاهده همه پلن‌ها</span>
+          <span>مشاهده همه گزینه‌ها</span>
           ${icons.arrowLeft}
         </button>
       </div>
@@ -4373,13 +4500,13 @@ body.ssw-all-plans-open {
       <div class="ssw-all-plans-modal" id="similar-sponsored-all-plans-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-all-plans-title">
         <section class="ssw-all-plans-dialog" role="document">
           <header class="ssw-all-plans-header">
-            <h3 class="ssw-all-plans-title" id="similar-sponsored-all-plans-title">پلن‌های تبلیغات فروشگاه‌های مشابه</h3>
+            <h3 class="ssw-all-plans-title" id="similar-sponsored-all-plans-title">گزینه‌های نمایش در فروشگاه‌های مشابه</h3>
             <button type="button" class="ssw-all-plans-close" data-similar-sponsored-all-plans-close aria-label="بستن">
               ${icons.close}
             </button>
           </header>
           <div class="ssw-all-plans-content">
-            <div class="ssw-all-plans-list" id="similar-sponsored-all-plans-list" role="list" aria-label="پلن‌های تبلیغات فروشگاه‌های مشابه"></div>
+            <div class="ssw-all-plans-list" id="similar-sponsored-all-plans-list" role="list" aria-label="گزینه‌های نمایش در فروشگاه‌های مشابه"></div>
           </div>
         </section>
       </div>
@@ -4483,7 +4610,7 @@ body.ssw-all-plans-open {
       <div class="ssw-guide-modal" id="similar-sponsored-guide-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-guide-title">
         <section class="ssw-guide-modal__dialog" role="document">
           <span class="ssw-guide-modal__handle" aria-hidden="true"></span>
-          <button type="button" class="ssw-guide-modal__close" data-similar-sponsored-guide-close aria-label="بستن راهنمای پلن">
+          <button type="button" class="ssw-guide-modal__close" data-similar-sponsored-guide-close aria-label="بستن راهنما">
             ${icons.close}
           </button>
 
@@ -4497,7 +4624,7 @@ body.ssw-all-plans-open {
           </header>
 
           <div class="ssw-guide-price">
-            <span>هزینه این پلن</span>
+            <span>هزینه این گزینه</span>
             <strong id="similar-sponsored-guide-price"></strong>
           </div>
           <div class="ssw-guide-facts" id="similar-sponsored-guide-facts"></div>
@@ -4510,7 +4637,7 @@ body.ssw-all-plans-open {
             <section class="ssw-guide-panel" aria-labelledby="similar-sponsored-guide-flow-title">
               <h4 class="ssw-guide-panel__title" id="similar-sponsored-guide-flow-title">مسیر فعال‌سازی تبلیغ</h4>
               <ol class="ssw-guide-steps">
-                <li><span>۱</span>پلن را انتخاب می‌کنید و پرداخت آنلاین انجام می‌شود.</li>
+                <li><span>۱</span>گزینه موردنظر را انتخاب می‌کنید و پرداخت آنلاین انجام می‌شود.</li>
                 <li><span>۲</span>مدیر درخواست را بررسی و زمان نمایش را تعیین می‌کند.</li>
                 <li><span>۳</span>پس از تایید، فروشگاه در بخش فروشگاه‌های مشابه نمایش داده می‌شود.</li>
               </ol>
@@ -4525,7 +4652,7 @@ body.ssw-all-plans-open {
           <div class="ssw-guide-actions">
             <button type="button" class="ssw-plan-cta" data-similar-sponsored-guide-select>
               ${icons.arrowLeft}
-              <span>ثبت درخواست این پلن</span>
+              <span>ثبت درخواست این گزینه</span>
             </button>
             <button type="button" class="ssw-guide-actions__close" data-similar-sponsored-guide-close>بستن</button>
           </div>
@@ -4732,24 +4859,19 @@ body.ssw-all-plans-open {
       container.innerHTML = `
         <div class="ssw-empty">
           ${icons.emptyBox}
-          <span>فعلاً پلن فعالی برای این جایگاه تعریف نشده است. قیمت و وضعیت پلن‌ها از سمت مدیر کنترل می‌شود.</span>
+          <span>فعلاً گزینه فعالی برای نمایش در فروشگاه‌های مشابه تعریف نشده است.</span>
         </div>`;
       renderCarouselDots(0);
       updateCarouselHints(0);
       return;
     }
 
-    const compactDescriptions = {
-      priority: 'جایگاه برتر · دیده‌شدن بیشتر',
-      normal: 'نمایش در بخش مشابه‌ها'
-    };
-
     container.innerHTML = plans.map((plan, index) => {
       const isPriority = plan.tier === 'priority';
-      const planTitle = plan.title || `${tierLabels[plan.tier] || 'پلن تبلیغ'} - ${durationLabels[plan.durationUnit] || ''}`;
-      const planDesc = compactDescriptions[plan.tier] || 'نمایش هدفمند در مشابه‌ها';
-      const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
-      const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
+      const planTitle = getMarketingPlanTitle(plan);
+      const planDesc = tierDescriptions[plan.tier] || 'فروشگاه شما در بخش فروشگاه‌های مشابه نمایش داده می‌شود.';
+      const badgeLabel = getMarketingBadgeLabel(plan);
+      const unitLabel = getMarketingDurationLabel(plan);
 
       return `
         <article class="upgrade-ad-card upgrade-ad-card--search ssw-plan-card${isPriority ? ' ssw-plan-card--priority' : ' ssw-plan-card--standard'}" data-plan-tier="${escapeHtml(plan.tier)}" data-plan-duration="${escapeHtml(plan.durationUnit)}" role="listitem" aria-labelledby="ssw-plan-title-${index}">
@@ -4765,7 +4887,7 @@ body.ssw-all-plans-open {
             <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${badgeLabel}">${badgeLabel}</div>
           </div>
 
-          <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت پلن">
+          <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت گزینه نمایش">
             <span class="upgrade-ad-price ssw-plan-price">${formatMoney(plan.price)}</span>
             <span class="upgrade-ad-unit ssw-plan-unit">تومان / ${escapeHtml(unitLabel)}</span>
           </div>
@@ -4796,15 +4918,11 @@ body.ssw-all-plans-open {
      RENDER REQUESTS
      ───────────────────────────────────────────────────── */
   function getPlanCardDetails(plan) {
-    const compactDescriptions = {
-      priority: 'جایگاه برتر · دیده‌شدن بیشتر',
-      normal: 'نمایش در بخش مشابه‌ها'
-    };
     const isPriority = plan.tier === 'priority';
-    const unitLabel = durationLabels[plan.durationUnit] || 'دوره';
-    const planTitle = plan.title || `${tierLabels[plan.tier] || 'پلن تبلیغ'} - ${unitLabel}`;
-    const planDesc = plan.description || compactDescriptions[plan.tier] || 'نمایش هدفمند در مشابه‌ها';
-    const badgeLabel = isPriority ? 'پیشنهادی' : 'استاندارد';
+    const unitLabel = getMarketingDurationLabel(plan);
+    const planTitle = getMarketingPlanTitle(plan);
+    const planDesc = tierDescriptions[plan.tier] || 'فروشگاه شما در بخش فروشگاه‌های مشابه نمایش داده می‌شود.';
+    const badgeLabel = getMarketingBadgeLabel(plan);
     const features = getPlanGuideFeatures(plan);
     return { isPriority, unitLabel, planTitle, planDesc, badgeLabel, features };
   }
@@ -4833,7 +4951,7 @@ body.ssw-all-plans-open {
           <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${escapeHtml(badgeLabel)}">${escapeHtml(badgeLabel)}</div>
         </div>
 
-        <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت پلن">
+        <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت گزینه نمایش">
           <span class="upgrade-ad-price ssw-plan-price">${formatMoney(plan.price)}</span>
           <span class="upgrade-ad-unit ssw-plan-unit">تومان / ${escapeHtml(unitLabel)}</span>
         </div>
@@ -4855,7 +4973,7 @@ body.ssw-all-plans-open {
   function renderAllPlans(plans) {
     const list = document.getElementById('similar-sponsored-all-plans-list');
     const triggerWrap = document.getElementById('similar-sponsored-all-plans-trigger-wrap');
-    if (triggerWrap) triggerWrap.hidden = !plans.length;
+    if (triggerWrap) triggerWrap.hidden = true;
     if (!list) return;
     list.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index, { mode: 'full' })).join('');
   }
@@ -4869,15 +4987,14 @@ body.ssw-all-plans-open {
       container.innerHTML = `
         <div class="ssw-empty">
           ${icons.emptyBox}
-          <span>فعلاً پلن فعالی برای این جایگاه تعریف نشده است. قیمت و وضعیت پلن‌ها از سمت مدیر کنترل می‌شود.</span>
+          <span>فعلاً گزینه فعالی برای نمایش در فروشگاه‌های مشابه تعریف نشده است.</span>
         </div>`;
       renderAllPlans([]);
       renderCarouselDots(0);
       return;
     }
 
-    const previewPlans = plans.slice(0, Math.min(3, plans.length));
-    container.innerHTML = previewPlans.map((plan, index) => renderPlanCard(plan, index, { mode: 'preview' })).join('');
+    container.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index, { mode: 'preview' })).join('');
     container.dir = 'rtl';
     container.setAttribute('aria-orientation', 'vertical');
     renderAllPlans(plans);
@@ -4933,7 +5050,8 @@ body.ssw-all-plans-open {
       const paymentClass = ['pending', 'submitted', 'verified', 'rejected', 'waived'].includes(paymentStatus)
         ? `ssw-payment-pill--${paymentStatus}` : 'ssw-payment-pill--pending';
 
-      const planTitle   = escapeHtml(item.planTitle || tierLabels[item.planTier] || 'نمایش در فروشگاه‌های مشابه');
+      const displayPlan = { tier: item.planTier, durationUnit: item.durationUnit, durationDays: item.durationDays };
+      const planTitle   = escapeHtml(getMarketingPlanTitle(displayPlan));
       const tierLabel   = escapeHtml(tierLabels[item.planTier] || item.planTier || 'تبلیغ ویژه');
       const durLabel    = escapeHtml(durationLabels[item.durationUnit] || item.durationUnit || '');
       const statusLabel = escapeHtml(statusLabels[status] || status);
@@ -4972,7 +5090,7 @@ body.ssw-all-plans-open {
           <div class="ssw-request-details">
             <div class="ssw-request-meta">
               <div class="ssw-request-meta-card">
-                <span class="ssw-request-meta-label">نوع پلن</span>
+                <span class="ssw-request-meta-label">نوع نمایش</span>
                 <strong class="ssw-request-meta-value">${tierLabel}</strong>
               </div>
               <div class="ssw-request-meta-card">
@@ -5325,9 +5443,7 @@ body.ssw-all-plans-open {
     const price = document.getElementById('similar-sponsored-modal-price');
     resetModalState();
     if (label) {
-      const tier = plan.title || tierLabels[plan.tier] || '';
-      const duration = durationLabels[plan.durationUnit] || '';
-      label.textContent = duration ? `${tier} • ${duration}` : tier;
+      label.textContent = getMarketingPlanTitle(plan);
     }
     if (price) {
       price.textContent = formatMoney(plan.price);
@@ -5365,11 +5481,10 @@ body.ssw-all-plans-open {
 
     state.guidePlan = plan;
 
-    const title = plan.title || tierLabels[plan.tier] || 'پلن تبلیغ فروشگاه‌های مشابه';
-    const desc = plan.description || tierDescriptions[plan.tier] || 'نمایش ویژه فروشگاه شما کنار فروشگاه‌های هم‌حوزه.';
-    const periodLabel = durationLabels[plan.durationUnit] || plan.durationUnit || 'دوره';
+    const title = getMarketingPlanTitle(plan);
+    const desc = tierDescriptions[plan.tier] || 'فروشگاه شما در بخش فروشگاه‌های مشابه نمایش داده می‌شود.';
+    const periodLabel = getMarketingDurationLabel(plan);
     const durationValue = plan.durationDays ? `${escapeHtml(String(plan.durationDays))} روز` : escapeHtml(periodLabel);
-    const slotValue = plan.slotLimit ? `${escapeHtml(String(plan.slotLimit))} جایگاه` : 'طبق ظرفیت';
     const features = getPlanGuideFeatures(plan);
     const badge = document.getElementById('similar-sponsored-guide-badge');
     const titleEl = document.getElementById('similar-sponsored-guide-title');
@@ -5379,7 +5494,7 @@ body.ssw-all-plans-open {
     const featuresEl = document.getElementById('similar-sponsored-guide-features');
 
     if (badge) {
-      badge.textContent = plan.tier === 'priority' ? 'پلن پیشنهادی' : 'پلن استاندارد';
+      badge.textContent = getMarketingBadgeLabel(plan);
       badge.className = `ssw-guide-badge${plan.tier === 'priority' ? ' ssw-guide-badge--priority' : ''}`;
     }
     if (titleEl) titleEl.textContent = title;
@@ -5392,12 +5507,16 @@ body.ssw-all-plans-open {
           <strong>${durationValue}</strong>
         </div>
         <div class="ssw-guide-fact">
-          <span>دوره پلن</span>
-          <strong>${escapeHtml(periodLabel)}</strong>
+          <span>محل نمایش</span>
+          <strong>بخش فروشگاه‌های مشابه</strong>
         </div>
         <div class="ssw-guide-fact">
-          <span>ظرفیت</span>
-          <strong>${slotValue}</strong>
+          <span>مزیت اصلی</span>
+          <strong>${plan.tier === 'priority' ? 'بالاترین جایگاه تبلیغاتی' : 'نمایش قبل از فروشگاه‌های عادی'}</strong>
+        </div>
+        <div class="ssw-guide-fact">
+          <span>مدل نمایش</span>
+          <strong>${escapeHtml(periodLabel)}</strong>
         </div>
       `;
     }
