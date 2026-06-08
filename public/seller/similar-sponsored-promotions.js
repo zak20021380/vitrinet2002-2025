@@ -38,7 +38,7 @@
 
   const tierLabels = {
     normal: 'نمایش عادی',
-    priority: '⭐ نمایش ویژه'
+    priority: 'نمایش ویژه'
   };
 
   const tierDescriptions = {
@@ -221,7 +221,7 @@
   }
 
   function getMarketingPlanTitle(plan = {}) {
-    const prefix = plan.tier === 'priority' ? '⭐ نمایش ویژه' : 'نمایش عادی';
+    const prefix = plan.tier === 'priority' ? 'نمایش ویژه' : 'نمایش عادی';
     return `${prefix} ${getMarketingDurationLabel(plan)}`;
   }
 
@@ -4424,6 +4424,191 @@ body.ssw-all-plans-open {
     font-size: .69rem !important;
   }
 }
+
+/* Mobile carousel override: single-row snap cards with compact density */
+@media (max-width: 639px) {
+  #similar-sponsored-seller-root .ssw-carousel-shell {
+    margin-inline: -.25rem !important;
+    overflow: hidden !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-shell::before,
+  #similar-sponsored-seller-root .ssw-carousel-shell::after {
+    display: block !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plans-grid#similar-sponsored-plans {
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: .58rem !important;
+    width: 100%;
+    padding: .28rem .72rem .18rem !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-padding-inline: .72rem;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plans-grid#similar-sponsored-plans::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-card.upgrade-ad-card.ssw-plan-card--preview {
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: .52rem;
+    row-gap: .24rem;
+    flex: 0 0 min(84vw, 330px) !important;
+    width: min(84vw, 330px) !important;
+    max-width: min(84vw, 330px) !important;
+    min-height: 142px !important;
+    padding: .64rem .68rem .62rem !important;
+    border-radius: 14px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-visual {
+    gap: .24rem;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-visual__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-visual__icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-visual__line {
+    min-height: 20px;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-title {
+    font-size: .76rem !important;
+    line-height: 1.38;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-desc {
+    font-size: .56rem !important;
+    line-height: 1.42;
+    -webkit-line-clamp: 1;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-badge {
+    display: inline-flex !important;
+    align-items: center;
+    gap: .24rem;
+    min-height: 18px;
+    padding: .12rem .38rem;
+    border-radius: 7px;
+    font-size: .5rem !important;
+    line-height: 1.2;
+    box-shadow: none !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  #similar-sponsored-seller-root .ssw-plan-badge-icon svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-pricing.ssw-plan-pricing {
+    min-height: 38px;
+    padding: .34rem .48rem;
+    border-radius: 10px;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-price.ssw-plan-price {
+    font-size: clamp(1.05rem, 4.7vw, 1.34rem);
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-unit.ssw-plan-unit {
+    font-size: .52rem;
+    line-height: 1.35;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-actions {
+    margin-top: .06rem;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-cta.ssw-plan-cta,
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-card--priority .upgrade-ad-cta.ssw-plan-cta {
+    width: 100%;
+    min-height: 36px;
+    padding: .42rem .6rem;
+    border-radius: 10px;
+    font-size: .68rem;
+    font-weight: 900;
+    background: #0f766e !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-cta.ssw-plan-cta:hover,
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-cta.ssw-plan-cta:active {
+    transform: none;
+    background: #115e59 !important;
+    box-shadow: none !important;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .upgrade-ad-cta.ssw-plan-cta::after {
+    width: 10px;
+    height: 10px;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-dots {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: .32rem 0 0;
+    margin: 0;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-dots[hidden] {
+    display: none !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-dot {
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
+    min-height: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(100, 116, 139, .32);
+    box-shadow: none;
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-dot.is-active {
+    width: 22px;
+    height: 6px;
+    background: #0f766e;
+    box-shadow: none;
+  }
+}
     `;
     document.head.appendChild(style);
   }
@@ -4437,6 +4622,7 @@ body.ssw-all-plans-open {
     trendUp: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
     zap: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
     zapSmall: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    mapPin: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1116 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
     check: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
     info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
     shield: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
@@ -4927,9 +5113,18 @@ body.ssw-all-plans-open {
     return { isPriority, unitLabel, planTitle, planDesc, badgeLabel, features };
   }
 
+  function getMarketingBadgeIcon(plan = {}, badgeLabel = '') {
+    const label = String(badgeLabel || '');
+    if (plan.durationUnit === 'weekly' || label.includes('بازدید')) return icons.trendUp;
+    if (plan.durationUnit === 'daily' || label.includes('جایگاه')) return icons.mapPin;
+    if (plan.tier === 'priority' || label.includes('ویژه')) return icons.zap;
+    return icons.mapPin;
+  }
+
   function renderPlanCard(plan, index, options = {}) {
     const { mode = 'preview' } = options;
     const { isPriority, unitLabel, planTitle, planDesc, badgeLabel, features } = getPlanCardDetails(plan);
+    const badgeIcon = getMarketingBadgeIcon(plan, badgeLabel);
     const titleId = `ssw-plan-title-${mode}-${index}`;
     const featureMarkup = mode === 'full'
       ? `<ul class="ssw-plan-features">
@@ -4948,7 +5143,7 @@ body.ssw-all-plans-open {
             <h4 id="${titleId}" class="ssw-plan-title">${escapeHtml(planTitle)}</h4>
             <p class="ssw-plan-desc">${escapeHtml(planDesc)}</p>
           </div>
-          <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${escapeHtml(badgeLabel)}">${escapeHtml(badgeLabel)}</div>
+          <div class="ssw-plan-badge${isPriority ? ' ssw-plan-badge--recommended' : ''}" aria-label="${escapeHtml(badgeLabel)}"><span class="ssw-plan-badge-icon" aria-hidden="true">${badgeIcon}</span><span>${escapeHtml(badgeLabel)}</span></div>
         </div>
 
         <div class="upgrade-ad-pricing ssw-plan-pricing" aria-label="قیمت گزینه نمایش">
@@ -4991,14 +5186,19 @@ body.ssw-all-plans-open {
         </div>`;
       renderAllPlans([]);
       renderCarouselDots(0);
+      updateCarouselHints(0);
       return;
     }
 
     container.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index, { mode: 'preview' })).join('');
     container.dir = 'rtl';
-    container.setAttribute('aria-orientation', 'vertical');
+    container.setAttribute('aria-orientation', 'horizontal');
     renderAllPlans(plans);
-    renderCarouselDots(0);
+    renderCarouselDots(plans.length);
+    requestAnimationFrame(() => {
+      container.scrollLeft = 0;
+      updateCarouselHints(0);
+    });
   }
 
   function renderRequests() {
@@ -5721,7 +5921,7 @@ body.ssw-all-plans-open {
       const index = Number(button.dataset.carouselIndex);
       const card = plansRail?.querySelectorAll('.ssw-plan-card')[index];
       if (!card) return;
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
       updateCarouselHints(index);
     });
 
