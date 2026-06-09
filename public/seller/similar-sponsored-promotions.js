@@ -4609,6 +4609,152 @@ body.ssw-all-plans-open {
     box-shadow: none;
   }
 }
+
+/* Final mobile behavior: horizontal rail + all-plans bottom sheet */
+@media (max-width: 639px) {
+  #similar-sponsored-seller-root .ssw-section-header {
+    display: flex !important;
+    position: relative;
+    align-items: flex-start;
+    gap: .5rem;
+    margin: 0 0 .55rem;
+    padding: 0 .1rem 0 0;
+    min-height: 38px;
+  }
+
+  #similar-sponsored-seller-root .ssw-section-header-meta {
+    padding-inline-start: 5.5rem;
+  }
+
+  #similar-sponsored-seller-root .ssw-section-eyebrow,
+  #similar-sponsored-seller-root .ssw-section-subtitle {
+    display: none;
+  }
+
+  #similar-sponsored-seller-root .ssw-section-title {
+    font-size: .86rem !important;
+    line-height: 1.45 !important;
+    margin: 0;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-trigger-wrap {
+    position: absolute;
+    top: 0;
+    right: .1rem;
+    z-index: 4;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-trigger-wrap[hidden] {
+    display: none !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-trigger {
+    width: auto;
+    min-height: 30px;
+    padding: .28rem .65rem;
+    border: 1px solid rgba(15, 118, 110, .34);
+    border-radius: 999px;
+    color: #0f766e;
+    background: rgba(255, 255, 255, .72);
+    box-shadow: none;
+    font-size: .68rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-trigger:hover,
+  #similar-sponsored-seller-root .ssw-all-plans-trigger:active {
+    transform: none;
+    box-shadow: none;
+    background: rgba(240, 253, 250, .88);
+  }
+
+  #similar-sponsored-seller-root .ssw-carousel-shell {
+    margin-inline: -16px !important;
+    overflow: hidden !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plans-grid#similar-sponsored-plans {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    padding: 0 16px 12px !important;
+    overflow-x: scroll !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-padding-inline: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-plans-grid#similar-sponsored-plans::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  #similar-sponsored-seller-root #similar-sponsored-plans .ssw-plan-card.upgrade-ad-card.ssw-plan-card--preview {
+    min-width: 80vw !important;
+    width: 80vw !important;
+    max-width: 80vw !important;
+    flex: 0 0 80vw !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-modal {
+    background: rgba(0, 0, 0, .5);
+    animation: sswAllPlansBackdropIn 300ms ease both;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-dialog {
+    height: 92vh;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    animation: sswAllPlansSlideUp 300ms ease both;
+    touch-action: pan-y;
+    will-change: transform;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-header::before {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: #cbd5e1;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  #similar-sponsored-seller-root .ssw-all-plans-list .ssw-plan-card.upgrade-ad-card {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: none !important;
+    flex-shrink: 1 !important;
+    scroll-snap-align: none !important;
+  }
+}
+
+@keyframes sswAllPlansBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
     `;
     document.head.appendChild(style);
   }
@@ -4650,6 +4796,11 @@ body.ssw-all-plans-open {
       <!-- Section Header -->
       <header class="ssw-section-header">
         <div class="ssw-section-header-icon" aria-hidden="true">${icons.storeSmall}</div>
+        <div class="ssw-all-plans-trigger-wrap" id="similar-sponsored-all-plans-trigger-wrap" hidden>
+          <button type="button" class="ssw-all-plans-trigger" data-similar-sponsored-all-plans-open>
+            <span>مشاهده همه</span>
+          </button>
+        </div>
         <div class="ssw-section-header-meta">
           <span class="ssw-section-eyebrow" aria-label="پیشنهادی">
             ${icons.zapSmall}
@@ -4674,13 +4825,6 @@ body.ssw-all-plans-open {
         <div class="ssw-plans-grid" id="similar-sponsored-plans" role="list" tabindex="0" aria-label="گزینه‌های نمایش در فروشگاه‌های مشابه"></div>
       </div>
       <div class="ssw-carousel-dots" id="similar-sponsored-dots" aria-label="نشانگر گزینه‌های نمایش" hidden></div>
-
-      <div class="ssw-all-plans-trigger-wrap" id="similar-sponsored-all-plans-trigger-wrap" hidden>
-        <button type="button" class="ssw-all-plans-trigger" data-similar-sponsored-all-plans-open>
-          <span>مشاهده همه گزینه‌ها</span>
-          ${icons.arrowLeft}
-        </button>
-      </div>
 
       <!-- All Plans Modal -->
       <div class="ssw-all-plans-modal" id="similar-sponsored-all-plans-modal" hidden aria-modal="true" role="dialog" aria-labelledby="similar-sponsored-all-plans-title">
@@ -5168,7 +5312,7 @@ body.ssw-all-plans-open {
   function renderAllPlans(plans) {
     const list = document.getElementById('similar-sponsored-all-plans-list');
     const triggerWrap = document.getElementById('similar-sponsored-all-plans-trigger-wrap');
-    if (triggerWrap) triggerWrap.hidden = true;
+    if (triggerWrap) triggerWrap.hidden = plans.length <= 1;
     if (!list) return;
     list.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index, { mode: 'full' })).join('');
   }
@@ -5610,6 +5754,12 @@ body.ssw-all-plans-open {
   function openAllPlansModal() {
     const modal = document.getElementById('similar-sponsored-all-plans-modal');
     if (!modal) return;
+    const dialog = modal.querySelector('.ssw-all-plans-dialog');
+    if (dialog) {
+      dialog.style.removeProperty('transform');
+      dialog.style.removeProperty('transition');
+    }
+    modal.style.removeProperty('opacity');
     modal.hidden = false;
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.add('ssw-modal-open', 'ssw-all-plans-open');
@@ -5622,6 +5772,12 @@ body.ssw-all-plans-open {
   function closeAllPlansModal({ restoreFocus = true } = {}) {
     const modal = document.getElementById('similar-sponsored-all-plans-modal');
     if (!modal || modal.hidden) return;
+    const dialog = modal.querySelector('.ssw-all-plans-dialog');
+    if (dialog) {
+      dialog.style.removeProperty('transform');
+      dialog.style.removeProperty('transition');
+    }
+    modal.style.removeProperty('opacity');
     modal.hidden = true;
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.remove('ssw-all-plans-open');
@@ -6010,9 +6166,55 @@ body.ssw-all-plans-open {
     document.getElementById('similar-sponsored-guide-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-guide-modal') closeGuideModal();
     });
-    document.getElementById('similar-sponsored-all-plans-modal')?.addEventListener('click', (event) => {
+    const allPlansModal = document.getElementById('similar-sponsored-all-plans-modal');
+    const allPlansDialog = allPlansModal?.querySelector('.ssw-all-plans-dialog');
+    allPlansModal?.addEventListener('click', (event) => {
       if (event.target.id === 'similar-sponsored-all-plans-modal') closeAllPlansModal();
     });
+
+    let allPlansDrag = null;
+    allPlansDialog?.addEventListener('touchstart', (event) => {
+      if (allPlansModal?.hidden || !event.touches?.length) return;
+      const scrollArea = event.target.closest('.ssw-all-plans-content');
+      if (scrollArea && scrollArea.scrollTop > 0) return;
+      allPlansDrag = {
+        startY: event.touches[0].clientY,
+        currentY: event.touches[0].clientY
+      };
+      allPlansDialog.style.transition = 'none';
+    }, { passive: true });
+    allPlansDialog?.addEventListener('touchmove', (event) => {
+      if (!allPlansDrag || !event.touches?.length) return;
+      const deltaY = Math.max(0, event.touches[0].clientY - allPlansDrag.startY);
+      allPlansDrag.currentY = event.touches[0].clientY;
+      if (deltaY <= 0) return;
+      if (event.cancelable) event.preventDefault();
+      const clamped = Math.min(deltaY, 220);
+      allPlansDialog.style.transform = `translateY(${clamped}px)`;
+      if (allPlansModal) allPlansModal.style.opacity = String(Math.max(.35, 1 - (clamped / 300)));
+    }, { passive: false });
+    allPlansDialog?.addEventListener('touchend', () => {
+      if (!allPlansDrag) return;
+      const deltaY = Math.max(0, allPlansDrag.currentY - allPlansDrag.startY);
+      allPlansDialog.style.transition = 'transform 300ms ease';
+      if (allPlansModal) allPlansModal.style.removeProperty('opacity');
+      if (deltaY > 80) {
+        closeAllPlansModal();
+      } else {
+        allPlansDialog.style.transform = 'translateY(0)';
+        window.setTimeout(() => {
+          allPlansDialog.style.removeProperty('transform');
+          allPlansDialog.style.removeProperty('transition');
+        }, 300);
+      }
+      allPlansDrag = null;
+    }, { passive: true });
+    allPlansDialog?.addEventListener('touchcancel', () => {
+      allPlansDrag = null;
+      allPlansDialog.style.removeProperty('transform');
+      allPlansDialog.style.removeProperty('transition');
+      allPlansModal?.style.removeProperty('opacity');
+    }, { passive: true });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
