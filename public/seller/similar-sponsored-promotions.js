@@ -4796,11 +4796,6 @@ body.ssw-all-plans-open {
       <!-- Section Header -->
       <header class="ssw-section-header">
         <div class="ssw-section-header-icon" aria-hidden="true">${icons.storeSmall}</div>
-        <div class="ssw-all-plans-trigger-wrap" id="similar-sponsored-all-plans-trigger-wrap" hidden>
-          <button type="button" class="ssw-all-plans-trigger" data-similar-sponsored-all-plans-open>
-            <span>مشاهده همه</span>
-          </button>
-        </div>
         <div class="ssw-section-header-meta">
           <span class="ssw-section-eyebrow" aria-label="پیشنهادی">
             ${icons.zapSmall}
