@@ -40,8 +40,8 @@ const DEFAULT_PLANS = [
   durationDays: DURATION_DAYS[plan.durationUnit],
   title: `${TIER_LABELS[plan.tier]} - ${DURATION_LABELS[plan.durationUnit]}`,
   description: plan.tier === 'priority'
-    ? 'نمایش قبل از اسپانسری معمولی در بخش مغازه‌های مشابه'
-    : 'نمایش قبل از مغازه‌های مشابه عادی'
+    ? 'نمایش در جایگاه‌های بالاتر و پربازدیدتر بخش فروشگاه‌های مشابه'
+    : 'نمایش استاندارد در بخش فروشگاه‌های مشابه، بعد از پلن‌های ویژه'
 }));
 
 const PLAN_ORDER = {
