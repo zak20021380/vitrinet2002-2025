@@ -77,19 +77,25 @@ exports.getShopAppearance = async (req, res) => {
       query = { sellerId: sellerId };
     }
 
-    const shop = await ShopAppearance.findOne(query);
+    const shop = await ShopAppearance.findOne(query)
+      .populate('sellerId', 'storename shopurl category subcategory address city phone boardImage');
     if (!shop) {
       return res.status(404).json({ message: "ظاهر فروشگاه یافت نشد!" });
     }
+    const seller = shop.sellerId;
+    const payload = shop.toObject();
 
     // تبدیل URLهای نسبی به مطلق برای shopLogo و slides
-    shop.shopLogo = makeFullUrl(req, shop.shopLogo);
-    shop.slides = shop.slides.map(slide => ({
-      ...slide._doc,
+    payload.shopLogo = makeFullUrl(req, payload.shopLogo);
+    payload.slides = (payload.slides || []).map(slide => ({
+      ...slide,
       img: makeFullUrl(req, slide.img)
     }));
+    payload.shopCategory = payload.shopCategory || seller?.subcategory || seller?.category || '';
+    payload.shopSubcategory = seller?.subcategory || '';
+    payload.category = payload.shopCategory;
 
-    res.json(shop);
+    res.json(payload);
   } catch (err) {
     console.error("خطا در دریافت اطلاعات ظاهر فروشگاه:", err);
     res.status(500).json({ message: "خطا در دریافت اطلاعات ظاهر فروشگاه!" });
@@ -171,19 +177,25 @@ exports.getAppearanceByUrl = async (req, res) => {
     if (!shopurl) {
       return res.status(400).json({ message: "آدرس فروشگاه وارد نشده است." });
     }
-    const shop = await ShopAppearance.findOne({ customUrl: shopurl });
+    const shop = await ShopAppearance.findOne({ customUrl: shopurl })
+      .populate('sellerId', 'storename shopurl category subcategory address city phone boardImage');
     if (!shop) {
       return res.status(404).json({ message: "ظاهر فروشگاه با این آدرس یافت نشد!" });
     }
+    const seller = shop.sellerId;
+    const payload = shop.toObject();
 
     // تبدیل URLهای نسبی به مطلق برای shopLogo و slides
-    shop.shopLogo = makeFullUrl(req, shop.shopLogo);
-    shop.slides = shop.slides.map(slide => ({
-      ...slide._doc,
+    payload.shopLogo = makeFullUrl(req, payload.shopLogo);
+    payload.slides = (payload.slides || []).map(slide => ({
+      ...slide,
       img: makeFullUrl(req, slide.img)
     }));
+    payload.shopCategory = payload.shopCategory || seller?.subcategory || seller?.category || '';
+    payload.shopSubcategory = seller?.subcategory || '';
+    payload.category = payload.shopCategory;
 
-    res.json(shop);
+    res.json(payload);
   } catch (err) {
     console.error("خطا در دریافت ظاهر فروشگاه بر اساس url:", err);
     res.status(500).json({ message: "خطا در دریافت ظاهر فروشگاه!" });
