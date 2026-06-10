@@ -136,6 +136,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  align-items: flex-start;
+  direction: rtl;
+  text-align: right;
 }
 
 .logo-text {
@@ -165,33 +168,32 @@ body {
 .shop-category-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.32rem;
   width: fit-content;
   max-width: min(100%, 14rem);
-  padding: 0.22rem 0.56rem;
+  padding: 0.2rem 0.62rem;
   border-radius: 999px;
-  background: rgba(124, 131, 253, 0.08);
-  border: 1px solid rgba(124, 131, 253, 0.16);
-  color: var(--primary);
-  font-size: 0.72rem;
+  background: rgba(124, 131, 253, 0.1);
+  border: 1px solid rgba(124, 131, 253, 0.22);
+  color: #5b62d6;
+  font-size: 0.7rem;
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.3;
   letter-spacing: 0;
-  box-shadow: 0 6px 16px rgba(124, 131, 253, 0.08);
+  box-shadow: 0 5px 14px rgba(124, 131, 253, 0.08);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .shop-category-badge[hidden] {
   display: none !important;
 }
 
-.shop-category-badge__icon {
-  flex: 0 0 auto;
-  line-height: 1;
-}
-
 .shop-category-badge__text {
   min-width: 0;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== Customer Badge (Compact) ===== */
@@ -202,6 +204,14 @@ body {
   justify-content: center;
   /* در دسکتاپ کمی فاصله می‌دهیم */
   margin-left: 1rem;
+}
+
+.mobile-actions-row {
+  display: contents;
+}
+
+.seller-utility-actions {
+  display: contents;
 }
 
 .customer-badge {
@@ -4027,32 +4037,264 @@ body {
 
 @media (min-width: 641px) {
   .shop-category-badge {
-    font-size: 0.76rem;
-    padding: 0.24rem 0.62rem;
+    font-size: 0.72rem;
+    padding: 0.22rem 0.7rem;
   }
 }
 
+/* Final mobile seller header layout */
 @media (max-width: 640px) {
+  .shop-header .header-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0.62rem 0.78rem 0.72rem;
+    gap: 0.58rem;
+    min-height: 0;
+  }
+
+  .brand-area {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "menu spacer brand"
+      "identity identity identity";
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 0.44rem 0.62rem;
+    direction: ltr;
+  }
+
+  .menu-toggle {
+    grid-area: menu;
+    display: inline-flex;
+    justify-self: start;
+    align-self: start;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .home-link {
+    grid-area: brand;
+    justify-self: end;
+    align-self: start;
+    min-width: 0;
+    gap: 0;
+  }
+
+  .home-link:hover {
+    transform: none;
+  }
+
+  .brand-label {
+    display: inline-block;
+    font-size: 1.06rem;
+    line-height: 38px;
+  }
+
+  .logo-wrap {
+    grid-area: identity;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    text-align: center;
+    gap: 0.18rem;
+    padding: 0.08rem 0 0;
+    direction: rtl;
+  }
+
+  .logo-text {
+    max-width: 100%;
+    font-size: 1.02rem;
+    line-height: 1.2;
+    text-align: center;
+  }
+
   .shop-category-badge {
-    max-width: clamp(78px, 26vw, 150px);
-    padding: 0.18rem 0.42rem;
+    max-width: min(100%, 13rem);
+    min-height: 20px;
+    padding: 0.15rem 0.58rem;
     font-size: 0.66rem;
     box-shadow: none;
   }
-}
 
-@media (max-width: 520px) {
-  .shop-category-badge {
-    max-width: clamp(68px, 23vw, 112px);
-    font-size: 0.61rem;
-    gap: 0.22rem;
+  .logo-caption {
+    display: block;
+    max-width: 100%;
+    color: #6b7280;
+    font-size: 0.69rem;
+    line-height: 1.35;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shop-stories {
+    grid-column: 1 / -1;
+  }
+
+  .mobile-actions-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    gap: 0.42rem;
+    padding: 0.02rem 0 0;
+  }
+
+  .badge-cluster {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .seller-utility-actions {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    gap: 0.46rem;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0 0.08rem;
+    scroll-padding-inline: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .seller-utility-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-header-actions,
+  .header-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    align-self: auto;
+    margin: 0;
+    gap: 0.46rem;
+  }
+
+  .header-actions,
+  .shop-header.menu-open .header-actions {
+    position: static;
+    inset: auto;
+    flex-direction: row;
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transition: none;
+  }
+
+  .header-actions #addressBtn {
+    display: none;
+  }
+
+  .customer-badge,
+  .mobile-action-btn,
+  .action-item {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    height: 36px;
+    min-height: 36px;
+    width: auto;
+    min-width: 74px;
+    padding: 0 0.76rem;
+    gap: 0.36rem;
+    border-radius: 12px;
+    font-size: 0.73rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .customer-badge {
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline: 0.88rem;
+  }
+
+  .action-item {
+    background: #fff;
+    border: 1.5px solid rgba(124, 131, 253, 0.18);
+    color: #374151;
+  }
+
+  .action-item span,
+  .mobile-action-btn span {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .customer-meta {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.36rem;
+    line-height: 1;
+  }
+
+  .customer-count {
+    font-size: inherit;
+  }
+
+  .customer-cta {
+    display: inline-flex;
+    font-size: 0.68rem;
+    padding: 3px 7px;
+  }
+
+  .customer-icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 8px;
+  }
+
+  .customer-icon svg,
+  .mobile-action-btn svg,
+  .action-item svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
   }
 }
 
 @media (max-width: 390px) {
-  .shop-category-badge {
-    max-width: clamp(62px, 24vw, 96px);
-    padding-inline: 0.34rem;
+  .brand-area {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+  }
+
+  .brand-label {
+    font-size: 0.98rem;
+    line-height: 36px;
+  }
+
+  .customer-badge,
+  .mobile-action-btn,
+  .action-item {
+    height: 34px;
+    min-height: 34px;
+    min-width: 70px;
+    padding-inline: 0.64rem;
+    font-size: 0.69rem;
   }
 }
 
@@ -4106,15 +4348,14 @@ body {
       </button>
       <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="بازگشت به صفحه اصلی">
         <span class="brand-label">ویترینت</span>
-        <div class="logo-wrap">
-          <h1 class="logo-text logo-txt" id="shopLogoText">نئون استایل</h1>
-          <span class="shop-category-badge" id="shopCategoryBadge" hidden>
-            <span class="shop-category-badge__icon" aria-hidden="true">🏷</span>
-            <span class="shop-category-badge__text" id="shopCategoryBadgeText"></span>
-          </span>
-          <p class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</p>
-        </div>
       </a>
+      <div class="logo-wrap">
+        <h1 class="logo-text logo-txt" id="shopLogoText">نئون استایل</h1>
+        <span class="shop-category-badge" id="shopCategoryBadge" hidden>
+          <span class="shop-category-badge__text" id="shopCategoryBadgeText"></span>
+        </span>
+        <p class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</p>
+      </div>
       <section class="shop-stories" id="shopStoriesSection" aria-label="استوری فروشگاه" hidden>
         <div class="stories-shell">
           <div class="stories-content" id="shopStoriesContent" aria-live="polite"></div>
@@ -4122,64 +4363,68 @@ body {
       </section>
     </div>
 
-    <!-- Customer Badge -->
-    <div class="badge-cluster">
-      <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
-        <span class="customer-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </span>
-        <div class="customer-meta">
-          <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
-          <span class="customer-cta">عضویت سریع
+    <div class="mobile-actions-row" aria-label="اقدام‌های فروشگاه">
+      <!-- Customer Badge -->
+      <div class="badge-cluster">
+        <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
+          <span class="customer-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14m7-7H5"/>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
           </span>
+          <div class="customer-meta">
+            <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
+            <span class="customer-cta">عضویت سریع
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14m7-7H5"/>
+              </svg>
+            </span>
+          </div>
+        </button>
+      </div>
+
+      <div class="seller-utility-actions" aria-label="ابزارهای فروشگاه">
+        <!-- Mobile Visible Actions (فقط در موبایل نمایش داده می‌شود) -->
+        <div class="mobile-header-actions">
+          <button id="addressBtnMobile" class="mobile-action-btn" aria-label="مشاهده آدرس فروشگاه" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>آدرس</span>
+          </button>
         </div>
-      </button>
-    </div>
 
-    <!-- Mobile Visible Actions (فقط در موبایل نمایش داده می‌شود) -->
-    <div class="mobile-header-actions">
-      <button id="addressBtnMobile" class="mobile-action-btn" aria-label="مشاهده آدرس فروشگاه" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <span>آدرس</span>
-      </button>
+        <!-- Navigation / Actions -->
+        <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
+          <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>آدرس</span>
+          </button>
+          <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>گزارش</span>
+          </button>
+          <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+            </svg>
+            <span><span id="shop-rating">4.8</span> امتیاز</span>
+            <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
+          </button>
+        </nav>
+      </div>
     </div>
-
-    <!-- Navigation / Actions -->
-    <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
-      <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <span>آدرس</span>
-      </button>
-      <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <span>گزارش</span>
-      </button>
-      <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
-        </svg>
-        <span><span id="shop-rating">4.8</span> امتیاز</span>
-        <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
-      </button>
-    </nav>
   </div>
 </header>
 <!-- پاپ‌آپ آدرس فروشگاه -->
@@ -4648,7 +4893,7 @@ function setShopCategoryBadge(category) {
 
   text.textContent = cleanCategory;
   badge.hidden = false;
-  badge.setAttribute('aria-label', `دسته‌بندی فروشگاه: ${cleanCategory}`);
+  badge.setAttribute('aria-label', cleanCategory);
 }
 
 function resolveShopCategory(source = {}) {
