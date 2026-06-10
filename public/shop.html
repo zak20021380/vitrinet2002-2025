@@ -141,6 +141,18 @@ body {
   text-align: right;
 }
 
+.identity-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.mobile-logo-caption {
+  display: none;
+}
+
 .logo-text {
   font-family: 'Vazirmatn', sans-serif;
   font-weight: 700;
@@ -4298,6 +4310,324 @@ body {
   }
 }
 
+/* Compact mobile seller header: spacing/layout only. */
+@media (max-width: 640px) {
+  .shop-header {
+    width: 100vw;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  .shop-header .header-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    gap: 6px;
+    padding: 6px 10px;
+    min-height: 0;
+  }
+
+  .brand-area {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas: "menu brand identity";
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    direction: ltr;
+  }
+
+  .menu-toggle {
+    grid-area: menu;
+    display: inline-flex;
+    justify-self: start;
+    align-self: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+
+  .menu-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .home-link {
+    grid-area: brand;
+    display: inline-flex;
+    justify-self: center;
+    align-self: center;
+    min-width: 0;
+    gap: 0;
+  }
+
+  .home-link:hover {
+    transform: none;
+  }
+
+  .brand-label {
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .logo-wrap {
+    grid-area: identity;
+    display: block;
+    width: auto;
+    max-width: min(58vw, 220px);
+    min-width: 0;
+    padding: 0;
+    direction: rtl;
+    text-align: right;
+    justify-self: end;
+  }
+
+  .identity-line {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .logo-text {
+    flex: 0 1 auto;
+    max-width: min(58vw, 180px);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.25;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shop-category-badge {
+    flex: 0 0 auto;
+    max-width: 78px;
+    min-height: 18px;
+    padding: 1px 8px;
+    font-size: 10px;
+    line-height: 1.35;
+    box-shadow: none;
+  }
+
+  .desktop-logo-caption {
+    display: none;
+  }
+
+  .mobile-logo-caption {
+    display: block;
+  }
+
+  .shop-stories {
+    grid-column: 1 / -1;
+  }
+
+  .mobile-actions-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "caption tabs"
+      "stats stats";
+    align-items: center;
+    gap: 4px 6px;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    direction: ltr;
+  }
+
+  .mobile-actions-row .logo-caption {
+    grid-area: caption;
+    max-width: 100%;
+    margin: 0;
+    color: #6b7280;
+    font-size: 10px;
+    line-height: 1.3;
+    direction: rtl;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .badge-cluster {
+    grid-area: tabs;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .seller-utility-actions {
+    grid-area: stats;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-padding-inline: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    direction: rtl;
+  }
+
+  .seller-utility-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-header-actions,
+  .header-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .header-actions,
+  .shop-header.menu-open .header-actions {
+    position: static;
+    inset: auto;
+    flex-direction: row;
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transition: none;
+  }
+
+  .header-actions #addressBtn {
+    display: none;
+  }
+
+  .customer-badge,
+  .mobile-action-btn,
+  .action-item {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    height: 28px;
+    min-height: 28px;
+    width: auto;
+    min-width: 0;
+    padding: 4px 8px;
+    gap: 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .customer-badge {
+    max-width: 100%;
+    padding-inline: 8px;
+  }
+
+  .action-item {
+    background: #fff;
+    border: 1.5px solid rgba(124, 131, 253, 0.18);
+    color: #374151;
+  }
+
+  .customer-meta {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+  }
+
+  .customer-count,
+  .customer-cta,
+  .action-item span,
+  .mobile-action-btn span {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    font-size: inherit;
+  }
+
+  .customer-cta {
+    padding: 2px 5px;
+  }
+
+  .customer-cta svg,
+  .customer-icon,
+  .rating-count-pill {
+    flex: 0 0 auto;
+  }
+
+  .customer-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 7px;
+  }
+
+  .customer-icon svg,
+  .mobile-action-btn svg,
+  .action-item svg,
+  .customer-cta svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .rating-count-pill {
+    gap: 2px;
+    padding: 1px 4px;
+    font-size: 10px;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 390px) {
+  .shop-header .header-shell {
+    padding-inline: 8px;
+  }
+
+  .brand-area,
+  .mobile-actions-row {
+    gap: 4px;
+  }
+
+  .logo-text {
+    max-width: 112px;
+  }
+
+  .brand-label {
+    font-size: 0.72rem;
+  }
+
+  .customer-badge,
+  .mobile-action-btn,
+  .action-item {
+    padding-inline: 6px;
+    font-size: 11px;
+  }
+}
+
 
 
 
@@ -4350,11 +4680,13 @@ body {
         <span class="brand-label">ویترینت</span>
       </a>
       <div class="logo-wrap">
-        <h1 class="logo-text logo-txt" id="shopLogoText">نئون استایل</h1>
-        <span class="shop-category-badge" id="shopCategoryBadge" hidden>
-          <span class="shop-category-badge__text" id="shopCategoryBadgeText"></span>
-        </span>
-        <p class="logo-caption logo-tagline">پوشاک مدرن و اکسسوری خاص</p>
+        <div class="identity-line">
+          <h1 class="logo-text logo-txt" id="shopLogoText">نئون استایل</h1>
+          <span class="shop-category-badge" id="shopCategoryBadge" hidden>
+            <span class="shop-category-badge__text" id="shopCategoryBadgeText"></span>
+          </span>
+        </div>
+        <p class="logo-caption desktop-logo-caption">پوشاک مدرن و اکسسوری خاص</p>
       </div>
       <section class="shop-stories" id="shopStoriesSection" aria-label="استوری فروشگاه" hidden>
         <div class="stories-shell">
@@ -4364,6 +4696,7 @@ body {
     </div>
 
     <div class="mobile-actions-row" aria-label="اقدام‌های فروشگاه">
+      <p class="logo-caption logo-tagline mobile-logo-caption">پوشاک مدرن و اکسسوری خاص</p>
       <!-- Customer Badge -->
       <div class="badge-cluster">
         <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
