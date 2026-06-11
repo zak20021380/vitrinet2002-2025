@@ -4629,7 +4629,7 @@ body {
 }
 
 /* Mobile seller header cleanup: closed header stays minimal, actions live in menu. */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .shop-header {
     width: 100%;
     max-width: 100%;
@@ -4935,6 +4935,112 @@ body {
   }
 }
 
+.header-quick-actions {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .header-quick-actions {
+    order: 2;
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    direction: rtl;
+  }
+
+  .header-quick-actions .header-customer-badge {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px;
+    justify-content: center;
+    padding: 0 10px;
+    gap: 7px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(124, 131, 253, 0.2), 0 4px 12px rgba(82, 183, 136, 0.14);
+  }
+
+  .header-quick-actions .customer-meta {
+    min-width: 0;
+  }
+
+  .header-quick-actions .customer-count {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-address-chip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 36px;
+    min-height: 36px;
+    min-width: 76px;
+    padding: 0 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(124, 131, 253, 0.18);
+    background: #fff;
+    color: #374151;
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px rgba(35, 41, 70, 0.08);
+  }
+
+  .header-address-chip svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+  }
+
+  .mobile-actions-row {
+    order: 3;
+  }
+
+  .seller-utility-actions {
+    display: block !important;
+    margin-top: 0;
+  }
+
+  .seller-utility-actions > .badge-cluster,
+  .seller-utility-actions > .mobile-header-actions {
+    display: none !important;
+  }
+
+  .header-actions #addressBtn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .header-quick-actions .header-customer-badge,
+  .header-address-chip {
+    height: 34px;
+    min-height: 34px;
+  }
+
+  .header-address-chip {
+    min-width: 68px;
+    padding-inline: 8px;
+    font-size: 0.72rem;
+  }
+
+  .header-quick-actions .customer-icon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+}
+
 
 
 
@@ -5001,43 +5107,56 @@ body {
       </section>
     </div>
 
+    <div class="header-quick-actions" aria-label="دسترسی سریع فروشگاه">
+      <button id="customerBadgeHeader" class="customer-badge header-customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
+        <span class="customer-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <div class="customer-meta">
+          <span class="customer-count"><span data-customer-count>0</span> مشتری</span>
+        </div>
+      </button>
+      <button id="addressBtnHeader" class="header-address-chip" aria-label="مشاهده آدرس فروشگاه" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>آدرس</span>
+      </button>
+    </div>
+
     <div class="mobile-actions-row" aria-label="اقدام‌های فروشگاه">
       <p class="logo-caption logo-tagline mobile-logo-caption">پوشاک مدرن و اکسسوری خاص</p>
       <div class="seller-utility-actions" aria-label="ابزارهای فروشگاه">
-        <!-- Mobile Visible Actions (فقط در موبایل نمایش داده می‌شود) -->
-        <div class="mobile-header-actions">
-          <button id="addressBtnMobile" class="mobile-action-btn" aria-label="مشاهده آدرس فروشگاه" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span>آدرس</span>
+        <!-- Customer Badge -->
+        <div class="badge-cluster">
+          <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
+            <span class="customer-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </span>
+            <div class="customer-meta">
+              <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
+              <span class="customer-cta">عضویت سریع
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14m7-7H5"/>
+                </svg>
+              </span>
+            </div>
           </button>
         </div>
 
         <!-- Navigation / Actions -->
         <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
-          <!-- Customer Badge -->
-          <div class="badge-cluster">
-            <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
-              <span class="customer-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </span>
-              <div class="customer-meta">
-                <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
-                <span class="customer-cta">عضویت سریع
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 5v14m7-7H5"/>
-                  </svg>
-                </span>
-              </div>
-            </button>
-          </div>
           <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -6450,7 +6569,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // کنترل باز و بسته شدن مودال آدرس فروشگاه
 document.addEventListener('DOMContentLoaded', function () {
   const addressBtn = document.getElementById('addressBtn');
-  const addressBtnMobile = document.getElementById('addressBtnMobile');
+  const addressBtnHeader = document.getElementById('addressBtnHeader');
   const addressModal = document.getElementById('addressModal');
   const closeAddressModal = document.getElementById('closeAddressModal');
 
@@ -6461,8 +6580,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (addressBtn && addressModal) {
     addressBtn.onclick = openAddressModal;
   }
-  if (addressBtnMobile && addressModal) {
-    addressBtnMobile.onclick = openAddressModal;
+  if (addressBtnHeader && addressModal) {
+    addressBtnHeader.onclick = openAddressModal;
   }
   if (closeAddressModal && addressModal) {
     closeAddressModal.onclick = function() {
@@ -6694,6 +6813,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   // ───────────── مغازه محبوب ─────────────
   const favShopBtn       = document.getElementById('favShopBtn');
   const customerBadge    = document.getElementById('customerBadge');
+  const customerBadgeHeader = document.getElementById('customerBadgeHeader');
   const favShopModal     = document.getElementById('favShopModal');
   const closeFavShop     = document.getElementById('closeFavShopModal');
   const favShopCountEl   = document.getElementById('favShopCount');
@@ -6791,6 +6911,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   favShopBtn?.addEventListener('click', openCustomerModal);
   customerBadge?.addEventListener('click', openCustomerModal);
+  customerBadgeHeader?.addEventListener('click', openCustomerModal);
 
   closeFavShop?.addEventListener('click', () => {
     hideFavSuccessNotice();
