@@ -4935,109 +4935,343 @@ body {
   }
 }
 
-.header-quick-actions {
+.mobile-status-badge,
+.mobile-drawer-meta {
   display: none;
 }
 
+/* Final mobile marketplace header: compact top bar, all metadata in drawer. */
 @media (max-width: 900px) {
-  .header-quick-actions {
-    order: 2;
-    display: flex !important;
-    align-items: center;
-    gap: 6px;
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .shop-header {
+    z-index: 120;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.055);
+    backdrop-filter: blur(16px);
+  }
+
+  .shop-header .header-shell {
+    position: relative;
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 7px 10px !important;
+    box-sizing: border-box;
+  }
+
+  .brand-area {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    direction: ltr;
+  }
+
+  .menu-toggle {
+    grid-column: 1;
+    display: inline-flex !important;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 11px;
+    align-self: center;
+    justify-self: start;
+    background: rgba(124, 131, 253, 0.09);
+    color: #5b62d6;
+    box-shadow: none;
+  }
+
+  .menu-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .home-link,
+  .brand-label,
+  .desktop-logo-caption,
+  .mobile-logo-caption,
+  .shop-category-badge,
+  .shop-stories {
+    display: none !important;
+  }
+
+  .logo-wrap {
+    grid-column: 2;
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0;
+    text-align: right;
     direction: rtl;
   }
 
-  .header-quick-actions .header-customer-badge {
-    flex: 1 1 auto;
-    width: auto;
+  .identity-line {
+    display: block;
+    width: 100%;
     min-width: 0;
-    height: 36px;
-    min-height: 36px;
+  }
+
+  .logo-text {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    color: #111827;
+    font-size: 0.94rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-status-badge {
+    grid-column: 3;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    padding: 0 10px;
-    gap: 7px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(124, 131, 253, 0.2), 0 4px 12px rgba(82, 183, 136, 0.14);
+    min-width: 34px;
+    max-width: 42px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #047857;
+    font-size: 0.68rem;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
   }
 
-  .header-quick-actions .customer-meta {
+  .mobile-status-badge.is-closed {
+    background: rgba(239, 68, 68, 0.09);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #b91c1c;
+  }
+
+  .mobile-actions-row,
+  .seller-utility-actions {
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
+    box-sizing: border-box;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
   }
 
-  .header-quick-actions .customer-count {
+  .header-actions,
+  .shop-header.menu-open .header-actions {
+    position: fixed !important;
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    z-index: 130;
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    width: auto !important;
+    min-width: 0;
+    max-height: 0;
+    margin: 0;
+    padding: 0 10px;
+    gap: 8px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.985);
+    transform-origin: top center;
+    direction: rtl;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(18px);
+    transition: max-height 0.28s ease, opacity 0.2s ease, transform 0.22s ease, padding 0.22s ease;
+  }
+
+  .shop-header.menu-open .header-actions {
+    max-height: min(460px, calc(100vh - 76px));
+    padding: 12px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .mobile-drawer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 10px 12px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .mobile-drawer-kicker {
+    color: #7c83fd;
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .mobile-drawer-meta strong {
+    color: #111827;
+    font-size: 0.98rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .mobile-drawer-meta span,
+  .mobile-drawer-meta small {
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .mobile-drawer-meta [hidden] {
+    display: none !important;
+  }
+
+  .header-actions .badge-cluster {
+    display: flex !important;
+    width: 100%;
+    margin: 0;
+  }
+
+  .header-actions .customer-badge {
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    justify-content: space-between;
+    padding: 0 12px;
+    gap: 8px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, rgba(124, 131, 253, 0.95), rgba(82, 183, 136, 0.9));
+    box-shadow: 0 8px 20px rgba(124, 131, 253, 0.18);
+  }
+
+  .header-actions .customer-meta {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .header-actions .customer-count,
+  .header-actions .customer-cta {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .header-address-chip {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    height: 36px;
-    min-height: 36px;
-    min-width: 76px;
-    padding: 0 10px;
-    border-radius: 12px;
-    border: 1px solid rgba(124, 131, 253, 0.18);
-    background: #fff;
-    color: #374151;
-    font-size: 0.76rem;
-    font-weight: 800;
-    line-height: 1;
-    white-space: nowrap;
-    box-shadow: 0 6px 16px rgba(35, 41, 70, 0.08);
+  .header-actions .customer-icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 8px;
   }
 
-  .header-address-chip svg {
+  .header-actions .customer-icon svg {
     width: 14px;
     height: 14px;
-    flex: 0 0 auto;
   }
 
-  .mobile-actions-row {
-    order: 3;
-  }
-
-  .seller-utility-actions {
-    display: block !important;
-    margin-top: 0;
-  }
-
-  .seller-utility-actions > .badge-cluster,
-  .seller-utility-actions > .mobile-header-actions {
-    display: none !important;
-  }
-
+  .header-actions .action-item,
   .header-actions #addressBtn {
-    display: none !important;
+    display: inline-flex !important;
+    box-sizing: border-box;
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    justify-content: flex-start;
+    gap: 9px;
+    padding: 0 12px;
+    border-radius: 13px;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    background: #fff;
+    color: #273142;
+    font-size: 0.8rem;
+    font-weight: 850;
+    box-shadow: none;
+  }
+
+  .header-actions .action-item span {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-actions .action-item svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: #7c83fd;
+  }
+
+  .header-actions .rating-count-pill {
+    margin-right: auto;
+    padding: 2px 7px;
+    font-size: 0.68rem;
   }
 }
 
 @media (max-width: 390px) {
-  .header-quick-actions .header-customer-badge,
-  .header-address-chip {
-    height: 34px;
-    min-height: 34px;
+  .shop-header .header-shell {
+    padding-inline: 8px !important;
   }
 
-  .header-address-chip {
-    min-width: 68px;
-    padding-inline: 8px;
-    font-size: 0.72rem;
+  .brand-area {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 6px;
   }
 
-  .header-quick-actions .customer-icon {
-    width: 20px;
-    height: 20px;
-    flex-basis: 20px;
+  .menu-toggle {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+
+  .logo-text {
+    font-size: 0.9rem;
+  }
+
+  .mobile-status-badge {
+    display: none;
+  }
+
+  .header-actions,
+  .shop-header.menu-open .header-actions {
+    left: 8px;
+    right: 8px;
   }
 }
 
@@ -5100,6 +5334,7 @@ body {
         </div>
         <p class="logo-caption desktop-logo-caption">پوشاک مدرن و اکسسوری خاص</p>
       </div>
+      <span class="mobile-status-badge" aria-label="وضعیت فروشگاه">باز</span>
       <section class="shop-stories" id="shopStoriesSection" aria-label="استوری فروشگاه" hidden>
         <div class="stories-shell">
           <div class="stories-content" id="shopStoriesContent" aria-live="polite"></div>
@@ -5107,56 +5342,37 @@ body {
       </section>
     </div>
 
-    <div class="header-quick-actions" aria-label="دسترسی سریع فروشگاه">
-      <button id="customerBadgeHeader" class="customer-badge header-customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
-        <span class="customer-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </span>
-        <div class="customer-meta">
-          <span class="customer-count"><span data-customer-count>0</span> مشتری</span>
-        </div>
-      </button>
-      <button id="addressBtnHeader" class="header-address-chip" aria-label="مشاهده آدرس فروشگاه" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <span>آدرس</span>
-      </button>
-    </div>
-
     <div class="mobile-actions-row" aria-label="اقدام‌های فروشگاه">
       <p class="logo-caption logo-tagline mobile-logo-caption">پوشاک مدرن و اکسسوری خاص</p>
       <div class="seller-utility-actions" aria-label="ابزارهای فروشگاه">
-        <!-- Customer Badge -->
-        <div class="badge-cluster">
-          <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
-            <span class="customer-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </span>
-            <div class="customer-meta">
-              <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
-              <span class="customer-cta">عضویت سریع
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 5v14m7-7H5"/>
-                </svg>
-              </span>
-            </div>
-          </button>
-        </div>
-
         <!-- Navigation / Actions -->
         <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
+          <div class="mobile-drawer-meta" aria-label="اطلاعات فروشگاه">
+            <span class="mobile-drawer-kicker">اطلاعات فروشگاه</span>
+            <strong id="drawerShopName">نئون استایل</strong>
+            <span id="drawerShopCategory">دسته‌بندی فروشگاه</span>
+            <small id="drawerShopCaption">پوشاک مدرن و اکسسوری خاص</small>
+          </div>
+          <div class="badge-cluster">
+            <button id="customerBadge" class="customer-badge" type="button" aria-label="مشاهده مشتریان و عضویت سریع">
+              <span class="customer-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </span>
+              <div class="customer-meta">
+                <span class="customer-count"><span id="customerCountBadge" data-customer-count>0</span> مشتری</span>
+                <span class="customer-cta">عضویت سریع
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14m7-7H5"/>
+                  </svg>
+                </span>
+              </div>
+            </button>
+          </div>
           <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -5639,18 +5855,27 @@ function normalizeSellerId(value) {
 function setShopCategoryBadge(category) {
   const badge = document.getElementById('shopCategoryBadge');
   const text = document.getElementById('shopCategoryBadgeText');
+  const drawerCategory = document.getElementById('drawerShopCategory');
   if (!badge || !text) return;
 
   const cleanCategory = typeof category === 'string' ? category.trim() : '';
   if (!cleanCategory) {
     badge.hidden = true;
     text.textContent = '';
+    if (drawerCategory) {
+      drawerCategory.hidden = true;
+      drawerCategory.textContent = '';
+    }
     return;
   }
 
   text.textContent = cleanCategory;
   badge.hidden = false;
   badge.setAttribute('aria-label', cleanCategory);
+  if (drawerCategory) {
+    drawerCategory.hidden = false;
+    drawerCategory.textContent = cleanCategory;
+  }
 }
 
 function resolveShopCategory(source = {}) {
@@ -6207,19 +6432,29 @@ async function loadShopData() {
     loadShopStories(currentSellerId);
 
     // لوگو و نام فروشگاه
+    const resolvedShopName = data.shopLogoText || data.shopName || 'نام فروشگاه';
     document.querySelectorAll('.logo-txt').forEach(el =>
-      el.textContent = data.shopLogoText || data.shopName || 'نام فروشگاه'
+      el.textContent = resolvedShopName
     );
-    document.getElementById('currentShopName').textContent =
-      data.shopLogoText || data.shopName || 'نام فروشگاه';
+    document.getElementById('currentShopName').textContent = resolvedShopName;
+    const drawerShopName = document.getElementById('drawerShopName');
+    if (drawerShopName) drawerShopName.textContent = resolvedShopName;
     const shopHeaderDesc = data.shopShortDesc || data.shortDescription || data.description || data.shopDescription || 'فروشگاه آنلاین';
     document.querySelectorAll('.logo-caption').forEach(el => {
       el.textContent = shopHeaderDesc;
     });
+    const drawerShopCaption = document.getElementById('drawerShopCaption');
+    if (drawerShopCaption) drawerShopCaption.textContent = shopHeaderDesc;
     setShopCategoryBadge(resolveShopCategory(data));
 
     // وضعیت فروشگاه (باز/بسته)
     const shopStatusEl = document.getElementById('shop-status');
+    const mobileStatusBadge = document.querySelector('.mobile-status-badge');
+    if (mobileStatusBadge) {
+      const isClosed = data.shopStatus === 'closed';
+      mobileStatusBadge.textContent = isClosed ? 'بسته' : 'باز';
+      mobileStatusBadge.classList.toggle('is-closed', isClosed);
+    }
     if (shopStatusEl) {
       shopStatusEl.innerHTML =
         data.shopStatus === 'closed'
@@ -6448,9 +6683,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (headerActions) {
-      headerActions.querySelectorAll('.action-item').forEach((actionButton) => {
+      headerActions.querySelectorAll('button').forEach((actionButton) => {
         actionButton.addEventListener('click', () => {
-          if (window.innerWidth < 768) {
+          if (window.innerWidth <= 900) {
             requestAnimationFrame(() => closeHeaderMenu());
           }
         });
@@ -6470,7 +6705,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth > 900) {
         closeHeaderMenu();
       }
     });
@@ -6569,7 +6804,6 @@ document.addEventListener('DOMContentLoaded', function () {
 // کنترل باز و بسته شدن مودال آدرس فروشگاه
 document.addEventListener('DOMContentLoaded', function () {
   const addressBtn = document.getElementById('addressBtn');
-  const addressBtnHeader = document.getElementById('addressBtnHeader');
   const addressModal = document.getElementById('addressModal');
   const closeAddressModal = document.getElementById('closeAddressModal');
 
@@ -6579,9 +6813,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (addressBtn && addressModal) {
     addressBtn.onclick = openAddressModal;
-  }
-  if (addressBtnHeader && addressModal) {
-    addressBtnHeader.onclick = openAddressModal;
   }
   if (closeAddressModal && addressModal) {
     closeAddressModal.onclick = function() {
@@ -6813,7 +7044,6 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   // ───────────── مغازه محبوب ─────────────
   const favShopBtn       = document.getElementById('favShopBtn');
   const customerBadge    = document.getElementById('customerBadge');
-  const customerBadgeHeader = document.getElementById('customerBadgeHeader');
   const favShopModal     = document.getElementById('favShopModal');
   const closeFavShop     = document.getElementById('closeFavShopModal');
   const favShopCountEl   = document.getElementById('favShopCount');
@@ -6911,7 +7141,6 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   favShopBtn?.addEventListener('click', openCustomerModal);
   customerBadge?.addEventListener('click', openCustomerModal);
-  customerBadgeHeader?.addEventListener('click', openCustomerModal);
 
   closeFavShop?.addEventListener('click', () => {
     hideFavSuccessNotice();
