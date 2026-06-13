@@ -83,12 +83,19 @@ function setShopCategoryBadge(category) {
   const badge = document.getElementById('shopCategoryBadge');
   const text = document.getElementById('shopCategoryBadgeText');
   const drawerCategory = document.getElementById('drawerShopCategory');
+  const mobileCategory = document.getElementById('mobileShopCategoryText');
+  const mobileCategoryChip = document.getElementById('mobileCategoryChip');
   if (!badge || !text) return;
 
   const cleanCategory = typeof category === 'string' ? category.trim() : '';
   if (!cleanCategory) {
     badge.hidden = true;
     text.textContent = '';
+    if (mobileCategory) mobileCategory.textContent = 'دسته‌بندی';
+    if (mobileCategoryChip) {
+      mobileCategoryChip.hidden = false;
+      mobileCategoryChip.setAttribute('aria-label', 'دسته‌بندی فروشگاه');
+    }
     if (drawerCategory) {
       drawerCategory.hidden = true;
       drawerCategory.textContent = '';
@@ -99,6 +106,11 @@ function setShopCategoryBadge(category) {
   text.textContent = cleanCategory;
   badge.hidden = false;
   badge.setAttribute('aria-label', cleanCategory);
+  if (mobileCategory) mobileCategory.textContent = cleanCategory;
+  if (mobileCategoryChip) {
+    mobileCategoryChip.hidden = false;
+    mobileCategoryChip.setAttribute('aria-label', `دسته‌بندی ${cleanCategory}`);
+  }
   if (drawerCategory) {
     drawerCategory.hidden = false;
     drawerCategory.textContent = cleanCategory;
@@ -709,11 +721,16 @@ async function loadShopData() {
       ? parseFloat(data.averageRating).toFixed(1)
       : '0.0';
     document.getElementById('shop-rating').textContent = avg;
+    const mobileRating = document.getElementById('mobile-shop-rating');
+    if (mobileRating) mobileRating.textContent = avg;
 
     const ratingCount = typeof data.ratingCount === 'number'
       ? data.ratingCount
       : 0;
-    document.getElementById('rating-count').textContent = ratingCount.toLocaleString();
+    const formattedRatingCount = ratingCount.toLocaleString();
+    document.getElementById('rating-count').textContent = formattedRatingCount;
+    const mobileRatingCount = document.getElementById('mobile-rating-count');
+    if (mobileRatingCount) mobileRatingCount.textContent = formattedRatingCount;
 
     try {
       const favRes = await fetch(`${SHOP_API_BASE}/api/favorite-shops/count/${currentSellerId}`);
@@ -1031,6 +1048,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // کنترل باز و بسته شدن مودال آدرس فروشگاه
 document.addEventListener('DOMContentLoaded', function () {
   const addressBtn = document.getElementById('addressBtn');
+  const mobileAddressBtn = document.getElementById('mobileAddressBtn');
   const addressModal = document.getElementById('addressModal');
   const closeAddressModal = document.getElementById('closeAddressModal');
 
@@ -1040,6 +1058,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (addressBtn && addressModal) {
     addressBtn.onclick = openAddressModal;
+  }
+  if (mobileAddressBtn && addressModal) {
+    mobileAddressBtn.onclick = openAddressModal;
   }
   if (closeAddressModal && addressModal) {
     closeAddressModal.onclick = function() {
@@ -1072,6 +1093,7 @@ const REPORT_URL   = `${API_BASE}/api/reports`;
 /* ‌────────── المان‌های صفحه ────────── */
 /* 1) مودال آدرس */
 const addressBtn        = document.getElementById('addressBtn');
+const mobileAddressBtn  = document.getElementById('mobileAddressBtn');
 const addressModal      = document.getElementById('addressModal');
 const closeAddressModal = document.getElementById('closeAddressModal');
 
@@ -1106,6 +1128,7 @@ const isLoggedIn = async () => {
 
 /* ───────────── مودال آدرس ───────────── */
 addressBtn?.addEventListener('click', () => addressModal?.classList.remove('hidden'));
+mobileAddressBtn?.addEventListener('click', () => addressModal?.classList.remove('hidden'));
 closeAddressModal?.addEventListener('click', () => addressModal?.classList.add('hidden'));
 addressModal?.addEventListener('click', e => (e.target === addressModal) && addressModal.classList.add('hidden'));
 
@@ -1193,6 +1216,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   // ───────────── امتیازدهی ─────────────
   const rateShow       = document.getElementById('rateShow');
+  const mobileRateShow = document.getElementById('mobileRateShow');
   const rateModal      = document.getElementById('rateModal');
   const closeRateModal = document.getElementById('closeRateModal');
   const rateStars      = document.getElementById('rateStars');
@@ -1215,7 +1239,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     }
   }
 
-  rateShow.addEventListener('click', async () => {
+  const openRateModal = async () => {
     if (!(await isLoggedIn())) {
       if (confirm('برای ثبت امتیاز باید وارد شوید. به صفحهٔ ورود بروید؟')) {
         SafeSS.setJSON('afterLoginReturn', location.href); // SafeSS
@@ -1227,7 +1251,10 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     renderStars(0);
     rateMsg.classList.add('hidden');
     rateModal.classList.remove('hidden');
-  });
+  };
+
+  rateShow?.addEventListener('click', openRateModal);
+  mobileRateShow?.addEventListener('click', openRateModal);
 
   closeRateModal.addEventListener('click', () => rateModal.classList.add('hidden'));
   rateModal.addEventListener('click', e => {
@@ -1252,9 +1279,15 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'خطا در ثبت امتیاز');
 
-      document.getElementById('shop-rating').textContent = parseFloat(data.averageRating).toFixed(1);
+      const updatedAverageRating = parseFloat(data.averageRating).toFixed(1);
+      document.getElementById('shop-rating').textContent = updatedAverageRating;
+      const mobileRating = document.getElementById('mobile-shop-rating');
+      if (mobileRating) mobileRating.textContent = updatedAverageRating;
       if (typeof data.ratingCount === 'number') {
-        document.getElementById('rating-count').textContent = data.ratingCount.toLocaleString();
+        const formattedRatingCount = data.ratingCount.toLocaleString();
+        document.getElementById('rating-count').textContent = formattedRatingCount;
+        const mobileRatingCount = document.getElementById('mobile-rating-count');
+        if (mobileRatingCount) mobileRatingCount.textContent = formattedRatingCount;
       }
       rateMsg.textContent = '✅ امتیاز با موفقیت ثبت شد.';
       rateMsg.className   = 'text-green-500 font-bold mt-1';
