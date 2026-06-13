@@ -5251,22 +5251,49 @@ body {
 }
 
 /* Professional compact mobile shop header. */
-.mobile-header-count {
+.mobile-header-count,
+.mobile-customer-badge {
   display: none;
 }
 
+.mobile-customer-badge {
+  font-family: inherit;
+  border: 0;
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
+  body {
+    padding-top: 58px;
+  }
+
   .shop-header {
     isolation: isolate;
+    position: fixed;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 100vw;
+    max-width: 100vw;
+    overflow: visible;
+    direction: ltr;
   }
 
   .shop-header .header-shell {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr);
     align-items: center;
+    width: 100%;
+    max-width: 100vw;
     min-height: 58px;
     max-height: 64px;
     padding: 8px 12px !important;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .shop-header.menu-open .header-shell {
+    overflow: visible;
   }
 
   .brand-area {
@@ -5281,7 +5308,10 @@ body {
 
   .menu-toggle {
     grid-column: 1;
+    display: inline-flex !important;
     justify-self: start;
+    position: relative;
+    z-index: 3;
     width: 36px;
     height: 36px;
     min-width: 36px;
@@ -5316,9 +5346,12 @@ body {
 
   .logo-wrap {
     grid-column: 2;
+    position: relative;
+    z-index: 1;
     min-width: 0;
     width: 100%;
     overflow: hidden;
+    direction: rtl;
   }
 
   .identity-line {
@@ -5349,7 +5382,8 @@ body {
   }
 
   .mobile-status-badge,
-  .mobile-header-count {
+  .mobile-header-count,
+  .mobile-customer-badge {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -5388,6 +5422,49 @@ body {
     border: 1px solid rgba(124, 131, 253, 0.18);
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .mobile-customer-badge {
+    grid-column: 1;
+    gap: 4px;
+    height: 30px;
+    min-width: 70px;
+    max-width: 86px;
+    padding: 0 10px;
+    color: #fff;
+    background: linear-gradient(135deg, #7c83fd 0%, #52b788 100%);
+    border: 1px solid rgba(255, 255, 255, 0.36);
+    box-shadow: 0 9px 20px rgba(124, 131, 253, 0.24), 0 4px 12px rgba(82, 183, 136, 0.18);
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  }
+
+  .mobile-customer-badge:hover {
+    filter: brightness(1.03);
+  }
+
+  .mobile-customer-badge:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 5px 14px rgba(124, 131, 253, 0.2);
+  }
+
+  .mobile-customer-badge span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-customer-badge span:first-child {
+    font-size: 0.76rem;
+    font-weight: 950;
+    line-height: 1;
+  }
+
+  .mobile-customer-badge span:last-child {
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
   }
 
   .mobile-actions-row,
@@ -5484,6 +5561,7 @@ body {
   }
 
   .header-actions .badge-cluster {
+    display: none !important;
     width: 100%;
   }
 
@@ -5544,6 +5622,21 @@ body {
     font-size: 0.66rem;
   }
 
+  .mobile-customer-badge {
+    height: 28px;
+    min-width: 66px;
+    max-width: 78px;
+    padding-inline: 8px;
+  }
+
+  .mobile-customer-badge span:first-child {
+    font-size: 0.72rem;
+  }
+
+  .mobile-customer-badge span:last-child {
+    font-size: 0.62rem;
+  }
+
   .header-actions,
   .shop-header.menu-open .header-actions {
     left: 10px;
@@ -5562,6 +5655,132 @@ body {
 
   .mobile-header-count {
     grid-column: 3;
+  }
+}
+
+@media (max-width: 900px) {
+  .brand-area {
+    display: block !important;
+    height: 42px;
+    min-height: 42px;
+    max-width: 100%;
+    overflow: hidden;
+    direction: ltr;
+  }
+
+  .menu-toggle {
+    position: fixed !important;
+    top: 11px;
+    right: 12px;
+    transform: none;
+    z-index: 9999;
+  }
+
+  .menu-toggle svg {
+    display: none;
+  }
+
+  .menu-toggle::before {
+    content: "";
+    width: 16px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
+  }
+
+  .shop-header.menu-open .menu-toggle::before {
+    box-shadow: none;
+    transform: rotate(45deg);
+  }
+
+  .shop-header.menu-open .menu-toggle::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: rotate(-45deg);
+  }
+
+  .menu-toggle:hover {
+    transform: scale(1.03);
+  }
+
+  .menu-toggle:active {
+    transform: scale(0.97);
+  }
+
+  .mobile-customer-badge {
+    position: fixed !important;
+    top: 14px;
+    left: 12px;
+    transform: none;
+    z-index: 4;
+  }
+
+  .mobile-status-badge {
+    position: fixed !important;
+    top: 17px;
+    left: 96px;
+    transform: none;
+    z-index: 4;
+  }
+
+  .logo-wrap {
+    position: fixed !important;
+    top: 0;
+    left: 142px;
+    right: 56px;
+    width: calc(100vw - 198px) !important;
+    max-width: calc(100vw - 198px);
+    height: 58px;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    transform: none;
+  }
+
+  .identity-line {
+    justify-content: flex-end;
+  }
+
+  .logo-text {
+    text-align: right;
+  }
+}
+
+@media (max-width: 430px) {
+  .menu-toggle {
+    top: 12px;
+    right: 10px;
+  }
+
+  .mobile-customer-badge {
+    top: 15px;
+    left: 10px;
+  }
+
+  .mobile-status-badge {
+    top: 17px;
+    left: 84px;
+  }
+
+  .logo-wrap {
+    left: 130px;
+    right: 52px;
+    width: calc(100vw - 182px) !important;
+    max-width: calc(100vw - 182px);
+  }
+}
+
+@media (max-width: 370px) {
+  .logo-wrap {
+    left: 86px;
+    right: 48px;
+    width: calc(100vw - 134px) !important;
+    max-width: calc(100vw - 134px);
   }
 }
 

@@ -1270,7 +1270,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   // ───────────── مغازه محبوب ─────────────
   const favShopBtn       = document.getElementById('favShopBtn');
-  const customerBadge    = document.getElementById('customerBadge');
+  const customerTriggers = document.querySelectorAll('[data-customer-trigger]');
   const favShopModal     = document.getElementById('favShopModal');
   const closeFavShop     = document.getElementById('closeFavShopModal');
   const favShopCountEl   = document.getElementById('favShopCount');
@@ -1367,7 +1367,9 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   };
 
   favShopBtn?.addEventListener('click', openCustomerModal);
-  customerBadge?.addEventListener('click', openCustomerModal);
+  customerTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', openCustomerModal);
+  });
 
   closeFavShop?.addEventListener('click', () => {
     hideFavSuccessNotice();
