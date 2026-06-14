@@ -744,6 +744,11 @@ async function loadShopData() {
         mobileStatusText.textContent = isClosed ? 'بسته' : 'باز';
       }
     }
+    if (mobileStatusChip && mobileStatusText) {
+      const mobileStatusLabel = mobileStatusText.textContent || '';
+      mobileStatusChip.setAttribute('aria-label', `\u0648\u0636\u0639\u06cc\u062a \u0641\u0631\u0648\u0634\u06af\u0627\u0647: ${mobileStatusLabel}`);
+      mobileStatusChip.title = mobileStatusLabel;
+    }
     if (shopStatusEl) {
       shopStatusEl.innerHTML =
         data.shopStatus === 'closed'
