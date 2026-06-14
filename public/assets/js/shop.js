@@ -85,17 +85,21 @@ function setShopCategoryBadge(category) {
   const drawerCategory = document.getElementById('drawerShopCategory');
   const mobileCategory = document.getElementById('mobileShopCategoryText');
   const mobileCategoryChip = document.getElementById('mobileCategoryChip');
-  if (!badge || !text) return;
+  if (badge) {
+    badge.hidden = true;
+    badge.setAttribute('aria-hidden', 'true');
+    badge.removeAttribute('aria-label');
+  }
+  if (text) text.textContent = '';
+  if (mobileCategory) mobileCategory.textContent = '';
+  if (mobileCategoryChip) {
+    mobileCategoryChip.hidden = true;
+    mobileCategoryChip.setAttribute('aria-hidden', 'true');
+    mobileCategoryChip.removeAttribute('aria-label');
+  }
 
   const cleanCategory = typeof category === 'string' ? category.trim() : '';
   if (!cleanCategory) {
-    badge.hidden = true;
-    text.textContent = '';
-    if (mobileCategory) mobileCategory.textContent = 'دسته‌بندی';
-    if (mobileCategoryChip) {
-      mobileCategoryChip.hidden = false;
-      mobileCategoryChip.setAttribute('aria-label', 'دسته‌بندی فروشگاه');
-    }
     if (drawerCategory) {
       drawerCategory.hidden = true;
       drawerCategory.textContent = '';
@@ -103,14 +107,6 @@ function setShopCategoryBadge(category) {
     return;
   }
 
-  text.textContent = cleanCategory;
-  badge.hidden = false;
-  badge.setAttribute('aria-label', cleanCategory);
-  if (mobileCategory) mobileCategory.textContent = cleanCategory;
-  if (mobileCategoryChip) {
-    mobileCategoryChip.hidden = false;
-    mobileCategoryChip.setAttribute('aria-label', `دسته‌بندی ${cleanCategory}`);
-  }
   if (drawerCategory) {
     drawerCategory.hidden = false;
     drawerCategory.textContent = cleanCategory;
@@ -915,14 +911,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeHeaderMenu = () => {
     if (!shopHeader || !headerMenuToggle) return;
     shopHeader.classList.remove('menu-open');
+    document.body.classList.remove('shop-menu-open');
     headerMenuToggle.setAttribute('aria-expanded', 'false');
   };
 
   if (shopHeader && headerMenuToggle) {
     const headerActions = document.getElementById('headerActions');
 
-    headerMenuToggle.addEventListener('click', () => {
+    headerMenuToggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const isOpen = shopHeader.classList.toggle('menu-open');
+      document.body.classList.toggle('shop-menu-open', isOpen);
       headerMenuToggle.setAttribute('aria-expanded', String(isOpen));
     });
 

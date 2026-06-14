@@ -6319,6 +6319,46 @@ body {
   }
 }
 
+/* Final shop header fixes: category stays out of the header, and the drawer remains tappable. */
+.shop-header .shop-category-badge,
+.mobile-category-chip {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .shop-header.menu-open {
+    overflow: visible !important;
+  }
+
+  .menu-toggle {
+    position: fixed !important;
+    top: 11px !important;
+    right: 10px !important;
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .mobile-header-tools {
+    right: 128px !important;
+    left: 108px !important;
+    pointer-events: auto;
+  }
+
+  .header-actions {
+    z-index: 9999 !important;
+  }
+
+  .shop-header.menu-open .header-actions {
+    display: flex !important;
+    max-height: min(460px, calc(100vh - 76px)) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    overflow: auto !important;
+  }
+}
+
 /* --- */
 
     .footer-action-btn svg, .footer-home-btn svg {
