@@ -726,28 +726,28 @@ async function loadShopData() {
     // وضعیت فروشگاه (باز/بسته) — آپدیت چیپ هدر موبایل و بج قدیمی
     const shopStatusEl = document.getElementById('shop-status');
     const mobileStatusBadge = document.querySelector('.mobile-status-badge');
-    const mobileStatusChip = document.getElementById('mobileStatusChip');
-    const mobileStatusText = mobileStatusChip ? mobileStatusChip.querySelector('.mobile-status-text') : null;
+    const coverStatusBadge = document.getElementById('shopCoverStatusBadge');
+    const coverStatusText = coverStatusBadge ? coverStatusBadge.querySelector('.shop-cover-status-text') : null;
     const isClosed = data.shopStatus === 'closed';
     const hasStatusData = data.shopStatus === 'open' || data.shopStatus === 'closed';
     if (mobileStatusBadge) {
       mobileStatusBadge.textContent = isClosed ? 'بسته' : 'باز';
       mobileStatusBadge.classList.toggle('is-closed', isClosed);
     }
-    if (mobileStatusChip && mobileStatusText) {
-      mobileStatusChip.classList.remove('is-open', 'is-closed', 'is-unknown');
+    if (coverStatusBadge && coverStatusText) {
+      coverStatusBadge.classList.remove('is-open', 'is-closed', 'is-unknown');
       if (!hasStatusData) {
-        mobileStatusChip.classList.add('is-unknown');
-        mobileStatusText.textContent = 'نامشخص';
+        coverStatusBadge.classList.add('is-unknown');
+        coverStatusText.textContent = 'نامشخص';
       } else {
-        mobileStatusChip.classList.add(isClosed ? 'is-closed' : 'is-open');
-        mobileStatusText.textContent = isClosed ? 'بسته' : 'باز';
+        coverStatusBadge.classList.add(isClosed ? 'is-closed' : 'is-open');
+        coverStatusText.textContent = isClosed ? 'بسته' : 'باز';
       }
     }
-    if (mobileStatusChip && mobileStatusText) {
-      const mobileStatusLabel = mobileStatusText.textContent || '';
-      mobileStatusChip.setAttribute('aria-label', `\u0648\u0636\u0639\u06cc\u062a \u0641\u0631\u0648\u0634\u06af\u0627\u0647: ${mobileStatusLabel}`);
-      mobileStatusChip.title = mobileStatusLabel;
+    if (coverStatusBadge && coverStatusText) {
+      const coverStatusLabel = coverStatusText.textContent || '';
+      coverStatusBadge.setAttribute('aria-label', `\u0648\u0636\u0639\u06cc\u062a \u0641\u0631\u0648\u0634\u06af\u0627\u0647: ${coverStatusLabel}`);
+      coverStatusBadge.title = coverStatusLabel;
     }
     if (shopStatusEl) {
       shopStatusEl.innerHTML =

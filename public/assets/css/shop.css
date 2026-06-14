@@ -7490,6 +7490,86 @@ body {
   display: none;
 }
 
+.shop-cover-status-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 24;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.76);
+  color: #475569;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 0.75rem;
+  font-weight: 850;
+  line-height: 1;
+  direction: rtl;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.shop-cover-status-dot {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.16);
+}
+
+.shop-cover-status-text {
+  min-width: 0;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-cover-status-badge.is-open {
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.24);
+  background: rgba(240, 253, 244, 0.78);
+}
+
+.shop-cover-status-badge.is-open .shop-cover-status-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+.shop-cover-status-badge.is-closed {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.22);
+  background: rgba(254, 242, 242, 0.8);
+}
+
+.shop-cover-status-badge.is-closed .shop-cover-status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18);
+}
+
+.shop-cover-status-badge.is-unknown {
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(248, 250, 252, 0.78);
+}
+
+@media (max-width: 640px) {
+  .shop-cover-status-badge {
+    top: 10px;
+    right: 10px;
+    min-height: 26px;
+    padding-inline: 10px;
+    font-size: 0.7rem;
+  }
+}
+
 /* Premium mobile shop header: one clean row, rating/report stay in menu. */
 @media (max-width: 900px) {
   body {
@@ -7839,6 +7919,11 @@ body {
     padding-inline: 10px !important;
     font-size: 0.72rem !important;
   }
+}
+
+.shop-header .mobile-inline-status,
+.shop-header #mobileStatusChip {
+  display: none !important;
 }
 
     .footer-action-btn svg, .footer-home-btn svg {
