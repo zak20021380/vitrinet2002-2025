@@ -723,13 +723,26 @@ async function loadShopData() {
     if (drawerShopCaption) drawerShopCaption.textContent = shopHeaderDesc;
     setShopCategoryBadge(resolveShopCategory(data));
 
-    // وضعیت فروشگاه (باز/بسته)
+    // وضعیت فروشگاه (باز/بسته) — آپدیت چیپ هدر موبایل و بج قدیمی
     const shopStatusEl = document.getElementById('shop-status');
     const mobileStatusBadge = document.querySelector('.mobile-status-badge');
+    const mobileStatusChip = document.getElementById('mobileStatusChip');
+    const mobileStatusText = mobileStatusChip ? mobileStatusChip.querySelector('.mobile-status-text') : null;
+    const isClosed = data.shopStatus === 'closed';
+    const hasStatusData = data.shopStatus === 'open' || data.shopStatus === 'closed';
     if (mobileStatusBadge) {
-      const isClosed = data.shopStatus === 'closed';
       mobileStatusBadge.textContent = isClosed ? 'بسته' : 'باز';
       mobileStatusBadge.classList.toggle('is-closed', isClosed);
+    }
+    if (mobileStatusChip && mobileStatusText) {
+      mobileStatusChip.classList.remove('is-open', 'is-closed', 'is-unknown');
+      if (!hasStatusData) {
+        mobileStatusChip.classList.add('is-unknown');
+        mobileStatusText.textContent = 'نامشخص';
+      } else {
+        mobileStatusChip.classList.add(isClosed ? 'is-closed' : 'is-open');
+        mobileStatusText.textContent = isClosed ? 'بسته' : 'باز';
+      }
     }
     if (shopStatusEl) {
       shopStatusEl.innerHTML =

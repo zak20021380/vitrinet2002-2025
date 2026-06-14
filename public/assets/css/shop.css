@@ -7216,7 +7216,7 @@ body {
     gap: 5px !important;
     border-radius: 999px !important;
     font-size: 0.74rem !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
     line-height: 1 !important;
     overflow: hidden !important;
     white-space: nowrap !important;
@@ -7233,9 +7233,9 @@ body {
   }
 
   .mobile-address-chip {
-    width: 70px !important;
-    min-width: 70px !important;
-    max-width: 70px !important;
+    width: 62px !important;
+    min-width: 62px !important;
+    max-width: 62px !important;
     color: #047857 !important;
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(255, 255, 255, 0.98)) !important;
     border-color: rgba(16, 185, 129, 0.32) !important;
@@ -7248,9 +7248,9 @@ body {
   }
 
   .mobile-rating-chip {
-    width: 60px !important;
-    min-width: 60px !important;
-    max-width: 60px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
     color: #b45309 !important;
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(255, 255, 255, 0.98)) !important;
     border-color: rgba(245, 158, 11, 0.32) !important;
@@ -7260,6 +7260,95 @@ body {
   .mobile-rating-chip:hover {
     border-color: rgba(245, 158, 11, 0.5) !important;
     box-shadow: 0 6px 14px rgba(245, 158, 11, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .mobile-status-chip {
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    cursor: default !important;
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+    color: #475569 !important;
+    gap: 4px !important;
+    padding: 0 8px !important;
+  }
+
+  .mobile-status-chip .mobile-status-dot {
+    display: inline-block !important;
+    flex: 0 0 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    border-radius: 999px !important;
+    background: #94a3b8 !important;
+    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18) !important;
+    transition: background 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .mobile-status-chip .mobile-status-text {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  @keyframes statusDotPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.22);
+    }
+    50% {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+  }
+
+  .mobile-status-chip.is-open .mobile-status-dot {
+    animation: statusDotPulse 2.4s ease-in-out infinite !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-status-chip.is-open .mobile-status-dot {
+      animation: none !important;
+    }
+  }
+
+  .mobile-status-chip.is-open {
+    color: #047857 !important;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(255, 255, 255, 0.98)) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .mobile-status-chip.is-open .mobile-status-dot {
+    background: #10b981 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.22) !important;
+  }
+
+  .mobile-status-chip.is-closed {
+    color: #b91c1c !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(255, 255, 255, 0.98)) !important;
+    border-color: rgba(239, 68, 68, 0.32) !important;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .mobile-status-chip.is-closed .mobile-status-dot {
+    background: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.22) !important;
+  }
+
+  .mobile-status-chip.is-unknown {
+    color: #64748b !important;
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .mobile-status-chip.is-unknown .mobile-status-dot {
+    background: #94a3b8 !important;
+    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18) !important;
   }
 
   .mobile-header-chip svg {
@@ -7347,20 +7436,26 @@ body {
 
   .mobile-header-chip {
     height: 34px !important;
-    padding-inline: 10px !important;
+    padding-inline: 9px !important;
     font-size: 0.72rem !important;
   }
 
   .mobile-address-chip {
-    width: 70px !important;
-    min-width: 70px !important;
-    max-width: 70px !important;
-  }
-
-  .mobile-rating-chip {
     width: 60px !important;
     min-width: 60px !important;
     max-width: 60px !important;
+  }
+
+  .mobile-rating-chip {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+  }
+
+  .mobile-status-chip {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
   }
 }
 
@@ -7373,9 +7468,21 @@ body {
   }
 
   .mobile-address-chip {
-    width: 66px !important;
-    min-width: 66px !important;
-    max-width: 66px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+  }
+
+  .mobile-rating-chip {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+  }
+
+  .mobile-status-chip {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
   }
 }
 
