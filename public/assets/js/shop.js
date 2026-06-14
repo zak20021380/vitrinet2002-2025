@@ -1,5 +1,32 @@
 // Extracted from shop.html.
 
+(function ensureSafeSessionStorage() {
+  if (window.SafeSS && typeof window.SafeSS.setJSON === 'function' && typeof window.SafeSS.getJSON === 'function') {
+    return;
+  }
+
+  window.SafeSS = {
+    setJSON(key, value) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (err) {
+        console.warn('SafeSS setJSON failed', err);
+        return false;
+      }
+    },
+    getJSON(key, fallback = null) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (err) {
+        console.warn('SafeSS getJSON failed', err);
+        return fallback;
+      }
+    }
+  };
+})();
+
 /*
 <!--
 <script>
@@ -57,6 +84,12 @@ function getStoredSellerField(field) {
   } catch {
     return '';
   }
+}
+
+function setTextById(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+  return element;
 }
 
 function getShopSellerId() {
@@ -671,7 +704,7 @@ async function loadShopData() {
     document.querySelectorAll('.logo-txt').forEach(el =>
       el.textContent = resolvedShopName
     );
-    document.getElementById('currentShopName').textContent = resolvedShopName;
+    setTextById('currentShopName', resolvedShopName);
     const drawerShopName = document.getElementById('drawerShopName');
     if (drawerShopName) drawerShopName.textContent = resolvedShopName;
     const shopHeaderDesc = data.shopShortDesc || data.shortDescription || data.description || data.shopDescription || 'فروشگاه آنلاین';
@@ -716,7 +749,7 @@ async function loadShopData() {
     const avg = typeof data.averageRating === 'number'
       ? parseFloat(data.averageRating).toFixed(1)
       : '0.0';
-    document.getElementById('shop-rating').textContent = avg;
+    setTextById('shop-rating', avg);
     const mobileRating = document.getElementById('mobile-shop-rating');
     if (mobileRating) mobileRating.textContent = avg;
 
@@ -724,7 +757,7 @@ async function loadShopData() {
       ? data.ratingCount
       : 0;
     const formattedRatingCount = ratingCount.toLocaleString();
-    document.getElementById('rating-count').textContent = formattedRatingCount;
+    setTextById('rating-count', formattedRatingCount);
     const mobileRatingCount = document.getElementById('mobile-rating-count');
     if (mobileRatingCount) mobileRatingCount.textContent = formattedRatingCount;
 
@@ -759,7 +792,7 @@ async function loadShopData() {
     console.error(e);
     renderStoriesEmpty();
     document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
-    document.getElementById('currentShopName').textContent = 'نام فروشگاه';
+    setTextById('currentShopName', 'نام فروشگاه');
     setShopCategoryBadge('');
     setDynamicSEO({
       shopName: 'نام فروشگاه',
@@ -1192,8 +1225,8 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
     $send.textContent = 'ارسال گزارش';
 
     if (confirm('برای ارسال گزارش باید وارد شوید. مایلید به صفحهٔ ورود بروید؟')) {
-      SafeSS.setJSON('afterLoginReturn', location.href); // SafeSS
-      SafeSS.setJSON('reportDraft', draft); // SafeSS
+      window.SafeSS.setJSON('afterLoginReturn', location.href);
+      window.SafeSS.setJSON('reportDraft', draft);
       location.href = '/login.html';
     } else {
       showMsg('ابتدا وارد حساب شوید سپس دوباره گزارش دهید.', false);
@@ -1202,11 +1235,11 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
 
   /* ───── بازیابی پیش‌نویس پس از ورود ───── */
   (async () => {
-    const draft = SafeSS.getJSON('reportDraft'); // SafeSS
-    if (!draft) return; // SafeSS
+    const draft = window.SafeSS.getJSON('reportDraft');
+    if (!draft) return;
     if (!(await isLoggedIn())) return;  // هنوز وارد نشده
 
-    const { type, description } = draft; // SafeSS
+    const { type, description } = draft;
     sessionStorage.removeItem('reportDraft');
 
     $type.value = type;
@@ -1242,7 +1275,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
   const openRateModal = async () => {
     if (!(await isLoggedIn())) {
       if (confirm('برای ثبت امتیاز باید وارد شوید. به صفحهٔ ورود بروید؟')) {
-        SafeSS.setJSON('afterLoginReturn', location.href); // SafeSS
+        window.SafeSS.setJSON('afterLoginReturn', location.href);
         location.href = '/login.html';
       }
       return;
@@ -1280,12 +1313,12 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       if (!res.ok) throw new Error(data.message || 'خطا در ثبت امتیاز');
 
       const updatedAverageRating = parseFloat(data.averageRating).toFixed(1);
-      document.getElementById('shop-rating').textContent = updatedAverageRating;
+      setTextById('shop-rating', updatedAverageRating);
       const mobileRating = document.getElementById('mobile-shop-rating');
       if (mobileRating) mobileRating.textContent = updatedAverageRating;
       if (typeof data.ratingCount === 'number') {
         const formattedRatingCount = data.ratingCount.toLocaleString();
-        document.getElementById('rating-count').textContent = formattedRatingCount;
+        setTextById('rating-count', formattedRatingCount);
         const mobileRatingCount = document.getElementById('mobile-rating-count');
         if (mobileRatingCount) mobileRatingCount.textContent = formattedRatingCount;
       }
@@ -2226,6 +2259,8 @@ function setDynamicSEO(shop) {
   
   let visitStartTime = Date.now();
   let visitTracked = false;
+  let missionAuthPromise = null;
+  let missionTrackingAllowed = false;
   let scrolledToBottom = false;
   
   // تابع نمایش Toast
@@ -2255,10 +2290,20 @@ function setDynamicSEO(shop) {
     return String(num).replace(/\d/g, d => persianDigits[d]);
   }
   
-  // دریافت CSRF Token
-  function getCsrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute('content') : '';
+  async function canTrackMissionVisit() {
+    if (missionTrackingAllowed) return true;
+    if (!missionAuthPromise) {
+      missionAuthPromise = fetch('/api/auth/getCurrentUser', { credentials: 'include' })
+        .then((res) => {
+          missionTrackingAllowed = res.ok;
+          return missionTrackingAllowed;
+        })
+        .catch(() => false)
+        .finally(() => {
+          missionAuthPromise = null;
+        });
+    }
+    return missionAuthPromise;
   }
   
   // ثبت بازدید
@@ -2271,14 +2316,14 @@ function setDynamicSEO(shop) {
     if (timeSpent < MISSION_CONFIG.minTimeSeconds) return;
     
     visitTracked = true;
+    if (!(await canTrackMissionVisit())) return;
     
     try {
       const res = await fetch(`${MISSION_CONFIG.apiBase}/api/missions/track-visit`, {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': getCsrfToken()
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           storeId: currentSellerId,
@@ -2346,15 +2391,19 @@ function setDynamicSEO(shop) {
   // قبل از ترک صفحه
   window.addEventListener('beforeunload', () => {
     const timeSpent = Math.floor((Date.now() - visitStartTime) / 1000);
-    if (timeSpent >= MISSION_CONFIG.minTimeSeconds && !visitTracked && currentSellerId) {
-      // استفاده از sendBeacon برای ارسال قبل از بستن
-      navigator.sendBeacon(
-        `${MISSION_CONFIG.apiBase}/api/missions/track-visit`,
-        JSON.stringify({
+    if (timeSpent >= MISSION_CONFIG.minTimeSeconds && !visitTracked && currentSellerId && missionTrackingAllowed) {
+      fetch(`${MISSION_CONFIG.apiBase}/api/missions/track-visit`, {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           storeId: currentSellerId,
           timeSpent: timeSpent
         })
-      );
+      }).catch(() => {});
     }
   });
   
