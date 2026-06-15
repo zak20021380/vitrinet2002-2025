@@ -741,7 +741,7 @@ async function loadShopData() {
         coverStatusText.textContent = 'نامشخص';
       } else {
         coverStatusBadge.classList.add(isClosed ? 'is-closed' : 'is-open');
-        coverStatusText.textContent = isClosed ? 'بسته' : 'باز';
+        coverStatusText.textContent = isClosed ? 'بسته است' : 'باز است';
       }
     }
     if (coverStatusBadge && coverStatusText) {
