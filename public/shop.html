@@ -93,6 +93,10 @@
             <strong id="drawerShopName">نئون استایل</strong>
             <span id="drawerShopCategory">دسته‌بندی فروشگاه</span>
             <small id="drawerShopCaption">پوشاک مدرن و اکسسوری خاص</small>
+            <span class="drawer-status-chip is-unknown" id="drawerShopStatus" hidden>
+              <span class="drawer-status-dot" aria-hidden="true"></span>
+              <span class="drawer-status-text">نامشخص</span>
+            </span>
           </div>
           <div class="badge-cluster">
             <button id="customerBadge" class="customer-badge" type="button" data-customer-trigger aria-label="مشاهده مشتریان و عضویت سریع">
@@ -114,27 +118,132 @@
               </div>
             </button>
           </div>
+          <section class="drawer-menu-section drawer-menu-section--quick" aria-labelledby="drawerQuickActionsTitle">
+            <h2 class="drawer-section-title" id="drawerQuickActionsTitle">اقدامات سریع</h2>
+            <div class="drawer-row-group">
+              <button id="shareShopBtn" class="drawer-action-row" aria-label="اشتراک‌گذاری فروشگاه" type="button" data-menu-stay-open>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <path d="M8.59 13.51 15.42 17.49"/>
+                    <path d="M15.41 6.51 8.59 10.49"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">اشتراک‌گذاری فروشگاه</span>
+                  <small id="shareShopHint">ارسال لینک برای دیگران</small>
+                </span>
+                <span class="drawer-row-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18 9 12l6-6"/>
+                  </svg>
+                </span>
+              </button>
+              <button id="copyShopLinkBtn" class="drawer-action-row" aria-label="کپی لینک فروشگاه" type="button" data-menu-stay-open>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">کپی لینک فروشگاه</span>
+                  <small id="copyShopLinkHint">ذخیره لینک در کلیپ‌بورد</small>
+                </span>
+                <span class="drawer-row-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18 9 12l6-6"/>
+                  </svg>
+                </span>
+              </button>
+              <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">گزارش</span>
+                  <small>ثبت گزارش تخلف</small>
+                </span>
+                <span class="drawer-row-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18 9 12l6-6"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </section>
+          <section class="drawer-menu-section drawer-menu-section--details" aria-labelledby="drawerDetailsTitle">
+            <h2 class="drawer-section-title" id="drawerDetailsTitle">جزئیات فروشگاه</h2>
+            <div class="drawer-row-group">
+              <button id="rateShow" class="action-item drawer-detail-row" aria-label="مشاهده و ثبت امتیاز" type="button">
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title"><span id="shop-rating">4.8</span> امتیاز</span>
+                  <small class="rating-count-pill"><span id="rating-count">0</span> رای</small>
+                </span>
+                <span class="drawer-row-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18 9 12l6-6"/>
+                  </svg>
+                </span>
+              </button>
+              <div class="drawer-detail-row" id="drawerWorkingHoursRow" hidden>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">ساعت کاری</span>
+                  <small id="drawerWorkingHoursText"></small>
+                </span>
+              </div>
+              <div class="drawer-detail-row" id="drawerAboutShopRow" hidden>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">درباره فروشگاه</span>
+                  <small id="drawerAboutShopText"></small>
+                </span>
+              </div>
+              <div class="drawer-detail-row" id="drawerCategoryRow" hidden>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">دسته‌بندی فروشگاه</span>
+                  <small id="drawerCategoryText"></small>
+                </span>
+              </div>
+            </div>
+          </section>
           <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
               <circle cx="12" cy="10" r="3"/>
             </svg>
             <span>آدرس</span>
-          </button>
-          <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span>گزارش</span>
-          </button>
-          <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
-            </svg>
-            <span><span id="shop-rating">4.8</span> امتیاز</span>
-            <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
           </button>
         </nav>
       </div>

@@ -92,6 +92,39 @@ function setTextById(id, value) {
   return element;
 }
 
+function getCurrentShopShareUrl() {
+  const url = new URL(window.location.href);
+  url.hash = '';
+  return url.toString();
+}
+
+function setDrawerOptionalRow(rowId, textId, value) {
+  const row = document.getElementById(rowId);
+  const text = document.getElementById(textId);
+  const cleanValue = typeof value === 'string' ? value.trim() : '';
+  if (!row || !text) return;
+  row.hidden = !cleanValue;
+  text.textContent = cleanValue;
+}
+
+function resolveWorkingHoursText(source = {}) {
+  const directValue = [
+    source.workingHours,
+    source.shopWorkingHours,
+    source.openingHours,
+    source.businessHours,
+    source.workHours
+  ].find(value => typeof value === 'string' && value.trim());
+
+  if (directValue) return directValue.trim();
+
+  const start = source.openTime || source.startTime || source.workingHoursStart;
+  const end = source.closeTime || source.endTime || source.workingHoursEnd;
+  if (start && end) return `${start} تا ${end}`;
+
+  return '';
+}
+
 function getShopSellerId() {
   const urlParams = new URLSearchParams(window.location.search);
   return (
@@ -721,13 +754,28 @@ async function loadShopData() {
     });
     const drawerShopCaption = document.getElementById('drawerShopCaption');
     if (drawerShopCaption) drawerShopCaption.textContent = shopHeaderDesc;
-    setShopCategoryBadge(resolveShopCategory(data));
+    const resolvedShopCategory = resolveShopCategory(data);
+    setShopCategoryBadge(resolvedShopCategory);
+    const drawerShopCategory = document.getElementById('drawerShopCategory');
+    setDrawerOptionalRow('drawerWorkingHoursRow', 'drawerWorkingHoursText', resolveWorkingHoursText(data));
+    setDrawerOptionalRow(
+      'drawerAboutShopRow',
+      'drawerAboutShopText',
+      data.aboutShop || data.about || data.shopAbout || data.fullDescription || data.shopDescription || ''
+    );
+    setDrawerOptionalRow(
+      'drawerCategoryRow',
+      'drawerCategoryText',
+      resolvedShopCategory && drawerShopCategory?.hidden ? resolvedShopCategory : ''
+    );
 
     // وضعیت فروشگاه (باز/بسته) — آپدیت چیپ هدر موبایل و بج قدیمی
     const shopStatusEl = document.getElementById('shop-status');
     const mobileStatusBadge = document.querySelector('.mobile-status-badge');
     const coverStatusBadge = document.getElementById('shopCoverStatusBadge');
     const coverStatusText = coverStatusBadge ? coverStatusBadge.querySelector('.shop-cover-status-text') : null;
+    const drawerStatusBadge = document.getElementById('drawerShopStatus');
+    const drawerStatusText = drawerStatusBadge ? drawerStatusBadge.querySelector('.drawer-status-text') : null;
     const isClosed = data.shopStatus === 'closed';
     const hasStatusData = data.shopStatus === 'open' || data.shopStatus === 'closed';
     if (mobileStatusBadge) {
@@ -743,6 +791,12 @@ async function loadShopData() {
         coverStatusBadge.classList.add(isClosed ? 'is-closed' : 'is-open');
         coverStatusText.textContent = isClosed ? 'بسته است' : 'باز است';
       }
+    }
+    if (drawerStatusBadge && drawerStatusText) {
+      drawerStatusBadge.hidden = !hasStatusData;
+      drawerStatusBadge.classList.remove('is-open', 'is-closed', 'is-unknown');
+      drawerStatusBadge.classList.add(!hasStatusData ? 'is-unknown' : (isClosed ? 'is-closed' : 'is-open'));
+      drawerStatusText.textContent = isClosed ? 'بسته است' : 'باز است';
     }
     if (coverStatusBadge && coverStatusText) {
       const coverStatusLabel = coverStatusText.textContent || '';
@@ -988,6 +1042,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (headerActions) {
       headerActions.querySelectorAll('button').forEach((actionButton) => {
         actionButton.addEventListener('click', () => {
+          if (actionButton.hasAttribute('data-menu-stay-open')) return;
           if (window.innerWidth <= 900) {
             requestAnimationFrame(() => closeHeaderMenu());
           }
@@ -1013,6 +1068,67 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  const updateDrawerHint = (id, message, fallback) => {
+    const hint = document.getElementById(id);
+    if (!hint) return;
+    hint.textContent = message;
+    window.clearTimeout(hint.dataset.resetTimer);
+    hint.dataset.resetTimer = window.setTimeout(() => {
+      hint.textContent = fallback;
+      delete hint.dataset.resetTimer;
+    }, 1800);
+  };
+
+  const copyShopUrl = async () => {
+    const shareUrl = getCurrentShopShareUrl();
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const field = document.createElement('textarea');
+        field.value = shareUrl;
+        field.setAttribute('readonly', '');
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        document.execCommand('copy');
+        field.remove();
+      }
+      updateDrawerHint('copyShopLinkHint', 'لینک فروشگاه کپی شد', 'ذخیره لینک در کلیپ‌بورد');
+      return true;
+    } catch (error) {
+      console.warn('Copy shop link failed', error);
+      updateDrawerHint('copyShopLinkHint', 'کپی لینک انجام نشد', 'ذخیره لینک در کلیپ‌بورد');
+      return false;
+    }
+  };
+
+  document.getElementById('copyShopLinkBtn')?.addEventListener('click', copyShopUrl);
+
+  document.getElementById('shareShopBtn')?.addEventListener('click', async () => {
+    const shareUrl = getCurrentShopShareUrl();
+    const shareTitle = document.getElementById('drawerShopName')?.textContent?.trim() || document.title || 'فروشگاه';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: shareTitle, url: shareUrl });
+        updateDrawerHint('shareShopHint', 'لینک فروشگاه آماده ارسال شد', 'ارسال لینک برای دیگران');
+        return;
+      }
+      const copied = await copyShopUrl();
+      updateDrawerHint(
+        'shareShopHint',
+        copied ? 'اشتراک‌گذاری پشتیبانی نشد؛ لینک کپی شد' : 'اشتراک‌گذاری پشتیبانی نشد',
+        'ارسال لینک برای دیگران'
+      );
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.warn('Share shop failed', error);
+        updateDrawerHint('shareShopHint', 'اشتراک‌گذاری انجام نشد', 'ارسال لینک برای دیگران');
+      }
+    }
+  });
 
   const scrollTopBtn = document.getElementById('scrollTopBtn');
   window.onscroll = () => {
