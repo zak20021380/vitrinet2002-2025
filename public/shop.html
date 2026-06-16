@@ -25,6 +25,523 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/assets/css/shop.css">
+<style>
+@media (max-width: 900px) {
+  body.shop-menu-open::after {
+    content: "" !important;
+    position: fixed !important;
+    inset: 104px 0 0 0 !important;
+    z-index: 10040 !important;
+    background: rgba(15, 23, 42, 0.24) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+  }
+
+  .shop-header.menu-open {
+    z-index: 10060 !important;
+    overflow: visible !important;
+  }
+
+  .shop-header .mobile-header-tools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 1 1 100% !important;
+    order: 8 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .shop-header .mobile-header-chip,
+  .shop-header .mobile-status-badge {
+    min-height: 28px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #334155 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+
+  .shop-header .mobile-rating-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 0 9px !important;
+    color: #1e293b !important;
+  }
+
+  .shop-header .mobile-rating-chip small {
+    color: #64748b !important;
+    font-size: 0.62rem !important;
+    font-weight: 750 !important;
+  }
+
+  .shop-header .mobile-status-badge {
+    display: inline-flex !important;
+    position: static !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 42px !important;
+    max-width: none !important;
+    padding: 0 10px !important;
+    inset: auto !important;
+    transform: none !important;
+    color: #0f766e !important;
+    background: rgba(240, 253, 250, 0.94) !important;
+    border-color: rgba(13, 148, 136, 0.18) !important;
+  }
+
+  .shop-header .mobile-status-badge.is-closed {
+    color: #92400e !important;
+    background: rgba(255, 251, 235, 0.94) !important;
+    border-color: rgba(245, 158, 11, 0.22) !important;
+  }
+
+  .shop-header #headerActions,
+  .shop-header.menu-open #headerActions {
+    position: fixed !important;
+    top: 112px !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: 10px !important;
+    width: min(336px, calc(100vw - 16px)) !important;
+    max-width: none !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(15, 23, 42, 0.10) !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)) !important;
+    box-shadow:
+      0 24px 60px rgba(15, 23, 42, 0.22),
+      0 6px 20px rgba(15, 23, 42, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    direction: rtl !important;
+    z-index: 10050 !important;
+    transform-origin: top right !important;
+  }
+
+  .shop-header #headerActions {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(18px) scale(0.985) !important;
+    transition:
+      opacity 0.2s ease,
+      transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0.2s ease !important;
+  }
+
+  .shop-header.menu-open #headerActions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) scale(1) !important;
+  }
+
+  .shop-header #headerActions > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) 34px !important;
+    grid-template-areas:
+      "avatar kicker close"
+      "avatar name close"
+      "avatar caption close" !important;
+    align-items: center !important;
+    column-gap: 10px !important;
+    row-gap: 1px !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    background: rgba(248, 250, 252, 0.82) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+    overflow: hidden !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta::before,
+  .shop-header #headerActions #drawerShopCategory,
+  .shop-header #headerActions .drawer-status-chip {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-avatar {
+    grid-area: avatar !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 15px !important;
+    color: #0f766e !important;
+    background: linear-gradient(145deg, #ecfdf5, #f8fafc) !important;
+    border: 1px solid rgba(13, 148, 136, 0.14) !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-avatar svg {
+    width: 21px !important;
+    height: 21px !important;
+    stroke-width: 1.8 !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-kicker {
+    grid-area: kicker !important;
+    color: #64748b !important;
+    font-size: 0.66rem !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta strong {
+    grid-area: name !important;
+    color: #0f172a !important;
+    font-size: 0.98rem !important;
+    font-weight: 900 !important;
+    line-height: 1.35 !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta small {
+    grid-area: caption !important;
+    color: #475569 !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+  }
+
+  .shop-header #headerActions .drawer-close-btn {
+    grid-area: close !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    color: #475569 !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions .drawer-close-btn:active {
+    transform: scale(0.96) !important;
+    background: #f1f5f9 !important;
+  }
+
+  .shop-header #headerActions .drawer-close-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke-width: 2 !important;
+  }
+
+  .shop-header #headerActions .badge-cluster,
+  .shop-header #headerActions #addressBtn {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-menu-section,
+  .shop-header #headerActions .drawer-menu-section--flat {
+    display: grid !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions .drawer-section-label {
+    display: block !important;
+    margin: 0 4px 7px !important;
+    color: #64748b !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    line-height: 1.3 !important;
+  }
+
+  .shop-header #headerActions .drawer-copy-actions {
+    display: block !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 8px 10px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(13, 148, 136, 0.16) !important;
+    background: rgba(240, 253, 250, 0.78) !important;
+    color: #0f766e !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon {
+    width: 24px !important;
+    height: 24px !important;
+    color: #0f766e !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-title {
+    color: #0f766e !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkHint {
+    color: #64748b !important;
+    font-size: 0.64rem !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-chevron {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-row-group {
+    display: grid !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn),
+  .shop-header #headerActions .drawer-detail-row,
+  .shop-header #headerActions #reportBtn {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 30px minmax(0, 1fr) 18px !important;
+    align-items: center !important;
+    gap: 11px !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    padding: 10px 12px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    text-align: right !important;
+    transition: background 0.14s ease, transform 0.14s ease !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):active,
+  .shop-header #headerActions .drawer-detail-row:active {
+    background: rgba(15, 23, 42, 0.045) !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):not(:last-child)::after,
+  .shop-header #headerActions .drawer-detail-row:not(:last-child)::after {
+    content: "" !important;
+    position: absolute !important;
+    right: 54px !important;
+    left: 12px !important;
+    bottom: 0 !important;
+    height: 1px !important;
+    background: rgba(15, 23, 42, 0.07) !important;
+  }
+
+  .shop-header #headerActions .drawer-row-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(15, 23, 42, 0.06) !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+    color: currentColor !important;
+    stroke-width: 1.75 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-copy {
+    display: grid !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-title,
+  .shop-header #headerActions #reportBtn > span:not(.drawer-row-icon):not(.drawer-row-chevron) {
+    color: #0f172a !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+    line-height: 1.35 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-copy small {
+    color: #64748b !important;
+    font-size: 0.68rem !important;
+    font-weight: 650 !important;
+    line-height: 1.35 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-chevron {
+    color: #94a3b8 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-chevron svg {
+    width: 15px !important;
+    height: 15px !important;
+    stroke-width: 1.9 !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn {
+    display: flex !important;
+    min-height: 42px !important;
+    border: 1px solid rgba(13, 148, 136, 0.16) !important;
+    background: rgba(240, 253, 250, 0.78) !important;
+    color: #0f766e !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #0f766e !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-title {
+    color: #0f766e !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkHint {
+    color: #64748b !important;
+  }
+
+  @supports selector(:has(*)) {
+    .shop-header #headerActions .drawer-secondary-section:has(#drawerWorkingHoursRow[hidden]):has(#drawerAboutShopRow[hidden]):has(#drawerCategoryRow[hidden]) {
+      display: none !important;
+    }
+  }
+
+  .shop-header #headerActions #rateShow {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-detail-row[hidden] {
+    display: none !important;
+  }
+
+  .shop-header.menu-open #headerActions.header-actions,
+  .shop-header #headerActions.header-actions {
+    top: 112px !important;
+    right: 8px !important;
+    bottom: auto !important;
+    width: min(336px, calc(100vw - 16px)) !important;
+    height: calc(100vh - 122px) !important;
+    height: calc(100dvh - 122px) !important;
+    min-height: 360px !important;
+    max-height: calc(100vh - 122px) !important;
+    max-height: calc(100dvh - 122px) !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)) !important;
+    z-index: 10050 !important;
+    gap: 12px !important;
+  }
+
+  .shop-header #headerActions.header-actions #rateShow.drawer-action-row.drawer-action-row--rating,
+  .shop-header.menu-open #headerActions.header-actions #rateShow.drawer-action-row.drawer-action-row--rating {
+    display: none !important;
+  }
+
+  .shop-header.menu-open #headerActions.header-actions #addressBtn {
+    display: grid !important;
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 11px !important;
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05) !important;
+    text-align: right !important;
+  }
+
+  .shop-header.menu-open #headerActions.header-actions #addressBtn svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: #475569 !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .shop-header #headerActions,
+  .shop-header.menu-open #headerActions {
+    top: 110px !important;
+    right: 6px !important;
+    bottom: 8px !important;
+    width: min(330px, calc(100vw - 12px)) !important;
+    padding: 10px !important;
+    border-radius: 20px !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn),
+  .shop-header #headerActions .drawer-detail-row,
+  .shop-header #headerActions #reportBtn {
+    min-height: 50px !important;
+    padding: 9px 10px !important;
+  }
+
+  .shop-header.menu-open #headerActions.header-actions,
+  .shop-header #headerActions.header-actions {
+    top: 110px !important;
+    right: 6px !important;
+    width: min(330px, calc(100vw - 12px)) !important;
+    height: calc(100vh - 118px) !important;
+    height: calc(100dvh - 118px) !important;
+    max-height: calc(100vh - 118px) !important;
+    max-height: calc(100dvh - 118px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .shop-header .mobile-address-chip {
+    display: none !important;
+  }
+}
+</style>
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 
 
@@ -68,6 +585,14 @@
         <span>مشتری</span>
       </button>
       <div class="mobile-header-tools" aria-label="اطلاعات سریع فروشگاه">
+        <span class="mobile-status-badge is-unknown" aria-label="وضعیت فروشگاه">نامشخص</span>
+        <button class="mobile-header-chip mobile-rating-chip" id="mobileRateShow" type="button" aria-label="مشاهده و ثبت امتیاز">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+          </svg>
+          <span><span id="mobile-shop-rating">4.8</span> از ۵</span>
+          <small><span id="mobile-rating-count">0</span> رای</small>
+        </button>
         <button class="mobile-header-chip mobile-address-chip" id="mobileAddressBtn" type="button" aria-label="مشاهده آدرس فروشگاه">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -89,7 +614,14 @@
         <!-- Navigation / Actions -->
         <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
           <div class="mobile-drawer-meta" aria-label="اطلاعات فروشگاه">
-            <span class="mobile-drawer-kicker">اطلاعات فروشگاه</span>
+            <span class="drawer-shop-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 10h16l-1-5H5l-1 5Z"/>
+                <path d="M5 10v9h14v-9"/>
+                <path d="M9 19v-5h6v5"/>
+              </svg>
+            </span>
+            <span class="mobile-drawer-kicker">منوی فروشگاه</span>
             <strong id="drawerShopName">نئون استایل</strong>
             <span id="drawerShopCategory">دسته‌بندی فروشگاه</span>
             <small id="drawerShopCaption">پوشاک مدرن و اکسسوری خاص</small>
@@ -97,6 +629,12 @@
               <span class="drawer-status-dot" aria-hidden="true"></span>
               <span class="drawer-status-text">نامشخص</span>
             </span>
+            <button class="drawer-close-btn" type="button" aria-label="بستن منو">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"/>
+                <path d="M6 6l12 12"/>
+              </svg>
+            </button>
           </div>
           <div class="badge-cluster">
             <button id="customerBadge" class="customer-badge" type="button" data-customer-trigger aria-label="مشاهده مشتریان و عضویت سریع">
@@ -119,19 +657,8 @@
             </button>
           </div>
           <div class="drawer-menu-section drawer-menu-section--flat">
-            <div class="drawer-row-group">
-              <button id="rateShow" class="action-item drawer-action-row drawer-action-row--rating" aria-label="مشاهده و ثبت امتیاز" type="button">
-                <span class="drawer-row-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
-                  </svg>
-                </span>
-                <span class="drawer-row-copy">
-                  <span class="drawer-row-title">امتیاز فروشگاه</span>
-                  <small class="rating-count-pill"><span id="shop-rating">4.8</span> از ۵ · <span id="rating-count">0</span> رای</small>
-                </span>
-                <span class="drawer-row-rating-value" id="drawerRatingValue">0.0 از ۵</span>
-              </button>
+            <div class="drawer-copy-actions" aria-label="اشتراک‌گذاری فروشگاه">
+              <span class="drawer-section-label">اشتراک‌گذاری</span>
               <button id="copyShopLinkBtn" class="drawer-action-row" aria-label="کپی لینک فروشگاه" type="button" data-menu-stay-open>
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -149,23 +676,21 @@
                   </svg>
                 </span>
               </button>
-              <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
+            </div>
+            <div class="drawer-secondary-section" aria-label="جزئیات فروشگاه">
+              <span class="drawer-section-label">جزئیات فروشگاه</span>
+              <div class="drawer-row-group">
+              <button id="rateShow" class="action-item drawer-action-row drawer-action-row--rating" aria-label="مشاهده و ثبت امتیاز" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
-                  <span class="drawer-row-title">گزارش فروشگاه</span>
-                  <small>ثبت گزارش تخلف</small>
+                  <span class="drawer-row-title">امتیاز فروشگاه</span>
+                  <small class="rating-count-pill"><span id="shop-rating">4.8</span> از ۵ · <span id="rating-count">0</span> رای</small>
                 </span>
-                <span class="drawer-row-chevron" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 18 9 12l6-6"/>
-                  </svg>
-                </span>
+                <span class="drawer-row-rating-value" id="drawerRatingValue">0.0 از ۵</span>
               </button>
               <div class="drawer-detail-row drawer-divider-before" id="drawerWorkingHoursRow" hidden>
                 <span class="drawer-row-icon" aria-hidden="true">
@@ -205,6 +730,30 @@
                   <span class="drawer-row-title">دسته‌بندی فروشگاه</span>
                   <small id="drawerCategoryText"></small>
                 </span>
+              </div>
+              </div>
+            </div>
+            <div class="drawer-secondary-section" aria-label="اقدام‌های بیشتر">
+              <span class="drawer-section-label">اقدام‌های بیشتر</span>
+              <div class="drawer-row-group">
+                <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
+                  <span class="drawer-row-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                  </span>
+                  <span class="drawer-row-copy">
+                    <span class="drawer-row-title">گزارش فروشگاه</span>
+                    <small>ثبت گزارش تخلف</small>
+                  </span>
+                  <span class="drawer-row-chevron" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M15 18 9 12l6-6"/>
+                    </svg>
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -584,5 +1133,16 @@
   <span class="mission-toast-progress">۱/۳</span>
 </div>
 <script src="/assets/js/shop.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const mobileRateShow = document.getElementById('mobileRateShow');
+  const desktopRateShow = document.getElementById('rateShow');
+  if (mobileRateShow && desktopRateShow) {
+    mobileRateShow.addEventListener('click', function () {
+      desktopRateShow.click();
+    });
+  }
+});
+</script>
 </body>
 </html>
