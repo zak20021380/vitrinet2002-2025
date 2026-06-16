@@ -766,7 +766,7 @@ async function loadShopData() {
     setDrawerOptionalRow(
       'drawerCategoryRow',
       'drawerCategoryText',
-      resolvedShopCategory && drawerShopCategory?.hidden ? resolvedShopCategory : ''
+      resolvedShopCategory
     );
 
     // وضعیت فروشگاه (باز/بسته) — آپدیت چیپ هدر موبایل و بج قدیمی
