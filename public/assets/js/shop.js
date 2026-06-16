@@ -1107,29 +1107,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('copyShopLinkBtn')?.addEventListener('click', copyShopUrl);
 
-  document.getElementById('shareShopBtn')?.addEventListener('click', async () => {
-    const shareUrl = getCurrentShopShareUrl();
-    const shareTitle = document.getElementById('drawerShopName')?.textContent?.trim() || document.title || 'فروشگاه';
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: shareTitle, url: shareUrl });
-        updateDrawerHint('shareShopHint', 'لینک فروشگاه آماده ارسال شد', 'ارسال لینک برای دیگران');
-        return;
-      }
-      const copied = await copyShopUrl();
-      updateDrawerHint(
-        'shareShopHint',
-        copied ? 'اشتراک‌گذاری پشتیبانی نشد؛ لینک کپی شد' : 'اشتراک‌گذاری پشتیبانی نشد',
-        'ارسال لینک برای دیگران'
-      );
-    } catch (error) {
-      if (error?.name !== 'AbortError') {
-        console.warn('Share shop failed', error);
-        updateDrawerHint('shareShopHint', 'اشتراک‌گذاری انجام نشد', 'ارسال لینک برای دیگران');
-      }
-    }
-  });
-
   const scrollTopBtn = document.getElementById('scrollTopBtn');
   window.onscroll = () => {
     if (scrollTopBtn) scrollTopBtn.classList.toggle('hidden', window.scrollY < 300);

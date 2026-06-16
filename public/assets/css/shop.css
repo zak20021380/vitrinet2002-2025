@@ -7987,7 +7987,6 @@ body {
 }
 
 .shop-header #headerActions .drawer-section-title,
-.shop-header #headerActions #shareShopBtn,
 .shop-header #headerActions #copyShopLinkBtn,
 .shop-header #headerActions #drawerWorkingHoursRow,
 .shop-header #headerActions #drawerAboutShopRow,
@@ -8345,8 +8344,7 @@ body {
     display: none !important;
   }
 
-  .shop-header #headerActions #shareShopBtn,
-  .shop-header #headerActions #copyShopLinkBtn,
+    .shop-header #headerActions #copyShopLinkBtn,
   .shop-header #headerActions #reportBtn,
   .shop-header #headerActions #rateShow,
   .shop-header #headerActions #drawerWorkingHoursRow:not([hidden]),
@@ -8802,8 +8800,7 @@ body {
     font-weight: 650 !important;
   }
 
-  .shop-header #headerActions #shareShopBtn,
-  .shop-header #headerActions #copyShopLinkBtn,
+    .shop-header #headerActions #copyShopLinkBtn,
   .shop-header #headerActions #reportBtn,
   .shop-header #headerActions #rateShow,
   .shop-header #headerActions #drawerWorkingHoursRow:not([hidden]),
@@ -8833,5 +8830,468 @@ body {
   .shop-header #headerActions #rateShow {
     min-height: 46px !important;
     padding: 8px 8px !important;
+  }
+}
+/* =====================================================
+   Hamburger Drawer Menu — Premium mobile action sheet
+   Single consolidated override for all breakpoints
+   ===================================================== */
+
+/* Desktop: hide drawer elements, keep only icon buttons */
+.shop-header #headerActions .drawer-menu-section,
+.shop-header #headerActions .drawer-menu-section--flat,
+.shop-header #headerActions .drawer-row-group {
+  display: contents;
+}
+
+.shop-header #headerActions .drawer-section-title,
+.shop-header #headerActions #copyShopLinkBtn,
+.shop-header #headerActions #drawerWorkingHoursRow,
+.shop-header #headerActions #drawerAboutShopRow,
+.shop-header #headerActions #drawerCategoryRow,
+.shop-header #headerActions .drawer-status-chip,
+.shop-header #headerActions .drawer-row-chevron,
+.shop-header #headerActions .drawer-row-copy small {
+  display: none;
+}
+
+.shop-header #headerActions .badge-cluster { order: 1; }
+.shop-header #headerActions #addressBtn { order: 2; }
+.shop-header #headerActions #rateShow { order: 3; }
+.shop-header #headerActions #reportBtn { order: 4; }
+
+.shop-header #headerActions #reportBtn .drawer-row-icon,
+.shop-header #headerActions #reportBtn .drawer-row-copy,
+.shop-header #headerActions #rateShow .drawer-row-icon,
+.shop-header #headerActions #rateShow .drawer-row-copy {
+  display: contents;
+}
+
+.shop-header #headerActions #reportBtn .drawer-row-title,
+.shop-header #headerActions #rateShow .drawer-row-title {
+  display: inline;
+}
+
+.shop-header #headerActions #rateShow .rating-count-pill {
+  display: inline-flex;
+}
+
+/* ---- Mobile: premium compact action sheet ---- */
+@media (max-width: 900px) {
+
+  /* Kill backdrop pseudo from older blocks */
+  .shop-header.menu-open::before {
+    content: none !important;
+  }
+
+  /* ---- Panel container ---- */
+  .shop-header #headerActions,
+  .shop-header.menu-open #headerActions {
+    position: fixed !important;
+    top: 48px !important;
+    right: 8px !important;
+    left: auto !important;
+    width: min(290px, calc(100vw - 16px)) !important;
+    max-width: none !important;
+    max-height: calc(100vh - 64px) !important;
+    padding: 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(15, 23, 42, 0.07) !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    box-shadow:
+      0 12px 40px rgba(15, 23, 42, 0.12),
+      0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    direction: rtl !important;
+    z-index: 100 !important;
+    transform-origin: top right !important;
+  }
+
+  .shop-header #headerActions {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-8px) scale(0.97) !important;
+    transition:
+      opacity 0.22s cubic-bezier(0.4,0,0.2,1),
+      transform 0.22s cubic-bezier(0.4,0,0.2,1),
+      visibility 0.22s ease !important;
+  }
+
+  .shop-header.menu-open #headerActions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
+  /* Force full width children */
+  .shop-header #headerActions > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Hide badge cluster and address in drawer */
+  .shop-header #headerActions .badge-cluster,
+  .shop-header #headerActions #addressBtn {
+    display: none !important;
+  }
+
+  /* ---- Drawer meta (store info) ---- */
+  .shop-header #headerActions .mobile-drawer-meta {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "kicker status"
+      "name status"
+      "category status"
+      "caption caption" !important;
+    align-items: center !important;
+    gap: 2px 8px !important;
+    min-height: 0 !important;
+    padding: 10px 12px 10px 12px !important;
+    margin: 0 0 4px 0 !important;
+    border: 1px solid rgba(15, 23, 42, 0.05) !important;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    text-align: right !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta::before {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-kicker {
+    grid-area: kicker !important;
+    display: block !important;
+    margin: 0 !important;
+    color: #7c8798 !important;
+    font-size: 0.66rem !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta strong {
+    grid-area: name !important;
+    display: block !important;
+    min-width: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+    line-height: 1.4 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta > span:not(.mobile-drawer-kicker):not(.drawer-status-chip),
+  .shop-header #headerActions .mobile-drawer-meta small {
+    display: block !important;
+    min-width: 0 !important;
+    color: #64748b !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .shop-header #headerActions #drawerShopCaption {
+    grid-area: caption !important;
+    display: block !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    color: #94a3b8 !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+  }
+
+  .shop-header #headerActions #drawerShopCaption:empty {
+    display: none !important;
+  }
+
+  .shop-header #headerActions #drawerShopCategory {
+    grid-area: category !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta [hidden] {
+    display: none !important;
+  }
+
+  /* Status chip */
+  .shop-header #headerActions .drawer-status-chip {
+    grid-area: status !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    align-self: start !important;
+    min-height: 22px !important;
+    padding: 3px 7px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(20, 184, 166, 0.16) !important;
+    background: rgba(240, 253, 250, 0.72) !important;
+    color: #0f766e !important;
+    font-size: 0.64rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions .drawer-status-chip[hidden] {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-status-dot {
+    width: 5px !important;
+    height: 5px !important;
+    flex: 0 0 5px !important;
+    border-radius: 999px !important;
+    background: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+  }
+
+  .shop-header #headerActions .drawer-status-chip.is-closed {
+    border-color: rgba(245, 158, 11, 0.18) !important;
+    background: rgba(255, 251, 235, 0.72) !important;
+    color: #92400e !important;
+  }
+
+  .shop-header #headerActions .drawer-status-chip.is-closed .drawer-status-dot {
+    background: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
+  }
+
+  /* ---- Flat menu section & row group ---- */
+  .shop-header #headerActions .drawer-menu-section,
+  .shop-header #headerActions .drawer-menu-section--flat {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions .drawer-section-title {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-row-group {
+    display: grid !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(15, 23, 42, 0.05) !important;
+    background: rgba(248, 250, 252, 0.52) !important;
+    box-shadow: none !important;
+  }
+
+  /* ---- Action & detail rows ---- */
+  .shop-header #headerActions .drawer-action-row,
+  .shop-header #headerActions .drawer-detail-row,
+  .shop-header #headerActions #reportBtn,
+  .shop-header #headerActions #rateShow {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr) 16px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 7px 10px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    font-family: inherit !important;
+    text-align: right !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: background 0.12s ease !important;
+  }
+
+  .shop-header #headerActions .drawer-detail-row:not(button) {
+    cursor: default !important;
+  }
+
+  /* Divider lines between rows */
+  .shop-header #headerActions .drawer-action-row:not(:last-child)::after,
+  .shop-header #headerActions .drawer-detail-row:not(:last-child)::after {
+    content: "" !important;
+    position: absolute !important;
+    right: 44px !important;
+    left: 10px !important;
+    bottom: 0 !important;
+    height: 1px !important;
+    background: rgba(15, 23, 42, 0.05) !important;
+  }
+
+  /* Divider-before class for visual grouping */
+  .shop-header #headerActions .drawer-divider-before::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 10px !important;
+    left: 10px !important;
+    height: 1px !important;
+    background: rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row:active,
+  .shop-header #headerActions .drawer-detail-row:active {
+    background: rgba(15, 23, 42, 0.035) !important;
+  }
+
+  /* ---- Thin line icons (no bubbles) ---- */
+  .shop-header #headerActions .drawer-row-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #64748b !important;
+    box-shadow: none !important;
+  }
+
+  .shop-header #headerActions .drawer-row-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+    color: #64748b !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+  }
+
+  /* ---- Row copy (title + subtitle) ---- */
+  .shop-header #headerActions .drawer-row-copy {
+    display: grid !important;
+    gap: 1px !important;
+    min-width: 0 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-title,
+  .shop-header #headerActions #reportBtn > span:not(.drawer-row-icon):not(.drawer-row-chevron),
+  .shop-header #headerActions #rateShow > span:not(.drawer-row-icon):not(.drawer-row-chevron) {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    color: #1e293b !important;
+    font-size: 0.8rem !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-copy small {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    color: #94a3b8 !important;
+    font-size: 0.66rem !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+  }
+
+  /* ---- Muted gray chevrons ---- */
+  .shop-header #headerActions .drawer-row-chevron {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: #cbd5e1 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-chevron svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: #cbd5e1 !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+  }
+
+  /* ---- Rating pill ---- */
+  .shop-header #headerActions .rating-count-pill {
+    display: block !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #94a3b8 !important;
+    font-size: 0.66rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Show relevant rows in drawer */
+  .shop-header #headerActions #copyShopLinkBtn,
+  .shop-header #headerActions #reportBtn,
+  .shop-header #headerActions #rateShow,
+  .shop-header #headerActions #drawerWorkingHoursRow:not([hidden]),
+  .shop-header #headerActions #drawerAboutShopRow:not([hidden]),
+  .shop-header #headerActions #drawerCategoryRow:not([hidden]) {
+    display: grid !important;
+  }
+
+  .shop-header #headerActions #drawerWorkingHoursRow[hidden],
+  .shop-header #headerActions #drawerAboutShopRow[hidden],
+  .shop-header #headerActions #drawerCategoryRow[hidden] {
+    display: none !important;
+  }
+}
+
+/* Slightly tighter at very small screens */
+@media (max-width: 375px) {
+  .shop-header #headerActions,
+  .shop-header.menu-open #headerActions {
+    right: 6px !important;
+    width: min(280px, calc(100vw - 12px)) !important;
+    padding: 5px !important;
+    border-radius: 14px !important;
+  }
+
+  .shop-header #headerActions .drawer-action-row,
+  .shop-header #headerActions .drawer-detail-row,
+  .shop-header #headerActions #reportBtn,
+  .shop-header #headerActions #rateShow {
+    min-height: 42px !important;
+    padding: 6px 8px !important;
+    gap: 8px !important;
+  }
+
+  .shop-header #headerActions .drawer-row-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .shop-header #headerActions .drawer-row-title {
+    font-size: 0.76rem !important;
   }
 }
