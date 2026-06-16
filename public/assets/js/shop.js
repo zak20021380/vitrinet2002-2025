@@ -825,6 +825,15 @@ async function loadShopData() {
       `;
     }
 
+    // Compact mobile address line (one-line, ellipsis). Always visible in header.
+    const mobileAddressLine = document.getElementById('mobileAddressLine');
+    const mobileAddressText = document.getElementById('mobileAddressText');
+    if (mobileAddressLine && mobileAddressText) {
+      const cleanAddress = typeof data.shopAddress === 'string' ? data.shopAddress.trim() : '';
+      mobileAddressText.textContent = cleanAddress || 'آدرس ثبت نشده';
+      mobileAddressLine.classList.toggle('is-empty', !cleanAddress);
+    }
+
     // امتیاز میانگین کاربران و تعداد کل امتیازها
     const avg = typeof data.averageRating === 'number'
       ? parseFloat(data.averageRating).toFixed(1)
@@ -1215,6 +1224,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (mobileAddressBtn && addressModal) {
     mobileAddressBtn.onclick = openAddressModal;
+  }
+  const mobileAddressLineBtn = document.getElementById('mobileAddressLine');
+  if (mobileAddressLineBtn && addressModal) {
+    mobileAddressLineBtn.onclick = openAddressModal;
   }
   if (closeAddressModal && addressModal) {
     closeAddressModal.onclick = function() {
