@@ -533,6 +533,60 @@
     height: 14px !important;
   }
 }
+
+/* ─── Desktop header chips ─── */
+@media (max-width: 900px) {
+  #desktopHeaderChips {
+    display: none !important;
+  }
+}
+@media (min-width: 901px) {
+  #desktopHeaderChips {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+  .desktop-rate-chip,
+  .desktop-report-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: default;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .desktop-rate-chip {
+    background: #F4F4F4;
+    color: #1A1A1A;
+  }
+  .desktop-rate-chip .chip-star-icon {
+    width: 16px;
+    height: 16px;
+    color: #F5A623;
+    flex: 0 0 auto;
+  }
+  .desktop-rate-chip .chip-rating-value {
+    color: #1A1A1A;
+  }
+  .desktop-report-chip {
+    background: #FFF0F0;
+    color: #E53935;
+  }
+  .desktop-report-chip .chip-flag-icon {
+    width: 16px;
+    height: 16px;
+    color: #E53935;
+    flex: 0 0 auto;
+  }
+}
 </style>
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 
@@ -603,6 +657,23 @@
           <div class="stories-content" id="shopStoriesContent" aria-live="polite"></div>
         </div>
       </section>
+    </div>
+
+    <!-- Desktop-only header chips -->
+    <div class="desktop-header-chips" id="desktopHeaderChips">
+      <button class="desktop-rate-chip" type="button" aria-label="امتیاز فروشگاه">
+        <svg class="chip-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m12 3.5 2.65 5.36 5.92.86-4.28 4.17 1.01 5.9L12 17l-5.3 2.79 1.01-5.9-4.28-4.17 5.92-.86L12 3.5Z"/>
+        </svg>
+        <span class="chip-label chip-rating-value" id="desktopRatingValue">۰.۰ از ۵</span>
+      </button>
+      <button class="desktop-report-chip" type="button" aria-label="گزارش فروشگاه">
+        <svg class="chip-flag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 21V5"/>
+          <path d="M6 5h11l-1.5 4L17 13H6"/>
+        </svg>
+        <span class="chip-label">گزارش فروشگاه</span>
+      </button>
     </div>
 
     <div class="mobile-actions-row" aria-label="اقدام‌های فروشگاه">
