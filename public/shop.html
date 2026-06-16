@@ -541,50 +541,112 @@
   }
 }
 @media (min-width: 901px) {
+  .shop-header .header-shell,
+  .shop-header .header-actions {
+    align-items: center;
+    gap: 12px;
+  }
+  .shop-header #headerActions #addressBtn {
+    height: 42px;
+    align-self: center;
+  }
   #desktopHeaderChips {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex: 0 0 auto;
+    align-self: center;
   }
   .desktop-rate-chip,
   .desktop-report-chip {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 6px 14px;
+    height: 42px;
+    padding: 8px 16px;
     border-radius: 20px;
-    border: none;
+    border: 1.5px solid transparent;
     font-family: 'Vazirmatn', sans-serif;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1;
-    cursor: default;
+    cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .desktop-rate-chip::after,
+  .desktop-report-chip::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+    transition: transform 0.38s ease, opacity 0.42s ease;
   }
   .desktop-rate-chip {
-    background: #F4F4F4;
-    color: #1A1A1A;
+    background: #FFF8E7;
+    border-color: #F5A623;
+    color: #B8860B;
+    box-shadow: 0 2px 8px rgba(245,166,35,0.2);
+  }
+  .desktop-rate-chip:hover {
+    background: #F2ECD9;
+    transform: scale(1.02);
+  }
+  .desktop-rate-chip::after {
+    background: radial-gradient(circle, rgba(245,166,35,0.24) 0%, rgba(245,166,35,0.18) 34%, transparent 36%);
+  }
+  .desktop-rate-chip:active::after {
+    opacity: 1;
+    transform: scale(3);
+    transition: 0s;
   }
   .desktop-rate-chip .chip-star-icon {
-    width: 16px;
-    height: 16px;
+    width: 17px;
+    height: 17px;
     color: #F5A623;
     flex: 0 0 auto;
   }
   .desktop-rate-chip .chip-rating-value {
-    color: #1A1A1A;
+    color: #B8860B;
+    font-size: 13px;
+    font-weight: 700;
   }
   .desktop-report-chip {
     background: #FFF0F0;
+    border-color: #E53935;
     color: #E53935;
+    box-shadow: 0 2px 8px rgba(229,57,53,0.2);
+  }
+  .desktop-report-chip:hover {
+    background: #F2E4E4;
+    transform: scale(1.02);
+  }
+  .desktop-report-chip::after {
+    background: radial-gradient(circle, rgba(229,57,53,0.24) 0%, rgba(229,57,53,0.18) 34%, transparent 36%);
+  }
+  .desktop-report-chip:active::after {
+    opacity: 1;
+    transform: scale(3);
+    transition: 0s;
   }
   .desktop-report-chip .chip-flag-icon {
-    width: 16px;
-    height: 16px;
+    width: 17px;
+    height: 17px;
     color: #E53935;
     flex: 0 0 auto;
+  }
+  .desktop-report-chip .chip-label {
+    color: #E53935;
+    font-size: 13px;
+    font-weight: 700;
   }
 }
 </style>
@@ -661,16 +723,15 @@
 
     <!-- Desktop-only header chips -->
     <div class="desktop-header-chips" id="desktopHeaderChips">
-      <button class="desktop-rate-chip" type="button" aria-label="امتیاز فروشگاه">
-        <svg class="chip-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m12 3.5 2.65 5.36 5.92.86-4.28 4.17 1.01 5.9L12 17l-5.3 2.79 1.01-5.9-4.28-4.17 5.92-.86L12 3.5Z"/>
+      <button class="desktop-rate-chip" type="button" aria-label="امتیاز فروشگاه" onclick="document.getElementById('rateShow')?.click()">
+        <svg class="chip-star-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27Z"/>
         </svg>
         <span class="chip-label chip-rating-value" id="desktopRatingValue">۰.۰ از ۵</span>
       </button>
-      <button class="desktop-report-chip" type="button" aria-label="گزارش فروشگاه">
-        <svg class="chip-flag-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M6 21V5"/>
-          <path d="M6 5h11l-1.5 4L17 13H6"/>
+      <button class="desktop-report-chip" type="button" aria-label="گزارش فروشگاه" onclick="document.getElementById('reportBtn')?.click()">
+        <svg class="chip-flag-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M6 3.75c0-.41.34-.75.75-.75h10.76c.61 0 .97.69.62 1.19L16.7 6.25l1.43 2.06c.35.5-.01 1.19-.62 1.19H7.5v10.75a.75.75 0 0 1-1.5 0V3.75Z"/>
         </svg>
         <span class="chip-label">گزارش فروشگاه</span>
       </button>
