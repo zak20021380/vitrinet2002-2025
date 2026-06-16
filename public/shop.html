@@ -127,11 +127,11 @@
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 4px !important;
-    padding: 24px 8px 8px !important;
-    border-radius: 24px 24px 0 0 !important;
+    padding: 22px 8px 8px !important;
+    border-radius: 20px 20px 0 0 !important;
     border: none !important;
     background: #ffffff !important;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12) !important;
+    box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -143,10 +143,10 @@
     top: 8px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 40px !important;
+    width: 36px !important;
     height: 4px !important;
     border-radius: 999px !important;
-    background: #CCCCCC !important;
+    background: #DDDDDD !important;
     flex: 0 0 auto !important;
     pointer-events: none !important;
   }
@@ -193,8 +193,7 @@
   /* ── Hide shop profile card, badge, address from menu ── */
   .shop-header #headerActions .mobile-drawer-meta,
   .shop-header #headerActions .badge-cluster,
-  .shop-header #headerActions #addressBtn,
-  .shop-header #headerActions #rateShow {
+  .shop-header #headerActions #addressBtn {
     display: none !important;
   }
 
@@ -235,19 +234,20 @@
 
   /* ── Copy link button (special) ── */
   .shop-header #headerActions #copyShopLinkBtn {
-    display: flex !important;
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) auto !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
+    gap: 12px !important;
     width: 100% !important;
-    height: 52px !important;
-    min-height: 52px !important;
+    height: 56px !important;
+    min-height: 56px !important;
     padding: 0 14px !important;
     margin: 0 !important;
-    border-radius: 10px !important;
-    border: 1px solid rgba(13, 148, 136, 0.14) !important;
-    background: rgba(240, 253, 250, 0.7) !important;
-    color: #0f766e !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1A1A1A !important;
     box-shadow: none !important;
     text-align: right !important;
     transition: background 0.14s ease !important;
@@ -255,44 +255,46 @@
   }
 
   .shop-header #headerActions #copyShopLinkBtn:active {
-    background: rgba(240, 253, 250, 0.5) !important;
+    background: #F7F7F7 !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn::after {
+    content: "" !important;
+    position: absolute !important;
+    right: 66px !important;
+    left: 14px !important;
+    bottom: 0 !important;
+    height: 0.5px !important;
+    background: #F0F0F0 !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon {
-    width: 36px !important;
-    height: 36px !important;
+    width: 38px !important;
+    height: 38px !important;
     border: 0 !important;
     border-radius: 10px !important;
-    background: rgba(13, 148, 136, 0.1) !important;
-    color: #0f766e !important;
+    background: #F4F4F4 !important;
+    color: #555555 !important;
     flex-shrink: 0 !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 22px !important;
+    height: 22px !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-copy {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 0 !important;
+    align-items: center !important;
     min-width: 0 !important;
     flex: 1 !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-title {
-    color: #0f766e !important;
-    font-size: 0.75rem !important;
-    font-weight: 800 !important;
-    line-height: 1.3 !important;
-  }
-
-  .shop-header #headerActions #copyShopLinkHint {
-    color: #64748b !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
+    color: #1A1A1A !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-chevron {
@@ -305,18 +307,18 @@
   .shop-header #headerActions #reportBtn {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: 36px minmax(0, 1fr) auto !important;
+    grid-template-columns: 38px minmax(0, 1fr) auto !important;
     align-items: center !important;
     gap: 12px !important;
     width: 100% !important;
-    height: 52px !important;
-    min-height: 52px !important;
+    height: 56px !important;
+    min-height: 56px !important;
     padding: 0 14px !important;
     margin: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
-    color: #1e293b !important;
+    color: #1A1A1A !important;
     box-shadow: none !important;
     text-align: right !important;
     cursor: pointer !important;
@@ -325,66 +327,76 @@
 
   .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):hover:not(:active),
   .shop-header #headerActions .drawer-detail-row:hover:not(:active) {
-    background: rgba(124, 131, 253, 0.06) !important;
+    background: #FAFAFA !important;
   }
 
   .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):active,
   .shop-header #headerActions .drawer-detail-row:active {
-    background: rgba(124, 131, 253, 0.12) !important;
+    background: #F7F7F7 !important;
   }
 
   .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):not(:last-child)::after,
   .shop-header #headerActions .drawer-detail-row:not(:last-child)::after {
     content: "" !important;
     position: absolute !important;
-    right: 62px !important;
+    right: 66px !important;
     left: 14px !important;
     bottom: 0 !important;
     height: 0.5px !important;
     background: #F0F0F0 !important;
   }
 
+  @supports selector(:has(~ *)) {
+    .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn)::after,
+    .shop-header #headerActions .drawer-detail-row::after {
+      display: none !important;
+    }
+
+    .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn):has(~ .drawer-detail-row:not([hidden]))::after,
+    .shop-header #headerActions .drawer-detail-row:not([hidden]):has(~ .drawer-detail-row:not([hidden]))::after {
+      display: block !important;
+    }
+  }
+
   .shop-header #headerActions .drawer-row-icon {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
+    width: 38px !important;
+    height: 38px !important;
     border-radius: 10px !important;
     border: none !important;
-    background: rgba(124, 131, 253, 0.1) !important;
-    color: #5b62d6 !important;
+    background: #F4F4F4 !important;
+    color: #555555 !important;
     flex-shrink: 0 !important;
   }
 
   .shop-header #headerActions .drawer-row-icon svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 22px !important;
+    height: 22px !important;
     color: currentColor !important;
     stroke-width: 2 !important;
   }
 
   .shop-header #headerActions .drawer-row-copy {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 0 !important;
+    align-items: center !important;
     min-width: 0 !important;
     flex: 1 !important;
   }
 
   .shop-header #headerActions .drawer-row-title,
   .shop-header #headerActions #reportBtn > span:not(.drawer-row-icon):not(.drawer-row-chevron) {
-    color: #1e293b !important;
-    font-size: 15px !important;
+    color: #1A1A1A !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
-    line-height: 1.3 !important;
+    line-height: 1.35 !important;
+    direction: rtl !important;
+    text-align: right !important;
   }
 
   .shop-header #headerActions .drawer-row-copy small {
-    color: #94a3b8 !important;
-    font-size: 0.62rem !important;
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
+    display: none !important;
   }
 
   .shop-header #headerActions .drawer-row-chevron {
@@ -399,6 +411,7 @@
   }
 
   .shop-header #headerActions .drawer-row-rating-value {
+    display: none !important;
     font-size: 13px !important;
     font-weight: 700 !important;
     color: #94a3b8 !important;
@@ -407,7 +420,7 @@
 
   /* ── Hide secondary sections when all hidden ── */
   @supports selector(:has(*)) {
-    .shop-header #headerActions .drawer-secondary-section:has(#drawerWorkingHoursRow[hidden]):has(#drawerAboutShopRow[hidden]):has(#drawerCategoryRow[hidden]) {
+    .shop-header #headerActions .drawer-secondary-section:has(#rateShow[hidden]):has(#drawerWorkingHoursRow[hidden]):has(#drawerAboutShopRow[hidden]):has(#drawerCategoryRow[hidden]) {
       display: none !important;
     }
   }
@@ -624,13 +637,13 @@
               <button id="copyShopLinkBtn" class="drawer-action-row" aria-label="کپی لینک فروشگاه" type="button" data-menu-stay-open>
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2"/>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    <path d="M9.5 14.5 14.5 9.5"/>
+                    <path d="M11 6.5h3.5a4 4 0 0 1 0 8H13"/>
+                    <path d="M11 17.5H7.5a4 4 0 0 1 0-8H9"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
                   <span class="drawer-row-title">کپی لینک فروشگاه</span>
-                  <small id="copyShopLinkHint">ذخیره لینک در کلیپ‌بورد</small>
                 </span>
                 <span class="drawer-row-chevron" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -645,12 +658,11 @@
               <button id="rateShow" class="action-item drawer-action-row drawer-action-row--rating" aria-label="مشاهده و ثبت امتیاز" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+                    <path d="m12 3.5 2.65 5.36 5.92.86-4.28 4.17 1.01 5.9L12 17l-5.3 2.79 1.01-5.9-4.28-4.17 5.92-.86L12 3.5Z"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
                   <span class="drawer-row-title">امتیاز فروشگاه</span>
-                  <small class="rating-count-pill"><span id="shop-rating">4.8</span> از ۵ · <span id="rating-count">0</span> رای</small>
                 </span>
                 <span class="drawer-row-rating-value" id="drawerRatingValue">0.0 از ۵</span>
               </button>
@@ -658,7 +670,7 @@
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
+                    <path d="M12 7v5l3 2"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
@@ -682,10 +694,9 @@
               <div class="drawer-detail-row" id="drawerCategoryRow" hidden>
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <path d="M12 3 6.5 11h11L12 3Z"/>
+                    <rect x="4" y="14" width="6" height="6" rx="1.5"/>
+                    <circle cx="17" cy="17" r="3"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
@@ -701,14 +712,12 @@
                 <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
                   <span class="drawer-row-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="8" x2="12" y2="12"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      <path d="M6 21V5"/>
+                      <path d="M6 5h11l-1.5 4L17 13H6"/>
                     </svg>
                   </span>
                   <span class="drawer-row-copy">
                     <span class="drawer-row-title">گزارش فروشگاه</span>
-                    <small>ثبت گزارش تخلف</small>
                   </span>
                   <span class="drawer-row-chevron" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
