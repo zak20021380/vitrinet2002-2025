@@ -541,14 +541,19 @@
   }
 }
 @media (min-width: 901px) {
-  .shop-header .header-shell,
+  .shop-header .header-shell {
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+  }
   .shop-header .header-actions {
     align-items: center;
     gap: 12px;
   }
-  .shop-header #headerActions #addressBtn {
-    height: 42px;
-    align-self: center;
+  /* Hide original address button and customer badge on desktop */
+  .shop-header #headerActions #addressBtn,
+  .shop-header #headerActions .badge-cluster {
+    display: none !important;
   }
   #desktopHeaderChips {
     display: flex;
@@ -556,6 +561,104 @@
     gap: 12px;
     flex: 0 0 auto;
     align-self: center;
+  }
+  /* ── Desktop آدرس chip ── */
+  .desktop-address-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 42px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #CCCCCC;
+    background: #FFFFFF;
+    color: #333333;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .desktop-address-chip:hover {
+    border-color: #999999;
+    background: #F5F5F5;
+  }
+  .desktop-address-chip svg {
+    width: 15px;
+    height: 15px;
+    color: #555555;
+    flex: 0 0 auto;
+  }
+  /* ── Desktop مشتری / عضویت سریع chip ── */
+  .desktop-customer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: 42px;
+    padding: 0 1.1rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(124, 131, 253, 0.92) 0%, rgba(82, 183, 136, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #fff;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+    box-shadow: 0 12px 30px rgba(124, 131, 253, 0.28), 0 6px 18px rgba(82, 183, 136, 0.24);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .desktop-customer-chip:hover {
+    filter: brightness(1.03);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 32px rgba(124, 131, 253, 0.32), 0 8px 20px rgba(82, 183, 136, 0.26);
+  }
+  .desktop-customer-chip:active {
+    transform: translateY(0);
+  }
+  .desktop-customer-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  .desktop-customer-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .desktop-customer-count {
+    color: #f7fafc;
+    font-size: 13px;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.16);
+  }
+  .desktop-customer-label {
+    color: #f7fafc;
+    font-size: 13px;
+  }
+  .desktop-customer-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 11px;
+    color: #e0f5ff;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 3px 7px;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
   }
   .desktop-rate-chip,
   .desktop-report-chip {
@@ -723,6 +826,26 @@
 
     <!-- Desktop-only header chips -->
     <div class="desktop-header-chips" id="desktopHeaderChips">
+      <button class="desktop-address-chip" type="button" aria-label="مشاهده آدرس فروشگاه" onclick="document.getElementById('addressModal')?.classList.remove('hidden')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>آدرس</span>
+      </button>
+      <button class="desktop-customer-chip" type="button" data-customer-trigger aria-label="مشاهده مشتریان و عضویت سریع">
+        <span class="desktop-customer-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <span class="desktop-customer-count" data-customer-count>0</span>
+        <span class="desktop-customer-label">مشتری</span>
+        <span class="desktop-customer-cta">عضویت سریع</span>
+      </button>
       <button class="desktop-rate-chip" type="button" aria-label="امتیاز فروشگاه" onclick="document.getElementById('rateShow')?.click()">
         <svg class="chip-star-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27Z"/>
