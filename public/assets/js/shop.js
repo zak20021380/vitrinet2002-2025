@@ -832,6 +832,8 @@ async function loadShopData() {
     setTextById('shop-rating', avg);
     const mobileRating = document.getElementById('mobile-shop-rating');
     if (mobileRating) mobileRating.textContent = avg;
+    // بروزرسانی مقدار پاک رتبه در پنل منو (سمت چپ ردیف امتیاز)
+    setTextById('drawerRatingValue', `${avg} از ۵`);
 
     const ratingCount = typeof data.ratingCount === 'number'
       ? data.ratingCount
@@ -1435,6 +1437,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       setTextById('shop-rating', updatedAverageRating);
       const mobileRating = document.getElementById('mobile-shop-rating');
       if (mobileRating) mobileRating.textContent = updatedAverageRating;
+      setTextById('drawerRatingValue', `${updatedAverageRating} از ۵`);
       if (typeof data.ratingCount === 'number') {
         const formattedRatingCount = data.ratingCount.toLocaleString();
         setTextById('rating-count', formattedRatingCount);
