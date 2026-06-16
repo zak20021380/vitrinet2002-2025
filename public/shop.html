@@ -549,6 +549,35 @@
   .shop-header .brand-area {
     order: 1;
   }
+  .desktop-header-category {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--primary);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .desktop-header-category:has(#drawerShopCategory:not([hidden])) {
+    display: flex !important;
+  }
+  .desktop-header-category svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    color: currentColor;
+  }
+  .desktop-header-category span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .shop-header .mobile-actions-row {
     display: none;
   }
@@ -562,7 +591,7 @@
     display: none !important;
   }
   #desktopHeaderChips {
-    order: 2;
+    order: 3;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -829,6 +858,14 @@
           <div class="stories-content" id="shopStoriesContent" aria-live="polite"></div>
         </div>
       </section>
+    </div>
+
+    <div class="desktop-header-category" aria-label="دسته‌بندی فروشگاه" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/>
+        <circle cx="7.5" cy="7.5" r="1.5"/>
+      </svg>
+      <span id="drawerShopCategory" hidden></span>
     </div>
 
     <!-- Desktop-only header chips -->
