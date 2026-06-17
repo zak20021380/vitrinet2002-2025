@@ -229,15 +229,7 @@
     background: #F5F5F5 !important;
   }
 
-  .shop-header #headerActions #copyShopLinkBtn::after {
-    content: "" !important;
-    position: absolute !important;
-    right: 14px !important;
-    left: 14px !important;
-    bottom: 0 !important;
-    height: 0.5px !important;
-    background: #EEEEEE !important;
-  }
+
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon {
     width: 20px !important;
@@ -402,20 +394,182 @@
 
   .shop-header #headerActions .drawer-row-rating-value {
     display: none !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #94a3b8 !important;
     flex-shrink: 0 !important;
   }
 
-  /* ── Hide secondary sections when all hidden ── */
-  @supports selector(:has(*)) {
-    .shop-header #headerActions .drawer-secondary-section:has(#rateShow[hidden]):has(#drawerWorkingHoursRow[hidden]):has(#drawerAboutShopRow[hidden]):has(#drawerCategoryRow[hidden]) {
-      display: none !important;
-    }
+  .shop-header #headerActions .drawer-detail-row[hidden] {
+    display: none !important;
   }
 
-  .shop-header #headerActions .drawer-detail-row[hidden] {
+  .shop-header #headerActions .mobile-drawer-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+    padding: 6px 16px 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-category {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: var(--primary) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-category:has(#drawerCategoryText:empty) {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .mobile-drawer-meta:has(#drawerCategoryText:empty) {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-category svg {
+    width: 13px !important;
+    height: 13px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .shop-header #headerActions .drawer-menu-group {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .shop-header #headerActions .drawer-menu-divider {
+    height: 1px !important;
+    margin: 4px 16px !important;
+    background: #E5E7EB !important;
+  }
+
+  .shop-header #headerActions .drawer-menu-divider--strong {
+    height: 2px !important;
+    margin: 10px 16px !important;
+    background: #FECACA !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn,
+  .shop-header #headerActions .drawer-action-row:not(#copyShopLinkBtn),
+  .shop-header #headerActions .drawer-detail-row,
+  .shop-header #headerActions #reportBtn {
+    grid-template-columns: 36px minmax(0, 1fr) auto !important;
+    min-height: 62px !important;
+    height: auto !important;
+    padding: 14px 16px !important;
+    gap: 12px !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon,
+  .shop-header #headerActions .drawer-row-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    color: #374151 !important;
+    background: rgba(55, 65, 81, 0.1) !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon {
+    color: #3B82F6 !important;
+    background: rgba(59, 130, 246, 0.12) !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon svg,
+  .shop-header #headerActions .drawer-row-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .shop-header #headerActions .drawer-row-title {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #1F2937 !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-title {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #1F2937 !important;
+  }
+
+  .shop-header #headerActions #copyShopLinkBtn .drawer-row-chevron,
+  .shop-header #headerActions #drawerCategoryRow .drawer-row-chevron {
+    display: inline-flex !important;
+    color: #9CA3AF !important;
+  }
+
+  .shop-header #headerActions .drawer-row-chevron svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .shop-header #headerActions #rateShow .drawer-row-copy {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+  }
+
+  .shop-header #headerActions .drawer-rating-line {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    direction: ltr !important;
+  }
+
+  .shop-header #headerActions .drawer-rating-stars {
+    display: inline-flex !important;
+    gap: 1px !important;
+    color: #D1D5DB !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  .shop-header #headerActions .drawer-rating-stars .is-filled {
+    color: #F5A623 !important;
+  }
+
+  .shop-header #headerActions .drawer-row-rating-value {
+    display: inline-flex !important;
+    color: #F5A623 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    direction: rtl !important;
+  }
+
+  .shop-header #headerActions #reportBtn {
+    color: #E53935 !important;
+  }
+
+  .shop-header #headerActions #reportBtn .drawer-row-icon {
+    color: #E53935 !important;
+    background: rgba(229, 57, 53, 0.1) !important;
+  }
+
+  .shop-header #headerActions #reportBtn .drawer-row-title {
+    color: #E53935 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+
+  .shop-header #headerActions #drawerCategoryRow .drawer-row-icon {
+    color: var(--primary) !important;
+    background: rgba(124, 131, 253, 0.1) !important;
+  }
+
+  .shop-header #headerActions #rateShow .drawer-row-icon {
+    color: #F5A623 !important;
+    background: rgba(245, 166, 35, 0.1) !important;
+  }
+
+  .shop-header #headerActions #reportBtn .drawer-row-chevron,
+  .shop-header #headerActions #rateShow .drawer-row-chevron {
+    display: none !important;
+  }
+
+  .shop-header #headerActions #drawerWorkingHoursRow,
+  .shop-header #headerActions #drawerAboutShopRow {
     display: none !important;
   }
 }
@@ -911,6 +1065,15 @@
       <div class="seller-utility-actions" aria-label="ابزارهای فروشگاه">
         <!-- Navigation / Actions -->
         <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
+          <div class="mobile-drawer-meta" aria-label="اطلاعات فروشگاه">
+            <span class="drawer-shop-category">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/>
+                <circle cx="7.5" cy="7.5" r="1.5"/>
+              </svg>
+              <span id="drawerCategoryText"></span>
+            </span>
+          </div>
           <div class="badge-cluster">
             <button id="customerBadge" class="customer-badge" type="button" data-customer-trigger aria-label="مشاهده مشتریان و عضویت سریع">
               <span class="customer-icon" aria-hidden="true">
@@ -932,8 +1095,7 @@
             </button>
           </div>
           <div class="drawer-menu-section drawer-menu-section--flat">
-            <div class="drawer-copy-actions" aria-label="اشتراک‌گذاری فروشگاه">
-              <span class="drawer-section-label">اشتراک‌گذاری</span>
+            <div class="drawer-menu-group" aria-label="اقدام‌های فروشگاه">
               <button id="copyShopLinkBtn" class="drawer-action-row" aria-label="کپی لینک فروشگاه" type="button" data-menu-stay-open>
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -951,10 +1113,23 @@
                   </svg>
                 </span>
               </button>
-            </div>
-            <div class="drawer-secondary-section" aria-label="جزئیات فروشگاه">
-              <span class="drawer-section-label">جزئیات فروشگاه</span>
-              <div class="drawer-row-group">
+              <div class="drawer-detail-row" id="drawerCategoryRow" hidden>
+                <span class="drawer-row-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/>
+                    <circle cx="7.5" cy="7.5" r="1.5"/>
+                  </svg>
+                </span>
+                <span class="drawer-row-copy">
+                  <span class="drawer-row-title">دسته‌بندی فروشگاه</span>
+                </span>
+                <span class="drawer-row-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18 9 12l6-6"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="drawer-menu-divider" aria-hidden="true"></div>
               <button id="rateShow" class="action-item drawer-action-row drawer-action-row--rating" aria-label="مشاهده و ثبت امتیاز" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -963,71 +1138,71 @@
                 </span>
                 <span class="drawer-row-copy">
                   <span class="drawer-row-title">امتیاز فروشگاه</span>
+                  <span class="drawer-rating-line">
+                    <span class="drawer-rating-stars" aria-hidden="true">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </span>
+                    <span class="drawer-row-rating-value" id="drawerRatingValue">0.0 از ۵</span>
+                  </span>
                 </span>
-                <span class="drawer-row-rating-value" id="drawerRatingValue">0.0 از ۵</span>
               </button>
-              <div class="drawer-detail-row drawer-divider-before" id="drawerWorkingHoursRow" hidden>
+              <div class="drawer-menu-divider drawer-menu-divider--strong" aria-hidden="true"></div>
+              <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 7v5l3 2"/>
+                    <path d="M6 21V5"/>
+                    <path d="M6 5h11l-1.5 4L17 13H6"/>
                   </svg>
                 </span>
                 <span class="drawer-row-copy">
-                  <span class="drawer-row-title">ساعت کاری</span>
-                  <small id="drawerWorkingHoursText"></small>
+                  <span class="drawer-row-title">گزارش فروشگاه</span>
                 </span>
-              </div>
-              <div class="drawer-detail-row" id="drawerAboutShopRow" hidden>
-                <span class="drawer-row-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 16v-4"/>
-                    <path d="M12 8h.01"/>
-                  </svg>
-                </span>
-                <span class="drawer-row-copy">
-                  <span class="drawer-row-title">درباره فروشگاه</span>
-                  <small id="drawerAboutShopText"></small>
-                </span>
-              </div>
-              <div class="drawer-detail-row" id="drawerCategoryRow" hidden>
-                <span class="drawer-row-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 3 6.5 11h11L12 3Z"/>
-                    <rect x="4" y="14" width="6" height="6" rx="1.5"/>
-                    <circle cx="17" cy="17" r="3"/>
-                  </svg>
-                </span>
-                <span class="drawer-row-copy">
-                  <span class="drawer-row-title">دسته‌بندی فروشگاه</span>
-                  <small id="drawerCategoryText"></small>
-                </span>
-              </div>
-              </div>
+              </button>
             </div>
-            <div class="drawer-secondary-section" aria-label="اقدام‌های بیشتر">
-              <span class="drawer-section-label">اقدام‌های بیشتر</span>
-              <div class="drawer-row-group">
-                <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
-                  <span class="drawer-row-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6 21V5"/>
-                      <path d="M6 5h11l-1.5 4L17 13H6"/>
-                    </svg>
-                  </span>
-                  <span class="drawer-row-copy">
-                    <span class="drawer-row-title">گزارش فروشگاه</span>
-                  </span>
-                  <span class="drawer-row-chevron" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M15 18 9 12l6-6"/>
-                    </svg>
-                  </span>
-                </button>
-              </div>
+            <div class="drawer-detail-row" id="drawerWorkingHoursRow" hidden>
+              <span class="drawer-row-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 7v5l3 2"/>
+                </svg>
+              </span>
+              <span class="drawer-row-copy">
+                <span class="drawer-row-title">ساعت کاری</span>
+                <small id="drawerWorkingHoursText"></small>
+              </span>
+            </div>
+            <div class="drawer-detail-row" id="drawerAboutShopRow" hidden>
+              <span class="drawer-row-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 16v-4"/>
+                  <path d="M12 8h.01"/>
+                </svg>
+              </span>
+              <span class="drawer-row-copy">
+                <span class="drawer-row-title">درباره فروشگاه</span>
+                <small id="drawerAboutShopText"></small>
+              </span>
             </div>
           </div>
+          <script>
+            (() => {
+              const valueEl = document.getElementById('drawerRatingValue');
+              const starsEl = document.querySelector('#headerActions .drawer-rating-stars');
+              if (!valueEl || !starsEl) return;
+              const normalize = value => String(value || '')
+                .replace(/[۰-۹]/g, digit => '۰۱۲۳۴۵۶۷۸۹'.indexOf(digit))
+                .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+              const render = () => {
+                const rating = Math.max(0, Math.min(5, parseFloat(normalize(valueEl.textContent)) || 0));
+                [...starsEl.children].forEach((star, index) => {
+                  star.classList.toggle('is-filled', index < Math.round(rating));
+                });
+              };
+              render();
+              new MutationObserver(render).observe(valueEl, { childList: true, characterData: true, subtree: true });
+            })();
+          </script>
           <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
