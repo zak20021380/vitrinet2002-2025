@@ -381,6 +381,21 @@
     display: none !important;
   }
 
+  .shop-header #headerActions #drawerCategoryRowSubtitle {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: #757575 !important;
+    line-height: 1.3 !important;
+    margin-top: 2px !important;
+    direction: rtl !important;
+    text-align: right !important;
+  }
+
+  .shop-header #headerActions #drawerCategoryRowSubtitle:empty {
+    display: none !important;
+  }
+
   .shop-header #headerActions .drawer-row-chevron {
     color: #cbd5e1 !important;
     flex-shrink: 0 !important;
@@ -410,28 +425,69 @@
     box-sizing: border-box !important;
   }
 
-  .shop-header #headerActions .drawer-shop-category {
+  .shop-header #headerActions .drawer-modal-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 16px 16px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    gap: 6px !important;
+    background: transparent !important;
+    border: 0 !important;
+    text-align: center !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-name-large {
+    display: block !important;
+    width: 100% !important;
+    font-family: 'Vazirmatn', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #0F172A !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    direction: rtl !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .shop-header #headerActions .drawer-shop-name-large:empty {
+    display: none !important;
+  }
+
+  .shop-header #headerActions .drawer-category-row {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
+    direction: rtl !important;
     color: var(--primary) !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     line-height: 1.3 !important;
   }
 
-  .shop-header #headerActions .drawer-shop-category:has(#drawerCategoryText:empty) {
+  .shop-header #headerActions .drawer-category-row[hidden],
+  .shop-header #headerActions .drawer-category-row:has(#drawerCategoryText:empty) {
     display: none !important;
   }
 
-  .shop-header #headerActions .mobile-drawer-meta:has(#drawerCategoryText:empty) {
-    display: none !important;
-  }
-
-  .shop-header #headerActions .drawer-shop-category svg {
+  .shop-header #headerActions .drawer-category-row-icon {
     width: 13px !important;
     height: 13px !important;
     flex: 0 0 auto !important;
+    color: var(--primary) !important;
+    stroke-width: 2 !important;
+  }
+
+  .shop-header #headerActions .drawer-category-row > #drawerCategoryText {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--primary) !important;
+    line-height: 1.3 !important;
   }
 
   .shop-header #headerActions .drawer-menu-group {
@@ -449,6 +505,28 @@
     height: 2px !important;
     margin: 10px 16px !important;
     background: #FECACA !important;
+  }
+
+  .shop-header #headerActions .drawer-group-divider {
+    height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    pointer-events: none !important;
+    position: relative !important;
+    display: block !important;
+  }
+
+  .shop-header #headerActions .drawer-group-divider::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 16px !important;
+    right: 16px !important;
+    height: 1px !important;
+    background: #E5E7EB !important;
+    transform: translateY(-50%) !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn,
@@ -544,7 +622,7 @@
 
   .shop-header #headerActions #reportBtn .drawer-row-icon {
     color: #E53935 !important;
-    background: rgba(229, 57, 53, 0.1) !important;
+    background: rgba(229, 57, 53, 0.12) !important;
   }
 
   .shop-header #headerActions #reportBtn .drawer-row-title {
@@ -554,13 +632,13 @@
   }
 
   .shop-header #headerActions #drawerCategoryRow .drawer-row-icon {
-    color: var(--primary) !important;
-    background: rgba(124, 131, 253, 0.1) !important;
+    color: #6366F1 !important;
+    background: rgba(99, 102, 241, 0.12) !important;
   }
 
   .shop-header #headerActions #rateShow .drawer-row-icon {
     color: #F5A623 !important;
-    background: rgba(245, 166, 35, 0.1) !important;
+    background: rgba(245, 166, 35, 0.12) !important;
   }
 
   .shop-header #headerActions #reportBtn .drawer-row-chevron,
@@ -1065,14 +1143,15 @@
       <div class="seller-utility-actions" aria-label="ابزارهای فروشگاه">
         <!-- Navigation / Actions -->
         <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
-          <div class="mobile-drawer-meta" aria-label="اطلاعات فروشگاه">
-            <span class="drawer-shop-category">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82Z"/>
-                <circle cx="7.5" cy="7.5" r="1.5"/>
+          <div class="drawer-modal-header" aria-label="اطلاعات فروشگاه">
+            <div class="drawer-shop-name-large" id="drawerShopName"></div>
+            <div class="drawer-category-row" id="drawerCategoryRowTop" hidden>
+              <svg class="drawer-category-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h11c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                <circle cx="9" cy="10" r="1.5"/>
               </svg>
               <span id="drawerCategoryText"></span>
-            </span>
+            </div>
           </div>
           <div class="badge-cluster">
             <button id="customerBadge" class="customer-badge" type="button" data-customer-trigger aria-label="مشاهده مشتریان و عضویت سریع">
@@ -1122,6 +1201,7 @@
                 </span>
                 <span class="drawer-row-copy">
                   <span class="drawer-row-title">دسته‌بندی فروشگاه</span>
+                  <small class="drawer-row-subtitle" id="drawerCategoryRowSubtitle"></small>
                 </span>
                 <span class="drawer-row-chevron" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -1146,7 +1226,7 @@
                   </span>
                 </span>
               </button>
-              <div class="drawer-menu-divider drawer-menu-divider--strong" aria-hidden="true"></div>
+              <div class="drawer-group-divider" id="drawerReportGroupDivider" aria-hidden="true"></div>
               <button id="reportBtn" class="action-item drawer-action-row" aria-label="ثبت گزارش تخلف" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -1201,6 +1281,16 @@
               };
               render();
               new MutationObserver(render).observe(valueEl, { childList: true, characterData: true, subtree: true });
+            })();
+            (() => {
+              const sourceEl = document.getElementById('drawerCategoryText');
+              const subtitleEl = document.getElementById('drawerCategoryRowSubtitle');
+              if (!sourceEl || !subtitleEl) return;
+              const apply = () => {
+                subtitleEl.textContent = sourceEl.textContent || '';
+              };
+              apply();
+              new MutationObserver(apply).observe(sourceEl, { childList: true, characterData: true, subtree: true });
             })();
           </script>
           <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button">
