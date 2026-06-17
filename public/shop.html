@@ -118,10 +118,10 @@
     align-items: stretch !important;
     gap: 0 !important;
     padding: 4px 0 !important;
-    border-radius: 16px !important;
+    border-radius: 20px !important;
     border: none !important;
     background: #FFFFFF !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -432,7 +432,7 @@
     justify-content: center !important;
     width: 100% !important;
     padding: 16px 16px 12px !important;
-    margin: 0 !important;
+    margin: 0 0 8px 0 !important;
     box-sizing: border-box !important;
     gap: 6px !important;
     background: transparent !important;
@@ -538,6 +538,10 @@
     height: auto !important;
     padding: 14px 16px !important;
     gap: 12px !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: background-color 0.2s ease !important;
   }
 
   .shop-header #headerActions #copyShopLinkBtn .drawer-row-icon,
@@ -599,13 +603,13 @@
   .shop-header #headerActions .drawer-rating-stars {
     display: inline-flex !important;
     gap: 1px !important;
-    color: #D1D5DB !important;
+    color: #EEEEEE !important;
     font-size: 16px !important;
     line-height: 1 !important;
   }
 
   .shop-header #headerActions .drawer-rating-stars .is-filled {
-    color: #F5A623 !important;
+    color: #FFC107 !important;
   }
 
   .shop-header #headerActions .drawer-row-rating-value {
@@ -1287,7 +1291,8 @@
               const subtitleEl = document.getElementById('drawerCategoryRowSubtitle');
               if (!sourceEl || !subtitleEl) return;
               const apply = () => {
-                subtitleEl.textContent = sourceEl.textContent || '';
+                const raw = (sourceEl.textContent || '').trim();
+                subtitleEl.textContent = raw.replace(/^دسته‌بندی[:\s]+/, '');
               };
               apply();
               new MutationObserver(apply).observe(sourceEl, { childList: true, characterData: true, subtree: true });
