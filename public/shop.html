@@ -1464,10 +1464,6 @@
   font-weight: 700 !important;
   color: #1A1A1A !important;
 }
-.shop-header #headerActions button#rateShow.drawer-action-row {
-  min-height: 56px !important;
-  height: 56px !important;
-}
 </style>
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 
@@ -1655,7 +1651,6 @@
                   </svg>
                 </span>
               </div>
-              <div class="drawer-menu-divider" aria-hidden="true"></div>
               <button id="rateShow" class="action-item drawer-action-row" aria-label="مشاهده و ثبت امتیاز" type="button">
                 <span class="drawer-row-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1664,6 +1659,7 @@
                 </span>
                 <span class="drawer-row-copy">
                   <span class="drawer-row-title">امتیاز فروشگاه</span>
+                  <small class="drawer-row-rating-value" id="drawerRatingValue"></small>
                 </span>
               </button>
               <div class="drawer-group-divider" id="drawerReportGroupDivider" aria-hidden="true"></div>
@@ -1707,20 +1703,15 @@
           </div>
           <script>
             (() => {
-              const valueEl = document.getElementById('drawerRatingValue');
-              const starsEl = document.querySelector('#headerActions .drawer-rating-stars');
-              if (!valueEl || !starsEl) return;
-              const normalize = value => String(value || '')
-                .replace(/[۰-۹]/g, digit => '۰۱۲۳۴۵۶۷۸۹'.indexOf(digit))
-                .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+              const el = document.getElementById('drawerRatingValue');
+              if (!el) return;
+              const normalize = v => String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
               const render = () => {
-                const rating = Math.max(0, Math.min(5, parseFloat(normalize(valueEl.textContent)) || 0));
-                [...starsEl.children].forEach((star, index) => {
-                  star.classList.toggle('is-filled', index < Math.round(rating));
-                });
+                const raw = normalize(el.textContent || '');
+                if (!raw || /^0\.0/.test(raw)) el.textContent = 'بدون امتیاز';
               };
               render();
-              new MutationObserver(render).observe(valueEl, { childList: true, characterData: true, subtree: true });
+              new MutationObserver(render).observe(el, { childList: true, characterData: true, subtree: true });
             })();
             (() => {
               const sourceEl = document.getElementById('drawerCategoryText');
