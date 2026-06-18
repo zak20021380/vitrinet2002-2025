@@ -13629,6 +13629,7 @@ body.edit-product-modal-open {
       });
 
       updateActiveButton(sectionName);
+      window.dispatchEvent(new CustomEvent('seller:section-change', { detail: { section: sectionName } }));
     }
 
     async function showPerformance() {
@@ -14237,15 +14238,14 @@ body.edit-product-modal-open {
         }
       });
 
-      document.querySelectorAll('[data-section="stories"]').forEach((node) => {
-        node.addEventListener('click', () => {
-          loadStories(true).then(refreshStoryReplies).catch(() => {});
-        });
-      });
-
       document.addEventListener('seller:ready', () => {
         if (document.getElementById('section-stories')?.style.display !== 'none') {
           loadStories(true);
+        }
+      });
+      window.addEventListener('seller:section-change', (event) => {
+        if (event.detail?.section === 'stories') {
+          loadStories(true).then(refreshStoryReplies).catch(() => {});
         }
       });
 

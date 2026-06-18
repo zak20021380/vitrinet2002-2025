@@ -255,7 +255,6 @@ function setCustomerCount(countValue = 0) {
 }
 
 const STORY_VIEW_DURATION_MS = 6500;
-const SHOP_STORY_HEADER_ENTRY_ENABLED = false;
 const shopStoriesState = {
   stories: [],
   avatarUrl: '',
@@ -362,11 +361,6 @@ function renderShopStories(stories = []) {
 
   const activeStories = stories.filter((story) => story && story.status !== 'expired' && getStoryRemainingMs(story) > 0);
   shopStoriesState.stories = activeStories;
-
-  if (!SHOP_STORY_HEADER_ENTRY_ENABLED || section?.dataset.headerEntryDisabled === 'true') {
-    renderStoriesEmpty();
-    return;
-  }
 
   if (!activeStories.length) {
     renderStoriesEmpty();
