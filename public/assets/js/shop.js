@@ -66,6 +66,9 @@ function getShopSlug() {
   if (urlParams.has('shopurl')) {
     return urlParams.get('shopurl');
   }
+  if (urlParams.has('sellerId') || urlParams.has('id')) {
+    return '';
+  }
   // shops/mobforoshi یا shop.html/mobforoshi یا حتی shop.html?shopurl=mobforoshi
   let path = window.location.pathname.split('/').filter(Boolean);
   let last = path[path.length - 1] || '';
@@ -84,6 +87,23 @@ function getStoredSellerField(field) {
   } catch {
     return '';
   }
+}
+
+function normalizeEntityId(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return String(value).trim();
+  if (typeof value === 'object') {
+    const directValue = value._id || value.id || value.sellerId || value.$oid;
+    if (directValue && directValue !== value) {
+      return normalizeEntityId(directValue);
+    }
+    if (typeof value.toString === 'function' && value.toString !== Object.prototype.toString) {
+      const text = value.toString();
+      return text && text !== '[object Object]' ? text.trim() : '';
+    }
+  }
+  return '';
 }
 
 function setTextById(id, value) {
@@ -155,12 +175,14 @@ function getShopSellerId() {
 }
 
 function normalizeSellerId(value) {
-  if (!value) return '';
-  if (typeof value === 'string') return value.trim();
-  if (typeof value === 'object') {
-    return String(value._id || value.id || value.$oid || '').trim();
-  }
-  return String(value).trim();
+  return normalizeEntityId(value);
+}
+
+function resolveShopDataSellerId(data = {}) {
+  return normalizeSellerId(data.sellerId) ||
+    normalizeSellerId(data.seller) ||
+    normalizeSellerId(data.owner) ||
+    normalizeSellerId(data.shopOwner);
 }
 
 function setShopCategoryBadge(category) {
@@ -321,8 +343,11 @@ function normalizeStoryImageUrl(url) {
 
 function getStoryRemainingMs(story) {
   const expiresAt = story?.expiresAt ? new Date(story.expiresAt).getTime() : 0;
-  if (!expiresAt) return 0;
-  return Math.max(0, expiresAt - Date.now());
+  if (expiresAt && !Number.isNaN(expiresAt)) {
+    return Math.max(0, expiresAt - Date.now());
+  }
+  const remainingMs = Number(story?.remainingMs);
+  return Number.isFinite(remainingMs) ? Math.max(0, remainingMs) : 0;
 }
 
 function markStoryMediaFallback(container) {
@@ -359,7 +384,8 @@ function renderShopStories(stories = []) {
   const content = document.getElementById('shopStoriesContent');
   if (!content) return;
 
-  const activeStories = stories.filter((story) => story && story.status !== 'expired' && getStoryRemainingMs(story) > 0);
+  const storyList = Array.isArray(stories) ? stories : (stories ? [stories] : []);
+  const activeStories = storyList.filter((story) => story && story.status !== 'expired' && getStoryRemainingMs(story) > 0);
   shopStoriesState.stories = activeStories;
 
   if (!activeStories.length) {
@@ -405,20 +431,29 @@ function renderShopStories(stories = []) {
   }, 30000);
 }
 
+function extractPublicStories(data = {}) {
+  const stories = Array.isArray(data.stories) ? data.stories : [];
+  if (stories.length) return stories;
+
+  const singleStory = data.story || data.activeStory || data.latestActiveStory;
+  return singleStory ? [singleStory] : [];
+}
+
 async function loadShopStories(sellerId) {
   const content = document.getElementById('shopStoriesContent');
-  if (!sellerId || !content) {
+  const resolvedSellerId = normalizeSellerId(sellerId);
+  if (!resolvedSellerId || !content) {
     renderStoriesEmpty();
     return;
   }
 
   try {
-    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${sellerId}`);
+    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${encodeURIComponent(resolvedSellerId)}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) {
       throw new Error(data.message || 'امکان بارگذاری استوری‌ها وجود ندارد.');
     }
-    renderShopStories(Array.isArray(data.stories) ? data.stories : []);
+    renderShopStories(extractPublicStories(data));
   } catch (error) {
     console.warn('بارگذاری استوری ناموفق بود:', error);
     renderStoriesEmpty();
@@ -738,7 +773,7 @@ async function loadShopData() {
     const data = await res.json();
 
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
-    currentSellerId = normalizeSellerId(data.sellerId) || sellerIdParam;
+    currentSellerId = resolveShopDataSellerId(data) || normalizeSellerId(sellerIdParam);
     shopStoriesState.avatarUrl = data.shopLogo || data.boardImage || data.footerImage || '';
     setSimilarShopContext({
       sellerId: currentSellerId,
