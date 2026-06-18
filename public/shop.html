@@ -1727,13 +1727,9 @@
               const normalize = v => String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
               const render = () => {
                 const text = el.textContent || '';
-                if (!text.trim() || text.trim() === 'بدون امتیاز') {
-                  el.textContent = '۰ از ۵';
-                  return;
-                }
                 const normalized = normalize(text);
-                if (/^0\.0/.test(normalized)) {
-                  el.textContent = '۰ از ۵ • ثبت امتیاز';
+                if (!text.trim() || text.trim() === 'بدون امتیاز' || /^0\.0/.test(normalized)) {
+                  el.textContent = '۰ از ۵ · ثبت امتیاز';
                   return;
                 }
                 if (/[0-9]/.test(text)) {
