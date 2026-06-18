@@ -1464,6 +1464,10 @@
   font-weight: 700 !important;
   color: #1A1A1A !important;
 }
+.shop-header #headerActions #rateShow .drawer-row-rating-value {
+  max-width: none !important;
+  white-space: nowrap !important;
+}
 </style>
 <!-- TODO: فعال‌سازی پست‌هاگ را هنگام انتشار فراموش نکنید | TODO: Enable PostHog analytics when going live -->
 
@@ -1705,10 +1709,22 @@
             (() => {
               const el = document.getElementById('drawerRatingValue');
               if (!el) return;
+              const toPersianDigits = s => String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
               const normalize = v => String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
               const render = () => {
-                const raw = normalize(el.textContent || '');
-                if (!raw || /^0\.0/.test(raw)) el.textContent = 'بدون امتیاز';
+                const text = el.textContent || '';
+                if (!text.trim() || text.trim() === 'بدون امتیاز') {
+                  el.textContent = '۰ از ۵';
+                  return;
+                }
+                const normalized = normalize(text);
+                if (/^0\.0/.test(normalized)) {
+                  el.textContent = '۰ از ۵ • ثبت امتیاز';
+                  return;
+                }
+                if (/[0-9]/.test(text)) {
+                  el.textContent = toPersianDigits(text);
+                }
               };
               render();
               new MutationObserver(render).observe(el, { childList: true, characterData: true, subtree: true });
