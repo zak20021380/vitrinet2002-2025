@@ -92,6 +92,24 @@ function setTextById(id, value) {
   return element;
 }
 
+function formatDrawerRatingValue(averageRating, ratingCount) {
+  const ratingNumber = Number(averageRating);
+  if (!Number.isFinite(ratingNumber) || ratingNumber <= 0) {
+    return 'بدون امتیاز';
+  }
+
+  const ratingText = ratingNumber.toLocaleString('fa-IR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  });
+  const countNumber = Number(ratingCount);
+  const hasReviewCount = Number.isFinite(countNumber) && countNumber > 0;
+
+  return hasReviewCount
+    ? `${ratingText} از ۵ • ${countNumber.toLocaleString('fa-IR')} نظر`
+    : `${ratingText} از ۵`;
+}
+
 function getCurrentShopShareUrl() {
   const url = new URL(window.location.href);
   url.hash = '';
@@ -841,12 +859,12 @@ async function loadShopData() {
     setTextById('shop-rating', avg);
     const mobileRating = document.getElementById('mobile-shop-rating');
     if (mobileRating) mobileRating.textContent = avg;
-    // بروزرسانی مقدار پاک رتبه در پنل منو (سمت چپ ردیف امتیاز)
-    setTextById('drawerRatingValue', `${avg} از ۵`);
 
     const ratingCount = typeof data.ratingCount === 'number'
       ? data.ratingCount
       : 0;
+    // بروزرسانی مقدار پاک رتبه در پنل منو (سمت چپ ردیف امتیاز)
+    setTextById('drawerRatingValue', formatDrawerRatingValue(data.averageRating, ratingCount));
     const formattedRatingCount = ratingCount.toLocaleString();
     setTextById('rating-count', formattedRatingCount);
     const mobileRatingCount = document.getElementById('mobile-rating-count');
@@ -1450,7 +1468,7 @@ addressModal?.addEventListener('click', e => (e.target === addressModal) && addr
       setTextById('shop-rating', updatedAverageRating);
       const mobileRating = document.getElementById('mobile-shop-rating');
       if (mobileRating) mobileRating.textContent = updatedAverageRating;
-      setTextById('drawerRatingValue', `${updatedAverageRating} از ۵`);
+      setTextById('drawerRatingValue', formatDrawerRatingValue(data.averageRating, data.ratingCount));
       if (typeof data.ratingCount === 'number') {
         const formattedRatingCount = data.ratingCount.toLocaleString();
         setTextById('rating-count', formattedRatingCount);
