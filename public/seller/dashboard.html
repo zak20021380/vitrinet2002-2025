@@ -14008,7 +14008,18 @@ body.edit-product-modal-open {
     function renderStory() {
       showLoading(false);
       const story = state.story;
-      if (!story?.imageUrl || story.status === 'deleted') {
+      
+      // Only show story if it has valid data, an image, a real ID, and is explicitly active.
+      // Stories that are expired or deleted must not be shown in the "استوری فعلی" section.
+      // Match the validation logic used in shop.js for consistency.
+      const storyId = story?.id || story?._id;
+      const isValidActiveStory = story 
+        && (storyId && String(storyId).trim() !== '')
+        && story.imageUrl 
+        && story.status === 'active'
+        && Number(story.remainingMs || 0) > 0;
+      
+      if (!isValidActiveStory) {
         if (els.storyEmptyState) els.storyEmptyState.style.display = '';
         if (els.storyCard) els.storyCard.style.display = 'none';
         if (els.storyRepliesPanel) els.storyRepliesPanel.style.display = 'none';
@@ -14042,7 +14053,25 @@ body.edit-product-modal-open {
         if (!res.ok || data.success === false) {
           throw new Error(localizeStoryError(data.message, 'امکان بارگذاری استوری‌ها وجود ندارد.'));
         }
-        state.story = data.story || data.latestStory || null;
+        
+        // The backend returns both 'story' (active) and 'latestStory' (most recent).
+        // We want to show only truly active stories (status === 'active' and not expired).
+        // If data.story exists and is active, use it; otherwise the section shows empty.
+        const receivedStory = data.story || null;
+        
+        // Debug log to help diagnose issues (remove after testing)
+        if (receivedStory) {
+          console.log('[Stories] Received story:', {
+            id: receivedStory.id || receivedStory._id,
+            status: receivedStory.status,
+            remainingMs: receivedStory.remainingMs,
+            hasImage: !!receivedStory.imageUrl
+          });
+        } else {
+          console.log('[Stories] No story received from backend');
+        }
+        
+        state.story = receivedStory;
         state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
           ? new Date(data.nextAvailableAt).getTime()
           : 0;
@@ -14051,6 +14080,7 @@ body.edit-product-modal-open {
         renderStory();
         startTicker();
       } catch (error) {
+        console.error('[Stories] Load error:', error);
         showLoading(false);
         state.story = null;
         renderStory();
