@@ -202,6 +202,16 @@ async function buildStoryState(sellerId, target = 'shop') {
     SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target)).sort({ createdAt: -1 }).lean()
   ]);
 
+  // Debug logging
+  console.log('[buildStoryState] sellerId:', sellerId, 'target:', target);
+  console.log('[buildStoryState] latestStory found:', !!latestStory, latestStory ? {
+    id: latestStory._id,
+    status: latestStory.status,
+    expiresAt: latestStory.expiresAt,
+    createdAt: latestStory.createdAt
+  } : null);
+  console.log('[buildStoryState] activeStory found:', !!activeStory);
+
   const nextAvailableAt = latestStory?.createdAt
     ? new Date(new Date(latestStory.createdAt).getTime() + STORY_DURATION_MS)
     : null;
@@ -424,7 +434,15 @@ router.get('/me', authMiddleware('seller'), async (req, res) => {
       return res.status(401).json({ success: false, message: 'Seller authentication is required.' });
     }
 
-    return res.json(await buildStoryState(sellerId, getStoryTarget(req)));
+    const storyState = await buildStoryState(sellerId, getStoryTarget(req));
+    
+    console.log('[GET /api/seller/stories/me] Returning state for seller:', sellerId, {
+      hasStory: !!storyState.story,
+      storyStatus: storyState.story?.status,
+      storyId: storyState.story?.id
+    });
+
+    return res.json(storyState);
   } catch (error) {
     console.error('Failed to load seller story:', error);
     return res.status(500).json({ success: false, message: 'Could not load story data.' });
@@ -572,12 +590,24 @@ router.post('/', authMiddleware('seller'), (req, res) => {
         targetType: target,
         imageUrl: `/uploads/stories/${req.file.filename}`,
         caption,
-        expiresAt: SellerStory.buildExpiryDate(now)
+        expiresAt: SellerStory.buildExpiryDate(now),
+        status: 'active'  // Explicitly set status
       });
 
+      console.log('[POST /api/seller/stories] Created story:', {
+        id: story._id,
+        sellerId,
+        status: story.status,
+        expiresAt: story.expiresAt,
+        targetType: story.targetType
+      });
+
+      const storyState = await buildStoryState(sellerId, target);
+      const createdStory = serializeStory(story.toObject(), now);
+
       return res.status(201).json({
-        ...(await buildStoryState(sellerId, target)),
-        story: serializeStory(story, now)
+        ...storyState,
+        story: createdStory  // Ensure we return the newly created story
       });
     } catch (error) {
       removeUploadedFile(req.file);

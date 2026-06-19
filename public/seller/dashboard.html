@@ -14048,7 +14048,16 @@ body.edit-product-modal-open {
       showLoading(true);
       showFeedback('');
       try {
-        const res = await fetch(buildApiUrl('/api/seller/stories/me'), withCredentials());
+        // Add cache-busting and ensure fresh data
+        const url = buildApiUrl('/api/seller/stories/me');
+        const cacheBust = force ? `?_=${Date.now()}` : '';
+        const res = await fetch(url + cacheBust, withCredentials({
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        }));
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.success === false) {
           throw new Error(localizeStoryError(data.message, 'امکان بارگذاری استوری‌ها وجود ندارد.'));
@@ -14059,17 +14068,16 @@ body.edit-product-modal-open {
         // If data.story exists and is active, use it; otherwise the section shows empty.
         const receivedStory = data.story || null;
         
-        // Debug log to help diagnose issues (remove after testing)
-        if (receivedStory) {
-          console.log('[Stories] Received story:', {
-            id: receivedStory.id || receivedStory._id,
-            status: receivedStory.status,
-            remainingMs: receivedStory.remainingMs,
-            hasImage: !!receivedStory.imageUrl
-          });
-        } else {
-          console.log('[Stories] No story received from backend');
-        }
+        // Debug log to help diagnose issues
+        console.log('[Stories] Received from API:', {
+          hasStory: !!receivedStory,
+          storyId: receivedStory?.id || receivedStory?._id,
+          status: receivedStory?.status,
+          remainingMs: receivedStory?.remainingMs,
+          hasImage: !!receivedStory?.imageUrl,
+          expiresAt: receivedStory?.expiresAt,
+          createdAt: receivedStory?.createdAt
+        });
         
         state.story = receivedStory;
         state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
