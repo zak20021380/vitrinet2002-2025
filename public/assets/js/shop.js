@@ -554,6 +554,11 @@ function renderPlainShopCircle() {
   media.appendChild(createStoryThumbFallback());
 
   thumb.append(media);
+  thumb.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showShopStoryToast('فروشگاه هنوز استوری منتشر نکرده است');
+  });
   list.appendChild(thumb);
   content.appendChild(list);
 

@@ -1865,7 +1865,7 @@ body {
    that clearly communicates this is a shop logo/avatar, not an interactive
    story button. The ring is thinner and subtler than the active story state. */
 .story-thumb.story-thumb--plain {
-  cursor: default;
+  cursor: pointer;
 }
 
 /* Thin neutral ring using a border instead of a full background gradient.
@@ -1875,6 +1875,7 @@ body {
   border: 1.5px solid #e2e8f0;
   box-shadow: 0 2px 6px rgba(28, 44, 90, .04);
   animation: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* No blurred glow behind the ring for the no-story state. */
@@ -1889,6 +1890,7 @@ body {
   height: 48px;
   border-width: 2px;
   background: #fff;
+  transition: transform 0.2s ease;
 }
 
 /* When the shop has a logo, display it directly without any fallback icon */
@@ -1908,11 +1910,27 @@ body {
   height: 52%;
 }
 
-.story-thumb.story-thumb--plain:hover,
+/* Subtle hover feedback to show it's interactive */
+.story-thumb.story-thumb--plain:hover::before {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(28, 44, 90, .08);
+}
+
+.story-thumb.story-thumb--plain:hover .story-thumb-media {
+  transform: scale(1.02);
+}
+
+.story-thumb.story-thumb--plain:active .story-thumb-media {
+  transform: scale(0.98);
+}
+
 .story-thumb.story-thumb--plain:focus-visible {
-  transform: none;
-  box-shadow: none;
   outline: none;
+}
+
+.story-thumb.story-thumb--plain:focus-visible::before {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(124, 131, 253, 0.18);
 }
 
 /* Mobile adjustments for the thinner ring */
@@ -8596,29 +8614,69 @@ body {
 /* Toast shown when tapping the inactive/expired shop story ring. */
 .shop-story-toast {
   position: fixed;
-  bottom: 26px;
+  bottom: 32px;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #1e293b;
-  color: #f8fafc;
-  padding: 11px 20px;
-  border-radius: 999px;
+  transform: translateX(-50%) translateY(120px);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.96) 0%, rgba(51, 65, 85, 0.94) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 14px 24px 14px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
   font-family: 'Vazirmatn', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
   white-space: nowrap;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, .28), 0 2px 8px rgba(15, 23, 42, .18);
+  box-shadow: 
+    0 20px 40px rgba(15, 23, 42, .32),
+    0 8px 16px rgba(15, 23, 42, .24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   z-index: 10060;
   opacity: 0;
   pointer-events: none;
   direction: rtl;
-  transition: opacity .3s ease, transform .3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity .35s ease, transform .4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shop-story-toast::before {
+  content: "📖";
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(124, 131, 253, 0.15);
+  border: 1px solid rgba(124, 131, 253, 0.25);
+  flex-shrink: 0;
 }
 
 .shop-story-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 520px) {
+  .shop-story-toast {
+    bottom: 24px;
+    font-size: 12.5px;
+    padding: 12px 20px 12px 18px;
+    border-radius: 14px;
+    max-width: calc(100vw - 48px);
+  }
+  
+  .shop-story-toast::before {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
 }
 
 /* Scoped mobile shop hamburger action sheet refresh. */
