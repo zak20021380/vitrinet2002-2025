@@ -286,6 +286,7 @@ const shopStoriesState = {
   hasShopContext: false,
   sellerId: '',
   avatarUrl: '',
+  shopName: '',
   activeIndex: 0,
   viewerTimer: null,
   toastTimer: null,
@@ -385,6 +386,18 @@ function getShopAvatarUrl() {
 
 function hasValidShopStoryContext() {
   return Boolean(shopStoriesState.hasShopContext && normalizeSellerId(shopStoriesState.sellerId));
+}
+
+function getShopAvatarInitial() {
+  const name = String(shopStoriesState.shopName || '').replace(/\s+/g, ' ').trim();
+  return name ? Array.from(name)[0] : '؟';
+}
+
+function createStoryThumbFallback() {
+  const fallback = document.createElement('div');
+  fallback.className = 'story-media-fallback story-thumb-fallback';
+  fallback.textContent = getShopAvatarInitial();
+  return fallback;
 }
 
 function getStoryRemainingMs(story) {
@@ -497,10 +510,7 @@ function renderInactiveStoryRing(latestStory) {
   const media = document.createElement('div');
   media.className = 'story-thumb-media';
   media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
-  const fallback = document.createElement('div');
-  fallback.className = 'story-media-fallback';
-  fallback.textContent = '';
-  media.appendChild(fallback);
+  media.appendChild(createStoryThumbFallback());
 
   thumb.append(media);
   thumb.addEventListener('click', onExpiredStoryClick);
@@ -540,10 +550,7 @@ function renderPlainShopCircle() {
   const media = document.createElement('div');
   media.className = 'story-thumb-media';
   media.appendChild(createStoryImage(avatarSrc, 'تصویر فروشگاه', media));
-  const fallback = document.createElement('div');
-  fallback.className = 'story-media-fallback';
-  fallback.textContent = '';
-  media.appendChild(fallback);
+  media.appendChild(createStoryThumbFallback());
 
   thumb.append(media);
   list.appendChild(thumb);
@@ -604,10 +611,7 @@ function renderShopStories(stories = []) {
     media.className = 'story-thumb-media';
     const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl }) || getValidatedStoryImageUrl(story);
     media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
-    const fallback = document.createElement('div');
-    fallback.className = 'story-media-fallback';
-    fallback.textContent = '';
-    media.appendChild(fallback);
+    media.appendChild(createStoryThumbFallback());
 
     thumb.append(media);
     thumb.addEventListener('click', () => openStoryViewer(index));
@@ -1036,7 +1040,9 @@ async function loadShopData() {
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
     currentSellerId = resolveShopDataSellerId(data) || normalizeSellerId(sellerIdParam);
     const resolvedAvatarUrl = data.shopLogo || data.boardImage || data.sellerId?.boardImage || data.footerImage || '';
+    const resolvedShopName = data.shopLogoText || data.shopName || 'نام فروشگاه';
     shopStoriesState.avatarUrl = resolvedAvatarUrl;
+    shopStoriesState.shopName = resolvedShopName;
     shopStoriesState.hasShopContext = Boolean(currentSellerId);
     setSimilarShopContext({
       sellerId: currentSellerId,
@@ -1051,7 +1057,6 @@ async function loadShopData() {
     loadShopStories(currentSellerId);
 
     // لوگو و نام فروشگاه
-    const resolvedShopName = data.shopLogoText || data.shopName || 'نام فروشگاه';
     document.querySelectorAll('.logo-txt').forEach(el =>
       el.textContent = resolvedShopName
     );
