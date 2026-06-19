@@ -277,12 +277,17 @@ function setCustomerCount(countValue = 0) {
 }
 
 const STORY_VIEW_DURATION_MS = 6500;
+const STORY_LIFETIME_MS = 24 * 60 * 60 * 1000;
+const SHOP_STORY_INACTIVE_TOAST_MESSAGE = 'استوری فعالی وجود ندارد';
 const shopStoriesState = {
   stories: [],
+  latestStory: null,
+  hasExpiredStory: false,
   sellerId: '',
   avatarUrl: '',
   activeIndex: 0,
   viewerTimer: null,
+  toastTimer: null,
   viewerStartedAt: 0,
   viewerElapsedMs: 0,
   viewerPaused: false,
@@ -412,8 +417,109 @@ function hideStoriesSection() {
   clearInterval(shopStoriesState.countdownTimer);
 }
 
+// Small transient toast for the inactive/expired story state. We avoid opening the
+// story viewer in that case and instead let the user know there is no active story.
+function showShopStoryToast(message = SHOP_STORY_INACTIVE_TOAST_MESSAGE) {
+  let toast = document.getElementById('shopStoryToast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  toast.setAttribute('aria-hidden', 'false');
+  clearTimeout(shopStoriesState.toastTimer);
+  shopStoriesState.toastTimer = window.setTimeout(() => {
+    toast.classList.remove('show');
+    toast.setAttribute('aria-hidden', 'true');
+  }, 2200);
+}
+
+// Clicking an expired/inactive story ring must never open stale story media.
+function onExpiredStoryClick(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  showShopStoryToast();
+}
+
 function renderStoriesEmpty() {
   hideStoriesSection();
+}
+
+// When the latest story is expired/older than 24h we keep the circular icon
+// visible but render it in an inactive/expired style: no colorful ring, no glow.
+// Clicking it only surfaces the "no active story" toast and never opens the viewer.
+function renderInactiveStoryRing(latestStory) {
+  const section = document.getElementById('shopStoriesSection');
+  const content = document.getElementById('shopStoriesContent');
+  if (!section || !content) return;
+
+  section.hidden = false;
+  section.removeAttribute('aria-hidden');
+  content.innerHTML = '';
+
+  const list = document.createElement('div');
+  list.className = 'stories-list';
+
+  const thumb = document.createElement('button');
+  thumb.type = 'button';
+  thumb.className = 'story-thumb story-thumb--inactive';
+  thumb.setAttribute('aria-label', SHOP_STORY_INACTIVE_TOAST_MESSAGE);
+  thumb.setAttribute('aria-disabled', 'true');
+  thumb.title = SHOP_STORY_INACTIVE_TOAST_MESSAGE;
+
+  const media = document.createElement('div');
+  media.className = 'story-thumb-media';
+  const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl }) ||
+    getValidatedStoryImageUrl(latestStory);
+  media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
+  const fallback = document.createElement('div');
+  fallback.className = 'story-media-fallback';
+  fallback.textContent = '';
+  media.appendChild(fallback);
+
+  thumb.append(media);
+  thumb.addEventListener('click', onExpiredStoryClick);
+  list.appendChild(thumb);
+  content.appendChild(list);
+
+  shopStoriesState.hasExpiredStory = true;
+  shopStoriesState.stories = [];
+}
+
+// No story data at all: keep the circular shop/avatar circle visible, but with
+// NO story ring (neither active nor expired). It is a plain avatar circle and is
+// not interactive as a story.
+function renderPlainShopCircle() {
+  const section = document.getElementById('shopStoriesSection');
+  const content = document.getElementById('shopStoriesContent');
+  if (!section || !content) return;
+
+  section.hidden = false;
+  section.removeAttribute('aria-hidden');
+  content.innerHTML = '';
+
+  const list = document.createElement('div');
+  list.className = 'stories-list';
+
+  const thumb = document.createElement('button');
+  thumb.type = 'button';
+  thumb.className = 'story-thumb story-thumb--plain';
+  thumb.setAttribute('aria-label', 'تصویر فروشگاه');
+  thumb.tabIndex = -1;
+
+  const media = document.createElement('div');
+  media.className = 'story-thumb-media';
+  const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl });
+  media.appendChild(createStoryImage(avatarSrc, 'تصویر فروشگاه', media));
+  const fallback = document.createElement('div');
+  fallback.className = 'story-media-fallback';
+  fallback.textContent = '';
+  media.appendChild(fallback);
+
+  thumb.append(media);
+  list.appendChild(thumb);
+  content.appendChild(list);
+
+  shopStoriesState.hasExpiredStory = false;
+  shopStoriesState.stories = [];
 }
 
 // A story is only considered "active" when it is explicitly active, has a real id,
@@ -439,9 +545,12 @@ function renderShopStories(stories = []) {
   const storyList = Array.isArray(stories) ? stories : (stories ? [stories] : []);
   const activeStories = storyList.filter((story) => isStoryTrulyActive(story));
   shopStoriesState.stories = activeStories;
+  shopStoriesState.hasExpiredStory = false;
 
   if (!activeStories.length) {
-    renderStoriesEmpty();
+    // A story we were just viewing expired/ran out. Keep the circle visible as a
+    // plain avatar rather than hiding it, since the shop still has no active story.
+    renderPlainShopCircle();
     return;
   }
 
@@ -494,6 +603,35 @@ function extractPublicStories(data = {}, sellerId = shopStoriesState.sellerId) {
   return isStoryTrulyActive(singleStory, sellerId) ? [singleStory] : [];
 }
 
+// Only treat a record as an EXPIRED story (gray inactive ring) when it is a real
+// story that has genuinely passed its lifetime. A record counts as expired only if:
+//   - status is explicitly 'expired', OR
+//   - the publish/create time is older than 24h.
+// Deleted, draft, pending, empty, invalid, or otherwise unknown records are NOT
+// expired stories and must not render as the inactive story ring.
+function isStoryExpiredRecord(story, sellerId = shopStoriesState.sellerId) {
+  if (!story || typeof story !== 'object') return false;
+  if (getStoryId(story) === '') return false;
+
+  const rawStatus = typeof story.status === 'string' ? story.status.trim().toLowerCase() : '';
+  // Deleted/draft/pending stories are intentionally excluded from the expired state.
+  if (['deleted', 'draft', 'pending', ''].includes(rawStatus)) return false;
+
+  // Reject records that belong to a different shop than the one we are viewing.
+  const expectedSellerId = normalizeSellerId(sellerId);
+  const storySellerId = getStorySellerId(story);
+  if (expectedSellerId && storySellerId && storySellerId !== expectedSellerId) return false;
+
+  // Explicit expired flag from the backend.
+  if (rawStatus === 'expired') return true;
+
+  // Otherwise require a real, parseable publish/create timestamp older than 24h.
+  const publishedAt = new Date(story.createdAt || story.publishedAt || story.createdAtMs || 0).getTime();
+  if (!Number.isFinite(publishedAt) || publishedAt <= 0) return false;
+  const ageMs = Date.now() - publishedAt;
+  return ageMs >= STORY_LIFETIME_MS;
+}
+
 async function loadShopStories(sellerId) {
   const content = document.getElementById('shopStoriesContent');
   const resolvedSellerId = normalizeSellerId(sellerId);
@@ -516,14 +654,26 @@ async function loadShopStories(sellerId) {
       throw new Error(data.message || 'امکان بارگذاری استوری‌ها وجود ندارد.');
     }
     const activeStories = extractPublicStories(data, resolvedSellerId);
-    if (!activeStories.length) {
-      renderStoriesEmpty();
+    if (activeStories.length) {
+      renderShopStories(activeStories);
       return;
     }
-    renderShopStories(activeStories);
+
+    // No active story. If the shop has an expired/older story on record we keep
+    // the circular icon visible in an inactive style instead of hiding it.
+    const latestStory = data.latestStory || data.story || null;
+    if (isStoryExpiredRecord(latestStory, resolvedSellerId)) {
+      shopStoriesState.latestStory = latestStory;
+      renderInactiveStoryRing(latestStory);
+      return;
+    }
+
+    // No story data at all (or only deleted/draft/pending records) → keep the
+    // circular shop/avatar circle visible, but without any story ring.
+    renderPlainShopCircle();
   } catch (error) {
     console.warn('بارگذاری استوری ناموفق بود:', error);
-    renderStoriesEmpty();
+    renderPlainShopCircle();
   }
 }
 

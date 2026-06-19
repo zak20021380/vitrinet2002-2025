@@ -1815,6 +1815,57 @@ body {
   }
 }
 
+/* Inactive / expired story ring: the circular icon stays visible but communicates
+   that there is no active story. No colorful ring, no glow, no animation. */
+.story-thumb.story-thumb--inactive {
+  cursor: default;
+  opacity: 1;
+}
+
+.story-thumb.story-thumb--inactive::before {
+  background: #e2e8f0;
+  box-shadow: none;
+  animation: none;
+}
+
+.story-thumb.story-thumb--inactive::after {
+  content: none;
+}
+
+.story-thumb.story-thumb--inactive:hover,
+.story-thumb.story-thumb--inactive:focus-visible {
+  transform: none;
+  box-shadow: none;
+}
+
+.story-thumb.story-thumb--inactive:focus-visible::before {
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, .22);
+}
+
+/* No story data: the circular shop/avatar stays visible, but as a plain circle
+   with NO story ring (neither active nor expired) and no interactivity. */
+.story-thumb.story-thumb--plain {
+  cursor: default;
+}
+
+/* Suppress both ring pseudo-elements entirely so the avatar shows ringless. */
+.story-thumb.story-thumb--plain::before,
+.story-thumb.story-thumb--plain::after {
+  content: none;
+}
+
+.story-thumb.story-thumb--plain .story-thumb-media {
+  border-color: #f1f5f9;
+  background: #f1f5f9;
+}
+
+.story-thumb.story-thumb--plain:hover,
+.story-thumb.story-thumb--plain:focus-visible {
+  transform: none;
+  box-shadow: none;
+  outline: none;
+}
+
 
 
 
@@ -8468,6 +8519,34 @@ body {
   padding: 2px 8px;
   border-radius: 6px;
   font-size: 12px;
+}
+
+/* Toast shown when tapping the inactive/expired shop story ring. */
+.shop-story-toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .28), 0 2px 8px rgba(15, 23, 42, .18);
+  z-index: 10060;
+  opacity: 0;
+  pointer-events: none;
+  direction: rtl;
+  transition: opacity .3s ease, transform .3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.shop-story-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* Scoped mobile shop hamburger action sheet refresh. */
