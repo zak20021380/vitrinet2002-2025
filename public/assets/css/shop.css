@@ -1588,8 +1588,21 @@ body {
   white-space: nowrap;
 }
 
-.shop-stories[hidden] {
+/* Visibility depends on real active story data, never on DOM existence.
+   The section ships with [hidden]; it is only un-hidden by JS after a real
+   active story is confirmed. These rules guarantee [hidden] always wins,
+   regardless of source order or specificity battles below. */
+.shop-stories[hidden],
+#shopStoriesSection[hidden] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 .stories-shell {

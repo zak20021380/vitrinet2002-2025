@@ -279,6 +279,7 @@ function setCustomerCount(countValue = 0) {
 const STORY_VIEW_DURATION_MS = 6500;
 const shopStoriesState = {
   stories: [],
+  sellerId: '',
   avatarUrl: '',
   activeIndex: 0,
   viewerTimer: null,
@@ -294,8 +295,30 @@ const shopStoriesState = {
   replying: false
 };
 
+// Hide the story circle by default. It must only appear once a real active story
+// for THIS shop/seller is confirmed from the API. Run as early as possible so the
+// element can never be visible before the data check completes.
+(function ensureStoriesHiddenByDefault() {
+  const hide = () => {
+    const section = document.getElementById('shopStoriesSection');
+    if (section) {
+      section.hidden = true;
+      section.setAttribute('aria-hidden', 'true');
+    }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hide, { once: true });
+  } else {
+    hide();
+  }
+})();
+
 function getStoryId(story) {
   return story && String(story.id || story._id || '');
+}
+
+function getStorySellerId(story) {
+  return normalizeSellerId(story?.sellerId || story?.seller || story?.owner || '');
 }
 
 function formatStoryCount(value) {
@@ -341,6 +364,14 @@ function normalizeStoryImageUrl(url) {
   return url.startsWith('/') ? url : `/${url}`;
 }
 
+function getValidatedStoryImageUrl(story) {
+  const imageUrl = normalizeStoryImageUrl(story?.imageUrl);
+  if (!imageUrl) return '';
+  if (/^https?:\/\/[^\s"'<>]+$/i.test(imageUrl)) return imageUrl;
+  if (/^\/[^\s"'<>]+$/i.test(imageUrl)) return imageUrl;
+  return '';
+}
+
 function getStoryRemainingMs(story) {
   const expiresAt = story?.expiresAt ? new Date(story.expiresAt).getTime() : 0;
   if (expiresAt && !Number.isNaN(expiresAt)) {
@@ -369,14 +400,35 @@ function createStoryImage(src, alt, fallbackContainer) {
   return img;
 }
 
-function renderStoriesEmpty() {
+function hideStoriesSection() {
   const section = document.getElementById('shopStoriesSection');
   const content = document.getElementById('shopStoriesContent');
-  if (!content) return;
-  if (section) section.hidden = true;
-  if (section) section.setAttribute('aria-hidden', 'true');
-  content.innerHTML = '';
+  if (section) {
+    section.hidden = true;
+    section.setAttribute('aria-hidden', 'true');
+  }
+  if (content) content.innerHTML = '';
+  shopStoriesState.stories = [];
   clearInterval(shopStoriesState.countdownTimer);
+}
+
+function renderStoriesEmpty() {
+  hideStoriesSection();
+}
+
+// A story is only considered "active" when it is explicitly active, has a real id,
+// a usable image, and a remaining lifetime greater than zero. This guards against
+// placeholder/demo/fallback/expired/deleted payloads that might slip through.
+function isStoryTrulyActive(story, sellerId = shopStoriesState.sellerId) {
+  if (!story || typeof story !== 'object') return false;
+  if (story.status && story.status !== 'active') return false;
+  if (getStoryId(story) === '') return false;
+  const expectedSellerId = normalizeSellerId(sellerId);
+  const storySellerId = getStorySellerId(story);
+  if (expectedSellerId && storySellerId !== expectedSellerId) return false;
+  const imageUrl = getValidatedStoryImageUrl(story);
+  if (!imageUrl) return false;
+  return getStoryRemainingMs(story) > 0;
 }
 
 function renderShopStories(stories = []) {
@@ -385,7 +437,7 @@ function renderShopStories(stories = []) {
   if (!content) return;
 
   const storyList = Array.isArray(stories) ? stories : (stories ? [stories] : []);
-  const activeStories = storyList.filter((story) => story && story.status !== 'expired' && getStoryRemainingMs(story) > 0);
+  const activeStories = storyList.filter((story) => isStoryTrulyActive(story));
   shopStoriesState.stories = activeStories;
 
   if (!activeStories.length) {
@@ -409,7 +461,7 @@ function renderShopStories(stories = []) {
 
     const media = document.createElement('div');
     media.className = 'story-thumb-media';
-    const avatarSrc = normalizeStoryImageUrl(shopStoriesState.avatarUrl || story.imageUrl);
+    const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl }) || getValidatedStoryImageUrl(story);
     media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
     const fallback = document.createElement('div');
     fallback.className = 'story-media-fallback';
@@ -431,29 +483,44 @@ function renderShopStories(stories = []) {
   }, 30000);
 }
 
-function extractPublicStories(data = {}) {
-  const stories = Array.isArray(data.stories) ? data.stories : [];
-  if (stories.length) return stories;
+// Pull active stories only from the documented API contract (data.stories / data.story).
+// Stale/expired/deleted entries are rejected here before the render/show path, so we
+// never reveal placeholder, fallback, demo, cached, or old story data.
+function extractPublicStories(data = {}, sellerId = shopStoriesState.sellerId) {
+  const fromList = Array.isArray(data.stories) ? data.stories : [];
+  if (fromList.length) return fromList.filter((story) => isStoryTrulyActive(story, sellerId));
 
-  const singleStory = data.story || data.activeStory || data.latestActiveStory;
-  return singleStory ? [singleStory] : [];
+  const singleStory = data.story;
+  return isStoryTrulyActive(singleStory, sellerId) ? [singleStory] : [];
 }
 
 async function loadShopStories(sellerId) {
   const content = document.getElementById('shopStoriesContent');
   const resolvedSellerId = normalizeSellerId(sellerId);
+  shopStoriesState.sellerId = resolvedSellerId;
+  // Keep the story circle hidden until a real active story is confirmed.
+  hideStoriesSection();
   if (!resolvedSellerId || !content) {
-    renderStoriesEmpty();
     return;
   }
 
   try {
-    const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${encodeURIComponent(resolvedSellerId)}`);
+    // cache: 'no-store' so we never render stale/old story data after a
+    // seller deletes or lets their story expire in the dashboard.
+    const res = await fetch(
+      `${SHOP_API_BASE}/api/seller/stories/public/${encodeURIComponent(resolvedSellerId)}`,
+      { cache: 'no-store' }
+    );
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.success === false) {
       throw new Error(data.message || 'امکان بارگذاری استوری‌ها وجود ندارد.');
     }
-    renderShopStories(extractPublicStories(data));
+    const activeStories = extractPublicStories(data, resolvedSellerId);
+    if (!activeStories.length) {
+      renderStoriesEmpty();
+      return;
+    }
+    renderShopStories(activeStories);
   } catch (error) {
     console.warn('بارگذاری استوری ناموفق بود:', error);
     renderStoriesEmpty();

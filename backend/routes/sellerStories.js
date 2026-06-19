@@ -107,6 +107,7 @@ function serializeStory(story, now = new Date(), options = {}) {
   if (!story) return null;
   const expiresAt = story.expiresAt ? new Date(story.expiresAt) : null;
   const createdAt = story.createdAt ? new Date(story.createdAt) : null;
+  const sellerId = story.seller ? String(story.seller) : '';
   const isDeleted = story.status === 'deleted';
   const isExpired = isDeleted || !expiresAt || expiresAt.getTime() <= now.getTime() || story.status === 'expired';
   const remainingMs = expiresAt ? Math.max(0, expiresAt.getTime() - now.getTime()) : 0;
@@ -123,6 +124,7 @@ function serializeStory(story, now = new Date(), options = {}) {
   const payload = {
     id: story._id,
     _id: story._id,
+    sellerId,
     imageUrl: story.imageUrl,
     targetType: story.targetType || 'shop',
     caption: story.caption || '',
