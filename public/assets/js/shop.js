@@ -283,6 +283,7 @@ const shopStoriesState = {
   stories: [],
   latestStory: null,
   hasExpiredStory: false,
+  hasShopContext: false,
   sellerId: '',
   avatarUrl: '',
   activeIndex: 0,
@@ -377,6 +378,14 @@ function getValidatedStoryImageUrl(story) {
   return '';
 }
 
+function getShopAvatarUrl() {
+  return getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl });
+}
+
+function hasValidShopStoryContext() {
+  return Boolean(shopStoriesState.hasShopContext && normalizeSellerId(shopStoriesState.sellerId) && getShopAvatarUrl());
+}
+
 function getStoryRemainingMs(story) {
   const expiresAt = story?.expiresAt ? new Date(story.expiresAt).getTime() : 0;
   if (expiresAt && !Number.isNaN(expiresAt)) {
@@ -439,7 +448,21 @@ function onExpiredStoryClick(event) {
   showShopStoryToast();
 }
 
-function renderStoriesEmpty() {
+function renderStoriesEmpty(options = {}) {
+  if (options.forceHide || !hasValidShopStoryContext()) {
+    hideStoriesSection();
+    return;
+  }
+
+  if (isStoryExpiredRecord(shopStoriesState.latestStory)) {
+    renderInactiveStoryRing(shopStoriesState.latestStory);
+    return;
+  }
+
+  renderPlainShopCircle();
+}
+
+function renderStoriesUnavailable() {
   hideStoriesSection();
 }
 
@@ -450,6 +473,11 @@ function renderInactiveStoryRing(latestStory) {
   const section = document.getElementById('shopStoriesSection');
   const content = document.getElementById('shopStoriesContent');
   if (!section || !content) return;
+  const avatarSrc = getShopAvatarUrl();
+  if (!avatarSrc || !hasValidShopStoryContext()) {
+    hideStoriesSection();
+    return;
+  }
 
   section.hidden = false;
   section.removeAttribute('aria-hidden');
@@ -467,8 +495,6 @@ function renderInactiveStoryRing(latestStory) {
 
   const media = document.createElement('div');
   media.className = 'story-thumb-media';
-  const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl }) ||
-    getValidatedStoryImageUrl(latestStory);
   media.appendChild(createStoryImage(avatarSrc, 'استوری فروشگاه', media));
   const fallback = document.createElement('div');
   fallback.className = 'story-media-fallback';
@@ -491,6 +517,11 @@ function renderPlainShopCircle() {
   const section = document.getElementById('shopStoriesSection');
   const content = document.getElementById('shopStoriesContent');
   if (!section || !content) return;
+  const avatarSrc = getShopAvatarUrl();
+  if (!avatarSrc || !hasValidShopStoryContext()) {
+    hideStoriesSection();
+    return;
+  }
 
   section.hidden = false;
   section.removeAttribute('aria-hidden');
@@ -507,7 +538,6 @@ function renderPlainShopCircle() {
 
   const media = document.createElement('div');
   media.className = 'story-thumb-media';
-  const avatarSrc = getValidatedStoryImageUrl({ imageUrl: shopStoriesState.avatarUrl });
   media.appendChild(createStoryImage(avatarSrc, 'تصویر فروشگاه', media));
   const fallback = document.createElement('div');
   fallback.className = 'story-media-fallback';
@@ -546,11 +576,12 @@ function renderShopStories(stories = []) {
   const activeStories = storyList.filter((story) => isStoryTrulyActive(story));
   shopStoriesState.stories = activeStories;
   shopStoriesState.hasExpiredStory = false;
+  shopStoriesState.latestStory = activeStories[0] || shopStoriesState.latestStory;
 
   if (!activeStories.length) {
-    // A story we were just viewing expired/ran out. Keep the circle visible as a
-    // plain avatar rather than hiding it, since the shop still has no active story.
-    renderPlainShopCircle();
+    // A story we were just viewing expired/ran out. Re-evaluate the empty state:
+    // expired latest story => gray ring, otherwise plain shop avatar.
+    renderStoriesEmpty();
     return;
   }
 
@@ -620,7 +651,7 @@ function isStoryExpiredRecord(story, sellerId = shopStoriesState.sellerId) {
   // Reject records that belong to a different shop than the one we are viewing.
   const expectedSellerId = normalizeSellerId(sellerId);
   const storySellerId = getStorySellerId(story);
-  if (expectedSellerId && storySellerId && storySellerId !== expectedSellerId) return false;
+  if (expectedSellerId && storySellerId !== expectedSellerId) return false;
 
   // Explicit expired flag from the backend.
   if (rawStatus === 'expired') return true;
@@ -789,6 +820,12 @@ function renderViewerStory(index) {
   const stories = shopStoriesState.stories;
   const story = stories[index];
   if (!story) return closeStoryViewer();
+  if (!isStoryTrulyActive(story)) {
+    closeStoryViewer();
+    renderStoriesEmpty();
+    showShopStoryToast();
+    return;
+  }
 
   shopStoriesState.activeIndex = index;
   shopStoriesState.viewerStartedAt = Date.now();
@@ -830,6 +867,11 @@ function renderViewerStory(index) {
 
 function openStoryViewer(index = 0) {
   if (!shopStoriesState.stories.length) return;
+  if (!isStoryTrulyActive(shopStoriesState.stories[index])) {
+    renderStoriesEmpty();
+    showShopStoryToast();
+    return;
+  }
   const viewer = document.getElementById('storyViewer');
   if (!viewer) return;
 
@@ -978,7 +1020,8 @@ async function submitStoryReply(event) {
 async function loadShopData() {
   if (!slug && !sellerIdParam) {
     setShopCategoryBadge(getStoredShopCategory());
-    renderStoriesEmpty();
+    shopStoriesState.hasShopContext = false;
+    renderStoriesUnavailable();
     return;
   }
   try {
@@ -991,7 +1034,9 @@ async function loadShopData() {
 
     // ← وقتی اطلاعات فروشگاه لود شد، شناسه‌ش رو توی currentSellerId ذخیره می‌کنیم
     currentSellerId = resolveShopDataSellerId(data) || normalizeSellerId(sellerIdParam);
-    shopStoriesState.avatarUrl = data.shopLogo || data.boardImage || data.footerImage || '';
+    const resolvedAvatarUrl = data.shopLogo || data.boardImage || data.sellerId?.boardImage || data.footerImage || '';
+    shopStoriesState.avatarUrl = resolvedAvatarUrl;
+    shopStoriesState.hasShopContext = Boolean(currentSellerId && getValidatedStoryImageUrl({ imageUrl: resolvedAvatarUrl }));
     setSimilarShopContext({
       sellerId: currentSellerId,
       shopUrl: slug || data.customUrl || data.shopurl || '',
@@ -1145,7 +1190,8 @@ async function loadShopData() {
 
   } catch (e) {
     console.error(e);
-    renderStoriesEmpty();
+    shopStoriesState.hasShopContext = false;
+    renderStoriesUnavailable();
     document.querySelectorAll('.logo-txt').forEach(el => el.textContent = 'نام فروشگاه');
     setTextById('currentShopName', 'نام فروشگاه');
     setShopCategoryBadge('');
