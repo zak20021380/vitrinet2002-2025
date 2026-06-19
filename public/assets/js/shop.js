@@ -308,6 +308,7 @@ const shopStoriesState = {
   const hide = () => {
     const section = document.getElementById('shopStoriesSection');
     if (section) {
+      if (section.querySelector('.story-thumb')) return;
       section.hidden = true;
       section.setAttribute('aria-hidden', 'true');
     }
@@ -383,7 +384,7 @@ function getShopAvatarUrl() {
 }
 
 function hasValidShopStoryContext() {
-  return Boolean(shopStoriesState.hasShopContext && normalizeSellerId(shopStoriesState.sellerId) && getShopAvatarUrl());
+  return Boolean(shopStoriesState.hasShopContext && normalizeSellerId(shopStoriesState.sellerId));
 }
 
 function getStoryRemainingMs(story) {
@@ -474,7 +475,7 @@ function renderInactiveStoryRing(latestStory) {
   const content = document.getElementById('shopStoriesContent');
   if (!section || !content) return;
   const avatarSrc = getShopAvatarUrl();
-  if (!avatarSrc || !hasValidShopStoryContext()) {
+  if (!hasValidShopStoryContext()) {
     hideStoriesSection();
     return;
   }
@@ -518,7 +519,7 @@ function renderPlainShopCircle() {
   const content = document.getElementById('shopStoriesContent');
   if (!section || !content) return;
   const avatarSrc = getShopAvatarUrl();
-  if (!avatarSrc || !hasValidShopStoryContext()) {
+  if (!hasValidShopStoryContext()) {
     hideStoriesSection();
     return;
   }
@@ -1036,7 +1037,7 @@ async function loadShopData() {
     currentSellerId = resolveShopDataSellerId(data) || normalizeSellerId(sellerIdParam);
     const resolvedAvatarUrl = data.shopLogo || data.boardImage || data.sellerId?.boardImage || data.footerImage || '';
     shopStoriesState.avatarUrl = resolvedAvatarUrl;
-    shopStoriesState.hasShopContext = Boolean(currentSellerId && getValidatedStoryImageUrl({ imageUrl: resolvedAvatarUrl }));
+    shopStoriesState.hasShopContext = Boolean(currentSellerId);
     setSimilarShopContext({
       sellerId: currentSellerId,
       shopUrl: slug || data.customUrl || data.shopurl || '',
