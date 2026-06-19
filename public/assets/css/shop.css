@@ -1861,29 +1861,38 @@ body {
   box-shadow: 0 0 0 3px rgba(148, 163, 184, .22);
 }
 
-/* No story data: the circular shop/avatar stays visible, but as a plain circle
-   with NO story ring (neither active nor expired) and no interactivity. */
+/* No story data: keep the exact same avatar structure as the active story
+   circle — outer ring + small white gap + inner circular avatar — but render
+   the ring as a flat neutral light-gray instead of a colorful gradient. No
+   glow, no animation, and it is not interactive (never opens stale media). */
 .story-thumb.story-thumb--plain {
   cursor: default;
 }
 
-/* Suppress both ring pseudo-elements entirely so the avatar shows ringless. */
-.story-thumb.story-thumb--plain::before,
+/* Neutral light-gray outer ring, same position/size as the active colorful
+   ring, but static (no rotation) and flat (no colored shadow). */
+.story-thumb.story-thumb--plain::before {
+  background: #e2e8f0;
+  box-shadow: none;
+  animation: none;
+}
+
+/* No blurred glow behind the ring for the no-story state. */
 .story-thumb.story-thumb--plain::after {
   content: none;
 }
 
+/* Inner avatar inherits the active state's white border, so the gap between
+   the gray ring and the avatar matches the active story circle exactly. */
 .story-thumb.story-thumb--plain .story-thumb-media {
-  /* Subtle but visible neutral border — same sizing/spacing as the active
-     avatar, without any colorful ring, glow, or animation. */
-  border: 1px solid #cbd5e1;
   background: #fff;
 }
 
-/* Clearer, slightly darker icon so the no-story avatar reads as intentional
-   and premium, not disabled. */
+/* Soft filled avatar-style fallback with a small store icon, so the no-story
+   avatar reads as a real avatar rather than an outlined icon button. */
 .story-thumb.story-thumb--plain .story-thumb-fallback {
   color: #64748b;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
 }
 
 .story-thumb.story-thumb--plain:hover,
