@@ -388,15 +388,16 @@ function hasValidShopStoryContext() {
   return Boolean(shopStoriesState.hasShopContext && normalizeSellerId(shopStoriesState.sellerId));
 }
 
-function getShopAvatarInitial() {
-  const name = String(shopStoriesState.shopName || '').replace(/\s+/g, ' ').trim();
-  return name ? Array.from(name)[0] : '؟';
-}
+// Inline minimal store/shop icon used as a premium fallback when the shop has no
+// logo/avatar image. No text initials are ever rendered as the avatar fallback.
+const SHOP_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1 10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1L4 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>';
 
+// When the shop has a logo/avatar, show that image inside the circle. Otherwise,
+// render a clean minimal store icon instead of a letter initial placeholder.
 function createStoryThumbFallback() {
   const fallback = document.createElement('div');
-  fallback.className = 'story-media-fallback story-thumb-fallback';
-  fallback.textContent = getShopAvatarInitial();
+  fallback.className = 'story-media-fallback story-thumb-fallback story-thumb-icon';
+  fallback.innerHTML = SHOP_ICON_SVG;
   return fallback;
 }
 
