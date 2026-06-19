@@ -1861,19 +1861,19 @@ body {
   box-shadow: 0 0 0 3px rgba(148, 163, 184, .22);
 }
 
-/* No story data: keep the exact same avatar structure as the active story
-   circle — outer ring + small white gap + inner circular avatar — but render
-   the ring as a flat neutral light-gray instead of a colorful gradient. No
-   glow, no animation, and it is not interactive (never opens stale media). */
+/* No story data: clean avatar-style presentation with a thin neutral ring
+   that clearly communicates this is a shop logo/avatar, not an interactive
+   story button. The ring is thinner and subtler than the active story state. */
 .story-thumb.story-thumb--plain {
   cursor: default;
 }
 
-/* Neutral light-gray outer ring, same position/size as the active colorful
-   ring, but static (no rotation) and flat (no colored shadow). */
+/* Thin neutral ring using a border instead of a full background gradient.
+   This creates a cleaner, more avatar-like appearance. */
 .story-thumb.story-thumb--plain::before {
-  background: #e2e8f0;
-  box-shadow: none;
+  background: transparent;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(28, 44, 90, .04);
   animation: none;
 }
 
@@ -1882,17 +1882,30 @@ body {
   content: none;
 }
 
-/* Inner avatar inherits the active state's white border, so the gap between
-   the gray ring and the avatar matches the active story circle exactly. */
+/* Inner avatar with a slightly larger size to make the ring thinner.
+   The white border remains to create visual separation. */
 .story-thumb.story-thumb--plain .story-thumb-media {
+  width: 48px;
+  height: 48px;
+  border-width: 2px;
   background: #fff;
 }
 
-/* Soft filled avatar-style fallback with a small store icon, so the no-story
-   avatar reads as a real avatar rather than an outlined icon button. */
+/* When the shop has a logo, display it directly without any fallback icon */
+.story-thumb.story-thumb--plain .story-thumb-media img {
+  display: block;
+}
+
+/* Soft filled avatar-style fallback with a small store icon, only shown when
+   no logo exists. Subtler colors to reinforce the avatar aesthetic. */
 .story-thumb.story-thumb--plain .story-thumb-fallback {
-  color: #64748b;
-  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #94a3b8;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+.story-thumb.story-thumb--plain .story-thumb-fallback svg {
+  width: 52%;
+  height: 52%;
 }
 
 .story-thumb.story-thumb--plain:hover,
@@ -1900,6 +1913,29 @@ body {
   transform: none;
   box-shadow: none;
   outline: none;
+}
+
+/* Mobile adjustments for the thinner ring */
+@media (max-width: 520px) {
+  .story-thumb.story-thumb--plain::before {
+    border-width: 1.2px;
+  }
+  
+  .story-thumb.story-thumb--plain .story-thumb-media {
+    width: 41px;
+    height: 41px;
+  }
+}
+
+@media (max-width: 390px) {
+  .story-thumb.story-thumb--plain::before {
+    border-width: 1px;
+  }
+  
+  .story-thumb.story-thumb--plain .story-thumb-media {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 
