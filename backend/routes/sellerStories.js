@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const SellerStory = require('../models/SellerStory');
+const Seller = require('../models/Seller');
+const SellerNotification = require('../models/SellerNotification');
 const User = require('../models/user');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { JWT_SECRET } = require('../config/security');
@@ -112,6 +114,182 @@ function cleanSingleLine(value, maxLength = 140) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLength);
+}
+
+function buildStoryDashboardUrl(storyId) {
+  const encodedStoryId = encodeURIComponent(String(storyId || ''));
+  return `/seller/dashboard.html?section=stories${encodedStoryId ? `&storyId=${encodedStoryId}` : ''}`;
+}
+
+function getTokenCandidates(req) {
+  const authHeader = req.headers.authorization;
+  const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  return [
+    headerToken,
+    req.cookies?.user_token,
+    req.cookies?.seller_token
+  ].filter((token, index, tokens) => token && tokens.indexOf(token) === index);
+}
+
+async function getOptionalStoryActor(req, storySellerId = null) {
+  const tokens = getTokenCandidates(req);
+  for (const token of tokens) {
+    try {
+      const payload = jwt.verify(token, JWT_SECRET);
+      const role = String(payload?.role || '').trim().toLowerCase();
+      if (!payload?.id || !['user', 'seller'].includes(role)) continue;
+
+      if (role === 'seller') {
+        const seller = await Seller.findById(payload.id).select('storename firstname lastname phone').lean();
+        if (!seller) continue;
+
+        const sellerName = cleanSingleLine(
+          seller.storename || `${seller.firstname || ''} ${seller.lastname || ''}`,
+          60
+        );
+        return {
+          role: 'seller',
+          sellerId: seller._id,
+          isStoryOwner: storySellerId ? String(seller._id) === String(storySellerId) : false,
+          displayName: sellerName || 'فروشنده'
+        };
+      }
+
+      const user = await User.findById(payload.id).select('firstname lastname phone deleted').lean();
+      if (!user || user.deleted) continue;
+
+      let isStoryOwner = false;
+      if (storySellerId && user.phone) {
+        const owner = await Seller.findById(storySellerId).select('phone').lean();
+        isStoryOwner = Boolean(owner?.phone && String(owner.phone) === String(user.phone));
+      }
+
+      const fullName = cleanSingleLine(`${user.firstname || ''} ${user.lastname || ''}`, 60);
+      return {
+        role: 'user',
+        userId: user._id,
+        isStoryOwner,
+        displayName: fullName || (user.phone ? `کاربر ${String(user.phone).slice(-4)}` : 'یک کاربر')
+      };
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
+
+function getStoryActorName(actor) {
+  return cleanSingleLine(actor?.displayName, 60) || 'یک کاربر';
+}
+
+async function createStoryLikeNotification(story, actor, reactionKey) {
+  try {
+    const storyId = story?._id;
+    const sellerId = story?.seller;
+    if (!storyId || !sellerId || actor?.isStoryOwner) return null;
+
+    const actorKey = actor?.userId
+      ? `user:${actor.userId}`
+      : (reactionKey ? `reaction:${reactionKey}` : 'anonymous');
+    const actorName = getStoryActorName(actor);
+    const isNamedActor = actorName && actorName !== 'یک کاربر';
+    const dedupeKey = `story-like:${storyId}:${actorKey}`;
+    const actionUrl = buildStoryDashboardUrl(storyId);
+
+    return await SellerNotification.findOneAndUpdate(
+      { dedupeKey },
+      {
+        $setOnInsert: {
+          sellerId,
+          recipientRole: 'seller',
+          recipientId: sellerId,
+          type: 'story_like',
+          title: 'استوری شما لایک شد',
+          message: isNamedActor
+            ? `${actorName} استوری فروشگاه شما را لایک کرد.`
+            : 'یک کاربر استوری فروشگاه شما را لایک کرد.',
+          read: false,
+          readAt: null,
+          targetRoute: 'stories',
+          targetId: String(storyId),
+          metadata: {
+            storyId: String(storyId),
+            actorKey,
+            actorName,
+            createdAt: new Date()
+          },
+          dedupeKey,
+          relatedData: {
+            storyId,
+            customerId: actor?.userId || null,
+            customerName: actorName,
+            actionUrl
+          }
+        }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+  } catch (error) {
+    console.warn('Failed to create story like notification:', error.message || error);
+    return null;
+  }
+}
+
+async function createStoryReplyNotification(story, reply, actor) {
+  try {
+    const storyId = story?._id;
+    const sellerId = story?.seller;
+    const replyId = reply?._id;
+    if (!storyId || !sellerId || !replyId || actor?.isStoryOwner) return null;
+
+    const preview = cleanSingleLine(reply.message, 90);
+    const actorName = cleanSingleLine(actor?.displayName || reply.displayName, 60) || 'یک کاربر';
+    const isNamedActor = actorName && actorName !== 'یک کاربر';
+    const dedupeKey = `story-reply:${storyId}:${replyId}`;
+    const actionUrl = buildStoryDashboardUrl(storyId);
+    const previewText = preview ? `: «${preview}»` : '.';
+
+    return await SellerNotification.findOneAndUpdate(
+      { dedupeKey },
+      {
+        $setOnInsert: {
+          sellerId,
+          recipientRole: 'seller',
+          recipientId: sellerId,
+          type: 'story_reply',
+          title: 'پاسخ جدید به استوری',
+          message: isNamedActor
+            ? `${actorName} به استوری شما پاسخ داد${previewText}`
+            : `یک کاربر به استوری شما پاسخ داد${previewText}`,
+          read: false,
+          readAt: null,
+          targetRoute: 'stories',
+          targetId: String(storyId),
+          metadata: {
+            storyId: String(storyId),
+            replyId: String(replyId),
+            actorName,
+            replyPreview: preview,
+            createdAt: new Date()
+          },
+          dedupeKey,
+          relatedData: {
+            storyId,
+            storyReplyId: String(replyId),
+            replyPreview: preview,
+            customerId: actor?.userId || reply.user || null,
+            customerName: actorName,
+            actionUrl
+          }
+        }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+  } catch (error) {
+    console.warn('Failed to create story reply notification:', error.message || error);
+    return null;
+  }
 }
 
 function serializeReply(reply) {
@@ -411,6 +589,8 @@ router.post('/public/:storyId/reaction', async (req, res) => {
       story.likesCount = Math.max(0, Number(story.likesCount || 0) + 1);
       reacted = true;
       await story.save();
+      const actor = await getOptionalStoryActor(req, story.seller);
+      await createStoryLikeNotification(story, actor, reactionKey);
     } else {
       story.likesCount = Math.max(0, Number(story.likesCount || 0));
     }
@@ -441,8 +621,30 @@ router.post('/public/:storyId/replies', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Story is not active.' });
     }
 
-    const optionalAuthor = await getOptionalReplyAuthor(req);
+    const actor = await getOptionalStoryActor(req, story.seller);
+    const optionalAuthor = actor?.role === 'user'
+      ? { userId: actor.userId, displayName: actor.displayName }
+      : await getOptionalReplyAuthor(req);
     const requestedName = cleanSingleLine(req.body?.displayName, 60);
+    const replyKey = getReplyKey(req);
+    const duplicateReply = (Array.isArray(story.replies) ? story.replies : [])
+      .find((item) => (
+        item?.replyKey &&
+        item.replyKey === replyKey &&
+        cleanSingleLine(item.message, 500) === message &&
+        item.createdAt &&
+        (now.getTime() - new Date(item.createdAt).getTime()) < 30000
+      ));
+
+    if (duplicateReply) {
+      return res.json({
+        success: true,
+        duplicate: true,
+        reply: serializeReply(duplicateReply),
+        story: serializeStory(story.toObject(), now)
+      });
+    }
+
     const reply = {
       message,
       displayName: optionalAuthor?.displayName || requestedName || 'کاربر ویتری‌نت',
@@ -450,6 +652,9 @@ router.post('/public/:storyId/replies', async (req, res) => {
       user: optionalAuthor?.userId || null,
       createdAt: now
     };
+    reply.displayName = actor?.displayName || requestedName || reply.displayName || 'یک کاربر';
+    reply.replyKey = replyKey;
+    reply.user = actor?.role === 'user' ? actor.userId : reply.user;
 
     story.replies.push(reply);
     story.repliesCount = Math.max(Number(story.repliesCount || 0) + 1, story.replies.length);
@@ -457,6 +662,7 @@ router.post('/public/:storyId/replies', async (req, res) => {
     await story.save();
 
     const savedReply = story.replies[story.replies.length - 1];
+    await createStoryReplyNotification(story, savedReply, actor);
     return res.status(201).json({
       success: true,
       reply: serializeReply(savedReply),

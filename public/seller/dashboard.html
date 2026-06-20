@@ -15937,6 +15937,10 @@ body.edit-product-modal-open {
       'advertising_request_approved',
       'advertising_request_rejected'
     ]);
+    const storyNotificationTypes = new Set([
+      'story_like',
+      'story_reply'
+    ]);
 
     const buildApiUrl = (path) => {
       if (!path) return '';
@@ -16025,6 +16029,8 @@ body.edit-product-modal-open {
           review: 'ri-star-fill',
           customer_message: 'ri-message-3-fill',
           product_like: 'ri-heart-fill',
+          story_like: 'ri-heart-3-fill',
+          story_reply: 'ri-chat-1-fill',
           order: 'ri-shopping-cart-fill',
           admin_message: 'ri-admin-fill',
           system: 'ri-settings-3-fill',
@@ -16041,6 +16047,8 @@ body.edit-product-modal-open {
         if (item.read) return 'خوانده شده';
         if (item.type === 'advertising_request_approved') return 'تایید شده';
         if (item.type === 'advertising_request_rejected') return 'رد شده';
+        if (item.type === 'story_like') return 'لایک استوری';
+        if (item.type === 'story_reply') return 'پاسخ استوری';
         const statusTexts = {
           review: 'نظر جدید',
           customer_message: 'پیام جدید',
@@ -16057,12 +16065,15 @@ body.edit-product-modal-open {
         if (advertisingNotificationTypes.has(type)) {
           return Boolean(item?.relatedData?.actionUrl || item?.targetRoute);
         }
+        if (storyNotificationTypes.has(type)) return true;
         return ['review', 'customer_message', 'product_like'].includes(type);
       };
 
       // تابع برای تعیین متن راهنمای عمل
       const getActionHint = (type) => {
         if (advertisingNotificationTypes.has(type)) return 'مشاهده درخواست';
+        if (type === 'story_like') return 'مشاهده استوری‌ها';
+        if (type === 'story_reply') return 'مشاهده پاسخ‌ها';
         const hints = {
           review: 'مشاهده و مدیریت نظرات',
           customer_message: 'مشاهده پیام‌ها',
@@ -16424,6 +16435,14 @@ body.edit-product-modal-open {
             // هدایت به بخش محصولات
             if (typeof showSection === 'function') {
               showSection('products');
+            }
+            break;
+          case 'story_like':
+          case 'story_reply':
+            if (typeof showSection === 'function') {
+              showSection('stories');
+            } else {
+              window.location.hash = 'stories';
             }
             break;
           default:

@@ -943,6 +943,7 @@ async function reactToCurrentStory() {
   try {
     const res = await fetch(`${SHOP_API_BASE}/api/seller/stories/public/${storyId}/reaction`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         ...(reactionKey ? { 'X-Story-Reaction-Key': reactionKey } : {}),
         'X-Story-Reaction-State': nextReacted ? 'liked' : 'unliked'

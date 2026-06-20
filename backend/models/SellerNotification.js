@@ -34,6 +34,8 @@ const sellerNotificationSchema = new mongoose.Schema({
       'admin_message',
       'system',
       'info',
+      'story_like',
+      'story_reply',
       'ad_approved',
       'advertising_request_approved',
       'advertising_request_rejected'
@@ -106,6 +108,12 @@ const sellerNotificationSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AdOrder'
     },
+    storyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SellerStory'
+    },
+    storyReplyId: String,
+    replyPreview: String,
     similarPromotionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'SimilarShopPromotion'
