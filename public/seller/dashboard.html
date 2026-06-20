@@ -10173,77 +10173,157 @@
 
 .story-replies-panel {
   width: 100%;
-  max-width: min(480px, 100%);
-  margin: 14px auto 0;
-  padding: 14px;
-  border: 1px solid rgba(148, 163, 184, .18);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, .92);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, .06);
+  max-width: min(520px, 100%);
+  margin: 18px auto 0;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, .1);
+  border-radius: 24px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, .96), rgba(248, 250, 252, .88));
+  box-shadow:
+    0 4px 6px rgba(15, 23, 42, .02),
+    0 12px 28px rgba(15, 23, 42, .06),
+    inset 0 1px 0 rgba(255, 255, 255, .8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .story-replies-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, .1);
 }
 
 .story-replies-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: #0f172a;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 950;
+  letter-spacing: -.02em;
 }
 
 .story-replies-title i {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 11px;
   color: #0369a1;
-  background: #e0f2fe;
-  font-size: 16px;
+  background: linear-gradient(145deg, #e0f2fe, #bae6fd);
+  font-size: 17px;
+  box-shadow: 0 2px 8px rgba(3, 105, 161, .12);
 }
 
 .story-replies-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 28px;
-  padding: 5px 9px;
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 12px;
   border-radius: 999px;
   color: #047857;
-  background: #ecfdf5;
-  border: 1px solid rgba(16, 185, 129, .16);
+  background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+  border: 1px solid rgba(16, 185, 129, .14);
   font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, .1);
+  letter-spacing: .01em;
 }
 
 .story-replies-list {
   display: grid;
-  gap: 8px;
-  max-height: 300px;
+  gap: 10px;
+  max-height: 340px;
   overflow: auto;
-  padding-inline-end: 2px;
+  padding-inline-end: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, .22) transparent;
+}
+
+.story-replies-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.story-replies-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.story-replies-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, .22);
+  border-radius: 999px;
 }
 
 .story-reply-item {
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #f8fafc;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, .1);
+  border-radius: 18px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, .85), rgba(248, 250, 252, .6));
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .03);
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.story-reply-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(14, 165, 233, .06), transparent 70%);
+  transition: opacity .25s ease;
 }
 
 .story-reply-item.unread {
-  border-color: rgba(14, 165, 233, .34);
-  background: #f0f9ff;
+  border-color: rgba(14, 165, 233, .2);
+  background: linear-gradient(165deg, rgba(240, 249, 255, .9), rgba(224, 242, 254, .6));
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, .03),
+    0 0 0 1px rgba(14, 165, 233, .08),
+    0 4px 14px rgba(14, 165, 233, .06);
+}
+
+.story-reply-item.unread::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0ea5e9;
+  box-shadow: 0 0 6px rgba(14, 165, 233, .45);
+}
+
+.story-reply-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #e0f2fe, #bae6fd);
+  display: grid;
+  place-items: center;
+  color: #0369a1;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(3, 105, 161, .1);
+}
+
+.story-reply-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 .story-reply-meta {
@@ -10251,7 +10331,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
   color: #64748b;
   font-size: 11px;
   font-weight: 850;
@@ -10262,28 +10341,39 @@
   align-items: center;
   gap: 5px;
   color: #0f172a;
+  font-weight: 900;
+  letter-spacing: -.01em;
+}
+
+.story-reply-author i {
+  font-size: 13px;
+  color: #0ea5e9;
 }
 
 .story-reply-message {
   margin: 0;
   color: #334155;
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.7;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.75;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
+.story-reply-item.unread .story-reply-message {
+  color: #1e293b;
+}
+
 .story-replies-empty {
   margin: 0;
-  padding: 16px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 16px;
-  color: #64748b;
-  background: #f8fafc;
+  padding: 24px 16px;
+  border: 1px dashed rgba(148, 163, 184, .25);
+  border-radius: 18px;
+  color: #94a3b8;
+  background: linear-gradient(165deg, rgba(248, 250, 252, .5), rgba(241, 245, 249, .3));
   text-align: center;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 12.5px;
+  font-weight: 700;
 }
 
 .story-replies-actions {
@@ -14171,6 +14261,15 @@ body.edit-product-modal-open {
         const item = document.createElement('article');
         item.className = `story-reply-item${reply.readAt ? '' : ' unread'}`;
 
+        /* avatar column */
+        const avatar = document.createElement('div');
+        avatar.className = 'story-reply-avatar';
+        avatar.innerHTML = '<i class="ri-user-smile-line" aria-hidden="true"></i>';
+
+        /* body column */
+        const body = document.createElement('div');
+        body.className = 'story-reply-body';
+
         const meta = document.createElement('div');
         meta.className = 'story-reply-meta';
 
@@ -14188,7 +14287,8 @@ body.edit-product-modal-open {
         message.textContent = reply.message || '';
 
         meta.append(author, time);
-        item.append(meta, message);
+        body.append(meta, message);
+        item.append(avatar, body);
         els.storyRepliesList.appendChild(item);
       });
 
