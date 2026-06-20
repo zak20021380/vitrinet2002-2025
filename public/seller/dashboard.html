@@ -13807,6 +13807,62 @@ body.edit-product-modal-open {
       return toPersianDigits(`${hours}:${minutes}:${seconds}`);
     }
 
+    function parseStoryTime(value) {
+      if (!value) return 0;
+      const time = new Date(value).getTime();
+      return Number.isFinite(time) ? time : 0;
+    }
+
+    function getStoryExpiryTime(story) {
+      const createdAt = parseStoryTime(story?.createdAt);
+      if (createdAt) return createdAt + DAY_MS;
+
+      const expiresAt = parseStoryTime(story?.expiresAt);
+      if (expiresAt) return expiresAt;
+
+      const remainingMs = Number(story?.remainingMs);
+      return Number.isFinite(remainingMs) && remainingMs > 0 ? Date.now() + remainingMs : 0;
+    }
+
+    function normalizeStory(rawStory) {
+      if (!rawStory || typeof rawStory !== 'object') return null;
+
+      const storyId = rawStory.id || rawStory._id;
+      const imageUrl = String(rawStory.imageUrl || '').trim();
+      if (!storyId || !imageUrl) return null;
+
+      const now = Date.now();
+      const createdAt = parseStoryTime(rawStory.createdAt);
+      const expiresAt = getStoryExpiryTime(rawStory);
+      const remainingMs = expiresAt ? Math.max(0, expiresAt - now) : 0;
+      const ageMs = createdAt ? now - createdAt : 0;
+      const isDeleted = rawStory.status === 'deleted';
+      const isWithinStoryWindow = createdAt ? ageMs < DAY_MS : remainingMs > 0;
+      const isActive = !isDeleted && remainingMs > 0 && isWithinStoryWindow;
+
+      return {
+        ...rawStory,
+        id: storyId,
+        _id: rawStory._id || storyId,
+        imageUrl,
+        status: isActive ? 'active' : (isDeleted ? 'deleted' : 'expired'),
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : rawStory.expiresAt,
+        remainingMs
+      };
+    }
+
+    function pickActiveStory(...candidates) {
+      for (const candidate of candidates.flat()) {
+        const story = normalizeStory(candidate);
+        if (story?.status === 'active') return story;
+      }
+      return null;
+    }
+
+    function hasActiveStory(story) {
+      return normalizeStory(story)?.status === 'active';
+    }
+
     function formatReplyTime(value) {
       if (!value) return '';
       const date = new Date(value);
@@ -13893,8 +13949,8 @@ body.edit-product-modal-open {
       if (els.storyImageInput) els.storyImageInput.disabled = state.uploading || !state.canPost;
       if (els.storyUploadDrop) els.storyUploadDrop.classList.toggle('is-disabled', !state.canPost || state.uploading);
       if (els.storyDeleteBtn) {
-        const hasActiveStory = state.story?.id && state.story?.status === 'active';
-        els.storyDeleteBtn.disabled = state.deleting || state.uploading || !hasActiveStory;
+        const canDeleteStory = hasActiveStory(state.story);
+        els.storyDeleteBtn.disabled = state.deleting || state.uploading || !canDeleteStory;
         els.storyDeleteBtn.innerHTML = state.deleting
           ? '<i class="ri-loader-4-line" aria-hidden="true"></i> در حال حذف...'
           : '<i class="ri-delete-bin-6-line" aria-hidden="true"></i> حذف استوری فعلی';
@@ -13973,12 +14029,18 @@ body.edit-product-modal-open {
     }
 
     function updateStoryCountdown() {
-      const story = state.story;
+      const story = normalizeStory(state.story);
+      state.story = story;
       if (!story || !els.storyExpirationText) return;
-      const expiresAt = story.expiresAt ? new Date(story.expiresAt).getTime() : 0;
+      if (story.status !== 'active') {
+        renderStory();
+        return;
+      }
+
+      const expiresAt = getStoryExpiryTime(story);
       const createdAt = story.createdAt ? new Date(story.createdAt).getTime() : 0;
       const remaining = expiresAt ? Math.max(0, expiresAt - Date.now()) : 0;
-      const isActive = story.status !== 'expired' && remaining > 0;
+      const isActive = story.status === 'active' && remaining > 0;
       const elapsed = createdAt ? Math.max(0, Date.now() - createdAt) : 0;
       const progress = isActive ? Math.min(100, Math.max(0, (elapsed / DAY_MS) * 100)) : 100;
       if (els.storyProgressBar) {
@@ -14007,17 +14069,11 @@ body.edit-product-modal-open {
 
     function renderStory() {
       showLoading(false);
-      const story = state.story;
+      const story = normalizeStory(state.story);
+      state.story = story;
       
-      // Only show story if it has valid data, an image, a real ID, and is explicitly active.
-      // Stories that are expired or deleted must not be shown in the "استوری فعلی" section.
-      // Match the validation logic used in shop.js for consistency.
-      const storyId = story?.id || story?._id;
-      const isValidActiveStory = story 
-        && (storyId && String(storyId).trim() !== '')
-        && story.imageUrl 
-        && story.status === 'active'
-        && Number(story.remainingMs || 0) > 0;
+      // Only show a valid, non-deleted story that is still inside its 24-hour window.
+      const isValidActiveStory = story?.status === 'active';
       
       if (!isValidActiveStory) {
         if (els.storyEmptyState) els.storyEmptyState.style.display = '';
@@ -14066,7 +14122,7 @@ body.edit-product-modal-open {
         // The backend returns both 'story' (active) and 'latestStory' (most recent).
         // We want to show only truly active stories (status === 'active' and not expired).
         // If data.story exists and is active, use it; otherwise the section shows empty.
-        const receivedStory = data.story || null;
+        const receivedStory = pickActiveStory(data.story, data.latestStory, data.stories || []);
         
         // Debug log to help diagnose issues
         console.log('[Stories] Received from API:', {
@@ -14205,7 +14261,7 @@ body.edit-product-modal-open {
           throw new Error(localizeStoryError(data.message, 'امکان انتشار استوری وجود ندارد.'));
         }
 
-        state.story = data.story || null;
+        state.story = pickActiveStory(data.story, data.latestStory, data.stories || []);
         state.cooldownEndsAt = data.nextAvailableAt ? new Date(data.nextAvailableAt).getTime() : Date.now() + DAY_MS;
         clearPreview();
         updateCooldown();
@@ -14222,7 +14278,7 @@ body.edit-product-modal-open {
 
     async function deleteCurrentStory() {
       const storyId = state.story?.id || state.story?._id;
-      if (state.deleting || !storyId || state.story?.status !== 'active') return;
+      if (state.deleting || !storyId || !hasActiveStory(state.story)) return;
       const confirmed = window.confirm('استوری فعلی حذف شود؟ برای ثبت استوری جدید باید تا پایان نوبت ۲۴ ساعته صبر کنید.');
       if (!confirmed) return;
 
@@ -14239,7 +14295,7 @@ body.edit-product-modal-open {
           throw new Error(localizeStoryError(data.message, 'امکان حذف استوری وجود ندارد.'));
         }
 
-        state.story = data.story || data.latestStory || null;
+        state.story = pickActiveStory(data.story, data.latestStory, data.stories || []);
         state.cooldownEndsAt = data.nextAvailableAt && data.cooldownRemainingMs > 0
           ? new Date(data.nextAvailableAt).getTime()
           : 0;
