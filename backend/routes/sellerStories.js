@@ -75,6 +75,38 @@ function mergeStoryTargetFilter(base, target) {
   return { ...base, ...filter };
 }
 
+function getStoryWindowEndsAt(story, now = new Date()) {
+  const createdAt = story?.createdAt ? new Date(story.createdAt) : null;
+  if (createdAt && !Number.isNaN(createdAt.getTime())) {
+    return new Date(createdAt.getTime() + STORY_DURATION_MS);
+  }
+
+  const expiresAt = story?.expiresAt ? new Date(story.expiresAt) : null;
+  if (expiresAt && !Number.isNaN(expiresAt.getTime())) return expiresAt;
+
+  return now;
+}
+
+function isStoryActive(story, now = new Date()) {
+  if (!story) return false;
+  if (story.status === 'deleted') return false;
+  if (!String(story.imageUrl || '').trim()) return false;
+  return getStoryWindowEndsAt(story, now).getTime() > now.getTime();
+}
+
+function activeStoryWindowFilter(now = new Date()) {
+  const earliestCreatedAt = new Date(now.getTime() - STORY_DURATION_MS);
+  return {
+    status: { $ne: 'deleted' },
+    imageUrl: { $exists: true, $nin: ['', null] },
+    $or: [
+      { createdAt: { $gt: earliestCreatedAt } },
+      { createdAt: { $exists: false }, expiresAt: { $gt: now } },
+      { createdAt: null, expiresAt: { $gt: now } }
+    ]
+  };
+}
+
 function cleanSingleLine(value, maxLength = 140) {
   return String(value || '')
     .replace(/\s+/g, ' ')
@@ -105,11 +137,12 @@ function serializeReplies(replies = [], limit = 50) {
 
 function serializeStory(story, now = new Date(), options = {}) {
   if (!story) return null;
-  const expiresAt = story.expiresAt ? new Date(story.expiresAt) : null;
+  if (!String(story.imageUrl || '').trim()) return null;
+  const expiresAt = getStoryWindowEndsAt(story, now);
   const createdAt = story.createdAt ? new Date(story.createdAt) : null;
   const sellerId = story.seller ? String(story.seller) : '';
   const isDeleted = story.status === 'deleted';
-  const isExpired = isDeleted || !expiresAt || expiresAt.getTime() <= now.getTime() || story.status === 'expired';
+  const isExpired = isDeleted || !expiresAt || expiresAt.getTime() <= now.getTime();
   const remainingMs = expiresAt ? Math.max(0, expiresAt.getTime() - now.getTime()) : 0;
   const elapsedMs = createdAt ? Math.max(0, now.getTime() - createdAt.getTime()) : 0;
   const progress = Math.min(100, Math.max(0, (elapsedMs / STORY_DURATION_MS) * 100));
@@ -133,7 +166,7 @@ function serializeStory(story, now = new Date(), options = {}) {
     repliesCount,
     status: isDeleted ? 'deleted' : (isExpired ? 'expired' : 'active'),
     createdAt: story.createdAt,
-    expiresAt: story.expiresAt,
+    expiresAt,
     remainingMs,
     progress
   };
@@ -188,7 +221,15 @@ function getDesiredReactionState(req) {
 
 async function expireOldStories(sellerId, target = 'shop', now = new Date()) {
   await SellerStory.updateMany(
-    mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $lte: now } }, target),
+    mergeStoryTargetFilter({
+      seller: sellerId,
+      status: 'active',
+      $or: [
+        { createdAt: { $lte: new Date(now.getTime() - STORY_DURATION_MS) } },
+        { createdAt: { $exists: false }, expiresAt: { $lte: now } },
+        { createdAt: null, expiresAt: { $lte: now } }
+      ]
+    }, target),
     { $set: { status: 'expired' } }
   );
 }
@@ -199,7 +240,7 @@ async function buildStoryState(sellerId, target = 'shop') {
 
   const [latestStory, activeStory] = await Promise.all([
     SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId }, target)).sort({ createdAt: -1 }).lean(),
-    SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target)).sort({ createdAt: -1 }).lean()
+    SellerStory.findOne(mergeStoryTargetFilter({ seller: sellerId, ...activeStoryWindowFilter(now) }, target)).sort({ createdAt: -1 }).lean()
   ]);
 
   // Debug logging
@@ -223,7 +264,7 @@ async function buildStoryState(sellerId, target = 'shop') {
   return {
     success: true,
     targetType: target,
-    story: serializeStory(activeStory || visibleLatestStory, now, { includeReplies: true }),
+    story: serializeStory(isStoryActive(activeStory, now) ? activeStory : null, now, { includeReplies: true }),
     latestStory: serializeStory(visibleLatestStory, now, { includeReplies: true }),
     canPost: cooldownRemainingMs <= 0,
     cooldownRemainingMs,
@@ -236,7 +277,7 @@ async function buildPublicStoryState(sellerId, target = 'shop') {
   await expireOldStories(sellerId, target, now);
 
   const [activeStories, latestStory] = await Promise.all([
-    SellerStory.find(mergeStoryTargetFilter({ seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target))
+    SellerStory.find(mergeStoryTargetFilter({ seller: sellerId, ...activeStoryWindowFilter(now) }, target))
       .sort({ createdAt: -1 })
       .limit(12)
       .lean(),
@@ -247,8 +288,8 @@ async function buildPublicStoryState(sellerId, target = 'shop') {
   return {
     success: true,
     targetType: target,
-    stories: activeStories.map((story) => serializeStory(story, now)),
-    story: serializeStory(activeStories[0] || null, now),
+    stories: activeStories.map((story) => serializeStory(story, now)).filter(Boolean),
+    story: serializeStory(activeStories.find((story) => isStoryActive(story, now)) || null, now),
     latestStory: serializeStory(visibleLatestStory, now)
   };
 }
@@ -323,7 +364,7 @@ router.post('/public/:storyId/view', async (req, res) => {
 
     const now = new Date();
     const story = await SellerStory.findOneAndUpdate(
-      { _id: storyId, status: 'active', expiresAt: { $gt: now } },
+      { _id: storyId, ...activeStoryWindowFilter(now) },
       { $inc: { viewsCount: 1 } },
       { new: true }
     ).lean();
@@ -349,7 +390,7 @@ router.post('/public/:storyId/reaction', async (req, res) => {
     const now = new Date();
     const reactionKey = getReactionKey(req);
     const desiredReacted = getDesiredReactionState(req);
-    const story = await SellerStory.findOne({ _id: storyId, status: 'active', expiresAt: { $gt: now } })
+    const story = await SellerStory.findOne({ _id: storyId, ...activeStoryWindowFilter(now) })
       .select('+likedBy');
     if (!story) {
       return res.status(404).json({ success: false, message: 'Story is not active.' });
@@ -394,7 +435,7 @@ router.post('/public/:storyId/replies', async (req, res) => {
     }
 
     const now = new Date();
-    const story = await SellerStory.findOne({ _id: storyId, status: 'active', expiresAt: { $gt: now } })
+    const story = await SellerStory.findOne({ _id: storyId, ...activeStoryWindowFilter(now) })
       .select('+replies.replyKey');
     if (!story) {
       return res.status(404).json({ success: false, message: 'Story is not active.' });
@@ -529,7 +570,7 @@ router.delete('/:storyId', authMiddleware('seller'), async (req, res) => {
     await expireOldStories(sellerId, target, now);
 
     const story = await SellerStory.findOneAndUpdate(
-      mergeStoryTargetFilter({ _id: storyId, seller: sellerId, status: 'active', expiresAt: { $gt: now } }, target),
+      mergeStoryTargetFilter({ _id: storyId, seller: sellerId, ...activeStoryWindowFilter(now) }, target),
       { $set: { status: 'deleted', expiresAt: now } },
       { new: true }
     ).lean();
