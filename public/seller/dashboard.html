@@ -1960,62 +1960,187 @@
     .sidebar-quick-links {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 8px;
-      padding: 0 16px 12px;
+      gap: 10px;
+      padding: 0 16px 16px;
     }
 
     .sidebar-quick-link {
+      position: relative;
       min-width: 0;
-      min-height: 48px;
+      min-height: 54px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 9px 12px;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      background: #ffffff;
-      color: #334155;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 2px solid transparent;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      color: #0f172a;
       cursor: pointer;
       text-align: right;
       justify-content: flex-start;
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      isolation: isolate;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 1px 3px rgba(15, 23, 42, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+
+    /* Subtle background gradient overlay */
+    .sidebar-quick-link::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(248, 250, 252, 0.8) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-quick-link:hover::before {
+      opacity: 1;
+    }
+
+    /* Shop button - Emerald/Green theme */
+    .sidebar-quick-link:first-child {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-color: rgba(16, 185, 129, 0.2);
+      box-shadow: 
+        0 2px 8px rgba(16, 185, 129, 0.12),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+
+    .sidebar-quick-link:first-child::before {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
+    }
+
+    /* Home button - Blue theme */
+    .sidebar-quick-link--home {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-color: rgba(59, 130, 246, 0.2);
+      box-shadow: 
+        0 2px 8px rgba(59, 130, 246, 0.12),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+
+    .sidebar-quick-link--home::before {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.12) 100%);
     }
 
     .sidebar-quick-link:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 
+        0 4px 12px rgba(15, 23, 42, 0.12),
+        0 2px 6px rgba(15, 23, 42, 0.06),
+        0 1px 0 rgba(255, 255, 255, 0.95) inset;
+    }
+
+    .sidebar-quick-link:first-child:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 
+        0 6px 20px rgba(16, 185, 129, 0.25),
+        0 2px 8px rgba(16, 185, 129, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.95) inset;
+    }
+
+    .sidebar-quick-link--home:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 
+        0 6px 20px rgba(59, 130, 246, 0.25),
+        0 2px 8px rgba(59, 130, 246, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.95) inset;
     }
 
     .sidebar-quick-link:active {
-      transform: scale(0.98);
+      transform: translateY(0) scale(0.98);
     }
 
     .sidebar-quick-link__icon {
-      width: 30px;
-      height: 30px;
+      position: relative;
+      z-index: 1;
+      width: 36px;
+      height: 36px;
       display: grid;
       place-items: center;
       flex-shrink: 0;
-      border-radius: 9px;
-      background: #ecfdf5;
-      color: #059669;
-      font-size: 16px;
+      border-radius: 11px;
+      font-size: 18px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
+    /* Shop icon - Enhanced emerald gradient */
+    .sidebar-quick-link:first-child .sidebar-quick-link__icon {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.25) inset;
+    }
+
+    /* Home icon - Enhanced blue gradient */
     .sidebar-quick-link--home .sidebar-quick-link__icon {
-      background: #eff6ff;
-      color: #2563eb;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #ffffff;
+      box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.25) inset;
+    }
+
+    .sidebar-quick-link:hover .sidebar-quick-link__icon {
+      transform: scale(1.08) rotate(-3deg);
+      box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.3) inset;
+    }
+
+    .sidebar-quick-link:first-child:hover .sidebar-quick-link__icon {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      box-shadow: 
+        0 6px 16px rgba(16, 185, 129, 0.45),
+        0 1px 0 rgba(255, 255, 255, 0.3) inset;
+    }
+
+    .sidebar-quick-link--home:hover .sidebar-quick-link__icon {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 
+        0 6px 16px rgba(59, 130, 246, 0.45),
+        0 1px 0 rgba(255, 255, 255, 0.3) inset;
     }
 
     .sidebar-quick-link__text {
+      position: relative;
+      z-index: 1;
       min-width: 0;
       display: block;
       overflow: visible;
       text-overflow: clip;
       white-space: normal;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
-      line-height: 1.35;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+      transition: color 0.2s ease;
+    }
+
+    /* Shop button text color */
+    .sidebar-quick-link:first-child .sidebar-quick-link__text {
+      color: #065f46;
+    }
+
+    .sidebar-quick-link:first-child:hover .sidebar-quick-link__text {
+      color: #047857;
+    }
+
+    /* Home button text color */
+    .sidebar-quick-link--home .sidebar-quick-link__text {
+      color: #1e40af;
+    }
+
+    .sidebar-quick-link--home:hover .sidebar-quick-link__text {
+      color: #1d4ed8;
     }
 
     /* ========== Menu Items Container - Breathable ========== */
