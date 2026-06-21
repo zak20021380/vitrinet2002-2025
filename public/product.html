@@ -573,10 +573,17 @@
 
     .meta-grid {
       display: grid;
-      gap: 0.75rem;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       width: 100%;
-      margin-top: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .meta-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
     }
 
     .product-actions {
@@ -777,23 +784,46 @@
 
     .meta-card {
       position: relative;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 1.1rem 1.2rem;
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 20px;
+      padding: 1.4rem 1.5rem;
+      border: 2px solid rgba(99, 102, 241, 0.08);
+      box-shadow: 
+        0 4px 20px rgba(15, 23, 42, 0.06),
+        0 1px 3px rgba(15, 23, 42, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 0.85rem;
+      gap: 1.1rem;
       align-items: center;
       isolation: isolate;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .meta-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.35s ease;
     }
 
     .meta-card:hover {
-      border-color: rgba(139, 92, 246, 0.25);
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
-      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.25);
+      box-shadow: 
+        0 8px 30px rgba(99, 102, 241, 0.12),
+        0 4px 12px rgba(15, 23, 42, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      transform: translateY(-4px) scale(1.01);
+    }
+
+    .meta-card:hover::before {
+      opacity: 1;
     }
 
     .meta-card::after {
@@ -801,41 +831,66 @@
     }
 
     .meta-card__icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.1) 100%);
       color: #6366f1;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
-      transition: all 0.25s ease;
+      box-shadow: 
+        0 4px 12px rgba(99, 102, 241, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meta-card__icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
     }
 
     .meta-card:hover .meta-card__icon {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.12) 100%);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.18);
-      transform: scale(1.05);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.15) 100%);
+      box-shadow: 
+        0 6px 18px rgba(99, 102, 241, 0.25),
+        inset 0 2px 0 rgba(255, 255, 255, 0.6);
+      transform: scale(1.08) rotate(-3deg);
+    }
+
+    .meta-card:hover .meta-card__icon::before {
+      opacity: 1;
     }
 
     .meta-card__icon svg {
-      width: 22px;
-      height: 22px;
+      width: 26px;
+      height: 26px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .meta-card:hover .meta-card__icon svg {
+      transform: scale(1.1);
     }
 
     .meta-card__content {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.45rem;
       min-width: 0;
     }
 
-    /* ===== Modern Minimal Like Button Style ===== */
     /* ===== Professional Like Button Style (Updated) ===== */
     .modern-like-wrapper {
-      margin: 0.75rem 0;
+      margin: 1.25rem 0;
       display: flex;
       justify-content: flex-start;
     }
@@ -844,18 +899,21 @@
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      background: linear-gradient(130deg, #fff1f2 0%, #ffe4e6 50%, #fff7ed 100%);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      border-radius: 999px;
+      gap: 12px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fce7f3 100%);
+      border: 2px solid rgba(244, 63, 94, 0.25);
+      border-radius: 18px;
       cursor: pointer;
-      transition: all 0.28s ease;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       color: #9f1239;
       font-family: 'Vazirmatn', sans-serif;
       font-weight: 800;
-      font-size: 0.95rem;
-      box-shadow: 0 16px 40px rgba(244, 63, 94, 0.2), 0 10px 24px rgba(251, 113, 133, 0.18);
+      font-size: 1rem;
+      box-shadow: 
+        0 8px 28px rgba(244, 63, 94, 0.15),
+        0 4px 12px rgba(251, 113, 133, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       overflow: hidden;
@@ -866,15 +924,18 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 18% 20%, rgba(254, 205, 211, 0.9), transparent 48%);
+      background: radial-gradient(circle at 18% 20%, rgba(254, 205, 211, 0.95), transparent 50%);
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.35s ease;
     }
 
     .modern-like-btn:hover {
-      border-color: rgba(244, 63, 94, 0.55);
-      transform: translateY(-3px) scale(1.01);
-      box-shadow: 0 18px 48px rgba(244, 63, 94, 0.28), 0 12px 30px rgba(251, 113, 133, 0.24);
+      border-color: rgba(244, 63, 94, 0.45);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 
+        0 12px 36px rgba(244, 63, 94, 0.25),
+        0 6px 16px rgba(251, 113, 133, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .modern-like-btn:hover::before {
@@ -883,32 +944,36 @@
 
     .modern-like-btn:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25), 0 16px 40px rgba(244, 63, 94, 0.22);
+      box-shadow: 
+        0 0 0 3px rgba(244, 63, 94, 0.3),
+        0 12px 36px rgba(244, 63, 94, 0.25);
     }
 
     .heart-icon-box {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 46px;
+      height: 46px;
       background: linear-gradient(145deg, #f43f5e, #fb7185);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      border-radius: 14px;
-      transition: all 0.3s ease;
+      border: 2px solid rgba(244, 63, 94, 0.3);
+      border-radius: 16px;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 18px rgba(244, 63, 94, 0.3);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 6px 16px rgba(244, 63, 94, 0.3);
     }
 
     .heart-svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       stroke: currentColor;
-      stroke-width: 2.2px;
+      stroke-width: 2.4px;
       fill: transparent;
       stroke-linecap: round;
       stroke-linejoin: round;
-      transition: all 0.3s ease;
+      transition: all 0.35s ease;
     }
 
     .like-separator {
@@ -918,13 +983,15 @@
     .like-counter {
       font-weight: 900;
       color: #be123c;
-      font-size: 0.95rem;
-      min-width: 32px;
+      font-size: 1rem;
+      min-width: 36px;
       text-align: center;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.95);
-      box-shadow: inset 0 0 0 1px rgba(254, 205, 211, 0.9), 0 2px 6px rgba(0, 0, 0, 0.06);
+      padding: 0.4rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 
+        inset 0 0 0 1.5px rgba(254, 205, 211, 0.95),
+        0 2px 8px rgba(0, 0, 0, 0.08);
       flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
@@ -937,7 +1004,7 @@
     }
 
     .like-text {
-      letter-spacing: -0.4px;
+      letter-spacing: -0.02em;
       flex: 1 1 auto;
       min-width: 0;
       white-space: nowrap;
@@ -947,9 +1014,12 @@
 
     .modern-like-btn.is-liked {
       border-color: transparent;
-      background: linear-gradient(120deg, #e11d48, #fb7185);
+      background: linear-gradient(135deg, #e11d48, #fb7185, #f472b6);
       color: #fff;
-      box-shadow: 0 18px 48px rgba(244, 63, 94, 0.36), 0 12px 28px rgba(251, 113, 133, 0.3);
+      box-shadow: 
+        0 12px 36px rgba(244, 63, 94, 0.35),
+        0 6px 16px rgba(251, 113, 133, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.25);
     }
 
     .modern-like-btn.is-liked .like-text {
@@ -958,8 +1028,10 @@
 
     .modern-like-btn.is-liked .like-counter {
       color: #e11d48;
-      background: rgba(255, 255, 255, 0.95);
-      box-shadow: inset 0 0 0 1px rgba(225, 29, 72, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 
+        inset 0 0 0 1.5px rgba(225, 29, 72, 0.25),
+        0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .modern-like-btn.is-liked .like-separator {
@@ -967,16 +1039,18 @@
     }
 
     .modern-like-btn.is-liked .heart-icon-box {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.98);
       color: #e11d48;
-      transform: scale(1.08);
-      box-shadow: 0 6px 16px rgba(255, 255, 255, 0.45), 0 10px 20px rgba(244, 63, 94, 0.25);
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 
+        0 8px 20px rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(244, 63, 94, 0.3);
     }
 
     .modern-like-btn.is-liked .heart-svg {
       stroke: currentColor;
       fill: currentColor;
-      animation: heartPop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: heartPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.375);
     }
 
     @keyframes heartPop {
@@ -984,8 +1058,8 @@
         transform: scale(1);
       }
 
-      45% {
-        transform: scale(1.25);
+      50% {
+        transform: scale(1.3) rotate(-10deg);
       }
 
       100% {
@@ -995,60 +1069,59 @@
 
     @media (max-width: 640px) {
       .modern-like-wrapper {
-        margin: 0.75rem 0;
+        margin: 1rem 0;
       }
 
       .modern-like-btn {
         width: 100%;
         justify-content: center;
-        padding: 0.6rem 1rem;
-        gap: 10px;
-        border-radius: 12px;
-        font-size: 0.88rem;
-        box-shadow: 0 8px 20px rgba(236, 72, 153, 0.12);
+        padding: 0.75rem 1.25rem;
+        gap: 12px;
+        border-radius: 16px;
+        font-size: 0.95rem;
       }
 
       .heart-icon-box {
-        width: 34px;
-        height: 34px;
-        border-radius: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
       }
 
       .heart-svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
       }
 
       .like-text {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
       }
 
       .like-counter {
-        font-size: 0.85rem;
-        min-width: 28px;
-        padding: 0.3rem 0.6rem;
-      }
-
-      .like-separator {
-        font-size: 1rem;
+        font-size: 0.9rem;
+        min-width: 32px;
+        padding: 0.35rem 0.7rem;
       }
     }
 
     .meta-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.8rem;
+      color: #64748b;
       display: flex;
       align-items: center;
       gap: 0.35rem;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.85;
     }
 
     .meta-value {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--text-main);
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #1e293b;
       word-break: break-word;
-      line-height: 1.5;
+      line-height: 1.4;
+      letter-spacing: -0.02em;
     }
 
     .price-range {
@@ -1066,14 +1139,26 @@
     }
 
     .meta-card--highlight .meta-card__icon {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.1) 100%);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.12) 100%);
       color: #059669;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .meta-card--highlight .meta-card__icon::before {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.2) 100%);
     }
 
     .meta-card--highlight:hover .meta-card__icon {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.15) 100%);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.18) 100%);
+      box-shadow: 
+        0 6px 18px rgba(16, 185, 129, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .meta-card--highlight .meta-value {
+      color: #059669;
     }
 
     .tag-list {
@@ -4671,14 +4756,20 @@
     .premium-seller-actions {
       width: 100%;
       padding: 0;
-      margin: 1.5rem 0;
+      margin: 1.75rem 0;
     }
 
     .seller-actions-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.85rem;
-      margin-bottom: 1rem;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .seller-actions-grid {
+        gap: 0.85rem;
+      }
     }
 
     .seller-action-btn {
@@ -4686,17 +4777,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 68px;
-      padding: 1rem 1.25rem;
+      min-height: 72px;
+      padding: 1.1rem 1.4rem;
       border: none;
-      border-radius: 16px;
+      border-radius: 18px;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
       overflow: hidden;
       isolation: isolate;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .seller-action-btn__bg {
@@ -4704,7 +4795,7 @@
       inset: 0;
       border-radius: inherit;
       opacity: 1;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.35s ease;
     }
 
     .seller-action-btn__content {
@@ -4713,20 +4804,22 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     .seller-action-btn__icon {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       flex-shrink: 0;
-      transition: transform 0.3s ease;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
     .seller-action-btn__text {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       line-height: 1.3;
       text-align: center;
+      letter-spacing: -0.01em;
     }
 
     /* پیام به فروشنده - Indigo/Blue */
