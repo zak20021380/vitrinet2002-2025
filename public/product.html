@@ -7403,6 +7403,690 @@
         transition: none;
       }
     }
+
+    /* Product summary component v2: compact, description-safe, mobile-first */
+    .product-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.78rem;
+      width: min(100%, calc(100vw - 2rem));
+      max-width: min(100%, calc(100vw - 2rem));
+      min-width: 0;
+      margin-inline: auto;
+      padding: clamp(0.78rem, 2.8vw, 1.28rem);
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.1), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      box-shadow: 0 20px 46px rgba(15, 23, 42, 0.09);
+      overflow: hidden;
+    }
+
+    .product-summary * {
+      min-width: 0;
+    }
+
+    .product-summary__header {
+      gap: 0.58rem;
+      padding: 0 0 0.78rem;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.72);
+    }
+
+    .product-summary h1 {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(1.13rem, 4.6vw, 1.72rem);
+      font-weight: 900;
+      line-height: 1.48;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .product-summary .mobile-tags-wrapper {
+      overflow: hidden;
+    }
+
+    .product-summary .tags-scroll-container {
+      justify-content: flex-start;
+      gap: 0.42rem;
+      padding: 0.04rem 0;
+      overflow-x: auto;
+      scroll-padding-inline: 0.2rem;
+    }
+
+    .product-summary #dynamicTags {
+      gap: 0.42rem !important;
+    }
+
+    .product-summary .main-badge-wrapper .badge,
+    .product-summary .tags-scroll-container .product-tag {
+      min-height: 26px;
+      padding: 0 0.62rem;
+      border-radius: 999px;
+      font-size: 0.67rem;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .product-summary__description-card,
+    .product-summary__details,
+    .product-summary__actions {
+      min-width: 0;
+    }
+
+    .product-summary__description-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 100%;
+      padding: 0.68rem;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.82), rgba(255, 255, 255, 0.98));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+
+    .product-summary__section-head {
+      display: flex;
+      align-items: center;
+      gap: 0.44rem;
+      color: #334155;
+      font-size: 0.74rem;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .product-summary__section-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #0f766e;
+      box-shadow: inset 0 0 0 1px rgba(20, 184, 166, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .product-summary__section-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .description-toggle-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .product-description-copy {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-height: 4.9rem;
+      min-height: 2.9rem;
+      padding: 0.42rem 0.56rem;
+      border: 1px solid rgba(226, 232, 240, 0.82);
+      border-radius: 14px;
+      background: #ffffff;
+      overflow: hidden;
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 650;
+      line-height: 1.85;
+      text-align: right;
+      direction: rtl;
+      box-sizing: border-box;
+      transition: max-height 0.24s ease;
+    }
+
+    .product-description-copy::after {
+      display: none;
+    }
+
+    .product-description-copy p {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .product-description-copy p + p {
+      margin-top: 0.45rem;
+    }
+
+    .description-toggle-input:checked ~ .product-description-copy {
+      max-height: min(42vh, 18rem);
+      overflow-y: auto;
+      padding-inline-end: 0.15rem;
+      scrollbar-width: thin;
+    }
+
+    .description-toggle-input:checked ~ .product-description-copy::after {
+      opacity: 0;
+    }
+
+    .description-toggle-label {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      min-height: 30px;
+      padding: 0.18rem 0.48rem;
+      border: 1px solid rgba(20, 184, 166, 0.2);
+      border-radius: 999px;
+      background: #ffffff;
+      color: #0f766e;
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.5;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.045);
+      user-select: none;
+    }
+
+    .description-toggle-label svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s ease;
+    }
+
+    .description-toggle-less {
+      display: none;
+    }
+
+    .description-toggle-input:checked ~ .description-toggle-label .description-toggle-more {
+      display: none;
+    }
+
+    .description-toggle-input:checked ~ .description-toggle-label .description-toggle-less {
+      display: inline;
+    }
+
+    .description-toggle-input:checked ~ .description-toggle-label svg {
+      transform: rotate(180deg);
+    }
+
+    .product-summary .subtitle[hidden] {
+      display: none !important;
+    }
+
+    .product-summary__details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .product-summary .status-message {
+      margin: 0;
+      padding: 0.58rem 0.68rem;
+      border: 1px solid rgba(203, 213, 225, 0.75);
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 0.73rem;
+      font-weight: 700;
+      line-height: 1.7;
+      box-shadow: none;
+    }
+
+    .product-summary .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.54rem;
+      width: 100%;
+    }
+
+    .product-summary .meta-card {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+      min-height: 58px;
+      padding: 0.56rem;
+      border: 1px solid rgba(226, 232, 240, 0.94);
+      border-radius: 15px;
+      background: #ffffff;
+      box-shadow: 0 7px 17px rgba(15, 23, 42, 0.045);
+    }
+
+    .product-summary .meta-card__icon {
+      width: 31px;
+      height: 31px;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 11px;
+      background: #f8fafc;
+      color: #64748b;
+      flex: 0 0 auto;
+    }
+
+    .product-summary .meta-card__icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .product-summary .meta-card__content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.08rem;
+      min-width: 0;
+      text-align: right;
+    }
+
+    .product-summary .meta-label {
+      color: #64748b;
+      font-size: 0.64rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .product-summary .meta-value {
+      color: #111827;
+      font-size: 0.75rem;
+      font-weight: 900;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .product-summary .meta-card--highlight {
+      grid-column: 1 / -1;
+      min-height: 74px;
+      padding: 0.7rem 0.76rem;
+      border-color: rgba(20, 184, 166, 0.28);
+      background:
+        linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(255, 255, 255, 0.98) 56%),
+        radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.1), transparent 36%);
+      box-shadow: 0 12px 25px rgba(15, 118, 110, 0.1);
+    }
+
+    .product-summary .meta-card--highlight .meta-card__icon {
+      width: 38px;
+      height: 38px;
+      border-color: rgba(20, 184, 166, 0.3);
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .product-summary .meta-card--highlight .meta-label {
+      color: #0f766e;
+    }
+
+    .product-summary .meta-card--highlight .meta-value {
+      color: #047857;
+      font-size: clamp(1rem, 4.3vw, 1.28rem);
+      line-height: 1.45;
+    }
+
+    .product-summary #updatedCard {
+      grid-column: auto;
+    }
+
+    .product-summary__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.64rem;
+      padding-top: 0.72rem;
+      border-top: 1px solid rgba(226, 232, 240, 0.75);
+    }
+
+    .product-summary .premium-seller-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .product-summary .seller-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin: 0;
+    }
+
+    .product-summary .seller-action-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      min-height: 56px;
+      padding: 0.54rem 0.34rem;
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      border-radius: 15px;
+      background: #ffffff;
+      color: #334155;
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.045);
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      overflow: hidden;
+    }
+
+    .product-summary .seller-action-btn__bg {
+      display: none;
+    }
+
+    .product-summary .seller-action-btn__content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.28rem;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .product-summary .seller-action-btn__icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      filter: none;
+    }
+
+    .product-summary .seller-action-btn__text {
+      max-width: 100%;
+      color: inherit;
+      font-size: 0.66rem;
+      font-weight: 900;
+      line-height: 1.4;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .product-summary .seller-action-btn--message {
+      grid-column: 1 / -1;
+      min-height: 52px;
+      padding: 0.72rem 0.9rem;
+      border-color: transparent;
+      background: linear-gradient(135deg, #0f766e 0%, #0284c7 100%);
+      color: #ffffff;
+      box-shadow: 0 13px 26px rgba(2, 132, 199, 0.22);
+    }
+
+    .product-summary .seller-action-btn--message .seller-action-btn__content {
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+
+    .product-summary .seller-action-btn--message .seller-action-btn__icon {
+      width: 19px;
+      height: 19px;
+    }
+
+    .product-summary .seller-action-btn--message .seller-action-btn__text {
+      font-size: 0.82rem;
+    }
+
+    .product-summary .seller-action-btn--address {
+      border-color: rgba(52, 211, 153, 0.34);
+      background: #f0fdf4;
+      color: #047857;
+    }
+
+    .product-summary .seller-action-btn--page {
+      border-color: rgba(125, 211, 252, 0.46);
+      background: #f0f9ff;
+      color: #0369a1;
+    }
+
+    .product-summary .seller-action-btn--discount {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .product-summary .seller-action-btn:hover:not(:disabled):not([aria-disabled="true"]),
+    .product-summary .seller-action-btn:focus-visible:not(:disabled):not([aria-disabled="true"]) {
+      transform: translateY(-1px);
+      border-color: rgba(20, 184, 166, 0.34);
+      box-shadow: 0 11px 23px rgba(15, 23, 42, 0.08);
+      outline: none;
+    }
+
+    .product-summary .seller-action-btn:disabled,
+    .product-summary .seller-action-btn.is-disabled,
+    .product-summary .seller-action-btn[aria-disabled="true"] {
+      opacity: 0.52;
+      border-color: #e2e8f0;
+      background: #f8fafc;
+      color: #94a3b8;
+      box-shadow: none !important;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .product-social-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .product-summary .modern-like-wrapper {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .product-summary .modern-like-btn,
+    .product-summary .premium-favorite-btn {
+      width: 100%;
+      min-height: 48px;
+      margin: 0;
+      padding: 0.42rem 0.48rem;
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      border-radius: 15px;
+      background: #ffffff;
+      color: #334155;
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.045);
+      font-family: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .product-summary .modern-like-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.38rem;
+    }
+
+    .product-summary .premium-favorite-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .product-summary .modern-like-btn::before,
+    .product-summary .premium-favorite-btn::before,
+    .product-summary .premium-favorite-btn::after,
+    .product-summary .favorite-btn-shine,
+    .product-summary .favorite-btn-shimmer,
+    .product-summary .favorite-particles,
+    .product-summary .favorite-icon-wrapper::before {
+      display: none;
+    }
+
+    .product-summary .heart-icon-box,
+    .product-summary .favorite-icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(251, 113, 133, 0.24);
+      border-radius: 11px;
+      background: #fff7f8;
+      color: #e11d48;
+      box-shadow: none;
+      flex: 0 0 auto;
+    }
+
+    .product-summary .heart-svg,
+    .product-summary .favorite-icon {
+      width: 16px;
+      height: 16px;
+      color: currentColor;
+      filter: none;
+    }
+
+    .product-summary .favorite-btn-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.42rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .product-summary .like-text,
+    .product-summary .favorite-text {
+      min-width: 0;
+      color: inherit;
+      font-size: 0.68rem;
+      font-weight: 900;
+      line-height: 1.42;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .product-summary .like-counter {
+      min-width: 28px;
+      padding: 0.24rem 0.42rem;
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #64748b;
+      box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.92);
+      font-size: 0.68rem;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .product-summary .modern-like-btn:hover,
+    .product-summary .premium-favorite-btn:hover,
+    .product-summary .modern-like-btn:focus-visible,
+    .product-summary .premium-favorite-btn:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(251, 113, 133, 0.34);
+      background: #fffafb;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.075);
+      outline: none;
+    }
+
+    .product-summary .modern-like-btn.is-liked,
+    .product-summary .premium-favorite-btn.is-liked {
+      border-color: rgba(225, 29, 72, 0.18);
+      background: #fff1f2;
+      color: #be123c;
+      box-shadow: 0 9px 20px rgba(225, 29, 72, 0.08);
+    }
+
+    .product-summary .modern-like-btn.is-liked .heart-icon-box,
+    .product-summary .premium-favorite-btn.is-liked .favorite-icon-wrapper {
+      background: #e11d48;
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .product-summary .modern-like-btn.is-liked .heart-svg,
+    .product-summary .premium-favorite-btn.is-liked .favorite-icon {
+      fill: currentColor;
+    }
+
+    @media (min-width: 520px) {
+      .product-summary .meta-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .product-summary .meta-card--highlight {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .product-summary {
+        gap: 0.9rem;
+      }
+
+      .product-summary__description-card {
+        padding: 0.78rem;
+      }
+
+      .product-description-copy {
+        font-size: 0.84rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .product-summary .seller-actions-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .product-summary .seller-action-btn--message {
+        grid-column: 1 / -1;
+      }
+
+      .product-summary .seller-action-btn--message .seller-action-btn__content {
+        flex-direction: row;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .product-summary {
+        border-radius: 18px;
+        padding: 0.68rem;
+      }
+
+      .product-summary .meta-grid,
+      .product-summary .seller-actions-grid,
+      .product-social-actions {
+        gap: 0.44rem;
+      }
+
+      .product-summary .meta-card {
+        min-height: 56px;
+        padding: 0.5rem;
+      }
+
+      .product-summary .meta-card__icon {
+        width: 28px;
+        height: 28px;
+      }
+
+      .product-summary .seller-action-btn__text,
+      .product-summary .like-text,
+      .product-summary .favorite-text {
+        font-size: 0.63rem;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .product-summary .meta-grid,
+      .product-social-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .product-description-copy,
+      .description-toggle-label svg,
+      .product-summary .seller-action-btn,
+      .product-summary .modern-like-btn,
+      .product-summary .premium-favorite-btn {
+        transition: none;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -7749,182 +8433,193 @@
           <div class="thumbnails" id="thumbnails" role="group" aria-label="تصاویر محصول" hidden></div>
         </div>
 
-        <div class="product-summary">
+        <div class="product-summary" aria-label="اطلاعات محصول">
           <div class="product-summary__header">
             <h1 id="productTitle">در حال بارگذاری محصول...</h1>
 
-            <!-- Premium Tags Section -->
             <div class="mobile-tags-wrapper" id="productTagsPanel" hidden>
               <div class="tags-scroll-container" dir="rtl">
-
-                <!-- آیکون تگ -->
                 <div class="tags-icon-indicator" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                     <circle cx="7" cy="7" r="1"></circle>
                   </svg>
                 </div>
-
-                <!-- جداکننده -->
                 <div class="tags-separator" aria-hidden="true"></div>
-
-                <!-- بج اصلی محصول -->
                 <div class="main-badge-wrapper">
                   <span class="badge" id="productBadge" hidden></span>
                 </div>
-
-                <!-- تگ‌های داینامیک -->
                 <div id="dynamicTags" class="flex items-center gap-2"></div>
               </div>
             </div>
-            <p class="subtitle" id="productSubtitle"></p>
           </div>
+
+          <section class="product-summary__description-card" aria-labelledby="productDescriptionHeading">
+            <div class="product-summary__section-head">
+              <span class="product-summary__section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M5 5.75A2.75 2.75 0 0 1 7.75 3h8.5A2.75 2.75 0 0 1 19 5.75v12.5A2.75 2.75 0 0 1 16.25 21h-8.5A2.75 2.75 0 0 1 5 18.25V5.75Z" stroke="currentColor" stroke-width="1.7" />
+                  <path d="M8.5 8h7M8.5 12h7M8.5 16h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span id="productDescriptionHeading">توضیحات محصول</span>
+            </div>
+            <input class="description-toggle-input" type="checkbox" id="productDescriptionToggle" aria-label="باز و بسته کردن توضیحات محصول">
+            <div class="product-description-copy" id="productDescriptionLong" aria-live="polite">
+              <p>در حال بارگذاری توضیحات محصول...</p>
+            </div>
+            <label class="description-toggle-label" for="productDescriptionToggle">
+              <span class="description-toggle-more">مشاهده بیشتر</span>
+              <span class="description-toggle-less">نمایش کمتر</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </label>
+            <p class="subtitle" id="productSubtitle" hidden></p>
+          </section>
 
           <div class="product-summary__details">
             <div class="status-message" id="statusMessage" role="status" aria-live="polite">در حال بارگذاری اطلاعات
               محصول...</div>
 
             <div class="meta-grid">
-            <div class="meta-card">
-              <span class="meta-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3a4 4 0 0 0-4 4v1.5h8V7a4 4 0 0 0-4-4Z" stroke="currentColor" stroke-width="1.6"
-                    stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M17 21H7a2 2 0 0 1-2-2v-5.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2Z"
-                    stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <div class="meta-card__content">
-                <span class="meta-label">فروشنده</span>
-                <span class="meta-value" id="productSeller">-</span>
+              <div class="meta-card meta-card--highlight" id="priceCard" hidden>
+                <span class="meta-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3v18m4.5-14.5H9a3 3 0 0 0 0 6h6a3 3 0 1 1 0 6H7.5" stroke="currentColor"
+                      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="meta-card__content">
+                  <span class="meta-label">قیمت اعلام شده</span>
+                  <span class="meta-value" id="productPrice"></span>
+                </div>
               </div>
-            </div>
-            <div class="meta-card">
-              <span class="meta-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M6 4.5h12l-1 5.5H7l-1-5.5Z" stroke="currentColor" stroke-width="1.6"
-                    stroke-linejoin="round" />
-                  <path d="M18 13.5H6V19a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19v-5.5Z" stroke="currentColor"
-                    stroke-width="1.6" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <div class="meta-card__content">
-                <span class="meta-label">دسته‌بندی</span>
-                <span class="meta-value" id="productCategory">-</span>
-              </div>
-            </div>
-            <div class="meta-card meta-card--highlight" id="priceCard" hidden>
-              <span class="meta-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3v18m4.5-14.5H9a3 3 0 0 0 0 6h6a3 3 0 1 1 0 6H7.5" stroke="currentColor"
-                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <div class="meta-card__content">
-                <span class="meta-label">قیمت اعلام شده</span>
-                <span class="meta-value" id="productPrice"></span>
-              </div>
-            </div>
 
-            <div class="meta-card" id="updatedCard" hidden>
-              <span class="meta-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 5V3m0 18v-2m6-6h2M4 13H2m14.95-6.95 1.414-1.414M7.636 16.364 6.222 17.778m0-11.556L7.636 7.636m10.728 8.728-1.414 1.414M8.5 10a3.5 3.5 0 0 1 6.472 1.33l1.668.62a.5.5 0 0 1 .07.91l-4.18 2a.5.5 0 0 1-.66-.25l-1.89-4.42A.5.5 0 0 1 8.5 10Z"
-                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <div class="meta-card__content">
-                <span class="meta-label">آخرین بروزرسانی</span>
-                <span class="meta-value" id="productUpdated"></span>
+              <div class="meta-card">
+                <span class="meta-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3a4 4 0 0 0-4 4v1.5h8V7a4 4 0 0 0-4-4Z" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M17 21H7a2 2 0 0 1-2-2v-5.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2Z"
+                      stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="meta-card__content">
+                  <span class="meta-label">فروشنده</span>
+                  <span class="meta-value" id="productSeller">-</span>
+                </div>
               </div>
-            </div>
+
+              <div class="meta-card">
+                <span class="meta-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 4.5h12l-1 5.5H7l-1-5.5Z" stroke="currentColor" stroke-width="1.6"
+                      stroke-linejoin="round" />
+                    <path d="M18 13.5H6V19a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19v-5.5Z" stroke="currentColor"
+                      stroke-width="1.6" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="meta-card__content">
+                  <span class="meta-label">دسته‌بندی</span>
+                  <span class="meta-value" id="productCategory">-</span>
+                </div>
+              </div>
+
+              <div class="meta-card" id="updatedCard" hidden>
+                <span class="meta-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 5V3m0 18v-2m6-6h2M4 13H2m14.95-6.95 1.414-1.414M7.636 16.364 6.222 17.778m0-11.556L7.636 7.636m10.728 8.728-1.414 1.414M8.5 10a3.5 3.5 0 0 1 6.472 1.33l1.668.62a.5.5 0 0 1 .07.91l-4.18 2a.5.5 0 0 1-.66-.25l-1.89-4.42A.5.5 0 0 1 8.5 10Z"
+                      stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="meta-card__content">
+                  <span class="meta-label">آخرین بروزرسانی</span>
+                  <span class="meta-value" id="productUpdated"></span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="product-summary__actions">
-            <div class="modern-like-wrapper">
-            <button id="likeButton" class="modern-like-btn" type="button" aria-label="پسندیدن">
-              <div class="heart-icon-box">
-                <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3.2 6.1a4.2 4.2 0 0 1 5.9 0L12 9l2.9-2.9a4.2 4.2 0 1 1 5.9 5.9L12 20.7l-8.8-8.7a4.2 4.2 0 0 1 0-5.9z" />
-                </svg>
-              </div>
-              <span class="like-text" id="likeButtonLabel">پسندیدن</span>
-              <span class="like-counter" id="likeCount">۰</span>
-            </button>
-            <span id="likeStatus" hidden></span>
-            <span id="likeMeterFill" hidden></span>
-            </div>
-
-            <!-- Premium Seller Actions - Redesigned Modern UI -->
             <div class="premium-seller-actions" id="sellerActions">
-            <!-- Main Action Buttons Grid -->
-            <div class="seller-actions-grid">
-              <!-- پیام به فروشنده - Primary Action -->
-              <button type="button" id="messageSellerButton" disabled class="seller-action-btn seller-action-btn--message">
-                <div class="seller-action-btn__bg"></div>
-                <div class="seller-action-btn__content">
-                  <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    <path d="M8 10h8M8 14h5" />
-                  </svg>
-                  <span class="seller-action-btn__text">پیام به فروشنده</span>
-                </div>
-              </button>
+              <div class="seller-actions-grid">
+                <button type="button" id="messageSellerButton" disabled class="seller-action-btn seller-action-btn--message">
+                  <div class="seller-action-btn__bg"></div>
+                  <div class="seller-action-btn__content">
+                    <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      <path d="M8 10h8M8 14h5" />
+                    </svg>
+                    <span class="seller-action-btn__text">پیام به فروشنده</span>
+                  </div>
+                </button>
 
-              <!-- آدرس مغازه -->
-              <button type="button" id="sellerAddressButton" disabled class="seller-action-btn seller-action-btn--address">
-                <div class="seller-action-btn__bg"></div>
-                <div class="seller-action-btn__content">
-                  <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span class="seller-action-btn__text">آدرس مغازه</span>
-                </div>
-              </button>
+                <button type="button" id="sellerAddressButton" disabled class="seller-action-btn seller-action-btn--address">
+                  <div class="seller-action-btn__bg"></div>
+                  <div class="seller-action-btn__content">
+                    <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span class="seller-action-btn__text">آدرس مغازه</span>
+                  </div>
+                </button>
 
-              <!-- صفحه مغازه -->
-              <a href="#" id="sellerLink" aria-disabled="true" data-has-shop="false" class="seller-action-btn seller-action-btn--page">
-                <div class="seller-action-btn__bg"></div>
-                <div class="seller-action-btn__content">
-                  <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <path d="M9 22V12h6v10" />
-                  </svg>
-                  <span class="seller-action-btn__text">صفحه مغازه</span>
-                </div>
-              </a>
+                <a href="#" id="sellerLink" aria-disabled="true" data-has-shop="false" class="seller-action-btn seller-action-btn--page">
+                  <div class="seller-action-btn__bg"></div>
+                  <div class="seller-action-btn__content">
+                    <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <path d="M9 22V12h6v10" />
+                    </svg>
+                    <span class="seller-action-btn__text">صفحه مغازه</span>
+                  </div>
+                </a>
 
-              <!-- درخواست تخفیف -->
-              <button type="button" id="discountButton" disabled class="seller-action-btn seller-action-btn--discount">
-                <div class="seller-action-btn__bg"></div>
-                <div class="seller-action-btn__content">
-                  <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="m15 9-6 6M9 9h.01M15 15h.01" />
-                  </svg>
-                  <span class="seller-action-btn__text">درخواست تخفیف</span>
-                </div>
-              </button>
-            </div>
-
-            <!-- دکمه افزودن به علاقه‌مندی - Premium Design -->
-            <button type="button" id="addToFavoritesBtn" class="premium-favorite-btn">
-              <div class="favorite-btn-shine"></div>
-              <div class="favorite-btn-content">
-                <div class="favorite-icon-wrapper">
-                  <svg id="favoriteIcon" class="favorite-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                  </svg>
-                </div>
-                <span id="favoriteText" class="favorite-text">افزودن به علاقه‌مندی‌ها</span>
+                <button type="button" id="discountButton" disabled class="seller-action-btn seller-action-btn--discount">
+                  <div class="seller-action-btn__bg"></div>
+                  <div class="seller-action-btn__content">
+                    <svg class="seller-action-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="m15 9-6 6M9 9h.01M15 15h.01" />
+                    </svg>
+                    <span class="seller-action-btn__text">درخواست تخفیف</span>
+                  </div>
+                </button>
               </div>
-              <div class="favorite-btn-shimmer"></div>
-              <div class="favorite-particles"></div>
-              </button>
+
+              <div class="product-social-actions">
+                <div class="modern-like-wrapper">
+                  <button id="likeButton" class="modern-like-btn" type="button" aria-label="پسندیدن">
+                    <div class="heart-icon-box">
+                      <svg class="heart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3.2 6.1a4.2 4.2 0 0 1 5.9 0L12 9l2.9-2.9a4.2 4.2 0 1 1 5.9 5.9L12 20.7l-8.8-8.7a4.2 4.2 0 0 1 0-5.9z" />
+                      </svg>
+                    </div>
+                    <span class="like-text" id="likeButtonLabel">پسندیدن</span>
+                    <span class="like-counter" id="likeCount">۰</span>
+                  </button>
+                  <span id="likeStatus" hidden></span>
+                  <span id="likeMeterFill" hidden></span>
+                </div>
+
+                <button type="button" id="addToFavoritesBtn" class="premium-favorite-btn">
+                  <div class="favorite-btn-shine"></div>
+                  <div class="favorite-btn-content">
+                    <div class="favorite-icon-wrapper">
+                      <svg id="favoriteIcon" class="favorite-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                    </div>
+                    <span id="favoriteText" class="favorite-text">افزودن به علاقه‌مندی‌ها</span>
+                  </div>
+                  <div class="favorite-btn-shimmer"></div>
+                  <div class="favorite-particles"></div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
