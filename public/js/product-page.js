@@ -158,7 +158,11 @@
     likeButtonLabel: document.getElementById('likeButtonLabel'),
     likeStatus: document.getElementById('likeStatus'),
     likeMeterFill: document.getElementById('likeMeterFill'),
-    addToFavoritesBtn: document.getElementById('addToFavoritesBtn')
+    addToFavoritesBtn: document.getElementById('addToFavoritesBtn'),
+    descriptionToggle: document.getElementById('productDescriptionToggle'),
+    descriptionToggleLabel: document.querySelector('label[for="productDescriptionToggle"]'),
+    descriptionPreview: document.getElementById('productDescriptionPreview'),
+    descriptionInline: document.getElementById('productDescriptionInline')
   };
 
   const state = {
@@ -1584,6 +1588,17 @@
     if (!dom.descriptionLong) return;
 
     dom.descriptionLong.innerHTML = '';
+    if (dom.descriptionToggle) dom.descriptionToggle.checked = false;
+    if (dom.descriptionPreview) {
+      dom.descriptionPreview.hidden = true;
+      dom.descriptionPreview.textContent = '';
+      dom.descriptionPreview.removeAttribute('style');
+    }
+    if (dom.descriptionInline) {
+      dom.descriptionInline.hidden = true;
+      dom.descriptionInline.textContent = '';
+    }
+    dom.descriptionLong.hidden = false;
     const parts = typeof desc === 'string'
       ? desc.split(/\n{2,}|[\r\n]+/).map(part => part.trim()).filter(Boolean)
       : [];
@@ -1592,6 +1607,20 @@
       const p = document.createElement('p');
       p.textContent = 'برای این محصول هنوز توضیحاتی ثبت نشده است.';
       dom.descriptionLong.appendChild(p);
+      dom.descriptionLong.dataset.descriptionPreview = p.textContent;
+      dom.descriptionLong.classList.add('is-short');
+      dom.descriptionLong.hidden = true;
+      if (dom.descriptionPreview) {
+        dom.descriptionPreview.textContent = p.textContent;
+        dom.descriptionPreview.hidden = false;
+        dom.descriptionPreview.style.display = 'block';
+        dom.descriptionPreview.style.color = '#1f2937';
+      }
+      if (dom.descriptionInline) {
+        dom.descriptionInline.textContent = p.textContent;
+        dom.descriptionInline.hidden = false;
+      }
+      if (dom.descriptionToggleLabel) dom.descriptionToggleLabel.hidden = true;
       return;
     }
 
@@ -1600,6 +1629,23 @@
       p.textContent = text;
       dom.descriptionLong.appendChild(p);
     });
+
+    const descriptionLength = parts.join(' ').length;
+    const isShortDescription = parts.length === 1 && descriptionLength <= 95;
+    dom.descriptionLong.dataset.descriptionPreview = isShortDescription ? parts[0] : '';
+    dom.descriptionLong.classList.toggle('is-short', isShortDescription);
+    dom.descriptionLong.hidden = isShortDescription;
+    if (dom.descriptionPreview) {
+      dom.descriptionPreview.textContent = isShortDescription ? parts[0] : '';
+      dom.descriptionPreview.hidden = !isShortDescription;
+      dom.descriptionPreview.style.display = isShortDescription ? 'block' : 'none';
+      dom.descriptionPreview.style.color = '#1f2937';
+    }
+    if (dom.descriptionInline) {
+      dom.descriptionInline.textContent = isShortDescription ? parts[0] : '';
+      dom.descriptionInline.hidden = !isShortDescription;
+    }
+    if (dom.descriptionToggleLabel) dom.descriptionToggleLabel.hidden = isShortDescription;
   }
 
   function renderSellerCard(seller, productDesc) {
