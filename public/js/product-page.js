@@ -689,11 +689,12 @@
     if (!dom.likeButton || !dom.likeCount) return;
 
     dom.likeButton.setAttribute('aria-pressed', likeState.liked ? 'true' : 'false');
+    dom.likeButton.setAttribute('aria-label', likeState.liked ? 'لغو پسندیدن محصول' : 'پسندیدن محصول');
     dom.likeButton.classList.toggle('is-liked', likeState.liked);
     dom.likeButton.classList.toggle('is-busy', likeState.loading);
 
     if (dom.likeButtonLabel) {
-      dom.likeButtonLabel.textContent = likeState.liked ? 'این محصول را پسندیده‌اید' : 'پسندیدن محصول';
+      dom.likeButtonLabel.textContent = likeState.liked ? 'پسندیده شد' : 'پسندیدن';
     }
 
     dom.likeCount.textContent = persianNumberFormatter.format(Math.max(0, likeState.likesCount));

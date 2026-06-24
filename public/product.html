@@ -8436,6 +8436,125 @@
         box-shadow: 0 7px 16px rgba(15, 23, 42, 0.045);
       }
     }
+
+    /* Stable product like/favorite actions: prevents post-like text squeeze on mobile */
+    .product-social-actions {
+      align-items: stretch;
+    }
+
+    .product-summary .modern-like-btn,
+    .product-summary .premium-favorite-btn {
+      min-width: 0;
+      min-height: 48px;
+      overflow: hidden;
+    }
+
+    .product-summary .modern-like-btn {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      align-items: center;
+      justify-content: initial;
+      gap: 0.44rem;
+      padding: 0.42rem 0.48rem;
+      border: 1px solid rgba(251, 113, 133, 0.3);
+      border-radius: 14px;
+      background: #fff7f8;
+      color: #be123c;
+      box-shadow: 0 7px 16px rgba(225, 29, 72, 0.055);
+    }
+
+    .product-summary .heart-icon-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 11px;
+      background: #fff;
+      color: #e11d48;
+      border: 1px solid rgba(251, 113, 133, 0.26);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+    }
+
+    .product-summary .heart-svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .product-summary .like-text {
+      min-width: 0;
+      color: inherit;
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.35;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0;
+    }
+
+    .product-summary .like-counter {
+      min-width: 25px;
+      height: 24px;
+      padding: 0 0.38rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #be123c;
+      box-shadow: inset 0 0 0 1px rgba(251, 113, 133, 0.22);
+      font-size: 0.66rem;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .product-summary .modern-like-btn:hover,
+    .product-summary .modern-like-btn:focus-visible {
+      background: #fff1f2;
+      border-color: rgba(225, 29, 72, 0.34);
+      box-shadow: 0 9px 19px rgba(225, 29, 72, 0.09);
+      transform: translateY(-1px);
+    }
+
+    .product-summary .modern-like-btn.is-liked {
+      border-color: rgba(225, 29, 72, 0.22);
+      background: #fff1f2;
+      color: #be123c;
+      box-shadow: 0 9px 20px rgba(225, 29, 72, 0.08);
+    }
+
+    .product-summary .modern-like-btn.is-liked .heart-icon-box {
+      background: #e11d48;
+      color: #fff;
+      border-color: transparent;
+      transform: none;
+      box-shadow: 0 7px 14px rgba(225, 29, 72, 0.18);
+    }
+
+    .product-summary .modern-like-btn.is-liked .like-counter {
+      background: #fff;
+      color: #be123c;
+      box-shadow: inset 0 0 0 1px rgba(225, 29, 72, 0.18);
+    }
+
+    .product-summary .modern-like-btn.is-busy {
+      cursor: progress;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    @media (max-width: 380px) {
+      .product-summary .modern-like-btn {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+        gap: 0.34rem;
+        padding-inline: 0.4rem;
+      }
+
+      .product-summary .heart-icon-box {
+        width: 28px;
+        height: 28px;
+      }
+
+      .product-summary .like-text {
+        font-size: 0.66rem;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -9503,7 +9622,7 @@
     </div>
   </footer>
 
-  <script src="/js/product-page.js?v=product-summary-mobile-20260624e" defer></script>
+  <script src="/js/product-page.js?v=product-summary-mobile-20260624f" defer></script>
   <script src="/js/product-comments.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
