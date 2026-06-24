@@ -1609,7 +1609,7 @@
       dom.descriptionLong.appendChild(p);
       dom.descriptionLong.dataset.descriptionPreview = p.textContent;
       dom.descriptionLong.classList.add('is-short');
-      dom.descriptionLong.hidden = true;
+      dom.descriptionLong.hidden = false;
       if (dom.descriptionPreview) {
         dom.descriptionPreview.textContent = p.textContent;
         dom.descriptionPreview.hidden = false;
@@ -1634,7 +1634,7 @@
     const isShortDescription = parts.length === 1 && descriptionLength <= 95;
     dom.descriptionLong.dataset.descriptionPreview = isShortDescription ? parts[0] : '';
     dom.descriptionLong.classList.toggle('is-short', isShortDescription);
-    dom.descriptionLong.hidden = isShortDescription;
+    dom.descriptionLong.hidden = false;
     if (dom.descriptionPreview) {
       dom.descriptionPreview.textContent = isShortDescription ? parts[0] : '';
       dom.descriptionPreview.hidden = !isShortDescription;
