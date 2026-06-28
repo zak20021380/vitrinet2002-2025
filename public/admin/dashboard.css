@@ -145,6 +145,7 @@ body.sidebar-open::before {
 /* Main Content */
 .main-content {
   flex: 1;
+  min-width: 0;
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
@@ -3573,6 +3574,8 @@ tr:last-child td {
   border: 1px solid rgba(226, 232, 240, 0.9);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.08);
   margin-bottom: 2.2rem;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .ad-orders-table-head {
@@ -3653,6 +3656,7 @@ tr:last-child td {
 
 .ad-orders-table {
   margin: 0;
+  max-width: 100%;
 }
 
 .ad-orders-table.table-wrap {
@@ -3661,13 +3665,16 @@ tr:last-child td {
   box-shadow: none;
   background: transparent;
   overflow-x: auto;
+  box-sizing: border-box;
 }
 
 .ad-orders-table.table-wrap table {
   border-collapse: separate;
   border-spacing: 0 14px;
+  width: 100%;
   min-width: 720px;
   background: transparent;
+  box-sizing: border-box;
 }
 
 .ad-orders-table table thead th {
@@ -3687,6 +3694,7 @@ tr:last-child td {
   font-size: 0.9rem;
   color: #475569;
   border: none;
+  overflow-wrap: anywhere;
 }
 
 .ad-orders-table table tbody tr.ad-order-row {
@@ -3965,12 +3973,14 @@ tr:last-child td {
   transform: translateY(-1px);
 }
 
-.ad-action-btn.reject {
+.ad-action-btn.reject,
+.ad-action-btn.danger {
   background: #fee2e2;
   color: #b91c1c;
 }
 
-.ad-action-btn.reject:hover {
+.ad-action-btn.reject:hover,
+.ad-action-btn.danger:hover {
   background: #fecaca;
 }
 
@@ -4055,7 +4065,7 @@ tr:last-child td {
   }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1180px) {
   .ad-orders-hero {
     padding: 1.2rem 1.2rem 1.45rem;
   }
@@ -4079,6 +4089,8 @@ tr:last-child td {
   }
 
   .ad-orders-table.table-wrap table {
+    display: block;
+    width: 100%;
     min-width: 100%;
     border-spacing: 0;
   }
@@ -4089,25 +4101,46 @@ tr:last-child td {
 
   .ad-orders-table table,
   .ad-orders-table table tbody,
-  .ad-orders-table table tr,
   .ad-orders-table table td {
     display: block;
     width: 100%;
   }
 
+  .ad-orders-table table tbody {
+    display: grid;
+    gap: 1rem;
+  }
+
   .ad-orders-table table tbody tr {
+    display: block;
     margin-bottom: 1.2rem;
   }
 
   .ad-orders-table table tbody tr.ad-order-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
     border-radius: 18px;
     box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
-    padding: 1rem 0.9rem 0.7rem;
+    padding: 1rem 1rem 0.9rem;
+    margin-bottom: 0;
   }
 
   .ad-orders-table table tbody tr.ad-order-row td {
-    padding: 0.75rem 0.9rem;
+    width: auto;
+    min-width: 0;
+    padding: 0;
     position: relative;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row td:first-child,
+  .ad-orders-table table tbody tr.ad-order-row td:last-child {
+    border-radius: 0;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row td:nth-child(2),
+  .ad-orders-table table tbody tr.ad-order-row td:nth-child(6) {
+    grid-column: 1 / -1;
   }
 
   .ad-orders-table table tbody tr.ad-order-row td::before {
@@ -4125,12 +4158,23 @@ tr:last-child td {
   }
 
   .ad-orders-table .ad-actions {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
     align-items: stretch;
   }
 
   .ad-orders-table .ad-action-btn {
     justify-content: center;
+    min-height: 40px;
+    text-align: center;
+  }
+
+  .ad-orders-table .ad-plan-pill,
+  .ad-orders-table .ad-plan-location,
+  .ad-status-badge {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.55;
   }
 }
 
@@ -4158,12 +4202,17 @@ tr:last-child td {
   }
 
   .ad-actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: stretch;
   }
 
   .ad-action-btn {
     justify-content: center;
+  }
+
+  .ad-orders-table table tbody tr.ad-order-row {
+    grid-template-columns: 1fr;
+    padding: 0.95rem 0.9rem 0.85rem;
   }
 
   .ad-modal-visit {
@@ -4901,6 +4950,47 @@ tr:last-child td {
 
   .main-content {
     padding: clamp(1.1rem, 6vw + 0.3rem, 1.4rem);
+  }
+}
+
+@media (max-width: 700px) {
+  #ad-orders-panel,
+  .ad-orders-table-card,
+  .ad-orders-table.table-wrap {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .ad-orders-table-card {
+    overflow: hidden;
+  }
+
+  .ad-orders-table.table-wrap {
+    display: block;
+    overflow: visible;
+  }
+
+  .ad-orders-table.table-wrap table,
+  .ad-orders-table table tbody,
+  .ad-orders-table table tbody tr.ad-order-row,
+  .ad-orders-table table tbody tr.ad-order-row td {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .ad-orders-table .ad-plan-pill,
+  .ad-orders-table .ad-plan-location,
+  .ad-status-badge {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-wrap: anywhere;
+  }
+
+  .ad-orders-table .ad-action-btn {
+    width: 100%;
   }
 }
 

@@ -3134,26 +3134,29 @@ function renderAdOrders() {
 
     const adText = order.adText ? `<div class="ad-text">${escapeHtml(order.adText)}</div>` : '';
 
-    let quickActions = '';
+    let statusActions = '';
     if (order.status === 'pending') {
-      quickActions = `
-        <button class="ad-action-btn approve" data-action="quick-approve" data-id="${orderId}">
+      statusActions = `
+        <button type="button" class="ad-action-btn approve" data-action="quick-approve" data-id="${orderId}">
           <i class="ri-checkbox-circle-line"></i> تایید سریع
         </button>
-        <button class="ad-action-btn reject" data-action="quick-reject" data-id="${orderId}">
+        <button type="button" class="ad-action-btn reject" data-action="quick-reject" data-id="${orderId}">
           <i class="ri-close-circle-line"></i> رد
         </button>
       `;
     } else if (order.status === 'approved') {
-      quickActions = `
-        <button class="ad-action-btn ghost" data-action="quick-edit" data-id="${orderId}">
+      statusActions = `
+        <button type="button" class="ad-action-btn ghost" data-action="quick-edit" data-id="${orderId}">
           <i class="ri-edit-line"></i> ویرایش
-        </button>
-        <button class="ad-action-btn reject" data-action="quick-delete" data-id="${orderId}">
-          <i class="ri-delete-bin-line"></i> حذف
         </button>
       `;
     }
+    const deleteAction = `
+      <button type="button" class="ad-action-btn danger" data-action="quick-delete" data-id="${orderId}">
+        <i class="ri-delete-bin-line"></i> حذف
+      </button>
+    `;
+    const quickActions = `${statusActions}${deleteAction}`;
 
     const displayDateHtml = displayedAt
       ? `<span class="ad-date-live"><i class="ri-calendar-check-line"></i> نمایش: ${displayedAt}</span>`
@@ -3195,7 +3198,7 @@ function renderAdOrders() {
         <td data-column="عملیات">
           <div class="ad-actions">
             ${viewLocationButton}
-            <button class="ad-action-btn ghost" data-action="view" data-id="${orderId}"><i class="ri-eye-line"></i> جزئیات</button>
+            <button type="button" class="ad-action-btn ghost" data-action="view" data-id="${orderId}"><i class="ri-eye-line"></i> جزئیات</button>
             ${quickActions}
           </div>
         </td>
