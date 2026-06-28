@@ -5643,68 +5643,86 @@
     /* ========== Similar Shops - Premium Modern Design ========== */
     #similarShopsSection {
       width: 100%;
-      margin: 2.5rem 0;
+      margin: 3rem 0;
+      padding: 1.5rem 0;
+      background: linear-gradient(180deg,
+          rgba(99, 102, 241, 0.03) 0%,
+          rgba(139, 92, 246, 0.05) 50%,
+          rgba(99, 102, 241, 0.03) 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(99, 102, 241, 0.06);
     }
 
     #similarShopsSection .similar-shops-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 1rem;
-      margin-bottom: 1.25rem;
+      padding: 0 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
     #similarShopsSection .similar-shops-title {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.75rem;
       margin: 0;
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-size: 1.25rem;
+      font-weight: 900;
       color: #1e293b;
+      letter-spacing: -0.02em;
     }
 
     #similarShopsSection .similar-shops-title-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
     #similarShopsSection .similar-shops-title-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
 
     #similarShopsSection .similar-shops-view-all {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.06) 100%);
+      gap: 0.45rem;
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
       color: #6366f1;
       font-size: 0.85rem;
       font-weight: 700;
-      border: 1px solid rgba(99, 102, 241, 0.15);
-      transition: all 0.2s ease;
+      border: 1.5px solid rgba(99, 102, 241, 0.18);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
+      overflow: hidden;
     }
 
     #similarShopsSection .similar-shops-view-all:hover {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.10) 100%);
-      border-color: rgba(99, 102, 241, 0.25);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
     }
 
     #similarShopsSection .similar-shops-view-all svg {
       width: 14px;
       height: 14px;
+      transition: transform 0.25s ease;
+    }
+
+    #similarShopsSection .similar-shops-view-all:hover svg {
+      transform: translateX(-3px);
     }
 
     #similarShopsSection .similar-shops-scroll-container {
@@ -5713,12 +5731,35 @@
       padding: 0.5rem 0;
     }
 
+    #similarShopsSection .similar-shops-scroll-container::before,
+    #similarShopsSection .similar-shops-scroll-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2.5rem;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #similarShopsSection .similar-shops-scroll-container::before {
+      right: 0;
+      background: linear-gradient(to left, rgba(248, 250, 252, 0.95), transparent);
+    }
+
+    #similarShopsSection .similar-shops-scroll-container::after {
+      left: 0;
+      background: linear-gradient(to right, rgba(248, 250, 252, 0.95), transparent);
+    }
+
     #similarShopsSection .similar-shops-scroll {
       display: flex;
       overflow-x: auto;
       overflow-y: hidden;
-      gap: 1rem;
-      padding: 0.5rem 1rem 1rem;
+      gap: 1.1rem;
+      padding: 0.75rem 1.25rem 1.25rem;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
@@ -5733,51 +5774,94 @@
     #similarShopsSection .similar-shop-card {
       position: relative;
       flex: 0 0 auto;
-      width: clamp(260px, 42vw, 300px);
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      width: clamp(270px, 38vw, 320px);
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow:
+        0 4px 6px -1px rgba(15, 23, 42, 0.04),
+        0 10px 15px -3px rgba(15, 23, 42, 0.06),
+        0 0 0 1px rgba(226, 232, 240, 0.6) inset;
       overflow: hidden;
       scroll-snap-align: start;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
       display: flex;
       flex-direction: column;
+      backdrop-filter: blur(8px);
+    }
+
+    #similarShopsSection .similar-shop-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.15), rgba(14, 165, 233, 0.25));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      z-index: 1;
     }
 
     #similarShopsSection .similar-shop-card:hover {
-      border-color: rgba(139, 92, 246, 0.3);
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
-      transform: translateY(-3px);
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 20px 25px -5px rgba(99, 102, 241, 0.12),
+        0 10px 10px -5px rgba(15, 23, 42, 0.05),
+        0 0 0 1px rgba(139, 92, 246, 0.2) inset;
+    }
+
+    #similarShopsSection .similar-shop-card:hover::before {
+      opacity: 1;
     }
 
     #similarShopsSection .similar-shop-card__header {
       position: relative;
-      padding: 1.25rem 1.25rem 0.85rem;
-      background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+      padding: 1.5rem 1.5rem 1rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
     }
 
     #similarShopsSection .similar-shop-card__logo-wrapper {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 64px;
-      height: 64px;
+      width: 76px;
+      height: 76px;
       margin: 0 auto;
-      border-radius: 14px;
+      border-radius: 18px;
       background: #ffffff;
-      border: 2px solid rgba(226, 232, 240, 0.6);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      border: 3px solid transparent;
+      box-shadow:
+        0 8px 24px rgba(15, 23, 42, 0.1),
+        0 0 0 2px rgba(255, 255, 255, 0.8) inset;
       overflow: hidden;
-      transition: all 0.25s ease;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #similarShopsSection .similar-shop-card__logo-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 21px;
+      padding: 3px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #14b8a6 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      z-index: -1;
     }
 
     #similarShopsSection .similar-shop-card:hover .similar-shop-card__logo-wrapper {
-      border-color: rgba(139, 92, 246, 0.4);
-      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.15);
-      transform: scale(1.05);
+      transform: scale(1.08) translateY(-2px);
+      box-shadow:
+        0 12px 28px rgba(99, 102, 241, 0.2),
+        0 0 0 2px rgba(255, 255, 255, 0.9) inset;
     }
 
     #similarShopsSection .similar-shop-card__logo {
@@ -5787,16 +5871,16 @@
     }
 
     #similarShopsSection .similar-shop-card__body {
-      padding: 1rem 1.25rem 1.25rem;
+      padding: 1.25rem 1.5rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1rem;
       flex: 1;
     }
 
     #similarShopsSection .similar-shop-card__name {
       margin: 0;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       color: #1e293b;
       text-align: center;
@@ -5806,28 +5890,44 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      transition: color 0.25s ease;
+    }
+
+    #similarShopsSection .similar-shop-card:hover .similar-shop-card__name {
+      color: #4f46e5;
     }
 
     #similarShopsSection .similar-shop-card__meta {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      padding-top: 0.5rem;
-      border-top: 1px dashed rgba(226, 232, 240, 0.8);
+      gap: 0.55rem;
+      padding-top: 0;
+      border-top: none;
     }
 
     #similarShopsSection .similar-shop-card__info-row {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-      color: #64748b;
+      gap: 0.6rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.08);
+      font-size: 0.78rem;
+      color: #475569;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    #similarShopsSection .similar-shop-card:hover .similar-shop-card__info-row {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.12);
     }
 
     #similarShopsSection .similar-shop-card__info-icon {
-      width: 16px;
-      height: 16px;
-      color: #94a3b8;
+      width: 15px;
+      height: 15px;
+      color: #6366f1;
       flex-shrink: 0;
     }
 
@@ -5840,67 +5940,108 @@
 
     #similarShopsSection .similar-shop-card__badge {
       position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      padding: 0.3rem 0.65rem;
-      border-radius: 8px;
+      top: 1rem;
+      right: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
-      z-index: 1;
+      font-size: 0.72rem;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      z-index: 2;
+    }
+
+    #similarShopsSection .similar-shop-card__badge::before {
+      content: '✦';
+      font-size: 0.65rem;
     }
 
     #similarShopsSection .similar-shop-card__cta {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
+      width: 100%;
       margin-top: auto;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       color: #ffffff;
-      font-size: 0.85rem;
-      font-weight: 700;
+      font-size: 0.88rem;
+      font-weight: 800;
       border: none;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-      transition: all 0.2s ease;
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    #similarShopsSection .similar-shop-card__cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg,
+          transparent 35%,
+          rgba(255, 255, 255, 0.25) 45%,
+          rgba(255, 255, 255, 0.4) 50%,
+          rgba(255, 255, 255, 0.25) 55%,
+          transparent 65%);
+      transform: translateX(-100%);
+      transition: transform 0.65s ease;
+      pointer-events: none;
+      z-index: 0;
     }
 
     #similarShopsSection .similar-shop-card:hover .similar-shop-card__cta {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+      box-shadow: 0 10px 24px rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+    }
+
+    #similarShopsSection .similar-shop-card:hover .similar-shop-card__cta::before {
+      transform: translateX(100%);
     }
 
     #similarShopsSection .similar-shop-card__cta svg {
+      position: relative;
+      z-index: 1;
       width: 16px;
       height: 16px;
+      transition: transform 0.25s ease;
+    }
+
+    #similarShopsSection .similar-shop-card:hover .similar-shop-card__cta svg {
+      transform: translateX(-3px);
     }
 
     /* Mobile optimizations */
     @media (max-width: 640px) {
       #similarShopsSection {
         margin: 2rem 0;
+        padding: 1.25rem 0;
+        border-radius: 20px;
       }
 
       #similarShopsSection .similar-shops-header {
-        padding: 0 0.85rem;
-        margin-bottom: 1rem;
+        padding: 0 1rem;
+        margin-bottom: 1.25rem;
       }
 
       #similarShopsSection .similar-shops-title {
-        font-size: 1rem;
-        gap: 0.5rem;
+        font-size: 1.05rem;
+        gap: 0.6rem;
       }
 
       #similarShopsSection .similar-shops-title-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
       }
 
       #similarShopsSection .similar-shops-title-icon svg {
@@ -5909,18 +6050,61 @@
       }
 
       #similarShopsSection .similar-shops-view-all {
-        padding: 0.45rem 0.85rem;
-        font-size: 0.8rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.78rem;
       }
 
       #similarShopsSection .similar-shops-scroll {
         gap: 0.85rem;
-        padding: 0.5rem 0.85rem 1rem;
+        padding: 0.5rem 1rem 1rem;
       }
 
       #similarShopsSection .similar-shop-card {
-        width: clamp(240px, 72vw, 280px);
-        border-radius: 14px;
+        width: clamp(250px, 78vw, 300px);
+        border-radius: 18px;
+      }
+
+      #similarShopsSection .similar-shop-card__header {
+        padding: 1.25rem 1.25rem 0.85rem;
+      }
+
+      #similarShopsSection .similar-shop-card__logo-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+      }
+
+      #similarShopsSection .similar-shop-card__body {
+        padding: 1rem 1.25rem 1.25rem;
+        gap: 0.85rem;
+      }
+
+      #similarShopsSection .similar-shop-card__name {
+        font-size: 0.98rem;
+      }
+
+      #similarShopsSection .similar-shop-card__info-row {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.74rem;
+      }
+
+      #similarShopsSection .similar-shop-card__cta {
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+        border-radius: 10px;
+      }
+
+      #similarShopsSection .similar-shop-card__badge {
+        padding: 0.28rem 0.6rem;
+        font-size: 0.65rem;
+        top: 0.85rem;
+        right: 0.85rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #similarShopsSection .similar-shop-card {
+        width: clamp(230px, 84vw, 270px);
       }
 
       #similarShopsSection .similar-shop-card__header {
@@ -5928,57 +6112,21 @@
       }
 
       #similarShopsSection .similar-shop-card__logo-wrapper {
-        width: 56px;
-        height: 56px;
-        border-radius: 12px;
+        width: 58px;
+        height: 58px;
+        border-radius: 14px;
       }
 
       #similarShopsSection .similar-shop-card__body {
         padding: 0.85rem 1rem 1rem;
-        gap: 0.65rem;
       }
 
       #similarShopsSection .similar-shop-card__name {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
       }
 
       #similarShopsSection .similar-shop-card__info-row {
-        font-size: 0.75rem;
-      }
-
-      #similarShopsSection .similar-shop-card__cta {
-        padding: 0.7rem 1.1rem;
-        font-size: 0.82rem;
-      }
-
-      #similarShopsSection .similar-shop-card__badge {
-        padding: 0.25rem 0.55rem;
-        font-size: 0.65rem;
-        top: 0.65rem;
-        right: 0.65rem;
-      }
-    }
-
-    @media (max-width: 380px) {
-      #similarShopsSection .similar-shop-card {
-        width: clamp(220px, 82vw, 260px);
-      }
-
-      #similarShopsSection .similar-shop-card__header {
-        padding: 0.85rem 0.85rem 0.65rem;
-      }
-
-      #similarShopsSection .similar-shop-card__logo-wrapper {
-        width: 52px;
-        height: 52px;
-      }
-
-      #similarShopsSection .similar-shop-card__body {
-        padding: 0.75rem 0.85rem 0.85rem;
-      }
-
-      #similarShopsSection .similar-shop-card__name {
-        font-size: 0.9rem;
+        font-size: 0.7rem;
       }
     }
 
