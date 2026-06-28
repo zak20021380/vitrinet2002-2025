@@ -9492,12 +9492,12 @@
         <!-- Login Prompt (shown when not logged in) -->
         <div class="message-login-prompt" id="messageLoginPrompt" hidden>
           <p>برای ارسال پیام به فروشنده، ابتدا وارد حساب کاربری خود شوید.</p>
-          <a href="/login.html" class="message-login-btn">
+          <a href="/login.html" class="message-login-btn" data-login-redirect>
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            ورود به حساب
+            ورود / ثبت‌نام
           </a>
         </div>
 
@@ -9587,12 +9587,12 @@
         <!-- Login Prompt (shown when not logged in) -->
         <div class="message-login-prompt" id="discountLoginPrompt" hidden>
           <p>برای درخواست تخفیف، ابتدا وارد حساب کاربری خود شوید.</p>
-          <a href="/login.html" class="message-login-btn">
+          <a href="/login.html" class="message-login-btn" data-login-redirect>
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            ورود به حساب
+            ورود / ثبت‌نام
           </a>
         </div>
 
@@ -9695,6 +9695,23 @@
 
   <script src="/js/product-page.js?v=product-summary-mobile-20260624f" defer></script>
   <script src="/js/product-comments.js" defer></script>
+  <script>
+    // ستون پارامتر redirect روی دکمه‌های ورود مودال‌ها تا کاربر پس از لاگین به همین محصول بازگردد
+    (function () {
+      function applyLoginRedirect() {
+        var currentUrl = window.location.href;
+        var encoded = encodeURIComponent(currentUrl);
+        document.querySelectorAll('[data-login-redirect]').forEach(function (link) {
+          link.href = '/login.html?redirect=' + encoded;
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyLoginRedirect);
+      } else {
+        applyLoginRedirect();
+      }
+    })();
+  </script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       window.setTimeout(function () {
