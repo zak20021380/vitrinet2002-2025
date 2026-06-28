@@ -4091,7 +4091,7 @@
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      padding: 1rem;
+      padding: clamp(0.75rem, 3vw, 1.5rem);
     }
 
     #messageModal.overlay[hidden] {
@@ -4103,26 +4103,92 @@
       display: flex;
       flex-direction: column;
       margin: auto;
+      width: min(460px, calc(100vw - 1.5rem));
       max-height: 85vh;
       max-height: 85dvh;
-      overflow: visible;
+      overflow: hidden;
+      border-radius: 28px;
+      background: #f8fbff;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow:
+        0 28px 70px rgba(15, 23, 42, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
     }
 
     #messageModal .message-modal-body {
       flex: 1 1 auto;
       overflow-y: auto;
       min-height: 0;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.92));
+      scrollbar-width: thin;
     }
 
     #messageModal .message-modal-footer {
       flex-shrink: 0 !important;
       display: flex !important;
       flex-direction: column;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+      background: #f8fbff;
+      border-top: 1px solid rgba(226, 232, 240, 0.86);
       position: relative;
       z-index: 10;
-      min-height: 80px;
+      min-height: 0;
+    }
+
+    #messageModal .message-modal-header {
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.26), transparent 28%),
+        linear-gradient(135deg, #7c3aed 0%, #8b5cf6 48%, #6366f1 100%);
+    }
+
+    #messageModal .message-modal-title {
+      padding-inline-end: 3rem;
+      line-height: 1.45;
+    }
+
+    #messageModal .message-modal-subtitle {
+      padding-inline-end: 3rem;
+      line-height: 1.7;
+    }
+
+    #messageModal .message-product-info {
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(226, 232, 240, 0.78);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    #messageModal .message-product-image {
+      border-radius: 14px;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+    }
+
+    #messageModal .message-textarea {
+      min-height: 58px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.48);
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.03);
+    }
+
+    #messageModal .message-textarea:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14), 0 12px 24px rgba(99, 102, 241, 0.08);
+    }
+
+    #messageModal .message-btn {
+      border-radius: 16px;
+    }
+
+    #messageModal .message-btn--cancel {
+      background: #fff;
+      border-color: rgba(203, 213, 225, 0.9);
+    }
+
+    #messageModal .message-btn--send {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed 52%, #6366f1);
+      box-shadow: 0 12px 26px rgba(124, 58, 237, 0.3);
     }
 
     #messageModal .message-modal-footer:not([hidden]) {
@@ -4153,12 +4219,12 @@
       }
 
       #messageModal .message-modal-dialog {
-        width: 94%;
+        width: min(420px, calc(100vw - 1.5rem));
         max-width: 420px;
         max-height: 80vh;
         max-height: 80dvh;
-        border-radius: var(--radius-lg);
-        overflow: visible;
+        border-radius: 24px;
+        overflow: hidden;
       }
 
       #messageModal .message-modal-header {
@@ -4168,6 +4234,11 @@
 
       #messageModal .message-modal-title {
         font-size: 1.1rem;
+        padding-inline-end: 2.65rem;
+      }
+
+      #messageModal .message-modal-subtitle {
+        padding-inline-end: 2.65rem;
       }
 
       #messageModal .message-modal-body {
@@ -4181,6 +4252,7 @@
 
       #messageModal .message-product-info {
         padding: 0.75rem;
+        border-radius: 16px;
       }
 
       #messageModal .message-product-image {
@@ -4220,15 +4292,15 @@
       }
 
       #messageModal .message-modal-dialog {
-        width: 92%;
+        width: min(380px, calc(100vw - 1rem));
         max-width: 380px;
         max-height: 85vh;
         max-height: 85dvh;
-        border-radius: var(--radius-lg);
+        border-radius: 22px;
       }
 
       #messageModal .message-modal-header {
-        padding: 0.85rem 1rem;
+        padding: 1rem 1rem 0.9rem;
       }
 
       #messageModal .message-modal-close {
@@ -4256,9 +4328,10 @@
       }
 
       #messageModal .message-textarea {
-        min-height: 44px;
+        min-height: 52px;
         font-size: 0.88rem;
         padding: 0.65rem 0.85rem;
+        border-radius: 15px;
       }
 
       #messageModal .message-modal-footer {
@@ -4284,11 +4357,11 @@
       }
 
       #messageModal .message-modal-dialog {
-        width: 94%;
+        width: min(340px, calc(100vw - 0.75rem));
         max-width: 340px;
         max-height: 88vh;
         max-height: 88dvh;
-        border-radius: var(--radius-md);
+        border-radius: 20px;
       }
 
       #messageModal .message-modal-body {
