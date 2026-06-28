@@ -8320,3 +8320,865 @@ body.subscription-checkout-open {
     transition-duration: 0.01ms;
   }
 }
+
+/* ─────────────────────────────────────────────────────
+   Store Subscription Cards - Premium Refresh
+   Scope: only the "اشتراک فروشگاه" cards in the upgrade tab.
+   ───────────────────────────────────────────────────── */
+#content-sub .upgrade-plans-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+#content-sub .upgrade-plan-card,
+#content-sub .upgrade-plan-card--v2 {
+  --plan-accent: #0d9488;
+  --plan-accent-2: #2563eb;
+  --plan-accent-soft: rgba(13, 148, 136, 0.1);
+  --plan-accent-border: rgba(13, 148, 136, 0.2);
+  --plan-shadow: rgba(13, 148, 136, 0.24);
+  isolation: isolate;
+  min-width: 0;
+  min-height: 100%;
+  padding: 1.05rem;
+  gap: 0.82rem;
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, var(--plan-accent-soft), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 18px 42px rgba(15, 23, 42, 0.1);
+}
+
+#content-sub .upgrade-plan-card--popular {
+  --plan-accent: #d97706;
+  --plan-accent-2: #ea580c;
+  --plan-accent-soft: rgba(217, 119, 6, 0.11);
+  --plan-accent-border: rgba(217, 119, 6, 0.24);
+  --plan-shadow: rgba(217, 119, 6, 0.24);
+}
+
+#content-sub .upgrade-plan-card--best {
+  --plan-accent: #2563eb;
+  --plan-accent-2: #0891b2;
+  --plan-accent-soft: rgba(37, 99, 235, 0.1);
+  --plan-accent-border: rgba(37, 99, 235, 0.22);
+  --plan-shadow: rgba(37, 99, 235, 0.22);
+}
+
+#content-sub .upgrade-plan-card::before,
+#content-sub .upgrade-plan-card--v2::before {
+  display: block;
+  inset: 0;
+  padding: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--plan-accent), transparent 54%);
+  -webkit-mask: none;
+  mask: none;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+#content-sub .upgrade-plan-card::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 1rem;
+  bottom: 1rem;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--plan-accent), var(--plan-accent-2));
+  box-shadow: 0 10px 22px var(--plan-shadow);
+}
+
+#content-sub .upgrade-plan-card:hover,
+#content-sub .upgrade-plan-card--v2:hover {
+  transform: translateY(-3px);
+  border-color: var(--plan-accent-border);
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.06),
+    0 24px 52px rgba(15, 23, 42, 0.13);
+}
+
+#content-sub .upgrade-plan-card:hover::before,
+#content-sub .upgrade-plan-card--v2:hover::before {
+  opacity: 0.12;
+}
+
+#content-sub .upgrade-plan-badge {
+  position: static;
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
+  padding: 0.34rem 0.68rem;
+  border: 1px solid var(--plan-accent-border);
+  border-radius: 999px;
+  background: var(--plan-accent-soft) !important;
+  box-shadow: none;
+  color: var(--plan-accent) !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-ribbon {
+  top: 1.15rem;
+  left: 1.05rem;
+  width: 28px;
+  height: 28px;
+  color: #f59e0b;
+  animation: none;
+}
+
+#content-sub .upgrade-plan-header {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon duration";
+  align-items: center;
+  gap: 0.22rem 0.72rem;
+  padding-top: 0;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-icon {
+  grid-area: icon;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border-color: var(--plan-accent-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.78)),
+    var(--plan-accent-soft);
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+#content-sub .upgrade-plan-icon svg,
+#content-sub .upgrade-plan-card--popular .upgrade-plan-icon svg,
+#content-sub .upgrade-plan-card--best .upgrade-plan-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--plan-accent);
+}
+
+#content-sub .upgrade-plan-card:hover .upgrade-plan-icon,
+#content-sub .upgrade-plan-card:hover .upgrade-plan-icon svg {
+  transform: none;
+}
+
+#content-sub .upgrade-plan-title {
+  grid-area: title;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 950;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-duration {
+  grid-area: duration;
+  width: max-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+#content-sub .upgrade-plan-duration svg {
+  width: 14px;
+  height: 14px;
+  color: var(--plan-accent);
+  opacity: 0.82;
+}
+
+#content-sub .upgrade-plan-pricing {
+  align-items: stretch;
+  margin-top: 0.1rem;
+  padding: 0.9rem 0.85rem;
+  border: 1px solid rgba(226, 232, 240, 0.74);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.78));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+#content-sub .upgrade-plan-pricing::before {
+  content: none;
+}
+
+#content-sub .upgrade-plan-price {
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.38rem;
+  direction: ltr;
+}
+
+#content-sub .upgrade-plan-price__amount,
+#content-sub .upgrade-plan-card--popular .upgrade-plan-price__amount,
+#content-sub .upgrade-plan-card--best .upgrade-plan-price__amount {
+  color: var(--plan-accent);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-size: 2rem;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+#content-sub .upgrade-plan-price__unit {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+#content-sub .upgrade-plan-desc {
+  min-height: 0;
+  padding: 0;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.7;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-features {
+  flex: 1;
+  gap: 0.48rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid rgba(226, 232, 240, 0.72);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.72);
+}
+
+#content-sub .upgrade-plan-feature {
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #263449;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.62;
+}
+
+#content-sub .upgrade-plan-feature__icon,
+#content-sub .upgrade-plan-card--popular .upgrade-plan-feature__icon,
+#content-sub .upgrade-plan-card--best .upgrade-plan-feature__icon {
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  margin-top: 0.18rem;
+  border-radius: 7px;
+  background: var(--plan-accent-soft);
+  color: var(--plan-accent);
+}
+
+#content-sub .upgrade-plan-feature__icon svg {
+  width: 11px;
+  height: 11px;
+}
+
+#content-sub .upgrade-plan-cta,
+#content-sub .upgrade-plan-card--popular .upgrade-plan-cta,
+#content-sub .upgrade-plan-card--best .upgrade-plan-cta {
+  min-height: 46px;
+  margin-top: 0;
+  padding: 0.78rem 1rem;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--plan-accent), var(--plan-accent-2));
+  color: #ffffff;
+  box-shadow:
+    0 12px 24px var(--plan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  font-size: 0.9rem;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-cta::before {
+  background: linear-gradient(135deg, var(--plan-accent-2), var(--plan-accent));
+}
+
+#content-sub .upgrade-plan-cta:hover,
+#content-sub .upgrade-plan-card--popular .upgrade-plan-cta:hover,
+#content-sub .upgrade-plan-card--best .upgrade-plan-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 15px 28px var(--plan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 980px) {
+  #content-sub .upgrade-plans-grid {
+    grid-template-columns: 1fr;
+    gap: 0.82rem;
+  }
+
+  #content-sub .upgrade-plan-card,
+  #content-sub .upgrade-plan-card--v2 {
+    padding: 0.92rem;
+    border-radius: 17px;
+    gap: 0.68rem;
+  }
+
+  #content-sub .upgrade-plan-card::after {
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 3px;
+  }
+
+  #content-sub .upgrade-plan-card:hover,
+  #content-sub .upgrade-plan-card--v2:hover,
+  #content-sub .upgrade-plan-cta:hover {
+    transform: none;
+  }
+
+  #content-sub .upgrade-plan-badge {
+    padding: 0.26rem 0.56rem;
+    font-size: 0.64rem;
+  }
+
+  #content-sub .upgrade-plan-ribbon {
+    display: none;
+  }
+
+  #content-sub .upgrade-plan-header {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 0.18rem 0.62rem;
+  }
+
+  #content-sub .upgrade-plan-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+
+  #content-sub .upgrade-plan-icon svg,
+  #content-sub .upgrade-plan-card--popular .upgrade-plan-icon svg,
+  #content-sub .upgrade-plan-card--best .upgrade-plan-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  #content-sub .upgrade-plan-title {
+    font-size: 1rem;
+  }
+
+  #content-sub .upgrade-plan-duration {
+    font-size: 0.71rem;
+  }
+
+  #content-sub .upgrade-plan-pricing {
+    padding: 0.72rem 0.7rem;
+    border-radius: 14px;
+  }
+
+  #content-sub .upgrade-plan-price__amount,
+  #content-sub .upgrade-plan-card--popular .upgrade-plan-price__amount,
+  #content-sub .upgrade-plan-card--best .upgrade-plan-price__amount {
+    font-size: 1.68rem;
+  }
+
+  #content-sub .upgrade-plan-desc {
+    font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
+  #content-sub .upgrade-plan-features {
+    gap: 0.42rem;
+    padding: 0.58rem 0;
+  }
+
+  #content-sub .upgrade-plan-feature {
+    font-size: 0.76rem;
+    line-height: 1.55;
+  }
+
+  #content-sub .upgrade-plan-cta,
+  #content-sub .upgrade-plan-card--popular .upgrade-plan-cta,
+  #content-sub .upgrade-plan-card--best .upgrade-plan-cta {
+    min-height: 44px;
+    padding: 0.72rem 0.9rem;
+    border-radius: 12px;
+    font-size: 0.86rem;
+  }
+}
+
+@media (max-width: 380px) {
+  #content-sub .upgrade-plan-card,
+  #content-sub .upgrade-plan-card--v2 {
+    padding: 0.82rem;
+  }
+
+  #content-sub .upgrade-plan-header {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  #content-sub .upgrade-plan-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  #content-sub .upgrade-plan-price__amount,
+  #content-sub .upgrade-plan-card--popular .upgrade-plan-price__amount,
+  #content-sub .upgrade-plan-card--best .upgrade-plan-price__amount {
+    font-size: 1.5rem;
+  }
+}
+
+/* Final specificity lock for the subscription-card refresh.
+   Earlier redesign layers use heavier selectors, so these keep this visual pass deterministic. */
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+  --plan-accent: #0d9488;
+  --plan-accent-2: #2563eb;
+  --plan-accent-soft: rgba(13, 148, 136, 0.1);
+  --plan-accent-border: rgba(13, 148, 136, 0.2);
+  --plan-shadow: rgba(13, 148, 136, 0.24);
+  min-width: 0;
+  min-height: 100%;
+  width: auto !important;
+  max-width: none !important;
+  padding: 1.05rem;
+  gap: 0.82rem;
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, var(--plan-accent-soft), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 18px 42px rgba(15, 23, 42, 0.1);
+  transform: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--popular {
+  --plan-accent: #d97706;
+  --plan-accent-2: #ea580c;
+  --plan-accent-soft: rgba(217, 119, 6, 0.11);
+  --plan-accent-border: rgba(217, 119, 6, 0.24);
+  --plan-shadow: rgba(217, 119, 6, 0.24);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--best {
+  --plan-accent: #2563eb;
+  --plan-accent-2: #0891b2;
+  --plan-accent-soft: rgba(37, 99, 235, 0.1);
+  --plan-accent-border: rgba(37, 99, 235, 0.22);
+  --plan-shadow: rgba(37, 99, 235, 0.22);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2::before {
+  content: '';
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  height: auto;
+  padding: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--plan-accent), transparent 54%);
+  -webkit-mask: none;
+  mask: none;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2::after {
+  content: '';
+  display: block !important;
+  position: absolute;
+  inset: auto;
+  inset-inline-start: 0;
+  top: 1rem;
+  bottom: 1rem;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--plan-accent), var(--plan-accent-2));
+  box-shadow: 0 10px 22px var(--plan-shadow);
+  pointer-events: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2:hover,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--popular:hover {
+  transform: translateY(-3px);
+  border-color: var(--plan-accent-border);
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.06),
+    0 24px 52px rgba(15, 23, 42, 0.13);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2:hover::before {
+  opacity: 0.12;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-ribbon {
+  top: 1.15rem;
+  left: 1.05rem;
+  width: 28px;
+  height: 28px;
+  display: flex !important;
+  color: #f59e0b;
+  animation: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge--popular,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge--best {
+  position: static;
+  align-self: flex-start;
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.34rem 0.68rem;
+  border: 1px solid var(--plan-accent-border);
+  border-radius: 999px;
+  background: var(--plan-accent-soft) !important;
+  box-shadow: none;
+  color: var(--plan-accent) !important;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge::before {
+  content: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-header {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon duration";
+  align-items: center;
+  justify-items: stretch;
+  gap: 0.22rem 0.72rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-icon {
+  grid-area: icon;
+  display: flex !important;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--plan-accent-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.78)),
+    var(--plan-accent-soft);
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--plan-accent);
+  transform: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2:hover .upgrade-plan-icon,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2:hover .upgrade-plan-icon svg {
+  transform: none;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--plan-accent);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-title {
+  grid-area: title;
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 950;
+  line-height: 1.35;
+  text-align: right;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-duration {
+  grid-area: duration;
+  justify-self: start;
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-duration svg {
+  width: 14px;
+  height: 14px;
+  color: var(--plan-accent);
+  opacity: 0.82;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-pricing {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  margin-top: 0.1rem;
+  padding: 0.9rem 0.85rem;
+  border: 1px solid rgba(226, 232, 240, 0.74) !important;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.78));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-pricing::before,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-pricing::after {
+  content: none !important;
+  display: none !important;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-price {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.38rem;
+  direction: ltr;
+  flex-wrap: nowrap;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-price__amount {
+  color: var(--plan-accent) !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 2rem;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: none !important;
+  white-space: nowrap;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-price__unit {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-desc {
+  margin: 0;
+  min-height: 0;
+  padding: 0;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.7;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-features {
+  flex: 1;
+  align-items: stretch;
+  gap: 0.48rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid rgba(226, 232, 240, 0.72) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.72) !important;
+  border-radius: 0;
+  background: transparent;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-feature {
+  width: auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0;
+  color: #263449;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.62;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-feature > span:last-child {
+  color: #263449;
+  text-align: right;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-feature__icon {
+  display: flex;
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  margin-top: 0.18rem;
+  border: 0;
+  border-radius: 7px;
+  background: var(--plan-accent-soft);
+  box-shadow: none;
+  color: var(--plan-accent);
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-feature__icon svg {
+  width: 11px;
+  height: 11px;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-cta,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--best .upgrade-plan-cta {
+  min-height: 46px;
+  margin-top: 0;
+  padding: 0.78rem 1rem;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--plan-accent), var(--plan-accent-2));
+  color: #ffffff;
+  box-shadow:
+    0 12px 24px var(--plan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  font-size: 0.9rem;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-cta::before {
+  background: linear-gradient(135deg, var(--plan-accent-2), var(--plan-accent));
+}
+
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-cta:hover,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta:hover,
+#content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--best .upgrade-plan-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 15px 28px var(--plan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 980px) {
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 0.92rem;
+    border-radius: 17px;
+    gap: 0.68rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2::after {
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 3px;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2:hover,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--popular:hover,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-cta:hover {
+    transform: none;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-ribbon {
+    display: none !important;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge--popular,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-badge--best {
+    padding: 0.26rem 0.56rem;
+    font-size: 0.64rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-header {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 0.18rem 0.62rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-title {
+    font-size: 1rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-duration {
+    font-size: 0.71rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-pricing {
+    padding: 0.72rem 0.7rem;
+    border-radius: 14px;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 1.68rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-desc {
+    font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-features {
+    gap: 0.42rem;
+    padding: 0.58rem 0;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-feature {
+    font-size: 0.76rem;
+    line-height: 1.55;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-cta,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--popular .upgrade-plan-cta,
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2.upgrade-plan-card--best .upgrade-plan-cta {
+    min-height: 44px;
+    padding: 0.72rem 0.9rem;
+    border-radius: 12px;
+    font-size: 0.86rem;
+  }
+}
+
+@media (max-width: 380px) {
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 {
+    padding: 0.82rem;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-header {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  #content-sub .upgrade-plan-card.upgrade-plan-card--v2 .upgrade-plan-price__amount {
+    font-size: 1.5rem;
+  }
+}
