@@ -4,11 +4,165 @@ const router = express.Router();
 const SellerPlan = require('../models/sellerPlan'); // مدل پلن خریداری‌شده فروشنده
 const AdOrder = require('../models/AdOrder');       // مدل سفارش تبلیغ
 const SimilarShopPromotion = require('../models/SimilarShopPromotion');
+const ServiceShop = require('../models/serviceShop');
+const Seller = require('../models/Seller');
 const auth = require('../middlewares/authMiddleware');
+
+const SIMILAR_PLACEMENT_LIMIT = 80;
 
 function objectIdString(value) {
   if (!value) return '';
   return String(value._id || value.id || value);
+}
+
+function normaliseText(value = '') {
+  return String(value || '').trim();
+}
+
+function escapeRegExp(value = '') {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function resolveSimilarDisplayStatus(promotion, now = new Date()) {
+  const status = promotion.status || 'pending';
+  const startAt = promotion.startAt ? new Date(promotion.startAt) : null;
+  const endAt = promotion.endAt ? new Date(promotion.endAt) : null;
+
+  if (status === 'expired' || (endAt && endAt <= now)) return 'expired';
+  if (status === 'approved' && startAt && startAt <= now && endAt && endAt > now) return 'active';
+  if (['pending', 'approved', 'paused'].includes(status)) return 'pending';
+  return 'expired';
+}
+
+function toPlacementShop(source = {}, { type = 'service', status = 'pending' } = {}) {
+  const shopUrl = normaliseText(source.shopUrl || source.shopurl || '').toLowerCase();
+  const sellerId = objectIdString(source.legacySellerId || source.sellerId || source._id);
+  const name = normaliseText(source.name || source.storename || source.ownerName || shopUrl || 'فروشگاه');
+  const category = normaliseText(source.category || source.categoryName || source.subcategory || 'فروشگاه مشابه');
+  const city = normaliseText(source.city || '');
+  const address = normaliseText(source.address || source.shopAddress || '');
+  const location = [city, address].filter(Boolean).join('، ') || 'موقعیت ثبت نشده';
+
+  return {
+    id: objectIdString(source._id || source.id || shopUrl || sellerId),
+    sellerId,
+    shopUrl,
+    name,
+    category,
+    location,
+    status,
+    views: null,
+    clicks: null,
+    url: shopUrl
+      ? (type === 'service'
+        ? `/service-shops.html?shopurl=${encodeURIComponent(shopUrl)}`
+        : `/shop.html?shopurl=${encodeURIComponent(shopUrl)}`)
+      : ''
+  };
+}
+
+function countPlacementsByStatus(placements = []) {
+  return placements.reduce((acc, item) => {
+    const status = ['active', 'pending', 'expired'].includes(item.status) ? item.status : 'pending';
+    acc[status] += 1;
+    return acc;
+  }, { active: 0, pending: 0, expired: 0 });
+}
+
+async function buildSimilarPromotionPlacements(promotion, now = new Date()) {
+  const lifecycleStatus = promotion.status || 'pending';
+  const category = normaliseText(
+    promotion.shopSnapshot?.categoryName
+    || promotion.shopSnapshot?.category
+    || ''
+  );
+  const displayStatus = resolveSimilarDisplayStatus(promotion, now);
+  const metrics = {
+    views: Number(promotion.metrics?.impressions || 0),
+    clicks: Number(promotion.metrics?.clicks || 0)
+  };
+
+  if (!category || ['rejected', 'removed'].includes(lifecycleStatus)) {
+    return {
+      summary: { total: 0, active: 0, pending: 0, expired: 0, ...metrics },
+      shops: []
+    };
+  }
+
+  const categoryRegex = new RegExp(escapeRegExp(category), 'i');
+  const excludeShopUrl = normaliseText(promotion.shopSnapshot?.shopUrl || '').toLowerCase();
+  const excludeSellerId = objectIdString(promotion.sellerId);
+  const excludeSellerObjectId = excludeSellerId && /^[a-f\d]{24}$/i.test(excludeSellerId)
+    ? excludeSellerId
+    : '';
+
+  const serviceMatch = {
+    status: 'approved',
+    isVisible: true,
+    'adminModeration.isBlocked': { $ne: true },
+    $or: [
+      { category: { $regex: categoryRegex } },
+      { subcategories: { $elemMatch: { $regex: categoryRegex } } },
+      { tags: { $elemMatch: { $regex: categoryRegex } } }
+    ]
+  };
+  if (excludeShopUrl) serviceMatch.shopUrl = { $ne: excludeShopUrl };
+  if (excludeSellerObjectId) serviceMatch.legacySellerId = { $ne: excludeSellerObjectId };
+
+  const legacyMatch = {
+    blockedByAdmin: { $ne: true },
+    $or: [
+      { category: { $regex: categoryRegex } },
+      { subcategory: { $regex: categoryRegex } }
+    ]
+  };
+  const legacyAnd = [];
+  if (excludeShopUrl) legacyAnd.push({ shopurl: { $ne: excludeShopUrl } });
+  if (excludeSellerObjectId) legacyAnd.push({ _id: { $ne: excludeSellerObjectId } });
+  if (legacyAnd.length) legacyMatch.$and = legacyAnd;
+
+  const [serviceShops, legacySellers] = await Promise.all([
+    ServiceShop.find(serviceMatch)
+      .select('name shopUrl category subcategories address city legacySellerId updatedAt createdAt')
+      .sort({ isFeatured: -1, isPremium: -1, updatedAt: -1, createdAt: -1 })
+      .limit(SIMILAR_PLACEMENT_LIMIT)
+      .lean(),
+    Seller.find(legacyMatch)
+      .select('storename shopurl category subcategory address city updatedAt createdAt')
+      .sort({ isPremium: -1, updatedAt: -1, createdAt: -1 })
+      .limit(SIMILAR_PLACEMENT_LIMIT)
+      .lean()
+  ]);
+
+  const shops = [];
+  const seen = new Set();
+  const pushPlacement = (placement) => {
+    const key = placement.shopUrl
+      ? `url:${placement.shopUrl}`
+      : (placement.sellerId ? `seller:${placement.sellerId}` : `id:${placement.id}`);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    shops.push(placement);
+  };
+
+  serviceShops.forEach((shop) => pushPlacement(toPlacementShop(shop, {
+    type: 'service',
+    status: displayStatus
+  })));
+  legacySellers.forEach((seller) => pushPlacement(toPlacementShop(seller, {
+    type: 'legacy',
+    status: displayStatus
+  })));
+
+  const counts = countPlacementsByStatus(shops);
+  return {
+    summary: {
+      total: shops.length,
+      ...counts,
+      ...metrics
+    },
+    shops
+  };
 }
 
 function mapAdOrder(ad) {
@@ -64,7 +218,7 @@ function mapAdOrder(ad) {
   };
 }
 
-function mapSimilarShopPromotion(promotion) {
+function mapSimilarShopPromotion(promotion, placementData = null) {
   const id = objectIdString(promotion._id);
   const originalStatus = promotion.status || 'pending';
   const status = originalStatus === 'removed' ? 'cancelled' : originalStatus;
@@ -115,6 +269,19 @@ function mapSimilarShopPromotion(promotion) {
     endAt: promotion.endAt || null,
     expiresAt: promotion.endAt || null,
     expiredAt: promotion.expiredAt || null,
+    metrics: {
+      views: Number(promotion.metrics?.impressions || 0),
+      clicks: Number(promotion.metrics?.clicks || 0)
+    },
+    placementSummary: placementData?.summary || {
+      total: 0,
+      active: 0,
+      pending: 0,
+      expired: 0,
+      views: Number(promotion.metrics?.impressions || 0),
+      clicks: Number(promotion.metrics?.clicks || 0)
+    },
+    placementShops: placementData?.shops || [],
     detailsUrl: `/seller/dashboard.html#upgrade-special-ads?focus=similar_promotions&promotion_id=${id}`
   };
 }
@@ -225,7 +392,13 @@ router.get('/my', auth('seller'), async (req, res) => {
     }));
 
     const adsMapped = ads.map(mapAdOrder);
-    const similarPromotionsMapped = similarPromotions.map(mapSimilarShopPromotion);
+    const serverNow = new Date();
+    const similarPlacementData = await Promise.all(
+      similarPromotions.map(promotion => buildSimilarPromotionPlacements(promotion, serverNow))
+    );
+    const similarPromotionsMapped = similarPromotions.map((promotion, index) => (
+      mapSimilarShopPromotion(promotion, similarPlacementData[index])
+    ));
 
     // ادغام و مرتب‌سازی بر اساس جدیدترین
     const allPlans = [...plansMapped, ...adsMapped, ...similarPromotionsMapped]

@@ -20,6 +20,278 @@ const escapeMyPlansHtml = (value = '') => String(value)
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
+function toMyPlansNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function getMyPlansPlacementSummary(plan = {}) {
+  const summary = plan.placementSummary || {};
+  const metrics = plan.metrics || {};
+  return {
+    total: toMyPlansNumber(summary.total),
+    active: toMyPlansNumber(summary.active),
+    pending: toMyPlansNumber(summary.pending),
+    expired: toMyPlansNumber(summary.expired),
+    views: toMyPlansNumber(summary.views ?? metrics.views ?? metrics.impressions),
+    clicks: toMyPlansNumber(summary.clicks ?? metrics.clicks)
+  };
+}
+
+function getMyPlansPlacementStatusLabel(status = '') {
+  switch (String(status || '').toLowerCase()) {
+    case 'active': return 'فعال';
+    case 'expired': return 'منقضی';
+    case 'pending':
+    default: return 'در انتظار';
+  }
+}
+
+function normalizeMyPlansPlacementShop(shop = {}) {
+  const status = ['active', 'pending', 'expired'].includes(String(shop.status || '').toLowerCase())
+    ? String(shop.status).toLowerCase()
+    : 'pending';
+
+  return {
+    id: String(shop.id || shop._id || shop.shopUrl || shop.sellerId || ''),
+    name: String(shop.name || shop.shopName || 'فروشگاه مشابه').trim(),
+    category: String(shop.category || shop.categoryName || 'دسته‌بندی ثبت نشده').trim(),
+    location: String(shop.location || shop.address || shop.city || 'موقعیت ثبت نشده').trim(),
+    status,
+    views: Number.isFinite(Number(shop.views)) ? Number(shop.views) : null,
+    clicks: Number.isFinite(Number(shop.clicks)) ? Number(shop.clicks) : null,
+    url: String(shop.url || shop.shopUrl || '').trim()
+  };
+}
+
+function buildMyPlansPlacementSummary(plan = {}) {
+  if (plan.source !== 'similar_shop_promotion') return '';
+  const summary = getMyPlansPlacementSummary(plan);
+  return `
+    <div class="myplans-placement-summary" aria-label="خلاصه محل‌های نمایش تبلیغ">
+      <div class="myplans-placement-summary__headline">
+        <span class="myplans-placement-summary__icon" aria-hidden="true">
+          <i class="ri-map-pin-range-line"></i>
+        </span>
+        <div>
+          <span class="myplans-placement-summary__label">محل نمایش</span>
+          <strong>${toFaDigits(summary.total)} فروشگاه مشابه</strong>
+        </div>
+      </div>
+      <div class="myplans-placement-summary__grid">
+        <span><b>${toFaDigits(summary.active)}</b> فعال</span>
+        <span><b>${toFaDigits(summary.pending)}</b> در انتظار</span>
+        <span><b>${toFaDigits(summary.expired)}</b> منقضی</span>
+      </div>
+      <div class="myplans-placement-summary__metrics">
+        <span><i class="ri-eye-line" aria-hidden="true"></i>${toFaDigits(summary.views)} بازدید</span>
+        <span><i class="ri-cursor-line" aria-hidden="true"></i>${toFaDigits(summary.clicks)} کلیک</span>
+      </div>
+    </div>
+  `;
+}
+
+function ensureMyPlansPlacementSheet() {
+  let sheet = document.getElementById('myPlansPlacementSheet');
+  if (sheet) return sheet;
+
+  sheet = document.createElement('div');
+  sheet.id = 'myPlansPlacementSheet';
+  sheet.className = 'myplans-placement-sheet';
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-labelledby', 'myPlansPlacementTitle');
+  sheet.setAttribute('dir', 'rtl');
+  sheet.innerHTML = `
+    <div class="myplans-placement-sheet__backdrop" data-placement-close></div>
+    <section class="myplans-placement-sheet__panel" role="document">
+      <div class="myplans-placement-sheet__handle" aria-hidden="true"></div>
+      <header class="myplans-placement-sheet__header">
+        <button type="button" class="myplans-placement-sheet__close" data-placement-close aria-label="بستن">
+          <i class="ri-close-line" aria-hidden="true"></i>
+        </button>
+        <div class="myplans-placement-sheet__title-wrap">
+          <span class="myplans-placement-sheet__eyebrow">محل‌های نمایش تبلیغ</span>
+          <h3 id="myPlansPlacementTitle" class="myplans-placement-sheet__title">نمایش تبلیغ در فروشگاه‌های مشابه</h3>
+          <p class="myplans-placement-sheet__subtitle" data-placement-subtitle>فهرست کامل فروشگاه‌هایی که تبلیغ در آن‌ها نمایش داده می‌شود.</p>
+        </div>
+      </header>
+
+      <div class="myplans-placement-sheet__stats" aria-label="آمار محل‌های نمایش">
+        <div class="myplans-placement-sheet__stat"><span data-placement-total>۰</span><small>فروشگاه</small></div>
+        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--active"><span data-placement-active>۰</span><small>فعال</small></div>
+        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--pending"><span data-placement-pending>۰</span><small>در انتظار</small></div>
+        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--expired"><span data-placement-expired>۰</span><small>منقضی</small></div>
+      </div>
+
+      <div class="myplans-placement-sheet__tools">
+        <label class="myplans-placement-search">
+          <i class="ri-search-line" aria-hidden="true"></i>
+          <input type="search" data-placement-search placeholder="جستجو بر اساس نام فروشگاه" autocomplete="off">
+        </label>
+        <div class="myplans-placement-filters" role="group" aria-label="فیلتر وضعیت نمایش">
+          <button type="button" class="is-active" data-placement-filter="all" aria-pressed="true">همه</button>
+          <button type="button" data-placement-filter="active" aria-pressed="false">فعال</button>
+          <button type="button" data-placement-filter="pending" aria-pressed="false">در انتظار</button>
+          <button type="button" data-placement-filter="expired" aria-pressed="false">منقضی</button>
+        </div>
+      </div>
+
+      <div class="myplans-placement-sheet__body">
+        <div class="myplans-placement-list" data-placement-list></div>
+        <div class="myplans-placement-empty" data-placement-empty hidden>
+          <i class="ri-store-2-line" aria-hidden="true"></i>
+          <strong>موردی پیدا نشد</strong>
+          <span>عبارت جستجو یا فیلتر وضعیت را تغییر دهید.</span>
+        </div>
+      </div>
+    </section>
+  `;
+
+  sheet._state = {
+    planId: '',
+    title: '',
+    summary: getMyPlansPlacementSummary(),
+    shops: [],
+    search: '',
+    filter: 'all'
+  };
+
+  sheet.querySelectorAll('[data-placement-close]').forEach((node) => {
+    node.addEventListener('click', closeMyPlansPlacementSheet);
+  });
+  sheet.querySelector('[data-placement-search]')?.addEventListener('input', (event) => {
+    sheet._state.search = event.target.value || '';
+    renderMyPlansPlacementSheet(sheet);
+  });
+  sheet.querySelectorAll('[data-placement-filter]').forEach((button) => {
+    button.addEventListener('click', () => {
+      sheet._state.filter = button.dataset.placementFilter || 'all';
+      sheet.querySelectorAll('[data-placement-filter]').forEach((item) => {
+        const active = item === button;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      renderMyPlansPlacementSheet(sheet);
+    });
+  });
+
+  document.body.appendChild(sheet);
+  return sheet;
+}
+
+function renderMyPlansPlacementSheet(sheet) {
+  const state = sheet._state || {};
+  const search = String(state.search || '').trim().toLowerCase();
+  const filter = state.filter || 'all';
+  const shops = Array.isArray(state.shops) ? state.shops : [];
+  const filtered = shops.filter((shop) => {
+    const matchesStatus = filter === 'all' || shop.status === filter;
+    const matchesSearch = !search || String(shop.name || '').toLowerCase().includes(search);
+    return matchesStatus && matchesSearch;
+  });
+
+  const summary = state.summary || getMyPlansPlacementSummary();
+  sheet.querySelector('[data-placement-total]').textContent = toFaDigits(summary.total);
+  sheet.querySelector('[data-placement-active]').textContent = toFaDigits(summary.active);
+  sheet.querySelector('[data-placement-pending]').textContent = toFaDigits(summary.pending);
+  sheet.querySelector('[data-placement-expired]').textContent = toFaDigits(summary.expired);
+  sheet.querySelector('#myPlansPlacementTitle').textContent = state.title || 'نمایش تبلیغ در فروشگاه‌های مشابه';
+  sheet.querySelector('[data-placement-subtitle]').textContent =
+    `${toFaDigits(summary.views)} بازدید و ${toFaDigits(summary.clicks)} کلیک برای این تبلیغ ثبت شده است.`;
+
+  const list = sheet.querySelector('[data-placement-list]');
+  const empty = sheet.querySelector('[data-placement-empty]');
+  if (!list || !empty) return;
+
+  list.innerHTML = filtered.map((shop) => {
+    const statusLabel = getMyPlansPlacementStatusLabel(shop.status);
+    const viewsText = shop.views === null ? '—' : toFaDigits(shop.views);
+    const clicksText = shop.clicks === null ? '—' : toFaDigits(shop.clicks);
+    const action = shop.url
+      ? `<a href="${escapeMyPlansHtml(shop.url)}" target="_blank" rel="noopener" class="myplans-placement-shop__action">مشاهده فروشگاه</a>`
+      : `<span class="myplans-placement-shop__action is-disabled">لینک ثبت نشده</span>`;
+
+    return `
+      <article class="myplans-placement-shop">
+        <div class="myplans-placement-shop__main">
+          <div class="myplans-placement-shop__avatar" aria-hidden="true">
+            <i class="ri-store-3-line"></i>
+          </div>
+          <div class="myplans-placement-shop__content">
+            <div class="myplans-placement-shop__topline">
+              <h4>${escapeMyPlansHtml(shop.name)}</h4>
+              <span class="myplans-placement-shop__status myplans-placement-shop__status--${escapeMyPlansHtml(shop.status)}">${statusLabel}</span>
+            </div>
+            <p>${escapeMyPlansHtml(shop.category)}</p>
+            <span class="myplans-placement-shop__location"><i class="ri-map-pin-2-line" aria-hidden="true"></i>${escapeMyPlansHtml(shop.location)}</span>
+          </div>
+        </div>
+        <div class="myplans-placement-shop__meta">
+          <span><i class="ri-eye-line" aria-hidden="true"></i>${viewsText} بازدید</span>
+          <span><i class="ri-cursor-line" aria-hidden="true"></i>${clicksText} کلیک</span>
+        </div>
+        ${action}
+      </article>
+    `;
+  }).join('');
+
+  empty.hidden = filtered.length > 0;
+}
+
+function openMyPlansPlacementSheet(planId) {
+  const data = window.__myPlansPlacementPlans?.[String(planId)] || null;
+  if (!data) return;
+  const sheet = ensureMyPlansPlacementSheet();
+  const filters = sheet.querySelectorAll('[data-placement-filter]');
+  filters.forEach((button) => {
+    const active = button.dataset.placementFilter === 'all';
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  const searchInput = sheet.querySelector('[data-placement-search]');
+  if (searchInput) searchInput.value = '';
+  sheet._state = {
+    planId: String(planId),
+    title: data.title,
+    summary: data.summary,
+    shops: data.shops,
+    search: '',
+    filter: 'all'
+  };
+  renderMyPlansPlacementSheet(sheet);
+  sheet._returnFocus = document.activeElement;
+  sheet.classList.add('is-open');
+  document.body.classList.add('myplans-placement-sheet-open');
+  document.removeEventListener('keydown', handleMyPlansPlacementSheetKeydown);
+  document.addEventListener('keydown', handleMyPlansPlacementSheetKeydown);
+  window.setTimeout(() => searchInput?.focus?.({ preventScroll: true }), 90);
+}
+
+function closeMyPlansPlacementSheet() {
+  const sheet = document.getElementById('myPlansPlacementSheet');
+  if (!sheet) return;
+  sheet.classList.remove('is-open');
+  document.body.classList.remove('myplans-placement-sheet-open');
+  document.removeEventListener('keydown', handleMyPlansPlacementSheetKeydown);
+  const returnFocus = sheet._returnFocus;
+  window.setTimeout(() => returnFocus?.focus?.({ preventScroll: true }), 120);
+}
+
+function handleMyPlansPlacementSheetKeydown(event) {
+  if (event.key === 'Escape') closeMyPlansPlacementSheet();
+}
+
+function bindMyPlansPlacementButtons(root = document) {
+  root.querySelectorAll('[data-open-placement-sheet]').forEach((button) => {
+    if (button.dataset.placementBound === '1') return;
+    button.dataset.placementBound = '1';
+    button.addEventListener('click', () => openMyPlansPlacementSheet(button.dataset.openPlacementSheet));
+  });
+}
+
+window.openMyPlansPlacementSheet = openMyPlansPlacementSheet;
+
 /* span های قیمت تبلیغ در صفحه */
 const adPriceElems = {
   search   : document.getElementById("price-ad_search"),
@@ -2646,6 +2918,7 @@ async function fetchMyPlans() {
         </section>
       `;
       // Initialize interactive filter chips for empty state
+      window.__myPlansPlacementPlans = {};
       initFilterChips();
       return;
     }
@@ -2846,16 +3119,18 @@ async function fetchMyPlans() {
     // Check if any ad plan is pending (for guard flow)
     const hasPendingAdPlan = adPlans.some(p => p.source !== 'similar_shop_promotion' && p.status === 'pending');
     const pendingAdPlan = adPlans.find(p => p.source !== 'similar_shop_promotion' && p.status === 'pending');
+    const placementPlanStore = {};
 
     const adCards = adPlans.length
-      ? adPlans.map(plan => {
+      ? adPlans.map((plan, index) => {
           const status = plan.status || 'pending';
           const statusClass = getStatusClass(status);
           const statusLabel = getStatusLabel(status);
           const adType = getAdTypeLabel(plan);
           const locationHint = getAdLocationHint(plan);
           const viewLink = ['approved', 'paid', 'active'].includes(status) ? resolveAdViewLink(plan) : '';
-          const detailsUrl = plan.source === 'similar_shop_promotion' ? plan.detailsUrl : '';
+          const isSimilarPromotion = plan.source === 'similar_shop_promotion';
+          const detailsUrl = isSimilarPromotion ? plan.detailsUrl : '';
           const submittedAt = plan.submittedAt || plan.createdAt || plan.startDate;
           const submittedDate = submittedAt ? toJalaliDate(submittedAt) : '-';
           const reviewDate = plan.rejectedAt || plan.approvedAt || plan.statusDate || plan.reviewedAt;
@@ -2919,7 +3194,26 @@ async function fetchMyPlans() {
 
           // Get ad ID for deep-linking
           const adId = plan._id || plan.id || '';
-          const promotionId = plan.source === 'similar_shop_promotion' ? adId : '';
+          const placementPlanId = String(adId || `similar-placement-${index}`);
+          const promotionId = isSimilarPromotion ? adId : '';
+          let placementSummarySection = '';
+          let placementActionBtn = '';
+          if (isSimilarPromotion) {
+            const summary = getMyPlansPlacementSummary(plan);
+            const shops = Array.isArray(plan.placementShops)
+              ? plan.placementShops.map(normalizeMyPlansPlacementShop)
+              : [];
+            placementPlanStore[placementPlanId] = {
+              title: plan.title || plan.adTitle || adType,
+              summary,
+              shops
+            };
+            placementSummarySection = buildMyPlansPlacementSummary(plan);
+            placementActionBtn = `<button type="button" class="myplans-card__action myplans-card__action--placement" data-open-placement-sheet="${escapeMyPlansHtml(placementPlanId)}">
+                <i class="ri-map-pin-user-line" aria-hidden="true"></i>
+                مشاهده محل‌های نمایش تبلیغ
+              </button>`;
+          }
           
           // Build scheduling info section for reserved ads
           let schedulingSection = '';
@@ -3020,10 +3314,12 @@ async function fetchMyPlans() {
                   ${escapeMyPlansHtml(locationHint || 'نمایش ویژه در ویترینت')}
                 </div>
                 ${relatedSection}
+                ${placementSummarySection}
               </div>
               ${schedulingSection}
               ${datesSection}
               ${rejectionSection}
+              ${placementActionBtn}
               ${actionBtn}
             </article>
           `;
@@ -3092,6 +3388,8 @@ async function fetchMyPlans() {
     `;
 
     // Initialize interactive filter chips
+    window.__myPlansPlacementPlans = placementPlanStore;
+    bindMyPlansPlacementButtons(box);
     initFilterChips();
   } catch (err) {
     console.error('fetchMyPlans error:', err);
@@ -3115,6 +3413,7 @@ async function fetchMyPlans() {
     if (heroStat3Value) heroStat3Value.textContent = '!';
     if (heroStat3Label) heroStat3Label.textContent = 'خطا';
     
+    window.__myPlansPlacementPlans = {};
     box.innerHTML = `
       <div class="myplans-error">
         <div class="myplans-error__icon">
