@@ -1667,6 +1667,7 @@ function parseUpgradeDeepLink() {
   return {
     section: section.replace('#', ''),
     adId: hashParams.get('ad_id') || searchParams.get('ad_id'),
+    requestId: hashParams.get('request_id') || searchParams.get('request_id'),
     promotionId: hashParams.get('promotion_id') || searchParams.get('promotion_id'),
     planTier: hashParams.get('plan_tier') || searchParams.get('plan_tier'),
     durationUnit: hashParams.get('duration_unit') || searchParams.get('duration_unit'),
@@ -1675,7 +1676,8 @@ function parseUpgradeDeepLink() {
 }
 
 function handleDeepLink() {
-  const { section, adId, promotionId, planTier, durationUnit, focus } = parseUpgradeDeepLink();
+  const { section, adId, requestId, promotionId, planTier, durationUnit, focus } = parseUpgradeDeepLink();
+  const exactRequestId = adId || requestId || (focus === 'my_plans' ? promotionId : '') || '';
 
   if (section === 'upgrade-special-ads') {
     toggleTabs('ads');
@@ -1687,10 +1689,10 @@ function handleDeepLink() {
       }
     }, 120);
 
-    if (focus === 'my_plans' || adId) {
+    if (focus === 'my_plans' || adId || requestId) {
       setTimeout(() => {
         toggleTabs('myplans');
-        focusMyPlans(adId);
+        focusMyPlans(exactRequestId);
       }, 260);
     } else if (focus === 'similar_promotions' || promotionId) {
       focusSimilarPromotion({ promotionId, planTier, durationUnit });
@@ -1699,7 +1701,7 @@ function handleDeepLink() {
 
   if (section === 'myplans') {
     toggleTabs('myplans');
-    setTimeout(() => focusMyPlans(adId), 260);
+    setTimeout(() => focusMyPlans(exactRequestId), 260);
   }
 }
 
@@ -1754,7 +1756,11 @@ function focusMyPlans(adId) {
     const safeAdId = adId && window.CSS?.escape
       ? window.CSS.escape(String(adId))
       : String(adId || '').replace(/"/g, '\\"');
-    const adCard = safeAdId ? document.querySelector(`[data-ad-id="${safeAdId}"]`) : null;
+    const adCard = safeAdId
+      ? document.querySelector(
+          `[data-request-id="${safeAdId}"], [data-ad-id="${safeAdId}"], [data-promotion-id="${safeAdId}"]`
+        )
+      : null;
 
     if (myPlansContent && !hasScrolled) {
       const initialTarget = adId ? myPlansContent : (adSection || myPlansContent);
@@ -2913,6 +2919,7 @@ async function fetchMyPlans() {
 
           // Get ad ID for deep-linking
           const adId = plan._id || plan.id || '';
+          const promotionId = plan.source === 'similar_shop_promotion' ? adId : '';
           
           // Build scheduling info section for reserved ads
           let schedulingSection = '';
@@ -2993,7 +3000,7 @@ async function fetchMyPlans() {
           `;
 
           return `
-            <article class="myplans-card myplans-card--ad" data-plan-status="${escapeMyPlansHtml(status)}" data-ad-id="${escapeMyPlansHtml(adId)}">
+            <article class="myplans-card myplans-card--ad" data-plan-status="${escapeMyPlansHtml(status)}" data-ad-id="${escapeMyPlansHtml(adId)}" data-request-id="${escapeMyPlansHtml(adId)}" ${promotionId ? `data-promotion-id="${escapeMyPlansHtml(promotionId)}"` : ''}>
               <div class="myplans-card__header">
                 <span class="myplans-card__type">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

@@ -38,7 +38,8 @@ const sellerNotificationSchema = new mongoose.Schema({
       'story_reply',
       'ad_approved',
       'advertising_request_approved',
-      'advertising_request_rejected'
+      'advertising_request_rejected',
+      'advertising_request_pending'
     ],
     default: 'info'
   },
