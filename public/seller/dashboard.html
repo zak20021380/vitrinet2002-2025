@@ -16093,6 +16093,12 @@ body.edit-product-modal-open {
         if (item.relatedData?.actionUrl) {
           wrapper.setAttribute('data-action-url', item.relatedData.actionUrl);
         }
+        if (item.relatedData?.adId || item.metadata?.adRequestId) {
+          wrapper.setAttribute('data-ad-id', item.relatedData?.adId || item.metadata?.adRequestId);
+        }
+        if (item.relatedData?.similarPromotionId || item.metadata?.promotionId) {
+          wrapper.setAttribute('data-promotion-id', item.relatedData?.similarPromotionId || item.metadata?.promotionId);
+        }
         if (item.targetRoute) wrapper.setAttribute('data-target-route', item.targetRoute);
         if (item.targetId) wrapper.setAttribute('data-target-id', item.targetId);
 
@@ -16327,35 +16333,94 @@ body.edit-product-modal-open {
      * هدایت به URL اعلان با گارد امنیتی
      * هرگز به s-seller-panel یا service-seller-panel هدایت نمی‌کند
      */
-    const navigateToNotificationAction = (actionUrl, adId) => {
+    const getNotificationActionParams = (actionUrl) => {
+      try {
+        const url = new URL(actionUrl || '', window.location.origin);
+        const hashQuery = url.hash.includes('?') ? url.hash.slice(url.hash.indexOf('?') + 1) : '';
+        const params = new URLSearchParams(url.search || hashQuery);
+        if (hashQuery) {
+          new URLSearchParams(hashQuery).forEach((value, key) => params.set(key, value));
+        }
+        return params;
+      } catch (error) {
+        return new URLSearchParams();
+      }
+    };
+
+    const buildSellerDashboardActionUrl = ({ actionUrl = '', adId = '', promotionId = '', targetRoute = '' } = {}) => {
+      const params = getNotificationActionParams(actionUrl);
+      const resolvedPromotionId = promotionId || params.get('promotion_id') || '';
+      const resolvedAdId = adId || params.get('ad_id') || '';
+      const isSimilarPromotion = targetRoute === 'seller-similar-advertising-requests'
+        || Boolean(resolvedPromotionId)
+        || params.get('focus') === 'similar_promotions';
+
+      const target = new URL('/seller/dashboard.html', window.location.origin);
+      const hashParams = new URLSearchParams({
+        focus: isSimilarPromotion ? 'similar_promotions' : 'my_plans'
+      });
+
+      if (isSimilarPromotion) {
+        if (resolvedPromotionId) hashParams.set('promotion_id', resolvedPromotionId);
+        ['plan_tier', 'duration_unit'].forEach((key) => {
+          const value = params.get(key);
+          if (value) hashParams.set(key, value);
+        });
+      } else if (resolvedAdId) {
+        hashParams.set('ad_id', resolvedAdId);
+      }
+
+      target.hash = `upgrade-special-ads?${hashParams.toString()}`;
+      return target;
+    };
+
+    const triggerSellerUpgradeDeepLink = () => {
+      if (typeof window.handleUpgradeDeepLinkNavigation === 'function') {
+        window.handleUpgradeDeepLinkNavigation();
+        return;
+      }
+      if (typeof window.handleDeepLink === 'function') {
+        window.handleDeepLink();
+        return;
+      }
+      if (typeof HashChangeEvent === 'function') {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      } else {
+        window.dispatchEvent(new Event('hashchange'));
+      }
+    };
+
+    const navigateToNotificationAction = (actionUrl, options = {}) => {
       if (!actionUrl) return;
       
       // گارد امنیتی: جلوگیری از هدایت به پنل سرویس‌دهنده
       const blockedPaths = ['s-seller-panel', 'service-seller-panel', 'service-seller'];
       const lowerUrl = actionUrl.toLowerCase();
+      const targetUrl = buildSellerDashboardActionUrl({ ...options, actionUrl });
       if (blockedPaths.some(blocked => lowerUrl.includes(blocked))) {
         console.warn('[Ad Approved Guard] Blocked redirect to service-seller panel:', actionUrl);
         // به جای آن، به بخش ارتقا در داشبورد محصول هدایت کن
-        const safeUrl = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
-        window.location.href = safeUrl;
-        return;
       }
-      
-      const targetUrl = new URL(actionUrl, window.location.origin);
       
       // گارد دوم: اطمینان از اینکه مسیر در seller/dashboard.html است
       if (!targetUrl.pathname.includes('/seller/dashboard.html')) {
         console.warn('[Ad Approved Guard] Redirecting to seller dashboard instead of:', targetUrl.pathname);
-        const safeUrl = `/seller/dashboard.html#upgrade-special-ads?focus=my_plans${adId ? `&ad_id=${adId}` : ''}`;
-        window.location.href = safeUrl;
+        window.location.href = targetUrl.toString();
         return;
       }
       
       if (targetUrl.pathname === window.location.pathname) {
+        const previousHash = window.location.hash;
         if (targetUrl.hash) {
           window.location.hash = targetUrl.hash;
         } else if (targetUrl.search) {
           window.location.search = targetUrl.search;
+          return;
+        }
+        if (previousHash === targetUrl.hash) {
+          triggerSellerUpgradeDeepLink();
+        } else {
+          setTimeout(triggerSellerUpgradeDeepLink, 0);
         }
         return;
       }
@@ -16370,17 +16435,17 @@ body.edit-product-modal-open {
       const id = notificationItem.getAttribute('data-id');
       const targetRoute = notificationItem.getAttribute('data-target-route');
       const targetId = notificationItem.getAttribute('data-target-id');
+      const relatedAdId = notificationItem.getAttribute('data-ad-id') || '';
+      const relatedPromotionId = notificationItem.getAttribute('data-promotion-id') || '';
       const fallbackActionUrl = targetRoute === 'seller-similar-advertising-requests'
-        ? `/seller/dashboard.html#upgrade-special-ads?focus=similar_promotions&promotion_id=${targetId || ''}`
-        : `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${targetId || ''}`;
+        ? `/seller/dashboard.html#upgrade-special-ads?focus=similar_promotions&promotion_id=${relatedPromotionId || targetId || ''}`
+        : `/seller/dashboard.html#upgrade-special-ads?focus=my_plans&ad_id=${relatedAdId || targetId || ''}`;
       const actionUrl = storedActionUrl || fallbackActionUrl;
       
       // استخراج ad_id از relatedData یا URL
-      let adId = null;
-      try {
-        const urlParams = new URLSearchParams(actionUrl?.split('?')[1] || '');
-        adId = urlParams.get('ad_id');
-      } catch (e) {}
+      const params = getNotificationActionParams(actionUrl);
+      const adId = relatedAdId || params.get('ad_id') || targetId || '';
+      const promotionId = relatedPromotionId || params.get('promotion_id') || (targetRoute === 'seller-similar-advertising-requests' ? targetId : '');
 
       await markNotificationRead(id);
       updateBadge();
@@ -16390,7 +16455,7 @@ body.edit-product-modal-open {
       
       // هدایت امن به بخش ارتقا
       setTimeout(() => {
-        navigateToNotificationAction(actionUrl, adId);
+        navigateToNotificationAction(actionUrl, { adId, promotionId, targetRoute });
       }, 150);
     };
 

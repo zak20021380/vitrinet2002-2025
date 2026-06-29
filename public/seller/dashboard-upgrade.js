@@ -3121,6 +3121,8 @@ async function fetchMyPlans() {
   }
 }
 
+window.handleDeepLink = handleDeepLink;
+
 window.refreshSellerAdvertisingPlans = async function refreshSellerAdvertisingPlans(options = {}) {
   if (!document.getElementById('myPlansBox')) return null;
   const result = await fetchMyPlans();

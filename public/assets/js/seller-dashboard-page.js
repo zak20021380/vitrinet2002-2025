@@ -2719,6 +2719,8 @@ function setMainImageIndex(idx) {
     }
   }
 
+  window.loadDashboardUpgrade = loadDashboardUpgrade;
+
   /* -------------------------------------------------
    ❷ هندلِ کلیکِ منوی «ارتقا»
    ------------------------------------------------- */
@@ -3026,15 +3028,22 @@ async function loadPerformanceStatus() {
 // ─── Deep-link handler for upgrade section ───────────────────────
 function hasUpgradeDeepLink() {
   const hash = window.location.hash || '';
-  return hash.startsWith('#upgrade-special-ads');
+  return hash.startsWith('#upgrade-special-ads') || hash.startsWith('#myplans');
 }
 
 function handleUpgradeDeepLinkNavigation() {
   if (!hasUpgradeDeepLink()) return;
   const upgradeSectionLoaded = document.querySelector('.upgrade-section');
-  if (upgradeSectionLoaded) return;
+  if (upgradeSectionLoaded) {
+    if (typeof window.handleDeepLink === 'function') {
+      window.handleDeepLink();
+    }
+    return;
+  }
   document.getElementById('menu-upgrade')?.click();
 }
+
+window.handleUpgradeDeepLinkNavigation = handleUpgradeDeepLinkNavigation;
 
 window.addEventListener('hashchange', handleUpgradeDeepLinkNavigation);
 window.addEventListener('popstate', handleUpgradeDeepLinkNavigation);
