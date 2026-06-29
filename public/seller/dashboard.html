@@ -15935,7 +15935,19 @@ body.edit-product-modal-open {
     const advertisingNotificationTypes = new Set([
       'ad_approved',
       'advertising_request_approved',
-      'advertising_request_rejected'
+      'advertising_request_rejected',
+      'advertising_request_pending'
+    ]);
+    const advertisingTargetRoutes = new Set([
+      'seller-advertising-requests',
+      'seller-similar-advertising-requests'
+    ]);
+    const advertisingRequestStatuses = new Set([
+      'approved',
+      'rejected',
+      'pending',
+      'review',
+      'in_review'
     ]);
     const storyNotificationTypes = new Set([
       'story_like',
@@ -15977,6 +15989,25 @@ body.edit-product-modal-open {
     const formatFabBadgeCount = (count) => (
       count > 99 ? `${badgeCountFormatter.format(99)}+` : badgeCountFormatter.format(count)
     );
+
+    const isAdvertisingRequestNotification = (type, item = {}) => {
+      const normalizedType = String(type || item?.type || '');
+      if (advertisingNotificationTypes.has(normalizedType)) return true;
+
+      const targetRoute = String(item?.targetRoute || '');
+      if (advertisingTargetRoutes.has(targetRoute)) return true;
+
+      const relatedStatus = String(item?.relatedData?.status || item?.metadata?.status || '').toLowerCase();
+      if (!advertisingRequestStatuses.has(relatedStatus)) return false;
+
+      return Boolean(
+        item?.relatedData?.adId ||
+        item?.relatedData?.similarPromotionId ||
+        item?.metadata?.adRequestId ||
+        item?.metadata?.promotionId ||
+        item?.targetId
+      );
+    };
 
     const updateBadge = () => {
       const unread = notifications.filter((item) => !item.read).length;
@@ -16062,16 +16093,24 @@ body.edit-product-modal-open {
 
       // تابع برای تعیین اینکه آیا اعلان قابل کلیک است
       const isClickable = (type, item) => {
-        if (advertisingNotificationTypes.has(type)) {
-          return Boolean(item?.relatedData?.actionUrl || item?.targetRoute);
+        if (isAdvertisingRequestNotification(type, item)) {
+          return Boolean(
+            item?.relatedData?.actionUrl ||
+            item?.targetRoute ||
+            item?.relatedData?.adId ||
+            item?.relatedData?.similarPromotionId ||
+            item?.metadata?.adRequestId ||
+            item?.metadata?.promotionId ||
+            item?.targetId
+          );
         }
         if (storyNotificationTypes.has(type)) return true;
         return ['review', 'customer_message', 'product_like'].includes(type);
       };
 
       // تابع برای تعیین متن راهنمای عمل
-      const getActionHint = (type) => {
-        if (advertisingNotificationTypes.has(type)) return 'مشاهده درخواست';
+      const getActionHint = (type, item = {}) => {
+        if (isAdvertisingRequestNotification(type, item)) return 'مشاهده درخواست';
         if (type === 'story_like') return 'مشاهده استوری‌ها';
         if (type === 'story_reply') return 'مشاهده پاسخ‌ها';
         const hints = {
@@ -16101,10 +16140,12 @@ body.edit-product-modal-open {
         }
         if (item.targetRoute) wrapper.setAttribute('data-target-route', item.targetRoute);
         if (item.targetId) wrapper.setAttribute('data-target-id', item.targetId);
+        const inferredStatus = item.type === 'advertising_request_pending' ? 'pending' : '';
+        const relatedStatus = String(item.relatedData?.status || item.metadata?.status || inferredStatus).toLowerCase();
+        if (relatedStatus) wrapper.setAttribute('data-related-status', relatedStatus);
 
         // برای اعلان تایید تبلیغ، رنگ سبز موفقیت
-        const isAdvertisingStatus = advertisingNotificationTypes.has(item.type);
-        const relatedStatus = String(item.relatedData?.status || item.metadata?.status || '').toLowerCase();
+        const isAdvertisingStatus = isAdvertisingRequestNotification(item.type, item);
         const isAdApproved = ['ad_approved', 'advertising_request_approved'].includes(item.type) || relatedStatus === 'approved';
         const isAdRejected = item.type === 'advertising_request_rejected' || relatedStatus === 'rejected';
         const isPending = ['pending', 'review', 'in_review'].includes(relatedStatus);
@@ -16124,9 +16165,13 @@ body.edit-product-modal-open {
 
         const icon = getNotificationIcon(item.type);
         const statusText = getStatusText(item);
-        const actionHint = getActionHint(item.type);
-        const fallbackTitle = isAdRejected ? 'درخواست تبلیغ شما رد شد' : 'درخواست تبلیغ شما تایید شد';
-        const fallbackMessage = isAdRejected ? 'برای مشاهده جزئیات درخواست کلیک کنید.' : 'درخواست تبلیغ شما آماده نمایش است.';
+        const actionHint = getActionHint(item.type, item);
+        const fallbackTitle = isAdRejected
+          ? 'درخواست تبلیغ شما رد شد'
+          : (isPending ? 'درخواست تبلیغ شما در انتظار بررسی است' : 'درخواست تبلیغ شما تایید شد');
+        const fallbackMessage = isAdRejected
+          ? 'برای مشاهده جزئیات درخواست کلیک کنید.'
+          : (isPending ? 'برای مشاهده وضعیت درخواست کلیک کنید.' : 'درخواست تبلیغ شما آماده نمایش است.');
         const statusKind = isAdRejected ? 'rejected' : (isAdApproved ? 'approved' : 'neutral');
         const visibleStatusText = isAdRejected
           ? 'رد شده'
@@ -16354,20 +16399,17 @@ body.edit-product-modal-open {
       const isSimilarPromotion = targetRoute === 'seller-similar-advertising-requests'
         || Boolean(resolvedPromotionId)
         || params.get('focus') === 'similar_promotions';
+      const requestId = isSimilarPromotion
+        ? (resolvedPromotionId || resolvedAdId || '')
+        : (resolvedAdId || resolvedPromotionId || '');
 
       const target = new URL('/seller/dashboard.html', window.location.origin);
       const hashParams = new URLSearchParams({
-        focus: isSimilarPromotion ? 'similar_promotions' : 'my_plans'
+        focus: 'my_plans'
       });
 
-      if (isSimilarPromotion) {
-        if (resolvedPromotionId) hashParams.set('promotion_id', resolvedPromotionId);
-        ['plan_tier', 'duration_unit'].forEach((key) => {
-          const value = params.get(key);
-          if (value) hashParams.set(key, value);
-        });
-      } else if (resolvedAdId) {
-        hashParams.set('ad_id', resolvedAdId);
+      if (requestId) {
+        hashParams.set('ad_id', requestId);
       }
 
       target.hash = `upgrade-special-ads?${hashParams.toString()}`;
@@ -16447,8 +16489,11 @@ body.edit-product-modal-open {
       const adId = relatedAdId || params.get('ad_id') || targetId || '';
       const promotionId = relatedPromotionId || params.get('promotion_id') || (targetRoute === 'seller-similar-advertising-requests' ? targetId : '');
 
-      await markNotificationRead(id);
-      updateBadge();
+      if (id) {
+        markNotificationRead(id).then((succeeded) => {
+          if (succeeded) updateBadge();
+        });
+      }
       
       // بستن مدال
       closeModal();
@@ -16468,9 +16513,20 @@ body.edit-product-modal-open {
       if (!notificationItem) return;
       
       const type = notificationItem.getAttribute('data-type');
+      const targetRoute = notificationItem.getAttribute('data-target-route') || '';
+      const relatedStatus = notificationItem.getAttribute('data-related-status') || '';
+      const hasAdvertisingRequestId = Boolean(
+        notificationItem.getAttribute('data-ad-id') ||
+        notificationItem.getAttribute('data-promotion-id') ||
+        notificationItem.getAttribute('data-target-id')
+      );
       
       // هدایت به بخش مربوطه بر اساس نوع اعلان
-      if (advertisingNotificationTypes.has(type)) {
+      if (
+        advertisingNotificationTypes.has(type) ||
+        advertisingTargetRoutes.has(targetRoute) ||
+        (advertisingRequestStatuses.has(relatedStatus) && hasAdvertisingRequestId)
+      ) {
         // استفاده از هندلر ویژه با گارد امنیتی
         handleAdvertisingRequestAction(notificationItem);
         return;
@@ -16522,7 +16578,19 @@ body.edit-product-modal-open {
       
       const notificationItem = event.target.closest('.notification-item--clickable');
       if (!notificationItem) return;
-      if (!advertisingNotificationTypes.has(notificationItem.getAttribute('data-type'))) return;
+      const type = notificationItem.getAttribute('data-type');
+      const targetRoute = notificationItem.getAttribute('data-target-route') || '';
+      const relatedStatus = notificationItem.getAttribute('data-related-status') || '';
+      const hasAdvertisingRequestId = Boolean(
+        notificationItem.getAttribute('data-ad-id') ||
+        notificationItem.getAttribute('data-promotion-id') ||
+        notificationItem.getAttribute('data-target-id')
+      );
+      if (
+        !advertisingNotificationTypes.has(type) &&
+        !advertisingTargetRoutes.has(targetRoute) &&
+        !(advertisingRequestStatuses.has(relatedStatus) && hasAdvertisingRequestId)
+      ) return;
       
       // جلوگیری از اسکرول با Space
       event.preventDefault();

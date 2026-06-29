@@ -1749,11 +1749,16 @@ function focusMyPlans(adId) {
 
   const tryFocus = () => {
     const myPlansContent = document.getElementById('content-myplans');
-    const grid = myPlansContent?.querySelector('.myplans-grid');
-    const adCard = adId ? document.querySelector(`[data-ad-id="${adId}"]`) : null;
+    const adSection = myPlansContent?.querySelector('.myplans-section--ad');
+    const grid = adSection?.querySelector('.myplans-grid') || myPlansContent?.querySelector('.myplans-grid');
+    const safeAdId = adId && window.CSS?.escape
+      ? window.CSS.escape(String(adId))
+      : String(adId || '').replace(/"/g, '\\"');
+    const adCard = safeAdId ? document.querySelector(`[data-ad-id="${safeAdId}"]`) : null;
 
     if (myPlansContent && !hasScrolled) {
-      myPlansContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const initialTarget = adId ? myPlansContent : (adSection || myPlansContent);
+      initialTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
       hasScrolled = true;
     }
 
@@ -1763,6 +1768,11 @@ function focusMyPlans(adId) {
       setTimeout(() => {
         adCard.classList.remove('myplans-card--highlighted');
       }, 2500);
+      return;
+    }
+
+    if (!adId && adSection) {
+      adSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
 

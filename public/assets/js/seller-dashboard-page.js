@@ -3033,7 +3033,7 @@ function hasUpgradeDeepLink() {
 
 function handleUpgradeDeepLinkNavigation() {
   if (!hasUpgradeDeepLink()) return;
-  const upgradeSectionLoaded = document.querySelector('.upgrade-section');
+  const upgradeSectionLoaded = document.querySelector('.upgrade-section, #content-sub, #content-ads, #content-myplans');
   if (upgradeSectionLoaded) {
     if (typeof window.handleDeepLink === 'function') {
       window.handleDeepLink();
