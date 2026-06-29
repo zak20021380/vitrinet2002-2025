@@ -3160,7 +3160,7 @@ async function fetchMyPlans() {
                   <path d="M15 3h6v6"/>
                   <path d="M10 14L21 3"/>
                 </svg>
-                مشاهده تبلیغ
+                مشاهده محصول
               </a>`;
           } else if (detailsUrl) {
             actionBtn = `<a href="${escapeMyPlansHtml(detailsUrl)}" class="myplans-card__action myplans-card__action--secondary">
@@ -3297,7 +3297,7 @@ async function fetchMyPlans() {
           `;
 
           return `
-            <article class="myplans-card myplans-card--ad" data-plan-status="${escapeMyPlansHtml(status)}" data-ad-id="${escapeMyPlansHtml(adId)}" data-request-id="${escapeMyPlansHtml(adId)}" ${promotionId ? `data-promotion-id="${escapeMyPlansHtml(promotionId)}"` : ''}>
+            <article class="myplans-card myplans-card--ad${isSimilarPromotion ? ' myplans-card--similar-ad' : ''}" data-plan-status="${escapeMyPlansHtml(status)}" data-ad-id="${escapeMyPlansHtml(adId)}" data-request-id="${escapeMyPlansHtml(adId)}" ${promotionId ? `data-promotion-id="${escapeMyPlansHtml(promotionId)}"` : ''}>
               <div class="myplans-card__header">
                 <span class="myplans-card__type">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
