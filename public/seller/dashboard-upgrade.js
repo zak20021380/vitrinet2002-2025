@@ -3198,6 +3198,9 @@ async function fetchMyPlans() {
           const promotionId = isSimilarPromotion ? adId : '';
           let placementSummarySection = '';
           let placementActionBtn = '';
+          const actionsClass = isSimilarPromotion
+            ? 'myplans-card__actions myplans-card__actions--similar'
+            : 'myplans-card__actions';
           if (isSimilarPromotion) {
             const summary = getMyPlansPlacementSummary(plan);
             const shops = Array.isArray(plan.placementShops)
@@ -3319,8 +3322,10 @@ async function fetchMyPlans() {
               ${schedulingSection}
               ${datesSection}
               ${rejectionSection}
-              ${placementActionBtn}
-              ${actionBtn}
+              <div class="${actionsClass}">
+                ${placementActionBtn}
+                ${actionBtn}
+              </div>
             </article>
           `;
         }).join('')
