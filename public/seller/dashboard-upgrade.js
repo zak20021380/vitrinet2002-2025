@@ -182,8 +182,8 @@ function renderMyPlansPlacementSheet(sheet) {
     const viewsText = shop.views === null ? '—' : toFaDigits(shop.views);
     const clicksText = shop.clicks === null ? '—' : toFaDigits(shop.clicks);
     const action = shop.url
-      ? `<a href="${escapeMyPlansHtml(shop.url)}" target="_blank" rel="noopener" class="myplans-placement-shop__action">مشاهده فروشگاه</a>`
-      : `<span class="myplans-placement-shop__action is-disabled">لینک ثبت نشده</span>`;
+      ? `<a href="${escapeMyPlansHtml(shop.url)}" target="_blank" rel="noopener" class="myplans-placement-shop__action"><i class="ri-external-link-line" aria-hidden="true"></i>مشاهده فروشگاه</a>`
+      : `<span class="myplans-placement-shop__action is-disabled"><i class="ri-link-unlink" aria-hidden="true"></i>لینک ثبت نشده</span>`;
 
     return `
       <article class="myplans-placement-shop">
@@ -230,7 +230,6 @@ function openMyPlansPlacementSheet(planId) {
   document.body.classList.add('myplans-placement-sheet-open');
   document.removeEventListener('keydown', handleMyPlansPlacementSheetKeydown);
   document.addEventListener('keydown', handleMyPlansPlacementSheetKeydown);
-  window.setTimeout(() => searchInput?.focus?.({ preventScroll: true }), 90);
 }
 
 function closeMyPlansPlacementSheet() {

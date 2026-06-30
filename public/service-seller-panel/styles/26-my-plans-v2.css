@@ -912,10 +912,12 @@ body.myplans-placement-sheet-open {
 .myplans-placement-sheet__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.48);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.38), rgba(15, 23, 42, 0.58)),
+    rgba(15, 23, 42, 0.48);
   opacity: 0;
   transition: opacity 0.24s ease;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
 
 .myplans-placement-sheet.is-open .myplans-placement-sheet__backdrop {
@@ -928,10 +930,15 @@ body.myplans-placement-sheet-open {
   flex-direction: column;
   width: min(100%, 680px);
   max-height: min(88vh, 760px);
-  padding: 0 1rem max(1rem, env(safe-area-inset-bottom));
+  padding: 0 1rem max(0.9rem, env(safe-area-inset-bottom));
   border-radius: 28px 28px 0 0;
-  background: #ffffff;
-  box-shadow: 0 -28px 70px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  border-bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  box-shadow:
+    0 -28px 70px rgba(15, 23, 42, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(100%);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
@@ -942,40 +949,43 @@ body.myplans-placement-sheet-open {
 }
 
 .myplans-placement-sheet__handle {
-  width: 46px;
-  height: 5px;
-  margin: 0.72rem auto 0.65rem;
+  width: 42px;
+  height: 4px;
+  margin: 0.66rem auto 0.58rem;
   border-radius: 999px;
-  background: #cbd5e1;
+  background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1);
 }
 
 .myplans-placement-sheet__header {
   display: flex;
   align-items: flex-start;
-  gap: 0.85rem;
-  padding: 0.15rem 0 0.95rem;
+  gap: 0.72rem;
+  padding: 0.1rem 0 0.82rem;
 }
 
 .myplans-placement-sheet__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
-  border: none;
-  border-radius: 14px;
-  background: #f1f5f9;
-  color: #334155;
+  border: 1px solid rgba(226, 232, 240, 0.94);
+  border-radius: 13px;
+  background: rgba(248, 250, 252, 0.94);
+  color: #475569;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .myplans-placement-sheet__close:hover,
 .myplans-placement-sheet__close:focus-visible {
-  background: #e2e8f0;
+  background: #ffffff;
+  border-color: rgba(14, 165, 233, 0.28);
   color: #0f172a;
   transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08), 0 0 0 4px rgba(14, 165, 233, 0.08);
 }
 
 .myplans-placement-sheet__close i {
@@ -990,42 +1000,51 @@ body.myplans-placement-sheet-open {
 
 .myplans-placement-sheet__eyebrow {
   display: inline-flex;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.18rem;
   color: #0284c7;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 900;
+  letter-spacing: 0;
 }
 
 .myplans-placement-sheet__title {
   margin: 0;
   color: #0f172a;
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 950;
-  line-height: 1.45;
+  line-height: 1.48;
 }
 
 .myplans-placement-sheet__subtitle {
-  margin: 0.3rem 0 0;
+  margin: 0.24rem 0 0;
   color: #64748b;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 650;
   line-height: 1.7;
 }
 
 .myplans-placement-sheet__tools {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 .myplans-placement-search {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 48px;
-  padding: 0 0.82rem;
-  border: 1px solid #dbeafe;
-  border-radius: 16px;
-  background: #f8fafc;
+  min-height: 44px;
+  padding: 0 0.78rem;
+  border: 1px solid rgba(191, 219, 254, 0.92);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
   color: #0284c7;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.myplans-placement-search:focus-within {
+  background: #ffffff;
+  border-color: rgba(14, 165, 233, 0.52);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.96);
 }
 
 .myplans-placement-search input {
@@ -1036,7 +1055,7 @@ body.myplans-placement-sheet-open {
   background: transparent;
   color: #0f172a;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 650;
 }
 
@@ -1047,28 +1066,30 @@ body.myplans-placement-sheet-open {
 .myplans-placement-sheet__body {
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: 0.2rem;
+  padding-bottom: 0.3rem;
   scrollbar-width: thin;
 }
 
 .myplans-placement-list {
   display: grid;
-  gap: 0.72rem;
+  gap: 0.68rem;
 }
 
 .myplans-placement-shop {
   display: grid;
-  gap: 0.65rem;
-  padding: 0.82rem;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  gap: 0.62rem;
+  padding: 0.78rem;
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
 
 .myplans-placement-shop__main {
   display: flex;
   align-items: flex-start;
-  gap: 0.7rem;
+  gap: 0.62rem;
   min-width: 0;
 }
 
@@ -1076,16 +1097,17 @@ body.myplans-placement-sheet-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   flex: 0 0 auto;
-  border-radius: 14px;
-  background: #ecfdf5;
-  color: #059669;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #ecfdf5, #dcfce7);
+  color: #047857;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .myplans-placement-shop__avatar i {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
@@ -1098,23 +1120,23 @@ body.myplans-placement-sheet-open {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.55rem;
+  gap: 0.5rem;
 }
 
 .myplans-placement-shop__topline h4 {
   margin: 0;
   min-width: 0;
   color: #0f172a;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 950;
-  line-height: 1.55;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .myplans-placement-shop__content p {
-  margin: 0.1rem 0 0;
+  margin: 0.08rem 0 0;
   color: #475569;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 750;
 }
 
@@ -1123,9 +1145,9 @@ body.myplans-placement-sheet-open {
   align-items: center;
   gap: 0.22rem;
   max-width: 100%;
-  margin-top: 0.35rem;
+  margin-top: 0.3rem;
   color: #64748b;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 650;
   line-height: 1.55;
 }
@@ -1139,33 +1161,37 @@ body.myplans-placement-sheet-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 62px;
-  padding: 0.22rem 0.48rem;
+  min-width: 56px;
+  padding: 0.2rem 0.46rem;
   border-radius: 999px;
-  font-size: 0.66rem;
+  font-size: 0.63rem;
   font-weight: 900;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .myplans-placement-shop__status--active {
   background: #dcfce7;
+  border-color: rgba(34, 197, 94, 0.16);
   color: #047857;
 }
 
 .myplans-placement-shop__status--pending {
   background: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.18);
   color: #b45309;
 }
 
 .myplans-placement-shop__status--expired {
   background: #fee2e2;
+  border-color: rgba(239, 68, 68, 0.16);
   color: #b91c1c;
 }
 
 .myplans-placement-shop__meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .myplans-placement-shop__meta span {
@@ -1173,11 +1199,12 @@ body.myplans-placement-sheet-open {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  min-height: 34px;
-  border-radius: 11px;
-  background: #f1f5f9;
+  min-height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  background: rgba(241, 245, 249, 0.76);
   color: #475569;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
 }
 
@@ -1185,18 +1212,36 @@ body.myplans-placement-sheet-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  border-radius: 12px;
-  background: #0f172a;
+  gap: 0.34rem;
+  min-height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0f172a 0%, #111827 54%, #075985 100%);
   color: #fff;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 900;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.myplans-placement-shop__action i {
+  font-size: 0.98rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.myplans-placement-shop__action:hover,
+.myplans-placement-shop__action:focus-visible {
+  color: #fff;
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.24), 0 0 0 4px rgba(14, 165, 233, 0.08);
 }
 
 .myplans-placement-shop__action.is-disabled {
   background: #e2e8f0;
   color: #64748b;
+  box-shadow: none;
 }
 
 .myplans-placement-empty {
