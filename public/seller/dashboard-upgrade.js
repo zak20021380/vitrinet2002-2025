@@ -117,24 +117,11 @@ function ensureMyPlansPlacementSheet() {
         </div>
       </header>
 
-      <div class="myplans-placement-sheet__stats" aria-label="آمار محل‌های نمایش">
-        <div class="myplans-placement-sheet__stat"><span data-placement-total>۰</span><small>فروشگاه</small></div>
-        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--active"><span data-placement-active>۰</span><small>فعال</small></div>
-        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--pending"><span data-placement-pending>۰</span><small>در انتظار</small></div>
-        <div class="myplans-placement-sheet__stat myplans-placement-sheet__stat--expired"><span data-placement-expired>۰</span><small>منقضی</small></div>
-      </div>
-
       <div class="myplans-placement-sheet__tools">
         <label class="myplans-placement-search">
           <i class="ri-search-line" aria-hidden="true"></i>
           <input type="search" data-placement-search placeholder="جستجو بر اساس نام فروشگاه" autocomplete="off">
         </label>
-        <div class="myplans-placement-filters" role="group" aria-label="فیلتر وضعیت نمایش">
-          <button type="button" class="is-active" data-placement-filter="all" aria-pressed="true">همه</button>
-          <button type="button" data-placement-filter="active" aria-pressed="false">فعال</button>
-          <button type="button" data-placement-filter="pending" aria-pressed="false">در انتظار</button>
-          <button type="button" data-placement-filter="expired" aria-pressed="false">منقضی</button>
-        </div>
       </div>
 
       <div class="myplans-placement-sheet__body">
@@ -142,7 +129,7 @@ function ensureMyPlansPlacementSheet() {
         <div class="myplans-placement-empty" data-placement-empty hidden>
           <i class="ri-store-2-line" aria-hidden="true"></i>
           <strong>موردی پیدا نشد</strong>
-          <span>عبارت جستجو یا فیلتر وضعیت را تغییر دهید.</span>
+          <span>عبارت جستجوی خود را تغییر دهید.</span>
         </div>
       </div>
     </section>
@@ -151,10 +138,8 @@ function ensureMyPlansPlacementSheet() {
   sheet._state = {
     planId: '',
     title: '',
-    summary: getMyPlansPlacementSummary(),
     shops: [],
-    search: '',
-    filter: 'all'
+    search: ''
   };
 
   sheet.querySelectorAll('[data-placement-close]').forEach((node) => {
@@ -164,17 +149,6 @@ function ensureMyPlansPlacementSheet() {
     sheet._state.search = event.target.value || '';
     renderMyPlansPlacementSheet(sheet);
   });
-  sheet.querySelectorAll('[data-placement-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      sheet._state.filter = button.dataset.placementFilter || 'all';
-      sheet.querySelectorAll('[data-placement-filter]').forEach((item) => {
-        const active = item === button;
-        item.classList.toggle('is-active', active);
-        item.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
-      renderMyPlansPlacementSheet(sheet);
-    });
-  });
 
   document.body.appendChild(sheet);
   return sheet;
@@ -183,22 +157,14 @@ function ensureMyPlansPlacementSheet() {
 function renderMyPlansPlacementSheet(sheet) {
   const state = sheet._state || {};
   const search = String(state.search || '').trim().toLowerCase();
-  const filter = state.filter || 'all';
   const shops = Array.isArray(state.shops) ? state.shops : [];
   const filtered = shops.filter((shop) => {
-    const matchesStatus = filter === 'all' || shop.status === filter;
-    const matchesSearch = !search || String(shop.name || '').toLowerCase().includes(search);
-    return matchesStatus && matchesSearch;
+    return !search || String(shop.name || '').toLowerCase().includes(search);
   });
 
-  const summary = state.summary || getMyPlansPlacementSummary();
-  sheet.querySelector('[data-placement-total]').textContent = toFaDigits(summary.total);
-  sheet.querySelector('[data-placement-active]').textContent = toFaDigits(summary.active);
-  sheet.querySelector('[data-placement-pending]').textContent = toFaDigits(summary.pending);
-  sheet.querySelector('[data-placement-expired]').textContent = toFaDigits(summary.expired);
   sheet.querySelector('#myPlansPlacementTitle').textContent = state.title || 'نمایش تبلیغ در فروشگاه‌های مشابه';
   sheet.querySelector('[data-placement-subtitle]').textContent =
-    `${toFaDigits(summary.views)} بازدید و ${toFaDigits(summary.clicks)} کلیک برای این تبلیغ ثبت شده است.`;
+    'فهرست فروشگاه‌های مشابه‌ای که تبلیغ شما در آن‌ها نمایش داده می‌شود.';
 
   const list = sheet.querySelector('[data-placement-list]');
   const empty = sheet.querySelector('[data-placement-empty]');
@@ -243,21 +209,13 @@ function openMyPlansPlacementSheet(planId) {
   const data = window.__myPlansPlacementPlans?.[String(planId)] || null;
   if (!data) return;
   const sheet = ensureMyPlansPlacementSheet();
-  const filters = sheet.querySelectorAll('[data-placement-filter]');
-  filters.forEach((button) => {
-    const active = button.dataset.placementFilter === 'all';
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-pressed', active ? 'true' : 'false');
-  });
   const searchInput = sheet.querySelector('[data-placement-search]');
   if (searchInput) searchInput.value = '';
   sheet._state = {
     planId: String(planId),
     title: data.title,
-    summary: data.summary,
     shops: data.shops,
-    search: '',
-    filter: 'all'
+    search: ''
   };
   renderMyPlansPlacementSheet(sheet);
   sheet._returnFocus = document.activeElement;
