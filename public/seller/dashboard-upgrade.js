@@ -28,13 +28,17 @@ function toMyPlansNumber(value, fallback = 0) {
 function getMyPlansPlacementSummary(plan = {}) {
   const summary = plan.placementSummary || {};
   const metrics = plan.metrics || {};
+  const viewsSource = summary.views ?? metrics.views ?? metrics.impressions;
+  const clicksSource = summary.clicks ?? metrics.clicks;
   return {
     total: toMyPlansNumber(summary.total),
     active: toMyPlansNumber(summary.active),
     pending: toMyPlansNumber(summary.pending),
     expired: toMyPlansNumber(summary.expired),
-    views: toMyPlansNumber(summary.views ?? metrics.views ?? metrics.impressions),
-    clicks: toMyPlansNumber(summary.clicks ?? metrics.clicks)
+    views: toMyPlansNumber(viewsSource),
+    clicks: toMyPlansNumber(clicksSource),
+    hasViews: Number.isFinite(Number(viewsSource)),
+    hasClicks: Number.isFinite(Number(clicksSource))
   };
 }
 
@@ -67,6 +71,17 @@ function normalizeMyPlansPlacementShop(shop = {}) {
 function buildMyPlansPlacementSummary(plan = {}) {
   if (plan.source !== 'similar_shop_promotion') return '';
   const summary = getMyPlansPlacementSummary(plan);
+  const metricItems = [
+    summary.hasViews
+      ? `<span><i class="ri-eye-line" aria-hidden="true"></i>${toFaDigits(summary.views)} بازدید</span>`
+      : '',
+    summary.hasClicks
+      ? `<span><i class="ri-cursor-line" aria-hidden="true"></i>${toFaDigits(summary.clicks)} کلیک</span>`
+      : ''
+  ].filter(Boolean);
+  const metricsSection = metricItems.length
+    ? `<div class="myplans-placement-summary__metrics${metricItems.length === 1 ? ' myplans-placement-summary__metrics--single' : ''}">${metricItems.join('')}</div>`
+    : '';
   return `
     <div class="myplans-placement-summary" aria-label="خلاصه محل‌های نمایش تبلیغ">
       <div class="myplans-placement-summary__headline">
@@ -78,15 +93,7 @@ function buildMyPlansPlacementSummary(plan = {}) {
           <strong>${toFaDigits(summary.total)} فروشگاه مشابه</strong>
         </div>
       </div>
-      <div class="myplans-placement-summary__grid">
-        <span><b>${toFaDigits(summary.active)}</b> فعال</span>
-        <span><b>${toFaDigits(summary.pending)}</b> در انتظار</span>
-        <span><b>${toFaDigits(summary.expired)}</b> منقضی</span>
-      </div>
-      <div class="myplans-placement-summary__metrics">
-        <span><i class="ri-eye-line" aria-hidden="true"></i>${toFaDigits(summary.views)} بازدید</span>
-        <span><i class="ri-cursor-line" aria-hidden="true"></i>${toFaDigits(summary.clicks)} کلیک</span>
-      </div>
+      ${metricsSection}
     </div>
   `;
 }
