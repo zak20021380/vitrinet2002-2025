@@ -2427,6 +2427,10 @@ function renderSimilarShops(items = []) {
     const image = escapeSimilarHtml(item.image || '/assets/images/shop-placeholder.svg');
     const href = escapeSimilarHtml(item.href || resolveShopLink(item.shopUrl));
     const shortInfo = escapeSimilarHtml(item.shortInfo || '');
+    const isNewShop = !item.sponsored && Number(item.rating || 0) <= 0;
+    const shopBadge = item.sponsored
+      ? '<span class="similar-shop-sponsored similar-shop-sponsored--featured"><i class="fas fa-gem" aria-hidden="true"></i><span>ویژه</span></span>'
+      : (isNewShop ? '<span class="similar-shop-sponsored similar-shop-sponsored--new"><i class="fas fa-sparkles" aria-hidden="true"></i><span>جدید</span></span>' : '');
     const rating = item.rating > 0
       ? toFaNumber(item.rating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
       : 'جدید';
@@ -2438,7 +2442,7 @@ function renderSimilarShops(items = []) {
       <article class="similar-shop-card">
         <a class="similar-shop-media" href="${href}" aria-label="${name}">
           <img class="similar-shop-logo" src="${image}" alt="${name}" loading="lazy" decoding="async" onerror="this.src='/assets/images/shop-placeholder.svg'">
-          <span class="similar-shop-sponsored" ${item.sponsored ? '' : 'hidden'}>ویژه</span>
+          ${shopBadge}
         </a>
         <div class="similar-shop-content">
           <div class="similar-shop-main">
@@ -2450,11 +2454,13 @@ function renderSimilarShops(items = []) {
           </div>
           <div class="similar-shop-meta">
             <span class="similar-shop-chip similar-shop-location" aria-label="موقعیت">
-              <i class="fas fa-location-dot" aria-hidden="true"></i>
+              <span class="similar-shop-icon" aria-hidden="true"><i class="fas fa-location-dot"></i></span>
               <span>${location}</span>
             </span>
             <span class="similar-shop-chip similar-shop-rating" aria-label="امتیاز">
-              <i class="fas fa-star" aria-hidden="true"></i>
+              <span class="similar-shop-stars" aria-hidden="true">
+                <i class="fas fa-star"></i>
+              </span>
               <span>${ratingLabel}</span>
             </span>
           </div>
@@ -2469,6 +2475,11 @@ function renderSimilarShops(items = []) {
   }).join('');
   bindSimilarShopSlider();
   renderSimilarShopDots(items.length);
+  requestAnimationFrame(() => {
+    list.scrollLeft = list.scrollWidth;
+    if (Math.abs(list.scrollLeft) < 1) list.scrollLeft = -list.scrollWidth;
+    updateSimilarShopDots(0);
+  });
 }
 
 async function fetchServiceSimilarShops() {
