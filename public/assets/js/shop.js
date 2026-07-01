@@ -1271,7 +1271,14 @@ function renderProducts(products = []) {
           ${p.badge ? `<div class="product-badge-top"><span class="${badgeClass}">${p.badge}</span></div>` : ''}
         </div>
         <div class="product-body">
-          <h3 class="product-title" title="${p.title}">${p.title}</h3>
+          <div class="product-title-row">
+            <span class="product-title-check" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M5 10.2l3.1 3.1L15.4 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <h3 class="product-title" title="${p.title}">${p.title}</h3>
+          </div>
           <div class="product-category-badge">${p.category || 'دسته‌بندی نشده'}</div>
           <div class="product-info-row">
             <div class="product-rating-chip">
