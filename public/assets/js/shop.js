@@ -1268,22 +1268,32 @@ function renderProducts(products = []) {
       <article class="product-card" data-cat="${p.category}" data-idx="${i}">
         <div class="product-media">
           <img src="${imageUrl}" alt="${p.title}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='assets/images/shop-placeholder.svg';" />
-          <div class="product-badges">
-            ${p.badge ? `<span class="${badgeClass}">${p.badge}</span>` : ''}
-          </div>
+          ${p.badge ? `<div class="product-badge-top"><span class="${badgeClass}">${p.badge}</span></div>` : ''}
         </div>
         <div class="product-body">
           <h3 class="product-title" title="${p.title}">${p.title}</h3>
-          <div class="product-category">${p.category || 'دسته‌بندی نشده'}</div>
-          <div class="product-meta">
-            <div class="product-price">${p.price?.toLocaleString?.() || p.priceTxt || ''} <span class="price-note">تومان</span></div>
+          <div class="product-category-badge">${p.category || 'دسته‌بندی نشده'}</div>
+          <div class="product-info-row">
+            <div class="product-rating-chip">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>جدید</span>
+            </div>
+            <div class="product-location-chip">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>سیرمیسیس</span>
+            </div>
           </div>
         </div>
         <button class="onyx-btn details-btn" aria-label="مشاهده ${p.title}" data-idx="${i}">
-          <span>مشاهده محصول</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
+          <span>ورود به فروشگاه</span>
         </button>
       </article>
     `;
