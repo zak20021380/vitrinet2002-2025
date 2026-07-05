@@ -9639,6 +9639,256 @@
         grid-template-columns: minmax(0, 1.08fr) minmax(430px, 0.92fr);
       }
     }
+
+    /* Product page layout polish: sizing and structure only, colors remain inherited. */
+    #headerInner {
+      min-height: 64px;
+    }
+
+    #desktopNav a,
+    #headerInner > a:first-child,
+    .product-header-action {
+      min-height: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .product-header-action {
+      padding-block: 0 !important;
+      padding-inline: 1rem !important;
+      border-radius: 16px !important;
+      white-space: nowrap;
+    }
+
+    #cityBadge .relative.flex.flex-col {
+      justify-content: center;
+      min-height: 100%;
+    }
+
+    .description-toggle-label {
+      min-height: 44px;
+    }
+
+    #mobileMenuToggle,
+    #mobileMenuClose,
+    .menu-nav-link,
+    .mobile-prize-code-btn {
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    @media (max-width: 767px) {
+      html,
+      body {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      body > * {
+        max-width: 100vw;
+      }
+
+      #headerInner {
+        min-height: 60px;
+        padding: 0.5rem 1rem !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+      }
+
+      #desktopNav,
+      #cityBadge,
+      #rewardClaimBtn,
+      #registerShopBtn {
+        display: none !important;
+      }
+
+      #mobileMenuToggle {
+        display: inline-flex !important;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+      }
+
+      #mobileMenu {
+        width: 100vw;
+        max-width: 100vw;
+        overflow: hidden;
+      }
+
+      #mobileMenu[aria-hidden="true"] #mobileMenuPanel {
+        visibility: hidden;
+      }
+
+      #mainHeader,
+      main {
+        max-width: 100vw;
+        overflow-x: clip;
+      }
+
+      main {
+        padding-top: 1rem;
+      }
+
+      .layout-width {
+        width: 100%;
+        max-width: 100% !important;
+        padding-inline: 0.75rem;
+      }
+
+      .product-hero {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 1rem;
+      }
+
+      .gallery {
+        position: relative !important;
+        top: auto !important;
+        width: 100%;
+        max-width: 100%;
+        min-height: 0;
+        padding: 0.75rem;
+        border-radius: 18px;
+      }
+
+      .hero-image {
+        padding: 0.5rem;
+      }
+
+      .slider-viewport {
+        width: 100%;
+        min-height: 0;
+        max-height: none;
+        aspect-ratio: 1 / 1;
+      }
+
+      .slider-control,
+      .slider-zoom {
+        width: 44px;
+        height: 44px;
+      }
+
+      .slider-indicator {
+        width: 44px;
+        height: 44px;
+        padding: 17px;
+        background-clip: content-box;
+      }
+
+      .thumb {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        flex-basis: 60px;
+      }
+
+      .product-summary {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-inline: 0 !important;
+        padding: clamp(0.75rem, 3vw, 1rem);
+        border-radius: 20px;
+      }
+
+      .product-summary h1 {
+        font-size: clamp(1.22rem, 6vw, 1.62rem);
+        line-height: 1.3;
+        text-align: right;
+      }
+
+      .product-summary .meta-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 0.5rem;
+      }
+
+      .product-summary .meta-card {
+        min-height: 52px;
+      }
+
+      .product-summary .meta-card--highlight {
+        min-height: 78px;
+      }
+
+      .product-summary .meta-card--highlight .meta-value {
+        font-size: clamp(1.25rem, 7vw, 1.58rem);
+        line-height: 1.18;
+      }
+
+      .product-summary__section-head {
+        grid-template-columns: 32px minmax(0, 1fr);
+      }
+
+      .description-toggle-label,
+      .product-summary .seller-action-btn,
+      .product-summary .modern-like-btn,
+      .product-summary .premium-favorite-btn {
+        min-height: 44px;
+      }
+
+      .product-summary .seller-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .product-summary .seller-action-btn--message {
+        grid-column: 1 / -1 !important;
+      }
+
+      .product-social-actions {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .mobile-bottom-nav a,
+      .mobile-bottom-nav button {
+        min-height: 44px;
+      }
+    }
+
+    @media (min-width: 480px) and (max-width: 767px) {
+      .product-summary .meta-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .product-social-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1179px) {
+      #headerInner {
+        gap: 0.75rem;
+      }
+
+      .product-header-action {
+        padding-inline: 0.9rem !important;
+      }
+
+      .product-hero {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      .gallery {
+        position: relative;
+        top: auto;
+      }
+
+      .product-summary {
+        max-width: none;
+      }
+    }
+
+    @media (min-width: 1180px) {
+      .product-hero {
+        align-items: start;
+      }
+
+      .gallery {
+        top: 92px;
+      }
+    }
   </style>
   <script src="/nav-active.js" defer></script>
 
@@ -9705,7 +9955,7 @@
       <!-- Left side: Actions -->
       <div class="flex items-center gap-2 sm:gap-3 flex-nowrap flex-shrink-0">
         <!-- Premium City Badge - Sanandaj (Interactive) -->
-        <button type="button" id="cityBadge" class="group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:shadow-2xl hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden border border-white/20" aria-label="تغییر شهر">
+        <button type="button" id="cityBadge" class="product-header-action product-header-action--city group relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:shadow-2xl hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 cursor-pointer overflow-hidden border border-white/20" aria-label="تغییر شهر">
           <!-- Animated shimmer effect -->
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
 
@@ -9745,9 +9995,9 @@
         </button>
 
         <!-- Reward Button -->
-        <button type="button" id="rewardClaimBtn"
-          class="group relative inline-flex items-center gap-1.5 sm:gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2 rounded-xl sm:rounded-2xl font-bold text-white text-xs sm:text-xs bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-md shadow-orange-500/25 hover:shadow-orange-500/45 hover:scale-[1.02] transition-all duration-200 overflow-hidden"
-          aria-haspopup="dialog" aria-controls="rewardModal" aria-expanded="false">
+        <button type="button" id="rewardClaimBtn" data-prize-code-trigger
+          class="product-header-action product-header-action--reward group relative inline-flex items-center gap-1.5 sm:gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2 rounded-xl sm:rounded-2xl font-bold text-white text-xs sm:text-xs bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-md shadow-orange-500/25 hover:shadow-orange-500/45 hover:scale-[1.02] transition-all duration-200 overflow-hidden"
+          aria-haspopup="dialog" aria-controls="prizeModal" aria-expanded="false">
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
           <svg class="relative w-5 h-5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
@@ -9757,7 +10007,7 @@
 
         <!-- Register Shop Button - Desktop only -->
         <a href="post.html" id="registerShopBtn"
-          class="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-white text-sm bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] transition-all duration-200">
+          class="product-header-action product-header-action--register hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-white text-sm bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02] transition-all duration-200">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -9927,13 +10177,21 @@
             <!-- Arrow indicator -->
             <div class="mr-auto flex-shrink-0">
               <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors duration-300">
-                <svg class="w-3.5 h-3.5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"></svg>
+                <svg class="w-3.5 h-3.5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M15 18l-6-6 6-6"/>
                 </svg>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Prize Code CTA -->
+        <button type="button" data-prize-code-trigger class="mobile-prize-code-btn cta-shine relative flex items-center justify-center gap-3 w-full px-5 py-4 rounded-2xl font-black text-base text-white bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 active:scale-[0.97] transition-all duration-300 overflow-hidden group" aria-haspopup="dialog" aria-controls="prizeModal" aria-expanded="false">
+          <svg class="relative w-6 h-6 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+          </svg>
+          <span class="relative drop-shadow-sm">جایزه</span>
+        </button>
 
         <!-- Register Shop CTA -->
         <a href="post.html" class="cta-shine relative flex items-center justify-center gap-3 w-full px-5 py-4 rounded-2xl font-black text-base text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 active:scale-[0.97] transition-all duration-300 overflow-hidden group">

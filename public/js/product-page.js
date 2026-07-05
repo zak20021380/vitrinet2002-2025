@@ -2030,12 +2030,13 @@
 
   // Prize Code Modal Functionality
   (function initializePrizeCodeModal() {
-    const prizeBtn = document.getElementById('prizeCodeBtn');
+    const prizeBtns = Array.from(document.querySelectorAll('#prizeCodeBtn, #rewardClaimBtn, [data-prize-code-trigger]'));
     const modal = document.getElementById('prizeModal');
     const closeBtn = document.getElementById('prizeModalClose');
     const codeDisplay = document.getElementById('prizeCodeDisplay');
+    let activePrizeTrigger = null;
 
-    if (!prizeBtn || !modal || !closeBtn || !codeDisplay) {
+    if (!prizeBtns.length || !modal || !closeBtn || !codeDisplay) {
       console.warn('Prize code modal elements not found');
       return;
     }
@@ -2063,13 +2064,17 @@
 
         // Hide button if campaign is inactive OR showButton is false
         if (!data.active || data.showButton === false) {
-          prizeBtn.style.display = 'none';
-          prizeBtn.setAttribute('hidden', 'true');
-          prizeBtn.setAttribute('aria-hidden', 'true');
+          prizeBtns.forEach(button => {
+            button.style.display = 'none';
+            button.setAttribute('hidden', 'true');
+            button.setAttribute('aria-hidden', 'true');
+          });
         } else {
-          prizeBtn.style.display = '';
-          prizeBtn.removeAttribute('hidden');
-          prizeBtn.setAttribute('aria-hidden', 'false');
+          prizeBtns.forEach(button => {
+            button.style.display = '';
+            button.removeAttribute('hidden');
+            button.setAttribute('aria-hidden', 'false');
+          });
         }
       } catch (error) {
         console.error('Error checking campaign status:', error);
@@ -2145,17 +2150,25 @@
     function openModal() {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      prizeBtns.forEach(button => button.setAttribute('aria-expanded', 'true'));
       revealPrizeCode();
-      prizeBtn.blur();
+      if (document.activeElement instanceof HTMLElement) {
+        activePrizeTrigger = document.activeElement;
+        activePrizeTrigger.blur();
+      }
     }
 
     function closeModal() {
       modal.classList.remove('active');
       document.body.style.overflow = '';
-      prizeBtn.focus({ preventScroll: true });
+      prizeBtns.forEach(button => button.setAttribute('aria-expanded', 'false'));
+      if (activePrizeTrigger instanceof HTMLElement) {
+        activePrizeTrigger.focus({ preventScroll: true });
+      }
+      activePrizeTrigger = null;
     }
 
-    prizeBtn.addEventListener('click', openModal);
+    prizeBtns.forEach(button => button.addEventListener('click', openModal));
     closeBtn.addEventListener('click', closeModal);
 
     modal.addEventListener('click', function (e) {
