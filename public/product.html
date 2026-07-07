@@ -9707,7 +9707,7 @@
 
       #headerInner {
         display: grid !important;
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
         min-height: 64px;
         padding: 0.55rem 0.85rem !important;
@@ -9718,7 +9718,8 @@
       }
 
       #headerInner > a:first-child {
-        grid-column: 2;
+        grid-column: 3;
+        grid-row: 1;
         justify-self: end;
         direction: rtl;
         height: auto;
@@ -9746,11 +9747,7 @@
       }
 
       #headerInner > div:last-child {
-        grid-column: 1;
-        justify-self: start;
-        direction: rtl;
-        gap: 0.4rem !important;
-        min-width: 0;
+        display: contents !important;
       }
 
       #desktopNav,
@@ -9760,6 +9757,9 @@
       }
 
       #cityBadge {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: center;
         position: relative;
         inset: auto;
         z-index: auto;
@@ -9845,6 +9845,9 @@
       }
 
       #mobileMenuToggle {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
         display: inline-flex !important;
         flex: 0 0 40px;
         width: 40px;
