@@ -460,12 +460,18 @@
   #mobileMenuPanel {
     width: 82vw !important;
     max-width: 310px !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
     padding-top: 0 !important;
     background: rgba(255, 255, 255, 0.98) !important;
     border-left: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-bottom: 0 !important;
+    border-bottom-left-radius: 0 !important;
     box-shadow: -18px 0 48px rgba(15, 23, 42, 0.16) !important;
     backdrop-filter: blur(18px) !important;
     transition-duration: 0.36s !important;
+    overflow: hidden !important;
   }
 
   #mobileMenuBackdrop.active {
@@ -540,9 +546,11 @@
   /* Navigation */
   #mobileMenuPanel nav {
     display: flex;
+    flex: 0 1 auto !important;
     flex-direction: column;
     gap: 3px;
     padding: 12px !important;
+    overflow-y: auto !important;
   }
 
   #mobileMenuPanel nav > :not([hidden]) ~ :not([hidden]) {
@@ -626,10 +634,16 @@
 
   /* Compact footer */
   #mobileMenuPanel > div:last-child {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
     padding: 10px 12px max(10px, env(safe-area-inset-bottom)) !important;
     gap: 8px !important;
-    background: #f8fafc !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 48%, #f1f5f9 100%) !important;
     border-color: #e2e8f0 !important;
+    overflow-y: auto !important;
   }
 
   #mobileMenuPanel > div:last-child > .absolute {
@@ -643,9 +657,9 @@
   #mobileMenuPanel .mobile-menu-location-card {
     padding: 9px !important;
     border-radius: 12px !important;
-    background: #0f2430 !important;
-    border: 1px solid rgba(51, 65, 85, 0.72) !important;
-    box-shadow: 0 7px 18px rgba(15, 35, 48, 0.16) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%) !important;
+    border: 1px solid #ccfbf1 !important;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.09) !important;
   }
 
   #mobileMenuPanel .mobile-menu-location-card > .absolute,
@@ -661,8 +675,9 @@
     width: 32px !important;
     height: 32px !important;
     border-radius: 9px !important;
-    box-shadow: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: linear-gradient(135deg, #0f766e, #0891b2) !important;
+    box-shadow: 0 4px 10px rgba(13, 148, 136, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
   }
 
   #mobileMenuPanel .mobile-menu-location-card .flex-shrink-0 > div:first-child svg {
@@ -673,27 +688,37 @@
   #mobileMenuPanel .mobile-menu-location-card .text-\[10px\] {
     font-size: 0.48rem !important;
     line-height: 1 !important;
+    color: #64748b !important;
   }
 
   #mobileMenuPanel .mobile-menu-location-card .text-base {
     font-size: 0.76rem !important;
     line-height: 1.15 !important;
+    color: #0f172a !important;
   }
 
   #mobileMenuPanel .mobile-menu-location-card .text-\[9px\] {
     font-size: 0.46rem !important;
     padding: 1px 5px !important;
+    color: #0f766e !important;
+    background: #ccfbf1 !important;
+    border-color: #99f6e4 !important;
   }
 
-  #mobileMenuPanel .mobile-menu-location-card .mr-auto > div {
+  #mobileMenuPanel .mobile-menu-location-card .mr-auto.flex-shrink-0 > div:first-child {
     width: 23px !important;
     height: 23px !important;
     border-radius: 7px !important;
+    color: #0f766e !important;
+    background: #ffffff !important;
+    border: 1px solid #ccfbf1 !important;
+    box-shadow: none !important;
   }
 
-  #mobileMenuPanel .mobile-menu-location-card .mr-auto svg {
+  #mobileMenuPanel .mobile-menu-location-card .mr-auto.flex-shrink-0 svg {
     width: 10px !important;
     height: 10px !important;
+    color: #0f766e !important;
   }
 
   #mobileMenuPanel > div:last-child > .mobile-prize-code-btn,
