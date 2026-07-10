@@ -7,6 +7,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style-index.css" />
+  <link rel="stylesheet" href="/css/premium-mobile-menu.css" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;600;700;900&family=Poppins:wght@800;900&display=swap" rel="stylesheet"/>
   <script src="/nav-active.js" defer></script>
 
@@ -1702,6 +1703,144 @@
         border-radius: 1.375rem;
       }
     }
+
+    /* Shared categories-page header treatment */
+    #mainHeader,
+    #headerMenuOverlay {
+      display: none !important;
+    }
+    #categoriesHeader {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.06) !important;
+      backdrop-filter: blur(24px) saturate(150%) !important;
+    }
+    #categoriesHeader .categories-header__inner {
+      min-height: 70px;
+      flex-wrap: nowrap !important;
+      gap: 1rem;
+      padding-top: 0.62rem !important;
+      padding-bottom: 0.62rem !important;
+    }
+    #categoriesHeader .categories-brand-group { gap: 0.65rem; min-width: 0; }
+    #categoriesHeader .logo-vitreenet {
+      display: inline-flex;
+      align-items: center;
+      padding: 0;
+      background: none;
+      color: #059669;
+      filter: none;
+      text-decoration: none;
+    }
+    #categoriesHeader .categories-brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #10b981, #14b8a6 55%, #06b6d4);
+      color: #fff;
+      box-shadow: 0 7px 16px rgba(16, 185, 129, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.08rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    #categoriesHeader .categories-city-badge {
+      min-height: 36px;
+      margin-left: 0 !important;
+      padding: 0.38rem 0.68rem !important;
+      gap: 0.35rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 11px !important;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.9) 70%, rgba(14, 165, 233, 0.9)) !important;
+      box-shadow: 0 6px 14px rgba(16, 185, 129, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(5px) !important;
+    }
+    #categoriesHeader .categories-city-badge svg { width: 15px; height: 15px; margin-left: 0 !important; filter: none !important; }
+    #categoriesHeader .categories-city-badge svg path { fill: #fff; }
+    #categoriesHeader .categories-city-badge span {
+      color: #fff !important;
+      font-size: 0.72rem !important;
+      font-weight: 850 !important;
+      text-shadow: none !important;
+      letter-spacing: 0 !important;
+    }
+    #categoriesHeader .categories-header-nav { gap: 0.3rem !important; min-width: 0; }
+    #categoriesHeader .main-nav-link {
+      min-height: 40px;
+      flex-direction: row !important;
+      flex: 0 0 auto !important;
+      padding: 0.5rem 0.78rem !important;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      color: #475569 !important;
+      font-size: 0.82rem !important;
+      font-weight: 750 !important;
+      line-height: 1;
+    }
+    #categoriesHeader .main-nav-link:hover,
+    #categoriesHeader .main-nav-link:focus-visible {
+      color: #0f766e !important;
+      background: #f0fdfa;
+      border-color: #ccfbf1;
+      outline: none;
+    }
+    #categoriesHeader .main-nav-link[href="categories.html"] {
+      color: #0f766e !important;
+      background: #ecfdf5;
+      border-color: rgba(16, 185, 129, 0.18);
+    }
+    #categoriesHeader .categories-register-btn {
+      min-height: 40px;
+      padding: 0.52rem 0.9rem !important;
+      gap: 0.42rem;
+      border: 1px solid rgba(255, 255, 255, 0.22) !important;
+      border-radius: 11px !important;
+      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%) !important;
+      box-shadow: 0 2px 12px rgba(16, 185, 129, 0.2) !important;
+      transform: none !important;
+    }
+    #categoriesHeader .categories-register-btn::before { display: none; }
+    #categoriesHeader .categories-register-btn span { width: auto; font-size: 0.76rem; font-weight: 850; white-space: nowrap; }
+    #categoriesHeader .categories-register-icon { width: 16px; height: 16px; flex: 0 0 16px; }
+    #categoriesHeader #mobileMenuToggle { display: none; }
+
+    @media (max-width: 767px) {
+      #categoriesHeader .categories-header__inner { min-height: 58px; gap: 0.5rem; padding: 0.45rem 0.7rem !important; }
+      #categoriesHeader .categories-brand-group { gap: 0.42rem; }
+      #categoriesHeader .categories-brand-mark { width: 31px; height: 31px; flex-basis: 31px; border-radius: 10px; font-size: 0.86rem; }
+      #categoriesHeader .categories-city-badge { min-height: 30px; padding: 0.28rem 0.48rem !important; border-radius: 9px !important; }
+      #categoriesHeader .categories-city-badge svg { width: 12px; height: 12px; }
+      #categoriesHeader .categories-city-badge span { font-size: 0.62rem !important; }
+      #categoriesHeader .hide-on-mobile { display: none !important; }
+      #categoriesHeader .categories-header-nav { flex: 0 0 auto; }
+      #categoriesHeader .categories-register-btn { min-height: 32px; padding: 0.36rem 0.58rem !important; border-radius: 9px !important; }
+      #categoriesHeader .categories-register-btn span { font-size: 0.63rem; }
+      #categoriesHeader .categories-register-icon { width: 13px; height: 13px; flex-basis: 13px; }
+      #categoriesHeader #mobileMenuToggle {
+        display: inline-flex !important;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        flex: 0 0 40px;
+        border-radius: 12px;
+      }
+    }
+    @media (max-width: 380px) {
+      #categoriesHeader .categories-brand-mark { width: 27px; height: 27px; flex-basis: 27px; border-radius: 9px; font-size: 0.74rem; }
+      #categoriesHeader .categories-city-badge { padding-inline: 0.4rem !important; }
+      #categoriesHeader .categories-register-btn { padding-inline: 0.48rem !important; }
+    }
+    @media (min-width: 768px) {
+      #categoriesHeader .categories-header-nav,
+      #categoriesHeader .hide-on-mobile {
+        display: flex !important;
+      }
+    }
   </style>
 
   
@@ -1799,6 +1938,60 @@
       </button>
     </div>
   </aside>
+</div>
+
+<header id="categoriesHeader" class="w-full sticky top-0 z-50">
+  <div class="categories-header__inner max-w-7xl mx-auto flex flex-nowrap items-center justify-between px-4 sm:px-6 py-2 sm:py-3">
+    <div class="categories-brand-group flex items-center flex-shrink-0">
+      <a href="index.html" class="logo-vitreenet" aria-label="ویترینت، صفحه اصلی">
+        <span class="categories-brand-mark" aria-hidden="true">V</span>
+      </a>
+      <div class="categories-city-badge flex items-center rounded-full">
+        <svg fill="none" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5C7.13 2.5 4 5.61 4 9.45c0 3.52 4.1 7.93 6.2 10.01.46.47 1.2.47 1.66 0 2.1-2.08 6.14-6.49 6.14-10.01C18 5.61 14.87 2.5 11 2.5Zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"/></svg>
+        <span>سنندج</span>
+      </div>
+    </div>
+    <nav id="categoriesDesktopNav" class="categories-header-nav flex items-center justify-end flex-nowrap text-sm sm:text-base w-auto">
+      <a href="index.html" class="main-nav-link hide-on-mobile flex items-center justify-center">خانه</a>
+      <a href="categories.html" class="main-nav-link hide-on-mobile flex items-center justify-center">دسته‌بندی</a>
+      <a href="login.html" class="main-nav-link hide-on-mobile flex items-center justify-center">ورود</a>
+      <a href="post.html" id="categoriesRegisterShopBtn" class="categories-register-btn btn-grad flex items-center justify-center text-white">
+        <svg class="categories-register-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5V20h16v-9.5"/><path d="M3 10.5 4.8 4h14.4l1.8 6.5"/><path d="M3 10.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>
+        <span>ثبت فروشگاه</span>
+      </a>
+      <button type="button" id="mobileMenuToggle" class="relative items-center justify-center bg-gradient-to-br from-white via-gray-50 to-white border border-gray-200/60 shadow-lg shadow-gray-900/5 active:scale-95 transition-all duration-300 group overflow-hidden" aria-label="باز کردن منو" aria-expanded="false" aria-controls="mobileMenu">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/0 via-teal-50/0 to-cyan-50/0 group-hover:from-emerald-50/80 group-hover:via-teal-50/60 group-hover:to-cyan-50/80 transition-all duration-500"></div>
+        <div class="relative flex flex-col items-center justify-center gap-[5px] w-6 h-6">
+          <span id="menuLine1" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 rounded-full transition-all duration-300 origin-center"></span>
+          <span id="menuLine2" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 rounded-full transition-all duration-300"></span>
+          <span id="menuLine3" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 rounded-full transition-all duration-300 origin-center"></span>
+        </div>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div id="mobileMenu" class="md:hidden fixed inset-0 z-[9998] pointer-events-none" aria-hidden="true">
+  <div id="mobileMenuBackdrop" class="absolute inset-0 transition-all duration-500 z-[9999] cursor-pointer pointer-events-none"></div>
+  <div id="mobileMenuPanel" class="absolute top-0 right-0 h-full w-[90vw] max-w-[380px] bg-white shadow-[-12px_0_48px_rgba(0,0,0,0.12)] border-l border-gray-200/50 transform translate-x-full transition-all duration-500 flex flex-col pointer-events-none z-[10000]">
+    <div class="relative flex items-center justify-between p-5 border-b border-gray-200/60 bg-white z-50">
+      <div class="relative flex items-center gap-3 z-10">
+        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30"><svg viewBox="0 0 24 24" class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6h3l3 12 3-12h3"/></svg></span>
+        <div class="flex flex-col"><span class="text-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">ویترینت</span><span class="text-[10px] font-bold text-teal-600/70 leading-tight">فروشگاه آنلاین</span></div>
+      </div>
+      <button id="mobileMenuClose" type="button" class="relative w-11 h-11 rounded-2xl bg-white border border-gray-200/60 flex items-center justify-center text-gray-600 shadow-md z-50" aria-label="بستن منو"><svg class="w-5 h-5 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <nav class="flex-1 overflow-y-auto p-5 space-y-2 scrollbar-thin">
+      <a href="index.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold overflow-hidden"><span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-md"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><span class="relative text-base">خانه</span><svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <a href="categories.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold overflow-hidden"><span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600 shadow-md"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="relative text-base">دسته‌بندی</span><svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <a href="all-products.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold overflow-hidden"><span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 shadow-md"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span><span class="relative text-base">محصولات</span><svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <a href="login.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold overflow-hidden"><span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-md"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5M15 12H3"/></svg></span><span class="relative text-base">ورود / ثبت‌نام</span><svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></a>
+    </nav>
+    <div class="relative p-5 border-t border-gray-200/60 bg-gradient-to-t from-white via-gray-50/50 to-transparent space-y-4">
+      <div class="mobile-menu-location-card relative group overflow-hidden rounded-2xl bg-slate-900 p-4 border border-slate-700/50"><div class="relative flex items-center gap-3"><div class="relative flex-shrink-0"><div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 via-cyan-500 to-emerald-500 flex items-center justify-center"><svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div><div class="flex flex-col gap-0.5 min-w-0"><span class="text-[10px] font-semibold text-teal-300/80">موقعیت شما</span><div class="flex items-center gap-1.5"><span class="text-base font-black text-white">سنندج</span><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold text-teal-300 border border-teal-400/30">کردستان</span></div></div><div class="mr-auto flex-shrink-0"><div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center"><svg class="w-3.5 h-3.5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></div></div></div></div>
+      <a href="post.html" class="cta-shine relative flex items-center justify-center gap-3 w-full px-5 py-4 rounded-2xl font-black text-base text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl shadow-emerald-500/30 overflow-hidden"><svg class="relative w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg><span class="relative">ثبت فروشگاه</span></a>
+    </div>
+  </div>
 </div>
 
   <main class="px-4 sm:px-6 lg:px-8 pt-12 pb-16">
@@ -3267,6 +3460,45 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
       } else {
         setupHeaderMenu();
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      function initCategoriesStyleMenu() {
+        const toggle = document.getElementById('mobileMenuToggle');
+        const close = document.getElementById('mobileMenuClose');
+        const menu = document.getElementById('mobileMenu');
+        const backdrop = document.getElementById('mobileMenuBackdrop');
+        const panel = document.getElementById('mobileMenuPanel');
+        const lines = [document.getElementById('menuLine1'), document.getElementById('menuLine2'), document.getElementById('menuLine3')];
+        if (!toggle || !close || !menu || !backdrop || !panel) return;
+        let open = false;
+        function setOpen(next) {
+          open = next;
+          toggle.setAttribute('aria-expanded', String(next));
+          menu.setAttribute('aria-hidden', String(!next));
+          menu.classList.toggle('pointer-events-none', !next);
+          menu.classList.toggle('pointer-events-auto', next);
+          backdrop.classList.toggle('active', next);
+          panel.classList.toggle('translate-x-full', !next);
+          panel.classList.toggle('translate-x-0', next);
+          lines[0]?.classList.toggle('rotate-45', next);
+          lines[0]?.classList.toggle('translate-y-[7px]', next);
+          lines[1]?.classList.toggle('opacity-0', next);
+          lines[1]?.classList.toggle('scale-0', next);
+          lines[2]?.classList.toggle('-rotate-45', next);
+          lines[2]?.classList.toggle('-translate-y-[7px]', next);
+          document.body.style.overflow = next ? 'hidden' : '';
+        }
+        toggle.addEventListener('click', function () { setOpen(!open); });
+        close.addEventListener('click', function () { setOpen(false); });
+        backdrop.addEventListener('click', function () { setOpen(false); });
+        panel.querySelectorAll('a').forEach(function (link) { link.addEventListener('click', function () { setOpen(false); }); });
+        document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && open) setOpen(false); });
+        window.addEventListener('resize', function () { if (window.innerWidth >= 768 && open) setOpen(false); });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCategoriesStyleMenu);
+      else initCategoriesStyleMenu();
     })();
   </script>
 </body>
