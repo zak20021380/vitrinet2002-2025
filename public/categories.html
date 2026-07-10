@@ -13,6 +13,7 @@
   <title>دسته‌بندی فروشگاه‌ها - ویترینت</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style-index.css" />
+  <link rel="stylesheet" href="/css/premium-mobile-menu.css" />
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
@@ -389,7 +390,7 @@
       #registerShopBtn { box-shadow: none; }
     }
     /* mobile adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
       .hide-on-mobile { display: none !important; }
     }
     ::-webkit-scrollbar { width: 7px; }
@@ -873,6 +874,16 @@
         flex-basis: 13px;
       }
 
+      #categoriesHeader #mobileMenuToggle {
+        display: inline-flex !important;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        flex: 0 0 40px;
+        border-radius: 12px;
+      }
+
       .categories-search-control {
         min-height: 50px;
         padding: 0.3rem 0.34rem 0.3rem 0.5rem !important;
@@ -931,6 +942,12 @@
       #categorySearchButton {
         min-width: 72px;
         padding-inline: 0.54rem !important;
+      }
+    }
+
+    @media (min-width: 768px) {
+      #categoriesHeader #mobileMenuToggle {
+        display: none !important;
       }
     }
     </style>
@@ -1000,9 +1017,97 @@
         </svg>
         <span>ثبت فروشگاه</span>
       </a>
+      <button type="button" id="mobileMenuToggle"
+        class="relative items-center justify-center rounded-2xl bg-gradient-to-br from-white via-gray-50 to-white border border-gray-200/60 shadow-lg shadow-gray-900/5 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-300/40 active:scale-95 transition-all duration-300 group overflow-hidden"
+        aria-label="باز کردن منو" aria-expanded="false" aria-controls="mobileMenu">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/0 via-teal-50/0 to-cyan-50/0 group-hover:from-emerald-50/80 group-hover:via-teal-50/60 group-hover:to-cyan-50/80 transition-all duration-500 rounded-2xl"></div>
+        <div class="relative flex flex-col items-center justify-center gap-[5px] w-6 h-6">
+          <span id="menuLine1" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 origin-center shadow-sm"></span>
+          <span id="menuLine2" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 shadow-sm"></span>
+          <span id="menuLine3" class="block w-6 h-[2.5px] bg-gradient-to-r from-gray-700 to-gray-600 group-hover:from-emerald-600 group-hover:to-teal-600 rounded-full transition-all duration-300 origin-center shadow-sm"></span>
+        </div>
+        <span class="absolute inset-0 rounded-2xl opacity-0 group-active:opacity-100 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 transition-opacity duration-150"></span>
+      </button>
     </nav>
   </div>
 </header>
+
+<div id="mobileMenu" class="md:hidden fixed inset-0 z-[9998] pointer-events-none" aria-hidden="true">
+  <div id="mobileMenuBackdrop" class="absolute inset-0 bg-gradient-to-br from-gray-900/0 via-slate-900/0 to-gray-900/0 backdrop-blur-none transition-all duration-500 z-[9999] cursor-pointer pointer-events-none"></div>
+  <div id="mobileMenuPanel" class="absolute top-0 right-0 h-full w-[90vw] max-w-[380px] bg-gradient-to-br from-white via-gray-50/95 to-white shadow-[-12px_0_48px_rgba(0,0,0,0.12)] border-l border-gray-200/50 transform translate-x-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col backdrop-blur-xl pointer-events-none z-[10000]">
+    <div class="relative flex items-center justify-between p-5 border-b border-gray-200/60 bg-gradient-to-r from-white via-emerald-50/30 to-teal-50/30 backdrop-blur-sm z-50">
+      <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none z-0"></div>
+      <div class="relative flex items-center gap-3 z-10">
+        <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-2 ring-white/50">
+          <svg viewBox="0 0 24 24" class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M6 6h3l3 12 3-12h3"/>
+          </svg>
+        </span>
+        <div class="flex flex-col">
+          <span class="text-xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">ویترینت</span>
+          <span class="text-[10px] font-bold text-teal-600/70 leading-tight">فروشگاه آنلاین</span>
+        </div>
+      </div>
+      <button id="mobileMenuClose" type="button" class="relative w-11 h-11 rounded-2xl bg-white border border-gray-200/60 flex items-center justify-center text-gray-600 active:scale-95 transition-all duration-300 shadow-md group z-50" aria-label="بستن منو">
+        <svg class="w-5 h-5 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto p-5 space-y-2 scrollbar-thin">
+      <a href="index.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold transition-all duration-300 overflow-hidden">
+        <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-md">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </span>
+        <span class="relative text-base">خانه</span>
+        <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <a href="categories.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold transition-all duration-300 overflow-hidden">
+        <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600 shadow-md">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        </span>
+        <span class="relative text-base">دسته‌بندی</span>
+        <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <a href="all-products.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold transition-all duration-300 overflow-hidden">
+        <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 shadow-md">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        </span>
+        <span class="relative text-base">محصولات</span>
+        <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <a href="login.html" class="menu-nav-link group relative flex items-center gap-4 px-5 py-4 rounded-2xl text-gray-700 font-bold transition-all duration-300 overflow-hidden">
+        <span class="menu-icon-wrapper relative w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-md">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5M15 12H3"/></svg>
+        </span>
+        <span class="relative text-base">ورود / ثبت‌نام</span>
+        <svg class="menu-arrow relative w-5 h-5 mr-auto text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+    </nav>
+
+    <div class="relative p-5 border-t border-gray-200/60 bg-gradient-to-t from-white via-gray-50/50 to-transparent space-y-4">
+      <div class="mobile-menu-location-card relative group overflow-hidden rounded-2xl bg-slate-900 p-4 border border-slate-700/50">
+        <div class="relative flex items-center gap-3">
+          <div class="relative flex-shrink-0">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 via-cyan-500 to-emerald-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            </div>
+          </div>
+          <div class="flex flex-col gap-0.5 min-w-0">
+            <span class="text-[10px] font-semibold text-teal-300/80">موقعیت شما</span>
+            <div class="flex items-center gap-1.5"><span class="text-base font-black text-white">سنندج</span><span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold text-teal-300 border border-teal-400/30">کردستان</span></div>
+          </div>
+          <div class="mr-auto flex-shrink-0"><div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center"><svg class="w-3.5 h-3.5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></div></div>
+        </div>
+      </div>
+      <a href="post.html" class="cta-shine relative flex items-center justify-center gap-3 w-full px-5 py-4 rounded-2xl font-black text-base text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 shadow-xl shadow-emerald-500/30 transition-all duration-300 overflow-hidden group">
+        <svg class="relative w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="relative">ثبت فروشگاه</span>
+      </a>
+    </div>
+  </div>
+</div>
 
 <main class="max-w-7xl mx-auto mt-4 sm:mt-8 md:mt-12 mb-14 px-4">
   <section class="glass rounded-2xl py-12 px-4 sm:px-8 lg:px-12 shadow-lg mt-2">
@@ -1042,6 +1147,61 @@
   </footer>
 
 <script src="js/categories.js" defer></script>
+<script>
+  (function () {
+    function initCategoriesMobileMenu() {
+      const toggle = document.getElementById('mobileMenuToggle');
+      const close = document.getElementById('mobileMenuClose');
+      const menu = document.getElementById('mobileMenu');
+      const backdrop = document.getElementById('mobileMenuBackdrop');
+      const panel = document.getElementById('mobileMenuPanel');
+      const lines = [
+        document.getElementById('menuLine1'),
+        document.getElementById('menuLine2'),
+        document.getElementById('menuLine3')
+      ];
+      if (!toggle || !close || !menu || !backdrop || !panel) return;
+
+      let open = false;
+      function setOpen(next) {
+        open = next;
+        toggle.setAttribute('aria-expanded', String(next));
+        menu.setAttribute('aria-hidden', String(!next));
+        menu.classList.toggle('pointer-events-none', !next);
+        menu.classList.toggle('pointer-events-auto', next);
+        backdrop.classList.toggle('active', next);
+        panel.classList.toggle('translate-x-full', !next);
+        panel.classList.toggle('translate-x-0', next);
+        lines[0]?.classList.toggle('rotate-45', next);
+        lines[0]?.classList.toggle('translate-y-[7px]', next);
+        lines[1]?.classList.toggle('opacity-0', next);
+        lines[1]?.classList.toggle('scale-0', next);
+        lines[2]?.classList.toggle('-rotate-45', next);
+        lines[2]?.classList.toggle('-translate-y-[7px]', next);
+        document.body.style.overflow = next ? 'hidden' : '';
+      }
+
+      toggle.addEventListener('click', function () { setOpen(!open); });
+      close.addEventListener('click', function () { setOpen(false); });
+      backdrop.addEventListener('click', function () { setOpen(false); });
+      panel.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () { setOpen(false); });
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && open) setOpen(false);
+      });
+      window.addEventListener('resize', function () {
+        if (window.innerWidth >= 768 && open) setOpen(false);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCategoriesMobileMenu);
+    } else {
+      initCategoriesMobileMenu();
+    }
+  })();
+</script>
 
 
 <!-- TODO: افزودن رویدادهای PostHog پس از فعال‌سازی | TODO: Enable PostHog events after activation -->
