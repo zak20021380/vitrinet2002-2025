@@ -453,3 +453,284 @@
   will-change: opacity, backdrop-filter;
 }
 
+/* ========================================
+   Compact professional drawer — phones only
+   ======================================== */
+@media (max-width: 767px) {
+  #mobileMenuPanel {
+    width: 82vw !important;
+    max-width: 310px !important;
+    padding-top: 0 !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-left: 1px solid rgba(148, 163, 184, 0.22) !important;
+    box-shadow: -18px 0 48px rgba(15, 23, 42, 0.16) !important;
+    backdrop-filter: blur(18px) !important;
+    transition-duration: 0.36s !important;
+  }
+
+  #mobileMenuBackdrop.active {
+    background: rgba(15, 23, 42, 0.48) !important;
+    backdrop-filter: blur(3px) !important;
+  }
+
+  /* Drawer header */
+  #mobileMenuPanel > div:first-child {
+    min-height: 62px;
+    padding: max(12px, env(safe-area-inset-top)) 14px 12px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(226, 232, 240, 0.9) !important;
+    box-shadow: none !important;
+  }
+
+  #mobileMenuPanel > div:first-child > .absolute {
+    display: none !important;
+  }
+
+  #mobileMenuPanel > div:first-child > .relative.flex.items-center {
+    gap: 9px !important;
+  }
+
+  #mobileMenuPanel > div:first-child > .relative.flex.items-center > span {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 5px 14px rgba(13, 148, 136, 0.18) !important;
+  }
+
+  #mobileMenuPanel > div:first-child > .relative.flex.items-center > span svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  #mobileMenuPanel > div:first-child .text-xl {
+    font-size: 0.95rem !important;
+    line-height: 1.15 !important;
+  }
+
+  #mobileMenuPanel > div:first-child .text-\[10px\] {
+    font-size: 0.5rem !important;
+    margin-top: 2px;
+  }
+
+  #mobileMenuClose {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 10px !important;
+    color: #64748b !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  #mobileMenuClose:hover,
+  #mobileMenuClose:active,
+  #mobileMenuClose:focus {
+    color: #0f766e !important;
+    background: #f0fdfa !important;
+    border-color: #99f6e4 !important;
+  }
+
+  #mobileMenuClose svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* Navigation */
+  #mobileMenuPanel nav {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px !important;
+  }
+
+  #mobileMenuPanel nav > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0 !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link {
+    min-height: 46px !important;
+    padding: 6px 8px !important;
+    gap: 10px !important;
+    border-radius: 10px !important;
+    color: #334155 !important;
+    background: transparent !important;
+    font-size: 0.78rem !important;
+    font-weight: 750 !important;
+    transform: none !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link > .absolute {
+    display: none !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link::before {
+    right: 0;
+    left: auto;
+    top: 9px;
+    width: 2px;
+    height: calc(100% - 18px);
+    border-radius: 999px;
+    background: #0f766e;
+  }
+
+  #mobileMenuPanel .menu-nav-link:hover,
+  #mobileMenuPanel .menu-nav-link:focus-visible {
+    color: #0f766e !important;
+    background: #f0fdfa !important;
+  }
+
+  #mobileMenuPanel .menu-icon-wrapper {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 9px !important;
+    color: #0f766e !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  #mobileMenuPanel .menu-icon-wrapper svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke-width: 2 !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link:hover .menu-icon-wrapper {
+    color: #fff !important;
+    background: #0f766e !important;
+    border-color: #0f766e !important;
+    transform: none !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link > span.relative.text-base {
+    font-size: 0.78rem !important;
+    font-weight: 750 !important;
+  }
+
+  #mobileMenuPanel .menu-arrow {
+    width: 14px !important;
+    height: 14px !important;
+    color: #94a3b8 !important;
+    stroke-width: 2 !important;
+  }
+
+  #mobileMenuPanel .menu-nav-link:hover .menu-arrow {
+    color: #0f766e !important;
+    transform: translateX(-2px) !important;
+  }
+
+  /* Compact footer */
+  #mobileMenuPanel > div:last-child {
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom)) !important;
+    gap: 8px !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  #mobileMenuPanel > div:last-child > .absolute {
+    display: none !important;
+  }
+
+  #mobileMenuPanel > div:last-child > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 8px !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card {
+    padding: 9px !important;
+    border-radius: 12px !important;
+    background: #0f2430 !important;
+    border: 1px solid rgba(51, 65, 85, 0.72) !important;
+    box-shadow: 0 7px 18px rgba(15, 35, 48, 0.16) !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card > .absolute,
+  #mobileMenuPanel .mobile-menu-location-card .animate-ping {
+    display: none !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card > .relative.flex {
+    gap: 8px !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .flex-shrink-0 > div:first-child {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .flex-shrink-0 > div:first-child svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .text-\[10px\] {
+    font-size: 0.48rem !important;
+    line-height: 1 !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .text-base {
+    font-size: 0.76rem !important;
+    line-height: 1.15 !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .text-\[9px\] {
+    font-size: 0.46rem !important;
+    padding: 1px 5px !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .mr-auto > div {
+    width: 23px !important;
+    height: 23px !important;
+    border-radius: 7px !important;
+  }
+
+  #mobileMenuPanel .mobile-menu-location-card .mr-auto svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  #mobileMenuPanel > div:last-child > .mobile-prize-code-btn,
+  #mobileMenuPanel > div:last-child > a.cta-shine {
+    min-height: 40px !important;
+    padding: 0 13px !important;
+    gap: 7px !important;
+    border-radius: 11px !important;
+    font-size: 0.76rem !important;
+    font-weight: 850 !important;
+    box-shadow: 0 5px 14px rgba(13, 148, 136, 0.17) !important;
+  }
+
+  #mobileMenuPanel > div:last-child > .mobile-prize-code-btn svg,
+  #mobileMenuPanel > div:last-child > a.cta-shine svg {
+    width: 15px !important;
+    height: 15px !important;
+    filter: none !important;
+    stroke-width: 2.25 !important;
+  }
+
+  #mobileMenuPanel > div:last-child > .mobile-prize-code-btn {
+    color: #475569 !important;
+    background: #fff !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  #mobileMenuPanel > div:last-child > .mobile-prize-code-btn svg {
+    color: #d97706 !important;
+  }
+
+  #mobileMenuPanel > div:last-child > a.cta-shine {
+    background: linear-gradient(135deg, #0f766e, #0891b2) !important;
+    background-image: linear-gradient(135deg, #0f766e, #0891b2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+}
+
