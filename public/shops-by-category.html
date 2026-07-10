@@ -588,13 +588,13 @@
     .filter-input-wrap {
       position: relative;
       min-width: 0;
-      min-height: 70px;
+      min-height: 56px;
       overflow: hidden;
-      border: 1px solid #cee1dc;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
-      box-shadow: 0 12px 28px -24px rgba(15, 23, 42, 0.58), inset 0 1px 0 #fff;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      border: 1px solid #d3e2de;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 8px 20px -20px rgba(15, 23, 42, 0.5);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .sort-select-wrap {
       position: relative;
@@ -613,12 +613,17 @@
       box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.12), 0 18px 34px -24px rgba(0, 169, 133, 0.62);
       transform: none;
     }
-    .filter-input-wrap:hover,
+    .filter-input-wrap:hover {
+      border-color: #b9d8d0;
+    }
     .sort-select-wrap:hover {
       border-color: rgba(0, 151, 122, 0.46);
       transform: translateY(-1px);
     }
-    .filter-input-wrap:focus-within,
+    .filter-input-wrap:focus-within {
+      border-color: #009b7d;
+      box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.1);
+    }
     .sort-select-wrap:focus-within {
       border-color: #009b7d;
       box-shadow: 0 0 0 4px rgba(0, 169, 133, 0.11), 0 18px 34px -25px rgba(0, 137, 110, 0.68), inset 0 1px 0 #fff;
@@ -628,25 +633,23 @@
       position: absolute;
       z-index: 2;
       top: 50%;
-      right: 0.72rem;
+      right: 0.55rem;
       display: grid;
-      width: 46px;
-      height: 46px;
+      width: 38px;
+      height: 38px;
       transform: translateY(-50%);
       place-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 14px;
-      background: linear-gradient(145deg, #087a68, #00ad8b);
+      border: 0;
+      border-radius: 11px;
+      background: #078b73;
       color: #fff;
-      box-shadow: 0 12px 22px -14px rgba(0, 128, 105, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 16px -12px rgba(0, 111, 91, 0.75);
       pointer-events: none;
     }
     .filter-input-wrap .search-icon svg {
-      width: 20px;
-      height: 20px;
-      stroke-width: 2.15;
+      width: 17px;
+      height: 17px;
     }
-    .search-field-label,
     .sort-field-label {
       position: absolute;
       z-index: 2;
@@ -657,11 +660,6 @@
       pointer-events: none;
       transition: color 0.2s ease;
     }
-    .search-field-label {
-      top: 0.68rem;
-      right: 4.35rem;
-    }
-    .filter-input-wrap:focus-within .search-field-label,
     .sort-select-wrap:focus-within .sort-field-label {
       color: #007e67;
     }
@@ -669,10 +667,10 @@
       position: absolute;
       z-index: 4;
       top: 50%;
-      left: 0.72rem;
+      left: 0.65rem;
       display: grid;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       padding: 0;
       transform: translateY(-50%) scale(0.86);
       place-items: center;
@@ -762,9 +760,10 @@
       transform: none;
     }
     #searchInput {
-      min-height: 68px;
-      padding: 1.65rem 4.35rem 0.42rem 3.25rem;
-      font-size: 0.9rem;
+      min-height: 54px;
+      padding: 0.75rem 3.55rem 0.75rem 3rem;
+      font-size: 0.86rem;
+      font-weight: 700;
     }
     #searchInput::-webkit-search-cancel-button {
       display: none;
@@ -1157,7 +1156,7 @@
       }
       .filter-input-wrap,
       #searchInput {
-        min-height: 68px;
+        min-height: 54px;
       }
       .sort-select-wrap,
       .sort-trigger {
@@ -1220,16 +1219,13 @@
         font-size: 0.78rem;
       }
       .filter-input-wrap .search-icon {
-        right: 0.62rem;
-        width: 43px;
-        height: 43px;
-        border-radius: 13px;
-      }
-      .search-field-label {
-        right: 4rem;
+        right: 0.5rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
       }
       #searchInput {
-        padding-right: 4rem;
+        padding-right: 3.35rem;
       }
       .category-chip,
       .filter-chip {
@@ -2582,7 +2578,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
                 </span>
-                <label class="search-field-label" for="searchInput">جستجوی سریع فروشگاه</label>
                 <input type="search" id="searchInput" class="vitrine-input" placeholder="نام فروشگاه، محله یا آدرس..." aria-label="جستجو در فروشگاه‌ها" autocomplete="off" enterkeyhint="search"/>
                 <button type="button" id="searchClear" class="search-clear" aria-label="پاک کردن جستجو" hidden>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
