@@ -262,7 +262,8 @@
       isolation: isolate;
       box-sizing: border-box;
       width: 100%;
-      overflow: hidden;
+      overflow: visible;
+      z-index: 2;
       padding: 2.5rem;
       border: 1px solid #e4ecea;
       border-radius: 28px;
@@ -295,6 +296,7 @@
       border: 1px solid rgba(0, 184, 148, 0.07);
       border-radius: 50%;
       box-shadow: 0 0 0 38px rgba(0, 184, 148, 0.018), 0 0 0 78px rgba(0, 184, 148, 0.012);
+      display: none;
       pointer-events: none;
     }
     .category-hero__head {
@@ -448,7 +450,7 @@
       margin: 2.25rem auto 0 !important;
       flex-direction: column;
       padding: 0.65rem;
-      overflow: hidden;
+      overflow: visible;
       border: 1px solid #e1ebe8;
       border-radius: 22px;
       background: #f6faf9;
@@ -527,6 +529,10 @@
       background: transparent;
       box-shadow: none;
     }
+    .filter-card-row.has-open-dropdown {
+      position: relative;
+      z-index: 55;
+    }
     #typeFilterWrapper,
     #viewTypeFilterWrapper {
       padding: 0.35rem;
@@ -575,6 +581,15 @@
       box-shadow: 0 8px 22px -22px rgba(15, 23, 42, 0.5), inset 0 1px 0 #fff;
       transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
+    .sort-select-wrap {
+      overflow: visible;
+    }
+    .sort-select-wrap.is-open {
+      z-index: 50;
+      border-color: #00a985;
+      box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.12), 0 18px 34px -24px rgba(0, 169, 133, 0.62);
+      transform: none;
+    }
     .filter-input-wrap:hover,
     .sort-select-wrap:hover {
       border-color: rgba(0, 169, 133, 0.4);
@@ -608,17 +623,7 @@
       height: 16px;
     }
     .sort-select-wrap::after {
-      content: '';
-      position: absolute;
-      z-index: 2;
-      top: 50%;
-      left: 1rem;
-      width: 0.48rem;
-      height: 0.48rem;
-      border-right: 1.8px solid #087a68;
-      border-bottom: 1.8px solid #087a68;
-      transform: translateY(-68%) rotate(45deg);
-      pointer-events: none;
+      content: none;
     }
 
     /* --- Inputs --- */
@@ -655,14 +660,172 @@
       padding-left: 1rem;
     }
     #sortSelect {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .sort-trigger {
       position: relative;
-      z-index: 1;
-      appearance: none;
-      padding-right: 3.55rem;
-      padding-left: 2.65rem;
+      z-index: 3;
+      display: flex;
+      width: 100%;
+      min-height: 52px;
+      align-items: center;
+      padding: 0.75rem 3.55rem 0.75rem 2.8rem;
+      border: 0;
+      border-radius: inherit;
+      outline: none;
+      background: transparent;
       color: #172b38;
+      font-family: inherit;
+      font-size: 0.86rem;
       font-weight: 850;
+      text-align: right;
       cursor: pointer;
+    }
+    .sort-trigger:focus-visible {
+      box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.14);
+    }
+    .sort-trigger__chevron {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      color: #087a68;
+      transform: translateY(-50%);
+      transition: transform 0.22s ease;
+    }
+    .sort-select-wrap.is-open .sort-trigger__chevron {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .sort-menu {
+      position: absolute;
+      z-index: 60;
+      top: calc(100% + 9px);
+      right: 0;
+      left: 0;
+      display: flex;
+      min-width: 238px;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.45rem;
+      border: 1px solid #dce8e5;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.985);
+      box-shadow: 0 24px 50px -20px rgba(15, 23, 42, 0.36), 0 8px 20px -16px rgba(0, 169, 133, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px) scale(0.985);
+      transform-origin: top center;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    }
+    .sort-select-wrap.is-open .sort-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .sort-option {
+      display: grid;
+      width: 100%;
+      min-height: 54px;
+      grid-template-columns: 34px minmax(0, 1fr) 24px;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.55rem;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      outline: none;
+      background: transparent;
+      color: #405460;
+      font-family: inherit;
+      text-align: right;
+      cursor: pointer;
+      transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+    }
+    .sort-option:hover,
+    .sort-option:focus-visible {
+      border-color: #dcece8;
+      background: #f3faf8;
+      color: #087a68;
+      transform: translateX(-1px);
+    }
+    .sort-option.is-selected {
+      border-color: #cceae2;
+      background: linear-gradient(135deg, #edf9f5, #f7fcfa);
+      color: #087a68;
+    }
+    .sort-option__icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 10px;
+      background: #f0f6f5;
+      color: #6b7e87;
+      transition: color 0.16s ease, background-color 0.16s ease;
+    }
+    .sort-option:hover .sort-option__icon,
+    .sort-option:focus-visible .sort-option__icon,
+    .sort-option.is-selected .sort-option__icon {
+      background: #dcf5ed;
+      color: #008d73;
+    }
+    .sort-option__icon svg {
+      width: 17px;
+      height: 17px;
+    }
+    .sort-option__copy {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 0.05rem;
+    }
+    .sort-option__label {
+      color: inherit;
+      font-size: 0.78rem;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+    .sort-option__hint {
+      overflow: hidden;
+      color: #8a9aa3;
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sort-option__check {
+      display: grid;
+      width: 20px;
+      height: 20px;
+      place-items: center;
+      border-radius: 50%;
+      background: #00a985;
+      color: #fff;
+      opacity: 0;
+      transform: scale(0.72);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+    .sort-option__check svg {
+      width: 12px;
+      height: 12px;
+    }
+    .sort-option.is-selected .sort-option__check {
+      opacity: 1;
+      transform: scale(1);
     }
 
     /* --- Category chips --- */
@@ -2301,11 +2464,40 @@
                     <path d="M8 6h12M8 12h8M8 18h4M4 5v14"/>
                   </svg>
                 </span>
-                <select id="sortSelect" class="vitrine-input cursor-pointer" aria-label="مرتب‌سازی نتایج">
+                <select id="sortSelect" class="vitrine-input cursor-pointer" aria-label="مرتب‌سازی نتایج" aria-hidden="true" tabindex="-1">
                   <option value="popular">محبوب‌ترین</option>
                   <option value="newest">جدیدترین</option>
                   <option value="rating_desc">بیشترین امتیاز</option>
                 </select>
+                <button type="button" id="sortTrigger" class="sort-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="sortMenu">
+                  <span id="sortTriggerLabel">محبوب‌ترین</span>
+                  <svg class="sort-trigger__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m7 10 5 5 5-5"/>
+                  </svg>
+                </button>
+                <div id="sortMenu" class="sort-menu" role="listbox" aria-label="مرتب‌سازی نتایج" aria-hidden="true">
+                  <button type="button" class="sort-option is-selected" id="sortOptionPopular" role="option" aria-selected="true" data-sort-value="popular" tabindex="-1">
+                    <span class="sort-option__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.5 3-1.5 4.5-3 6.5C7.5 11.4 7 13 7 15a5 5 0 0 0 10 0c0-3-1.7-5.2-5-8 0 2-1 3-2 4"/></svg>
+                    </span>
+                    <span class="sort-option__copy"><span class="sort-option__label">محبوب‌ترین</span><span class="sort-option__hint">براساس میزان بازدید</span></span>
+                    <span class="sort-option__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span>
+                  </button>
+                  <button type="button" class="sort-option" id="sortOptionNewest" role="option" aria-selected="false" data-sort-value="newest" tabindex="-1">
+                    <span class="sort-option__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2M18.5 5.5 20 4"/></svg>
+                    </span>
+                    <span class="sort-option__copy"><span class="sort-option__label">جدیدترین</span><span class="sort-option__hint">تازه‌ترین فروشگاه‌ها</span></span>
+                    <span class="sort-option__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span>
+                  </button>
+                  <button type="button" class="sort-option" id="sortOptionRating" role="option" aria-selected="false" data-sort-value="rating_desc" tabindex="-1">
+                    <span class="sort-option__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
+                    </span>
+                    <span class="sort-option__copy"><span class="sort-option__label">بیشترین امتیاز</span><span class="sort-option__hint">برگزیده کاربران</span></span>
+                    <span class="sort-option__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2528,6 +2720,7 @@
         initializeTypeFilter();
         initializeViewTypeFilter();
         attachFilterEvents();
+        initializeSortDropdown();
         attachShopFilterEvents();
         attachViewTypeFilterEvents();
         await fetchRealShops();
@@ -3195,6 +3388,102 @@
             applyFiltersAndRender();
           });
         });
+      }
+
+      function initializeSortDropdown() {
+        const select = document.getElementById('sortSelect');
+        const wrap = select?.closest('.sort-select-wrap');
+        const row = wrap?.closest('.filter-card-row');
+        const trigger = document.getElementById('sortTrigger');
+        const triggerLabel = document.getElementById('sortTriggerLabel');
+        const menu = document.getElementById('sortMenu');
+        const options = Array.from(menu?.querySelectorAll('[data-sort-value]') || []);
+
+        if (!select || !wrap || !trigger || !triggerLabel || !menu || options.length === 0) return;
+
+        let isOpen = false;
+
+        const syncSelection = () => {
+          const nativeOption = select.options[select.selectedIndex];
+          triggerLabel.textContent = nativeOption?.textContent || '';
+          options.forEach(option => {
+            const selected = option.dataset.sortValue === select.value;
+            option.classList.toggle('is-selected', selected);
+            option.setAttribute('aria-selected', String(selected));
+          });
+        };
+
+        const setOpen = (nextOpen, focusSelected = false) => {
+          isOpen = nextOpen;
+          wrap.classList.toggle('is-open', isOpen);
+          row?.classList.toggle('has-open-dropdown', isOpen);
+          trigger.setAttribute('aria-expanded', String(isOpen));
+          menu.setAttribute('aria-hidden', String(!isOpen));
+
+          if (isOpen && focusSelected) {
+            requestAnimationFrame(() => {
+              (options.find(option => option.classList.contains('is-selected')) || options[0]).focus();
+            });
+          }
+        };
+
+        const chooseOption = option => {
+          const value = option?.dataset.sortValue;
+          if (!value) return;
+          select.value = value;
+          syncSelection();
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          setOpen(false);
+          trigger.focus();
+        };
+
+        const moveOptionFocus = (current, direction) => {
+          const index = options.indexOf(current);
+          const nextIndex = (index + direction + options.length) % options.length;
+          options[nextIndex].focus();
+        };
+
+        trigger.addEventListener('click', () => setOpen(!isOpen, !isOpen));
+        trigger.addEventListener('keydown', event => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            setOpen(true, true);
+          } else if (event.key === 'Escape' && isOpen) {
+            event.preventDefault();
+            setOpen(false);
+          }
+        });
+
+        options.forEach(option => {
+          option.addEventListener('click', () => chooseOption(option));
+          option.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              moveOptionFocus(option, 1);
+            } else if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              moveOptionFocus(option, -1);
+            } else if (event.key === 'Home' || event.key === 'End') {
+              event.preventDefault();
+              options[event.key === 'Home' ? 0 : options.length - 1].focus();
+            } else if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              chooseOption(option);
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              setOpen(false);
+              trigger.focus();
+            } else if (event.key === 'Tab') {
+              setOpen(false);
+            }
+          });
+        });
+
+        document.addEventListener('pointerdown', event => {
+          if (isOpen && !wrap.contains(event.target)) setOpen(false);
+        });
+        select.addEventListener('change', syncSelection);
+        syncSelection();
       }
 
       function setActiveTypeFilterButton(selectedType) {
