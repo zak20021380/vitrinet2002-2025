@@ -2524,6 +2524,291 @@
       }
     }
 
+    /* --- Portfolio cards: image-led, premium, mobile-first --- */
+    .portfolio-item {
+      aspect-ratio: 4 / 5;
+      border: 1px solid rgba(203, 213, 225, 0.78);
+      border-radius: 18px;
+      background: #e8f2ef;
+      box-shadow: 0 10px 26px -16px rgba(15, 23, 42, 0.5), 0 4px 12px -8px rgba(5, 150, 105, 0.24);
+      cursor: default;
+      transform: translateZ(0);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .portfolio-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 34%);
+      pointer-events: none;
+    }
+
+    .portfolio-item::after {
+      z-index: 8;
+      padding: 1px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(16, 185, 129, 0.32), rgba(14, 165, 233, 0.2));
+      opacity: 0.72;
+    }
+
+    .portfolio-item:hover {
+      border-color: rgba(16, 185, 129, 0.42);
+      box-shadow: 0 20px 38px -22px rgba(15, 23, 42, 0.62), 0 12px 24px -18px rgba(5, 150, 105, 0.5);
+      transform: translateY(-4px);
+    }
+
+    .portfolio-item:hover::after { opacity: 1; }
+
+    .portfolio-item img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      filter: saturate(0.98) contrast(1.01);
+      transform: scale(1.001);
+      transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
+    }
+
+    .portfolio-item:hover img {
+      filter: saturate(1.04) contrast(1.02);
+      transform: scale(1.045);
+    }
+
+    .portfolio-overlay,
+    .portfolio-item:hover .portfolio-overlay {
+      z-index: 4;
+      padding: 10px;
+      gap: 0.65rem;
+      background:
+        linear-gradient(180deg, rgba(2, 6, 23, 0.16) 0%, transparent 30%, transparent 45%, rgba(2, 6, 23, 0.2) 59%, rgba(2, 6, 23, 0.9) 100%);
+      opacity: 1;
+      transform: none;
+    }
+
+    .portfolio-overlay-top {
+      align-items: flex-start;
+      min-height: 30px;
+    }
+
+    .portfolio-chip {
+      min-height: 30px;
+      max-width: calc(100% - 4px);
+      padding: 0.38rem 0.58rem;
+      gap: 0.32rem;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.64);
+      color: #fff;
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.35;
+      box-shadow: 0 8px 18px -10px rgba(2, 6, 23, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .portfolio-chip svg {
+      width: 12px;
+      height: 12px;
+      flex-basis: 12px;
+    }
+
+    .portfolio-meta,
+    .portfolio-item:hover .portfolio-meta {
+      width: 100%;
+      padding: 0 2px 2px;
+      transform: none;
+    }
+
+    .portfolio-card-title {
+      display: -webkit-box;
+      min-height: 2.7em;
+      margin: 0;
+      overflow: hidden;
+      color: #fff;
+      font-size: clamp(0.82rem, 3.7vw, 0.98rem);
+      font-weight: 900;
+      line-height: 1.35;
+      letter-spacing: -0.018em;
+      text-shadow: 0 2px 12px rgba(2, 6, 23, 0.54);
+      overflow-wrap: anywhere;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .portfolio-card-shop {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.3rem;
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 0.64rem;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .portfolio-card-shop svg {
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
+      color: #6ee7b7;
+    }
+
+    .portfolio-card-shop span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .portfolio-card-actions {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .portfolio-detail-btn {
+      bottom: auto;
+      min-width: 0;
+      min-height: 36px;
+      flex: 1 1 auto;
+      align-self: auto;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.48rem 0.62rem;
+      overflow: visible;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #0f766e;
+      font-size: 0.69rem;
+      font-weight: 850;
+      box-shadow: 0 8px 18px -12px rgba(2, 6, 23, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .portfolio-detail-btn::after { display: none; }
+
+    .portfolio-detail-btn:hover {
+      border-color: #fff;
+      background: #fff;
+      color: #047857;
+      box-shadow: 0 10px 22px -12px rgba(2, 6, 23, 0.8);
+      filter: none;
+      transform: translateY(-1px);
+    }
+
+    .portfolio-detail-btn svg {
+      width: 13px;
+      height: 13px;
+      flex: 0 0 13px;
+      color: #10b981;
+    }
+
+    .portfolio-like-pill {
+      min-width: 48px;
+      min-height: 36px;
+      flex: 0 0 auto;
+      justify-content: center;
+      gap: 0.28rem;
+      padding: 0.42rem 0.56rem;
+      border: 1px solid rgba(255, 255, 255, 0.66);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #f43f5e;
+      font-size: 0.68rem;
+      box-shadow: 0 8px 18px -12px rgba(2, 6, 23, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .portfolio-like-pill svg {
+      width: 14px;
+      height: 14px;
+      color: currentColor;
+    }
+
+    .portfolio-like-pill.is-liked {
+      border-color: rgba(251, 113, 133, 0.72);
+      background: #fb7185;
+      color: #fff;
+      box-shadow: 0 9px 20px -12px rgba(225, 29, 72, 0.85);
+    }
+
+    .portfolio-detail-btn:focus-visible,
+    .portfolio-like-pill:focus-visible {
+      outline: 3px solid rgba(94, 234, 212, 0.52);
+      outline-offset: 2px;
+    }
+
+    @media (min-width: 480px) {
+      .portfolio-item { aspect-ratio: 1 / 1; }
+      .portfolio-overlay { padding: 12px; }
+      .portfolio-card-title { font-size: 0.98rem; }
+      .portfolio-card-shop { font-size: 0.69rem; }
+    }
+
+    @media (max-width: 360px) {
+      #portfolioGrid { gap: 0.5rem; }
+      .portfolio-overlay,
+      .portfolio-item:hover .portfolio-overlay { padding: 8px; }
+      .portfolio-card-title { font-size: 0.76rem; }
+      .portfolio-card-actions { gap: 6px; }
+      .portfolio-detail-btn {
+        padding-inline: 0.35rem;
+        font-size: 0.64rem;
+      }
+      .portfolio-detail-btn svg {
+        width: 11px;
+        height: 11px;
+        flex-basis: 11px;
+      }
+      .portfolio-like-pill {
+        min-width: 44px;
+        padding-inline: 0.42rem;
+      }
+    }
+
+    @media (min-width: 641px) {
+      .portfolio-item {
+        aspect-ratio: 4 / 3;
+        border-radius: 20px;
+      }
+
+      .portfolio-overlay,
+      .portfolio-item:hover .portfolio-overlay {
+        padding: 15px;
+        background: linear-gradient(180deg, rgba(2, 6, 23, 0.14) 0%, transparent 32%, rgba(2, 6, 23, 0.08) 48%, rgba(2, 6, 23, 0.9) 100%);
+      }
+
+      .portfolio-chip {
+        min-height: 32px;
+        padding: 0.42rem 0.68rem;
+        border-radius: 11px;
+        font-size: 0.72rem;
+      }
+
+      .portfolio-card-title {
+        min-height: auto;
+        font-size: 1.05rem;
+        -webkit-line-clamp: 1;
+      }
+
+      .portfolio-card-shop { font-size: 0.72rem; }
+      .portfolio-card-actions { max-width: 250px; margin-top: 11px; }
+      .portfolio-detail-btn { min-height: 39px; font-size: 0.76rem; }
+      .portfolio-like-pill { min-height: 39px; min-width: 54px; font-size: 0.73rem; }
+    }
+
+    @media (hover: none) {
+      .portfolio-item:hover { transform: none; }
+      .portfolio-item:hover img { transform: scale(1.001); }
+    }
+
     /* --- Portfolio modal: premium, mobile-first presentation --- */
     .portfolio-modal {
       box-sizing: border-box;
@@ -4212,6 +4497,9 @@
          portfolioGrid.innerHTML = filtered.map((shop) => {
             const imageSrc = state.hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
             const title = shop.storename || 'نمونه کار';
+            const sellerName = String(shop.sellerName || shop?.portfolioMeta?.shopName || '').trim();
+            const safeTitle = escapeHtml(title);
+            const safeSellerName = escapeHtml(sellerName);
             const categoryGroup = String(shop.categoryGroup || '').trim();
             const safeCategoryGroup = escapeHtml(categoryGroup);
             const categoryBadge = categoryGroup ? `
@@ -4233,21 +4521,28 @@
               : 'type="button" disabled';
            return `
             <div class="portfolio-item group" data-shop-id="${targetId || ''}" data-portfolio-id="${portfolioId || ''}">
-                  <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
+                  <img src="${escapeHtml(imageSrc)}" loading="lazy" alt="${safeTitle}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
                   <div class="portfolio-overlay">
                       <div class="portfolio-overlay-top">
                         ${categoryBadge}
                       </div>
-            <div class="portfolio-meta">
-                           <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
-                           <div class="flex items-center justify-between gap-3 text-white" style="opacity: 0.94;">
-                             <button class="portfolio-like-pill" ${likeButtonAttrs}>
+                        <div class="portfolio-meta">
+                           <h4 class="portfolio-card-title">${safeTitle}</h4>
+                           ${sellerName ? `
+                             <p class="portfolio-card-shop">
+                               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16v10H4V10Zm2-6h12l2 6H4l2-6Zm3 9v7m6-7v7"/>
+                               </svg>
+                               <span>${safeSellerName}</span>
+                             </p>` : ''}
+                           <div class="portfolio-card-actions">
+                             <button class="portfolio-like-pill" aria-label="پسندیدن ${safeTitle}" ${likeButtonAttrs}>
                                <svg fill="currentColor" viewBox="0 0 24 24">
                                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
                                </svg>
                                <span class="js-likes">${likeLabel}</span>
                              </button>
-                             <button class="portfolio-detail-btn" ${buttonAttrs}>
+                             <button class="portfolio-detail-btn" aria-label="مشاهده ${safeTitle}" ${buttonAttrs}>
                                 <span>مشاهده</span>
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
