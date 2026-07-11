@@ -2198,6 +2198,364 @@
       }
     }
 
+    /* --- Portfolio modal: premium, mobile-first presentation --- */
+    .portfolio-modal {
+      box-sizing: border-box;
+      align-items: flex-end;
+      padding: 12px 0 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(14px) saturate(115%);
+      -webkit-backdrop-filter: blur(14px) saturate(115%);
+      overscroll-behavior: contain;
+    }
+
+    .portfolio-modal *,
+    .portfolio-modal *::before,
+    .portfolio-modal *::after {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .portfolio-modal-content {
+      width: 100%;
+      max-width: none;
+      height: auto;
+      max-height: calc(100dvh - 12px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-bottom: 0;
+      border-radius: 26px 26px 0 0;
+      background: #fff;
+      box-shadow: 0 -20px 60px rgba(2, 6, 23, 0.26);
+      overflow: hidden;
+      isolation: isolate;
+      animation: portfolioSheetIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes portfolioSheetIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .portfolio-sheet-handle {
+      position: absolute;
+      top: 7px;
+      left: 50%;
+      z-index: 25;
+      width: 38px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .portfolio-modal .modal-image-wrapper {
+      flex: 0 0 auto;
+      height: clamp(250px, 39dvh, 360px);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(51, 65, 85, 0.72), transparent 58%),
+        #0b1220;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .portfolio-modal-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      background: transparent;
+    }
+
+    .portfolio-modal-close {
+      top: max(18px, env(safe-area-inset-top));
+      left: 16px;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      color: #0f172a;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.74);
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.22);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portfolio-modal-close:hover {
+      transform: translateY(-1px);
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(2, 6, 23, 0.28);
+    }
+
+    .portfolio-modal-close:active { transform: scale(0.96); }
+
+    .portfolio-modal-close:focus-visible,
+    .modal-likes-subtle:focus-visible,
+    .modal-cta-btn:focus-visible {
+      outline: 3px solid rgba(14, 165, 233, 0.38);
+      outline-offset: 3px;
+    }
+
+    .portfolio-modal-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 20px 18px 18px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .portfolio-modal-body::-webkit-scrollbar { width: 6px; }
+    .portfolio-modal-body::-webkit-scrollbar-track { background: transparent; }
+    .portfolio-modal-body::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    .modal-title-row {
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .modal-title-content { flex: 1 1 auto; }
+
+    .modal-title-content h3 {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(1.3rem, 5.8vw, 1.65rem);
+      font-weight: 900;
+      line-height: 1.38;
+      letter-spacing: -0.025em;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-title-content p { display: none; }
+
+    .modal-likes-subtle {
+      flex: 0 0 auto;
+      min-width: 60px;
+      min-height: 42px;
+      padding: 0.55rem 0.78rem;
+      justify-content: center;
+      border-color: #fee2e2;
+      background: #fff7f7;
+      box-shadow: none;
+    }
+
+    .modal-likes-subtle:hover {
+      background: #fff1f2;
+      border-color: #fecdd3;
+    }
+
+    .modal-likes-subtle svg { width: 20px; height: 20px; }
+
+    .portfolio-meta-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 18px;
+    }
+
+    .portfolio-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      max-width: 100%;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .portfolio-meta-item[hidden] { display: none; }
+
+    .portfolio-meta-item svg {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      color: #0f9f83;
+    }
+
+    .portfolio-meta-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #modalLocation {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-description-block {
+      padding-top: 17px;
+      border-top: 1px solid #eef2f7;
+    }
+
+    .modal-section-label {
+      margin: 0 0 7px;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .modal-description {
+      color: #475569;
+      font-size: 0.91rem;
+      line-height: 1.9;
+      overflow-wrap: anywhere;
+      white-space: pre-line;
+    }
+
+    .modal-footer-sticky,
+    .portfolio-modal.active .modal-footer-sticky {
+      position: relative;
+      inset: auto;
+      display: flex !important;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      border-top: 1px solid #e7edf3;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.07);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .modal-seller-profile {
+      flex: 1 1 42%;
+      gap: 9px;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .seller-avatar {
+      width: 38px;
+      height: 38px;
+      font-size: 0.9rem;
+      box-shadow: 0 5px 14px rgba(16, 185, 129, 0.2);
+    }
+
+    .seller-label { font-size: 0.66rem; }
+    .seller-name { font-size: 0.82rem; }
+
+    .modal-cta-btn {
+      width: auto;
+      min-height: 44px;
+      flex: 1 1 58%;
+      padding: 0.72rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.79rem;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px -9px rgba(5, 150, 105, 0.72);
+    }
+
+    body.portfolio-modal-open .mobile-nav,
+    body.portfolio-modal-open .mobile-bottom-nav {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    @media (min-width: 641px) {
+      .portfolio-modal {
+        align-items: center;
+        padding: 24px;
+      }
+
+      .portfolio-modal-content {
+        max-width: 760px;
+        max-height: min(92dvh, 900px);
+        border: 1px solid rgba(255, 255, 255, 0.38);
+        border-radius: 26px;
+        box-shadow: 0 30px 90px -24px rgba(2, 6, 23, 0.72);
+        animation-name: portfolioModalIn;
+      }
+
+      @keyframes portfolioModalIn {
+        from { opacity: 0; transform: translateY(18px) scale(0.975); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      .portfolio-sheet-handle { display: none; }
+
+      .portfolio-modal .modal-image-wrapper {
+        height: clamp(330px, 46dvh, 480px);
+      }
+
+      .portfolio-modal-body { padding: 24px 26px 22px; }
+      .modal-title-content h3 { font-size: 1.65rem; }
+
+      .modal-footer-sticky,
+      .portfolio-modal.active .modal-footer-sticky {
+        padding: 14px 26px 16px;
+      }
+
+      .modal-seller-profile { flex-basis: auto; }
+      .seller-avatar { width: 42px; height: 42px; }
+      .seller-name { font-size: 0.9rem; }
+      .modal-cta-btn { flex: 0 0 auto; min-width: 220px; font-size: 0.88rem; }
+    }
+
+    @media (min-width: 960px) {
+      .portfolio-modal-content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.82fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "media details"
+          "media actions";
+        width: min(1080px, calc(100vw - 64px));
+        max-width: 1080px;
+        height: min(82dvh, 760px);
+        min-height: 560px;
+      }
+
+      .portfolio-modal .modal-image-wrapper {
+        grid-area: media;
+        width: auto;
+        height: 100%;
+        min-height: 0;
+        border-bottom: 0;
+        border-right: 1px solid rgba(15, 23, 42, 0.12);
+      }
+
+      .portfolio-modal-body {
+        grid-area: details;
+        padding: 34px 32px 28px;
+      }
+
+      .modal-title-content h3 { font-size: 1.8rem; }
+
+      .modal-footer-sticky,
+      .portfolio-modal.active .modal-footer-sticky {
+        grid-area: actions;
+        display: block !important;
+        padding: 18px 32px 24px;
+        box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.045);
+      }
+
+      .modal-seller-profile { margin-bottom: 14px; }
+      .modal-cta-btn { display: block; width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .portfolio-modal,
+      .portfolio-modal-content,
+      .portfolio-modal-close,
+      .modal-cta-btn { animation: none !important; transition: none !important; }
+    }
+
     /* Shared categories-page header treatment */
     #mainHeader,
     #headerMenuOverlay {
@@ -2743,8 +3101,9 @@
   </main>
 
   <!-- Portfolio Modal -->
-  <div id="portfolioModal" class="portfolio-modal">
-    <div class="portfolio-modal-content">
+  <div id="portfolioModal" class="portfolio-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="portfolio-modal-content" role="document">
+      <span class="portfolio-sheet-handle" aria-hidden="true"></span>
       <!-- Image Wrapper with floating close button -->
       <div class="modal-image-wrapper">
         <button class="portfolio-modal-close" onclick="closePortfolioModal()" aria-label="بستن">
@@ -2772,8 +3131,38 @@
           </button>
         </div>
 
+        <div class="portfolio-meta-list" aria-label="اطلاعات نمونه کار">
+          <div id="modalCategoryMeta" class="portfolio-meta-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M7 4v6m10-6v6M5 10h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z"/>
+            </svg>
+            <span id="modalCategoryValue"></span>
+          </div>
+          <div id="modalLocationMeta" class="portfolio-meta-item" hidden>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/>
+            </svg>
+            <span id="modalLocation"></span>
+          </div>
+          <div id="modalViewsMeta" class="portfolio-meta-item" hidden>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <span id="modalViews"></span>
+          </div>
+          <div id="modalRatingMeta" class="portfolio-meta-item" hidden>
+            <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.8Z"/>
+            </svg>
+            <span id="modalRating"></span>
+          </div>
+        </div>
+
         <!-- Description -->
-        <p id="modalDescription" class="modal-description"></p>
+        <div class="modal-description-block">
+          <p class="modal-section-label">درباره این نمونه کار</p>
+          <p id="modalDescription" class="modal-description"></p>
+        </div>
       </div>
 
       <!-- Sticky Footer -->
@@ -3412,6 +3801,7 @@
            ? validPortfolios.slice(0, 5).map(item => {
                const portfolioId = item?.id || item?._id || item?.portfolioId;
                const shopId = item?.shop?.id || item?.shopId || item?.shop?._id || item?.id;
+               const sellerShop = allShops.find(shop => String(shop?.id || '') === String(shopId || '')) || {};
                const likeCount = typeof item?.likes === 'number'
                  ? item.likes
                  : (typeof item?.likeCount === 'number' ? item.likeCount : 0);
@@ -3420,10 +3810,20 @@
                  storename: item?.title || item?.shop?.name || 'نمونه کار',
                  category: item?.categoryName || item?.shop?.category || 'نمونه کار',
                  image: item?.image,
+                 desc: item?.description || '',
+                 address: sellerShop?.address || item?.shop?.address || '',
+                 city: sellerShop?.city || item?.shop?.city || '',
+                 shopurl: item?.shop?.shopUrl || sellerShop?.shopurl || '',
+                 sellerName: item?.shop?.name || sellerShop?.storename || '',
+                 views: Number(item?.viewCount || item?.views || 0),
+                 rating: Number(item?.shop?.rating || sellerShop?.rating || 0),
+                 reviewCount: Number(item?.shop?.reviewCount || sellerShop?.reviewCount || 0),
                  shopType: 'portfolio',
                  likes: likeCount,
                  portfolioMeta: {
                    title: item?.title,
+                   description: item?.description,
+                   shopName: item?.shop?.name,
                    shopId,
                    portfolioId,
                    liked: !!item?.liked
@@ -3845,8 +4245,12 @@
 
       // Modal Functions Global
 window.openPortfolioModal = function (shopId, portfolioId = '') {
-  const shop = state.shops.find(s => s.id === shopId)
-    || state.portfolioCards.find((item) => item.id === shopId || item?.portfolioMeta?.shopId === shopId)
+  const shop = state.portfolioCards.find((item) => (
+      (portfolioId && String(item?.portfolioMeta?.portfolioId || '') === String(portfolioId))
+      || String(item?.id || '') === String(shopId)
+      || String(item?.portfolioMeta?.shopId || '') === String(shopId)
+    ))
+    || state.shops.find(s => String(s.id || '') === String(shopId))
     || null;
   if (!shop) return;
 
@@ -3854,14 +4258,40 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
   const activePortfolioId = portfolioId || shop?.portfolioMeta?.portfolioId || '';
 
   // Populate image
-  document.getElementById('modalImage').src = resolveShopImage(shop);
+  document.getElementById('modalImage').src = shop?.portfolioMeta ? resolvePortfolioImage(shop) : resolveShopImage(shop);
 
   // Populate title and category
   document.getElementById('modalTitle').textContent = shop.storename || 'فروشگاه';
-  document.getElementById('modalCategory').textContent = shop.category || '';
+  const category = shop.category || '';
+  document.getElementById('modalCategory').textContent = category;
+  document.getElementById('modalCategoryValue').textContent = category || 'نمونه کار';
 
   // Populate description
   document.getElementById('modalDescription').textContent = shop.desc || 'توضیحات در دسترس نیست';
+
+  // Populate portfolio and shop metadata only when the API provides it
+  const locationParts = [shop.city, shop.address]
+    .map(value => String(value || '').trim())
+    .filter((value, index, values) => value && values.indexOf(value) === index);
+  const locationMeta = document.getElementById('modalLocationMeta');
+  const locationValue = document.getElementById('modalLocation');
+  locationValue.textContent = locationParts.join('، ');
+  locationValue.title = locationParts.join('، ');
+  locationMeta.hidden = locationParts.length === 0;
+
+  const hasViews = shop.views !== undefined || shop.viewCount !== undefined;
+  const views = Number(shop.views || shop.viewCount || 0);
+  const viewsMeta = document.getElementById('modalViewsMeta');
+  document.getElementById('modalViews').textContent = `${views.toLocaleString('fa-IR')} بازدید`;
+  viewsMeta.hidden = !hasViews || !Number.isFinite(views);
+
+  const rating = Number(shop.rating || 0);
+  const reviewCount = Number(shop.reviewCount || 0);
+  const ratingMeta = document.getElementById('modalRatingMeta');
+  document.getElementById('modalRating').textContent = reviewCount > 0
+    ? `${rating.toLocaleString('fa-IR', { maximumFractionDigits: 1 })} از ${reviewCount.toLocaleString('fa-IR')} نظر`
+    : rating.toLocaleString('fa-IR', { maximumFractionDigits: 1 });
+  ratingMeta.hidden = !(rating > 0);
 
   // Populate likes (default to 0 if not available)
   const likeValue = (activePortfolioId && typeof window.__getPortfolioLikes === 'function')
@@ -3870,11 +4300,12 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
   document.getElementById('modalLikes').textContent = likeValue;
 
   // Generate and populate seller avatar
-  const avatarText = generateTextAvatar(shop.storename);
+  const sellerName = shop.sellerName || shop?.portfolioMeta?.shopName || shop.storename || 'فروشگاه';
+  const avatarText = generateTextAvatar(sellerName);
   document.getElementById('sellerAvatar').textContent = avatarText;
 
   // Populate seller name
-  document.getElementById('modalSeller').textContent = shop.storename || 'فروشگاه';
+  document.getElementById('modalSeller').textContent = sellerName;
 
   // Set seller link
   const sellerLinkHref = shop.shopurl
@@ -3892,14 +4323,26 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
     window.__PF_SET_ACTIVE_ID(activePortfolioId || null);
   }
 
+  modal._returnFocus = document.activeElement;
   modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('portfolio-modal-open');
   document.body.style.overflow = 'hidden';
+  window.setTimeout(() => modal.querySelector('.portfolio-modal-close')?.focus({ preventScroll: true }), 0);
 };
 
 
       window.closePortfolioModal = function() {
-        document.getElementById('portfolioModal').classList.remove('active');
+        const modal = document.getElementById('portfolioModal');
+        const wasActive = modal.classList.contains('active');
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('portfolio-modal-open');
         document.body.style.overflow = '';
+        if (wasActive && modal._returnFocus && typeof modal._returnFocus.focus === 'function') {
+          modal._returnFocus.focus({ preventScroll: true });
+        }
+        modal._returnFocus = null;
       };
 
       document.getElementById('portfolioModal').addEventListener('click', function(e) {
