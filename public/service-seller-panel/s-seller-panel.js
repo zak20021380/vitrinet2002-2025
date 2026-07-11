@@ -3744,6 +3744,39 @@ async function loadComplimentaryPlan() {
     window.__COMPLIMENTARY_PLAN__ = plan;
     PlanAccessGuard.refresh(plan);
 
+    // Force hide overlays if plan is active
+    if (plan && (plan.isActive || plan.activeNow)) {
+      console.log('🔓 Force unlocking UI - plan is active');
+      const overlays = [
+        document.getElementById('plan-lock-settings'),
+        document.getElementById('plan-lock-bookings')
+      ];
+      overlays.forEach(overlay => {
+        if (overlay) {
+          overlay.hidden = true;
+          overlay.setAttribute('aria-hidden', 'true');
+        }
+      });
+      
+      // Also unlock buttons
+      const buttons = [
+        'add-service-btn',
+        'add-portfolio-btn',
+        'vip-settings-btn',
+        'vip-toggle-btn',
+        'service-image-btn',
+        'portfolio-image-btn'
+      ];
+      buttons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.disabled = false;
+          btn.removeAttribute('aria-disabled');
+          btn.classList.remove('is-disabled');
+        }
+      });
+    }
+
     // اگر پلن هدیه واقعاً فعال باشد، حتی در صورت شکست در دریافت فلگ‌ها
     // باید دسترسی پلن برای فروشنده آزاد شود.
     try {
