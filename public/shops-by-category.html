@@ -3736,7 +3736,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h12M4 6h.01M8 12h9M4 12h.01M8 18h6M4 18h.01"/>
                   </svg>
                 </span>
-                <span id="portfolioSortLabel" class="portfolio-filter-trigger__label">برترین‌ها</span>
+                <span id="portfolioSortLabel" class="portfolio-filter-trigger__label">محبوب‌ترین</span>
                 <svg class="portfolio-filter-trigger__chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="m6 9 6 6 6-6"/>
                 </svg>
@@ -3744,9 +3744,8 @@
               <div id="portfolioSortMenu" class="portfolio-filter-menu" role="listbox" aria-label="مرتب‌سازی نمونه کارها"></div>
               <label for="portfolioSortFilter" class="sr-only">مرتب‌سازی نمونه کارها</label>
               <select id="portfolioSortFilter" class="sr-only" tabindex="-1" aria-hidden="true">
-                <option value="best">برترین‌ها</option>
                 <option value="views">پربازدیدترین</option>
-                <option value="likes">محبوب‌ترین</option>
+                <option value="likes" selected>محبوب‌ترین</option>
                 <option value="newest">جدیدترین</option>
               </select>
             </div>
@@ -3923,7 +3922,7 @@
         portfolioCards: [],
         hasRealPortfolios: false,
         portfolioCategoryFilter: 'all',
-        portfolioSort: 'best',
+        portfolioSort: 'likes',
         shops: [],
         serviceShops: [],
         regularShops: [],
@@ -4788,12 +4787,11 @@
          const select = document.getElementById('portfolioSortFilter');
          const label = document.getElementById('portfolioSortLabel');
          if (!menu || !select || !label) return;
-         const options = [
-           { value: 'best', label: 'برترین‌ها', path: 'm12 3 1.8 4.3L18 9l-4.2 1.7L12 15l-1.8-4.3L6 9l4.2-1.7L12 3Z' },
-           { value: 'views', label: 'پربازدیدترین', path: 'M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z' },
-           { value: 'likes', label: 'محبوب‌ترین', path: 'M12 20.5 4.8 13.9A4.7 4.7 0 0 1 11.5 7l.5.6.5-.6a4.7 4.7 0 0 1 6.7 6.9L12 20.5Z' },
-           { value: 'newest', label: 'جدیدترین', path: 'M12 8v4l2.6 1.6M4.9 4.9 3 3m16.1 1.9L21 3M12 3v2m8 7h2M2 12h2m8 9a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z' }
-         ];
+          const options = [
+            { value: 'views', label: 'پربازدیدترین', path: 'M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z' },
+            { value: 'likes', label: 'محبوب‌ترین', path: 'M12 20.5 4.8 13.9A4.7 4.7 0 0 1 11.5 7l.5.6.5-.6a4.7 4.7 0 0 1 6.7 6.9L12 20.5Z' },
+            { value: 'newest', label: 'جدیدترین', path: 'M12 8v4l2.6 1.6M4.9 4.9 3 3m16.1 1.9L21 3M12 3v2m8 7h2M2 12h2m8 9a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z' }
+          ];
          menu.innerHTML = options.map((option) => {
            const selected = option.value === select.value;
            return `
@@ -4807,7 +4805,7 @@
                </svg>
              </button>`;
          }).join('');
-         label.textContent = select.options[select.selectedIndex]?.textContent || 'برترین‌ها';
+         label.textContent = select.options[select.selectedIndex]?.textContent || 'محبوب‌ترین';
       }
 
       function initializePortfolioSortControl() {
@@ -4818,7 +4816,7 @@
          const label = document.getElementById('portfolioSortLabel');
          if (!control || !trigger || !menu || !select || !label || control.dataset.ready === 'true') return;
          control.dataset.ready = 'true';
-         select.value = state.portfolioSort || 'best';
+         select.value = state.portfolioSort || 'likes';
          renderPortfolioSortOptions();
 
          const setOpen = (open) => {
@@ -4837,16 +4835,16 @@
          menu.addEventListener('click', (event) => {
            const option = event.target.closest('.portfolio-filter-option');
            if (!option) return;
-           select.value = option.dataset.value || 'best';
+            select.value = option.dataset.value || 'likes';
            state.portfolioSort = select.value;
-           label.textContent = option.querySelector('.portfolio-filter-option__text')?.textContent || 'برترین‌ها';
+            label.textContent = option.querySelector('.portfolio-filter-option__text')?.textContent || 'محبوب‌ترین';
            renderPortfolioSortOptions();
            setOpen(false);
            renderPortfolioGrid(state.portfolioCards || []);
            trigger.focus({ preventScroll: true });
          });
          select.addEventListener('change', () => {
-           state.portfolioSort = select.value || 'best';
+            state.portfolioSort = select.value || 'likes';
            renderPortfolioSortOptions();
            renderPortfolioGrid(state.portfolioCards || []);
          });
