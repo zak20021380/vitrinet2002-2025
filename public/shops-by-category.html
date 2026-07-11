@@ -1673,11 +1673,22 @@
       color: #10b981;
     }
 
-    .portfolio-category-control {
+    .portfolio-category-control,
+    .portfolio-sort-control {
       position: relative;
       z-index: 30;
       width: 224px;
       max-width: min(224px, calc(100vw - 32px));
+    }
+
+    .portfolio-sort-control {
+      width: 172px;
+      max-width: min(172px, calc(100vw - 32px));
+    }
+
+    .portfolio-sort-control .portfolio-filter-trigger__icon {
+      background: linear-gradient(145deg, #0f766e, #0ea5e9);
+      box-shadow: 0 7px 14px -7px rgba(14, 165, 233, 0.62);
     }
 
     .portfolio-filter-trigger {
@@ -1741,7 +1752,8 @@
       transition: transform 0.22s ease;
     }
 
-    .portfolio-category-control.is-open .portfolio-filter-trigger__chevron {
+    .portfolio-category-control.is-open .portfolio-filter-trigger__chevron,
+    .portfolio-sort-control.is-open .portfolio-filter-trigger__chevron {
       transform: rotate(180deg);
     }
 
@@ -1771,22 +1783,36 @@
       scrollbar-color: #99d8cd transparent;
     }
 
-    .portfolio-category-control.is-open .portfolio-filter-menu {
+    .portfolio-category-control.is-open .portfolio-filter-menu,
+    .portfolio-sort-control.is-open .portfolio-filter-menu {
       opacity: 1;
       visibility: visible;
       transform: translateY(0) scale(1);
       pointer-events: auto;
     }
 
-    .portfolio-category-control.opens-up .portfolio-filter-menu {
+    .portfolio-category-control.opens-up .portfolio-filter-menu,
+    .portfolio-sort-control.opens-up .portfolio-filter-menu {
       top: auto;
       bottom: calc(100% + 9px);
       transform: translateY(6px) scale(0.98);
       transform-origin: bottom right;
     }
 
-    .portfolio-category-control.opens-up.is-open .portfolio-filter-menu {
+    .portfolio-category-control.opens-up.is-open .portfolio-filter-menu,
+    .portfolio-sort-control.opens-up.is-open .portfolio-filter-menu {
       transform: translateY(0) scale(1);
+    }
+
+    .portfolio-sort-control .portfolio-filter-menu {
+      inset-inline-start: 0;
+      inset-inline-end: auto;
+      width: 248px;
+      transform-origin: top left;
+    }
+
+    .portfolio-sort-control.opens-up .portfolio-filter-menu {
+      transform-origin: bottom left;
     }
 
     .portfolio-filter-option {
@@ -2432,20 +2458,45 @@
         padding-inline-start: calc(3px + 0.75rem);
       }
 
-      #portfolioSection .section-header-badge {
-        min-height: 44px;
-        flex: 0 0 auto;
-      }
-
       .portfolio-category-control {
         width: auto;
         max-width: none;
         flex: 1 1 auto;
       }
 
+      .portfolio-sort-control {
+        width: auto;
+        max-width: 48%;
+        flex: 0 0 46%;
+      }
+
+      .portfolio-sort-control .portfolio-filter-trigger,
+      .portfolio-category-control .portfolio-filter-trigger {
+        min-height: 44px;
+        gap: 0.45rem;
+        padding-inline: 0.36rem 0.48rem;
+      }
+
+      .portfolio-sort-control .portfolio-filter-trigger__icon,
+      .portfolio-category-control .portfolio-filter-trigger__icon {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+      }
+
+      .portfolio-sort-control .portfolio-filter-trigger__label,
+      .portfolio-category-control .portfolio-filter-trigger__label {
+        font-size: 0.7rem;
+      }
+
       .portfolio-filter-menu {
         width: 100%;
         max-width: none;
+      }
+
+      .portfolio-sort-control .portfolio-filter-menu {
+        width: min(248px, calc(100vw - 32px));
+        max-width: calc(100vw - 32px);
       }
 
       .portfolio-chip {
@@ -2472,6 +2523,11 @@
       .portfolio-meta span {
         font-size: 0.75rem !important;
       }
+    }
+
+    @media (max-width: 360px) {
+      .portfolio-sort-control .portfolio-filter-trigger__icon { display: none; }
+      .portfolio-sort-control .portfolio-filter-trigger { padding-inline: 0.55rem; }
     }
 
     /* Section header controls - mobile (scoped to 767px so tablets-in-landscape
@@ -3673,11 +3729,26 @@
           <div class="section-header-line"></div>
           <h2 class="section-header-title">نمونه کارهای برتر</h2>
           <div class="section-header-controls">
-            <div class="section-header-badge">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 3 1.8 4.3L18 9l-4.2 1.7L12 15l-1.8-4.3L6 9l4.2-1.7L12 3Zm6 11 .9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9L18 14Z"/>
-              </svg>
-              <span>برترین‌ها</span>
+            <div id="portfolioSortControl" class="portfolio-sort-control">
+              <button id="portfolioSortTrigger" class="portfolio-filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="portfolioSortMenu">
+                <span class="portfolio-filter-trigger__icon" aria-hidden="true">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h12M4 6h.01M8 12h9M4 12h.01M8 18h6M4 18h.01"/>
+                  </svg>
+                </span>
+                <span id="portfolioSortLabel" class="portfolio-filter-trigger__label">برترین‌ها</span>
+                <svg class="portfolio-filter-trigger__chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+              <div id="portfolioSortMenu" class="portfolio-filter-menu" role="listbox" aria-label="مرتب‌سازی نمونه کارها"></div>
+              <label for="portfolioSortFilter" class="sr-only">مرتب‌سازی نمونه کارها</label>
+              <select id="portfolioSortFilter" class="sr-only" tabindex="-1" aria-hidden="true">
+                <option value="best">برترین‌ها</option>
+                <option value="views">پربازدیدترین</option>
+                <option value="likes">محبوب‌ترین</option>
+                <option value="newest">جدیدترین</option>
+              </select>
             </div>
             <div id="portfolioCategoryControl" class="portfolio-category-control">
               <button id="portfolioCategoryFilterTrigger" class="portfolio-filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="portfolioCategoryFilterMenu">
@@ -3852,6 +3923,7 @@
         portfolioCards: [],
         hasRealPortfolios: false,
         portfolioCategoryFilter: 'all',
+        portfolioSort: 'best',
         shops: [],
         serviceShops: [],
         regularShops: [],
@@ -3879,6 +3951,7 @@
         attachViewTypeFilterEvents();
         await fetchRealShops();
         await initializePortfolioCategoryFilter();
+        initializePortfolioSortControl();
       });
 
       /**
@@ -4454,6 +4527,7 @@
                  shopurl: item?.shop?.shopUrl || sellerShop?.shopurl || '',
                  sellerName: item?.shop?.name || sellerShop?.storename || '',
                  views: Number(item?.viewCount || item?.views || 0),
+                 createdAt: item?.createdAt || item?.publishedAt || '',
                  rating: Number(item?.shop?.rating || sellerShop?.rating || 0),
                  reviewCount: Number(item?.shop?.reviewCount || sellerShop?.reviewCount || 0),
                  shopType: 'portfolio',
@@ -4494,7 +4568,15 @@
          const filtered = activeFilter === 'all'
            ? list
            : list.filter((item) => String(item?.categoryGroup || '') === String(activeFilter));
-         portfolioGrid.innerHTML = filtered.map((shop) => {
+         const sorted = [...filtered];
+         if (state.portfolioSort === 'views') {
+           sorted.sort((a, b) => Number(b?.views || 0) - Number(a?.views || 0));
+         } else if (state.portfolioSort === 'likes') {
+           sorted.sort((a, b) => getPortfolioLikeCount(b) - getPortfolioLikeCount(a));
+         } else if (state.portfolioSort === 'newest') {
+           sorted.sort((a, b) => getPortfolioTimestamp(b) - getPortfolioTimestamp(a));
+         }
+         portfolioGrid.innerHTML = sorted.map((shop) => {
             const imageSrc = state.hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
             const title = shop.storename || 'نمونه کار';
             const sellerName = String(shop.sellerName || shop?.portfolioMeta?.shopName || '').trim();
@@ -4554,13 +4636,35 @@
                   </div>
               `;
             }).join('');
-          const likeItems = filtered
+          const likeItems = sorted
             .map(item => ({ id: item.portfolioMeta?.portfolioId, likes: item.likes, liked: !!item.portfolioMeta?.liked }))
             .filter(it => it.id);
           if (likeItems.length) {
             document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items: likeItems } }));
           }
           updateTypeFilterViews();
+      }
+
+      function getPortfolioLikeCount(item) {
+         const portfolioId = item?.portfolioMeta?.portfolioId;
+         if (portfolioId && typeof window.__getPortfolioLikes === 'function') {
+           const liveCount = Number(window.__getPortfolioLikes(portfolioId));
+           if (Number.isFinite(liveCount)) return liveCount;
+         }
+         return Number(item?.likes || item?.likeCount || 0);
+      }
+
+      function getPortfolioTimestamp(item) {
+         const explicitDate = item?.createdAt || item?.publishedAt || item?.updatedAt;
+         if (explicitDate) {
+           const timestamp = new Date(explicitDate).getTime();
+           if (Number.isFinite(timestamp)) return timestamp;
+         }
+         const portfolioId = String(item?.portfolioMeta?.portfolioId || item?.portfolioId || item?.id || '');
+         if (/^[a-f\d]{24}$/i.test(portfolioId)) {
+           return parseInt(portfolioId.slice(0, 8), 16) * 1000;
+         }
+         return 0;
       }
 
       function populatePortfolioCategoryFilter(categories) {
@@ -4667,6 +4771,84 @@
            setOpen(false);
            select.dispatchEvent(new Event('change', { bubbles: true }));
            trigger.focus({ preventScroll: true });
+         });
+         document.addEventListener('click', (event) => {
+           if (!control.contains(event.target)) setOpen(false);
+         });
+         document.addEventListener('keydown', (event) => {
+           if (event.key === 'Escape' && control.classList.contains('is-open')) {
+             setOpen(false);
+             trigger.focus({ preventScroll: true });
+           }
+         });
+      }
+
+      function renderPortfolioSortOptions() {
+         const menu = document.getElementById('portfolioSortMenu');
+         const select = document.getElementById('portfolioSortFilter');
+         const label = document.getElementById('portfolioSortLabel');
+         if (!menu || !select || !label) return;
+         const options = [
+           { value: 'best', label: 'برترین‌ها', path: 'm12 3 1.8 4.3L18 9l-4.2 1.7L12 15l-1.8-4.3L6 9l4.2-1.7L12 3Z' },
+           { value: 'views', label: 'پربازدیدترین', path: 'M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z' },
+           { value: 'likes', label: 'محبوب‌ترین', path: 'M12 20.5 4.8 13.9A4.7 4.7 0 0 1 11.5 7l.5.6.5-.6a4.7 4.7 0 0 1 6.7 6.9L12 20.5Z' },
+           { value: 'newest', label: 'جدیدترین', path: 'M12 8v4l2.6 1.6M4.9 4.9 3 3m16.1 1.9L21 3M12 3v2m8 7h2M2 12h2m8 9a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z' }
+         ];
+         menu.innerHTML = options.map((option) => {
+           const selected = option.value === select.value;
+           return `
+             <button type="button" class="portfolio-filter-option${selected ? ' is-selected' : ''}" data-value="${option.value}" role="option" aria-selected="${selected}">
+               <span class="portfolio-filter-option__icon" aria-hidden="true">
+                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${option.path}"/></svg>
+               </span>
+               <span class="portfolio-filter-option__text">${option.label}</span>
+               <svg class="portfolio-filter-option__check" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5 12 4 4L19 6"/>
+               </svg>
+             </button>`;
+         }).join('');
+         label.textContent = select.options[select.selectedIndex]?.textContent || 'برترین‌ها';
+      }
+
+      function initializePortfolioSortControl() {
+         const control = document.getElementById('portfolioSortControl');
+         const trigger = document.getElementById('portfolioSortTrigger');
+         const menu = document.getElementById('portfolioSortMenu');
+         const select = document.getElementById('portfolioSortFilter');
+         const label = document.getElementById('portfolioSortLabel');
+         if (!control || !trigger || !menu || !select || !label || control.dataset.ready === 'true') return;
+         control.dataset.ready = 'true';
+         select.value = state.portfolioSort || 'best';
+         renderPortfolioSortOptions();
+
+         const setOpen = (open) => {
+           if (open) {
+             const triggerRect = trigger.getBoundingClientRect();
+             const menuHeight = Math.min(menu.scrollHeight || 320, Math.min(320, window.innerHeight * 0.55));
+             const spaceBelow = window.innerHeight - triggerRect.bottom;
+             const spaceAbove = triggerRect.top;
+             control.classList.toggle('opens-up', spaceBelow < menuHeight + 20 && spaceAbove > spaceBelow);
+           }
+           control.classList.toggle('is-open', open);
+           trigger.setAttribute('aria-expanded', String(open));
+         };
+
+         trigger.addEventListener('click', () => setOpen(!control.classList.contains('is-open')));
+         menu.addEventListener('click', (event) => {
+           const option = event.target.closest('.portfolio-filter-option');
+           if (!option) return;
+           select.value = option.dataset.value || 'best';
+           state.portfolioSort = select.value;
+           label.textContent = option.querySelector('.portfolio-filter-option__text')?.textContent || 'برترین‌ها';
+           renderPortfolioSortOptions();
+           setOpen(false);
+           renderPortfolioGrid(state.portfolioCards || []);
+           trigger.focus({ preventScroll: true });
+         });
+         select.addEventListener('change', () => {
+           state.portfolioSort = select.value || 'best';
+           renderPortfolioSortOptions();
+           renderPortfolioGrid(state.portfolioCards || []);
          });
          document.addEventListener('click', (event) => {
            if (!control.contains(event.target)) setOpen(false);
