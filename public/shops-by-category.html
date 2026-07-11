@@ -1565,7 +1565,27 @@
     }
 
     .portfolio-chip {
-      background: rgba(255, 255, 255, 0.22);
+      max-width: 100%;
+      padding: 0.42rem 0.68rem;
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(15, 23, 42, 0.62);
+      box-shadow: 0 8px 22px rgba(2, 6, 23, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px) saturate(130%);
+      -webkit-backdrop-filter: blur(10px) saturate(130%);
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    .portfolio-chip svg {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 14px;
+      color: #6ee7b7;
+    }
+
+    .portfolio-chip span {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     .portfolio-rank {
@@ -1631,6 +1651,209 @@
       gap: 0.5rem;
       flex-shrink: 0;
       min-width: 0;
+    }
+
+    #portfolioSection .section-header-title {
+      flex: 1 1 auto;
+    }
+
+    #portfolioSection .section-header-badge {
+      min-height: 42px;
+      padding: 0.55rem 0.78rem;
+      border: 1px solid rgba(16, 185, 129, 0.16);
+      border-radius: 13px;
+      background: linear-gradient(145deg, #ecfdf5, #f0fdfa);
+      color: #087a68;
+      box-shadow: inset 0 1px 0 #fff;
+    }
+
+    #portfolioSection .section-header-badge svg {
+      width: 15px;
+      height: 15px;
+      color: #10b981;
+    }
+
+    .portfolio-category-control {
+      position: relative;
+      z-index: 30;
+      width: 224px;
+      max-width: min(224px, calc(100vw - 32px));
+    }
+
+    .portfolio-filter-trigger {
+      display: flex;
+      width: 100%;
+      min-height: 46px;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.35rem 0.42rem 0.35rem 0.62rem;
+      border: 1px solid #dce8e5;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #243b45;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 8px 24px -17px rgba(15, 118, 110, 0.7), inset 0 1px 0 #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .portfolio-filter-trigger:hover {
+      border-color: rgba(13, 148, 136, 0.45);
+      box-shadow: 0 12px 28px -18px rgba(15, 118, 110, 0.75), inset 0 1px 0 #fff;
+      transform: translateY(-1px);
+    }
+
+    .portfolio-filter-trigger:focus-visible {
+      outline: none;
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16), 0 12px 28px -18px rgba(15, 118, 110, 0.75);
+    }
+
+    .portfolio-filter-trigger__icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #059669, #14b8a6);
+      color: #fff;
+      box-shadow: 0 7px 14px -7px rgba(5, 150, 105, 0.72);
+    }
+
+    .portfolio-filter-trigger__icon svg { width: 17px; height: 17px; }
+
+    .portfolio-filter-trigger__label {
+      flex: 1 1 auto;
+      overflow: hidden;
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .portfolio-filter-trigger__chevron {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      color: #78908d;
+      transition: transform 0.22s ease;
+    }
+
+    .portfolio-category-control.is-open .portfolio-filter-trigger__chevron {
+      transform: rotate(180deg);
+    }
+
+    .portfolio-filter-menu {
+      position: absolute;
+      top: calc(100% + 9px);
+      inset-inline-end: 0;
+      width: 272px;
+      max-width: calc(100vw - 32px);
+      max-height: min(320px, 55vh);
+      padding: 7px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: 1px solid rgba(203, 213, 225, 0.82);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 22px 55px -20px rgba(15, 23, 42, 0.34), 0 8px 20px -15px rgba(15, 118, 110, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px) scale(0.98);
+      transform-origin: top right;
+      pointer-events: none;
+      backdrop-filter: blur(18px) saturate(135%);
+      -webkit-backdrop-filter: blur(18px) saturate(135%);
+      transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+      scrollbar-width: thin;
+      scrollbar-color: #99d8cd transparent;
+    }
+
+    .portfolio-category-control.is-open .portfolio-filter-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .portfolio-category-control.opens-up .portfolio-filter-menu {
+      top: auto;
+      bottom: calc(100% + 9px);
+      transform: translateY(6px) scale(0.98);
+      transform-origin: bottom right;
+    }
+
+    .portfolio-category-control.opens-up.is-open .portfolio-filter-menu {
+      transform: translateY(0) scale(1);
+    }
+
+    .portfolio-filter-option {
+      display: flex;
+      width: 100%;
+      min-height: 48px;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.55rem 0.62rem;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: #475569;
+      font-family: inherit;
+      text-align: right;
+      cursor: pointer;
+      transition: color 0.16s ease, background-color 0.16s ease;
+    }
+
+    .portfolio-filter-option:hover,
+    .portfolio-filter-option:focus-visible {
+      outline: none;
+      background: #f0fdfa;
+      color: #0f766e;
+    }
+
+    .portfolio-filter-option.is-selected {
+      background: linear-gradient(135deg, #ecfdf5, #f0fdfa);
+      color: #087a68;
+    }
+
+    .portfolio-filter-option__icon {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      place-items: center;
+      border: 1px solid #dceae7;
+      border-radius: 10px;
+      background: #fff;
+      color: #0f9f83;
+    }
+
+    .portfolio-filter-option__icon svg { width: 16px; height: 16px; }
+
+    .portfolio-filter-option__text {
+      flex: 1 1 auto;
+      overflow: hidden;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .portfolio-filter-option__check {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      color: #10b981;
+      opacity: 0;
+      transform: scale(0.72);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+
+    .portfolio-filter-option.is-selected .portfolio-filter-option__check {
+      opacity: 1;
+      transform: scale(1);
     }
 
     .section-header-select {
@@ -2200,6 +2423,44 @@
         font-size: 0.6875rem;
       }
 
+      #portfolioSection .section-header {
+        flex-wrap: wrap;
+      }
+
+      #portfolioSection .section-header-controls {
+        width: 100%;
+        padding-inline-start: calc(3px + 0.75rem);
+      }
+
+      #portfolioSection .section-header-badge {
+        min-height: 44px;
+        flex: 0 0 auto;
+      }
+
+      .portfolio-category-control {
+        width: auto;
+        max-width: none;
+        flex: 1 1 auto;
+      }
+
+      .portfolio-filter-menu {
+        width: 100%;
+        max-width: none;
+      }
+
+      .portfolio-chip {
+        padding: 0.34rem 0.5rem;
+        gap: 0.25rem;
+        border-radius: 0.7rem;
+        font-size: 0.64rem;
+      }
+
+      .portfolio-chip svg {
+        width: 12px;
+        height: 12px;
+        flex-basis: 12px;
+      }
+
       #portfolioGrid {
         gap: 0.75rem;
       }
@@ -2221,13 +2482,7 @@
         min-width: 0;
       }
 
-      .section-header-select {
-        max-width: 140px;
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+      .section-header-select { max-width: 140px; }
     }
 
     /* Tablet Responsive - Enhanced */
@@ -3133,13 +3388,30 @@
           <div class="section-header-line"></div>
           <h2 class="section-header-title">نمونه کارهای برتر</h2>
           <div class="section-header-controls">
-            <label for="portfolioCategoryFilter" class="sr-only">فیلتر دسته‌بندی</label>
             <div class="section-header-badge">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 3 1.8 4.3L18 9l-4.2 1.7L12 15l-1.8-4.3L6 9l4.2-1.7L12 3Zm6 11 .9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9L18 14Z"/>
+              </svg>
               <span>برترین‌ها</span>
             </div>
-            <select id="portfolioCategoryFilter" class="section-header-select" aria-label="فیلتر دسته‌بندی نمونه کارها">
-              <option value="all">همه دسته‌ها</option>
-            </select>
+            <div id="portfolioCategoryControl" class="portfolio-category-control">
+              <button id="portfolioCategoryFilterTrigger" class="portfolio-filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="portfolioCategoryFilterMenu">
+                <span class="portfolio-filter-trigger__icon" aria-hidden="true">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M7 12h10m-7 7h4"/>
+                  </svg>
+                </span>
+                <span id="portfolioCategoryFilterLabel" class="portfolio-filter-trigger__label">همه دسته‌ها</span>
+                <svg class="portfolio-filter-trigger__chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+              <div id="portfolioCategoryFilterMenu" class="portfolio-filter-menu" role="listbox" aria-label="دسته‌بندی نمونه کارها"></div>
+              <label for="portfolioCategoryFilter" class="sr-only">فیلتر دسته‌بندی</label>
+              <select id="portfolioCategoryFilter" class="sr-only" tabindex="-1" aria-hidden="true">
+                <option value="all">همه دسته‌ها</option>
+              </select>
+            </div>
           </div>
         </div>
         <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6"></div>
@@ -3889,6 +4161,7 @@
                  id: shopId,
                  storename: item?.title || item?.shop?.name || 'نمونه کار',
                  category: item?.categoryName || item?.shop?.category || 'نمونه کار',
+                 categoryGroup: resolvePortfolioCategoryGroup(item, sellerShop),
                  image: item?.image,
                  desc: item?.description || '',
                  address: sellerShop?.address || item?.shop?.address || '',
@@ -3912,6 +4185,7 @@
              })
            : allShops.slice(0, 5).map(shop => ({
                ...shop,
+               categoryGroup: resolvePortfolioCategoryGroup(shop, shop),
                likes: typeof shop?.likes === 'number' ? shop.likes : 0
              }));
 
@@ -3934,11 +4208,19 @@
          const activeFilter = state.portfolioCategoryFilter || 'all';
          const filtered = activeFilter === 'all'
            ? list
-           : list.filter((item) => String(item?.category || '') === String(activeFilter));
+           : list.filter((item) => String(item?.categoryGroup || '') === String(activeFilter));
          portfolioGrid.innerHTML = filtered.map((shop) => {
             const imageSrc = state.hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
             const title = shop.storename || 'نمونه کار';
-            const category = shop.category || 'فروشگاه';
+            const categoryGroup = String(shop.categoryGroup || '').trim();
+            const safeCategoryGroup = escapeHtml(categoryGroup);
+            const categoryBadge = categoryGroup ? `
+              <div class="portfolio-chip" title="${safeCategoryGroup}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13 13 20a2 2 0 0 1-2.8 0L4 13.8A2 2 0 0 1 3.4 12V5a2 2 0 0 1 2-2h7a2 2 0 0 1 1.4.6L20 9.8a2 2 0 0 1 0 3.2Z"/><circle cx="8.5" cy="8.5" r="1.25"/>
+                </svg>
+                <span>${safeCategoryGroup}</span>
+              </div>` : '';
             const targetId = shop.portfolioMeta?.shopId || shop.id;
             const portfolioId = shop.portfolioMeta?.portfolioId;
             const buttonAttrs = targetId
@@ -3954,12 +4236,7 @@
                   <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
                   <div class="portfolio-overlay">
                       <div class="portfolio-overlay-top">
-                        <div class="portfolio-chip">
-                          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.968 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01-.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
-                          </svg>
-                          ${category}
-                        </div>
+                        ${categoryBadge}
                       </div>
             <div class="portfolio-meta">
                            <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
@@ -4011,37 +4288,110 @@
            unique.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
          select.value = validCurrent ? current : 'all';
          state.portfolioCategoryFilter = select.value;
+         renderPortfolioCategoryOptions(unique);
+      }
+
+      function resolvePortfolioCategoryGroup(item, sellerShop = {}) {
+         const candidates = [
+           sellerShop?.subcategory,
+           Array.isArray(sellerShop?.subcategories) ? sellerShop.subcategories[0] : '',
+           item?.categoryGroup,
+           item?.subcategoryName,
+           item?.subcategory,
+           Array.isArray(item?.subcategories) ? item.subcategories[0] : '',
+           item?.shop?.subcategoryName,
+           item?.shop?.subcategory,
+           Array.isArray(item?.shop?.subcategories) ? item.shop.subcategories[0] : ''
+         ];
+         const genericLabels = new Set(['خدمات', 'نمونه کار', 'فروشگاه', 'عمومی']);
+         return candidates
+           .map(value => String(value || '').trim())
+           .find(value => value && !genericLabels.has(value)) || '';
+      }
+
+      function renderPortfolioCategoryOptions(categories) {
+         const control = document.getElementById('portfolioCategoryControl');
+         const menu = document.getElementById('portfolioCategoryFilterMenu');
+         const select = document.getElementById('portfolioCategoryFilter');
+         const label = document.getElementById('portfolioCategoryFilterLabel');
+         if (!control || !menu || !select || !label) return;
+         const values = ['all', ...(Array.isArray(categories) ? categories : [])];
+         const icon = `
+           <span class="portfolio-filter-option__icon" aria-hidden="true">
+             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M7 4v6m10-6v6M5 10h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z"/>
+             </svg>
+           </span>`;
+         menu.innerHTML = values.map((value) => {
+           const optionLabel = value === 'all' ? 'همه دسته‌ها' : value;
+           const selected = value === select.value;
+           return `
+             <button type="button" class="portfolio-filter-option${selected ? ' is-selected' : ''}" data-value="${escapeHtml(value)}" role="option" aria-selected="${selected}">
+               ${icon}
+               <span class="portfolio-filter-option__text">${escapeHtml(optionLabel)}</span>
+               <svg class="portfolio-filter-option__check" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5 12 4 4L19 6"/>
+               </svg>
+             </button>`;
+         }).join('');
+         label.textContent = select.options[select.selectedIndex]?.textContent || 'همه دسته‌ها';
+      }
+
+      function setupPortfolioCategoryControl() {
+         const control = document.getElementById('portfolioCategoryControl');
+         const trigger = document.getElementById('portfolioCategoryFilterTrigger');
+         const menu = document.getElementById('portfolioCategoryFilterMenu');
+         const select = document.getElementById('portfolioCategoryFilter');
+         const label = document.getElementById('portfolioCategoryFilterLabel');
+         if (!control || !trigger || !menu || !select || !label || control.dataset.ready === 'true') return;
+         control.dataset.ready = 'true';
+
+         const setOpen = (open) => {
+           if (open) {
+             const triggerRect = trigger.getBoundingClientRect();
+             const menuHeight = Math.min(menu.scrollHeight || 320, Math.min(320, window.innerHeight * 0.55));
+             const spaceBelow = window.innerHeight - triggerRect.bottom;
+             const spaceAbove = triggerRect.top;
+             control.classList.toggle('opens-up', spaceBelow < menuHeight + 20 && spaceAbove > spaceBelow);
+           }
+           control.classList.toggle('is-open', open);
+           trigger.setAttribute('aria-expanded', String(open));
+         };
+
+         trigger.addEventListener('click', () => setOpen(!control.classList.contains('is-open')));
+         menu.addEventListener('click', (event) => {
+           const option = event.target.closest('.portfolio-filter-option');
+           if (!option) return;
+           select.value = option.dataset.value || 'all';
+           label.textContent = option.querySelector('.portfolio-filter-option__text')?.textContent || 'همه دسته‌ها';
+           menu.querySelectorAll('.portfolio-filter-option').forEach((item) => {
+             const selected = item === option;
+             item.classList.toggle('is-selected', selected);
+             item.setAttribute('aria-selected', String(selected));
+           });
+           setOpen(false);
+           select.dispatchEvent(new Event('change', { bubbles: true }));
+           trigger.focus({ preventScroll: true });
+         });
+         document.addEventListener('click', (event) => {
+           if (!control.contains(event.target)) setOpen(false);
+         });
+         document.addEventListener('keydown', (event) => {
+           if (event.key === 'Escape' && control.classList.contains('is-open')) {
+             setOpen(false);
+             trigger.focus({ preventScroll: true });
+           }
+         });
       }
 
       async function initializePortfolioCategoryFilter() {
          const select = document.getElementById('portfolioCategoryFilter');
          if (!select) return;
-         let categories = [];
-         try {
-           const res = await fetch('/api/categories', { credentials: 'include' });
-           if (res.ok) {
-             const payload = await res.json().catch(() => ({}));
-             const list = Array.isArray(payload?.serviceSubcategories)
-               ? payload.serviceSubcategories
-               : (Array.isArray(payload) ? payload : []);
-             categories = list
-               .map((entry) => {
-                 if (!entry) return '';
-                 if (typeof entry === 'string') return entry;
-                 return entry.name || entry.title || entry.label || '';
-               })
-               .filter(Boolean);
-           }
-         } catch (err) {
-           console.warn('initializePortfolioCategoryFilter -> fetch failed, falling back to portfolio cards', err);
-         }
-         if (!categories.length) {
-           const fallback = [...new Set((state.portfolioCards || [])
-             .map((item) => String(item?.category || '').trim())
-             .filter(Boolean))];
-           categories = fallback;
-         }
+         const categories = [...new Set((state.portfolioCards || [])
+           .map((item) => String(item?.categoryGroup || '').trim())
+           .filter(Boolean))];
          populatePortfolioCategoryFilter(categories);
+         setupPortfolioCategoryControl();
          select.addEventListener('change', (event) => {
            const value = event?.target?.value || 'all';
            state.portfolioCategoryFilter = value;
@@ -4412,7 +4762,7 @@ window.openPortfolioModal = function (shopId, portfolioId = '') {
 
   // Populate title and category
   document.getElementById('modalTitle').textContent = shop.storename || 'فروشگاه';
-  const category = shop.category || '';
+  const category = shop.categoryGroup || shop.category || '';
   document.getElementById('modalCategory').textContent = category;
   document.getElementById('modalCategoryValue').textContent = category || 'نمونه کار';
 
