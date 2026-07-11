@@ -1625,6 +1625,60 @@
       color: #10b981;
     }
 
+    .section-header-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      min-width: 0;
+    }
+
+    .section-header-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding: 0.375rem 0.875rem;
+      padding-left: 2rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+      border: 1.5px solid rgba(16, 185, 129, 0.3);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #10b981;
+      cursor: pointer;
+      direction: rtl;
+      text-align: right;
+      font-family: inherit;
+      line-height: 1.2;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: left 0.75rem center;
+      background-size: 0.75rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .section-header-select:focus {
+      outline: none;
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .section-header-select:hover {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     /* Loader */
     .loader {
       border: 3px solid #e2e8f0;
@@ -2156,6 +2210,23 @@
 
       .portfolio-meta span {
         font-size: 0.75rem !important;
+      }
+    }
+
+    /* Section header controls - mobile (scoped to 767px so tablets-in-landscape
+       between 641px and 767px get the same constraints). */
+    @media (max-width: 767px) {
+      .section-header-controls {
+        gap: 0.4rem;
+        min-width: 0;
+      }
+
+      .section-header-select {
+        max-width: 140px;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -3061,8 +3132,14 @@
         <div class="section-header">
           <div class="section-header-line"></div>
           <h2 class="section-header-title">نمونه کارهای برتر</h2>
-          <div class="section-header-badge">
-            <span>برترین‌ها</span>
+          <div class="section-header-controls">
+            <label for="portfolioCategoryFilter" class="sr-only">فیلتر دسته‌بندی</label>
+            <div class="section-header-badge">
+              <span>برترین‌ها</span>
+            </div>
+            <select id="portfolioCategoryFilter" class="section-header-select" aria-label="فیلتر دسته‌بندی نمونه کارها">
+              <option value="all">همه دسته‌ها</option>
+            </select>
           </div>
         </div>
         <div id="portfolioGrid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6"></div>
@@ -3216,6 +3293,8 @@
         hasPortfolioSamples: false,
         portfolioSamples: [],
         portfolioCards: [],
+        hasRealPortfolios: false,
+        portfolioCategoryFilter: 'all',
         shops: [],
         serviceShops: [],
         regularShops: [],
@@ -3242,6 +3321,7 @@
         attachShopFilterEvents();
         attachViewTypeFilterEvents();
         await fetchRealShops();
+        await initializePortfolioCategoryFilter();
       });
 
       /**
@@ -3837,66 +3917,136 @@
 
          state.hasPortfolioSamples = sampleShops.length > 0;
          state.portfolioCards = sampleShops;
+         state.hasRealPortfolios = hasRealPortfolios;
 
          if(sampleShops.length > 0 && portfolioSec && portfolioGrid) {
              portfolioSec.classList.remove('hidden');
-             portfolioGrid.innerHTML = sampleShops.map((shop) => {
-                const imageSrc = hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
-                const title = shop.storename || 'نمونه کار';
-                const category = shop.category || 'فروشگاه';
-                const targetId = shop.portfolioMeta?.shopId || shop.id;
-                const portfolioId = shop.portfolioMeta?.portfolioId;
-                const buttonAttrs = targetId
-                  ? `onclick="openPortfolioModal('${targetId}','${portfolioId || ''}')"`
-                  : 'type="button" disabled';
-                const likeCount = typeof shop?.likes === 'number' ? shop.likes : 0;
-                const likeLabel = likeCount?.toLocaleString ? likeCount.toLocaleString('fa-IR') : likeCount;
-                const likeButtonAttrs = portfolioId
-                  ? `type="button" data-portfolio-like data-portfolio-id="${portfolioId}" aria-pressed="${shop.portfolioMeta?.liked ? 'true' : 'false'}"`
-                  : 'type="button" disabled';
-               return `
-                <div class="portfolio-item group" data-shop-id="${targetId || ''}" data-portfolio-id="${portfolioId || ''}">
-                      <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
-                      <div class="portfolio-overlay">
-                          <div class="portfolio-overlay-top">
-                            <div class="portfolio-chip">
-                              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01-.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
-                              </svg>
-                              ${category}
-                            </div>
-                          </div>
-                <div class="portfolio-meta">
-                             <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
-                             <div class="flex items-center justify-between gap-3 text-white" style="opacity: 0.94;">
-                               <button class="portfolio-like-pill" ${likeButtonAttrs}>
-                                 <svg fill="currentColor" viewBox="0 0 24 24">
-                                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
-                                 </svg>
-                                 <span class="js-likes">${likeLabel}</span>
-                               </button>
-                               <button class="portfolio-detail-btn" ${buttonAttrs}>
-                                  <span>مشاهده</span>
-                                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
-                                  </svg>
-                               </button>
-                             </div>
-                          </div>
-                      </div>
-                    </div>
-                `;
-              }).join('');
-            const likeItems = sampleShops
-              .map(item => ({ id: item.portfolioMeta?.portfolioId, likes: item.likes, liked: !!item.portfolioMeta?.liked }))
-              .filter(it => it.id);
-            if (likeItems.length) {
-              document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items: likeItems } }));
-            }
-            updateTypeFilterViews();
-        } else if (portfolioSec) {
+             renderPortfolioGrid(sampleShops);
+         } else if (portfolioSec) {
             portfolioSec.style.display = 'none';
          }
+      }
+
+      function renderPortfolioGrid(items) {
+         const portfolioGrid = document.getElementById('portfolioGrid');
+         if (!portfolioGrid) return;
+         const list = Array.isArray(items) ? items : [];
+         const activeFilter = state.portfolioCategoryFilter || 'all';
+         const filtered = activeFilter === 'all'
+           ? list
+           : list.filter((item) => String(item?.category || '') === String(activeFilter));
+         portfolioGrid.innerHTML = filtered.map((shop) => {
+            const imageSrc = state.hasRealPortfolios ? resolvePortfolioImage(shop) : resolveShopImage(shop);
+            const title = shop.storename || 'نمونه کار';
+            const category = shop.category || 'فروشگاه';
+            const targetId = shop.portfolioMeta?.shopId || shop.id;
+            const portfolioId = shop.portfolioMeta?.portfolioId;
+            const buttonAttrs = targetId
+              ? `onclick="openPortfolioModal('${targetId}','${portfolioId || ''}')"`
+              : 'type="button" disabled';
+            const likeCount = typeof shop?.likes === 'number' ? shop.likes : 0;
+            const likeLabel = likeCount?.toLocaleString ? likeCount.toLocaleString('fa-IR') : likeCount;
+            const likeButtonAttrs = portfolioId
+              ? `type="button" data-portfolio-like data-portfolio-id="${portfolioId}" aria-pressed="${shop.portfolioMeta?.liked ? 'true' : 'false'}"`
+              : 'type="button" disabled';
+           return `
+            <div class="portfolio-item group" data-shop-id="${targetId || ''}" data-portfolio-id="${portfolioId || ''}">
+                  <img src="${imageSrc}" alt="${title}" onerror="this.src='https://placehold.co/600x600/f1f5f9/10b981?text=${encodeURIComponent(title)}'">
+                  <div class="portfolio-overlay">
+                      <div class="portfolio-overlay-top">
+                        <div class="portfolio-chip">
+                          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.968 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01-.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                          </svg>
+                          ${category}
+                        </div>
+                      </div>
+            <div class="portfolio-meta">
+                           <h4 class="text-white font-black text-base mb-2 leading-tight" style="text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);">${title}</h4>
+                           <div class="flex items-center justify-between gap-3 text-white" style="opacity: 0.94;">
+                             <button class="portfolio-like-pill" ${likeButtonAttrs}>
+                               <svg fill="currentColor" viewBox="0 0 24 24">
+                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                               </svg>
+                               <span class="js-likes">${likeLabel}</span>
+                             </button>
+                             <button class="portfolio-detail-btn" ${buttonAttrs}>
+                                <span>مشاهده</span>
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                             </button>
+                           </div>
+                        </div>
+                    </div>
+                  </div>
+              `;
+            }).join('');
+          const likeItems = filtered
+            .map(item => ({ id: item.portfolioMeta?.portfolioId, likes: item.likes, liked: !!item.portfolioMeta?.liked }))
+            .filter(it => it.id);
+          if (likeItems.length) {
+            document.dispatchEvent(new CustomEvent('portfolio:rendered', { detail: { items: likeItems } }));
+          }
+          updateTypeFilterViews();
+      }
+
+      function populatePortfolioCategoryFilter(categories) {
+         const select = document.getElementById('portfolioCategoryFilter');
+         if (!select) return;
+         const seen = new Set();
+         const unique = [];
+         (Array.isArray(categories) ? categories : []).forEach((entry) => {
+            const name = typeof entry === 'string' ? entry : (entry?.name || entry?.title || '');
+            const trimmed = String(name || '').trim();
+            if (!trimmed) return;
+            const key = trimmed.toLocaleLowerCase('fa-IR');
+            if (seen.has(key)) return;
+            seen.add(key);
+            unique.push(trimmed);
+         });
+         const current = state.portfolioCategoryFilter || 'all';
+         const validCurrent = current === 'all' || unique.some((c) => c.toLocaleLowerCase('fa-IR') === current.toLocaleLowerCase('fa-IR'));
+         select.innerHTML = '<option value="all">همه دسته‌ها</option>' +
+           unique.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+         select.value = validCurrent ? current : 'all';
+         state.portfolioCategoryFilter = select.value;
+      }
+
+      async function initializePortfolioCategoryFilter() {
+         const select = document.getElementById('portfolioCategoryFilter');
+         if (!select) return;
+         let categories = [];
+         try {
+           const res = await fetch('/api/categories', { credentials: 'include' });
+           if (res.ok) {
+             const payload = await res.json().catch(() => ({}));
+             const list = Array.isArray(payload?.serviceSubcategories)
+               ? payload.serviceSubcategories
+               : (Array.isArray(payload) ? payload : []);
+             categories = list
+               .map((entry) => {
+                 if (!entry) return '';
+                 if (typeof entry === 'string') return entry;
+                 return entry.name || entry.title || entry.label || '';
+               })
+               .filter(Boolean);
+           }
+         } catch (err) {
+           console.warn('initializePortfolioCategoryFilter -> fetch failed, falling back to portfolio cards', err);
+         }
+         if (!categories.length) {
+           const fallback = [...new Set((state.portfolioCards || [])
+             .map((item) => String(item?.category || '').trim())
+             .filter(Boolean))];
+           categories = fallback;
+         }
+         populatePortfolioCategoryFilter(categories);
+         select.addEventListener('change', (event) => {
+           const value = event?.target?.value || 'all';
+           state.portfolioCategoryFilter = value;
+           renderPortfolioGrid(state.portfolioCards || []);
+         });
       }
 
       function attachFilterEvents() {
