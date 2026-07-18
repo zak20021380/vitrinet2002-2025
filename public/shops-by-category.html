@@ -937,6 +937,278 @@
       transform: scale(1);
     }
 
+    /* --- Filter dropdowns (price range & shopping centers) --- */
+    .filter-select-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .filter-select-wrap .filter-native-select {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .filter-select-trigger {
+      position: relative;
+      display: flex;
+      width: 100%;
+      min-height: 58px;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.55rem 0.5rem 2.35rem;
+      border: 1px solid #dbe7e4;
+      border-radius: 16px;
+      outline: none;
+      background: #fff;
+      color: #172b38;
+      font-family: inherit;
+      text-align: right;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .filter-select-trigger:hover {
+      border-color: rgba(0, 169, 133, 0.45);
+      box-shadow: 0 10px 24px -18px rgba(8, 122, 104, 0.5);
+    }
+    .filter-select-trigger:focus-visible {
+      border-color: rgba(0, 169, 133, 0.55);
+      box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.16);
+    }
+    .filter-select-wrap.is-open .filter-select-trigger {
+      border-color: rgba(0, 169, 133, 0.6);
+      background: #fbfefd;
+      box-shadow: 0 0 0 3px rgba(0, 169, 133, 0.13), 0 14px 30px -22px rgba(8, 122, 104, 0.55);
+    }
+    .filter-select-trigger__icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      place-items: center;
+      border: 1px solid #e2eeeb;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #f4faf8, #ebf5f2);
+      color: #6b7e87;
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .filter-select-trigger__icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .filter-select-wrap.is-open .filter-select-trigger__icon,
+    .filter-select-trigger.has-value .filter-select-trigger__icon {
+      border-color: #bfe8dc;
+      background: linear-gradient(145deg, #e4f7f0, #d5f2e8);
+      color: #008d73;
+    }
+    .filter-select-trigger__copy {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.12rem;
+    }
+    .filter-select-trigger__kicker {
+      color: #8a9aa5;
+      font-size: 0.62rem;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
+    }
+    .filter-select-trigger__value {
+      overflow: hidden;
+      color: #172b38;
+      font-size: 0.82rem;
+      font-weight: 850;
+      line-height: 1.45;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+    }
+    .filter-select-trigger.has-value .filter-select-trigger__value {
+      color: #087a68;
+    }
+    .filter-select-trigger__badge {
+      position: absolute;
+      top: -5px;
+      left: 12px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #00a985;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .filter-select-trigger.has-value .filter-select-trigger__badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .filter-select-trigger__chevron {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      color: #087a68;
+      transform: translateY(-50%);
+      transition: transform 0.22s ease;
+    }
+    .filter-select-wrap.is-open .filter-select-trigger__chevron {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .filter-select-menu {
+      position: absolute;
+      z-index: 70;
+      top: calc(100% + 8px);
+      right: 0;
+      left: 0;
+      display: flex;
+      max-height: 296px;
+      flex-direction: column;
+      gap: 0.28rem;
+      padding: 0.45rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      border: 1px solid #dce8e5;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.99);
+      box-shadow: 0 24px 50px -20px rgba(15, 23, 42, 0.36), 0 8px 20px -16px rgba(0, 169, 133, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px) scale(0.985);
+      transform-origin: top center;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+      scrollbar-width: thin;
+      scrollbar-color: #c6ddd6 transparent;
+    }
+    .filter-select-menu::-webkit-scrollbar {
+      width: 5px;
+    }
+    .filter-select-menu::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: #c6ddd6;
+    }
+    .filter-select-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .filter-select-wrap.is-open .filter-select-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .filter-select-option {
+      display: grid;
+      width: 100%;
+      min-height: 52px;
+      flex: 0 0 auto;
+      grid-template-columns: 34px minmax(0, 1fr) 24px;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.55rem;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      outline: none;
+      background: transparent;
+      color: #405460;
+      font-family: inherit;
+      text-align: right;
+      cursor: pointer;
+      transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+    }
+    .filter-select-option:hover,
+    .filter-select-option:focus-visible {
+      border-color: #dcece8;
+      background: #f3faf8;
+      color: #087a68;
+      transform: translateX(-1px);
+    }
+    .filter-select-option.is-selected {
+      border-color: #cceae2;
+      background: linear-gradient(135deg, #edf9f5, #f7fcfa);
+      color: #087a68;
+    }
+    .filter-select-option__icon {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 10px;
+      background: #f0f6f5;
+      color: #6b7e87;
+      transition: color 0.16s ease, background-color 0.16s ease;
+    }
+    .filter-select-option:hover .filter-select-option__icon,
+    .filter-select-option:focus-visible .filter-select-option__icon,
+    .filter-select-option.is-selected .filter-select-option__icon {
+      background: #dcf5ed;
+      color: #008d73;
+    }
+    .filter-select-option__icon svg {
+      width: 17px;
+      height: 17px;
+    }
+    .filter-select-option__copy {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 0.05rem;
+    }
+    .filter-select-option__label {
+      overflow: hidden;
+      color: inherit;
+      font-size: 0.78rem;
+      font-weight: 900;
+      line-height: 1.45;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .filter-select-option__hint {
+      overflow: hidden;
+      color: #8a9aa3;
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1.5;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .filter-select-option__check {
+      display: grid;
+      width: 20px;
+      height: 20px;
+      place-items: center;
+      border-radius: 50%;
+      background: #00a985;
+      color: #fff;
+      opacity: 0;
+      transform: scale(0.72);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+    .filter-select-option__check svg {
+      width: 12px;
+      height: 12px;
+    }
+    .filter-select-option.is-selected .filter-select-option__check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    #shopFiltersContainer.has-open-dropdown,
+    #shopFiltersContainer .shop-filters-container {
+      overflow: visible;
+    }
+
     /* --- Category chips --- */
     #subcatRow {
       padding-top: 0.8rem;
@@ -3684,13 +3956,7 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="filter-group" id="priceFilterGroup">
-                  <div class="filter-label">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span>محدوده قیمت</span>
-                  </div>
-                  <select id="priceFilterSelect" class="vitrine-input cursor-pointer" data-filter-type="price">
+                  <select id="priceFilterSelect" class="filter-native-select" data-filter-type="price" aria-hidden="true" tabindex="-1">
                     <option value="all">همه قیمت‌ها</option>
                     <option value="0-100000">تا 100 هزار تومان</option>
                     <option value="100000-500000">100 تا 500 هزار</option>
@@ -3698,19 +3964,49 @@
                     <option value="1000000-5000000">1 تا 5 میلیون</option>
                     <option value="5000000-999999999">بالای 5 میلیون</option>
                   </select>
+                  <div class="filter-select-wrap" id="priceFilterWrap">
+                    <button type="button" id="priceFilterTrigger" class="filter-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="priceFilterMenu">
+                      <span class="filter-select-trigger__icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </span>
+                      <span class="filter-select-trigger__copy">
+                        <span class="filter-select-trigger__kicker">محدوده قیمت</span>
+                        <span class="filter-select-trigger__value" id="priceFilterTriggerLabel">همه قیمت‌ها</span>
+                      </span>
+                      <span class="filter-select-trigger__badge" aria-hidden="true"></span>
+                      <svg class="filter-select-trigger__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m7 10 5 5 5-5"/>
+                      </svg>
+                    </button>
+                    <div id="priceFilterMenu" class="filter-select-menu" role="listbox" aria-label="محدوده قیمت" aria-hidden="true"></div>
+                  </div>
                 </div>
 
                 <div class="filter-group" id="shoppingCenterFilterGroup">
-                  <div class="filter-label">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                    <span>مراکز خرید</span>
-                  </div>
-                  <select id="shoppingCenterFilterSelect" class="vitrine-input cursor-pointer" data-filter-type="shoppingCenter">
+                  <select id="shoppingCenterFilterSelect" class="filter-native-select" data-filter-type="shoppingCenter" aria-hidden="true" tabindex="-1">
                     <option value="all">همه مراکز</option>
                     <!-- Will be populated dynamically from API -->
                   </select>
+                  <div class="filter-select-wrap" id="shoppingCenterFilterWrap">
+                    <button type="button" id="shoppingCenterFilterTrigger" class="filter-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="shoppingCenterFilterMenu">
+                      <span class="filter-select-trigger__icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                      </span>
+                      <span class="filter-select-trigger__copy">
+                        <span class="filter-select-trigger__kicker">مراکز خرید</span>
+                        <span class="filter-select-trigger__value" id="shoppingCenterFilterTriggerLabel">همه مراکز</span>
+                      </span>
+                      <span class="filter-select-trigger__badge" aria-hidden="true"></span>
+                      <svg class="filter-select-trigger__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m7 10 5 5 5-5"/>
+                      </svg>
+                    </button>
+                    <div id="shoppingCenterFilterMenu" class="filter-select-menu" role="listbox" aria-label="مراکز خرید" aria-hidden="true"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3946,6 +4242,7 @@
         initializeViewTypeFilter();
         attachFilterEvents();
         initializeSortDropdown();
+        initializeFilterSelectDropdowns();
         attachShopFilterEvents();
         attachViewTypeFilterEvents();
         await fetchRealShops();
@@ -4093,15 +4390,224 @@
           return;
         }
 
-        // Add shopping center options
-        const options = shoppingCenters.map(center =>
-          `<option value="${escapeHtml(center.title)}">${escapeHtml(center.title)}${center.stores ? ` (${center.stores})` : ''}</option>`
-        ).join('');
+        // Rebuild native select options safely (value = title, hint = store count)
+        select.innerHTML = '';
 
-        select.innerHTML = `
-          <option value="all">همه مراکز</option>
-          ${options}
-        `;
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'همه مراکز';
+        allOption.dataset.hint = 'نمایش فروشگاه‌های همه مراکز';
+        select.appendChild(allOption);
+
+        shoppingCenters.forEach(center => {
+          if (!center?.title) return;
+          const option = document.createElement('option');
+          option.value = center.title;
+          option.textContent = center.title;
+          if (center.stores) {
+            option.dataset.hint = `${center.stores} فروشگاه فعال`;
+          }
+          select.appendChild(option);
+        });
+
+        // Refresh the custom dropdown menu with the new options
+        filterSelectControls.shoppingCenter?.rebuild();
+      }
+
+      /**
+       * Custom dropdown controls for price & shopping center filters
+       */
+      const filterSelectControls = {};
+
+      const FILTER_OPTION_ICONS = {
+        all: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+        price: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 8.4c-1.35 0-2.45.72-2.45 1.62 0 .9 1.1 1.62 2.45 1.62s2.45.72 2.45 1.62c0 .9-1.1 1.62-2.45 1.62m0-6.48c.9 0 1.7.33 2.12.81M12 8.4v-.9m0 7.38v.9"/></svg>',
+        center: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16M3 21h18M9 7h1m4 0h1M9 11h1m4 0h1m-6 10v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4"/></svg>'
+      };
+
+      const PRICE_OPTION_HINTS = {
+        'all': 'بدون محدودیت قیمت',
+        '0-100000': 'مناسب خریدهای اقتصادی',
+        '100000-500000': 'محدوده میان‌رده',
+        '500000-1000000': 'انتخاب‌های باکیفیت',
+        '1000000-5000000': 'محدوده حرفه‌ای',
+        '5000000-999999999': 'محصولات لوکس و خاص'
+      };
+
+      function setupFilterSelect({ selectId, wrapId, triggerId, labelId, menuId, iconKey, getHint }) {
+        const select = document.getElementById(selectId);
+        const wrap = document.getElementById(wrapId);
+        const trigger = document.getElementById(triggerId);
+        const triggerLabel = document.getElementById(labelId);
+        const menu = document.getElementById(menuId);
+        const row = wrap?.closest('.filter-card-row');
+
+        if (!select || !wrap || !trigger || !triggerLabel || !menu) return null;
+
+        let isOpen = false;
+        let options = [];
+
+        const syncSelection = () => {
+          const nativeOption = select.options[select.selectedIndex];
+          triggerLabel.textContent = nativeOption?.textContent || '';
+          trigger.classList.toggle('has-value', select.value !== 'all');
+          options.forEach(option => {
+            const selected = option.dataset.value === select.value;
+            option.classList.toggle('is-selected', selected);
+            option.setAttribute('aria-selected', String(selected));
+          });
+        };
+
+        const setOpen = (nextOpen, focusSelected = false) => {
+          isOpen = nextOpen;
+          wrap.classList.toggle('is-open', isOpen);
+          row?.classList.toggle('has-open-dropdown', isOpen);
+          trigger.setAttribute('aria-expanded', String(isOpen));
+          menu.setAttribute('aria-hidden', String(!isOpen));
+
+          if (isOpen && focusSelected) {
+            requestAnimationFrame(() => {
+              (options.find(option => option.classList.contains('is-selected')) || options[0])?.focus();
+            });
+          }
+        };
+
+        const chooseOption = option => {
+          const value = option?.dataset.value;
+          if (value === undefined) return;
+          select.value = value;
+          syncSelection();
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          setOpen(false);
+          trigger.focus();
+        };
+
+        const moveOptionFocus = (current, direction) => {
+          const index = options.indexOf(current);
+          const nextIndex = (index + direction + options.length) % options.length;
+          options[nextIndex]?.focus();
+        };
+
+        const bindOptionEvents = option => {
+          option.addEventListener('click', () => chooseOption(option));
+          option.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              moveOptionFocus(option, 1);
+            } else if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              moveOptionFocus(option, -1);
+            } else if (event.key === 'Home' || event.key === 'End') {
+              event.preventDefault();
+              options[event.key === 'Home' ? 0 : options.length - 1]?.focus();
+            } else if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              chooseOption(option);
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              setOpen(false);
+              trigger.focus();
+            } else if (event.key === 'Tab') {
+              setOpen(false);
+            }
+          });
+        };
+
+        const buildOption = nativeOption => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'filter-select-option';
+          button.setAttribute('role', 'option');
+          button.setAttribute('aria-selected', 'false');
+          button.tabIndex = -1;
+          button.dataset.value = nativeOption.value;
+
+          const icon = document.createElement('span');
+          icon.className = 'filter-select-option__icon';
+          icon.setAttribute('aria-hidden', 'true');
+          icon.innerHTML = nativeOption.value === 'all'
+            ? FILTER_OPTION_ICONS.all
+            : (FILTER_OPTION_ICONS[iconKey] || FILTER_OPTION_ICONS.all);
+
+          const copy = document.createElement('span');
+          copy.className = 'filter-select-option__copy';
+
+          const label = document.createElement('span');
+          label.className = 'filter-select-option__label';
+          label.textContent = nativeOption.textContent;
+          copy.appendChild(label);
+
+          const hintText = typeof getHint === 'function' ? getHint(nativeOption) : '';
+          if (hintText) {
+            const hint = document.createElement('span');
+            hint.className = 'filter-select-option__hint';
+            hint.textContent = hintText;
+            copy.appendChild(hint);
+          }
+
+          const check = document.createElement('span');
+          check.className = 'filter-select-option__check';
+          check.setAttribute('aria-hidden', 'true');
+          check.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>';
+
+          button.appendChild(icon);
+          button.appendChild(copy);
+          button.appendChild(check);
+          bindOptionEvents(button);
+          return button;
+        };
+
+        const rebuild = () => {
+          menu.innerHTML = '';
+          options = Array.from(select.options).map(nativeOption => {
+            const option = buildOption(nativeOption);
+            menu.appendChild(option);
+            return option;
+          });
+          syncSelection();
+        };
+
+        trigger.addEventListener('click', () => setOpen(!isOpen, !isOpen));
+        trigger.addEventListener('keydown', event => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            setOpen(true, true);
+          } else if (event.key === 'Escape' && isOpen) {
+            event.preventDefault();
+            setOpen(false);
+          }
+        });
+
+        document.addEventListener('pointerdown', event => {
+          if (isOpen && !wrap.contains(event.target)) setOpen(false);
+        });
+
+        select.addEventListener('change', syncSelection);
+        rebuild();
+
+        return { rebuild, syncSelection };
+      }
+
+      function initializeFilterSelectDropdowns() {
+        filterSelectControls.price = setupFilterSelect({
+          selectId: 'priceFilterSelect',
+          wrapId: 'priceFilterWrap',
+          triggerId: 'priceFilterTrigger',
+          labelId: 'priceFilterTriggerLabel',
+          menuId: 'priceFilterMenu',
+          iconKey: 'price',
+          getHint: nativeOption => PRICE_OPTION_HINTS[nativeOption.value] || ''
+        });
+
+        filterSelectControls.shoppingCenter = setupFilterSelect({
+          selectId: 'shoppingCenterFilterSelect',
+          wrapId: 'shoppingCenterFilterWrap',
+          triggerId: 'shoppingCenterFilterTrigger',
+          labelId: 'shoppingCenterFilterTriggerLabel',
+          menuId: 'shoppingCenterFilterMenu',
+          iconKey: 'center',
+          getHint: nativeOption => nativeOption.dataset.hint || ''
+        });
       }
 
       /**
