@@ -2312,67 +2312,119 @@
       0 10px 25px rgba(82, 183, 136, 0.2);
   }
 
-  @media (max-width: 640px) {
+  /* ============================================================
+     Mobile hero — complete redesign (≤767px only)
+     Flat editorial layout: start-aligned RTL header, quiet meta
+     chips, dark full-width CTA + round call key, hairline stats.
+     Desktop (≥768px) is untouched.
+     ============================================================ */
+  @media (max-width: 767px) {
     .service-hero {
       min-height: auto !important;
-      padding-inline: 0.65rem !important;
       align-items: flex-start !important;
+      padding-inline: 1rem !important;
+      background: #f8fafc !important;
+    }
+
+    /* flat surface: no blobs, no dot grid, no gradient halo */
+    .service-hero > .pointer-events-none {
+      display: none !important;
+    }
+
+    .service-hero .group > [class*="blur-xl"] {
+      display: none !important;
     }
 
     .service-hero .relative.z-10 {
-      padding-block: 0.75rem 0.75rem !important;
+      padding-block: 1rem 1.25rem !important;
     }
 
     .service-hero + #services {
-      padding-top: 1.35rem !important;
+      padding-top: 1.25rem !important;
+    }
+
+    /* card: plain white, hairline border, soft single shadow */
+    .service-hero .backdrop-blur-2xl {
+      background: #ffffff !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      border: 1px solid #e8edf4 !important;
+      border-radius: 1.4rem !important;
+      box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 16px 36px -24px rgba(15, 23, 42, 0.18) !important;
+    }
+
+    .service-hero .backdrop-blur-2xl > .h-1 {
+      display: none !important;
     }
 
     .service-hero__content {
-      padding: 1rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1.05rem !important;
+      padding: 1.3rem 1.25rem 1.1rem !important;
     }
 
-    .service-hero__content > :not([hidden]) ~ :not([hidden]) {
-      margin-top: 1rem !important;
+    .service-hero__content > * {
+      margin: 0 !important;
+    }
+
+    .service-hero__content > .h-px {
+      display: none !important;
+    }
+
+    /* 1 — business name: start-aligned, solid ink, no underline */
+    .service-hero__title {
+      order: 1;
+      text-align: right !important;
     }
 
     .service-hero__title > :not([hidden]) ~ :not([hidden]) {
-      margin-top: 0.65rem !important;
-    }
-
-    .service-hero #biz-name {
-      font-size: 1.45rem !important;
-      line-height: 1.35 !important;
-      letter-spacing: 0 !important;
+      margin-top: 0 !important;
     }
 
     .service-hero__title > span {
-      width: 4.25rem !important;
-      height: 2px !important;
+      display: none !important;
     }
 
+    .service-hero #biz-name {
+      background: none !important;
+      -webkit-text-fill-color: #0f172a !important;
+      color: #0f172a !important;
+      font-size: 1.5rem !important;
+      line-height: 1.3 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    /* 2 — meta: quiet neutral chips tucked under the name */
     .service-hero__meta {
+      order: 2;
+      justify-content: flex-start !important;
       gap: 0.5rem !important;
-      align-items: center !important;
     }
 
     .service-hero__rating,
     .service-hero__location {
-      min-height: 36px !important;
-      padding: 0.45rem 0.65rem !important;
+      min-height: 32px !important;
+      padding: 0.3rem 0.7rem !important;
+      border: none !important;
       border-radius: 999px !important;
+      background: #f1f5f9 !important;
+      box-shadow: none !important;
       font-size: 0.72rem !important;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05) !important;
+      color: #475569 !important;
     }
 
     .service-hero__rating svg,
     .service-hero__location svg {
-      width: 0.95rem !important;
-      height: 0.95rem !important;
+      width: 0.85rem !important;
+      height: 0.85rem !important;
       flex: 0 0 auto !important;
     }
 
     .service-hero__location {
-      max-width: min(100%, 11.5rem) !important;
+      max-width: min(100%, 12rem) !important;
     }
 
     .service-hero #hero-brief-address {
@@ -2384,101 +2436,176 @@
       vertical-align: middle !important;
     }
 
+    /* 3 — actions: full-width dark primary + round call key */
     .service-hero__actions {
+      order: 3;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) 3.4rem !important;
       gap: 0.6rem !important;
+      margin-top: 0.15rem !important;
     }
 
-    .service-hero #hero-cta,
-    .service-hero #hero-call {
-      min-height: 48px !important;
-      padding: 0 1rem !important;
-      border-radius: 0.95rem !important;
-      font-size: 0.84rem !important;
+    .service-hero #hero-cta {
+      min-height: 3.4rem !important;
+      padding: 0 1.25rem !important;
+      border-radius: 1.05rem !important;
+      background: #0f172a !important;
+      box-shadow: 0 12px 24px -12px rgba(15, 23, 42, 0.5) !important;
+      font-size: 0.92rem !important;
       line-height: 1 !important;
-      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12) !important;
       transform: none !important;
     }
 
-    .service-hero #hero-call {
-      border-width: 1px !important;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05) !important;
+    .service-hero #hero-cta > .absolute {
+      display: none !important;
     }
 
-    .service-hero #hero-cta svg,
+    .service-hero #hero-cta svg {
+      width: 1.1rem !important;
+      height: 1.1rem !important;
+      flex: 0 0 auto !important;
+      opacity: 0.9;
+    }
+
+    .service-hero #hero-call {
+      min-height: 3.4rem !important;
+      padding: 0 !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 1.05rem !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .service-hero #hero-call span {
+      display: none !important;
+    }
+
     .service-hero #hero-call svg {
-      width: 1.05rem !important;
-      height: 1.05rem !important;
+      width: 1.3rem !important;
+      height: 1.3rem !important;
       flex: 0 0 auto !important;
     }
 
+    /* 4 — stats: recessed hairline strip, small neutral glyph */
     .service-hero__summary-wrap {
-      margin-top: 1rem !important;
+      order: 4;
     }
 
     .service-hero [data-booking-summary] {
-      border-radius: 1.1rem !important;
-      border-color: rgba(191, 219, 254, 0.72) !important;
-      background: rgba(255, 255, 255, 0.92) !important;
-      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.1), 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+      border: 1px solid #eef2f6 !important;
+      border-radius: 1.05rem !important;
+      background: #f8fafc !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
+
+    .service-hero [data-booking-summary] > .pointer-events-none {
+      display: none !important;
     }
 
     .service-hero__summary-inner {
-      padding: 0.95rem !important;
-      gap: 0.85rem !important;
+      padding: 0.9rem 1.05rem !important;
+      gap: 0.75rem !important;
       align-items: center !important;
     }
 
     .service-hero .booking-label {
-      min-height: 30px !important;
-      padding: 0.34rem 0.65rem !important;
-      font-size: 0.7rem !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      font-size: 0.68rem !important;
+      font-weight: 600 !important;
       letter-spacing: 0 !important;
-      box-shadow: 0 6px 14px rgba(59, 130, 246, 0.08) !important;
+      color: #64748b !important;
+    }
+
+    .service-hero .booking-label > span {
+      width: 5px !important;
+      height: 5px !important;
+      background: #94a3b8 !important;
+      box-shadow: none !important;
     }
 
     .service-hero__count-row {
-      gap: 0.35rem 0.55rem !important;
-      align-items: center !important;
-      margin-top: 0.62rem !important;
+      gap: 0.4rem !important;
+      align-items: baseline !important;
+      margin-top: 0.45rem !important;
     }
 
     .service-hero .booking-count {
-      font-size: 1.75rem !important;
+      font-size: 1.9rem !important;
+      font-weight: 800 !important;
       line-height: 1 !important;
+      color: #0f172a !important;
     }
 
     .service-hero__count-row span:last-child {
       font-size: 0.78rem !important;
-      line-height: 1.5 !important;
+      font-weight: 600 !important;
+      line-height: 1.4 !important;
+      color: #475569 !important;
     }
 
     .service-hero .booking-status {
-      margin-top: 0.42rem !important;
-      font-size: 0.74rem !important;
-      line-height: 1.75 !important;
-      color: #64748b !important;
+      margin-top: 0.3rem !important;
+      font-size: 0.72rem !important;
+      line-height: 1.7 !important;
+      color: #94a3b8 !important;
     }
 
     .service-hero .booking-icon {
-      width: 3.15rem !important;
-      height: 3.15rem !important;
-      border-radius: 0.95rem !important;
-      box-shadow: 0 14px 28px rgba(99, 102, 241, 0.28) !important;
+      width: 2.6rem !important;
+      height: 2.6rem !important;
+      border-radius: 999px !important;
+      border: 1px solid #e2e8f0 !important;
+      background: #ffffff !important;
+      background-image: none !important;
+      color: #475569 !important;
+      box-shadow: none !important;
     }
 
     .service-hero .booking-icon i {
-      font-size: 1.45rem !important;
+      font-size: 1rem !important;
+    }
+
+    /* 5 — trust: single muted footer line above card edge */
+    .service-hero__content > div:last-child {
+      order: 5;
+      justify-content: center !important;
+      gap: 1.1rem !important;
+      padding-top: 0.9rem !important;
+      border-top: 1px solid #f1f5f9 !important;
+    }
+
+    .service-hero__content > div:last-child > div {
+      gap: 0.35rem !important;
+      font-size: 0.68rem !important;
+      color: #94a3b8 !important;
+    }
+
+    .service-hero__content > div:last-child .inline-block {
+      width: 4px !important;
+      height: 4px !important;
+      background: #cbd5e1 !important;
+      animation: none !important;
     }
   }
 
   @media (max-width: 360px) {
+    .service-hero__content {
+      padding: 1.1rem 1rem 0.95rem !important;
+    }
+
     .service-hero__summary-inner {
-      padding: 0.85rem !important;
-      gap: 0.65rem !important;
+      padding: 0.8rem 0.9rem !important;
+      gap: 0.6rem !important;
     }
 
     .service-hero .booking-icon {
-      width: 2.85rem !important;
-      height: 2.85rem !important;
+      width: 2.35rem !important;
+      height: 2.35rem !important;
     }
   }
