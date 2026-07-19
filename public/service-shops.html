@@ -29,19 +29,32 @@
 }
 /* ============================================================
    Shop header — premium minimal bar (all devices)
-   One quiet surface: frosted white, hairline bottom border.
+   Frosted glass surface, hairline border + soft depth shadow.
    Right (RTL): menu key · ویترینت · sep · shop name (ink).
-   Left: quiet pill actions + one accent customer chip.
+   Left: quiet pill actions + one brand-gradient customer chip
+   (same indigo→purple family as the hero cover & booking CTA).
    Mobile: actions collapse into a clean dropdown panel.
    ============================================================ */
 .shop-header {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.88);
-  -webkit-backdrop-filter: saturate(1.4) blur(14px);
-  backdrop-filter: saturate(1.4) blur(14px);
-  border-bottom: 1px solid #e7ecf3;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 8px 24px -20px rgba(15, 23, 42, 0.25);
+}
+
+.menu-toggle:focus-visible,
+.action-item:focus-visible,
+.mobile-action-btn:focus-visible,
+.customer-badge:focus-visible,
+.home-link:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px rgba(124, 131, 253, 0.55);
 }
 
 .shop-header .header-shell {
@@ -75,13 +88,14 @@
   background: #ffffff;
   color: #334155;
   cursor: pointer;
-  transition: background-color 0.18s ease, border-color 0.18s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .menu-toggle:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #eef0ff;
+  border-color: #c7cdfe;
+  color: #4e58f0;
 }
 
 .menu-toggle svg {
@@ -92,8 +106,8 @@
 }
 
 .shop-header.menu-open .menu-toggle {
-  background: #0f172a;
-  border-color: #0f172a;
+  background: linear-gradient(135deg, #6d75fb 0%, #7c5cf0 100%);
+  border-color: #5a63f2;
   color: #ffffff;
 }
 
@@ -116,15 +130,16 @@
 }
 
 .brand-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #7c83fd, #52b788);
+  background: linear-gradient(135deg, #6d75fb, #7c5cf0);
+  box-shadow: 0 0 0 3px rgba(124, 131, 253, 0.16);
   flex: 0 0 auto;
 }
 
 .home-link:hover .brand-label {
-  color: #7c83fd;
+  color: #5f68f9;
 }
 
 .brand-sep {
@@ -175,8 +190,8 @@
 }
 
 .action-item:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #eef0ff;
+  color: #1e2350;
 }
 
 .action-item svg {
@@ -189,7 +204,7 @@
 }
 
 .action-item:hover svg {
-  color: #0f172a;
+  color: #5f68f9;
 }
 
 .action-item span {
@@ -207,13 +222,13 @@
 .rating-count-pill {
   padding: 0.18rem 0.5rem;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: #fef3c7;
+  color: #92400e;
   font-size: 0.72rem;
   font-weight: 700;
 }
 
-/* ---- customer chip: the one accent ---- */
+/* ---- customer chip: the one accent (brand gradient) ---- */
 .badge-cluster {
   display: flex;
   align-items: center;
@@ -226,9 +241,11 @@
   gap: 0.55rem;
   min-height: 38px;
   padding: 0 0.55rem 0 0.95rem;
-  border: 1px solid #0f172a;
+  border: 1px solid #5a63f2;
   border-radius: 999px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background:
+    radial-gradient(120% 180% at 85% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
+    linear-gradient(120deg, #6d75fb 0%, #5f68f9 45%, #7c5cf0 100%);
   color: #ffffff;
   font-family: inherit;
   font-weight: 700;
@@ -236,17 +253,23 @@
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 8px 18px -10px rgba(15, 23, 42, 0.5);
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  box-shadow:
+    0 10px 22px -10px rgba(95, 104, 249, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, filter 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .customer-badge:hover {
-  box-shadow: 0 12px 22px -10px rgba(15, 23, 42, 0.55);
+  filter: brightness(1.05);
+  box-shadow:
+    0 14px 28px -10px rgba(95, 104, 249, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .customer-badge:active {
   transform: translateY(1px);
+  box-shadow: 0 6px 14px -8px rgba(95, 104, 249, 0.6);
 }
 
 .customer-icon {
@@ -255,7 +278,7 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  color: #cbd5e1;
+  color: #dfe2ff;
 }
 
 .customer-icon svg {
@@ -284,8 +307,8 @@
   gap: 0.25rem;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.2);
+  color: #f4f5ff;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -321,13 +344,14 @@
   font-size: 0.78rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.18s ease, border-color 0.18s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-action-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #eef0ff;
+  border-color: #c7cdfe;
+  color: #4e58f0;
 }
 
 .mobile-action-btn svg {
@@ -352,29 +376,33 @@
 
   .header-actions {
     position: absolute;
-    top: calc(100% + 0.5rem);
+    top: calc(100% + 0.6rem);
     right: 0.75rem;
     left: 0.75rem;
     z-index: 70;
     flex-direction: column;
     align-items: stretch;
     gap: 0.25rem;
-    padding: 0.45rem;
-    background: #ffffff;
-    border: 1px solid #e7ecf3;
-    border-radius: 1.1rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.96);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 1.25rem;
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
-      0 24px 48px -24px rgba(15, 23, 42, 0.22);
+      0 12px 24px -16px rgba(95, 104, 249, 0.35),
+      0 32px 64px -32px rgba(15, 23, 42, 0.28);
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top center;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .shop-header.menu-open .header-actions {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     pointer-events: auto;
   }
 
