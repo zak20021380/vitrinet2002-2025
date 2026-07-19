@@ -5350,6 +5350,13 @@ async function renderAll() {
 
     btn.addEventListener('click', () => openImageModal(it));
 
+    // کلیک روی تصویر هم مودال را باز می‌کند (هماهنگ با آیکن ذره‌بین)
+    const imgWrap = node.querySelector('.portfolio-img-container');
+    if (imgWrap) {
+      imgWrap.style.cursor = 'pointer';
+      imgWrap.addEventListener('click', () => openImageModal(it));
+    }
+
     return node;
   }
 

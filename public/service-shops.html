@@ -32,7 +32,7 @@
    Frosted glass surface, hairline border + soft depth shadow.
    Right (RTL): menu key · ویترینت · sep · shop name (ink).
    Left: quiet pill actions + one brand-gradient customer chip
-   (same indigo→purple family as the hero cover & booking CTA).
+   (same blue→teal family as the site CTAs, reviews & footer).
    Mobile: actions collapse into a clean dropdown panel.
    ============================================================ */
 .shop-header {
@@ -46,6 +46,17 @@
   box-shadow: 0 8px 24px -20px rgba(15, 23, 42, 0.25);
 }
 
+/* خط برند بالای هدر — امضای گرادیانی */
+.shop-header::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #14b8a6, #0ea5e9 35%, #2563eb 65%, rgba(37, 99, 235, 0.15));
+  pointer-events: none;
+}
+
 .menu-toggle:focus-visible,
 .action-item:focus-visible,
 .mobile-action-btn:focus-visible,
@@ -54,7 +65,7 @@
   outline: none;
   box-shadow:
     0 0 0 2px #ffffff,
-    0 0 0 4px rgba(124, 131, 253, 0.55);
+    0 0 0 4px rgba(37, 99, 235, 0.5);
 }
 
 .shop-header .header-shell {
@@ -80,35 +91,67 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   background: #ffffff;
   color: #334155;
   cursor: pointer;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .menu-toggle:hover {
-  background: #eef0ff;
-  border-color: #c7cdfe;
-  color: #4e58f0;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
 }
 
-.menu-toggle svg {
-  width: 17px;
-  height: 17px;
-  stroke-width: 2;
-  transition: transform 0.25s ease;
+/* برگر متحرک: سه خط ← ضربدر */
+.mt-box {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 12px;
+}
+
+.mt-line {
+  position: absolute;
+  inset-inline: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease, width 0.28s ease;
+}
+
+.mt-line:nth-child(1) { top: 0; }
+.mt-line:nth-child(2) { top: 5px; width: 70%; margin-inline-start: auto; }
+.mt-line:nth-child(3) { top: 10px; }
+
+.menu-toggle:hover .mt-line:nth-child(2) {
+  width: 100%;
 }
 
 .shop-header.menu-open .menu-toggle {
-  background: linear-gradient(135deg, #6d75fb 0%, #7c5cf0 100%);
-  border-color: #5a63f2;
+  background: linear-gradient(135deg, #2563eb 0%, #14b8a6 100%);
+  border-color: #1d4ed8;
   color: #ffffff;
+  box-shadow: 0 8px 18px -8px rgba(37, 99, 235, 0.55);
+}
+
+.shop-header.menu-open .mt-line:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.shop-header.menu-open .mt-line:nth-child(2) {
+  opacity: 0;
+  transform: translateX(6px);
+}
+
+.shop-header.menu-open .mt-line:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
 }
 
 .home-link {
@@ -133,13 +176,13 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #6d75fb, #7c5cf0);
-  box-shadow: 0 0 0 3px rgba(124, 131, 253, 0.16);
+  background: linear-gradient(135deg, #2563eb, #14b8a6);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
   flex: 0 0 auto;
 }
 
 .home-link:hover .brand-label {
-  color: #5f68f9;
+  color: #2563eb;
 }
 
 .brand-sep {
@@ -161,71 +204,119 @@
   text-overflow: ellipsis;
 }
 
-/* ---- actions: quiet pills ---- */
+/* ---- actions: rich items (pill on desktop, menu rows on mobile) ---- */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   flex: 0 0 auto;
 }
 
+.menu-caption {
+  display: none;
+}
+
 .action-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 38px;
-  padding: 0 0.95rem;
-  border: 1px solid transparent;
+  gap: 0.6rem;
+  border: 1px solid #eef1f6;
   border-radius: 999px;
-  background: transparent;
-  color: #475569;
+  background: #ffffff;
+  color: #0f172a;
   font-family: inherit;
-  font-weight: 700;
-  font-size: 0.84rem;
-  line-height: 1;
+  text-align: start;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  min-height: 42px;
+  padding: 0 0.85rem 0 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .action-item:hover {
-  background: #eef0ff;
-  color: #1e2350;
+  border-color: #bfdbfe;
+  box-shadow: 0 10px 20px -12px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
 }
 
-.action-item svg {
-  width: 15px;
-  height: 15px;
-  stroke-width: 2;
-  flex: 0 0 auto;
-  color: #94a3b8;
-  transition: color 0.18s ease;
+.action-item:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.action-item:hover svg {
-  color: #5f68f9;
-}
-
-.action-item span {
+/* کاشی آیکن رنگی */
+.action-tile {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  flex: 0 0 auto;
+  transition: transform 0.18s ease;
 }
 
-#rateShow svg {
+.action-item:hover .action-tile {
+  transform: scale(1.06);
+}
+
+.action-tile svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action-tile--blue {
+  background: linear-gradient(160deg, #eff6ff, #dbeafe);
+  color: #2563eb;
+}
+
+.action-tile--amber {
+  background: linear-gradient(160deg, #fffbeb, #fef3c7);
   color: #f59e0b;
-  fill: #f59e0b;
-  stroke: none;
 }
 
-.rating-count-pill {
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  background: #fef3c7;
-  color: #92400e;
+.action-tile--rose {
+  background: linear-gradient(160deg, #fff1f2, #ffe4e6);
+  color: #f43f5e;
+}
+
+.action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.14rem;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.action-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.action-title b {
+  font-weight: 800;
+  color: #b45309;
+  font-feature-settings: "ss02" 1, "tnum" 1;
+}
+
+.action-sub {
+  display: none;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.action-chevron {
+  display: none;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: #cbd5e1;
+  margin-inline-start: auto;
+  transition: color 0.18s ease, transform 0.18s ease;
 }
 
 /* ---- customer chip: the one accent (brand gradient) ---- */
@@ -236,16 +327,18 @@
 }
 
 .customer-badge {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   min-height: 38px;
   padding: 0 0.55rem 0 0.95rem;
-  border: 1px solid #5a63f2;
+  border: 1px solid #1d4ed8;
   border-radius: 999px;
   background:
     radial-gradient(120% 180% at 85% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
-    linear-gradient(120deg, #6d75fb 0%, #5f68f9 45%, #7c5cf0 100%);
+    linear-gradient(120deg, #2563eb 0%, #0ea5e9 45%, #14b8a6 100%);
   color: #ffffff;
   font-family: inherit;
   font-weight: 700;
@@ -254,22 +347,40 @@
   cursor: pointer;
   white-space: nowrap;
   box-shadow:
-    0 10px 22px -10px rgba(95, 104, 249, 0.65),
+    0 10px 22px -10px rgba(37, 99, 235, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
   transition: box-shadow 0.18s ease, transform 0.18s ease, filter 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* برق ملایم هنگام هاور */
+.customer-badge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-18deg);
+  transition: inset-inline-start 0.5s ease;
+  pointer-events: none;
+}
+
+.customer-badge:hover::after {
+  inset-inline-start: 120%;
+}
+
 .customer-badge:hover {
   filter: brightness(1.05);
   box-shadow:
-    0 14px 28px -10px rgba(95, 104, 249, 0.75),
+    0 14px 28px -10px rgba(37, 99, 235, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .customer-badge:active {
   transform: translateY(1px);
-  box-shadow: 0 6px 14px -8px rgba(95, 104, 249, 0.6);
+  box-shadow: 0 6px 14px -8px rgba(37, 99, 235, 0.55);
 }
 
 .customer-icon {
@@ -278,7 +389,7 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  color: #dfe2ff;
+  color: #d6f0ff;
 }
 
 .customer-icon svg {
@@ -308,7 +419,7 @@
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
-  color: #f4f5ff;
+  color: #f0f9ff;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -349,9 +460,9 @@
 }
 
 .mobile-action-btn:hover {
-  background: #eef0ff;
-  border-color: #c7cdfe;
-  color: #4e58f0;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
 }
 
 .mobile-action-btn svg {
@@ -377,21 +488,20 @@
   .header-actions {
     position: absolute;
     top: calc(100% + 0.6rem);
-    right: 0.75rem;
-    left: 0.75rem;
+    inset-inline: 0.75rem;
     z-index: 70;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.25rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.96);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
+    gap: 0.3rem;
+    padding: 0.65rem 0.6rem 0.6rem;
+    background: rgba(255, 255, 255, 0.97);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
     border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 1.25rem;
+    border-radius: 1.4rem;
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
-      0 12px 24px -16px rgba(95, 104, 249, 0.35),
+      0 12px 24px -16px rgba(37, 99, 235, 0.3),
       0 32px 64px -32px rgba(15, 23, 42, 0.28);
     opacity: 0;
     transform: translateY(-8px) scale(0.98);
@@ -406,24 +516,93 @@
     pointer-events: auto;
   }
 
+  /* عنوان کوچک منو */
+  .menu-caption {
+    display: block;
+    padding: 0.15rem 0.75rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+  }
+
+  /* ردیف‌های منو: کاشی + عنوان دوخطی + جهت‌نما */
   .action-item {
     width: 100%;
-    justify-content: flex-start;
-    min-height: 46px;
-    padding: 0 0.9rem;
-    border-radius: 0.75rem;
-    font-size: 0.88rem;
+    min-height: 58px;
+    padding: 0.55rem 0.75rem;
+    gap: 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    background: transparent;
+    box-shadow: none;
+    white-space: normal;
   }
 
-  .action-item svg {
-    width: 17px;
-    height: 17px;
+  .action-item:hover,
+  .action-item:active {
+    background: #f0f9ff;
+    border-color: #e0f2fe;
+    transform: none;
+    box-shadow: none;
   }
 
-  /* آدرس به‌صورت کلید آیکونی کنار برند دیده می‌شود */
-  .header-actions #addressBtn {
-    display: none;
+  .action-item + .action-item {
+    position: relative;
   }
+
+  .action-item + .action-item::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0.75rem;
+    top: -0.18rem;
+    height: 1px;
+    background: #f1f5f9;
+  }
+
+  .action-tile {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+
+  .action-tile svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .action-title {
+    font-size: 0.9rem;
+  }
+
+  .action-sub {
+    display: block;
+  }
+
+  .action-chevron {
+    display: block;
+  }
+
+  .action-item:hover .action-chevron {
+    color: #2563eb;
+    transform: translateX(-3px);
+  }
+
+  /* ورود پلکانی ردیف‌ها هنگام باز شدن منو */
+  .header-actions .action-item {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.18s ease, border-color 0.18s ease;
+  }
+
+  .shop-header.menu-open .header-actions .action-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .shop-header.menu-open .header-actions .action-item:nth-of-type(1) { transition-delay: 0.05s; }
+  .shop-header.menu-open .header-actions .action-item:nth-of-type(2) { transition-delay: 0.1s; }
+  .shop-header.menu-open .header-actions .action-item:nth-of-type(3) { transition-delay: 0.15s; }
 
   .customer-cta {
     display: none;
@@ -485,10 +664,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .menu-toggle,
-  .menu-toggle svg,
+  .mt-line,
   .action-item,
-  .action-item svg,
+  .action-tile,
+  .action-chevron,
   .customer-badge,
+  .customer-badge::after,
   .mobile-action-btn,
   .header-actions {
     transition: none;
@@ -558,11 +739,11 @@
     <!-- Brand: menu key · wordmark · shop name -->
     <div class="brand-area">
       <button class="menu-toggle" id="headerMenuToggle" aria-label="باز و بسته کردن منو" aria-expanded="false" aria-controls="headerActions" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="7" x2="20" y2="7"/>
-          <line x1="4" y1="12" x2="20" y2="12"/>
-          <line x1="4" y1="17" x2="14" y2="17"/>
-        </svg>
+        <span class="mt-box" aria-hidden="true">
+          <span class="mt-line"></span>
+          <span class="mt-line"></span>
+          <span class="mt-line"></span>
+        </span>
       </button>
       <a href="/" class="home-link" title="رفتن به صفحه اصلی" aria-label="بازگشت به صفحه اصلی ویترینت">
         <span class="brand-dot" aria-hidden="true"></span>
@@ -585,27 +766,54 @@
 
     <!-- Navigation / Actions -->
     <nav class="header-actions" id="headerActions" aria-label="منوی اصلی">
+      <span class="menu-caption" aria-hidden="true">دسترسی سریع</span>
+
       <button id="addressBtn" class="action-item" aria-label="مشاهده آدرس فروشگاه" type="button" data-open="addressModal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
+        <span class="action-tile action-tile--blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </span>
+        <span class="action-text">
+          <span class="action-title">آدرس فروشگاه</span>
+          <span class="action-sub">مسیر و اطلاعات تماس</span>
+        </span>
+        <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
         </svg>
-        <span>آدرس</span>
       </button>
+
       <button id="rateShow" class="action-item" aria-label="مشاهده و ثبت امتیاز" type="button">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+        <span class="action-tile action-tile--amber" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
+          </svg>
+        </span>
+        <span class="action-text">
+          <span class="action-title">امتیاز <b id="shop-rating">۴٫۸</b></span>
+          <span class="action-sub"><span id="rating-count">۰</span> رای ثبت‌شده</span>
+        </span>
+        <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
         </svg>
-        <span><span id="shop-rating">4.8</span> امتیاز</span>
-        <span class="rating-count-pill"><span id="rating-count">0</span> رای</span>
       </button>
+
       <button id="reportBtn" class="action-item" aria-label="ثبت گزارش تخلف" type="button" data-open="reportModal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <span class="action-tile action-tile--rose" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </span>
+        <span class="action-text">
+          <span class="action-title">گزارش تخلف</span>
+          <span class="action-sub">اعلام مشکل به ویترینت</span>
+        </span>
+        <svg class="action-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
         </svg>
-        <span>گزارش</span>
       </button>
     </nav>
 
@@ -1077,9 +1285,11 @@
 <!-- ============ Portfolio Section (Dynamic, from backend) ============ -->
 <section id="portfolio" class="portfolio-section">
   <div class="container mx-auto px-4">
-    <div class="text-center mb-6">
+    <div class="text-center mb-8">
+      <span class="portfolio-eyebrow"><i class="fas fa-wand-magic-sparkles"></i>گالری کارها</span>
       <h2 class="portfolio-title text-3xl font-extrabold">نمونه کارها</h2>
-      <p id="portfolio-empty" class="hidden text-gray-500 text-sm mt-3">فعلاً نمونه کاری ثبت نشده.</p>
+      <p class="portfolio-subtitle">نگاهی به کیفیت و جزئیات کارهای انجام‌شده بیندازید</p>
+      <p id="portfolio-empty" class="hidden portfolio-empty-state">فعلاً نمونه کاری ثبت نشده.</p>
       <div id="portfolio-loading" class="flex items-center justify-center gap-2 text-gray-500 text-sm mt-2">
         <i class="fas fa-spinner fa-spin"></i><span>در حال بارگذاری…</span>
       </div>
@@ -1096,31 +1306,35 @@
 
   <!-- Card Template -->
   <template id="tpl-portfolio-card">
-    <div class="portfolio-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col flex-shrink-0 w-72 md:w-auto">
-      <div class="relative portfolio-img-container h-56">
-        <img class="portfolio-img w-full h-full object-cover" alt="">
-      </div>
-      <div class="portfolio-content p-5 flex flex-col flex-1">
-        <h3 class="portfolio-name font-bold text-lg mb-2 truncate"></h3>
-        <p class="portfolio-description text-gray-600 text-sm mb-4 line-clamp-2"></p>
-        <div class="portfolio-stats flex items-center justify-between mb-4">
-          <div class="flex items-center space-x-3 space-x-reverse text-gray-500">
-            <div class="flex items-center"><i class="far fa-eye ml-1"></i><span class="text-sm js-views">0</span></div>
-            <button type="button"
-                    class="portfolio-like flex items-center text-gray-500 transition hover:text-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    data-portfolio-like
-                    aria-pressed="false"
-                    aria-label="پسند نمونه‌کار">
-              <i class="far fa-heart ml-1"></i>
-              <span class="text-sm js-likes">0</span>
-            </button>
-          </div>
+    <article class="portfolio-card flex flex-col flex-shrink-0 w-72 md:w-auto">
+      <div class="portfolio-img-container">
+        <img class="portfolio-img" alt="" loading="lazy">
+        <div class="portfolio-img-overlay" aria-hidden="true"></div>
+        <div class="portfolio-views-chip" title="بازدید">
+          <i class="far fa-eye"></i>
+          <span class="js-views">0</span>
         </div>
-        <button class="portfolio-btn w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 hover:from-blue-600 hover:to-blue-700 hover:shadow-md js-open">
-          مشاهده دقیق‌تر
-        </button>
+        <span class="portfolio-zoom-hint" aria-hidden="true"><i class="fas fa-magnifying-glass-plus"></i></span>
       </div>
-    </div>
+      <div class="portfolio-content">
+        <h3 class="portfolio-name"></h3>
+        <p class="portfolio-description"></p>
+        <div class="portfolio-footer">
+          <button class="portfolio-btn js-open" type="button">
+            <span>مشاهده دقیق‌تر</span>
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <button type="button"
+                  class="portfolio-like"
+                  data-portfolio-like
+                  aria-pressed="false"
+                  aria-label="پسند نمونه‌کار">
+            <i class="far fa-heart"></i>
+            <span class="js-likes">0</span>
+          </button>
+        </div>
+      </div>
+    </article>
   </template>
 </section>
 
