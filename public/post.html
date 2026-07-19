@@ -17,99 +17,227 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style-index.css" />
   <style>
+    :root {
+      --brand-a: #10b981;
+      --brand-b: #0ea5e9;
+      --ink: #0f172a;
+      --ink-soft: #64748b;
+      --line: #e7ecf3;
+    }
+
+    * { font-family: 'Vazirmatn', sans-serif; }
+
     body {
-      font-family: 'Vazirmatn', sans-serif;
-      background: linear-gradient(115deg, #e0fdfa 0%, #f8fafc 60%, #d4fbe8 100%);
+      color: var(--ink);
+      background:
+        radial-gradient(55% 38% at 85% 0%, rgba(16, 185, 129, 0.07), transparent 70%),
+        radial-gradient(45% 34% at 8% 12%, rgba(14, 165, 233, 0.07), transparent 70%),
+        linear-gradient(180deg, #f6f9fb 0%, #fdfefe 100%);
       min-height: 100vh;
     }
 
-    .glass {
-      background: rgba(255, 255, 255, 0.92);
-      box-shadow: 0 10px 38px #10b98119, 0 2px 10px #0ea5e914;
-      border-radius: 1.5rem;
-      backdrop-filter: blur(10px);
+    /* ================= Header ================= */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 8px 24px -18px rgba(15, 23, 42, 0.25);
     }
 
-    .brand-btn {
-      background: linear-gradient(90deg, #10b981 10%, #0ea5e9 100%);
-      color: #fff !important;
-      font-weight: bold;
-      border-radius: 1rem;
-      transition: all .17s;
-      box-shadow: 0 2px 12px #10b98126;
+    .site-header::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1px;
+      height: 2.5px;
+      background: linear-gradient(90deg, transparent, #10b981 25%, #0ea5e9 75%, transparent);
+      opacity: 0.7;
+      pointer-events: none;
     }
 
-    .brand-btn:hover {
-      filter: brightness(1.08);
+    .header-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
     }
 
-    .primary-text {
-      color: #10b981;
+    .header-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.85rem;
+      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 18px -8px rgba(16, 185, 129, 0.6);
+      flex: 0 0 auto;
     }
 
-    input[type="password"]:invalid {
-      background: #fef2f2;
-      border-color: #ef4444;
+    .header-brand-mark svg { width: 1.35rem; height: 1.35rem; }
+
+    .header-brand-text { display: flex; flex-direction: column; line-height: 1.3; }
+
+    .header-logo {
+      letter-spacing: 1px;
+      font-weight: 900;
     }
 
-    /* Enhanced mobile header styles */
-    .header-visual-tweaks {
-      border-bottom: 3px solid transparent;
-      background-image: linear-gradient(white, white), linear-gradient(90deg, #00C4B4, #0077B6);
-      background-origin: border-box;
-      background-clip: padding-box, border-box;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+    .header-brand-tagline {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0;
     }
 
-    /* Mobile Menu Panel */
+    .header-nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .header-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+      color: #475569;
+      border: 1px solid transparent;
+      transition: all 0.22s ease;
+      cursor: pointer;
+    }
+
+    .header-nav-btn svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+
+    .header-nav-btn:not(.header-nav-login):hover {
+      background: #ffffff;
+      border-color: var(--line);
+      color: #0f172a;
+      box-shadow: 0 4px 10px -4px rgba(15, 23, 42, 0.15);
+    }
+
+    .header-nav-login {
+      margin-inline-start: 0.5rem;
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      padding: 9px 18px;
+      border-radius: 999px;
+      box-shadow: 0 8px 18px -8px rgba(16, 185, 129, 0.55);
+    }
+
+    .header-nav-login:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px -8px rgba(14, 165, 233, 0.5);
+    }
+
+    /* دکمه ورود موبایل کنار همبرگر */
+    .header-mobile-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 6px 14px -6px rgba(16, 185, 129, 0.55);
+    }
+
+    .header-mobile-login svg { width: 14px; height: 14px; }
+
+    /* ---- hamburger ---- */
+    .hamburger {
+      width: 24px;
+      height: 20px;
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      z-index: 102;
+    }
+
+    .hamburger span {
+      background: #334155;
+      border-radius: 2px;
+      height: 2.5px;
+      width: 100%;
+      position: absolute;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      left: 0;
+    }
+
+    .hamburger span:nth-child(1) { top: 0; }
+    .hamburger span:nth-child(2) { top: 8px; }
+    .hamburger span:nth-child(3) { top: 16px; }
+
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg); top: 8px; }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg); top: 8px; }
+
+    /* ---- mobile drawer ---- */
     .nav-links {
       position: fixed;
       top: 0;
       right: -100%;
-      width: 75%;
-      max-width: 320px;
+      width: 78%;
+      max-width: 330px;
       height: 100vh;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-      box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+      height: 100dvh;
+      background: #ffffff;
+      box-shadow: -18px 0 50px rgba(15, 23, 42, 0.18);
       transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 101;
-      padding: 0;
-      padding-bottom: 90px; /* فضا برای bottom nav */
+      z-index: 1210 !important;
+      padding: 0 0 90px;
       overflow-y: auto;
-      border-radius: 24px 0 0 24px;
+      border-radius: 22px 0 0 22px;
     }
 
-    .nav-links.active {
-      right: 0;
-    }
+    .nav-links.active { right: 0; }
 
-    /* Menu Header */
     .nav-links-header {
-      background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
-      padding: 1.5rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 150% at 85% -20%, rgba(255, 255, 255, 0.25), transparent 55%),
+        linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      padding: 1.4rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-radius: 24px 0 0 0;
+      border-radius: 22px 0 0 0;
     }
 
     .nav-links-title {
       color: white;
-      font-weight: 700;
-      font-size: 1.1rem;
+      font-weight: 800;
+      font-size: 1.05rem;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .nav-links-title svg {
-      width: 22px;
-      height: 22px;
-    }
+    .nav-links-title svg { width: 21px; height: 21px; }
 
     .nav-close-btn {
       width: 36px;
@@ -125,266 +253,756 @@
       backdrop-filter: blur(4px);
     }
 
-    .nav-close-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.05);
-    }
+    .nav-close-btn:hover { background: rgba(255, 255, 255, 0.32); transform: scale(1.05); }
+    .nav-close-btn svg { width: 20px; height: 20px; color: white; }
 
-    .nav-close-btn svg {
-      width: 20px;
-      height: 20px;
-      color: white;
-    }
+    .nav-menu-items { padding: 1rem 0.85rem; }
 
-    /* Menu Items Container */
-    .nav-menu-items {
-      padding: 1rem 0.75rem;
-    }
-
-    /* Menu Item Styles */
     .nav-menu-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 16px;
+      padding: 13px 16px;
       border-radius: 14px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 15px;
       text-decoration: none;
-      color: #374151;
-      transition: all 0.25s ease;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: hidden;
+      color: #334155;
+      transition: all 0.22s ease;
+      margin-bottom: 6px;
+      border: 1px solid transparent;
     }
 
-    .nav-menu-item::before {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 0;
-      background: linear-gradient(180deg, #10b981, #0ea5e9);
-      border-radius: 4px 0 0 4px;
-      transition: height 0.25s ease;
-    }
+    .nav-menu-item svg { width: 21px; height: 21px; flex-shrink: 0; }
 
     .nav-menu-item:hover {
-      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
-      color: #10b981;
-      transform: translateX(-4px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-    }
-
-    .nav-menu-item:hover::before {
-      height: 60%;
-    }
-
-    .nav-menu-item svg {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-    }
-
-    /* Different colors for each menu item */
-    .nav-menu-item.home-item:hover {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      color: #166534;
-      box-shadow: 0 4px 12px rgba(22, 101, 52, 0.15);
-    }
-
-    .nav-menu-item.home-item:hover::before {
-      background: linear-gradient(180deg, #22c55e, #16a34a);
-    }
-
-    .nav-menu-item.category-item:hover {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      color: #1d4ed8;
-      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
-    }
-
-    .nav-menu-item.category-item:hover::before {
-      background: linear-gradient(180deg, #3b82f6, #2563eb);
-    }
-
-    .nav-menu-item.category-item svg {
-      transition: transform 0.3s ease;
-    }
-
-    .nav-menu-item.category-item:hover svg {
-      transform: rotate(90deg) scale(1.1);
+      background: #f0fdf9;
+      border-color: #ccfbef;
+      color: #0f766e;
+      transform: translateX(-3px);
     }
 
     .nav-menu-item.login-item {
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+      margin-top: 0.6rem;
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      box-shadow: 0 10px 22px -10px rgba(16, 185, 129, 0.6);
     }
 
     .nav-menu-item.login-item:hover {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      color: white;
-      transform: translateX(-4px);
-      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
-    }
-
-    .nav-menu-item.login-item::before {
-      background: white;
-      opacity: 0.5;
-    }
-
-    .nav-menu-item.login-item:hover::before {
-      height: 60%;
-      opacity: 1;
+      color: #ffffff;
+      filter: brightness(1.06);
+      transform: translateX(-3px);
     }
 
     .mobile-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      z-index: 100;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(2px);
+      z-index: 1200 !important;
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    .mobile-overlay.active {
-      opacity: 1;
-      visibility: visible;
+    .mobile-overlay.active { opacity: 1; visibility: visible; }
+
+    .mobile-bottom-nav { z-index: 40 !important; }
+
+    /* وقتی منوی همبرگری باز است، ناوبری پایین (استاتیک و تزریق‌شده) پنهان شود */
+    body.mobile-menu-open .mobile-bottom-nav,
+    body.mobile-menu-open footer.mobile-nav {
+      transform: translateY(140%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
     }
 
-    /* تنظیم z-index برای قرار گرفتن منو روی bottom nav */
-    .nav-links {
-      z-index: 101 !important;
+    /* ================= Page layout ================= */
+    .signup-shell {
+      max-width: 72rem;
+      margin-inline: auto;
+      padding: 2rem 1rem 4rem;
     }
 
-    .mobile-overlay {
-      z-index: 100 !important;
+    .signup-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      align-items: stretch;
     }
 
-    .mobile-bottom-nav {
-      z-index: 40 !important;
+    @media (min-width: 1024px) {
+      .signup-shell { padding-top: 3rem; }
+      .signup-grid { grid-template-columns: 0.9fr 1.1fr; gap: 1.5rem; }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    /* ---- brand / benefits panel ---- */
+    .brand-panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.6rem;
+      color: #ffffff;
+      background:
+        radial-gradient(110% 140% at 88% -10%, rgba(255, 255, 255, 0.22), transparent 52%),
+        radial-gradient(80% 120% at 5% 110%, rgba(2, 132, 199, 0.75), transparent 62%),
+        linear-gradient(135deg, #0d9488 0%, #10b981 42%, #0ea5e9 100%);
+      padding: 2.1rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      box-shadow:
+        0 2px 4px rgba(15, 23, 42, 0.06),
+        0 30px 60px -30px rgba(13, 148, 136, 0.55);
     }
 
-    .glass {
-      padding: 1.25rem !important;
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+      background-size: 22px 22px;
+      opacity: 0.35;
+      pointer-events: none;
     }
 
-    @media (max-width: 400px) {
-      .glass {
-        padding: 1rem !important;
+    .brand-panel > * { position: relative; }
+
+    .brand-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: fit-content;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(6px);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .brand-headline {
+      font-size: clamp(1.45rem, 1.1rem + 1.4vw, 2rem);
+      font-weight: 900;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .brand-sub {
+      font-size: 0.92rem;
+      line-height: 1.9;
+      color: rgba(255, 255, 255, 0.88);
+      margin: 0;
+      max-width: 30rem;
+    }
+
+    .brand-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .brand-perks li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.8rem 0.95rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .brand-perks li:hover {
+      transform: translateX(-4px);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .brand-perk-icon {
+      display: grid;
+      place-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      flex: 0 0 auto;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0d9488;
+    }
+
+    .brand-perk-icon svg { width: 1.15rem; height: 1.15rem; }
+
+    .brand-perk-title {
+      font-weight: 800;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .brand-perk-desc {
+      font-size: 0.8rem;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .brand-foot {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .brand-foot svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+
+    @media (max-width: 1023px) {
+      /* موبایل: فقط یک بنر باریک با تیتر — بقیه محتوا مخفی می‌شود تا فرم در اولویت باشد */
+      .brand-panel {
+        padding: 1rem 1.15rem;
+        gap: 0;
+        border-radius: 1.1rem;
+      }
+
+      .brand-eyebrow { display: none; }
+
+      .brand-headline {
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .brand-headline br { display: none; }
+
+      .brand-sub { display: none; }
+      .brand-perks { display: none; }
+      .brand-foot { display: none; }
+    }
+
+    /* ---- form card ---- */
+    .form-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 1.6rem;
+      box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 28px 55px -35px rgba(15, 23, 42, 0.25);
+      padding: 1.75rem 1.4rem 1.9rem;
+    }
+
+    @media (min-width: 640px) {
+      .form-card { padding: 2.25rem 2.25rem 2.4rem; }
+    }
+
+    /* موبایل: فشرده‌سازی ریتم عمودی فرم */
+    @media (max-width: 639px) {
+      .signup-shell { padding: 0.9rem 0.85rem 3rem; }
+      .signup-grid { gap: 0.85rem; }
+
+      .form-card {
+        padding: 1.25rem 1.05rem 1.35rem;
         border-radius: 1.25rem;
       }
 
-      .header-logo {
-        font-size: 1.25rem !important;
-      }
-    }
+      .form-title { font-size: 1.2rem; }
+      .form-subtitle { margin-bottom: 1.05rem; font-size: 0.82rem; }
 
-    .fadein {
-      animation: fadein .7s;
-    }
-
-    @keyframes fadein {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
+      #signup-form.space-y-5 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 0.85rem;
       }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
+      .form-section-label { margin: 1.15rem 0 0.75rem; }
+
+      .form-section-badge {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 0.55rem;
       }
+
+      .form-section-badge svg { width: 0.95rem; height: 0.95rem; }
+      .form-section-title { font-size: 0.9rem; }
+
+      .field-label { margin-bottom: 0.3rem; }
+
+      .field-input { padding: 0.68rem 0.9rem; }
+
+      /* نام و نام خانوادگی در یک ردیف حتی روی موبایل */
+      .name-row { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+      .field-note { font-size: 0.7rem; line-height: 1.7; }
+
+      .existing-seller-divider { margin: 1.1rem 0 0.75rem; }
     }
 
-    /* بخش ورود فروشندگان قبلی */
-    .existing-seller-section {
-      margin-top: 1.25rem;
-      padding-top: 0;
+    .form-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--ink);
+      margin: 0 0 0.3rem;
     }
 
+    .form-subtitle {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      line-height: 1.8;
+      margin: 0 0 1.6rem;
+    }
+
+    /* section separators inside form */
+    .form-section-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 1.9rem 0 1.1rem;
+    }
+
+    .form-section-label:first-of-type { margin-top: 0; }
+
+    .form-section-badge {
+      display: grid;
+      place-items: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 0.7rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12));
+      color: #0d9488;
+      flex: 0 0 auto;
+    }
+
+    .form-section-badge svg { width: 1.1rem; height: 1.1rem; }
+
+    .form-section-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .form-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--line), transparent);
+    }
+
+    /* fields */
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0.45rem;
+    }
+
+    .field-label .req { color: #f43f5e; }
+    .field-label .opt {
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 0.72rem;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 0.78rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 0.85rem;
+      background: #f8fafc;
+      font-size: 0.92rem;
+      color: var(--ink);
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+
+    .field-input::placeholder { color: #a8b3c4; }
+
+    .field-input:hover { border-color: #cbd5e1; }
+
+    .field-input:focus {
+      background: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    }
+
+    .field-input[readonly] {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .field-input[readonly]:focus {
+      border-color: #e2e8f0;
+      box-shadow: none;
+    }
+
+    /* ================= Category dropdown ================= */
+    .category-native-select {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    .category-dropdown { position: relative; }
+
+    .category-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-align: right;
+      cursor: pointer;
+    }
+
+    .category-trigger-icon {
+      display: grid;
+      place-items: center;
+      width: 1.7rem;
+      height: 1.7rem;
+      flex: 0 0 auto;
+      border-radius: 0.5rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12));
+      color: #0d9488;
+    }
+
+    .category-trigger-icon svg { width: 0.95rem; height: 0.95rem; }
+
+    .category-trigger-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .category-trigger-label.is-placeholder {
+      color: #a8b3c4;
+      font-weight: 400;
+    }
+
+    .category-trigger-chevron {
+      width: 1.05rem;
+      height: 1.05rem;
+      flex: 0 0 auto;
+      color: #64748b;
+      transition: transform 0.25s ease;
+    }
+
+    .category-dropdown.open .category-trigger {
+      background: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    }
+
+    .category-dropdown.open .category-trigger-chevron { transform: rotate(180deg); }
+
+    .category-panel {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      inset-inline: 0;
+      z-index: 60;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 0.9rem;
+      box-shadow:
+        0 4px 6px -4px rgba(15, 23, 42, 0.1),
+        0 24px 48px -20px rgba(15, 23, 42, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px) scale(0.98);
+      transform-origin: top center;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+      overflow: hidden;
+    }
+
+    .category-dropdown.open .category-panel {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .category-options {
+      list-style: none;
+      margin: 0;
+      padding: 0.4rem;
+      max-height: 16rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .category-options::-webkit-scrollbar { width: 5px; }
+    .category-options::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+
+    .category-option {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.65rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .category-option:hover,
+    .category-option.focused {
+      background: #f0fdf9;
+      color: #0f766e;
+    }
+
+    .category-option .category-option-check {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 auto;
+      color: #10b981;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .category-option[aria-selected="true"] {
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+      color: #0f766e;
+    }
+
+    .category-option[aria-selected="true"] .category-option-check { opacity: 1; }
+
+    .category-option.disabled {
+      color: #a8b3c4;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* موبایل: پنل از پایین صفحه بالا می‌آید (bottom sheet) */
+    @media (max-width: 639px) {
+      .category-panel {
+        position: fixed;
+        inset-inline: 0;
+        top: auto;
+        bottom: 0;
+        z-index: 1300;
+        border-radius: 1.25rem 1.25rem 0 0;
+        border: none;
+        box-shadow: 0 -18px 50px rgba(15, 23, 42, 0.25);
+        transform: translateY(100%);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      .category-dropdown.open .category-panel { transform: translateY(0); }
+
+      .category-panel::before {
+        content: '';
+        display: block;
+        width: 2.5rem;
+        height: 4px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        margin: 0.6rem auto 0.2rem;
+      }
+
+      .category-options {
+        max-height: min(55vh, 24rem);
+        padding: 0.5rem 0.85rem 0.85rem;
+      }
+
+      .category-option { padding: 0.8rem 0.85rem; }
+    }
+
+    .category-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1290;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .category-backdrop.active { opacity: 1; visibility: visible; }
+
+    @media (min-width: 640px) {
+      .category-backdrop { display: none; }
+    }
+
+    input[type="password"]:invalid {
+      background: #fef2f2;
+      border-color: #fda4af;
+    }
+
+    .field-hint-error {
+      font-size: 0.75rem;
+      color: #e11d48;
+      margin-top: 0.45rem;
+    }
+
+    .field-note {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.8;
+      margin-top: 0.45rem;
+    }
+
+    /* subcategory chips box */
+    .subcat-box {
+      margin-top: 0.6rem;
+      border: 1.5px dashed #d3dce8;
+      background: #f8fafc;
+      border-radius: 0.9rem;
+      padding: 0.85rem;
+    }
+
+    .subcat-box-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 0.55rem;
+    }
+
+    /* password toggle */
+    .password-toggle {
+      position: absolute;
+      inset-block: 0;
+      left: 0.8rem;
+      display: flex;
+      align-items: center;
+      color: #94a3b8;
+      transition: color 0.2s ease;
+    }
+
+    .password-toggle:hover { color: #475569; }
+    .password-toggle:focus-visible {
+      outline: 2px solid rgba(16, 185, 129, 0.55);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    /* rules checkbox */
+    .rules-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.9rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 0.9rem;
+      background: #f8fafc;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .rules-row:has(input:checked) {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: #f0fdf9;
+    }
+
+    /* submit */
+    .submit-btn {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(120deg, #10b981 0%, #0ea5e9 100%);
+      color: #ffffff;
+      font-size: 1.02rem;
+      font-weight: 800;
+      box-shadow: 0 16px 32px -14px rgba(16, 185, 129, 0.6);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -80%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.55s ease;
+    }
+
+    .submit-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -14px rgba(14, 165, 233, 0.55);
+    }
+
+    .submit-btn:hover::before { left: 120%; }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn svg { width: 1.2rem; height: 1.2rem; }
+
+    /* existing seller card */
     .existing-seller-divider {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 0.75rem;
+      margin: 1.5rem 0 1rem;
     }
 
     .existing-seller-divider-line {
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+      background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
     }
 
     .existing-seller-divider-text {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #9ca3af;
-      padding: 0 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #94a3b8;
     }
 
     .existing-seller-card {
-      position: relative;
       display: flex;
       align-items: center;
       gap: 0.875rem;
       padding: 1rem 1.125rem;
       background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-      border: 1.5px solid rgba(14, 165, 233, 0.15);
-      border-radius: 1.125rem;
+      border: 1.5px solid rgba(14, 165, 233, 0.16);
+      border-radius: 1.1rem;
       transition: all 0.3s ease;
     }
 
     .existing-seller-card:hover {
-      border-color: rgba(14, 165, 233, 0.3);
-      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.35);
+      box-shadow: 0 14px 30px -18px rgba(14, 165, 233, 0.45);
       transform: translateY(-2px);
     }
 
     .existing-seller-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       width: 44px;
       height: 44px;
       background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
       border-radius: 0.875rem;
-      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+      box-shadow: 0 8px 18px -8px rgba(14, 165, 233, 0.55);
       flex-shrink: 0;
     }
 
-    .existing-seller-icon svg {
-      width: 23px;
-      height: 23px;
-      color: white;
-    }
-
-    .existing-seller-content {
-      flex: 1;
-      min-width: 0;
-    }
+    .existing-seller-icon svg { width: 23px; height: 23px; color: white; }
 
     .existing-seller-title {
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 0.95rem;
+      font-weight: 800;
       color: #1e293b;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.2rem;
     }
 
     .existing-seller-desc {
-      font-size: 0.8125rem;
+      font-size: 0.79rem;
       color: #64748b;
-      line-height: 1.5;
+      line-height: 1.7;
     }
 
     .existing-seller-btn {
@@ -392,201 +1010,86 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.625rem 1.125rem;
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-      color: white;
-      font-size: 0.875rem;
-      font-weight: 700;
+      padding: 0.6rem 1.1rem;
+      background: #ffffff;
+      color: #0369a1;
+      font-size: 0.83rem;
+      font-weight: 800;
+      border: 1.5px solid #bae6fd;
       border-radius: 0.75rem;
       text-decoration: none;
       transition: all 0.25s ease;
-      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
       white-space: nowrap;
       flex-shrink: 0;
     }
 
     .existing-seller-btn:hover {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+      border-color: #7dd3fc;
+      background: #f0f9ff;
       transform: translateY(-1px);
-    }
-
-    .existing-seller-btn:active {
-      transform: translateY(0);
+      box-shadow: 0 10px 20px -12px rgba(14, 165, 233, 0.5);
     }
 
     .existing-seller-btn svg {
-      width: 17px;
-      height: 17px;
+      width: 16px;
+      height: 16px;
       transition: transform 0.25s ease;
     }
 
-    .existing-seller-btn:hover svg {
-      transform: translateX(-3px);
-    }
+    .existing-seller-btn:hover svg { transform: translateX(-3px); }
 
     @media (max-width: 480px) {
-      .existing-seller-section {
-        margin-top: 1rem;
+      .existing-seller-card { flex-wrap: wrap; padding: 0.9rem 1rem; }
+      .existing-seller-btn { width: 100%; margin-top: 0.5rem; padding: 0.75rem 1rem; }
+    }
+
+    /* verify section */
+    .verify-card {
+      max-width: 28rem;
+      margin-inline: auto;
+    }
+
+    .verify-icon {
+      display: grid;
+      place-items: center;
+      width: 3.6rem;
+      height: 3.6rem;
+      margin: 0 auto 1rem;
+      border-radius: 1.1rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(14, 165, 233, 0.14));
+      color: #0d9488;
+    }
+
+    .verify-icon svg { width: 1.8rem; height: 1.8rem; }
+
+    #sms-code {
+      letter-spacing: 0.6em;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    .fadein { animation: fadein 0.7s; }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* footer */
+    .site-footer {
+      border-top: 1px solid var(--line);
+      background: #ffffff;
+      text-align: center;
+      font-size: 0.83rem;
+      color: #94a3b8;
+      padding: 1.4rem 1rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .submit-btn, .brand-perks li, .existing-seller-card, .header-nav-btn, .nav-menu-item {
+        transition: none;
       }
-
-      .existing-seller-card {
-        flex-wrap: wrap;
-        padding: 0.875rem 1rem;
-      }
-      
-      .existing-seller-btn {
-        width: 100%;
-        margin-top: 0.625rem;
-        padding: 0.75rem 1rem;
-      }
-    }
-
-    #category.open {
-      position: absolute;
-      z-index: 50;
-      background: #fff;
-      width: 100%;
-      max-height: 15rem;
-      overflow-y: auto;
-    }
-
-    /* Optimized hamburger menu */
-    .hamburger {
-      width: 24px;
-      height: 20px;
-      position: relative;
-      cursor: pointer;
-      display: inline-block;
-      z-index: 102;
-    }
-
-    .hamburger span {
-      background: #374151;
-      border-radius: 2px;
-      height: 3px;
-      width: 100%;
-      position: absolute;
-      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      left: 0;
-    }
-
-    .hamburger span:nth-child(1) {
-      top: 0;
-    }
-
-    .hamburger span:nth-child(2) {
-      top: 8px;
-    }
-
-    .hamburger span:nth-child(3) {
-      top: 16px;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg);
-      top: 8px;
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg);
-      top: 8px;
-    }
-
-    /* Header Navigation Buttons */
-    .header-nav-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .header-nav-btn svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-    }
-
-    /* Home Button */
-    .header-nav-home {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-
-    .header-nav-home:hover {
-      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2);
-    }
-
-    /* Categories Button */
-    .header-nav-categories {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .header-nav-categories::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .header-nav-categories:hover::before {
-      opacity: 1;
-    }
-
-    .header-nav-categories:hover {
-      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
-      border-color: #93c5fd;
-    }
-
-    .header-nav-categories svg {
-      transition: transform 0.3s ease;
-    }
-
-    .header-nav-categories:hover svg {
-      transform: rotate(90deg) scale(1.1);
-    }
-
-    /* Login Button */
-    .header-nav-login {
-      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-      color: white;
-      border: none;
-      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-    }
-
-    .header-nav-login:hover {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
-    }
-
-    .header-nav-login svg {
-      width: 16px;
-      height: 16px;
     }
   </style>
   <script src="/nav-active.js" defer></script>
@@ -613,31 +1116,48 @@
 
 <body class="text-gray-800">
 
-  <!-- Enhanced Mobile-First Header -->
-  <header class="w-full bg-white/95 shadow-sm backdrop-blur-md sticky top-0 z-[100] header-visual-tweaks">
+  <!-- ================= Header ================= -->
+  <header class="site-header w-full">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
-        <div class="flex-shrink-0">
-          <a href="index.html"
-            class="header-logo font-extrabold text-[1.5rem] sm:text-[1.75rem] md:text-[2rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent"
-            style="letter-spacing:1.5px;">ویترینت</a>
-        </div>
+        <a href="index.html" class="header-brand flex-shrink-0">
+          <span class="header-brand-mark" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 9l1.4-4.6A1 1 0 0 1 6.36 3.7h11.28a1 1 0 0 1 .96.7L20 9"/>
+              <path d="M4 9a2.66 2.66 0 0 0 5.33 0 2.67 2.67 0 0 0 5.34 0A2.66 2.66 0 0 0 20 9"/>
+              <path d="M5.5 11.8V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-7.2"/>
+              <path d="M9.5 21v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5"/>
+            </svg>
+          </span>
+          <span class="header-brand-text">
+            <span class="header-logo text-[1.25rem] sm:text-[1.35rem] bg-gradient-to-l from-[#11d6ad] via-[#10b981] to-[#2db4e8] bg-clip-text text-transparent">ویترینت</span>
+            <span class="header-brand-tagline hidden sm:block">ویترین آنلاین کسب‌وکار شما</span>
+          </span>
+        </a>
 
         <!-- Desktop Navigation -->
-        <nav class="hidden sm:flex items-center space-x-2 sm:space-x-3 md:space-x-4 rtl:space-x-reverse">
-          <a href="index.html" class="header-nav-btn header-nav-home">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-            </svg>
-            <span>خانه</span>
-          </a>
-          <a href="categories.html" class="header-nav-btn header-nav-categories">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-            </svg>
-            <span>دسته‌بندی</span>
-          </a>
+        <nav class="hidden sm:flex items-center">
+          <div class="header-nav-pill">
+            <a href="index.html" class="header-nav-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              <span>خانه</span>
+            </a>
+            <a href="categories.html" class="header-nav-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+              <span>دسته‌بندی</span>
+            </a>
+            <a href="service-directory.html" class="header-nav-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+              </svg>
+              <span>خدمات</span>
+            </a>
+          </div>
           <a href="login.html" class="header-nav-btn header-nav-login">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -646,17 +1166,26 @@
           </a>
         </nav>
 
-        <!-- Mobile menu button -->
-        <button class="mobile-menu-btn hamburger sm:hidden" id="mobile-menu-btn" aria-label="منوی موبایل">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        <!-- Mobile: login + menu -->
+        <div class="flex items-center gap-3 sm:hidden">
+          <a href="login.html" class="header-mobile-login">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            <span>ورود</span>
+          </a>
+          <button class="mobile-menu-btn hamburger" id="mobile-menu-btn" aria-label="منوی موبایل" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </div>
     </div>
+  </header>
 
-    <!-- Mobile Navigation -->
-    <div class="nav-links sm:hidden" id="mobile-menu">
+  <!-- Mobile Navigation (خارج از header تا هیچ عنصری روی آن قرار نگیرد) -->
+  <div class="nav-links sm:hidden" id="mobile-menu">
       <div class="nav-links-header">
         <span class="nav-links-title">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -691,7 +1220,6 @@
         </a>
       </div>
     </div>
-  </header>
 
   <!-- Mobile Overlay (خارج از header برای پوشش کامل صفحه) -->
   <div class="mobile-overlay" id="mobile-overlay"></div>
@@ -740,204 +1268,346 @@
     </ul>
   </nav>
 
-  <!-- فرم ثبت فروشگاه -->
-  <main class="max-w-xl mx-auto min-h-screen flex flex-col justify-center items-center px-2" style="margin-top:48px;">
-    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10" id="register-section">
-      <h2 class="text-2xl sm:text-3xl font-extrabold primary-text mb-7 text-center">ثبت فروشگاه جدید</h2>
-      <form class="space-y-5" id="signup-form" autocomplete="off" novalidate>
+  <!-- ================= Main ================= -->
+  <main class="signup-shell">
+    <div class="signup-grid">
 
-        <!-- نام فروشنده -->
-        <div>
-          <label class="block text-sm font-bold mb-1">نام فروشنده <span class="text-red-500">*</span></label>
-          <input required type="text" name="firstname" id="firstname"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً علی"
-            minlength="2" maxlength="50" data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
-          <div id="firstname-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
-
-        <!-- نام خانوادگی فروشنده -->
-        <div>
-          <label class="block text-sm font-bold mb-1">نام خانوادگی فروشنده <span class="text-red-500">*</span></label>
-          <input required type="text" name="lastname" id="lastname"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً حسینی"
-            minlength="2" maxlength="50" data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
-          <div id="lastname-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
-
-        <!-- نام فروشگاه -->
-        <div>
-          <label class="block text-sm font-bold mb-1">نام فروشگاه <span class="text-red-500">*</span></label>
-          <input required type="text" name="storename" id="storename"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="مثلاً گل‌فروش مرکزی"
-            minlength="2" maxlength="80" />
-          <div id="storename-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
+      <!-- ستون معرفی — پنل برند -->
+      <aside class="brand-panel" aria-label="مزایای ثبت فروشگاه در ویترینت">
+        <span class="brand-eyebrow">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:0.9rem;height:0.9rem;">
+            <path d="M12 2l2.4 4.86 5.36.78-3.88 3.78.92 5.34L12 14.24l-4.8 2.52.92-5.34L4.24 7.64l5.36-.78L12 2z"/>
+          </svg>
+          شروع رایگان
+        </span>
 
         <div>
-          <label class="block text-sm font-bold mb-1">شماره تماس <span class="text-red-500">*</span></label>
-          <input required type="tel" id="phone" pattern="^09\d{9}$" name="phone"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="0912xxxxxxx"
-            maxlength="11" />
-          <div id="phone-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+          <h1 class="brand-headline">فروشگاه آنلاین خود را<br>همین امروز بسازید</h1>
+          <p class="brand-sub">در کمتر از ۵ دقیقه صاحب صفحه اختصاصی فروشگاه با آدرس اختصاصی شوید و کسب‌وکارتان را به هزاران مشتری معرفی کنید.</p>
         </div>
 
-        <div class="relative">
-          <label class="block text-sm font-bold mb-1">دسته‌بندی <span class="text-red-500">*</span></label>
-          <select required name="category" id="category"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200 bg-white">
-            <option value="" disabled selected>در حال بارگذاری...</option>
-          </select>
-
-          <!-- START: service examples (visible only for service categories) -->
-          <div id="service-examples" class="hidden mt-2 rounded-xl border border-gray-200 bg-gray-50 p-2.5">
-            <div class="text-xs text-gray-600 mb-1.5 font-bold">زیر گروه</div>
-            <div id="service-examples-chips" class="flex flex-wrap gap-2"></div>
-            <input type="hidden" id="subcategory" />
-            <div id="subcategory-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-            <div class="text-[11px] text-gray-500 mt-2">برای انتخاب زیر گروه، روی گزینه موردنظر کلیک کنید.</div>
-          </div>
-          <!-- END: service examples -->
-
-          <div id="category-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1">شهر</label>
-          <input type="text" readonly value="سنندج"
-            class="w-full p-3 border rounded-xl bg-gray-100 text-gray-500 focus:ring-0 cursor-not-allowed" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1">آدرس دقیق <span class="text-red-500">*</span></label>
-          <input required type="text" name="address" id="address"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200" placeholder="خیابان، کوچه، پلاک..."
-            data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
-          <div id="address-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1">کد معرف <span
-              class="text-gray-400 font-normal text-xs">(اختیاری)</span></label>
-          <input type="text" name="referral_code" id="referral_code"
-            class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-200"
-            placeholder="اگر کد معرف دارید وارد کنید" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1">رمز عبور <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <input required type="password" id="pass1" minlength="8"
-              class="w-full p-3 pl-12 border rounded-xl focus:ring-2 focus:ring-green-200"
-              placeholder="رمز عبور قوی وارد کنید" autocomplete="new-password" />
-            <button type="button" data-target="pass1" data-visible="false"
-              class="password-toggle absolute inset-y-0 left-3 flex items-center text-gray-400 hover:text-gray-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10b981]/60"
-              aria-label="نمایش رمز عبور" aria-pressed="false">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
-                <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+        <ul class="brand-perks">
+          <li>
+            <span class="brand-perk-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9l1.4-4.6A1 1 0 0 1 6.36 3.7h11.28a1 1 0 0 1 .96.7L20 9"/>
+                <path d="M4 9a2.66 2.66 0 0 0 5.33 0 2.67 2.67 0 0 0 5.34 0A2.66 2.66 0 0 0 20 9"/>
+                <path d="M5.5 11.8V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-7.2"/>
               </svg>
-            </button>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">رمز باید حداقل ۸ کاراکتر و ترکیبی از اعداد، حروف انگلیسی و نمادهایی مثل <span dir="ltr" class="inline-block">! @ # $ % ^ & *</span> باشد.</p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold mb-1">تکرار رمز عبور <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <input required type="password" id="pass2" minlength="8"
-              class="w-full p-3 pl-12 border rounded-xl focus:ring-2 focus:ring-green-200"
-              placeholder="رمز را دوباره وارد کنید" autocomplete="new-password" />
-            <button type="button" data-target="pass2" data-visible="false"
-              class="password-toggle absolute inset-y-0 left-3 flex items-center text-gray-400 hover:text-gray-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10b981]/60"
-              aria-label="نمایش رمز عبور" aria-pressed="false">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
-                aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
-                <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+            </span>
+            <div>
+              <div class="brand-perk-title">صفحه اختصاصی فروشگاه</div>
+              <div class="brand-perk-desc">ویترین آنلاین با آدرس اختصاصی، گالری محصولات و اطلاعات تماس</div>
+            </div>
+          </li>
+          <li>
+            <span class="brand-perk-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="16" rx="3"/>
+                <path d="M16 3v4M8 3v4M3 11h18"/>
+                <path d="M9.5 15.5l2 2 3.5-3.5"/>
               </svg>
-            </button>
+            </span>
+            <div>
+              <div class="brand-perk-title">رزرو و سفارش آنلاین</div>
+              <div class="brand-perk-desc">دریافت نوبت و سفارش مشتریان به‌صورت شبانه‌روزی</div>
+            </div>
+          </li>
+          <li>
+            <span class="brand-perk-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20V10M18 20V4M6 20v-4"/>
+              </svg>
+            </span>
+            <div>
+              <div class="brand-perk-title">آمار و گزارش فروش</div>
+              <div class="brand-perk-desc">بازدیدها، نوبت‌ها و عملکرد فروشگاه را یکجا دنبال کنید</div>
+            </div>
+          </li>
+          <li>
+            <span class="brand-perk-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9.5 12l2 2 3.5-3.5"/>
+              </svg>
+            </span>
+            <div>
+              <div class="brand-perk-title">بدون نیاز به دانش فنی</div>
+              <div class="brand-perk-desc">همه‌چیز ساده و فارسی؛ فقط فرم را پر کنید و شروع کنید</div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="brand-foot">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>اطلاعات شما نزد ویترینت محفوظ و رمزنگاری‌شده است.</span>
+        </div>
+      </aside>
+
+      <!-- ستون فرم -->
+      <section class="form-card" id="register-section">
+        <h2 class="form-title">ثبت فروشگاه جدید</h2>
+        <p class="form-subtitle">اطلاعات زیر را تکمیل کنید؛ پس از تأیید شماره موبایل، فروشگاه شما آماده می‌شود.</p>
+
+        <form class="space-y-5" id="signup-form" autocomplete="off" novalidate>
+
+          <!-- بخش ۱: اطلاعات فروشنده -->
+          <div class="form-section-label">
+            <span class="form-section-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <span class="form-section-title">اطلاعات فروشنده</span>
           </div>
-          <div id="pass-hint" class="text-xs mt-2 text-red-500 hidden"></div>
-        </div>
 
-        <!-- قوانین سایت -->
-        <div class="flex items-center gap-2 mt-3">
-          <input required type="checkbox" id="rules" class="accent-[#10b981] w-5 h-5 rounded border-gray-400" />
-          <label for="rules" class="text-sm select-none">
-            <span>قوانین سایت را مطالعه کرده‌ام و قبول دارم.</span>
-            <a href="rules.html" target="_blank" rel="noopener noreferrer"
-              class="text-[#0ea5e9] underline hover:text-[#10b981]">مطالعه قوانین</a>
-          </label>
-        </div>
-        <div id="rules-hint" class="text-xs mt-2 text-red-500 hidden"></div>
+          <div class="name-row grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- نام فروشنده -->
+            <div>
+              <label class="field-label">نام <span class="req">*</span></label>
+              <input required type="text" name="firstname" id="firstname"
+                class="field-input" placeholder="مثلاً علی"
+                minlength="2" maxlength="50" data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
+              <div id="firstname-hint" class="field-hint-error hidden"></div>
+            </div>
 
-        <button type="submit"
-          class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition mt-2">
-          ثبت فروشگاه
-        </button>
-      </form>
+            <!-- نام خانوادگی فروشنده -->
+            <div>
+              <label class="field-label">نام خانوادگی <span class="req">*</span></label>
+              <input required type="text" name="lastname" id="lastname"
+                class="field-input" placeholder="مثلاً حسینی"
+                minlength="2" maxlength="50" data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
+              <div id="lastname-hint" class="field-hint-error hidden"></div>
+            </div>
+          </div>
 
-      <!-- بخش ورود فروشندگان قبلی -->
-      <div class="existing-seller-section">
-        <div class="existing-seller-divider">
-          <span class="existing-seller-divider-line"></span>
-          <span class="existing-seller-divider-text">یا</span>
-          <span class="existing-seller-divider-line"></span>
-        </div>
-        
-        <div class="existing-seller-card">
-          <div class="existing-seller-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M15 7L12 10L9 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <div>
+            <label class="field-label">شماره تماس <span class="req">*</span></label>
+            <input required type="tel" id="phone" pattern="^09\d{9}$" name="phone"
+              class="field-input" placeholder="0912xxxxxxx" maxlength="11" />
+            <div id="phone-hint" class="field-hint-error hidden"></div>
+          </div>
+
+          <!-- بخش ۲: اطلاعات فروشگاه -->
+          <div class="form-section-label">
+            <span class="form-section-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9l1.4-4.6A1 1 0 0 1 6.36 3.7h11.28a1 1 0 0 1 .96.7L20 9"/>
+                <path d="M4 9a2.66 2.66 0 0 0 5.33 0 2.67 2.67 0 0 0 5.34 0A2.66 2.66 0 0 0 20 9"/>
+                <path d="M5.5 11.8V19a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-7.2"/>
+                <path d="M9.5 21v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5"/>
+              </svg>
+            </span>
+            <span class="form-section-title">اطلاعات فروشگاه</span>
+          </div>
+
+          <!-- نام فروشگاه -->
+          <div>
+            <label class="field-label">نام فروشگاه <span class="req">*</span></label>
+            <input required type="text" name="storename" id="storename"
+              class="field-input" placeholder="مثلاً گل‌فروشی مرکزی"
+              minlength="2" maxlength="80" />
+            <div id="storename-hint" class="field-hint-error hidden"></div>
+          </div>
+
+          <div class="relative">
+            <label class="field-label" id="category-label">دسته‌بندی <span class="req">*</span></label>
+            <!-- select اصلی مخفی می‌ماند تا منطق فعلی فرم دست‌نخورده کار کند -->
+            <select required name="category" id="category" class="category-native-select" aria-hidden="true" tabindex="-1">
+              <option value="" disabled selected>در حال بارگذاری...</option>
+            </select>
+
+            <div class="category-dropdown" id="category-dropdown">
+              <button type="button" class="field-input category-trigger" id="category-trigger"
+                aria-haspopup="listbox" aria-expanded="false" aria-labelledby="category-label category-trigger-label">
+                <span class="category-trigger-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                  </svg>
+                </span>
+                <span class="category-trigger-label is-placeholder" id="category-trigger-label">در حال بارگذاری...</span>
+                <svg class="category-trigger-chevron" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              <div class="category-panel">
+                <ul class="category-options" id="category-options" role="listbox" aria-labelledby="category-label"></ul>
+              </div>
+            </div>
+
+            <!-- START: service examples (visible only for service categories) -->
+            <div id="service-examples" class="hidden subcat-box">
+              <div class="subcat-box-title">زیر گروه</div>
+              <div id="service-examples-chips" class="flex flex-wrap gap-2"></div>
+              <input type="hidden" id="subcategory" />
+              <div id="subcategory-hint" class="field-hint-error hidden"></div>
+              <div class="field-note">برای انتخاب زیر گروه، روی گزینه موردنظر کلیک کنید.</div>
+            </div>
+            <!-- END: service examples -->
+
+            <div id="category-hint" class="field-hint-error hidden"></div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-[9rem_1fr] gap-4">
+            <div>
+              <label class="field-label">شهر</label>
+              <input type="text" readonly value="سنندج" class="field-input" />
+            </div>
+
+            <div>
+              <label class="field-label">آدرس دقیق <span class="req">*</span></label>
+              <input required type="text" name="address" id="address"
+                class="field-input" placeholder="خیابان، کوچه، پلاک..."
+                data-only-persian="true" title="لطفاً فقط با حروف فارسی وارد کنید." />
+              <div id="address-hint" class="field-hint-error hidden"></div>
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label">کد معرف <span class="opt">(اختیاری)</span></label>
+            <input type="text" name="referral_code" id="referral_code"
+              class="field-input" placeholder="اگر کد معرف دارید وارد کنید" />
+          </div>
+
+          <!-- بخش ۳: امنیت حساب -->
+          <div class="form-section-label">
+            <span class="form-section-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <span class="form-section-title">امنیت حساب</span>
+          </div>
+
+          <div>
+            <label class="field-label">رمز عبور <span class="req">*</span></label>
+            <div class="relative">
+              <input required type="password" id="pass1" minlength="8"
+                class="field-input pl-12"
+                placeholder="رمز عبور قوی وارد کنید" autocomplete="new-password" />
+              <button type="button" data-target="pass1" data-visible="false"
+                class="password-toggle"
+                aria-label="نمایش رمز عبور" aria-pressed="false">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
+                  aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
+                  <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+                </svg>
+              </button>
+            </div>
+            <p class="field-note">رمز باید حداقل ۸ کاراکتر و ترکیبی از اعداد، حروف انگلیسی و نمادهایی مثل <span dir="ltr" class="inline-block">! @ # $ % ^ & *</span> باشد.</p>
+          </div>
+
+          <div>
+            <label class="field-label">تکرار رمز عبور <span class="req">*</span></label>
+            <div class="relative">
+              <input required type="password" id="pass2" minlength="8"
+                class="field-input pl-12"
+                placeholder="رمز را دوباره وارد کنید" autocomplete="new-password" />
+              <button type="button" data-target="pass2" data-visible="false"
+                class="password-toggle"
+                aria-label="نمایش رمز عبور" aria-pressed="false">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"
+                  aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 12c1.5-4 5.25-7.5 9.75-7.5s8.25 3.5 9.75 7.5c-1.5 4-5.25 7.5-9.75 7.5S3.75 16 2.25 12z" />
+                  <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+                </svg>
+              </button>
+            </div>
+            <div id="pass-hint" class="field-hint-error hidden"></div>
+          </div>
+
+          <!-- قوانین سایت -->
+          <div class="rules-row">
+            <input required type="checkbox" id="rules" class="accent-[#10b981] w-5 h-5 mt-0.5 rounded border-gray-400 flex-shrink-0" />
+            <label for="rules" class="text-sm select-none leading-7">
+              <span>قوانین سایت را مطالعه کرده‌ام و قبول دارم.</span>
+              <a href="rules.html" target="_blank" rel="noopener noreferrer"
+                class="text-[#0ea5e9] font-bold underline decoration-2 underline-offset-4 hover:text-[#10b981] transition-colors">مطالعه قوانین</a>
+            </label>
+          </div>
+          <div id="rules-hint" class="field-hint-error hidden"></div>
+
+          <button type="submit" class="submit-btn mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 13l4 4L19 7"/>
             </svg>
-          </div>
-          <div class="existing-seller-content">
-            <h3 class="existing-seller-title">قبلاً ثبت‌نام کرده‌اید؟</h3>
-            <p class="existing-seller-desc">اگر فروشگاه شما از قبل در ویترینت ثبت شده، وارد پنل فروشندگی شوید.</p>
-          </div>
-          <a href="seller/login.html" class="existing-seller-btn">
-            <span>ورود به پنل فروشندگی</span>
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-        </div>
-      </div>
+            <span>ثبت فروشگاه</span>
+          </button>
+        </form>
 
-    </section>
+        <!-- بخش ورود فروشندگان قبلی -->
+        <div class="existing-seller-section">
+          <div class="existing-seller-divider">
+            <span class="existing-seller-divider-line"></span>
+            <span class="existing-seller-divider-text">یا</span>
+            <span class="existing-seller-divider-line"></span>
+          </div>
+
+          <div class="existing-seller-card">
+            <div class="existing-seller-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 7L12 10L9 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="existing-seller-content flex-1 min-w-0">
+              <h3 class="existing-seller-title">قبلاً ثبت‌نام کرده‌اید؟</h3>
+              <p class="existing-seller-desc">اگر فروشگاه شما از قبل در ویترینت ثبت شده، وارد پنل فروشندگی شوید.</p>
+            </div>
+            <a href="seller/login.html" class="existing-seller-btn">
+              <span>ورود به پنل فروشندگی</span>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+      </section>
+    </div>
 
     <!-- مرحله تایید کد پیامکی -->
-    <section class="glass border rounded-2xl shadow-2xl p-6 sm:p-10 fadein hidden" id="verify-section">
-      <h2 class="text-xl sm:text-2xl font-extrabold text-[#10b981] mb-4 text-center">تأیید شماره موبایل</h2>
-      <div class="text-center text-gray-600 text-sm mb-6">
+    <section class="form-card verify-card fadein hidden mt-6" id="verify-section">
+      <div class="verify-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="3"/>
+          <path d="M12 18h.01"/>
+          <path d="M9.5 9.5l1.75 1.75L14.5 8"/>
+        </svg>
+      </div>
+      <h2 class="form-title text-center">تأیید شماره موبایل</h2>
+      <div class="text-center text-gray-600 text-sm mb-6 leading-7">
         کد ۵ رقمی ارسال شده به شماره <span id="verify-phone" class="font-bold text-gray-800"></span> را وارد کنید.
-        <div class="mt-2 text-xs text-gray-500">اگر پیامک دریافت نکردید، تا ۶۰ ثانیه صبر کنید یا شماره را بررسی نمایید.
-        </div>
+        <div class="mt-2 text-xs text-gray-400">اگر پیامک دریافت نکردید، تا ۶۰ ثانیه صبر کنید یا شماره را بررسی نمایید.</div>
       </div>
       <form class="flex flex-col items-center gap-5" id="verify-form" autocomplete="off">
         <input type="text" inputmode="numeric" pattern="^\d{5}$" maxlength="5" id="sms-code"
-          class="w-40 text-center border rounded-xl p-3 text-lg font-bold tracking-widest focus:ring-2 focus:ring-green-200"
-          placeholder="-----" required />
-        <div id="code-hint" class="text-xs text-red-500 hidden"></div>
-        <button type="submit"
-          class="w-full brand-btn text-white py-3 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition">
-          تأیید کد
+          class="field-input w-44" dir="ltr" placeholder="-----" required />
+        <div id="code-hint" class="field-hint-error hidden"></div>
+        <button type="submit" class="submit-btn">
+          <span>تأیید کد</span>
         </button>
-        <button type="button" id="resend-btn" class="text-xs text-[#0ea5e9] underline hover:text-[#10b981] mt-2"
+        <button type="button" id="resend-btn" class="text-xs text-[#0ea5e9] font-bold underline decoration-2 underline-offset-4 hover:text-[#10b981] transition-colors disabled:text-gray-400 disabled:no-underline"
           disabled>ارسال مجدد کد <span id="resend-timer">(60)</span></button>
       </form>
     </section>
   </main>
 
   <!-- فوتر -->
-  <footer class="mt-20 bg-white border-t text-center text-sm text-gray-500 py-4">
+  <footer class="site-footer">
     © 2025 <span class="font-bold text-[#10b981]">ویترینت</span> | همه حقوق محفوظ است.
   </footer>
 

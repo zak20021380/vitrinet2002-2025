@@ -35,7 +35,9 @@ function toggleMobileMenu() {
   mobileMenu.classList.toggle('active');
   mobileOverlay.classList.toggle('active');
   document.body.classList.toggle('mobile-menu-open');
-  document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+  const isOpen = mobileMenu.classList.contains('active');
+  mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
 if (mobileMenuBtn) {
@@ -699,20 +701,7 @@ if (categorySelect) {
 }
 
 // force category dropdown to open downward
-categorySelect.addEventListener('focus', function () {
-  this.size = this.options.length;
-  this.classList.add('open');
-});
-categorySelect.addEventListener('blur', function () {
-  this.size = 1;
-  this.classList.remove('open');
-});
-categorySelect.addEventListener('change', function () {
-  this.size = 1;
-  this.classList.remove('open');
-  this.blur();
-  updateSignupSubmitState();
-});
+// (جایگزین‌شده با دراپ‌داون سفارشی — پایین فایل)
 
 // اعتبارسنجی و ارسال فرم ثبت فروشگاه
 function toEnglishDigits(value = '') {
@@ -1449,4 +1438,179 @@ function showToast(msg) {
     setTimeout(() => el.remove(), 300);
   }, 1400);
 }
+
+// ================= دراپ‌داون سفارشی دسته‌بندی =================
+// select اصلی (#category) مخفی است و منبع داده باقی می‌ماند؛
+// این ماژول فقط UI را می‌سازد و با dispatch رویداد change، منطق فعلی فرم را فعال می‌کند.
+(function initCategoryDropdown() {
+  const dropdown = document.getElementById('category-dropdown');
+  const trigger = document.getElementById('category-trigger');
+  const triggerLabel = document.getElementById('category-trigger-label');
+  const optionsList = document.getElementById('category-options');
+  if (!dropdown || !trigger || !triggerLabel || !optionsList || !categorySelect) return;
+
+  const CHECK_SVG = '<svg class="category-option-check" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
+  const MOBILE_SHEET_QUERY = window.matchMedia('(max-width: 639px)');
+
+  let backdrop = document.querySelector('.category-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'category-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  let focusedIndex = -1;
+
+  function getSelectableItems() {
+    return Array.from(optionsList.querySelectorAll('.category-option:not(.disabled)'));
+  }
+
+  function isOpen() {
+    return dropdown.classList.contains('open');
+  }
+
+  function setFocusedIndex(index) {
+    const items = getSelectableItems();
+    if (!items.length) return;
+    focusedIndex = Math.max(0, Math.min(index, items.length - 1));
+    items.forEach((item, i) => item.classList.toggle('focused', i === focusedIndex));
+    items[focusedIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  function openDropdown() {
+    if (isOpen() || categorySelect.disabled) return;
+    dropdown.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+    if (MOBILE_SHEET_QUERY.matches) {
+      backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    const items = getSelectableItems();
+    const selectedIdx = items.findIndex(item => item.getAttribute('aria-selected') === 'true');
+    setFocusedIndex(selectedIdx >= 0 ? selectedIdx : 0);
+  }
+
+  function closeDropdown({ refocus = false } = {}) {
+    if (!isOpen()) return;
+    dropdown.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+    backdrop.classList.remove('active');
+    // اسکرول بدنه را فقط وقتی آزاد کن که منوی همبرگری باز نباشد
+    if (!document.body.classList.contains('mobile-menu-open')) {
+      document.body.style.overflow = '';
+    }
+    focusedIndex = -1;
+    optionsList.querySelectorAll('.category-option.focused').forEach(item => item.classList.remove('focused'));
+    if (refocus) trigger.focus();
+  }
+
+  function selectValue(value) {
+    if (categorySelect.value !== value) {
+      categorySelect.value = value;
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    syncFromSelect();
+    closeDropdown({ refocus: !MOBILE_SHEET_QUERY.matches });
+  }
+
+  function syncFromSelect() {
+    const options = Array.from(categorySelect.options);
+    const selectedValue = categorySelect.value || '';
+    const placeholderOption = options.find(opt => opt.disabled);
+
+    // برچسب دکمه
+    if (selectedValue) {
+      triggerLabel.textContent = selectedValue;
+      triggerLabel.classList.remove('is-placeholder');
+    } else {
+      triggerLabel.textContent = placeholderOption ? placeholderOption.textContent : 'انتخاب دسته';
+      triggerLabel.classList.add('is-placeholder');
+    }
+
+    trigger.disabled = categorySelect.disabled;
+    trigger.classList.toggle('opacity-60', categorySelect.disabled);
+
+    // بازسازی لیست گزینه‌ها
+    optionsList.innerHTML = '';
+    options.forEach(opt => {
+      if (opt.disabled) return; // placeholder در لیست نمایش داده نمی‌شود
+      const li = document.createElement('li');
+      li.className = 'category-option';
+      li.setAttribute('role', 'option');
+      li.dataset.value = opt.value;
+      li.setAttribute('aria-selected', opt.value === selectedValue ? 'true' : 'false');
+      li.innerHTML = CHECK_SVG;
+      li.appendChild(document.createTextNode(opt.value));
+      optionsList.appendChild(li);
+    });
+
+    if (!optionsList.children.length) {
+      const empty = document.createElement('li');
+      empty.className = 'category-option disabled';
+      empty.textContent = placeholderOption ? placeholderOption.textContent : 'دسته‌ای یافت نشد';
+      optionsList.appendChild(empty);
+    }
+  }
+
+  // کلیک روی گزینه‌ها
+  optionsList.addEventListener('click', (e) => {
+    const item = e.target.closest('.category-option:not(.disabled)');
+    if (!item) return;
+    selectValue(item.dataset.value || '');
+  });
+
+  trigger.addEventListener('click', () => {
+    if (isOpen()) {
+      closeDropdown({ refocus: true });
+    } else {
+      openDropdown();
+    }
+  });
+
+  // پشتیبانی کیبورد
+  trigger.addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && !isOpen()) {
+      e.preventDefault();
+      openDropdown();
+      return;
+    }
+    if (!isOpen()) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedIndex(focusedIndex + 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedIndex(focusedIndex - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setFocusedIndex(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setFocusedIndex(getSelectableItems().length - 1);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const items = getSelectableItems();
+      if (focusedIndex >= 0 && items[focusedIndex]) {
+        selectValue(items[focusedIndex].dataset.value || '');
+      }
+    } else if (e.key === 'Escape' || e.key === 'Tab') {
+      closeDropdown({ refocus: e.key === 'Escape' });
+    }
+  });
+
+  // بستن با کلیک بیرون / بک‌دراپ
+  document.addEventListener('click', (e) => {
+    if (isOpen() && !dropdown.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+  backdrop.addEventListener('click', () => closeDropdown());
+
+  // اگر داده‌ها بعداً از سرور رسیدند (renderCategoryOptions) دوباره sync شود
+  const observer = new MutationObserver(() => syncFromSelect());
+  observer.observe(categorySelect, { childList: true });
+  categorySelect.addEventListener('change', syncFromSelect);
+
+  syncFromSelect();
+})();
 
