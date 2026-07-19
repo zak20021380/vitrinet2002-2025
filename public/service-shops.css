@@ -1963,23 +1963,6 @@
   }
 }
 
-/* ارتفاع پویا برای موبایل‌های ناچ‌دار */
-  .minh-dynamic { min-height: 82vh; min-height: 82svh; min-height: 82dvh; padding-bottom: env(safe-area-inset-bottom, 0); }
-
-  /* انیمیشن‌های ملایم */
-  @keyframes blob {
-    0%,100% { transform: translate(0,0) scale(1); }
-    33%     { transform: translate(26px,-40px) scale(1.06); }
-    66%     { transform: translate(-18px,18px) scale(0.95); }
-  }
-  .animate-blob { animation: blob 12s infinite cubic-bezier(.4,0,.2,1); }
-  .animation-delay-2000 { animation-delay: 2s; }
-  .animation-delay-4000 { animation-delay: 4s; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .animate-blob { animation: none; }
-  }
-
 /* هایلایت انتخاب‌ها + OTP */
   .bw-selected{ border-color:#3b82f6 !important; background:#eff6ff; }
   .bw-otp{ width:48px;height:56px;text-align:center;font-size:20px;border:1px solid #d1d5db;border-radius:12px;outline:0; }
@@ -2285,327 +2268,518 @@
     visibility: hidden !important;
   }
 
-  /* Booking summary refinement */
-  .booking-summary-card {
-    border: 1px solid rgba(99, 102, 241, 0.18);
-    box-shadow:
-      0 15px 35px rgba(124, 131, 253, 0.18),
-      0 8px 20px rgba(82, 183, 136, 0.08);
-  }
-
-  .booking-label {
-    border: 1px solid rgba(59, 130, 246, 0.16);
-    letter-spacing: 0.04em;
-  }
-
-  .booking-count {
-    font-feature-settings: "tnum" 1;
-  }
-
-  .booking-status {
-    color: #475569;
-  }
-
-  .booking-icon {
-    box-shadow:
-      0 18px 40px rgba(99, 102, 241, 0.35),
-      0 10px 25px rgba(82, 183, 136, 0.2);
-  }
-
   /* ============================================================
-     Mobile hero — complete redesign (≤767px only)
-     Flat editorial layout: start-aligned RTL header, quiet meta
-     chips, dark full-width CTA + round call key, hairline stats.
-     Desktop (≥768px) is untouched.
+     Service hero — premium profile header (all devices)
+     Editorial ink-on-paper system: calm surface, white card with
+     hairline border, strong ink typography, pill CTAs (dark
+     primary / quiet ghost), tabular booking stats, muted trust.
+     Mobile-first; refined at ≥640px, ≥768px and ≥1024px.
      ============================================================ */
-  @media (max-width: 767px) {
+  .service-hero {
+    position: relative;
+    isolation: isolate;
+    direction: rtl;
+    background:
+      radial-gradient(58% 44% at 50% 0%, rgba(124, 131, 253, 0.07), transparent 72%),
+      linear-gradient(180deg, #f6f8fb 0%, #fdfdfe 100%);
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .svh-container {
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .svh-card {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e7ecf3;
+    border-radius: 1.4rem;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 24px 48px -32px rgba(15, 23, 42, 0.16);
+    padding: 1.75rem 1.4rem 1.3rem;
+  }
+
+  /* گوشهٔ برند: هالهٔ ملایم در سمت شروع کارت */
+  .svh-card::before {
+    content: "";
+    position: absolute;
+    inset-block-start: -6rem;
+    inset-inline-start: -6rem;
+    width: 16rem;
+    height: 16rem;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, rgba(124, 131, 253, 0.12), transparent);
+    pointer-events: none;
+  }
+
+  .svh-card > * {
+    position: relative;
+  }
+
+  /* ---- head: identity + actions ---- */
+  .svh-head {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .svh-identity {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* title line — shared class kept so story-indicator rules still apply */
+  .service-hero__title-line.svh-title-line {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  #biz-story-slot:empty {
+    display: none;
+  }
+
+  .svh-title-line .service-hero-story-indicator {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+  }
+
+  .svh-name {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    font-size: clamp(1.9rem, 1.4rem + 2.4vw, 3.1rem);
+  }
+
+  .svh-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.7rem;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .svh-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+  }
+
+  .svh-star {
+    width: 1.1em;
+    height: 1.1em;
+    color: #f59e0b;
+    flex: 0 0 auto;
+  }
+
+  .svh-rating b {
+    font-weight: 700;
+    color: #0f172a;
+    font-feature-settings: "ss02" 1, "tnum" 1;
+  }
+
+  .svh-rating-count {
+    color: #94a3b8;
+  }
+
+  .svh-sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    flex: 0 0 auto;
+  }
+
+  .svh-address {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .svh-address svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex: 0 0 auto;
+    color: #94a3b8;
+    transition: color 0.15s ease;
+  }
+
+  .svh-address span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 13rem;
+  }
+
+  .svh-address:hover {
+    color: #0f172a;
+  }
+
+  .svh-address:hover svg {
+    color: #7c83fd;
+  }
+
+  .svh-address:hover span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: #cbd5e1;
+  }
+
+  .svh-address:focus-visible {
+    outline: 2px solid rgba(124, 131, 253, 0.6);
+    outline-offset: 3px;
+    border-radius: 0.35rem;
+  }
+
+  /* ---- actions: pill CTAs ---- */
+  .svh-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 3.5rem;
+    gap: 0.65rem;
+  }
+
+  .svh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 3.5rem;
+    padding-inline: 1.5rem;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .svh-btn svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 auto;
+  }
+
+  .svh-btn:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px #ffffff,
+      0 0 0 5px rgba(124, 131, 253, 0.55);
+  }
+
+  .svh-btn--primary {
+    border: 1px solid #5a63f2;
+    background: linear-gradient(180deg, #7b82fc 0%, #5f68f9 55%, #4e58f0 100%);
+    color: #ffffff;
+    box-shadow:
+      0 14px 28px -12px rgba(95, 104, 249, 0.65),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  .svh-btn--primary svg {
+    opacity: 0.95;
+  }
+
+  .svh-btn--primary:hover {
+    background: linear-gradient(180deg, #7078fb 0%, #545ef7 55%, #444eea 100%);
+    box-shadow:
+      0 18px 34px -12px rgba(95, 104, 249, 0.72),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  .svh-btn--primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 8px 18px -10px rgba(95, 104, 249, 0.6);
+  }
+
+  .svh-btn--ghost {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+  }
+
+  .svh-btn--ghost svg {
+    color: #7c83fd;
+    transition: color 0.18s ease;
+  }
+
+  .svh-btn--ghost:hover {
+    border-color: #c7cdfe;
+    background: #eef0ff;
+    color: #0f172a;
+  }
+
+  .svh-btn--ghost:active {
+    transform: translateY(1px);
+  }
+
+  /* mobile: call collapses to a round icon key */
+  @media (max-width: 639.98px) {
+    .svh-btn--ghost {
+      padding-inline: 0;
+    }
+
+    .svh-btn--ghost span {
+      display: none;
+    }
+
+    .svh-btn--ghost svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  /* ---- divider + foot: stats & trust ---- */
+  .svh-divider {
+    height: 1px;
+    background: #eef2f6;
+    margin-block: 1.15rem 0.95rem;
+  }
+
+  .svh-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+  }
+
+  .svh-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+  }
+
+  .svh-stat-num {
+    font-size: clamp(1.9rem, 1.55rem + 1.4vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    font-feature-settings: "ss02" 1, "tnum" 1;
+  }
+
+  .svh-stat-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-width: 0;
+  }
+
+  .svh-stat-label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.3;
+  }
+
+  .svh-stat-status {
+    margin: 0;
+    font-size: 0.76rem;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+
+  .svh-trust {
+    list-style: none;
+    margin: 0;
+    padding: 0.85rem 0 0;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 1.15rem;
+  }
+
+  .svh-trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .svh-trust svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    color: #94a3b8;
+    flex: 0 0 auto;
+  }
+
+  /* ---- ≥640px: tablet ---- */
+  @media (min-width: 640px) {
     .service-hero {
-      min-height: auto !important;
-      align-items: flex-start !important;
-      padding-inline: 1rem !important;
-      background: #f8fafc !important;
+      padding: 2.25rem 1.5rem 2.5rem;
     }
 
-    /* flat surface: no blobs, no dot grid, no gradient halo */
-    .service-hero > .pointer-events-none {
-      display: none !important;
+    .svh-card {
+      border-radius: 1.6rem;
+      padding: 2.4rem 2.25rem 1.7rem;
     }
 
-    .service-hero .group > [class*="blur-xl"] {
-      display: none !important;
+    .svh-identity {
+      gap: 0.85rem;
     }
 
-    .service-hero .relative.z-10 {
-      padding-block: 1rem 1.25rem !important;
+    .svh-actions {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 0.75rem;
     }
 
-    .service-hero + #services {
-      padding-top: 1.25rem !important;
+    .svh-meta {
+      font-size: 0.95rem;
     }
 
-    /* card: plain white, hairline border, soft single shadow */
-    .service-hero .backdrop-blur-2xl {
-      background: #ffffff !important;
-      -webkit-backdrop-filter: none !important;
-      backdrop-filter: none !important;
-      border: 1px solid #e8edf4 !important;
-      border-radius: 1.4rem !important;
+    .svh-address span {
+      max-width: 20rem;
+    }
+
+    .svh-divider {
+      margin-block: 1.7rem 1.25rem;
+    }
+
+    .svh-stat-label {
+      font-size: 0.9rem;
+    }
+
+    .svh-stat-status {
+      font-size: 0.8rem;
+    }
+
+    .svh-trust li {
+      font-size: 0.8rem;
+    }
+  }
+
+  /* ---- ≥768px: foot becomes a split row ---- */
+  @media (min-width: 768px) {
+    .svh-foot {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .svh-trust {
+      padding: 0;
+      border-top: 0;
+      justify-content: flex-end;
+      gap: 1.35rem;
+    }
+  }
+
+  /* ---- ≥1024px: identity right, actions left ---- */
+  @media (min-width: 1024px) {
+    .service-hero {
+      padding: 3.25rem 2rem 3.5rem;
+    }
+
+    .svh-card {
+      border-radius: 1.9rem;
+      padding: 3rem 3.25rem 2.1rem;
       box-shadow:
         0 1px 2px rgba(15, 23, 42, 0.04),
-        0 16px 36px -24px rgba(15, 23, 42, 0.18) !important;
+        0 16px 40px -24px rgba(15, 23, 42, 0.12),
+        0 48px 96px -48px rgba(15, 23, 42, 0.18);
     }
 
-    .service-hero .backdrop-blur-2xl > .h-1 {
-      display: none !important;
+    .svh-card::before {
+      width: 22rem;
+      height: 22rem;
     }
 
-    .service-hero__content {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1.05rem !important;
-      padding: 1.3rem 1.25rem 1.1rem !important;
+    .svh-head {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2.5rem;
     }
 
-    .service-hero__content > * {
-      margin: 0 !important;
+    .svh-identity {
+      flex: 1 1 auto;
+      gap: 0.95rem;
     }
 
-    .service-hero__content > .h-px {
-      display: none !important;
+    .svh-actions {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 0.8rem;
     }
 
-    /* 1 — business name: start-aligned, solid ink, no underline */
-    .service-hero__title {
-      order: 1;
-      text-align: right !important;
+    .svh-btn {
+      min-height: 3.75rem;
+      padding-inline: 2.1rem;
+      font-size: 1.02rem;
     }
 
-    .service-hero__title > :not([hidden]) ~ :not([hidden]) {
-      margin-top: 0 !important;
+    .svh-btn svg {
+      width: 1.3rem;
+      height: 1.3rem;
     }
 
-    .service-hero__title > span {
-      display: none !important;
+    .svh-title-line .service-hero-story-indicator {
+      width: 54px;
+      height: 54px;
+      min-width: 54px;
     }
 
-    .service-hero #biz-name {
-      background: none !important;
-      -webkit-text-fill-color: #0f172a !important;
-      color: #0f172a !important;
-      font-size: 1.5rem !important;
-      line-height: 1.3 !important;
-      letter-spacing: -0.01em !important;
-    }
-
-    /* 2 — meta: quiet neutral chips tucked under the name */
-    .service-hero__meta {
-      order: 2;
-      justify-content: flex-start !important;
-      gap: 0.5rem !important;
-    }
-
-    .service-hero__rating,
-    .service-hero__location {
-      min-height: 32px !important;
-      padding: 0.3rem 0.7rem !important;
-      border: none !important;
-      border-radius: 999px !important;
-      background: #f1f5f9 !important;
-      box-shadow: none !important;
-      font-size: 0.72rem !important;
-      color: #475569 !important;
-    }
-
-    .service-hero__rating svg,
-    .service-hero__location svg {
-      width: 0.85rem !important;
-      height: 0.85rem !important;
-      flex: 0 0 auto !important;
-    }
-
-    .service-hero__location {
-      max-width: min(100%, 12rem) !important;
-    }
-
-    .service-hero #hero-brief-address {
-      display: inline-block !important;
-      max-width: 8.5rem !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-      vertical-align: middle !important;
-    }
-
-    /* 3 — actions: full-width dark primary + round call key */
-    .service-hero__actions {
-      order: 3;
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) 3.4rem !important;
-      gap: 0.6rem !important;
-      margin-top: 0.15rem !important;
-    }
-
-    .service-hero #hero-cta {
-      min-height: 3.4rem !important;
-      padding: 0 1.25rem !important;
-      border-radius: 1.05rem !important;
-      background: #0f172a !important;
-      box-shadow: 0 12px 24px -12px rgba(15, 23, 42, 0.5) !important;
-      font-size: 0.92rem !important;
-      line-height: 1 !important;
-      transform: none !important;
-    }
-
-    .service-hero #hero-cta > .absolute {
-      display: none !important;
-    }
-
-    .service-hero #hero-cta svg {
-      width: 1.1rem !important;
-      height: 1.1rem !important;
-      flex: 0 0 auto !important;
-      opacity: 0.9;
-    }
-
-    .service-hero #hero-call {
-      min-height: 3.4rem !important;
-      padding: 0 !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 1.05rem !important;
-      background: #ffffff !important;
-      box-shadow: none !important;
-      transform: none !important;
-    }
-
-    .service-hero #hero-call span {
-      display: none !important;
-    }
-
-    .service-hero #hero-call svg {
-      width: 1.3rem !important;
-      height: 1.3rem !important;
-      flex: 0 0 auto !important;
-    }
-
-    /* 4 — stats: recessed hairline strip, small neutral glyph */
-    .service-hero__summary-wrap {
-      order: 4;
-    }
-
-    .service-hero [data-booking-summary] {
-      border: 1px solid #eef2f6 !important;
-      border-radius: 1.05rem !important;
-      background: #f8fafc !important;
-      -webkit-backdrop-filter: none !important;
-      backdrop-filter: none !important;
-      box-shadow: none !important;
-    }
-
-    .service-hero [data-booking-summary] > .pointer-events-none {
-      display: none !important;
-    }
-
-    .service-hero__summary-inner {
-      padding: 0.9rem 1.05rem !important;
-      gap: 0.75rem !important;
-      align-items: center !important;
-    }
-
-    .service-hero .booking-label {
-      min-height: 0 !important;
-      padding: 0 !important;
-      background: transparent !important;
-      box-shadow: none !important;
-      font-size: 0.68rem !important;
-      font-weight: 600 !important;
-      letter-spacing: 0 !important;
-      color: #64748b !important;
-    }
-
-    .service-hero .booking-label > span {
-      width: 5px !important;
-      height: 5px !important;
-      background: #94a3b8 !important;
-      box-shadow: none !important;
-    }
-
-    .service-hero__count-row {
-      gap: 0.4rem !important;
-      align-items: baseline !important;
-      margin-top: 0.45rem !important;
-    }
-
-    .service-hero .booking-count {
-      font-size: 1.9rem !important;
-      font-weight: 800 !important;
-      line-height: 1 !important;
-      color: #0f172a !important;
-    }
-
-    .service-hero__count-row span:last-child {
-      font-size: 0.78rem !important;
-      font-weight: 600 !important;
-      line-height: 1.4 !important;
-      color: #475569 !important;
-    }
-
-    .service-hero .booking-status {
-      margin-top: 0.3rem !important;
-      font-size: 0.72rem !important;
-      line-height: 1.7 !important;
-      color: #94a3b8 !important;
-    }
-
-    .service-hero .booking-icon {
-      width: 2.6rem !important;
-      height: 2.6rem !important;
-      border-radius: 999px !important;
-      border: 1px solid #e2e8f0 !important;
-      background: #ffffff !important;
-      background-image: none !important;
-      color: #475569 !important;
-      box-shadow: none !important;
-    }
-
-    .service-hero .booking-icon i {
-      font-size: 1rem !important;
-    }
-
-    /* 5 — trust: single muted footer line above card edge */
-    .service-hero__content > div:last-child {
-      order: 5;
-      justify-content: center !important;
-      gap: 1.1rem !important;
-      padding-top: 0.9rem !important;
-      border-top: 1px solid #f1f5f9 !important;
-    }
-
-    .service-hero__content > div:last-child > div {
-      gap: 0.35rem !important;
-      font-size: 0.68rem !important;
-      color: #94a3b8 !important;
-    }
-
-    .service-hero__content > div:last-child .inline-block {
-      width: 4px !important;
-      height: 4px !important;
-      background: #cbd5e1 !important;
-      animation: none !important;
+    .svh-divider {
+      margin-block: 2.1rem 1.45rem;
     }
   }
 
-  @media (max-width: 360px) {
-    .service-hero__content {
-      padding: 1.1rem 1rem 0.95rem !important;
+  /* ---- very narrow phones ---- */
+  @media (max-width: 380px) {
+    .svh-card {
+      padding: 1.4rem 1.1rem 1.05rem;
     }
 
-    .service-hero__summary-inner {
-      padding: 0.8rem 0.9rem !important;
-      gap: 0.6rem !important;
-    }
-
-    .service-hero .booking-icon {
-      width: 2.35rem !important;
-      height: 2.35rem !important;
+    .svh-address span {
+      max-width: 9.5rem;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .svh-btn,
+    .svh-address,
+    .svh-address svg,
+    .svh-btn--ghost svg {
+      transition: none;
+    }
+  }
+
+

@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (headerActions) {
       headerActions.querySelectorAll('.action-item').forEach((actionButton) => {
         actionButton.addEventListener('click', () => {
-          if (window.innerWidth < 768) {
+          if (window.innerWidth <= 900) {
             requestAnimationFrame(closeHeaderMenu);
           }
         });
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth > 900) {
         closeHeaderMenu();
       }
     });
