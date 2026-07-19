@@ -804,10 +804,18 @@ body {
     padding-left: 1rem;
     padding-top: 0.55rem;
     padding-bottom: 0.55rem;
+    /* اجازه شکستن ردیف هدر تا دکمه‌ها از صفحه بیرون نزنند */
+    flex-wrap: wrap;
+    row-gap: 0.55rem;
   }
 
   #logoCityWrap {
     flex: 1;
+  }
+
+  /* وقتی جا نبود، دکمه‌های اکشن به ردیف دوم می‌روند و وسط‌چین می‌شوند */
+  #headerInner > .header-item {
+    margin-inline: auto;
   }
 
   #mainHeader {
@@ -832,6 +840,12 @@ body {
     padding: 0.5rem 1rem !important;
     flex-shrink: 0;
   }
+
+  #rewardClaimBtn {
+    font-size: 0.85rem !important;
+    padding: 0.5rem 1rem !important;
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -840,8 +854,20 @@ body {
     padding: 0.4rem 0.75rem !important;
   }
 
+  #rewardClaimBtn {
+    font-size: 0.78rem !important;
+    padding: 0.4rem 0.75rem !important;
+  }
+
   #headerInner {
     gap: 0.65rem;
+  }
+
+  /* در عرض‌های خیلی کم، خود دکمه‌ها هم در صورت نیاز می‌شکنند */
+  #headerInner > .header-item {
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
   }
 
   #mainHeader {
