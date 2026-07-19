@@ -1171,14 +1171,14 @@ body.mobile-menu-open {
   font-size: 1.12rem;
 }
 
-/* استایل موبایل — برند راست، اکشن‌ها + همبرگری چپ */
+/* استایل موبایل — لوگو + شهر راست، جایزه + ثبت + همبرگری چپ (همیشه یک ردیف) */
 @media (max-width: 767px) {
   #headerInner {
     min-height: 60px;
-    padding-right: 0.85rem;
-    padding-left: 0.85rem;
+    padding-right: 0.7rem;
+    padding-left: 0.7rem;
     flex-wrap: nowrap;
-    gap: 0.5rem;
+    gap: 0.45rem;
   }
 
   #mainHeader.scrolled #headerInner {
@@ -1188,31 +1188,55 @@ body.mobile-menu-open {
   #logoCityWrap {
     flex: 0 1 auto;
     min-width: 0;
-    gap: 0.4rem;
+    gap: 0.45rem;
   }
 
-  /* بج شهر در موبایل داخل منوی کشویی است */
-  .header-city-chip {
+  /* در هدر موبایل فقط کاشی لوگو می‌ماند؛ متن برند در منوی کشویی هست */
+  #mainHeader .vitreenet-brand__text {
     display: none;
   }
 
-  #headerActions {
-    gap: 0.5rem;
-  }
-
   .vitreenet-brand__mark svg {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
   }
 
-  .vitreenet-brand__title {
-    font-size: 1rem;
-    letter-spacing: 0.06em;
+  /* بج شهر فشرده در کنار لوگو */
+  .header-city-chip {
+    display: inline-flex;
+    padding: 0.32rem 0.6rem;
+    font-size: 0.74rem;
+    gap: 0.22rem;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.22);
+  }
+
+  .header-city-chip i {
+    font-size: 0.85rem;
+  }
+
+  #headerActions {
+    gap: 0.4rem;
+  }
+
+  /* دکمه جایزه فقط آیکون می‌شود */
+  #rewardClaimBtn {
+    padding: 0.5rem;
+    gap: 0;
+    border-radius: 999px;
+  }
+
+  #rewardClaimBtn > span:not(.reward-header-icon) {
+    display: none;
+  }
+
+  #rewardClaimBtn .reward-header-icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   #registerShopBtn {
-    font-size: 0.78rem;
-    padding: 0.5rem 0.9rem;
+    font-size: 0.76rem;
+    padding: 0.5rem 0.8rem;
   }
 
   /* متن کوتاه‌تر دکمه ثبت در موبایل */
@@ -1227,19 +1251,70 @@ body.mobile-menu-open {
 
 @media (max-width: 480px) {
   #headerInner {
-    gap: 0.4rem;
-    padding-right: 0.7rem;
-    padding-left: 0.7rem;
+    gap: 0.35rem;
+    padding-right: 0.55rem;
+    padding-left: 0.55rem;
+  }
+
+  #logoCityWrap {
+    gap: 0.35rem;
+  }
+
+  .vitreenet-brand__mark svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .header-city-chip {
+    padding: 0.28rem 0.5rem;
+    font-size: 0.7rem;
   }
 
   #registerShopBtn {
-    font-size: 0.72rem;
-    padding: 0.45rem 0.75rem;
+    font-size: 0.7rem;
+    padding: 0.45rem 0.65rem;
+  }
+
+  #rewardClaimBtn {
+    padding: 0.45rem;
+  }
+
+  #rewardClaimBtn .reward-header-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .mobile-menu-btn {
     width: 40px;
     height: 40px;
+  }
+
+  .mobile-menu-btn__bar {
+    width: 17px;
+  }
+
+  .mobile-menu-btn__bar:nth-child(2) {
+    width: 11px;
+    margin-left: 11.5px;
+  }
+}
+
+/* عرض‌های خیلی کم — همه‌چیز جمع‌وجورتر، همچنان یک ردیف */
+@media (max-width: 385px) {
+  .header-city-chip span {
+    max-width: 52px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #registerShopBtn {
+    font-size: 0.66rem;
+    padding: 0.42rem 0.55rem;
+  }
+
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -1309,33 +1384,7 @@ body.mobile-menu-open {
   }
 }
 
-@media (max-width: 400px) {
-  .vitreenet-brand__mark svg {
-    width: 33px;
-    height: 33px;
-  }
-
-  .vitreenet-brand__title {
-    font-size: 0.92rem;
-    letter-spacing: 0.05em;
-  }
-
-  .vitreenet-brand__subtitle {
-    display: none;
-  }
-}
-
-/* در عرض‌های خیلی کم فقط لوگو می‌ماند تا هدر یک ردیف بماند */
-@media (max-width: 350px) {
-  .vitreenet-brand__text {
-    display: none;
-  }
-
-  #registerShopBtn {
-    font-size: 0.68rem;
-    padding: 0.42rem 0.6rem;
-  }
-}
+/* متن برند در هدر موبایل مخفی است (قانون در بخش هدر)؛ نسخه منوی کشویی همیشه کامل می‌ماند */
 
 #loginNavLink.logged-in {
   background: linear-gradient(115deg, #10b981 0%, #0ea5e9 100%);
