@@ -84,13 +84,28 @@ body {
   background: #c8f7e6;
 }
 
-/* استایل‌های header */
+/* ─────────────────────────────────────────────
+   HEADER — بازطراحی پرمیوم
+   ───────────────────────────────────────────── */
 #mainHeader {
-  transition: all 0.3s ease-in-out;
+  transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
   animation: slideDown 0.5s ease-out;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(1.8) blur(20px);
+  -webkit-backdrop-filter: saturate(1.8) blur(20px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  #mainHeader {
+    background: rgba(255, 255, 255, 0.98);
+  }
+}
+
+#headerInner {
+  min-height: 72px;
+  gap: 1rem;
 }
 
 @keyframes slideDown {
@@ -105,19 +120,43 @@ body {
   }
 }
 
-/* استایل منوی ناوبری */
+/* بج شهر */
+.header-city-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10b981E6 30%, #0ea5e9E6);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.header-city-chip i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* استایل منوی ناوبری دسکتاپ */
 .main-nav-link {
   position: relative;
   transition: all 0.25s ease;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.95rem;
 }
 
 .main-nav-link::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: 4px;
   right: 50%;
   width: 0;
-  height: 2px;
+  height: 2.5px;
   background: linear-gradient(90deg, #10b981 0%, #0ea5e9 100%);
   transition: all 0.3s ease;
   transform: translateX(50%);
@@ -125,13 +164,27 @@ body {
 }
 
 .main-nav-link:hover::after {
-  width: 70%;
+  width: 55%;
 }
 
-/* انیمیشن دکمه ثبت فروشگاه */
+/* دکمه‌های اکشن هدر */
+#rewardClaimBtn {
+  padding: 0.6rem 1.15rem;
+  font-size: 0.88rem;
+}
+
 #registerShopBtn {
   position: relative;
   overflow: hidden;
+  padding: 0.6rem 1.35rem;
+  font-size: 0.88rem;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.32);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#registerShopBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(14, 165, 233, 0.38);
 }
 
 #registerShopBtn::before {
@@ -152,6 +205,11 @@ body {
   height: 300px;
 }
 
+/* متن کوتاه دکمه ثبت فقط در موبایل */
+.register-btn-short {
+  display: none;
+}
+
 /* انیمیشن لوگو */
 .vitreenet-brand {
   animation: fadeInLogo 0.8s ease-out 0.2s both;
@@ -166,6 +224,322 @@ body {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/* ─── دکمه همبرگری ─── */
+.mobile-menu-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.045);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.94);
+  background: rgba(15, 23, 42, 0.09);
+}
+
+.mobile-menu-btn__bar {
+  display: block;
+  width: 19px;
+  height: 2.4px;
+  border-radius: 999px;
+  background: #334155;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, width 0.3s ease;
+}
+
+.mobile-menu-btn__bar:nth-child(2) {
+  width: 13px;
+  align-self: flex-end;
+  margin-left: 12.5px;
+}
+
+.mobile-menu-btn.open .mobile-menu-btn__bar:nth-child(1) {
+  transform: translateY(7.4px) rotate(45deg);
+}
+
+.mobile-menu-btn.open .mobile-menu-btn__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-btn.open .mobile-menu-btn__bar:nth-child(3) {
+  transform: translateY(-7.4px) rotate(-45deg);
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+/* ─── منوی کشویی موبایل ─── */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1490;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-menu-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(320px, 86vw);
+  background: #ffffff;
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 1.15rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-105%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0.25, 1), visibility 0s linear 0.36s;
+  box-shadow: 12px 0 44px rgba(15, 23, 42, 0.16);
+  border-top-right-radius: 26px;
+  border-bottom-right-radius: 26px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  visibility: hidden;
+}
+
+.mobile-menu-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0.25, 1), visibility 0s;
+}
+
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+.mobile-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.vitreenet-brand--drawer {
+  animation: none;
+  padding: 0;
+}
+
+.vitreenet-brand--drawer .vitreenet-brand__mark svg {
+  width: 40px;
+  height: 40px;
+}
+
+.vitreenet-brand--drawer .vitreenet-brand__title {
+  font-size: 1.05rem;
+  letter-spacing: 0.09em;
+}
+
+.vitreenet-brand--drawer .vitreenet-brand__subtitle {
+  font-size: 0.72rem;
+}
+
+.mobile-menu-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.045);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  color: #475569;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mobile-menu-close:active {
+  transform: scale(0.92);
+  background: rgba(15, 23, 42, 0.09);
+}
+
+.mobile-menu-city {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0.35rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  color: #0f766e;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mobile-menu-city i {
+  color: #10b981;
+  font-size: 1.05rem;
+}
+
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0;
+  flex: 1;
+}
+
+.mobile-menu-link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 0.7rem;
+  border-radius: 16px;
+  color: #1f2937;
+  font-weight: 700;
+  font-size: 0.98rem;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.mobile-menu-link:active,
+.mobile-menu-link:hover {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+}
+
+.mobile-menu-link__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.12));
+  color: #0d9488;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.mobile-menu-link:hover .mobile-menu-link__icon,
+.mobile-menu-link:active .mobile-menu-link__icon {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  color: #fff;
+}
+
+.mobile-menu-link__label {
+  flex: 1;
+}
+
+.mobile-menu-link__chev {
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.mobile-menu-link:hover .mobile-menu-link__chev {
+  color: #10b981;
+  transform: translateX(-3px);
+}
+
+/* حالت لاگین‌شده لینک ورود در منوی کشویی */
+#drawerLoginLink.logged-in .mobile-menu-link__icon {
+  background: linear-gradient(135deg, #10b981, #0ea5e9);
+  color: #fff;
+}
+
+#drawerLoginLink.logged-in .drawer-login-label {
+  color: #047857;
+}
+
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.mobile-menu-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.32);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-menu-reward:active {
+  transform: scale(0.97);
+}
+
+.mobile-menu-reward i {
+  font-size: 1.2rem;
+}
+
+.mobile-menu-register {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.32);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-menu-register:active {
+  transform: scale(0.97);
+}
+
+.mobile-menu-register i {
+  font-size: 1.2rem;
+}
+
+.mobile-menu-foot {
+  margin-top: 0.9rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .mobile-menu-panel,
+  .mobile-menu-overlay,
+  .mobile-menu-btn__bar {
+    transition: none;
   }
 }
 
@@ -779,9 +1153,13 @@ body {
 
 /* header کوچک شده در زمان اسکرول */
 #mainHeader.scrolled {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.09);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+#mainHeader.scrolled #headerInner {
+  min-height: 62px;
 }
 
 #mainHeader.scrolled .vitreenet-brand__mark svg {
@@ -790,23 +1168,21 @@ body {
 }
 
 #mainHeader.scrolled .vitreenet-brand__title {
-  font-size: 1.25rem;
+  font-size: 1.12rem;
 }
 
-#mainHeader.scrolled .vitreenet-brand__subtitle {
-  font-size: 0.8rem;
-}
-
-/* استایل موبایل */
+/* استایل موبایل — برند راست، اکشن‌ها + همبرگری چپ */
 @media (max-width: 767px) {
   #headerInner {
-    padding-right: 0.75rem;
-    padding-left: 0.75rem;
-    padding-top: 0.55rem;
-    padding-bottom: 0.55rem;
-    /* هدر همیشه یک ردیف می‌ماند؛ اندازه عناصر کوچک می‌شود */
+    min-height: 60px;
+    padding-right: 0.85rem;
+    padding-left: 0.85rem;
     flex-wrap: nowrap;
     gap: 0.5rem;
+  }
+
+  #mainHeader.scrolled #headerInner {
+    min-height: 56px;
   }
 
   #logoCityWrap {
@@ -815,180 +1191,13 @@ body {
     gap: 0.4rem;
   }
 
-  #headerInner > .header-item {
-    flex-shrink: 0;
-    gap: 0.4rem;
-  }
-
-  #mainHeader {
-    background: rgba(255, 255, 255, 0.68);
-    backdrop-filter: blur(22px);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.08);
-  }
-
-  .vitreenet-brand__mark svg {
-    width: 32px;
-    height: 32px;
-  }
-
-  .vitreenet-brand__title {
-    font-size: 1rem;
-    letter-spacing: 0.06em;
-  }
-
-  #registerShopBtn {
-    font-size: 0.8rem !important;
-    padding: 0.45rem 0.85rem !important;
-    flex-shrink: 0;
-  }
-
-  /* دکمه جایزه در موبایل فقط آیکون می‌شود تا هدر یک ردیف بماند */
-  #rewardClaimBtn {
-    font-size: 0.8rem !important;
-    padding: 0.5rem !important;
-    gap: 0 !important;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
-
-  #rewardClaimBtn > span:not(.reward-header-icon) {
+  /* بج شهر در موبایل داخل منوی کشویی است */
+  .header-city-chip {
     display: none;
   }
 
-  #rewardClaimBtn .reward-header-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  #registerShopBtn {
-    font-size: 0.7rem !important;
-    padding: 0.4rem 0.6rem !important;
-  }
-
-  #rewardClaimBtn {
-    padding: 0.45rem !important;
-  }
-
-  #rewardClaimBtn .reward-header-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  #headerInner {
-    gap: 0.4rem;
-    padding-right: 0.55rem;
-    padding-left: 0.55rem;
-  }
-
-  /* بج شهر کوچک‌تر می‌شود تا همه‌چیز در یک ردیف جا شود */
-  #logoCityWrap > div.header-item {
-    padding: 0.2rem 0.5rem !important;
-    gap: 0.15rem;
-  }
-
-  #logoCityWrap > div.header-item svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  #headerCity {
-    font-size: 11px !important;
-  }
-
-  #mainHeader {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(24px);
-  }
-}
-
-.vitreenet-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
-  padding: 0.2rem 0.35rem;
-  border-radius: 999px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.vitreenet-brand:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
-}
-
-.vitreenet-brand__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
-  padding: 2px;
-}
-
-.vitreenet-brand__mark svg {
-  width: 46px;
-  height: 46px;
-  display: block;
-  transition: transform 0.35s cubic-bezier(.43, 1.4, .58, 1);
-}
-
-.vitreenet-brand:hover .vitreenet-brand__mark svg {
-  transform: rotate(-7deg) scale(1.04);
-}
-
-.vitreenet-brand__text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  line-height: 1.05;
-  min-width: 0;
-  padding: 0.18rem 0.65rem;
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.05));
-  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
-}
-
-.vitreenet-brand__title {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 800;
-  font-size: 1.45rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: linear-gradient(120deg, #0ea5e9 0%, #22c55e 60%, #0fb67f 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 12px 26px rgba(14, 165, 233, 0.25);
-  position: relative;
-}
-
-.vitreenet-brand__title::after {
-  content: '';
-  display: block;
-  width: 28px;
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(120deg, #0ea5e9, #22d3ee, #10b981);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
-  transform: translateY(1px);
-}
-
-.vitreenet-brand__subtitle {
-  font-family: 'Vazirmatn', sans-serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: #0f766e;
-}
-
-@media (max-width: 640px) {
-  .vitreenet-brand {
-    gap: 0.55rem;
-    padding: 0.1rem 0.2rem;
+  #headerActions {
+    gap: 0.5rem;
   }
 
   .vitreenet-brand__mark svg {
@@ -997,39 +1206,118 @@ body {
   }
 
   .vitreenet-brand__title {
-    font-size: 1.1rem;
-    letter-spacing: 0.08em;
-    gap: 0.3rem;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
   }
 
-  .vitreenet-brand__title::after {
-    width: 22px;
-    height: 5px;
+  #registerShopBtn {
+    font-size: 0.78rem;
+    padding: 0.5rem 0.9rem;
   }
 
-  .vitreenet-brand__subtitle {
-    font-size: 0.72rem;
+  /* متن کوتاه‌تر دکمه ثبت در موبایل */
+  .register-btn-full {
+    display: none;
+  }
+
+  .register-btn-short {
+    display: inline;
   }
 }
 
 @media (max-width: 480px) {
-  .vitreenet-brand {
-    gap: 0.35rem;
-    padding: 0.1rem;
+  #headerInner {
+    gap: 0.4rem;
+    padding-right: 0.7rem;
+    padding-left: 0.7rem;
   }
 
-  .vitreenet-brand__mark svg {
-    width: 30px;
-    height: 30px;
+  #registerShopBtn {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .mobile-menu-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.vitreenet-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.vitreenet-brand__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vitreenet-brand__mark svg {
+  width: 44px;
+  height: 44px;
+  display: block;
+  filter: drop-shadow(0 5px 12px rgba(16, 185, 129, 0.3));
+  transition: transform 0.35s cubic-bezier(.43, 1.4, .58, 1), width 0.3s ease, height 0.3s ease;
+}
+
+.vitreenet-brand:hover .vitreenet-brand__mark svg {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.vitreenet-brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  line-height: 1;
+  min-width: 0;
+}
+
+.vitreenet-brand__title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1.28rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: linear-gradient(120deg, #0ea5e9 0%, #22c55e 60%, #0fb67f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: font-size 0.3s ease;
+}
+
+.vitreenet-brand__subtitle {
+  font-family: 'Vazirmatn', sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #0f766e;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .vitreenet-brand {
+    gap: 0.5rem;
   }
 
   .vitreenet-brand__title {
-    font-size: 0.9rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.07em;
+  }
+}
+
+@media (max-width: 400px) {
+  .vitreenet-brand__mark svg {
+    width: 33px;
+    height: 33px;
   }
 
-  .vitreenet-brand__title::after {
-    display: none;
+  .vitreenet-brand__title {
+    font-size: 0.92rem;
+    letter-spacing: 0.05em;
   }
 
   .vitreenet-brand__subtitle {
@@ -1037,31 +1325,15 @@ body {
   }
 }
 
-@media (max-width: 400px) {
-  .vitreenet-brand {
-    gap: 0.3rem;
-  }
-
-  .vitreenet-brand__mark svg {
-    width: 28px;
-    height: 28px;
-  }
-
-  .vitreenet-brand__title {
-    font-size: 0.82rem;
-    letter-spacing: 0.03em;
-  }
-}
-
-/* در عرض‌های خیلی کم فقط لوگوی دایره‌ای می‌ماند تا هدر یک ردیف بماند */
-@media (max-width: 360px) {
+/* در عرض‌های خیلی کم فقط لوگو می‌ماند تا هدر یک ردیف بماند */
+@media (max-width: 350px) {
   .vitreenet-brand__text {
     display: none;
   }
 
   #registerShopBtn {
-    font-size: 0.66rem !important;
-    padding: 0.38rem 0.5rem !important;
+    font-size: 0.68rem;
+    padding: 0.42rem 0.6rem;
   }
 }
 
