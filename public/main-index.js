@@ -320,12 +320,9 @@ function applyRewardCampaignToUI(campaign = rewardCampaignState) {
         : 'کمپین جوایز'
     );
 
-    // نمایش یا مخفی کردن دکمه بر اساس تنظیمات ادمین
-    if (campaignState.showButton === false) {
-      rewardElements.openBtn.style.display = 'none';
-    } else {
-      rewardElements.openBtn.style.display = '';
-    }
+    // The header entry point stays available even between active campaigns.
+    // Campaign state is communicated inside the modal instead of shifting the header layout.
+    rewardElements.openBtn.style.removeProperty('display');
   }
 
   if (!campaignState.active) {
