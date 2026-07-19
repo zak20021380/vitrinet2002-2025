@@ -2270,12 +2270,15 @@
 
   /* ============================================================
      Service hero — premium profile header (all devices)
-     Editorial ink-on-paper system: calm surface, white card with
-     hairline border, strong ink typography, pill CTAs (dark
-     primary / quiet ghost), tabular booking stats, muted trust.
+     Signature element: brand gradient cover band (same family as
+     the booking CTA) with an overlapping avatar. Everything else
+     stays disciplined: ink typography, one soft rating chip,
+     quiet address, pill CTAs (gradient primary / ghost call).
      Mobile-first; refined at ≥640px, ≥768px and ≥1024px.
      ============================================================ */
   .service-hero {
+    --svh-cover-h: 5.5rem;
+    --svh-avatar: 4.5rem;
     position: relative;
     isolation: isolate;
     direction: rtl;
@@ -2299,23 +2302,23 @@
     box-shadow:
       0 1px 2px rgba(15, 23, 42, 0.04),
       0 24px 48px -32px rgba(15, 23, 42, 0.16);
-    padding: 1.75rem 1.4rem 1.3rem;
+    padding: var(--svh-cover-h) 1.4rem 1.3rem;
   }
 
-  /* گوشهٔ برند: هالهٔ ملایم در سمت شروع کارت */
-  .svh-card::before {
-    content: "";
+  /* نوار برند بالای کارت — امضای بصری، هم‌خانواده با دکمه رزرو */
+  .svh-cover {
     position: absolute;
-    inset-block-start: -6rem;
-    inset-inline-start: -6rem;
-    width: 16rem;
-    height: 16rem;
-    border-radius: 999px;
-    background: radial-gradient(closest-side, rgba(124, 131, 253, 0.12), transparent);
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: var(--svh-cover-h);
+    background:
+      radial-gradient(120% 160% at 85% -20%, rgba(255, 255, 255, 0.28), transparent 55%),
+      radial-gradient(90% 140% at 12% 115%, rgba(147, 51, 234, 0.5), transparent 60%),
+      linear-gradient(120deg, #6d75fb 0%, #5f68f9 45%, #7c5cf0 100%);
     pointer-events: none;
   }
 
-  .svh-card > * {
+  .svh-card > :not(.svh-cover) {
     position: relative;
   }
 
@@ -2330,7 +2333,37 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  /* آواتار روی لبهٔ نوار برند می‌نشیند؛ استوری (در صورت وجود) کنارش */
+  .svh-avatar-row {
+    display: flex;
+    align-items: flex-end;
     gap: 0.75rem;
+    margin-block-start: calc(var(--svh-avatar) / -2);
+    margin-block-end: 0.15rem;
+  }
+
+  .svh-avatar {
+    width: var(--svh-avatar);
+    height: var(--svh-avatar);
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: linear-gradient(160deg, #f6f8ff 0%, #eef0fe 100%);
+    border: 3px solid #ffffff;
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.08),
+      0 12px 24px -12px rgba(95, 104, 249, 0.45);
+    color: #5f68f9;
+  }
+
+  .svh-avatar svg {
+    width: 46%;
+    height: 46%;
   }
 
   /* title line — shared class kept so story-indicator rules still apply */
@@ -2347,7 +2380,7 @@
     display: none;
   }
 
-  .svh-title-line .service-hero-story-indicator {
+  .svh-avatar-row .service-hero-story-indicator {
     width: 46px;
     height: 46px;
     min-width: 46px;
@@ -2364,45 +2397,69 @@
     font-size: clamp(1.9rem, 1.4rem + 2.4vw, 3.1rem);
   }
 
+  /* معرفی کوتاه — متن ثانویه با آیکن اطلاعات */
+  .svh-tagline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: #64748b;
+  }
+
+  .svh-tagline svg {
+    width: 1.05em;
+    height: 1.05em;
+    flex: 0 0 auto;
+    margin-block-start: 0.32em;
+    color: #94a3b8;
+  }
+
+  .svh-tagline:has(#biz-tagline:empty) {
+    display: none;
+  }
+
   .svh-meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.45rem 0.7rem;
+    gap: 0.55rem 0.8rem;
     font-size: 0.9rem;
     color: #64748b;
   }
 
+  /* نشان امتیاز — چیپ کهربایی با پس‌زمینه و آیکن ستاره */
   .svh-rating {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     white-space: nowrap;
+    padding: 0.38rem 0.75rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fde68a;
+    box-shadow: 0 6px 14px -10px rgba(245, 158, 11, 0.55);
   }
 
   .svh-star {
-    width: 1.1em;
-    height: 1.1em;
+    width: 1.05em;
+    height: 1.05em;
     color: #f59e0b;
     flex: 0 0 auto;
   }
 
   .svh-rating b {
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 800;
+    color: #92400e;
+    font-size: 0.95em;
     font-feature-settings: "ss02" 1, "tnum" 1;
   }
 
   .svh-rating-count {
-    color: #94a3b8;
-  }
-
-  .svh-sep {
-    width: 4px;
-    height: 4px;
-    border-radius: 999px;
-    background: #cbd5e1;
-    flex: 0 0 auto;
+    color: #b45309;
+    font-size: 0.84em;
+    font-weight: 500;
   }
 
   .svh-address {
@@ -2643,16 +2700,22 @@
   /* ---- ≥640px: tablet ---- */
   @media (min-width: 640px) {
     .service-hero {
+      --svh-cover-h: 6.5rem;
+      --svh-avatar: 5.25rem;
       padding: 2.25rem 1.5rem 2.5rem;
     }
 
     .svh-card {
       border-radius: 1.6rem;
-      padding: 2.4rem 2.25rem 1.7rem;
+      padding: var(--svh-cover-h) 2.25rem 1.7rem;
     }
 
     .svh-identity {
-      gap: 0.85rem;
+      gap: 0.75rem;
+    }
+
+    .svh-avatar-row {
+      gap: 0.9rem;
     }
 
     .svh-actions {
@@ -2662,6 +2725,10 @@
 
     .svh-meta {
       font-size: 0.95rem;
+    }
+
+    .svh-tagline {
+      font-size: 0.93rem;
     }
 
     .svh-address span {
@@ -2705,39 +2772,37 @@
   /* ---- ≥1024px: identity right, actions left ---- */
   @media (min-width: 1024px) {
     .service-hero {
+      --svh-cover-h: 7.5rem;
+      --svh-avatar: 6rem;
       padding: 3.25rem 2rem 3.5rem;
     }
 
     .svh-card {
       border-radius: 1.9rem;
-      padding: 3rem 3.25rem 2.1rem;
+      padding: var(--svh-cover-h) 3.25rem 2.1rem;
       box-shadow:
         0 1px 2px rgba(15, 23, 42, 0.04),
         0 16px 40px -24px rgba(15, 23, 42, 0.12),
         0 48px 96px -48px rgba(15, 23, 42, 0.18);
     }
 
-    .svh-card::before {
-      width: 22rem;
-      height: 22rem;
-    }
-
     .svh-head {
       flex-direction: row;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 2.5rem;
     }
 
     .svh-identity {
       flex: 1 1 auto;
-      gap: 0.95rem;
+      gap: 0.85rem;
     }
 
     .svh-actions {
       display: flex;
       flex: 0 0 auto;
       gap: 0.8rem;
+      padding-block-end: 0.35rem;
     }
 
     .svh-btn {
@@ -2751,7 +2816,7 @@
       height: 1.3rem;
     }
 
-    .svh-title-line .service-hero-story-indicator {
+    .svh-avatar-row .service-hero-story-indicator {
       width: 54px;
       height: 54px;
       min-width: 54px;
@@ -2764,8 +2829,13 @@
 
   /* ---- very narrow phones ---- */
   @media (max-width: 380px) {
+    .service-hero {
+      --svh-cover-h: 4.75rem;
+      --svh-avatar: 4rem;
+    }
+
     .svh-card {
-      padding: 1.4rem 1.1rem 1.05rem;
+      padding: var(--svh-cover-h) 1.1rem 1.05rem;
     }
 
     .svh-address span {
