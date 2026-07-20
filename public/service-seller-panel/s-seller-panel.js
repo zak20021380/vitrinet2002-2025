@@ -11990,6 +11990,7 @@ window.customersData = window.customersData || [];
   const checkoutModal = document.getElementById('ads-checkout-modal');
   const openBtn = document.getElementById('open-ads-modal-btn');
   const notificationFab = document.querySelector('.notification-fab');
+  let selectedPlanButton = null;
 
   if (!modal || !checkoutModal || !openBtn) return;
 
@@ -12064,7 +12065,7 @@ window.customersData = window.customersData || [];
     if (remainingAmountEl) {
       if (remainingBalance < 0) {
         remainingAmountEl.textContent = 'موجودی ناکافی';
-        remainingAmountEl.style.color = '#ef4444';
+        remainingAmountEl.style.color = 'var(--ads-v3-danger)';
       } else {
         remainingAmountEl.textContent = formatPersianNumber(remainingBalance) + ' تومان';
         remainingAmountEl.style.color = '';
@@ -12074,6 +12075,7 @@ window.customersData = window.customersData || [];
     // Close ads modal and open checkout modal
     modal.hidden = true;
     checkoutModal.hidden = false;
+    requestAnimationFrame(() => checkoutModal.querySelector('.ads-checkout-modal__surface')?.focus());
     
     // Store plan data for confirmation
     checkoutModal.dataset.planSlug = planData.slug;
@@ -12107,6 +12109,8 @@ window.customersData = window.customersData || [];
   const showToast = (message, type = 'success') => {
     const toast = document.createElement('div');
     toast.className = 'ads-toast ads-toast--' + type;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     
     const icon = type === 'success' 
       ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
@@ -12114,47 +12118,6 @@ window.customersData = window.customersData || [];
     
     toast.innerHTML = `${icon}<span>${message}</span>`;
     document.body.appendChild(toast);
-    
-    // Add styles dynamically if not exists
-    if (!document.getElementById('ads-toast-styles')) {
-      const style = document.createElement('style');
-      style.id = 'ads-toast-styles';
-      style.textContent = `
-        .ads-toast {
-          position: fixed;
-          bottom: 100px;
-          left: 50%;
-          transform: translateX(-50%) translateY(20px);
-          color: white;
-          padding: 14px 24px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          z-index: 99999;
-          opacity: 0;
-          animation: toastIn 0.4s ease forwards, toastOut 0.4s ease 3s forwards;
-          max-width: 90vw;
-        }
-        .ads-toast--success {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
-        }
-        .ads-toast--error {
-          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-          box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
-        }
-        @keyframes toastIn {
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes toastOut {
-          to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
     
     setTimeout(() => toast.remove(), 3500);
   };
@@ -12164,6 +12127,7 @@ window.customersData = window.customersData || [];
     updateWalletDisplays();
     modal.hidden = false;
     document.body.classList.add('no-scroll');
+    requestAnimationFrame(() => modal.querySelector('.ads-modal__surface')?.focus());
     
     // Hide notification FAB
     if (notificationFab) {
@@ -12184,6 +12148,8 @@ window.customersData = window.customersData || [];
       notificationFab.style.pointerEvents = '';
       notificationFab.style.transform = '';
     }
+
+    openBtn.focus();
   };
 
   // Close checkout modal
@@ -12197,6 +12163,15 @@ window.customersData = window.customersData || [];
       notificationFab.style.pointerEvents = '';
       notificationFab.style.transform = '';
     }
+
+    openBtn.focus();
+  };
+
+  // Return to plan comparison without ending the purchase flow.
+  const returnToPlans = () => {
+    checkoutModal.hidden = true;
+    modal.hidden = false;
+    requestAnimationFrame(() => selectedPlanButton?.focus());
   };
 
   // Event listeners - Open ads modal
@@ -12213,6 +12188,10 @@ window.customersData = window.customersData || [];
   // Close checkout modal
   checkoutModal.querySelectorAll('[data-checkout-close]').forEach(el => {
     el.addEventListener('click', closeCheckoutModal);
+  });
+
+  checkoutModal.querySelectorAll('[data-checkout-back]').forEach(el => {
+    el.addEventListener('click', returnToPlans);
   });
 
   // Checkout confirm button
@@ -12235,6 +12214,7 @@ window.customersData = window.customersData || [];
   // Add click handlers to plan buttons
   modal.querySelectorAll('.ads-plan-card__btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      selectedPlanButton = btn;
       const planData = {
         slug: btn.dataset.adSlug,
         title: btn.dataset.adTitle,
