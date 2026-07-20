@@ -708,14 +708,40 @@
             </div>
         </div>
       </section>
-      <section id="customers-view" class="view-section" role="region" aria-labelledby="customers-title" data-page="customers">
+      <section id="customers-view" class="view-section" role="region" aria-labelledby="customers-hero-title" data-page="customers">
         <div class="view-container">
-          <header class="view-header">
-            <div class="header-content">
-              <h2 class="view-title" id="customers-title">مشتریان</h2>
-              <p class="view-subtitle">مدیریت اطلاعات مشتریان</p>
+          <section class="customers-hero" aria-labelledby="customers-hero-title">
+            <div class="customers-hero__copy">
+              <span class="customers-hero__eyebrow"><span class="customers-hero__eyebrow-dot" aria-hidden="true"></span>مرکز ارتباط با مشتری</span>
+              <h1 id="customers-hero-title">مشتری‌هایتان را بهتر بشناسید</h1>
+              <p>سوابق رزرو، میزان تعامل و پیشنهادهای اختصاصی را در یک نمای ساده مدیریت کنید.</p>
             </div>
-          </header>
+            <div class="customers-hero__signal" aria-label="وضعیت ارتباط با مشتری">
+              <span class="customers-hero__signal-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/><path d="m19 8 1.5 1.5L23 7"/></svg>
+              </span>
+              <span><strong>رابطه ماندگار</strong><small>هر تعامل، یک فرصت تازه</small></span>
+            </div>
+          </section>
+
+          <section class="customers-kpis" aria-label="خلاصه مشتریان" role="list">
+            <article class="customers-kpi customers-kpi--blue" role="listitem">
+              <span class="customers-kpi__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span>
+              <span class="customers-kpi__body"><strong id="customer-total-count">۰</strong><span>کل مشتریان</span></span>
+            </article>
+            <article class="customers-kpi customers-kpi--green" role="listitem">
+              <span class="customers-kpi__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span>
+              <span class="customers-kpi__body"><strong id="customer-visit-count">۰</strong><span>رزروهای ثبت‌شده</span></span>
+            </article>
+            <article class="customers-kpi customers-kpi--amber" role="listitem">
+              <span class="customers-kpi__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 10h8M8 14h5"/></svg></span>
+              <span class="customers-kpi__body"><strong id="customer-review-count">۰</strong><span>تعامل و نظر</span></span>
+            </article>
+            <article class="customers-kpi customers-kpi--violet" role="listitem">
+              <span class="customers-kpi__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-7 7"/><path d="M8 21H3v-5"/><path d="m3 21 7-7"/><path d="M3 8V3h5"/><path d="m3 3 7 7"/><path d="M21 16v5h-5"/><path d="m21 21-7-7"/></svg></span>
+              <span class="customers-kpi__body"><strong id="customer-new-month">۰</strong><span>مشتری جدید در ۳۰ روز</span></span>
+            </article>
+          </section>
 
           <section class="discount-insights card" aria-label="آمار تخفیف‌ها">
             <div class="discount-insights__content">
@@ -758,16 +784,40 @@
               </button>
             </div>
           </section>
-          <div class="search-section">
+          <section class="customer-toolbar" aria-label="جستجو و فیلتر مشتریان">
             <div class="search-wrapper">
               <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام، شماره تماس..." aria-label="جستجو در مشتریان">
+              <input type="search" id="customer-search" class="search-input" placeholder="جستجوی نام یا شماره تماس" aria-label="جستجو در مشتریان">
             </div>
+            <div class="customer-toolbar__filters">
+              <span class="customer-toolbar__label">نمایش:</span>
+              <div class="customer-filters" role="tablist" aria-label="فیلتر مشتریان">
+                <button type="button" class="customer-filter active" data-filter="all" role="tab" aria-selected="true">همه</button>
+                <button type="button" class="customer-filter" data-filter="recent" role="tab" aria-selected="false">جدیدترین‌ها</button>
+                <button type="button" class="customer-filter" data-filter="loyal" role="tab" aria-selected="false">وفادارها</button>
+                <button type="button" class="customer-filter" data-filter="most-bookings" role="tab" aria-selected="false">بیشترین رزرو</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="customers-list-heading">
+            <div>
+              <h3>فهرست مشتریان</h3>
+              <p>برای مشاهده سوابق و تنظیمات، کارت هر مشتری را انتخاب کنید.</p>
+            </div>
+            <span class="customers-list-heading__hint"><span class="customers-list-heading__dot" aria-hidden="true"></span><span id="customer-results-count" aria-live="polite">۰ مشتری</span></span>
           </div>
 
-          <section class="universal-discount" aria-label="اهدای تخفیف همگانی">
+          <div id="customers-list" class="customers-grid" role="list" aria-live="polite"></div>
+
+          <details class="universal-discount" aria-label="اهدای تخفیف همگانی">
+            <summary class="universal-discount__summary">
+              <span class="universal-discount__summary-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7"/><path d="M2 7h20v5H2zM12 7v14"/><path d="M12 7H7.5a2.5 2.5 0 1 1 2.5-2.5C10 6 12 7 12 7ZM12 7h4.5A2.5 2.5 0 1 0 14 4.5C14 6 12 7 12 7Z"/></svg></span>
+              <span><strong>پیشنهاد ویژه برای همه</strong><small>یک کمپین کوتاه‌مدت برای مشتریان فعال بسازید</small></span>
+              <span class="universal-discount__summary-action"><span id="global-discount-summary-status">ایجاد کمپین</span><span class="universal-discount__summary-toggle" aria-hidden="true">+</span></span>
+            </summary>
             <div class="universal-discount__header">
               <div class="universal-discount__title">
                 <span class="ud-badge">جدید</span>
@@ -847,7 +897,7 @@
                 <button type="button" class="btn-ghost-danger" id="global-discount-clear">حذف تخفیف همگانی فعال</button>
               </div>
             </form>
-          </section>
+          </details>
 
 <!-- مودال جزئیات مشتری VIP -->
 <div id="vip-customer-modal" class="vipc-modal" role="dialog" aria-modal="true" aria-labelledby="vipc-modal-title" hidden>
@@ -1040,7 +1090,6 @@
 </div>
 
 
-          <div id="customers-list" class="customers-grid" role="list"></div>
         </div>
       </section>
       <section id="reviews-view" class="view-section" role="region" aria-labelledby="reviews-title" data-page="reviews">

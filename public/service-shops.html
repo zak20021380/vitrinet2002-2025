@@ -17,6 +17,7 @@
     <script src="/nav-active.js" defer></script>
     <link rel="stylesheet" href="service-shops.css">
     <link rel="stylesheet" href="css/service-shops-softui.css">
+    <link rel="stylesheet" href="css/service-shops-portfolio.css">
 
     <style>
 :root {
@@ -1283,47 +1284,66 @@
 
     <!-- Portfolio Section - Updated -->
 <!-- ============ Portfolio Section (Dynamic, from backend) ============ -->
-<section id="portfolio" class="portfolio-section">
-  <div class="container mx-auto px-4">
-    <div class="text-center mb-8">
-      <span class="portfolio-eyebrow"><i class="fas fa-wand-magic-sparkles"></i>گالری کارها</span>
-      <h2 class="portfolio-title text-3xl font-extrabold">نمونه کارها</h2>
-      <p class="portfolio-subtitle">نگاهی به کیفیت و جزئیات کارهای انجام‌شده بیندازید</p>
-      <p id="portfolio-empty" class="hidden portfolio-empty-state">فعلاً نمونه کاری ثبت نشده.</p>
-      <div id="portfolio-loading" class="flex items-center justify-center gap-2 text-gray-500 text-sm mt-2">
-        <i class="fas fa-spinner fa-spin"></i><span>در حال بارگذاری…</span>
+<section id="portfolio" class="portfolio-section portfolio-section--loading">
+  <div class="portfolio-shell">
+    <header class="portfolio-header">
+      <div class="portfolio-header__copy">
+        <span class="portfolio-eyebrow"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>گالری کارها</span>
+        <h2 class="portfolio-title">نمونه کارها</h2>
+        <p class="portfolio-subtitle">کیفیت، ظرافت و نتیجه نهایی خدمات را از نزدیک ببینید.</p>
       </div>
+      <div class="portfolio-count" aria-label="تعداد نمونه کارها">
+        <span class="portfolio-count__icon" aria-hidden="true"><i class="far fa-images"></i></span>
+        <span class="portfolio-count__copy"><strong id="portfolio-count">۰</strong><small>نمونه کار</small></span>
+      </div>
+    </header>
+
+    <div id="portfolio-loading" class="portfolio-loading" role="status">
+      <span class="portfolio-loading__spinner" aria-hidden="true"></span>
+      <span>در حال بارگذاری نمونه کارها</span>
+    </div>
+
+    <div id="portfolio-empty" class="hidden portfolio-empty-state" role="status">
+      <span class="portfolio-empty-state__icon" aria-hidden="true"><i class="far fa-images"></i></span>
+      <strong>هنوز نمونه کاری ثبت نشده</strong>
+      <span>به‌زودی تصاویر کارهای انجام‌شده در این بخش نمایش داده می‌شوند.</span>
     </div>
 
     <!-- Mobile: horizontal -->
-    <div class="md:hidden pb-6 -mx-4 px-4">
-      <div id="portfolio-row" class="flex space-x-4 space-x-reverse w-max overflow-x-auto scroll-container" style="scroll-padding: 0 1rem;"></div>
+    <div class="portfolio-mobile">
+      <div id="portfolio-row" class="portfolio-row scroll-container"></div>
     </div>
 
     <!-- Desktop: grid -->
-    <div id="portfolio-grid" class="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <div id="portfolio-grid" class="portfolio-grid"></div>
   </div>
 
   <!-- Card Template -->
   <template id="tpl-portfolio-card">
-    <article class="portfolio-card flex flex-col flex-shrink-0 w-72 md:w-auto">
-      <div class="portfolio-img-container">
+    <article class="portfolio-card">
+      <button class="portfolio-img-container js-open-media" type="button">
+        <span class="portfolio-image-fallback" aria-hidden="true"><i class="far fa-images"></i><span>تصویر در دسترس نیست</span></span>
         <img class="portfolio-img" alt="" loading="lazy">
-        <div class="portfolio-img-overlay" aria-hidden="true"></div>
-        <div class="portfolio-views-chip" title="بازدید">
+        <span class="portfolio-img-overlay" aria-hidden="true"></span>
+        <span class="portfolio-views-chip" title="تعداد بازدید">
           <i class="far fa-eye"></i>
           <span class="js-views">0</span>
+        </span>
+        <span class="portfolio-zoom-hint" aria-hidden="true"><i class="fas fa-up-right-and-down-left-from-center"></i></span>
+      </button>
+      <div class="portfolio-content">
+        <div class="portfolio-meta">
+          <span class="portfolio-work-label"><span class="portfolio-work-label__dot" aria-hidden="true"></span>نمونه کار</span>
+          <time class="portfolio-date" hidden></time>
         </div>
-        <span class="portfolio-zoom-hint" aria-hidden="true"><i class="fas fa-magnifying-glass-plus"></i></span>
-        <div class="portfolio-caption">
-          <h3 class="portfolio-name"></h3>
-          <p class="portfolio-description"></p>
-        </div>
+        <h3 class="portfolio-name"></h3>
+        <p class="portfolio-description"></p>
       </div>
       <div class="portfolio-footer">
         <button class="portfolio-btn js-open" type="button">
-          <span>مشاهده دقیق‌تر</span>
-          <i class="fas fa-arrow-left"></i>
+          <i class="far fa-eye" aria-hidden="true"></i>
+          <span>مشاهده جزئیات</span>
+          <i class="fas fa-arrow-left" aria-hidden="true"></i>
         </button>
         <button type="button"
                 class="portfolio-like"
@@ -1331,7 +1351,7 @@
                 aria-pressed="false"
                 aria-label="پسند نمونه‌کار">
           <i class="far fa-heart"></i>
-          <span class="js-likes">0</span>
+          <span class="js-likes" aria-label="تعداد پسند">0</span>
         </button>
       </div>
     </article>

@@ -5248,6 +5248,16 @@ async function renderAll() {
   const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const toFa = n => String(n ?? 0).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const formatPortfolioDate = value => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    try {
+      return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long' }).format(date);
+    } catch (_) {
+      return '';
+    }
+  };
 
   // shop slug from URL (?shopurl=, ?shop=, ?seller=)
   function getShopSlug() {
@@ -5319,6 +5329,8 @@ async function renderAll() {
   const emptyMsg = $('#portfolio-empty');
   const loading  = $('#portfolio-loading');
   const tpl = $('#tpl-portfolio-card');
+  const section = $('#portfolio');
+  const countEl = $('#portfolio-count');
 
   function createCard(it) {
     const node = tpl.content.firstElementChild.cloneNode(true);
@@ -5326,12 +5338,21 @@ async function renderAll() {
     const imgEl   = node.querySelector('.portfolio-img');
     const titleEl = node.querySelector('.portfolio-name');
     const descEl  = node.querySelector('.portfolio-description');
+    const dateEl  = node.querySelector('.portfolio-date');
     const vEl     = node.querySelector('.js-views');
     const lEl     = node.querySelector('.js-likes');
     const btn     = node.querySelector('.js-open');
 
     titleEl.textContent = it.title || '—';
-    descEl.textContent  = it.desc || '';
+    const description = (it.desc || '').trim();
+    descEl.textContent = description;
+    descEl.hidden = !description;
+    const dateLabel = formatPortfolioDate(it.created);
+    if (dateEl) {
+      dateEl.textContent = dateLabel;
+      dateEl.hidden = !dateLabel;
+      if (dateLabel) dateEl.dateTime = new Date(it.created).toISOString();
+    }
     vEl.textContent     = toFa(it.views);
     lEl.textContent     = toFa(it.likes);
 
@@ -5340,6 +5361,9 @@ async function renderAll() {
     imgEl.dataset.src = it.image || '';
     imgEl.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='; // 1x1
     node.dataset.itemId = it.id;
+    node.classList.toggle('portfolio-card--image-missing', !it.image);
+    imgEl.addEventListener('error', () => node.classList.add('portfolio-card--image-missing'));
+    btn.setAttribute('aria-label', `مشاهده جزئیات ${it.title || 'نمونه کار'}`);
     const hWrap = node.querySelector('.fa-heart')?.parentElement;
     const hIcon = hWrap?.querySelector('.fa-heart');
     if(hWrap && hIcon && it.liked){
@@ -5351,9 +5375,9 @@ async function renderAll() {
     btn.addEventListener('click', () => openImageModal(it));
 
     // کلیک روی تصویر هم مودال را باز می‌کند (هماهنگ با آیکن ذره‌بین)
-    const imgWrap = node.querySelector('.portfolio-img-container');
+    const imgWrap = node.querySelector('.js-open-media');
     if (imgWrap) {
-      imgWrap.style.cursor = 'pointer';
+      imgWrap.setAttribute('aria-label', `نمایش تصویر ${it.title || 'نمونه کار'}`);
       imgWrap.addEventListener('click', () => openImageModal(it));
     }
 
@@ -5364,6 +5388,9 @@ function render(items) {
   // clear
   row.innerHTML = '';
   grid.innerHTML = '';
+  if (countEl) countEl.textContent = toFa(items.length);
+  section?.classList.remove('portfolio-section--loading');
+  section?.classList.toggle('portfolio-section--empty', !items.length);
   if (!items.length) {
     emptyMsg.classList.remove('hidden');
     return;
@@ -5459,6 +5486,7 @@ function render(items) {
   // اگر پنل فروشنده بعد از ثبت نمونه‌کار event بزنه، این صفحه رفرش می‌شود:
   // document.dispatchEvent(new Event('portfolio:refresh'))
   document.addEventListener('portfolio:refresh', async () => {
+    section?.classList.add('portfolio-section--loading');
     loading?.classList.remove('hidden');
     const items = await loadPortfolio();
     render(items);

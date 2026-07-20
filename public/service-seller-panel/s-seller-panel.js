@@ -8274,7 +8274,11 @@ handlePlanDurationChange() {
       const btn = e.target.closest('.customer-filter');
       if (!btn) return;
       this.currentCustomerFilter = btn.dataset.filter || 'all';
-      btn.parentElement?.querySelectorAll('.customer-filter').forEach(el => el.classList.remove('active'));
+      btn.parentElement?.querySelectorAll('.customer-filter').forEach(el => {
+        const isActive = el === btn;
+        el.classList.toggle('active', isActive);
+        el.setAttribute('aria-selected', String(isActive));
+      });
       btn.classList.add('active');
       this.renderCustomers(this.currentCustomerQuery);
     }
@@ -8989,6 +8993,15 @@ initCustomerFeatures() {
         this.showCustomerDetails(card);
       }
     });
+
+      customersList.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.target.closest('button, a, input, select, textarea')) return;
+        const card = e.target.closest('.customer-card');
+        if (!card) return;
+        e.preventDefault();
+        this.showCustomerDetails(card);
+      });
   }
 }
 
@@ -9042,21 +9055,19 @@ updateCustomerStats(customers = []) {
 
 // Show customer details modal
 showCustomerDetails(card) {
-  // Extract customer data from card
-  const customerName = card.querySelector('.customer-name').textContent;
-  const customerPhone = card.querySelector('.customer-phone').textContent;
-  const lastReservationText = card.querySelector('.customer-last-reservation').textContent;
-  
-  // Get customer ID (would come from data attribute in real app)
-  const customerId = parseInt(card.dataset.customerId || Math.floor(Math.random() * 100));
-  
-  // Generate mock data for this customer
+  const customerId = String(card.dataset.customerId || card.dataset.userId || '');
+  const customer = MOCK_DATA.customers.find(item => String(item.id) === customerId);
+
+  if (customer) {
+    this.openCustomerModal(customer);
+    return;
+  }
+
+  const customerName = card.querySelector('.customer-name')?.textContent || 'مشتری';
+  const customerPhone = card.dataset.phone || card.querySelector('.customer-phone')?.textContent || '-';
+  const lastReservationText = card.querySelector('.customer-last-reservation')?.dataset.rawDate || '';
   const customerData = this.getCustomerData(customerId, customerName, customerPhone, lastReservationText);
-  
-  // Populate modal
   this.populateCustomerModal(customerData);
-  
-  // Show modal
   UIComponents.openModal('customer-details-modal');
 }
 
@@ -9070,7 +9081,7 @@ getCustomerData(id, name, phone, lastReservationText) {
   // Mock last reservation
   const services = ['اصلاح سر', 'اصلاح ریش', 'رنگ مو', 'کراتینه', 'اصلاح ابرو'];
   const statuses = ['completed', 'confirmed', 'pending'];
-  const rawDate = lastReservationText.replace('آخرین رزرو نوبت: ', '');
+  const rawDate = String(lastReservationText || '').replace('آخرین رزرو نوبت: ', '');
   const lastReservation = {
     date: UIComponents.formatRelativeDate(rawDate),
     service: services[Math.floor(Math.random() * services.length)],
@@ -9169,9 +9180,18 @@ renderCustomers(query = '') {
   const orderedCustomers = this.sortCustomersByFilter(filteredCustomers);
 
   this.updateCustomerStats(MOCK_DATA.customers);
+  this.setText('customer-results-count', `${this.formatNumber(orderedCustomers.length)} مشتری`);
 
   if (orderedCustomers.length === 0) {
-    listEl.innerHTML = `<div class="empty-state"><p class="muted">مشتری با این مشخصات یافت نشد.</p></div>`;
+    const hasCustomers = MOCK_DATA.customers.length > 0;
+    listEl.innerHTML = `
+      <div class="customers-empty" role="status">
+        <span class="customers-empty__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M8.5 11h5"/></svg>
+        </span>
+        <strong>${hasCustomers ? 'مشتری‌ای پیدا نشد' : 'هنوز مشتری‌ای ثبت نشده'}</strong>
+        <p>${hasCustomers ? 'عبارت جستجو یا فیلتر انتخاب‌شده را تغییر دهید.' : 'پس از ثبت اولین رزرو، اطلاعات مشتری اینجا نمایش داده می‌شود.'}</p>
+      </div>`;
     return;
   }
 
@@ -9187,7 +9207,7 @@ renderCustomers(query = '') {
     const joinedLabel = UIComponents.formatRelativeDate(c.joinedAt || c.lastReservation);
     const bookingsCount = this.formatNumber(c.bookingsCount ?? c.vipCurrent ?? 0);
     const reviewCount = this.formatNumber(c.reviewCount ?? c.rewardCount ?? 0);
-    const tier = (c.bookingsCount ?? 0) >= 10 ? 'وفادار' : 'فعال';
+    const tier = (c.bookingsCount ?? 0) >= 5 ? 'وفادار' : 'فعال';
     const personalDiscount = activeDiscounts.get(String(c.id));
     const isGlobalExcluded = this.isGlobalDiscountExcludedForCustomer(globalDiscount, c.id);
     const appliedGlobalDiscount = globalDiscount && !isGlobalExcluded ? globalDiscount : null;
@@ -9243,8 +9263,8 @@ renderCustomers(query = '') {
 
     return `
       <article class="customer-card card"
-               role="listitem" tabindex="0"
-               data-name="${escapeHtml(c.name)}" data-phone="${escapeHtml(c.phone)}" data-user-id="${escapeHtml(c.id)}">
+               role="listitem" tabindex="0" aria-label="مشاهده پرونده ${escapeHtml(c.name)}"
+               data-name="${escapeHtml(c.name)}" data-phone="${escapeHtml(c.phone)}" data-user-id="${escapeHtml(c.id)}" data-customer-id="${escapeHtml(c.id)}">
         <div class="customer-card__top">
           <div class="customer-avatar" aria-hidden="true">${escapeHtml(c.name.charAt(0))}</div>
           <div class="customer-info">
@@ -9252,24 +9272,28 @@ renderCustomers(query = '') {
               <div class="customer-name">${escapeHtml(c.name)}</div>
               <span class="customer-tier ${tier === 'وفادار' ? 'customer-tier--loyal' : 'customer-tier--active'}">${tier}</span>
             </div>
-            <div class="customer-phone">${UIComponents.formatPersianNumber(c.phone)}</div>
+            <div class="customer-phone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2.1z"/></svg><span>${UIComponents.formatPersianNumber(c.phone)}</span></div>
             <div class="customer-tags">
               <span class="customer-chip customer-chip--join"><span class="chip-dot"></span>عضویت از ${joinedLabel || '—'}</span>
-              <span class="customer-chip customer-chip--recent"><span class="chip-dot"></span>آخرین رزرو: ${lastReservation || '—'}</span>
+              <span class="customer-chip customer-chip--recent customer-last-reservation" data-raw-date="${escapeHtml(c.lastReservation || '')}"><span class="chip-dot"></span>آخرین رزرو: ${lastReservation || '—'}</span>
             </div>
           </div>
           <div class="customer-actions">
-            <button type="button" class="btn-secondary btn-exclusive-discount" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">اهدای تخفیف اختصاصی</button>
+            <button type="button" class="btn-secondary btn-exclusive-discount" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M2 7h20v5H2zM12 7v14"/><path d="M12 7H7.5a2.5 2.5 0 1 1 2.5-2.5C10 6 12 7 12 7ZM12 7h4.5A2.5 2.5 0 1 0 14 4.5C14 6 12 7 12 7Z"/></svg>
+              <span>پیشنهاد ویژه</span>
+            </button>
+            <span class="customer-card__open-hint">مشاهده پرونده <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span>
           </div>
         </div>
         <div class="customer-card__stats">
           <div class="stat-chip">
-            <span>رزرو</span>
-            <strong>${bookingsCount}</strong>
+            <span class="stat-chip__icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+            <span class="stat-chip__copy"><small>رزروها</small><strong>${bookingsCount}</strong></span>
           </div>
           <div class="stat-chip">
-            <span>نظرات</span>
-            <strong>${reviewCount}</strong>
+            <span class="stat-chip__icon stat-chip__icon--review" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg></span>
+            <span class="stat-chip__copy"><small>تعامل‌ها</small><strong>${reviewCount}</strong></span>
           </div>
           <div class="stat-chip stat-chip--accent stat-chip--discount">
             <div class="discount-state">
@@ -9277,9 +9301,9 @@ renderCustomers(query = '') {
               <strong class="discount-value">${discountValue}</strong>
             </div>
             <p class="discount-meta">${discountExpiry}</p>
-            <div class="discount-actions">
-              <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">${hasDiscount ? 'مدیریت تخفیف' : 'اهدای تخفیف'}</button>
-            </div>
+            ${hasDiscount ? `<div class="discount-actions">
+              <button type="button" class="link-btn" data-action="open-discount-modal" data-customer-id="${escapeHtml(c.id)}" data-customer-name="${escapeHtml(c.name)}" data-customer-phone="${escapeHtml(c.phone)}">مدیریت تخفیف</button>
+            </div>` : ''}
             ${discountCancelBlock}
           </div>
         </div>
@@ -9342,6 +9366,7 @@ renderCustomers(query = '') {
     this.globalDiscountTypeInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-type"]') || [];
     this.globalDiscountDurationInputs = this.globalDiscountForm?.querySelectorAll('input[name="global-discount-duration"]') || [];
     this.globalDiscountStatus = document.getElementById('global-discount-status');
+    this.globalDiscountSummaryStatus = document.getElementById('global-discount-summary-status');
     this.globalDiscountClear = document.getElementById('global-discount-clear');
     this.globalDiscountCustomDate = document.getElementById('global-discount-custom-date');
     this.globalDiscountCustomDateWrap = document.getElementById('global-discount-custom-date-wrap');
@@ -10115,9 +10140,12 @@ renderCustomers(query = '') {
   updateGlobalDiscountStatus() {
     if (!this.globalDiscountStatus) return;
     const active = this.getGlobalDiscount();
+    const campaignPanel = this.globalDiscountForm?.closest('.universal-discount');
+    campaignPanel?.classList.toggle('has-active-campaign', !!active);
     if (!active) {
       this.globalDiscountStatus.textContent = '';
       this.globalDiscountStatus.classList.remove('is-active', 'is-visible');
+      if (this.globalDiscountSummaryStatus) this.globalDiscountSummaryStatus.textContent = 'ایجاد کمپین';
       return;
     }
 
@@ -10129,6 +10157,7 @@ renderCustomers(query = '') {
     const excludedLabel = excludedCount ? ` • لغو برای ${this.formatNumber(excludedCount)} مشتری` : '';
     this.globalDiscountStatus.textContent = `فعال (${value}${time ? ` • ${time}` : ''}${excludedLabel})`;
     this.globalDiscountStatus.classList.add('is-active', 'is-visible');
+    if (this.globalDiscountSummaryStatus) this.globalDiscountSummaryStatus.textContent = 'کمپین فعال';
   }
 
   excludeCustomerFromGlobal(customerId) {
@@ -10674,11 +10703,14 @@ openCustomerModal(customer) {
 
   // Bookings and last reservation
   const bookingsFor = (MOCK_DATA.bookings || []).filter(b => b.customerName === customer.name);
+  const totalReservations = bookingsFor.length || Number(customer.bookingsCount || customer.vipCurrent || 0);
   document.getElementById('customer-total-reservations').textContent =
-    UIComponents.formatPersianNumber(bookingsFor.length);
+    UIComponents.formatPersianNumber(totalReservations);
 
   // Calculate completed and cancelled counts
-  const completedCount = bookingsFor.filter(b => b.status === 'completed').length;
+  const completedCount = bookingsFor.length
+    ? bookingsFor.filter(b => b.status === 'completed').length
+    : Number(customer.vipCurrent || customer.completedBookings || 0);
   const cancelledCount = bookingsFor.filter(b => b.status === 'cancelled').length;
   
   document.getElementById('customer-completed-reservations').textContent = 
@@ -10786,6 +10818,13 @@ openCustomerModal(customer) {
       this.renderPlans && this.renderPlans();
     };
   } else {
+    document.getElementById('last-reservation-date').textContent =
+      customer.lastReservation ? UIComponents.formatRelativeDate(customer.lastReservation) : 'ثبت نشده';
+    document.getElementById('last-reservation-service').textContent = 'اطلاعاتی ثبت نشده';
+    document.getElementById('last-reservation-time').textContent = '';
+    const status = document.getElementById('last-reservation-status');
+    status.textContent = 'بدون رزرو فعال';
+    status.className = 'status-badge';
     document.getElementById('last-reservation-actions').hidden = true;
   }
 
