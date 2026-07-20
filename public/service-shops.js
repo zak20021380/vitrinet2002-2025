@@ -5330,7 +5330,6 @@ async function renderAll() {
   const loading  = $('#portfolio-loading');
   const tpl = $('#tpl-portfolio-card');
   const section = $('#portfolio');
-  const countEl = $('#portfolio-count');
 
   function createCard(it) {
     const node = tpl.content.firstElementChild.cloneNode(true);
@@ -5388,7 +5387,6 @@ function render(items) {
   // clear
   row.innerHTML = '';
   grid.innerHTML = '';
-  if (countEl) countEl.textContent = toFa(items.length);
   section?.classList.remove('portfolio-section--loading');
   section?.classList.toggle('portfolio-section--empty', !items.length);
   if (!items.length) {
