@@ -12021,10 +12021,10 @@ window.customersData = window.customersData || [];
     return parseInt(englishNumeric, 10) || 3500000;
   };
 
-  // Format number to Persian with comma separator
+  // Format numbers with Persian digits and the locale-appropriate thousands separator.
   const formatPersianNumber = (num) => {
     const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-    const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '٬');
     return formatted.split('').map(char => {
       if (char >= '0' && char <= '9') {
         return persianDigits[parseInt(char)];
