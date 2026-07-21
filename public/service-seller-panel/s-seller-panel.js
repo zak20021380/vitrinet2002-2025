@@ -12000,6 +12000,19 @@ window.customersData = window.customersData || [];
 
   if (!modal || !checkoutModal || !openBtn) return;
 
+  // Fixed overlays can inherit an RTL layout offset when the document is wider
+  // than the visual viewport. Keep the mobile modal aligned to the visible screen.
+  const syncAdsModalViewport = () => {
+    if (!window.matchMedia('(max-width: 700px)').matches) {
+      modal.style.removeProperty('--ads-mobile-offset-x');
+      return;
+    }
+    const documentLeft = document.documentElement.getBoundingClientRect().left;
+    const visualLeft = window.visualViewport?.offsetLeft || 0;
+    const offset = Math.max(0, Math.round(documentLeft - visualLeft));
+    modal.style.setProperty('--ads-mobile-offset-x', `${offset}px`);
+  };
+
   // Get wallet balance from dashboard (synced with main wallet card)
   const getWalletBalance = () => {
     const walletEl = document.getElementById('wallet-balance');
@@ -12146,6 +12159,7 @@ window.customersData = window.customersData || [];
   // Open ads modal
   const openModal = () => {
     updateWalletDisplays();
+    syncAdsModalViewport();
     modal.hidden = false;
     document.body.classList.add('no-scroll');
     requestAnimationFrame(() => modal.querySelector('.ads-modal__surface')?.focus());
@@ -12210,6 +12224,9 @@ window.customersData = window.customersData || [];
   checkoutModal.querySelectorAll('[data-checkout-close]').forEach(el => {
     el.addEventListener('click', closeCheckoutModal);
   });
+
+  window.addEventListener('resize', syncAdsModalViewport, { passive: true });
+  window.visualViewport?.addEventListener('resize', syncAdsModalViewport, { passive: true });
 
   checkoutModal.querySelectorAll('[data-checkout-back]').forEach(el => {
     el.addEventListener('click', returnToPlans);
