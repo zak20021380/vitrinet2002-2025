@@ -11992,6 +11992,12 @@ window.customersData = window.customersData || [];
   const notificationFab = document.querySelector('.notification-fab');
   let selectedPlanButton = null;
 
+  const planPresentation = {
+    ad_products: { tone: 'basic', eyebrow: 'شروع اقتصادی' },
+    ad_home: { tone: 'featured', eyebrow: 'پیشنهاد پرفروش' },
+    ad_search: { tone: 'premium', eyebrow: 'بیشترین دیده‌شدن' }
+  };
+
   if (!modal || !checkoutModal || !openBtn) return;
 
   // Get wallet balance from dashboard (synced with main wallet card)
@@ -12050,12 +12056,25 @@ window.customersData = window.customersData || [];
     const { title, price, duration } = planData;
     const balance = getWalletBalance();
     const priceNum = parseInt(price, 10);
+    const presentation = planPresentation[planData.slug] || planPresentation.ad_home;
+    const checkoutSurface = checkoutModal.querySelector('.ads-checkout-modal__surface');
+    const walletCard = checkoutModal.querySelector('.ads-checkout-wallet');
+    const walletStatus = checkoutModal.querySelector('.ads-checkout-wallet__status');
+    const confirmButton = document.getElementById('ads-checkout-confirm');
+    const formattedPrice = formatPersianNumber(priceNum) + ' تومان';
+
+    if (checkoutSurface) checkoutSurface.dataset.planTone = presentation.tone;
+    const planEyebrow = document.getElementById('checkout-plan-eyebrow');
+    if (planEyebrow) planEyebrow.textContent = presentation.eyebrow;
     
     // Update checkout modal content
     document.getElementById('checkout-plan-title').textContent = title;
-    document.getElementById('checkout-daily-price').textContent = formatPersianNumber(priceNum) + ' تومان';
-    document.getElementById('checkout-duration').textContent = '۱ روز'; // Default 1 day
-    document.getElementById('checkout-total').textContent = formatPersianNumber(priceNum) + ' تومان';
+    document.getElementById('checkout-daily-price').textContent = formattedPrice;
+    document.getElementById('checkout-duration').textContent = duration === 'روزانه' ? '۱ روز' : (duration || '۱ روز');
+    document.getElementById('checkout-total').textContent = formattedPrice;
+    const confirmPrice = document.getElementById('checkout-confirm-price');
+    if (confirmPrice) confirmPrice.textContent = formattedPrice;
+    if (confirmButton) confirmButton.setAttribute('aria-label', `ثبت درخواست ${title} و پرداخت ${formattedPrice}`);
     
     // Calculate remaining balance
     const remainingBalance = balance - priceNum;
@@ -12065,10 +12084,12 @@ window.customersData = window.customersData || [];
     if (remainingAmountEl) {
       if (remainingBalance < 0) {
         remainingAmountEl.textContent = 'موجودی ناکافی';
-        remainingAmountEl.style.color = 'var(--ads-v3-danger)';
+        walletCard?.classList.add('is-insufficient');
+        if (walletStatus) walletStatus.textContent = 'نیاز به افزایش موجودی';
       } else {
         remainingAmountEl.textContent = formatPersianNumber(remainingBalance) + ' تومان';
-        remainingAmountEl.style.color = '';
+        walletCard?.classList.remove('is-insufficient');
+        if (walletStatus) walletStatus.textContent = 'آماده پرداخت';
       }
     }
     
